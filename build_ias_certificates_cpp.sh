@@ -14,6 +14,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# if we are not running in hardware mode then we can just copy
+# the simulator version and use it
+if [ "${SGX_MODE}" != "HW" ]; then
+    ln ias-certificates-sim.template ias-certificates.cpp
+    exit
+fi
+
 Cleanup () {
     echo "Cleaning up"
     rm ias-certificates.cpp.tmp -f
@@ -51,7 +58,7 @@ echo "Der certificate size retrieved"
 echo ""
 echo -n "Building ias-certificates.cpp ... "
 #replace the placemark in the template with the der certificate
-cmd=`echo "sed 's/IAS_REPORT_SIGNING_CA_CERT_DER_PLACEMARK/\`cat AttestationReportSigningCACert.pem.der.hex\`/' < ias-certificates.cpp.template > ias-certificates.cpp.tmp"`
+cmd=`echo "sed 's/IAS_REPORT_SIGNING_CA_CERT_DER_PLACEMARK/\`cat AttestationReportSigningCACert.pem.der.hex\`/' < ias-certificates-hw.template > ias-certificates.cpp.tmp"`
 eval $cmd
 #repplace the second placemark in the updated template with the der certificate size
 cmd=`echo "sed 's/IAS_REPORT_SIGNING_CA_CERT_DER_LEN_PLACEMARK/\`cat AttestationReportSigningCACert.pem.der.size\`/' < ias-certificates.cpp.tmp > ias-certificates.cpp"`
