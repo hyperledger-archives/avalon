@@ -16,9 +16,13 @@
 
 # if we are not running in hardware mode then we can just copy
 # the simulator version and use it
+
+if [ -f ias-certificates.cpp ]; then rm ias-certificates.cpp; fi
+
 if [ "${SGX_MODE}" != "HW" ]; then
-    ln ias-certificates-sim.template ias-certificates.cpp
-    exit
+    cp ias-certificates-sim.template ias-certificates.cpp
+    # Note: use cp instead of ln or ln -s so timestamps work properly for dependencies in makefile
+    exit 0
 fi
 
 Cleanup () {
@@ -29,17 +33,16 @@ Cleanup () {
     rm AttestationReportSigningCACert.pem -f
     rm AttestationReportSigningCACert.pem.der.hex -f
     rm AttestationReportSigningCACert.pem.der.size -f
-    exit 0
 }
 
-trap 'echo "**ERROR - line $LINENO**"; Cleanup' HUP INT QUIT PIPE TERM ERR
+trap 'echo "**ERROR - line $LINENO**"; Cleanup; exit 1' HUP INT QUIT PIPE TERM ERR
 
 #get certificate from Intel
 wget https://software.intel.com/sites/default/files/managed/7b/de/RK_PUB.zip
 test -e RK_PUB.zip && echo "Zipped certificated downloaded"
 
 #decompress certificate
-unzip RK_PUB.zip
+unzip -o RK_PUB.zip
 test -e RK_PUB.zip
 
 openssl x509 -outform der -in AttestationReportSigningCACert.pem -out AttestationReportSigningCACert.pem.der
@@ -66,3 +69,4 @@ eval $cmd
 echo "done"
 
 Cleanup
+exit 0
