@@ -17,6 +17,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <openssl/x509v3.h>
+#include <openssl/pem.h>
 
 #include "verify-report.h"
 #include "ias-certificates.h"
@@ -86,9 +87,8 @@ void get_quote_from_report(const uint8_t* report, const int report_len, sgx_quot
     free(quote_bin);
 }
 
-verify_status_t verify_ias_report_signature(char* ias_attestation_signing_cert,
-                                            unsigned int ias_attestation_signing_cert_len,
-                                            char* ias_report,
+verify_status_t verify_ias_report_signature(const char* ias_attestation_signing_cert_pem,
+                                            const char* ias_report,
                                             unsigned int ias_report_len,
                                             char* ias_signature,
                                             unsigned int ias_signature_len)
@@ -96,8 +96,9 @@ verify_status_t verify_ias_report_signature(char* ias_attestation_signing_cert,
     X509* crt = NULL;
     int ret;
 
-    const unsigned char* p = (unsigned char*)ias_attestation_signing_cert;
-    crt = d2i_X509(NULL, &p, ias_attestation_signing_cert_len);
+    BIO* crt_bio = BIO_new_mem_buf((void*)ias_attestation_signing_cert_pem, -1);
+
+    crt = PEM_read_bio_X509(crt_bio, NULL, 0, NULL);
     assert(crt != NULL);
 
     EVP_PKEY* key = X509_get_pubkey(crt);
@@ -121,6 +122,9 @@ verify_status_t verify_ias_report_signature(char* ias_attestation_signing_cert,
     ret = EVP_VerifyFinal(ctx, (unsigned char*)ias_signature_decoded, ret, key);
 
     EVP_MD_CTX_destroy(ctx);
+    EVP_PKEY_free(key);
+    X509_free(crt);
+    BIO_free(crt_bio);
 
     if(ret != 1) //error
         return VERIFY_FAILURE;
@@ -128,27 +132,28 @@ verify_status_t verify_ias_report_signature(char* ias_attestation_signing_cert,
     return VERIFY_SUCCESS; /* success */
 }
 
-verify_status_t verify_ias_certificate_chain(const char* optional_cert, int optional_cert_len)
+verify_status_t verify_ias_certificate_chain(const char* cert_pem)
 #ifndef IAS_CA_CERT_REQUIRED
 {
     return VERIFY_FAILURE; //fail (conservative approach for simulator-mode and in absence of CA certificate)
 }
 #else //IAS_CA_CERT_REQUIRED is defined
 {
+
+    assert(cert_pem!=NULL);
+
     /* Using the IAS CA certificate as a root of trust. */
-    /* Checking that optional_cert is signed by CA. If optional_cert is NULL,
-       use the stored attestation signing certificate. */
+    /* Checking that cert is signed by CA. */
 
     X509* cacrt;
     X509* crt;
-    const char *untrusted_cert = (optional_cert == NULL ? (char*)ias_report_signing_cert_der : optional_cert);
-    unsigned int untrusted_cert_len = (optional_cert == NULL ? ias_report_signing_cert_der_len : optional_cert_len);
 
-    crt = d2i_X509(NULL, (const unsigned char**)&untrusted_cert, untrusted_cert_len);
+    BIO* crt_bio = BIO_new_mem_buf((void*)cert_pem, -1);
+    crt = PEM_read_bio_X509(crt_bio, NULL, 0, NULL);
     assert(crt != NULL);
 
-    const unsigned char* p1 = ias_report_signing_ca_cert_der;
-    cacrt = d2i_X509(NULL, &p1, ias_report_signing_ca_cert_der_len);
+    BIO* cacrt_bio = BIO_new_mem_buf((void*)ias_report_signing_ca_cert_pem, -1);
+    cacrt = PEM_read_bio_X509(cacrt_bio, NULL, 0, NULL);
     assert(cacrt != NULL);
 
     X509_STORE* s = X509_STORE_new();
@@ -156,8 +161,13 @@ verify_status_t verify_ias_certificate_chain(const char* optional_cert, int opti
     X509_STORE_CTX* ctx = X509_STORE_CTX_new();
     X509_STORE_CTX_init(ctx, s, crt, NULL);
     int rc = X509_verify_cert(ctx);
+
     X509_STORE_CTX_free(ctx);
     X509_STORE_free(s);
+    X509_free(crt);
+    X509_free(cacrt);
+    BIO_free(crt_bio);
+    BIO_free(cacrt_bio);
 
     if(rc <= 0 ) {  // error
         return VERIFY_FAILURE; //fail

@@ -13,20 +13,17 @@
  * limitations under the License.
  */
 
-#ifndef IAS_CA_CERT_H
-#define IAS_CA_CERT_H
-
-//IAS attestation verification report signing certification authority certificate
-/*
-This certificate is the root of trust for enclave attestation verification.
-This is in PEM format of the SGX root certificate as can be downloaded from
-https://software.intel.com/sites/default/files/managed/7b/de/RK_PUB.zip
-*/
 #ifdef __cplusplus
 extern "C" {
 #endif
-extern const char ias_report_signing_ca_cert_pem[];
+extern const char ias_report_signing_ca_cert_pem[] =
+#ifdef IAS_CA_CERT_REQUIRED
+R"MLT(IAS_REPORT_SIGNING_CA_CERT_PEM_PLACEMARK
+)MLT"
+#else
+    "NO SUCH CA CERTIFICATE"
+#endif
+;
 #ifdef __cplusplus
 }
-#endif
 #endif
