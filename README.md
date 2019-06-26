@@ -16,7 +16,7 @@ TCF leverages the existence of a distributed ledger to
  * Provide a mechanism for submitting work orders from a client(s) to a worker
  * Preserve a log of work order receipts and acknowledgments 
 
-TCF uses Off-Chain Trusted Compute Specification defined by Enterprise Ethereum Alliance (EEA) Task Force as a starting point to apply a consistant and compatible approach to all supported blockchains.   
+TCF uses _Off-Chain Trusted Compute Specification_ defined by Enterprise Ethereum Alliance (EEA) Task Force as a starting point to apply a consistant and compatible approach to all supported blockchains.   
 
 # Initial Committers
  * danintel (daniel.anderson@intel.com)
