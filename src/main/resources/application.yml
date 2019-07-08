@@ -1,0 +1,31 @@
+server:
+  port: ${IEXEC_WORKER_PORT:18091}
+
+core:
+  host: ${IEXEC_CORE_HOST:localhost}
+  port: ${IEXEC_CORE_PORT:18090}
+
+worker:
+  name: ${IEXEC_WORKER_NAME:customWorker}
+  workerBaseDir: ${IEXEC_WORKER_BASE_DIR:/tmp/iexec-worker}
+  gasPriceMultiplier: ${IEXEC_GAS_PRICE_MULTIPLIER:1.3} # txs will be send with networkGasPrice*gasPriceMultiplier, 4.0 means super fast
+  gasPriceCap: ${IEXEC_GAS_PRICE_CAP:22000000000} #in Wei, will be used for txs if networkGasPrice*gasPriceMultiplier > gasPriceCap
+  teeEnabled: ${IEXEC_TEE_ENABLED:false}
+  overrideBlockchainNodeAddress: ${IEXEC_WORKER_OVERRIDE_BLOCKCHAIN_NODE_ADDRESS:} #will use it if set, else will use the one given by the core
+
+wallet:
+  encryptedFilePath: ${IEXEC_WORKER_WALLET_PATH:./src/main/resources/wallet/encrypted-wallet_worker1.json}
+  password: ${IEXEC_WORKER_WALLET_PASSWORD:whatever}
+
+scone:
+  las:
+    host: ${IEXEC_SCONE_LAS_HOST:localhost}
+    port: ${IEXEC_SCONE_LAS_PORT:18766}
+
+decryptFilePath: ${IEXEC_DECRYPT_FILE_PATH:./src/main/resources/decrypt-dataset.sh}
+encryptFilePath: ${IEXEC_ENCRYPT_FILE_PATH:./src/main/resources/encrypt-result.sh}
+
+management:
+  endpoint:
+    restart:
+      enabled: true

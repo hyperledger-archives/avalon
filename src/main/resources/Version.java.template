@@ -1,0 +1,5 @@
+package com.iexec.worker.utils.version;
+
+class Version {
+    static final String PROJECT_VERSION = "@projectversion@";
+}
