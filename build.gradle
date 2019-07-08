@@ -97,10 +97,10 @@ build.dependsOn jacocoTestReport
 
 task createVersion(type: Copy) {
     // delete old one
-    delete 'src/main/java/com/iexec/worker/utils/version/Version.java'
+    delete 'src/main/java/com/iexec/eea/worker/utils/version/Version.java'
     // use and copy template to the new location
     from 'src/main/resources/Version.java.template'
-    into 'src/main/java/com/iexec/worker/utils/version/'
+    into 'src/main/java/com/iexec/eea/worker/utils/version/'
 
     rename { String fileName ->
         fileName.replace('.template', '')
