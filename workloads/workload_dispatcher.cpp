@@ -19,9 +19,6 @@
 #include "echo_work_order/echo_workorder.h"
 #include "heart_disease_eval/heart_disease_evaluation.h"
 
-tcf::WorkOrderProcessorInterface* echo_result_factory();
-tcf::WorkOrderProcessorInterface* heart_disease_eval_factory();
-
 ByteArray ConvertStringToByteArray(std::string s) {
     ByteArray ba(s.begin(), s.end());
     return ba;
@@ -42,7 +39,7 @@ public:
 
         for (auto wo_data : in_work_order_data) {
             // Skip first work order data index since it is
-            // the idenitifer for the workload
+            // the identifier for the workload
             if (i == 0) {
                 i++;
                 continue;
