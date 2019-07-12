@@ -1,0 +1,17 @@
+{
+    "jsonrpc": "2.0",
+    "method": "WorkOrderReceiptCreate",
+    "id": 90,
+    "params": {
+        "workOrderId": "90",
+        "workerServiceId": "50",
+        "workerId": "90",
+        "requesterId":"r_id",
+        "requesterGeneratedNonce": "r_nounce",
+        "requesterSignature":"r_sig",
+        "receiptCreateStatus":0,
+        "workOrderRequestHash": "whash",
+        "signatureRules": "SHA-256/RSA-OAEP-4096"
+    }
+}
+

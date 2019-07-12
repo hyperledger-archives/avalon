@@ -1,0 +1,13 @@
+{
+    "jsonrpc": "2.0",
+    "method": "EncryptionKeyGet",
+    "id": 3,
+    "params": {
+        "workerId": "123",
+        "lastUsedKeyNonce": "",
+        "tag": "",
+        "requesterId": "",
+        "signatureNonce": "",
+        "signature": ""
+    }
+}

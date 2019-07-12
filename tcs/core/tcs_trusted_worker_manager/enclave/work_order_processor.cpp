@@ -1,0 +1,442 @@
+/* Copyright 2018 Intel Corporation
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*     http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
+
+#include "enclave_t.h"
+#include <algorithm>
+#include <vector>
+#include <string>
+
+#include "error.h"
+#include "tcf_error.h"
+#include "types.h"
+
+#include "crypto.h"
+#include "jsonvalue.h"
+#include "parson.h"
+#include "hex_string.h"
+#include "json_utils.h"
+#include "utils.h"
+
+#include "enclave_utils.h"
+#include "enclave_data.h"
+
+#include "work_order_processor_interface.h"
+#include "work_order_data.h"
+#include "work_order_processor.h"
+#include "db_store.h"
+#include "workload_processor.h"
+
+namespace tcf {
+    void WorkOrderProcessor::ParseJsonInput(EnclaveData& enclaveData, std::string json_str) {
+        // Parse the work order request
+        JsonValue parsed(json_parse_string(json_str.c_str()));
+        tcf::error::ThrowIfNull(
+            parsed.value, "failed to parse the work order request, badly formed JSON");
+
+        JSON_Object* request_object = json_value_get_object(parsed);
+        tcf::error::ThrowIfNull(request_object, "Missing JSON object in work order request");
+
+        json_request_id = GetJsonNumber(request_object, "id");
+
+        JSON_Object* params_object = json_object_dotget_object(request_object, "params");
+        tcf::error::ThrowIfNull(params_object, "Missing params object in work order request");
+
+        response_timeout_msecs = GetJsonNumber(
+            params_object,
+            "responseTimeoutMSecs");
+
+        payload_format = GetJsonStr(
+            params_object,
+            "payloadFormat",
+            "invalid request; failed to retrieve payload format");
+
+        verifying_key = GetJsonStr(
+            params_object,
+            "verifyingKey",
+            "invalid request; failed to retrieve verifyingKey");
+
+        result_uri = GetJsonStr(
+            params_object,
+            "resultUri",
+            "invalid request; failed to retrieve result uri");
+
+        notify_uri = GetJsonStr(
+            params_object,
+            "notifyUri",
+            "invalid request; failed to retrieve notify uri");
+
+        work_order_id = GetJsonStr(
+            params_object,
+            "workOrderId",
+            "invalid request; failed to retrieve work order id");
+
+        worker_id = GetJsonStr(
+            params_object,
+            "workerId",
+            "invalid request; failed to retrieve worker id");
+
+        work_load_id = GetJsonStr(
+            params_object,
+            "workloadId",
+            "invalid request; failed to retrieve work load id");
+
+        requester_id = GetJsonStr(
+            params_object,
+            "requesterId",
+            "invalid request; failed to retrieve requester id");
+
+        worker_encryption_key = GetJsonStr(
+            params_object,
+            "workerEncryptionKey",
+            "invalid request; failed to retrieve worker encryption key");
+
+        data_encryption_algorithm = GetJsonStr(
+            params_object,
+            "dataEncryptionAlgorithm",
+            "invalid request; failed to retrieve encryption algorithm");
+
+        encrypted_session_key = GetJsonStr(
+            params_object,
+            "encryptedSessionKey",
+            "invalid request; failed to retrieve encrypted session key");
+
+        session_key_iv = GetJsonStr(
+            params_object,
+            "sessionKeyIv",
+            "invalid request; failed to retrieve session key iv");
+
+        requester_nonce = GetJsonStr(
+            params_object,
+            "requesterNonce",
+            "invalid request; failed to retrieve requester nonce");
+
+        encrypted_request_hash = GetJsonStr(
+            params_object,
+            "encryptedRequestHash",
+            "invalid request; failed to retrieve requester nonce");
+
+        requester_signature = GetJsonStr(
+            params_object,
+            "requesterSignature",
+            "invalid request; failed to retrieve requester signature");
+
+
+        JSON_Array* data_array = json_object_get_array(params_object, "inData");
+
+        size_t count = json_array_get_count(data_array);
+        size_t i;
+        for (i = 0; i < count; i++) {
+            JSON_Object* data_object = json_array_get_object(data_array, i);
+            WorkOrderDataHandler wo_data;
+            wo_data.Unpack(enclaveData, data_object, encrypted_session_key);
+            data_items_in.emplace_back(wo_data);
+        }
+
+        data_array = json_object_get_array(params_object, "outData");
+
+        count = json_array_get_count(data_array);
+        for (i = 0; i < count; i++) {
+            JSON_Object* data_object = json_array_get_object(data_array, i);
+            WorkOrderDataHandler wo_data;
+            wo_data.Unpack(enclaveData, data_object, encrypted_session_key);
+            data_items_out.emplace_back(wo_data);
+        }
+
+    }
+
+    ByteArray WorkOrderProcessor::CreateJsonOutput() {
+        JSON_Status jret;
+
+        // Create the response structure
+        JsonValue resp_value(json_value_init_object());
+        tcf::error::ThrowIf<tcf::error::RuntimeError>(
+            !resp_value.value, "Failed to create the response object");
+
+        JSON_Object* resp = json_value_get_object(resp_value);
+        tcf::error::ThrowIfNull(resp, "Failed on retrieval of response object value");
+
+        JsonSetStr(resp, "jsonrpc", "2.0", "failed to serialize jsonrpc");
+        JsonSetNumber(resp, "id", json_request_id, "failed to serialize json request id");
+
+        jret = json_object_set_value(resp, "result", json_value_init_object());
+        tcf::error::ThrowIf<tcf::error::RuntimeError>(
+            jret != JSONSuccess, "failed to serialize result");
+
+        JSON_Object* result = json_object_get_object(resp, "result");
+        tcf::error::ThrowIfNull(result, "failed to serialize the result");
+
+        JsonSetStr(result, "workOrderId", work_order_id.c_str(), "failed to serialize work order id");
+        JsonSetStr(result, "workloadId", work_load_id.c_str(), "failed to serialize workload id");
+        JsonSetStr(result, "workerId", worker_id.c_str(), "failed to serialize worker id");
+        JsonSetStr(result, "requesterId", requester_id.c_str(), "failed to serialize requester id");
+        JsonSetStr(result, "workerNonce", worker_nonce.c_str(), "failed to serialize worker nonce");
+        JsonSetStr(result, "workerSignature", worker_signature.c_str(), "failed to serialize worker signature");
+
+        jret = json_object_set_value(result, "outData", json_value_init_array());
+        tcf::error::ThrowIf<tcf::error::RuntimeError>(
+            jret != JSONSuccess, "failed to serialize the result data");
+
+        JSON_Array* data_array = json_object_get_array(result, "outData");
+        tcf::error::ThrowIfNull(data_array, "failed to serialize the dependency array");
+
+        for (auto out_data : data_items_out)
+            out_data.Pack(data_array);
+
+        // serialize the resulting json
+        size_t serializedSize = json_serialization_size(resp_value);
+        ByteArray serialized_response;
+        serialized_response.resize(serializedSize);
+
+        jret = json_serialize_to_buffer(resp_value,
+            reinterpret_cast<char*>(&serialized_response[0]), serialized_response.size());
+        tcf::error::ThrowIf<tcf::error::RuntimeError>(
+            jret != JSONSuccess, "workorder response serialization failed");
+
+        return serialized_response;
+    }
+
+    std::vector<tcf::WorkOrderData> WorkOrderProcessor::ExecuteWorkOrder() {
+        std::vector<tcf::WorkOrderData> in_wo_data;
+        std::vector<tcf::WorkOrderData> out_wo_data;
+
+        if (data_items_in.size() > 0) {
+            // data_items_in vector is sorted based out of index
+            // data at index 0 is the identifier of the workorder
+            WorkOrderDataHandler& code_data_item = data_items_in.at(0);
+            // Vector is sorted the first object should have index 0
+            if (code_data_item.workorder_data.index == 0) {
+                for (auto d : data_items_in) {
+                    in_wo_data.emplace_back(d.workorder_data.index, d.workorder_data.decrypted_data);
+                }
+
+                for (auto d : data_items_out) {
+                    out_wo_data.emplace_back(d.workorder_data.index, d.workorder_data.decrypted_data);
+                }
+
+                WorkloadProcessor processor;
+                std::string workload_type = ByteArrayToStr(code_data_item.workorder_data.decrypted_data);
+                processor.ProcessWorkOrder(
+                        workload_type,
+                        StrToByteArray(requester_id),
+                        StrToByteArray(worker_id),
+                        StrToByteArray(work_order_id),
+                        in_wo_data,
+                        out_wo_data);
+                return out_wo_data;
+            }
+        }
+        tcf::error::RuntimeError("Work Order inData not  Found\n");
+        return out_wo_data;
+    }
+
+    ByteArray WorkOrderProcessor::ComputeRequestHash() {
+        ByteArray concat_hashes;
+        std::string concat_string = requester_nonce + work_order_id + worker_id + work_load_id + requester_id;
+        ByteArray hash_1 =  tcf::crypto::ComputeMessageHash(StrToByteArray(concat_string));
+
+        ByteArray hash_data;
+        std::string hash_2;
+        size_t i;
+        std::sort(data_items_in.begin(), data_items_in.end(),
+            [](WorkOrderDataHandler x, WorkOrderDataHandler  y)
+            {return x.workorder_data.index < y.workorder_data.index;});
+        for (i = 0; i < data_items_in.size(); i++) {
+            tcf::WorkOrderDataHandler& d = data_items_in.at(i);
+            if (!d.concat_string.empty()) {
+                concat_hashes = StrToByteArray(d.concat_string);
+                hash_data =  tcf::crypto::ComputeMessageHash(concat_hashes);
+                hash_2 = hash_2 + base64_encode(hash_data);
+            }
+        }
+
+        std::sort(data_items_out.begin(),  data_items_out.end(),
+            [](WorkOrderDataHandler x, WorkOrderDataHandler  y)
+            {return x.workorder_data.index < y.workorder_data.index;});
+        std::string hash_3;
+        for (i = 0; i < data_items_out.size(); i++) {
+            tcf::WorkOrderDataHandler& d = data_items_out.at(i);
+            if (!d.concat_string.empty()) {
+                concat_hashes = StrToByteArray(d.concat_string);
+                hash_data =  tcf::crypto::ComputeMessageHash(concat_hashes);
+                hash_3 = hash_3 + base64_encode(hash_data);
+            }
+        }
+
+        concat_string = base64_encode(hash_1) + hash_2 + hash_3;
+        concat_hashes = StrToByteArray(concat_string);
+        return tcf::crypto::ComputeMessageHash(concat_hashes);
+    }
+
+    tcf_err_t WorkOrderProcessor::VerifyRequestEncryption() {
+        tcf_err_t verify_status = TCF_SUCCESS;
+        ByteArray decrypt_request_hash;
+
+        try {
+            decrypt_request_hash = tcf::crypto::skenc::DecryptMessage(HexStringToBinary(encrypted_session_key), HexStringToBinary(session_key_iv), HexStringToBinary(encrypted_request_hash));
+        } catch (tcf::error::ValueError& e) {
+            Log(TCF_LOG_ERROR, "error::DecryptMessage - %d - %s", e.error_code(), e.what());
+            return TCF_ERR_CRYPTO;
+        } catch (tcf::error::Error& e) {
+            Log(TCF_LOG_ERROR, "error::DecryptMessage - %d - %s\n", e.error_code(), e.what());
+            return TCF_ERR_CRYPTO;
+        } catch (...) {
+            Log(TCF_LOG_ERROR, "error::DecryptMessage - unknown internal error");
+            return TCF_ERR_CRYPTO;
+        }
+
+        // Compare the request hash and decrypted request hash
+        ByteArray request_hash = ComputeRequestHash();
+
+        if ( std::equal(request_hash.begin(), request_hash.end(), decrypt_request_hash.begin()) ) {
+            Log(TCF_LOG_INFO, "Decrypted request hash matched with original request hash.. PASS");
+        } else {
+            Log(TCF_LOG_ERROR, "Decrypted Request hash didn't match with original request hash");
+            verify_status = TCF_ERR_CRYPTO;
+        }
+
+        return verify_status;
+    }
+
+    int WorkOrderProcessor::VerifySignature() {
+        ByteArray final_hash = ComputeRequestHash();
+        ByteArray Signature_byte = base64_decode(requester_signature);
+
+        tcf::crypto::sig::PublicKey public_signing_key_(verifying_key);
+
+        int SIG_result = public_signing_key_.VerifySignature(final_hash, Signature_byte);
+        if (SIG_result == 1) {
+            Log(TCF_LOG_INFO, "Client Signature Verification Passed");
+        } else if (SIG_result == 0) {
+            Log(TCF_LOG_ERROR, "Client Signature Verification Failed");
+        } else {
+            Log(TCF_LOG_ERROR, "Client Signature Verification Internal Error");
+        }
+        return SIG_result;
+    }
+
+    ByteArray WorkOrderProcessor::ResponseHashCalculate(std::vector<tcf::WorkOrderData>& wo_data) {
+        ByteArray concat_hashes;
+        ByteArray nonce = tcf::crypto::RandomBitString(16);
+        worker_nonce = base64_encode(tcf::crypto::ComputeMessageHash(nonce));
+        std::string concat_string = worker_nonce + work_order_id + worker_id + work_load_id + requester_id;
+
+        std::string hash_1 =  base64_encode(tcf::crypto::ComputeMessageHash(StrToByteArray(concat_string)));
+
+        int i = 0;
+        int out_data_size = data_items_out.size();
+
+        for (auto data : wo_data) {
+            if (i < out_data_size) {
+                tcf::WorkOrderDataHandler& out_data = data_items_out.at(i);
+                out_data.workorder_data.decrypted_data = data.decrypted_data;
+                out_data.ComputeHashString(session_key_iv);
+            } else {
+                tcf::WorkOrderDataHandler out_data(data, encrypted_session_key);
+                out_data.ComputeHashString(session_key_iv);
+                data_items_out.emplace_back(out_data);
+            }
+
+            i++;
+        }
+
+        std::sort(data_items_out.begin(),  data_items_out.end(),
+            [](WorkOrderDataHandler x, WorkOrderDataHandler  y)
+            {return x.workorder_data.index < y.workorder_data.index;});
+
+        ByteArray hash_2;
+        std::string outhash = "";
+        for (int i = 0; i < data_items_out.size(); i++) {
+            tcf::WorkOrderDataHandler& d = data_items_out.at(i);
+            if (!d.concat_string.empty()) {
+                concat_hashes = StrToByteArray(d.concat_string);
+                hash_2 =  tcf::crypto::ComputeMessageHash(concat_hashes);
+                outhash +=  base64_encode(hash_2);
+            }
+        }
+        concat_string = hash_1 + outhash;
+        ByteArray final_hash = tcf::crypto::ComputeMessageHash(StrToByteArray(concat_string));
+        return final_hash;
+    }
+
+    void WorkOrderProcessor::ComputeSignature(EnclaveData& enclave_data, ByteArray& message_hash) {
+        ByteArray sig = enclave_data.sign_message(message_hash);
+        worker_signature = base64_encode(sig);
+    }
+
+    void WorkOrderProcessor::ConcatHash(ByteArray& dst, ByteArray& src) {
+        copy(src.begin(), src.end(), back_inserter(dst));
+    }
+
+    ByteArray WorkOrderProcessor::CreateErrorResponse(int err_code, const char* err_message) {
+        JSON_Status jret;
+        // Create the response structure
+        JsonValue resp_value(json_value_init_object());
+        tcf::error::ThrowIf<tcf::error::RuntimeError>(
+            !resp_value.value, "Failed to create the response object");
+
+        JSON_Object* resp = json_value_get_object(resp_value);
+        tcf::error::ThrowIfNull(resp, "Failed on retrieval of response object value");
+
+        JsonSetStr(resp, "jsonrpc", "2.0", "failed to serialize jsonrpc");
+        JsonSetNumber(resp, "id", json_request_id, "failed to serialize json request id");
+
+        jret = json_object_set_value(resp, "error", json_value_init_object());
+        tcf::error::ThrowIf<tcf::error::RuntimeError>(
+            jret != JSONSuccess, "failed to serialize error");
+
+        JSON_Object* error = json_object_get_object(resp, "error");
+        tcf::error::ThrowIfNull(error, "failed to serialize the result");
+
+        JsonSetNumber(error, "code", err_code, "failed to serialize error code");
+        JsonSetStr(error, "message", err_message, "failed to serialize error message");
+
+        // serialize the resulting json
+        size_t serializedSize = json_serialization_size(resp_value);
+        ByteArray serialized_response;
+        serialized_response.resize(serializedSize);
+
+        jret = json_serialize_to_buffer(resp_value,
+            reinterpret_cast<char*>(&serialized_response[0]), serialized_response.size());
+        tcf::error::ThrowIf<tcf::error::RuntimeError>(
+            jret != JSONSuccess, "workorder response serialization failed");
+
+        return serialized_response;
+
+    }
+
+    ByteArray WorkOrderProcessor::Process(EnclaveData& enclaveData, std::string json_str) {
+        try {
+            ParseJsonInput(enclaveData, json_str);
+            tcf::error::ThrowIf<tcf::error::ValueError>(VerifyRequestEncryption()!= TCF_SUCCESS,
+                            "Decryption of client request hash failed. Request is tampered.");
+            tcf::error::ThrowIf<tcf::error::ValueError>(VerifySignature()!= true,
+                            "Signature Verification of client request failed. Request is tampered.");
+            std::vector<tcf::WorkOrderData> wo_data = ExecuteWorkOrder();
+            int i = 0;
+            int out_data_size = data_items_out.size();
+
+            ByteArray hash = ResponseHashCalculate(wo_data);
+            ComputeSignature(enclaveData, hash);
+            return CreateJsonOutput();
+        } catch (tcf::error::ValueError& e) {
+            return CreateErrorResponse(e.error_code(), e.what());
+        } catch (tcf::error::Error& e) {
+            return CreateErrorResponse(e.error_code(), e.what());
+        } catch (...) {
+            return CreateErrorResponse(TCF_ERR_UNKNOWN, "unknown internal error");
+        }
+    }
+}  // namespace tcf
+

@@ -1,0 +1,14 @@
+{
+    "jsonrpc": "2.0",
+    "method": "WorkOrderReceiptCreate",
+    "id": 81,
+    "params": {
+        "workOrderId": "81",
+        "workerServiceId": "50",
+        "workerId": "81",
+        "requesterId":"r_id",
+        "requesterGeneratedNonce": "r_nounce",
+        "requesterSignature":"r_sig"
+    }
+}
+

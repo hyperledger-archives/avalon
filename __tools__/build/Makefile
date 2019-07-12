@@ -1,0 +1,57 @@
+# Copyright 2018 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# SRCDIR defaults to the current directory
+# DSTDIR defaults to _dev under the current directory
+# Both can be overridden with environment variables
+SRCDIR?=$(dir $(abspath $(lastword $(MAKEFILE_LIST))))
+DSTDIR?=$(abspath $(SRCDIR)/_dev)
+
+PKGGEN=$(abspath $(SRCDIR)/../rebuild.sh)
+
+PY_VERSION=${shell python3 --version | sed 's/Python \(3\.[0-9]\).*/\1/'}
+PYTHON_DIR=$(DSTDIR)/lib/python$(PY_VERSION)/site-packages/
+
+all: environment template enclavekey packages
+
+clean :
+	rm -rf $(DSTDIR); $(abspath $(SRCDIR)/../clean.sh)
+
+environment : $(PYTHON_DIR)
+
+$(PYTHON_DIR) : $(DSTDIR)
+	virtualenv -p python3 --no-download $(DSTDIR)
+	. $(abspath $(DSTDIR)/bin/activate) ; pip install --upgrade pip
+	. $(abspath $(DSTDIR)/bin/activate) ; pip install --upgrade setuptools
+	. $(abspath $(DSTDIR)/bin/activate) ; pip install --upgrade toml
+	. $(abspath $(DSTDIR)/bin/activate) ; pip install --upgrade py-solc
+	. $(abspath $(DSTDIR)/bin/activate) ; pip install --upgrade web3
+	. $(abspath $(DSTDIR)/bin/activate) ; pip install --upgrade requests
+	. $(abspath $(DSTDIR)/bin/activate) ; pip install --upgrade colorlog
+	. $(abspath $(DSTDIR)/bin/activate) ; pip install --upgrade twisted
+	. $(abspath $(DSTDIR)/bin/activate) ; pip install --upgrade protobuf
+
+$(DSTDIR) :
+	mkdir -p $(DSTDIR)
+
+packages :
+	. $(abspath $(DSTDIR)/bin/activate) ; $(PKGGEN)
+
+enclavekey :
+	openssl genrsa -3 -out $(SRCDIR)/../../enclave.pem 3072
+
+template :
+	mkdir -p $(DSTDIR)/opt/tcf/logs
+
+.PHONY : environment packages template

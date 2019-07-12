@@ -1,0 +1,10 @@
+{
+    "jsonrpc": "2.0",
+    "method": "WorkOrderReceiptLookUpNext",
+    "id": 90,
+    "params": {
+        "workerServiceId": 50,
+        "lastLookUpTag": 90
+    }
+}
+

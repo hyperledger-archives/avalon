@@ -1,0 +1,11 @@
+{
+    "jsonrpc": "2.0",
+    "method": "WorkOrderReceiptUpdateRetrieve",
+    "id": 90,
+    "params": {
+        "workOrderId": "90",
+        "updaterId":  "u1",
+        "updateIndex": 1
+    }
+}
+
