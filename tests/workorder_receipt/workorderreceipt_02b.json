@@ -1,0 +1,14 @@
+{
+    "jsonrpc": "2.0",
+    "method": "WorkOrderReceiptUpdate",
+    "id": 90,
+    "params": {
+        "workOrderId": "90",
+        "updaterId": "u2",
+        "updateType": 1,
+        "updateData": "",
+        "updateSignature": "uSig",
+        "signatureRules": "SHA-256/RSA-OAEP-4096"
+    }
+}
+

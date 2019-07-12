@@ -1,0 +1,8 @@
+{
+    "jsonrpc": "2.0",
+    "method": "WorkerLookUp",
+    "id": 1,
+    "params": {
+        "workerType": 1
+    }
+}

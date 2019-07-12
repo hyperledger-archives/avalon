@@ -1,0 +1,62 @@
+# Copyright 2018 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+CMAKE_MINIMUM_REQUIRED(VERSION 3.2 FATAL_ERROR)
+
+SET(ENCLAVE_NAME TestEnclave)
+PROJECT(${ENCLAVE_NAME} C CXX)
+
+FILE(GLOB ENCLAVE_HEADERS *.h)
+FILE(GLOB ENCLAVE_SOURCES *.cpp ${TCF_CORE_DIR}/common/tests/testCrypto.cpp)
+FILE(GLOB ENCLAVE_EDL *.edl)
+FILE(GLOB ENCLAVE_CONFIG *.xml)
+FILE(GLOB ENCLAVE_LDS *.lds)
+
+SGX_EDGE_TRUSTED(${ENCLAVE_EDL} ENCLAVE_EDGE_SOURCES)
+SET(ENCLAVE_EDL ${ENCLAVE_EDL} PARENT_SCOPE)
+
+ADD_LIBRARY(${ENCLAVE_NAME} SHARED ${ENCLAVE_HEADERS} ${ENCLAVE_SOURCES} ${ENCLAVE_EDGE_SOURCES} ${ENCLAVE_EDL})
+ADD_DEPENDENCIES(${ENCLAVE_NAME} ttcf-common)
+
+TARGET_INCLUDE_DIRECTORIES(${ENCLAVE_NAME} PUBLIC  ${SGX_ENCLAVE_INCLUDE})
+TARGET_INCLUDE_DIRECTORIES(${ENCLAVE_NAME} PUBLIC  ${SGX_SSL}/include )
+TARGET_INCLUDE_DIRECTORIES(${ENCLAVE_NAME} PRIVATE ${TCF_CORE_DIR}/common)
+TARGET_INCLUDE_DIRECTORIES(${ENCLAVE_NAME} PRIVATE ${TCF_CORE_DIR}/common/tests)
+TARGET_INCLUDE_DIRECTORIES(${ENCLAVE_NAME} PRIVATE ${TCF_CORE_DIR}/common/crypto)
+TARGET_INCLUDE_DIRECTORIES(${ENCLAVE_NAME} PRIVATE ${TCF_CORE_DIR}/common/packages/base64)
+
+TARGET_COMPILE_OPTIONS(${ENCLAVE_NAME} PRIVATE ${COMMON_CXX_FLAGS})
+TARGET_COMPILE_OPTIONS(${ENCLAVE_NAME} PRIVATE -nostdinc)
+TARGET_COMPILE_OPTIONS(${ENCLAVE_NAME} PRIVATE -nostdinc++)
+
+TARGET_LINK_LIBRARIES(${ENCLAVE_NAME} -Wl,--no-undefined)
+TARGET_LINK_LIBRARIES(${ENCLAVE_NAME} -nostdlib)
+TARGET_LINK_LIBRARIES(${ENCLAVE_NAME} -nodefaultlibs)
+TARGET_LINK_LIBRARIES(${ENCLAVE_NAME} -nostartfiles)
+TARGET_LINK_LIBRARIES(${ENCLAVE_NAME} -Wl,-Bstatic)
+TARGET_LINK_LIBRARIES(${ENCLAVE_NAME} -Wl,-Bsymbolic)
+TARGET_LINK_LIBRARIES(${ENCLAVE_NAME} -Wl,--no-undefined)
+TARGET_LINK_LIBRARIES(${ENCLAVE_NAME} -Wl,-pie,-eenclave_entry)
+TARGET_LINK_LIBRARIES(${ENCLAVE_NAME} -Wl,--export-dynamic)
+TARGET_LINK_LIBRARIES(${ENCLAVE_NAME} -Wl,--defsym,__ImageBase=0)
+TARGET_LINK_LIBRARIES(${ENCLAVE_NAME} -Wl,--version-script=${ENCLAVE_LDS})
+TARGET_LINK_LIBRARIES(${ENCLAVE_NAME} -Wl,-L,${SGX_SDK}/lib64)
+TARGET_LINK_LIBRARIES(${ENCLAVE_NAME} -Wl,-L,${SGX_SSL}/lib64)
+TARGET_LINK_LIBRARIES(${ENCLAVE_NAME} -Wl,-L,${SGX_SSL}/lib64/release)
+TARGET_LINK_LIBRARIES(${ENCLAVE_NAME} -Wl,-L,${TCF_CORE_DIR}/common/build)
+TARGET_LINK_LIBRARIES(${ENCLAVE_NAME} -Wl,--whole-archive -lsgx_tsgxssl -Wl,--no-whole-archive)
+TARGET_LINK_LIBRARIES(${ENCLAVE_NAME} -Wl,--whole-archive -l${TRTS_LIBRARY_NAME} -Wl,--no-whole-archive)
+TARGET_LINK_LIBRARIES(${ENCLAVE_NAME} -Wl,--start-group -lttcf-common -lsgx_tsgxssl_crypto -lsgx_tstdc -lsgx_tcxx -lsgx_tcrypto -l${SERVICE_LIBRARY_NAME} -Wl,--end-group)
+
+SGX_SIGN_ENCLAVE(${ENCLAVE_NAME} ${TCF_ENCLAVE_CODE_SIGN_PEM} ${ENCLAVE_CONFIG})

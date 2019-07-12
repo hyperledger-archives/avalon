@@ -1,0 +1,26 @@
+{
+    "jsonrpc": "2.0",
+    "method": "WorkerRegister",
+    "id": 1,
+    "params": {
+        "workerId":"123",
+        "workerType":321,
+        "organizationId":"0Xd",
+        "applicationTypeId": "0XAD",
+        "workerEncryptionKey" : " " ,
+        "details": {
+            "hashingAlgorithm": "SHA-256",
+            "signingAlgorithm": "SECP256K1" ,
+            "keyEncryptionAlgorithm": "RSA-OAEP-3072" ,
+            "dataEncryptionAlgorithm": "AES-GCM-256" ,
+            "workerTypeData": {
+                "verificationKey": "0xA",
+                "encryptionKey": "ekey",
+                "encryptionKeyNonce": "enounce",
+                "encryptionKeySignature": "esig",
+                "enclaveCertificate": "ecert"
+            }
+        }
+    }
+}
+

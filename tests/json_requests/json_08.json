@@ -1,0 +1,38 @@
+{
+    "jsonrpc": "2.0",
+    "method": "WorkOrderSubmit",
+    "id": 11,
+    "params": {
+        "responseTimeoutMSecs": 6000,
+        "payloadFormat": "pformat",
+        "resultUri": "resulturi",
+        "notifyUri": "notifyuri",
+        "workOrderId": "0x23",
+        "workerId":"",
+        "workloadId": "0x2345",
+        "requesterId": "0x3456",
+        "workerEncryptionKey": "0x6789",
+        "dataEncryptionAlgorithm": "AES-GCM-256",
+        "encryptedSessionKey": "sessionkey",
+        "sessionKeyIv": "Iv",
+        "requesterNonce": "",
+        "encryptedRequestHash": "requesthash",
+        "requesterSignature": "",
+        "inData": [
+                   {"index": 1,
+                    "dataHash": "12ab34cd",
+                    "data": "Hello world",
+                    "encryptedDataEncryptionKey": "",
+                    "iv": ""
+                   },
+                   {"index": 0,
+                    "dataHash": "dcba4321",
+                    "data": "echo-result:",
+                    "encryptedDataEncryptionKey": "",
+                    "iv": ""
+                   }
+        ],
+        "verifyingKey": ""
+    }
+}
+
