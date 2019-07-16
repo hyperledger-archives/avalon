@@ -68,8 +68,8 @@ yourself using OpenSSL, then export the path to it:
   ```
 
 - `TCF_HOME`
-Used to locate the build directories.
-Described in the [BUILD document](BUILD.md#quickstart).
+Used to locate the top level build directory.
+It is described in the [BUILD document](BUILD.md#buildtcf).
 
 
 # <a name="packages"></a>Required Packages
@@ -120,7 +120,7 @@ on platforms that do not have hardware support for Intel SGX.
 ## Intel SGX SDK
 The Intel SGX SDK is required for both Intel SGX platforms and
 Intel SGX simulator mode.
-Download the Intel SGX SDK from
+Download the Intel SGX SDK 2.3.1 from
 [here](https://01.org/intel-software-guard-extensions/downloads)
 for your distribution.
 It is recommended to install Intel SGX SDK in `/opt/intel/sgxsdk/`
@@ -145,23 +145,25 @@ To learn more about Intel SGX read the
 visit the [Intel SGX homepage](https://software.intel.com/en-us/sgx).
 
 
-## Intel SGX in Hardware-mode
+## Intel SGX in Hardware Mode
 If you plan to run this on Intel SGX-enabled hardware, you will need
-to install Intel SGX driver, `libsgx-common` package in both standalone and docker builds. Additionally in standalone build, we need to install Intel SGX SDK manually.
-You can find the Linux installation instructions for Intel SGX at the
-[main Intel SGX GitHub page](https://github.com/intel/linux-sgx).
+to install packages `libsgx-enclave-common` and `libelf-dev` and
+install the Intel SGX driver for both standalone and docker builds.
+Additionally for standalone builds, we need to install Intel SGX SDK manually.
 
-
-You will need to obtain Intel IAS subscription key and SPID from the portal `https://api.portal.trustedservices.intel.com/`
-Replace SPID and Subscription key (either or Primary key or Secondary Key) in the file below.
+You will need to obtain Intel IAS subscription key and SPID from the portal
+https://api.portal.trustedservices.intel.com/
+<br />
+Replace the SPID and IAS Subscription key values in file
+`$TCF_HOME/config/tcs_config.toml` with the actual hexadecimal values
+(the IAS key may be either your or Primary key or Secondary key):
 ```
-<TCF_HOME_DIR>/config/work_order_tests.toml
-Modify spid and ias_api_key values with actual values.
 spid = '<spid obtained from portal>'
 ias_api_key = '<ias subscription key obtained from portal>'
 ```
 
-**The following steps are applicable only for standalone builds**
+**The following steps apply only to standalone builds.**
+
 Finally, make sure you have the `SGX_SDK` and `LD_LIBRARY_PATH` environment variables
 active for your current shell session before continuing. They are normally set
 by sourcing the Intel SGX SDK activation script
@@ -184,8 +186,10 @@ Set `SGX_MODE` as follows:
 export SGX_MODE=SIM
 ```
 
-
 # <a name="openssl"></a>OpenSSL
+
+**The OpenSSL steps apply only to standalone builds.**
+
 OpenSSL is a popular cryptography library. This project requires OpenSSL
 version 1.1.0h or later.
 
@@ -238,6 +242,9 @@ export LD_LIBRARY_PATH="$PWD/install/lib/${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
 ```
 
 # <a name="sgxssl"></a>Intel SGX OpenSSL
+
+**The Intel SGX OpenSSL steps apply only to standalone builds.**
+
 Intel SGX OpenSSL is a compilation of OpenSSL specifically for use with
 Intel SGX secure enclaves.
 This project specifically requires Intel SGX OpenSSL based on OpenSSL version 1.1.0h
