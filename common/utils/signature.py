@@ -109,7 +109,7 @@ class ClientSignature(object) :
             logger.debug("encrypted indata - %s", crypto.byte_array_to_base64(enc_data))
             i = i + 1
 
-        logger.debug("Workorder InData after encryption: %s\n", indata_objects)
+        logger.debug("Workorder InData after encryption: %s", indata_objects)
 
 #---------------------------------------------------------------------------------------------
     def __calculate_hash_on_concatenated_string(self, input_json_params, nonce_hash):
@@ -228,7 +228,7 @@ class ClientSignature(object) :
         final_hash = crypto.compute_message_hash(concat_hash)
         encrypted_request_hash = utility.encrypt_data(final_hash, compressed_encrypted_session_key, session_iv,)
         encrypted_request_hash_str = ''.join(format(i, '02x') for i in encrypted_request_hash)
-        logger.debug("encrypted request hash: \n%s\n", encrypted_request_hash_str)
+        logger.debug("encrypted request hash: \n%s", encrypted_request_hash_str)
 
         #Update the Input Json  Params
         input_json_params["encryptedRequestHash"] = encrypted_request_hash_str

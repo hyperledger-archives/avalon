@@ -156,7 +156,7 @@ def decrypt_data(encryption_key, iv, data):
     logger.debug("encrypted_session_key: %s", encryption_key)
     decrypt_result = crypto.SKENC_DecryptMessage(encryption_key, crypto.hex_to_byte_array(iv), data_byte)
     result = base64.b64decode(crypto.byte_array_to_base64(decrypt_result))
-    logger.info("Decryption Result at Client - %s \n", result)
+    logger.info("Decryption Result at Client - %s ", result)
 
 #---------------------------------------------------------------------------------------------
 

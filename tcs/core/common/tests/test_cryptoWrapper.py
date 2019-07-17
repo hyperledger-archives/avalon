@@ -154,7 +154,7 @@ except Exception as exc:
 if (bytearray(plaintext) == bytearray(msg)):
   logger.debug("Asymmetric encryption/decryption test successful!")
 else:
-  logger.error("ERROR: Asymmetric encryption/decryption failed.\n")
+  logger.error("ERROR: Asymmetric encryption/decryption failed.")
   exit(-1)
 
 #TEST AES-GCM
@@ -199,9 +199,9 @@ except Exception as exc:
  sys.exit(-1)
 
 if (bytearray(plaintext) == bytearray(msg)):
-  logger.debug("Symmetric encryption/decryption test successful!\n")
+  logger.debug("Symmetric encryption/decryption test successful!")
 else:
-  logger.error("ERROR:Symmetric encryption/decryption test failed: decrypted text and plaintext mismatch.\n")
+  logger.error("ERROR:Symmetric encryption/decryption test failed: decrypted text and plaintext mismatch.")
   exit(-1)
 
 c = list(ciphertext)
@@ -267,9 +267,9 @@ except Exception as exc:
  sys.exit(-1)
 
 if (bytearray(plaintext) == bytearray(msg)):
-  logger.debug("Symmetric encryption (random IV)/decryption test successful!\n")
+  logger.debug("Symmetric encryption (random IV)/decryption test successful!")
 else:
-  logger.error("ERROR:Symmetric encryption (random IV)/decryption test failed: decrypted text and plaintext mismatch.\n")
+  logger.error("ERROR:Symmetric encryption (random IV)/decryption test failed: decrypted text and plaintext mismatch.")
   exit(-1)
 
 c = list(ciphertext)

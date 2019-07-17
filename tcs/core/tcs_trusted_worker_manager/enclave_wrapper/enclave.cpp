@@ -74,7 +74,7 @@ namespace tcf {
             ret = g_Enclave[0].CallSgx([this] () {
                     return sgx_init_quote(&this->reportTargetInfo, &this->epidGroupId);
                 });
-            tcf::error::ThrowSgxError(ret, "Failed to initialized quote in enclave constructor");
+            tcf::error::ThrowSgxError(ret, "Failed to initialize quote in enclave constructor");
         }  // Enclave::Enclave
 
         // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -90,7 +90,7 @@ namespace tcf {
             } catch (...) {
                 tcf::Log(
                     TCF_LOG_ERROR,
-                    "Unknown error unloading tcf enclave");
+                    "Unknown error unloading tcf enclave\n");
             }
         }  // Enclave::~Enclave
 
