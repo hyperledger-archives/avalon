@@ -35,20 +35,20 @@ class IasClient(object):
         self._proxies = {}
         if "HttpsProxy" in kwargs:
             self._proxies["https"] = kwargs["HttpsProxy"]
-            logger.info("Proxy: %s\n", self._proxies["https"])
+            logger.info("Proxy: %s", self._proxies["https"])
         if "Spid" in kwargs:
             self._spid = kwargs["Spid"]
-            logger.info("SPID: %s\n", self._spid)
+            logger.info("SPID: %s", self._spid)
         else:
             raise KeyError('Missing Spid setting')
         if "IasServer" in kwargs:
             self._ias_url = kwargs["IasServer"]
-            logger.info("URL: %s\n", self._ias_url)
+            logger.info("URL: %s", self._ias_url)
         else:
             raise KeyError('Missing IasServer setting')
         if "ApiKey" in kwargs:
             self._ias_api_key = kwargs["ApiKey"]
-            logger.info("IAS ApiKey: %s\n", self._ias_api_key)
+            logger.info("IAS ApiKey: %s", self._ias_api_key)
         else:
             raise KeyError('Missing SpidCert setting')
         self._timeout=300
@@ -89,15 +89,15 @@ class IasClient(object):
         if nonce is not None:
             json['nonce'] = nonce
 
-        logger.debug("Posting attestation verification request to: %s\n",url)
+        logger.debug("Posting attestation verification request to: %s",url)
         req_header = {"Ocp-Apim-Subscription-Key": self._ias_api_key}
         result = requests.post(url,
                                json=json,
                                proxies=self._proxies,
                                headers=req_header,
                                timeout=self._timeout)
-        logger.debug("result headers: %s\n", result.headers)
-        logger.info("received attestation result code: %d\n", result.status_code)
+        logger.debug("result headers: %s", result.headers)
+        logger.info("received attestation result code: %d", result.status_code)
         if result.status_code != requests.codes.ok:
             logger.debug("post_verify_attestation HTTP Error code : %d", result.status_code)
             result.raise_for_status()
@@ -107,7 +107,7 @@ class IasClient(object):
             'ias_signature': result.headers.get('x-iasreport-signature'),
             'ias_certificate': urllib.parse.unquote(result.headers.get('x-iasreport-signing-certificate'))
         }
-        logger.debug("received ias certificate: %s\n", returnblob['ias_certificate'])
+        logger.debug("received ias certificate: %s", returnblob['ias_certificate'])
         return returnblob
 
     def verify_report_fields(self, original_quote, received_report):

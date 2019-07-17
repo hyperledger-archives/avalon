@@ -330,8 +330,8 @@ def start_enclave_manager(config):
         logger.debug("initialize the enclave")
         # Extended measurements is a list of enclave basename and enclave measurement
         extended_measurements = enclave_helper.initialize_enclave(config.get("EnclaveModule"))
-    except:
-        logger.exception("failed to initialize enclave; %s")
+    except Exception as e:
+        logger.exception("failed to initialize enclave; %s", str(e))
         sys.exit(-1)
 
     logger.info("creating a new enclave")

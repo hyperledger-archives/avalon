@@ -40,13 +40,13 @@ tcf_enclave_info::tcf_enclave_info(
     // tcf::SetLogFunction(PyLog);
 
     // Todo: PyLogV logs are removed, as its crashing the process, needs investigation
-    tcf::Log(TCF_LOG_INFO, "Initializing SGX TCF enclave");
-    tcf::Log(TCF_LOG_DEBUG, "Enclave path: %s", enclaveModulePath.c_str());
-    tcf::Log(TCF_LOG_DEBUG, "SPID: %s", spid.c_str());
+    tcf::Log(TCF_LOG_INFO, "Initializing SGX TCF enclave\n");
+    tcf::Log(TCF_LOG_DEBUG, "Enclave path: %s\n", enclaveModulePath.c_str());
+    tcf::Log(TCF_LOG_DEBUG, "SPID: %s\n", spid.c_str());
 
     tcf_err_t ret = tcf::enclave_api::base::Initialize(enclaveModulePath, spid, num_of_enclaves);
     ThrowTCFError(ret);
-    tcf::Log(TCF_LOG_INFO, "SGX TCF enclave initialized.");
+    tcf::Log(TCF_LOG_INFO, "SGX TCF enclave initialized.\n");
 
     HexEncodedString mrEnclaveBuffer;
     HexEncodedString basenameBuffer;
