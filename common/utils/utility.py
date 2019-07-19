@@ -174,15 +174,15 @@ def decrypted_response(input_json_str, encrypted_session_key):
     do_decrypt = True
     data_objects = input_json_params['outData']
     for item in data_objects:
-        data = item['data'].encode('ASCII')
-        e_key = item['encryptedDataEncryptionKey'].encode('ASCII')
-        if not e_key or (e_key == "null".encode('ASCII')):
+        data = item['data'].encode('UTF-8')
+        e_key = item['encryptedDataEncryptionKey'].encode('UTF-8')
+        if not e_key or (e_key == "null".encode('UTF-8')):
             encryption_key_byte = encrypted_session_key[:NO_OF_BYTES]
-        elif e_key == "-".encode('ASCII'):
+        elif e_key == "-".encode('UTF-8'):
             do_decrypt = False
         else:
             encryption_key_byte = crypto.base64_to_byte_array(e_key)
-        iv = item['iv'].encode('ASCII')
+        iv = item['iv'].encode('UTF-8')
         if not do_decrypt:
             input_json_params['outData'][i]['data'] = data
             logger.info("Work order response data not encrypted, data in plain is %s", base64.b64decode(data))
