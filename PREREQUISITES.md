@@ -153,6 +153,25 @@ Additionally for standalone builds, we need to install Intel SGX SDK manually.
 
 Steps to install above packages are as follows.
 
+### Remove Old `/dev/sgx` SGX Driver
+If device file `/dev/sgx` is present, remove the old driver:
+```
+sudo /opt/intel/sgxdriver/uninstall.sh
+```
+
+If the `uninstall.sh` script is missing, uninstall as follows:
+```
+sudo service aesmd stop
+sudo rm -f $(find /lib/modules -name intel_sgx.ko)
+sudo /sbin/depmod
+sudo sed -i '/^intel_sgx$/d' /etc/modules
+sudo rm -f /etc/sysconfig/modules/intel_sgx.modules
+sudo rm -f /etc/modules-load.d/intel_sgx.conf
+```
+
+After uninstalling, reboot with `sudo shutdown -r 0`
+
+### Install New `/dev/isgx` SGX Driver
 Install `SGX driver` 2.3.1 version
 ```
 wget https://download.01.org/intel-sgx/linux-2.3.1/ubuntu18.04/sgx_linux_x64_driver_4d69b9c.bin
@@ -174,13 +193,19 @@ sudo dpkg -i libsgx-enclave-common_2.3.101.46683-1_amd64.deb
 
 You will need to obtain Intel IAS subscription key and SPID from the portal
 https://api.portal.trustedservices.intel.com/
-<br />
+
 Replace the SPID and IAS Subscription key values in file
 `$TCF_HOME/config/tcs_config.toml` with the actual hexadecimal values
-(the IAS key may be either your or Primary key or Secondary key):
+(the IAS key may be either your or Primary key or Secondary key).
+
+Also, either update the `https_proxy` line, if you are behind a
+corporate proxy, otherwise comment out the `https_proxy` line:
 ```
 spid = '<spid obtained from portal>'
 ias_api_key = '<ias subscription key obtained from portal>'
+
+#https_proxy = "http://your-proxy:your-port/"
+
 ```
 
 **The following steps apply only to standalone builds.**
