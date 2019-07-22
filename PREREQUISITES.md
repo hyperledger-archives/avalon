@@ -151,6 +151,27 @@ to install packages `libsgx-enclave-common` and `libelf-dev` and
 install the Intel SGX driver for both standalone and docker builds.
 Additionally for standalone builds, we need to install Intel SGX SDK manually.
 
+Steps to install above packages are as follows.
+
+Install `SGX driver` 2.3.1 version
+```
+wget https://download.01.org/intel-sgx/linux-2.3.1/ubuntu18.04/sgx_linux_x64_driver_4d69b9c.bin
+chmod +x sgx_linux_x64_driver_4d69b9c.bin
+sudo ./sgx_linux_x64_driver_4d69b9c.bin
+```
+
+If installation of driver fails due to absence of `libelf-dev` package on the host system,
+install it using below command.
+```
+sudo apt-get install libelf-dev
+```
+
+Install `libsgx-enclave-common` 2.3.1 version
+```
+wget https://download.01.org/intel-sgx/linux-2.3.1/ubuntu18.04/libsgx-enclave-common_2.3.101.46683-1_amd64.deb
+sudo dpkg -i libsgx-enclave-common_2.3.101.46683-1_amd64.deb
+```
+
 You will need to obtain Intel IAS subscription key and SPID from the portal
 https://api.portal.trustedservices.intel.com/
 <br />
