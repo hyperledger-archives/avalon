@@ -24,7 +24,7 @@ tc::WorkOrderProcessorInterface* LookUpWorkOrder(std::string work_order_code) {
             return workOrderDispatchTable[i].work_order_factory_ptr();
         }
     }
-    tcf::error::RuntimeError("WorkOrder not  Found\n");
+    tcf::error::RuntimeError("Work order not found in Work order lookup table\n");
     return NULL;
 }
 
@@ -40,6 +40,10 @@ void WorkloadProcessor::ProcessWorkOrder(
         const std::vector<tcf::WorkOrderData>& in_work_order_data,
         std::vector<tcf::WorkOrderData>& out_work_order_data) {
     tcf::WorkOrderProcessorInterface* work_order = LookUpWorkOrder(code_id);
+    if (work_order == nullptr) {
+	tcf::error::RuntimeError("Work order not found in Work order lookup table\n");
+	return;
+    }
     work_order->ProcessWorkOrder(
                 code_id,
                 participant_address,
