@@ -29,3 +29,4 @@ src/main/java/com/iexec/worker/utils/version/Version.java
 
 /bin/
 .vscode/
+.DS_Store

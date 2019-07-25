@@ -1,21 +1,17 @@
 package com.iexec.eea.worker.docker;
 
-import com.iexec.common.utils.WaitUtils;
 import com.iexec.eea.worker.config.WorkerConfigurationService;
+import com.iexec.eea.worker.executor.TaskExecutionException;
 import com.iexec.eea.worker.utils.FileHelper;
+import com.iexec.eea.worker.utils.WaitUtils;
 import com.spotify.docker.client.DefaultDockerClient;
-import com.spotify.docker.client.DockerClient.LogsParam;
 import com.spotify.docker.client.exceptions.DockerCertificateException;
 import com.spotify.docker.client.exceptions.DockerException;
-import com.spotify.docker.client.messages.ContainerConfig;
-import com.spotify.docker.client.messages.ContainerCreation;
-import com.spotify.docker.client.messages.Device;
-import com.spotify.docker.client.messages.HostConfig;
+import com.spotify.docker.client.messages.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PreDestroy;
-
 import java.time.Instant;
 import java.util.Date;
 import java.util.List;
@@ -35,19 +31,10 @@ public class CustomDockerClient {
         this.workerConfigurationService = workerConfigurationService;
     }
 
-    public ContainerConfig buildContainerConfig(String chainTaskId, String imageUri, List<String> env, String... cmd) {
+    public ContainerConfig buildContainerConfig(String chainWorkOrderId, String imageUri, List<String> env, String... cmd) {
         if (imageUri == null || imageUri.isEmpty()) return null;
 
-        HostConfig hostConfig = getHostConfig(chainTaskId);
-        if (hostConfig == null) return null;
-
-        return buildCommonContainerConfig(hostConfig, imageUri, env, cmd);
-    }
-
-    public ContainerConfig buildSconeContainerConfig(String chainTaskId, String imageUri, List<String> env, String... cmd) {
-        if (imageUri == null || imageUri.isEmpty()) return null;
-
-        HostConfig hostConfig = getSconeHostConfig(chainTaskId);
+        HostConfig hostConfig = getHostConfig(chainWorkOrderId);
         if (hostConfig == null) return null;
 
         return buildCommonContainerConfig(hostConfig, imageUri, env, cmd);
@@ -56,57 +43,29 @@ public class CustomDockerClient {
     private ContainerConfig buildCommonContainerConfig(HostConfig hostConfig, String imageUri, List<String> env, String... cmd) {
         ContainerConfig.Builder containerConfigBuilder = ContainerConfig.builder();
 
-        if (cmd != null && cmd.length != 0) containerConfigBuilder.cmd(cmd);
+        if (cmd != null && cmd.length != 0 && cmd[0] != null) containerConfigBuilder.cmd(cmd);
+
+        if(env != null && !env.isEmpty())
+            containerConfigBuilder.env(env);
 
         return containerConfigBuilder.image(imageUri)
                 .hostConfig(hostConfig)
-                .env(env)
                 .build();
     }
 
-    private HostConfig getHostConfig(String chainTaskId) {
-        HostConfig.Bind inputBind = createInputBind(chainTaskId);
-        HostConfig.Bind outputBind = createOutputBind(chainTaskId);
+    private HostConfig getHostConfig(String chainWorkOrderId) {
+        HostConfig.Bind outputBind = createOutputBind(chainWorkOrderId);
 
-        if (inputBind == null || outputBind == null) return null;
+        if (outputBind == null) return null;
 
         return HostConfig.builder()
-                .appendBinds(inputBind, outputBind)
+                .appendBinds(outputBind)
                 .build();
     }
 
-    private HostConfig getSconeHostConfig(String chainTaskId) {
-        HostConfig.Bind inputBind = createInputBind(chainTaskId);
-        HostConfig.Bind outputBind = createOutputBind(chainTaskId);
-        HostConfig.Bind sconeBind = createSconeBind(chainTaskId);
-
-        if (inputBind == null || outputBind == null || sconeBind == null) return null;
-
-        Device device = Device.builder()
-                .pathOnHost("/dev/isgx")
-                .pathInContainer("/dev/isgx")
-                .cgroupPermissions("rwm")
-                .build();
-
-        return HostConfig.builder()
-                .appendBinds(inputBind, outputBind, sconeBind)
-                .devices(device)
-                .build();
-    }
-
-    private HostConfig.Bind createInputBind(String chainTaskId) {
-        String inputMountPoint = workerConfigurationService.getTaskInputDir(chainTaskId);
-        return createBind(inputMountPoint, FileHelper.SLASH_IEXEC_IN);
-    }
-
-    private HostConfig.Bind createOutputBind(String chainTaskId) {
-        String outputMountPoint = workerConfigurationService.getTaskIexecOutDir(chainTaskId);
-        return createBind(outputMountPoint, FileHelper.SLASH_IEXEC_OUT);
-    }
-
-    private HostConfig.Bind createSconeBind(String chainTaskId) {
-        String sconeMountPoint = workerConfigurationService.getTaskSconeDir(chainTaskId);
-        return createBind(sconeMountPoint, FileHelper.SLASH_SCONE);
+    private HostConfig.Bind createOutputBind(String chainWorkOrderId) {
+        String outputMountPoint = workerConfigurationService.getTaskOutputDir(chainWorkOrderId);
+        return createBind(outputMountPoint, FileHelper.OUT_DIR_PATH);
     }
 
     private HostConfig.Bind createBind(String source, String dest) {
@@ -125,18 +84,18 @@ public class CustomDockerClient {
                 .build();
     }
 
-    public boolean pullImage(String chainTaskId, String image) {
-        log.info("Image pull started [chainTaskId:{}, image:{}]", chainTaskId, image);
+    public boolean pullImage(String chainWorkOrderId, String image) {
+        log.info("Image pull started [chainWorkOrderId:{}, image:{}]", chainWorkOrderId, image);
 
         try {
             docker.pull(image);
         } catch (DockerException | InterruptedException e) {
-            log.error("Image pull failed [chainTaskId:{}, image:{}]", chainTaskId, image);
+            log.error("Image pull failed [chainWorkOrderId:{}, image:{}]", chainWorkOrderId, image);
             e.printStackTrace();
             return false;
         }
 
-        log.info("Image pull completed [chainTaskId:{}, image:{}]", chainTaskId, image);
+        log.info("Image pull completed [chainWorkOrderId:{}, image:{}]", chainWorkOrderId, image);
         return true;
     }
 
@@ -144,8 +103,8 @@ public class CustomDockerClient {
         try {
             return !docker.inspectImage(image).id().isEmpty();
         } catch (DockerException | InterruptedException e) {
-            log.error("Failed to check if image was pulled [image:{}]", image);
-            e.printStackTrace();
+            log.error("Failed to check if image was pulled [image:{}, exception:{}]",
+                    image, e);
             return false;
         }
     }
@@ -153,42 +112,48 @@ public class CustomDockerClient {
     /**
      * This creates a container, starts, waits then stops it, and returns its logs
      */
-    public String dockerRun(String chainTaskId, ContainerConfig containerConfig, long maxExecutionTime) {
-        if (containerConfig == null) {
-            log.error("Could not run computation, container config is null [chainTaskId:{}]", chainTaskId);
-            return "";
-        }
+    public long dockerRun(String workOrderId, ContainerConfig containerConfig, long maxExecutionTime) throws TaskExecutionException {
+        if (containerConfig == null)
+            throw new TaskExecutionException(workOrderId, "Could not run computation, container config is null");
 
-        log.info("Running computation [chainTaskId:{}, image:{}, cmd:{}]",
-                chainTaskId, containerConfig.image(), containerConfig.cmd());
+        log.info("Running computation [workOrderId:{}, image:{}, cmd:{}]",
+                workOrderId, containerConfig.image(), containerConfig.cmd());
 
         // docker create
-        String containerId = createContainer(chainTaskId, containerConfig);
-        if (containerId.isEmpty()) return "";
+        String containerId = createContainer(workOrderId, containerConfig);
 
         // docker start
-        boolean isContainerStarted = startContainer(containerId);
-
-        if (!isContainerStarted) return "";
+        try {
+            startContainer(containerId);
+        } catch (Exception e) {
+            throw new TaskExecutionException(workOrderId, "Could not start container", e);
+        }
 
         Date executionTimeoutDate = Date.from(Instant.now().plusMillis(maxExecutionTime));
-        waitContainer(chainTaskId, containerId, executionTimeoutDate);
+        waitContainer(workOrderId, containerId, executionTimeoutDate);
 
         // docker stop
-        stopContainer(containerId);
+        long returnCode = -1;
+        try {
+            returnCode = stopContainer(containerId);
+        } catch(Exception e) {
+            throw new TaskExecutionException(workOrderId, "Could not stop container", e);
+        }
 
-        log.info("Computation completed [chainTaskId:{}]", chainTaskId);
-
-        // docker logs
-        String stdout = getContainerLogs(containerId);
+        log.info("Computation completed [workOrderId:{}]", workOrderId);
 
         // docker rm
-        removeContainer(containerId);
-        return stdout;
+        try {
+            removeContainer(containerId);
+        } catch (Exception e) {
+            throw new TaskExecutionException(workOrderId, "Could not remove container", e);
+        }
+
+        return returnCode;
     }
 
-    public String createContainer(String chainTaskId, ContainerConfig containerConfig) {
-        log.debug("Creating container [chainTaskId:{}]", chainTaskId);
+    public String createContainer(String chainWorkOrderId, ContainerConfig containerConfig) {
+        log.debug("Creating container [chainWorkOrderId:{}]", chainWorkOrderId);
 
         if (containerConfig == null) return "";
 
@@ -197,45 +162,35 @@ public class CustomDockerClient {
         try {
             containerCreation = docker.createContainer(containerConfig);
         } catch (DockerException | InterruptedException e) {
-            log.error("Failed to create container [chainTaskId:{}, image:{}, cmd:{}]",
-                    chainTaskId, containerConfig.image(), containerConfig.cmd());
+            log.error("Failed to create container [chainWorkOrderId:{}, image:{}, cmd:{}]",
+                    chainWorkOrderId, containerConfig.image(), containerConfig.cmd());
             e.printStackTrace();
             return "";
         }
 
         if (containerCreation == null) return "";
 
-        log.info("Created container [chainTaskId:{}, containerId:{}]",
-                chainTaskId, containerCreation.id());
+        log.info("Created container [chainWorkOrderId:{}, containerId:{}]",
+                chainWorkOrderId, containerCreation.id());
 
         return containerCreation.id() != null ? containerCreation.id() : "";
     }
 
-    public boolean startContainer(String containerId) {
+    public void startContainer(String containerId) throws DockerException, InterruptedException {
         log.debug("Starting container [containerId:{}]", containerId);
-
-        try {
-            docker.startContainer(containerId);
-        } catch (DockerException | InterruptedException e) {
-            log.error("Failed to start container [containerId:{}]", containerId);
-            e.printStackTrace();
-            removeContainer(containerId);
-            return false;
-        }
-
+        docker.startContainer(containerId);
         log.debug("Started container [containerId:{}]", containerId);
-        return true;
     }
 
-    public void waitContainer(String chainTaskId, String containerId, Date executionTimeoutDate) {
+    public void waitContainer(String chainWorkOrderId, String containerId, Date executionTimeoutDate) {
         boolean isComputed = false;
         boolean isTimeout = false;
 
         if (containerId == null || containerId.isEmpty()) return;
 
         while (!isComputed && !isTimeout) {
-            log.info("Computing [chainTaskId:{}, containerId:{}, status:{}, isComputed:{}, isTimeout:{}]",
-                    chainTaskId, containerId, getContainerStatus(containerId), isComputed, isTimeout);
+            log.info("Computing [chainWorkOrderId:{}, containerId:{}, status:{}, isComputed:{}, isTimeout:{}]",
+                    chainWorkOrderId, containerId, getContainerStatus(containerId), isComputed, isTimeout);
 
             WaitUtils.sleep(1);
             isComputed = isContainerExited(containerId);
@@ -243,53 +198,20 @@ public class CustomDockerClient {
         }
 
         if (isTimeout) {
-            log.warn("Container reached timeout, stopping [chainTaskId:{}, containerId:{}]", chainTaskId, containerId);
+            log.warn("Container reached timeout, stopping [chainWorkOrderId:{}, containerId:{}]", chainWorkOrderId, containerId);
         }
     }
 
-    public boolean stopContainer(String containerId) {
+    public long stopContainer(String containerId) throws DockerException, InterruptedException {
         log.debug("Stopping container [containerId:{}]", containerId);
-
-        try {
-            docker.stopContainer(containerId, 0);
-        } catch (DockerException | InterruptedException e) {
-            log.error("Failed to stop container [containerId:{}]", containerId);
-            e.printStackTrace();
-            return false;
-        }
-
-        log.debug("Stopped container [containerId:{}]", containerId);
-        return true;
+        docker.stopContainer(containerId, 0);
+        return docker.waitContainer(containerId).statusCode();
     }
 
-    public String getContainerLogs(String containerId) {
-        log.debug("Getting container logs [containerId:{}]", containerId);
-        String stdout = "";
-
-        try {
-            stdout = docker.logs(containerId, LogsParam.stdout(), LogsParam.stderr()).readFully();
-        } catch (DockerException | InterruptedException e) {
-            log.error("Failed to get container logs [containerId:{}]", containerId);
-            e.printStackTrace();
-            return "Failed to get computation logs";
-        }
-
-        log.debug("Got container logs [containerId:{}]", containerId);
-        return stdout;
-    }
-
-    public boolean removeContainer(String containerId) {
+    public void removeContainer(String containerId) throws DockerException, InterruptedException {
         log.debug("Removing container [containerId:{}]", containerId);
-        try {
-            docker.removeContainer(containerId);
-        } catch (DockerException | InterruptedException e) {
-            log.error("Failed to remove container [containerId:{}]", containerId);
-            e.printStackTrace();
-            return false;
-        }
-
+        docker.removeContainer(containerId);
         log.debug("Removed container [containerId:{}]", containerId);
-        return true;
     }
 
     public boolean isContainerExited(String containerId) {

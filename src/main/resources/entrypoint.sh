@@ -1,6 +1,6 @@
 #!/bin/sh
-if [ ! -z $IEXEC_HTTP_PROXY_HOST ] && [ ! -z  $IEXEC_HTTP_PROXY_PORT ]; then
-	java -Dhttp.proxyHost=$IEXEC_HTTP_PROXY_HOST -Dhttp.proxyPort=$IEXEC_HTTP_PROXY_PORT -jar /iexec-worker.jar
+if [ ! -z $EEA_HTTP_PROXY_HOST ] && [ ! -z  $EEA_HTTP_PROXY_PORT ]; then
+	java -Dhttp.proxyHost=$EEA_HTTP_PROXY_HOST -Dhttp.proxyPort=$EEA_HTTP_PROXY_PORT -jar /eea-worker.jar
 fi
 
-java -jar /iexec-worker.jar
+java -jar /eea-worker.jar

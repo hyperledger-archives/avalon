@@ -1,27 +1,55 @@
 package com.iexec.eea.worker.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.iexec.eea.worker.utils.FileHelper;
-import com.iexec.eea.worker.chain.CredentialsService;
-
-import org.apache.http.HttpHost;
-import org.apache.http.impl.client.HttpClientBuilder;
+import com.iexec.eea.worker.chain.services.CredentialsService;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
+import javax.annotation.PostConstruct;
 import java.io.File;
-
-import static java.lang.management.ManagementFactory.getOperatingSystemMXBean;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 @Service
+@Slf4j
 public class WorkerConfigurationService {
+
+    //public static final String OUT_DIR = "eea_out";
+    public static final String OUT_DIR = "iexec";
 
     private CredentialsService credentialsService;
 
     @Value("${worker.name}")
     private String workerName;
+
+    @Value("${worker.organizationId}")
+    @Getter
+    private String organizationId;
+
+    @Value("${worker.applicationTypeIds}")
+    @Getter
+    private String[] applicationTypeIds;
+
+    @Value("${worker.registryContractAddress}")
+    @Getter
+    private String registryAddress;
+
+    @Value("${worker.workOrderContractAddress}")
+    @Getter
+    private String workOrderRegistryAddress;
+
+    @Value("${worker.detailsFilePath}")
+    private String detailsFilePath;
+
+    @Getter
+    private WorkerDetails workerDetails;
 
     @Value("${worker.workerBaseDir}")
     private String workerBaseDir;
@@ -32,11 +60,16 @@ public class WorkerConfigurationService {
     @Value("${worker.gasPriceCap}")
     private long gasPriceCap;
 
-    @Value("${worker.teeEnabled}")
-    private boolean isTeeEnabled;
+    @Value("${worker.blockchainNodeAddress}")
+    @Getter
+    private String blockchainNodeAddress;
 
-    @Value("${worker.overrideBlockchainNodeAddress}")
-    private String overrideBlockchainNodeAddress;
+    /**
+     * TODO this is useless for now
+     */
+    @Value("${worker.registryListContractAddress}")
+    @Getter
+    private String registryListAddress;
 
     public WorkerConfigurationService(CredentialsService credentialsService) {
         this.credentialsService = credentialsService;
@@ -54,42 +87,12 @@ public class WorkerConfigurationService {
         return workerBaseDir + File.separator + workerName;
     }
 
-    public String getTaskBaseDir(String chainTaskId) {
-        return getWorkerBaseDir() + File.separator + chainTaskId;
+    public String getTaskBaseDir(String workOrderId) {
+        return getWorkerBaseDir() + File.separatorChar + workOrderId;
     }
 
-    public String getTaskInputDir(String chainTaskId) {
-        return getWorkerBaseDir() + File.separator + chainTaskId + FileHelper.SLASH_INPUT;
-    }
-
-    public String getTaskOutputDir(String chainTaskId) {
-        return getWorkerBaseDir() + File.separator + chainTaskId + FileHelper.SLASH_OUTPUT;
-    }
-
-    public String getTaskIexecOutDir(String chainTaskId) {
-        return getWorkerBaseDir() + File.separator + chainTaskId + FileHelper.SLASH_OUTPUT
-                + FileHelper.SLASH_IEXEC_OUT;
-    }
-
-    public String getTaskSconeDir(String chainTaskId) {
-        return getWorkerBaseDir() + File.separator + chainTaskId + FileHelper.SLASH_SCONE;
-    }
-
-    public String getOS() {
-        return System.getProperty("os.name").trim();
-    }
-
-    public String getCPU() {
-        return System.getProperty("os.arch");
-    }
-
-    public int getNbCPU() {
-        return Runtime.getRuntime().availableProcessors();
-    }
-
-    public int getMemorySize() {
-        com.sun.management.OperatingSystemMXBean os = (com.sun.management.OperatingSystemMXBean) getOperatingSystemMXBean();
-        return new Long(os.getTotalPhysicalMemorySize() / (1024 * 1024 * 1024)).intValue();//in GB
+    public String getTaskOutputDir(String workOrderId) {
+        return getTaskBaseDir(workOrderId) + File.separatorChar + OUT_DIR;
     }
 
     public float getGasPriceMultiplier() {
@@ -98,14 +101,6 @@ public class WorkerConfigurationService {
 
     public long getGasPriceCap() {
         return gasPriceCap;
-    }
-
-    public boolean isTeeEnabled() {
-        return isTeeEnabled;
-    }
-
-    public String getOverrideBlockchainNodeAddress() {
-        return overrideBlockchainNodeAddress;
     }
 
     public String getHttpProxyHost() {
@@ -117,15 +112,64 @@ public class WorkerConfigurationService {
         return proxyPort != null && !proxyPort.isEmpty() ? Integer.valueOf(proxyPort) : null;
     }
 
-    @Bean
-    private RestTemplate restTemplate() {
-        HttpClientBuilder clientBuilder = HttpClientBuilder.create();
-        if (getHttpProxyHost() != null && getHttpProxyPort() != null) {
-            HttpHost myProxy = new HttpHost(getHttpProxyHost(), getHttpProxyPort());
-            clientBuilder.setProxy(myProxy);
+    public String getHttpsProxyHost() {
+        return System.getProperty("https.proxyHost");
+    }
+
+    public Integer getHttpsProxyPort() {
+        String proxyPort = System.getProperty("https.proxyPort");
+        return proxyPort != null && !proxyPort.isEmpty() ? Integer.valueOf(proxyPort) : null;
+    }
+
+    public String getDetails() {
+        File detailsFile = new File(detailsFilePath);
+
+        if(!detailsFile.exists() || !detailsFile.canRead()) {
+            log.error("Details file does not exist or cannot be read: " + detailsFilePath);
+            System.exit(20);
         }
-        HttpComponentsClientHttpRequestFactory factory = new HttpComponentsClientHttpRequestFactory();
-        factory.setHttpClient(clientBuilder.build());
-        return new RestTemplate(factory);
+
+        String content = null;
+        try {
+            content = Files.readString(detailsFile.toPath());
+        } catch (IOException e) {
+            log.error("Cannot read details file [path:{}, exception:{}", detailsFilePath, e.getMessage());
+            System.exit(21);
+        }
+
+        return content;
+    }
+
+    @PostConstruct
+    private void loadJson() {
+        ObjectMapper mapper = new ObjectMapper();
+        String jsonString = getDetails();
+
+        if(jsonString == null || jsonString.isEmpty()) {
+            log.error("WorkerDetails cannot be empty [workName:{}]",
+                    workerName);
+            return;
+        }
+
+        try {
+            workerDetails = new ObjectMapper().readValue(new File(detailsFilePath), WorkerConfigurationService.WorkerDetails.class);
+        } catch (IOException e) {
+            log.error("Could not parse WorkerDetails JSON [workerName:{}, exception:{}]",
+                    workerName, e.getMessage());
+        }
+    }
+
+    @Data
+    @AllArgsConstructor
+    @Builder
+    public static class WorkerDetails {
+        private String fromAddress;
+        private String hashingAlgorithm;
+        private String signingAlgorithm;
+        private String keyEncryptionAlgorithm;
+        private String encryptionPublicKey;
+        private String dataEncryptionAlgorithm;
+        private String workOrderPayloadFormats;
+        private String workerTypeData;
     }
 }

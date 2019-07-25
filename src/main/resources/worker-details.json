@@ -1,0 +1,26 @@
+{
+  "workOrderSyncUri": "used for direct model",
+  "workOrderAsyncUri": "used for direct model",
+  "workOrderPullUri": "used for direct model",
+  "workOrderNotifyUri": "used for direct model",
+  "receiptInvocationUri": "used for direct model",
+  "workOrderInvocationAddress": "??",
+  "receiptInvocationAddress": "??",
+  "fromAddress": "0x1a69b2EB604dB8eBa185dF03ea4F5288dcbbD248",
+  "hashingAlgorithm": "SHA-256,KECCAK-256",
+  "signingAlgorithm": "SECP256K1,RSA-OAEP-3072",
+  "keyEncryptionAlgorithm": "",
+  "encryptionPublicKey": "myPublicKey",
+  "dataEncryptionAlgorithm": "",
+  "workOrderPayloadFormats": [],
+  "workerTypeData" : {
+    "verificationKey": "",
+    "extendedMeasurements": "",
+    "proofDataType": "",
+    "proofData": {},
+    "encryptionKey": "",
+    "encryptionKeyNonce": "",
+    "encryptionKeySignature": "",
+    "enclaveCertificate": ""
+  }
+}

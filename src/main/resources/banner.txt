@@ -1,7 +1,9 @@
-${Ansi.YELLOW}          _ _____                ______
-${Ansi.YELLOW}  __/\__ (_) ____|_  _____  ___  \ \ \ \
-${Ansi.YELLOW}  \    / | |  _| \ \/ / _ \/ __|  \ \ \ \
-${Ansi.YELLOW}  /_  _\ | | |___ >  <  __/ (__   / / / /
-${Ansi.YELLOW}    \/   |_|_____/_/\_\___|\___| /_/_/_/
-${Ansi.YELLOW}                                =========
+${Ansi.YELLOW}
+${Ansi.YELLOW}  ______ ______            _______ _____ ______
+${Ansi.YELLOW} |  ____|  ____|   /\     |__   __/ ____|  ____|
+${Ansi.YELLOW} | |__  | |__     /  \ ______| | | |    | |__
+${Ansi.YELLOW} |  __| |  __|   / /\ \______| | | |    |  __|
+${Ansi.YELLOW} | |____| |____ / ____ \     | | | |____| |
+${Ansi.YELLOW} |______|______/_/    \_\    |_|  \_____|_|
+${Ansi.YELLOW}
 ${Ansi.YELLOW} :: Spring Boot${spring-boot.formatted-version} :: ${Ansi.DEFAULT}

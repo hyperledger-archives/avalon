@@ -1,29 +1,23 @@
 server:
-  port: ${IEXEC_WORKER_PORT:18091}
-
-core:
-  host: ${IEXEC_CORE_HOST:localhost}
-  port: ${IEXEC_CORE_PORT:18090}
+  port: ${EEA_WORKER_PORT:18091}
 
 worker:
-  name: ${IEXEC_WORKER_NAME:customWorker}
-  workerBaseDir: ${IEXEC_WORKER_BASE_DIR:/tmp/iexec-worker}
-  gasPriceMultiplier: ${IEXEC_GAS_PRICE_MULTIPLIER:1.3} # txs will be send with networkGasPrice*gasPriceMultiplier, 4.0 means super fast
-  gasPriceCap: ${IEXEC_GAS_PRICE_CAP:22000000000} #in Wei, will be used for txs if networkGasPrice*gasPriceMultiplier > gasPriceCap
-  teeEnabled: ${IEXEC_TEE_ENABLED:false}
-  overrideBlockchainNodeAddress: ${IEXEC_WORKER_OVERRIDE_BLOCKCHAIN_NODE_ADDRESS:} #will use it if set, else will use the one given by the core
+  name: ${EEA_WORKER_NAME:customWorker}
+  organizationId: ${EEA_WORKER_ORGID:0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff}
+  applicationTypeIds: ${EEA_WORKER_APPTYPEID:[0x1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f1f]}
+  registryListContractAddress: ${EEA_REGISTRYLIST_CONTRACT_ADDRESS:}
+  registryContractAddress: ${EEA_REGISTRY_CONTRACT_ADDRESS:0x79ede703f6e4FFbb50a3b7798CfEBF792581E830}
+  workOrderContractAddress: ${EEA_WORKORDER_CONTRACT_ADDRESS:0x9B04867c5551EC3b5aa9EB1496DdC79EE0e95ECb}
+  detailsFilePath: ${EEA_WORKER_DETAILS_PATH:./src/main/resources/worker-details.json}
+  workerBaseDir: ${EEA_WORKER_BASE_DIR:/tmp/eea-worker}
+  gasPriceMultiplier: ${EEA_GAS_PRICE_MULTIPLIER:1.3} # txs will be send with networkGasPrice*gasPriceMultiplier, 4.0 means super fast
+  gasPriceCap: ${EEA_GAS_PRICE_CAP:22000000000} #in Wei, will be used for txs if networkGasPrice*gasPriceMultiplier > gasPriceCap
+  blockchainNodeAddress: ${EEA_WORKER_BLOCKCHAIN_NODE_ADDRESS:http://localhost:8545}
+
 
 wallet:
-  encryptedFilePath: ${IEXEC_WORKER_WALLET_PATH:./src/main/resources/wallet/encrypted-wallet_worker1.json}
-  password: ${IEXEC_WORKER_WALLET_PASSWORD:whatever}
-
-scone:
-  las:
-    host: ${IEXEC_SCONE_LAS_HOST:localhost}
-    port: ${IEXEC_SCONE_LAS_PORT:18766}
-
-decryptFilePath: ${IEXEC_DECRYPT_FILE_PATH:./src/main/resources/decrypt-dataset.sh}
-encryptFilePath: ${IEXEC_ENCRYPT_FILE_PATH:./src/main/resources/encrypt-result.sh}
+  encryptedFilePath: ${EEA_WORKER_WALLET_PATH:./src/main/resources/wallet/wallet1.json}
+  password: ${EEA_WORKER_WALLET_PASSWORD:whatever}
 
 management:
   endpoint:

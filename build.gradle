@@ -1,8 +1,9 @@
 import org.apache.tools.ant.filters.ReplaceTokens
 
 buildscript {
+    ext.kotlin_version = '1.3.41'
     ext {
-        springBootVersion = '2.0.5.RELEASE'
+        springBootVersion = '2.1.6.RELEASE'
     }
     repositories {
         mavenCentral()
@@ -10,6 +11,8 @@ buildscript {
     }
     dependencies {
         classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+        classpath 'com.github.jengelman.gradle.plugins:shadow:4.0.4'
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
 
@@ -18,14 +21,17 @@ plugins {
 }
 
 apply plugin: 'java'
+apply plugin: 'kotlin'
 apply plugin: 'eclipse'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
 apply plugin: 'maven'
 apply plugin: 'jacoco'
+apply plugin: 'com.github.johnrengelman.shadow'
 
-group = 'com.iexec.worker'
-sourceCompatibility = 1.8
+group = 'com.iexec.eea.worker'
+sourceCompatibility = 11
+targetCompatibility = 11
 
 repositories {
     mavenCentral()
@@ -44,7 +50,9 @@ configurations {
 
 
 ext {
-    springCloudVersion = 'Finchley.RELEASE'
+    //Greenwich.SR2 is a patch for Greenwich.RELEASE
+    springCloudVersion = 'Greenwich.SR2'
+    web3jVersion = '4.3.0'
 }
 
 dependencyManagement {
@@ -54,9 +62,18 @@ dependencyManagement {
 }
 
 dependencies {
-    // iexec
-    compile "com.iexec.common:iexec-common:$iexecCommonVersion"
-    // compile files("../iexec-common/build/libs/iexec-common-${iexecCommonVersion}.jar")
+    // web3j dependency
+    compile "org.web3j:core:$web3jVersion"
+
+    // multiaddresses (IPFS)
+    compile 'com.github.multiformats:java-multiaddr:1.3.1'
+
+    //jaxb required with Java 11
+    compile 'javax.xml.bind:jaxb-api:2.3.0'
+
+    // lombok
+    compileOnly "org.projectlombok:lombok:1.18.2"
+    annotationProcessor "org.projectlombok:lombok:1.18.2"
 
     // spring
     compile "org.springframework.boot:spring-boot-starter"
@@ -68,28 +85,27 @@ dependencies {
     compile "org.springframework.retry:spring-retry"
     testCompile "org.springframework.boot:spring-boot-starter-test"
 
-    //docker-client
-    compile 'com.spotify:docker-client:8.13.1'
+    // docker-client
+    compile 'com.spotify:docker-client:8.16.0'
     compile 'org.glassfish.jersey.inject:jersey-hk2:2.26'
     compile 'org.glassfish.jersey.bundles.repackaged:jersey-guava:2.25.1'
     compile 'javax.activation:activation:1.1.1'
+
+    // Removes 'warning: unknown enum constant When.MAYBE'
+    compile 'com.google.code.findbugs:annotations:3.0.1'
+
 
     // lombok
     compileOnly "org.projectlombok:lombok:1.18.2"
     annotationProcessor "org.projectlombok:lombok:1.18.2"
 
-    // multiaddresses (IPFS)
-    compile 'com.github.multiformats:java-multiaddr:1.3.1'
-
-    // apache commons.lang3
-    compile 'org.apache.commons:commons-lang3:3.6'
-
     // package cloud
     deployerJars "io.packagecloud.maven.wagon:maven-packagecloud-wagon:0.0.6"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
 }
 
 jacoco {
-    toolVersion = "0.8.1"
+    toolVersion = "0.8.3"
     reportsDir = file("$buildDir/TestCoverageReport")
 }
 // the test coverage report will be created just before the build
@@ -97,10 +113,10 @@ build.dependsOn jacocoTestReport
 
 task createVersion(type: Copy) {
     // delete old one
-    delete 'src/main/java/com/iexec/eea/worker/utils/version/Version.java'
+    delete 'src/main/java/com/iexec/worker/utils/version/Version.java'
     // use and copy template to the new location
     from 'src/main/resources/Version.java.template'
-    into 'src/main/java/com/iexec/eea/worker/utils/version/'
+    into 'src/main/java/com/iexec/worker/utils/version/'
 
     rename { String fileName ->
         fileName.replace('.template', '')
@@ -127,10 +143,12 @@ project.ext.getNexusMaven = {
 }
 
 uploadArchives {
-    repositories.mavenDeployer {
-        configuration = configurations.deployerJars
-        repository(url: getNexusMaven()) {
-            authentication(userName: project.nexusUser, password: project.nexusPassword)
+    if (project.hasProperty("nexusUser") && project.hasProperty("nexusPassword")) {
+        repositories.mavenDeployer {
+            configuration = configurations.deployerJars
+            repository(url: getNexusMaven()) {
+                authentication(userName: project.nexusUser, password: project.nexusPassword)
+            }
         }
     }
 }
@@ -141,6 +159,14 @@ test {
         exclude '**/docker/**'
     }
 }
+
+shadowJar { //required if we want to embed web3j dependency inside
+    baseName = rootProject.name
+    classifier = null
+    version = version
+}
+
+build.dependsOn(shadowJar)
 
 def imageName = "nexus.iex.ec/iexec-worker"
 
@@ -167,7 +193,8 @@ task prepareDockerFile(type: Copy) {
 
 task buildImage(type: Exec) {
     description 'Build a docker image for the core'
-    commandLine("sh", "-c", "docker image build -f build/main/resources/Dockerfile -t " + getDockerImageNameFull() + " .")
+    commandLine("sh", "-c", "docker image build -f build/main/resources/Dockerfile -t " + getDockerImageNameFull() + " . &&" +
+            "docker tag " + getDockerImageNameFull() + " " + imageName + ":dev")
 }
 
 buildImage.dependsOn prepareDockerFile
@@ -199,4 +226,14 @@ project.ext.getJvmArgs = {
 
 bootRun {
     jvmArgs = project.ext.getJvmArgs()
+}
+compileKotlin {
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+}
+compileTestKotlin {
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
 }

@@ -1,19 +1,16 @@
 package com.iexec.eea.worker;
 
 
-import com.iexec.common.config.PublicConfiguration;
-import com.iexec.common.config.WorkerConfigurationModel;
-import com.iexec.eea.worker.amnesia.AmnesiaRecoveryService;
-import com.iexec.eea.worker.chain.CredentialsService;
-import com.iexec.eea.worker.chain.IexecHubService;
-import com.iexec.eea.worker.config.WorkerConfigurationService;
-import com.iexec.eea.worker.feign.CustomFeignClient;
-import com.iexec.eea.worker.result.ResultService;
-import com.iexec.eea.worker.utils.LoggingUtils;
-import com.iexec.eea.worker.utils.version.VersionService;
+import com.iexec.eea.worker.chain.model.ChainWorkOrder;
+import com.iexec.eea.worker.chain.model.ChainWorker;
+import com.iexec.eea.worker.chain.services.ComputationService;
+import com.iexec.eea.worker.chain.services.CredentialsService;
+import com.iexec.eea.worker.chain.services.WorkOrderRegistryService;
+import com.iexec.eea.worker.chain.services.WorkerRegistryService;
+import com.iexec.eea.worker.config.WorkerConfigurationModel;
 import lombok.extern.slf4j.Slf4j;
+import com.iexec.eea.worker.config.WorkerConfigurationService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -21,8 +18,10 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import org.web3j.crypto.Credentials;
 
-import java.util.List;
+import javax.swing.text.html.Option;
+import java.util.Optional;
 
 
 @SpringBootApplication
@@ -33,12 +32,6 @@ import java.util.List;
 @Slf4j
 public class Application implements CommandLineRunner {
 
-    @Value("${core.host}")
-    private String coreHost;
-
-    @Value("${core.port}")
-    private String corePort;
-
     @Autowired
     private WorkerConfigurationService workerConfig;
 
@@ -46,19 +39,13 @@ public class Application implements CommandLineRunner {
     private CredentialsService credentialsService;
 
     @Autowired
-    private CustomFeignClient customFeignClient;
+    private WorkerRegistryService workerRegistryService;
 
     @Autowired
-    private IexecHubService iexecHubService;
+    private ComputationService computationService;
 
     @Autowired
-    private ResultService resultService;
-
-    @Autowired
-    private AmnesiaRecoveryService amnesiaRecoveryService;
-
-    @Autowired
-    private VersionService versionService;
+    private WorkOrderRegistryService workOrderRegistryService;
 
     public static void main(String[] args) {
         SpringApplication.run(Application.class, args);
@@ -66,51 +53,42 @@ public class Application implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        String workerAddress = credentialsService.getCredentials().getAddress();
+        Credentials credentials = credentialsService.getCredentials();
+        String workerAddress = credentials.getAddress();
         WorkerConfigurationModel model = WorkerConfigurationModel.builder()
                 .name(workerConfig.getWorkerName())
+                .organizationId(workerConfig.getOrganizationId())
+                .workerRegistryAddress(workerConfig.getRegistryAddress())
+                .applicationTypeIds(workerConfig.getApplicationTypeIds())
                 .walletAddress(workerAddress)
-                .os(workerConfig.getOS())
-                .cpu(workerConfig.getCPU())
-                .cpuNb(workerConfig.getNbCPU())
-                .memorySize(workerConfig.getMemorySize())
-                .teeEnabled(workerConfig.isTeeEnabled())
+                .blockChainNodeAddress(workerConfig.getBlockchainNodeAddress())
                 .build();
 
-        log.info("Number of tasks that can run in parallel on this machine [tasks:{}]", workerConfig.getNbCPU() / 2);
-        log.info("Address of the core [address:{}]", "http://" + coreHost + ":" + corePort);
-        log.info("Version of the core [version:{}]", customFeignClient.getCoreVersion());
-        PublicConfiguration publicConfiguration = customFeignClient.getPublicConfiguration();
-        log.info("Get configuration of the core [config:{}]", publicConfiguration);
         if (workerConfig.getHttpProxyHost() != null && workerConfig.getHttpProxyPort() != null) {
             log.info("Running with proxy [proxyHost:{}, proxyPort:{}]", workerConfig.getHttpProxyHost(), workerConfig.getHttpProxyPort());
         }
 
-        if (!publicConfiguration.getRequiredWorkerVersion().isEmpty() &&
-                !versionService.getVersion().equals(publicConfiguration.getRequiredWorkerVersion())) {
-
-            String badVersion = String.format("Bad version! please upgrade your iexec-worker [current:%s, required:%s]",
-                    versionService.getVersion(), publicConfiguration.getRequiredWorkerVersion());
-
-            LoggingUtils.printHighlightedMessage(badVersion);
-            System.exit(0);
+        
+        // Register the worker
+        Optional<ChainWorker> chainWorker = workerRegistryService.workerRetrieve(workerAddress);
+        if(chainWorker.isPresent()) {
+            log.info("Worker already registered [worker:{}]", model);
+        }
+        else {
+            if(!workerRegistryService.workerRegister(
+                    workerAddress,
+                    ChainWorker.WorkerType.TEESGX,
+                    workerConfig.getOrganizationId(),
+                    workerConfig.getApplicationTypeIds(),
+                    workerConfig.getDetails())) {
+                log.error("Could not register worker [workerId:{}, registryAddress:{}]",
+                        workerConfig.getWorkerWalletAddress(), model.getWorkerRegistryAddress());
+                System.exit(2);
+            }
         }
 
-        if (!iexecHubService.hasEnoughGas()) {
-            String noEnoughGas = String.format("No enough gas! please refill your wallet [walletAddress:%s]", workerAddress);
-            LoggingUtils.printHighlightedMessage(noEnoughGas);
-            System.exit(0);
-        }
-
-        customFeignClient.registerWorker(model);
-        log.info("Registered the worker to the core [worker:{}]", model);
-
-        log.info("Cool, your iexec-worker is all set!");
-
-        // ask core for interrupted replicates
-        List<String> recoveredTasks = amnesiaRecoveryService.recoverInterruptedReplicates();
-
-        // clean the results folder
-        resultService.cleanUnusedResultFolders(recoveredTasks);
+        // Start waiting for events
+        computationService.start();
+        log.info("Worker running and waiting for work");
     }
 }

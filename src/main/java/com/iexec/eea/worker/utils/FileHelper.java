@@ -1,26 +1,22 @@
 package com.iexec.eea.worker.utils;
 
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.URL;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 @Slf4j
 public class FileHelper {
 
-    public static final String SLASH_IEXEC_OUT = File.separator + "iexec_out";
-    public static final String SLASH_IEXEC_IN = File.separator + "iexec_in";
-    public static final String SLASH_OUTPUT = File.separator + "output";
-    public static final String SLASH_INPUT = File.separator + "input";
-    public static final String SLASH_SCONE = File.separator + "scone";
+    //public static final String OUT_DIR_PATH = File.separatorChar + "tcf_out";
+    public static final String OUT_DIR_PATH = File.separatorChar + "iexec";
 
     private FileHelper() {
         throw new UnsupportedOperationException();
@@ -77,6 +73,16 @@ public class FileHelper {
             log.error("Failed to copy downloaded file to disk [directoryPath:{}, fileUri:{}]",
                     directoryPath, fileUri);
             return false;
+        }
+    }
+
+    public static String downloadFileInString(URL url) {
+        try {
+            InputStream in = url.openStream();//Not working with https resources yet
+            return new String(in.readAllBytes());
+        } catch (IOException e) {
+            log.error("Failed to download file [url:{}, exception:{}]", url, e.getCause());
+            return null;
         }
     }
 
@@ -151,5 +157,39 @@ public class FileHelper {
 
     public static String getFilenameFromUri(String uri) {
         return Paths.get(uri).getFileName().toString();
+    }
+
+    public static String readZippedFileInString(@NonNull String path) {
+        return readFileInString(path, true);
+    }
+
+    public static String readFileInString(@NonNull String path) {
+        return readFileInString(path, false);
+    }
+
+    public static String readFileInString(@NonNull String path, boolean zipped) {
+        StringBuffer sb = new StringBuffer();
+        try {
+            File f = new File(path);
+            InputStream fis = new FileInputStream(f);
+
+            if(zipped)
+                fis = new ZipInputStream(fis);
+
+            int fsize = (int) f.length();
+            byte buffer[] = new byte[fsize];
+            int read = -1;
+
+            // Just in case the long to int cast overflew
+            while((read = fis.read(buffer)) > 0)
+                sb.append(new String(buffer));
+            fis.close();
+
+        } catch (Exception e) {
+            log.error("Error reading file [path:{}, exception:{}]", path, e.getMessage());
+            System.exit(34);
+        }
+
+        return sb.toString();
     }
 }

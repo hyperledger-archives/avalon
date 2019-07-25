@@ -10,14 +10,12 @@ services:
     image: nexus.iex.ec/iexec-worker:${WORKER_VERSION}
     container_name: worker
     environment:
-      - IEXEC_CORE_HOST=core
-      - IEXEC_CORE_PORT=18090
-      - IEXEC_WORKER_NAME=worker
-      - IEXEC_TEE_ENABLED:false
-      - IEXEC_WORKER_WALLET_PATH=/iexec-wallets/encrypted-wallet_worker1.json
-      - IEXEC_WORKER_BASE_DIR=/tmp/iexec-worker
-      - IEXEC_SCONE_LAS_HOST=iexec-las
-      - IEXEC_SCONE_LAS_PORT=18766
+      - EEA_CORE_HOST=core
+      - EEA_CORE_PORT=18090
+      - EEA_WORKER_NAME=worker
+      - EEA_TEE_ENABLED:false
+      - EEA_WORKER_WALLET_PATH=/eea-wallets/encrypted-wallet_worker1.json
+      - EEA_WORKER_BASE_DIR=/tmp/eea-worker
     ports:
       - 18091:18091
     volumes:
