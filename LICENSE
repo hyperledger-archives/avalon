@@ -1,4 +1,4 @@
-                                 Apache License
+                                Apache License
                            Version 2.0, January 2004
                         http://www.apache.org/licenses/
 
@@ -199,3 +199,117 @@
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
+
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+
+The Hyperledger Trusted Compute Framework project contains open source
+components with separate copyright notices and license terms. Your use of the
+source code for the these components is subject to the terms and conditions of
+the following licenses.
+
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+parson
+
+For project details see: https://github.com/kgabis/parson
+
+MIT License
+
+Copyright (c) 2012 - 2017 Krzysztof Gabis
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+René Nyffenegger cpp-base64
+
+For project details see: https://github.com/ReneNyffenegger/cpp-base64
+
+Copyright © 2004-2017 by René Nyffenegger
+
+This source code is provided 'as-is', without any express or implied
+warranty. In no event will the author be held liable for any damages
+arising from the use of this software.
+
+Permission is granted to anyone to use this software for any purpose,
+including commercial applications, and to alter it and redistribute it
+freely, subject to the following restrictions:
+
+1. The origin of this source code must not be misrepresented; you must not
+   claim that you wrote the original source code. If you use this source code
+   in a product, an acknowledgment in the product documentation would be
+   appreciated but is not required.
+
+2. Altered source versions must be plainly marked as such, and must not be
+   misrepresented as being the original source code.
+
+3. This notice may not be removed or altered from any source distribution.
+
+
+/*
+    The original source code has been modified to be used with
+    Trusted Compute Framework (TCF).
+*/
+
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+ELK
+
+Copyright 1990, 1991, 1992, 1993, 1994, 1995, Oliver Laumann, Berlin(except for
+the contents of the directory `doc / usenix'). This software was derived from
+Elk 1.2, which was Copyright 1987, 1988, 1989, Nixdorf Computer AG and TELES
+GmbH, Berlin (Elk 1.2 has been written by Oliver Laumann (me) for TELES
+Telematic Services, Berlin, in a joint project between TELES and Nixdorf
+Microprocessor Engineering, Berlin). Oliver Laumann, TELES GmbH, and Nixdorf
+Computer AG, as co-owners or individual owners of copyright in this software,
+grant to any person or company a worldwide, royalty free, license to i) copy
+this software, ii) prepare derivative works based on this software, iii)
+distribute copies of this software or derivative works, iv) perform this
+software, or v) display this software, provided that this notice is not removed
+and that neither Oliver Laumann nor Teles nor Nixdorf are deemed to have made
+any representations as to the suitability of this software for any purpose nor
+are held responsible for any defects of this software. THERE IS ABSOLUTELY NO
+WARRANTY FOR THIS SOFTWARE. Berlin, June 20, 1995 Oliver Laumann
+
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+SLIB
+
+SLIB LICENSE Each file in SLIB (over a dozen lines in length) is either in the
+public domain, or comes with a statement of terms permitting users to copy,
+modify, and redistribute it. The comments at the beginning each file (containing
+over a dozen lines) must specify its terms. For instance, the comments at the
+beginning of "Template.scm" declare that it is in the public domain: ;;;
+"Template.scm" configuration template of *features* for Scheme ;;; Author:
+Aubrey Jaffer ;;; ;;; This code is in the public domain. Each copyrighted file
+lists the names of the copyright holders and gives permissions to copy, modify,
+and redistribute the file. For instance, the beginning of "require.scm" states:
+;;;; Implementation of VICINITY and MODULES for Scheme ;Copyright (C) 1991,
+1992, 1993, 1994, 1997 Aubrey Jaffer ; ;Permission to copy this software, to
+modify it, to redistribute it, ;to distribute modified versions, and to use it
+for any purpose is ;granted, subject to the following restrictions and
+understandings. ; ;1. Any copy made of this software must include this copyright
+notice ;in full. ; ;2. I have made no warranty or representation that the
+operation of ;this software will be error-free, and I am under no obligation to
+;provide any services, by way of maintenance, update, or otherwise. ; ;3. In
+conjunction with products arising from the use of this ;material, there shall be
+no use of my name in any advertising, ;promotional, or sales literature without
+prior written consent in ;each case.
+
