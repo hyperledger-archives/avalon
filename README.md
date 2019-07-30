@@ -60,8 +60,8 @@ for information on how to contribute and the guidelines for contributions.
 Hyperledger Trusted Compute Framework is released under the Apache License
 Version 2.0 software license. See the [license file](LICENSE) for more details.
 
-Hyperledger Private Data Objects documentation is licensed under the Creative
-Commons Attribution 4.0 International License. You may obtain a copy of the
-license at: http://creativecommons.org/licenses/by/4.0/.
+Hyperledger Trusted Compute Framework documentation is licensed under the
+Creative Commons Attribution 4.0 International License. You may obtain a copy
+of the license at: http://creativecommons.org/licenses/by/4.0/.
 
 © Copyright 2019, Intel Corporation.
