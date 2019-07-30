@@ -51,8 +51,8 @@ namespace tcf {
 
             void ComputeOutputHash();
             void VerifyInputHash(ByteArray input_data, ByteArray input_hash);
-            void DecryptInputData(ByteArray encrypted_input_data, ByteArray iv);
-            std::string EncryptOutputData(ByteArray iv);
+            void DecryptInputData(ByteArray encrypted_input_data, std::string iv_str);
+            std::string EncryptOutputData(std::string iv_str);
             ByteArray data_encryption_key = {};
         };
 }  // namespace tcf

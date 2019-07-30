@@ -97,16 +97,20 @@ class ClientSignature(object) :
         for item in indata_objects:
             data = item['data'].encode('ASCII')
             e_key = item['encryptedDataEncryptionKey'].encode('ASCII')
-            if (not e_key ) or (e_key == "null") :
+            if (not e_key ) or (e_key == "null".encode('ASCII')):
                 enc_data = utility.encrypt_data(data, encrypted_session_key, session_iv)
                 input_json_params['inData'][i]['data'] = crypto.byte_array_to_base64(enc_data)
                 input_json_params['inData'][i]['iv'] = input_json_params["sessionKeyIv"]
+                logger.debug("encrypted indata - %s", crypto.byte_array_to_base64(enc_data))
+            elif e_key == "-".encode('ASCII'):
+                # Skip encryption and just encode workorder data to base64 format
+                input_json_params['inData'][i]['data'] = crypto.byte_array_to_base64(data)
             else:
                 #TODO: Explore the necessity of session iv
                 enc_data = utility.encrypt_data(data, e_key, "0")
                 input_json_params['inData'][i]['data'] = crypto.byte_array_to_base64(enc_data)
                 input_json_params['inData'][i]['iv'] = format("0", '02x')
-            logger.debug("encrypted indata - %s", crypto.byte_array_to_base64(enc_data))
+                logger.debug("encrypted indata - %s", crypto.byte_array_to_base64(enc_data))
             i = i + 1
 
         logger.debug("Workorder InData after encryption: %s", indata_objects)
