@@ -171,7 +171,7 @@ version = subprocess.check_output(
 
 setup(name='tcf_crypto_library',
       version=version,
-      description='Common library for private objects',
+      description='Common library for Trusted Compute Framework',
       author='Intel Labs',
       packages=find_packages(),
       install_requires=[],
