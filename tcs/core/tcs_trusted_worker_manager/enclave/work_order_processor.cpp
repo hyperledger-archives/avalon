@@ -87,7 +87,7 @@ namespace tcf {
             "workerId",
             "invalid request; failed to retrieve worker id");
 
-        work_load_id = GetJsonStr(
+        workload_id = GetJsonStr(
             params_object,
             "workloadId",
             "invalid request; failed to retrieve work load id");
@@ -125,7 +125,7 @@ namespace tcf {
         encrypted_request_hash = GetJsonStr(
             params_object,
             "encryptedRequestHash",
-            "invalid request; failed to retrieve requester nonce");
+            "invalid request; failed to retrieve encrypted request hash");
 
         requester_signature = GetJsonStr(
             params_object,
@@ -177,12 +177,18 @@ namespace tcf {
         JSON_Object* result = json_object_get_object(resp, "result");
         tcf::error::ThrowIfNull(result, "failed to serialize the result");
 
-        JsonSetStr(result, "workOrderId", work_order_id.c_str(), "failed to serialize work order id");
-        JsonSetStr(result, "workloadId", work_load_id.c_str(), "failed to serialize workload id");
-        JsonSetStr(result, "workerId", worker_id.c_str(), "failed to serialize worker id");
-        JsonSetStr(result, "requesterId", requester_id.c_str(), "failed to serialize requester id");
-        JsonSetStr(result, "workerNonce", worker_nonce.c_str(), "failed to serialize worker nonce");
-        JsonSetStr(result, "workerSignature", worker_signature.c_str(), "failed to serialize worker signature");
+        JsonSetStr(result, "workOrderId", work_order_id.c_str(),
+				"failed to serialize work order id");
+        JsonSetStr(result, "workloadId", workload_id.c_str(),
+				"failed to serialize workload id");
+        JsonSetStr(result, "workerId", worker_id.c_str(),
+				"failed to serialize worker id");
+        JsonSetStr(result, "requesterId", requester_id.c_str(),
+				"failed to serialize requester id");
+        JsonSetStr(result, "workerNonce", worker_nonce.c_str(),
+				"failed to serialize worker nonce");
+        JsonSetStr(result, "workerSignature", worker_signature.c_str(),
+				"failed to serialize worker signature");
 
         jret = json_object_set_value(result, "outData", json_value_init_array());
         tcf::error::ThrowIf<tcf::error::RuntimeError>(
@@ -243,7 +249,8 @@ namespace tcf {
 
     ByteArray WorkOrderProcessor::ComputeRequestHash() {
         ByteArray concat_hashes;
-        std::string concat_string = requester_nonce + work_order_id + worker_id + work_load_id + requester_id;
+        std::string concat_string = requester_nonce + work_order_id +
+				worker_id + workload_id + requester_id;
         ByteArray hash_1 =  tcf::crypto::ComputeMessageHash(StrToByteArray(concat_string));
 
         ByteArray hash_data;
@@ -330,7 +337,8 @@ namespace tcf {
         ByteArray concat_hashes;
         ByteArray nonce = tcf::crypto::RandomBitString(16);
         worker_nonce = base64_encode(tcf::crypto::ComputeMessageHash(nonce));
-        std::string concat_string = worker_nonce + work_order_id + worker_id + work_load_id + requester_id;
+        std::string concat_string = worker_nonce + work_order_id +
+				worker_id + workload_id + requester_id;
 
         std::string hash_1 =  base64_encode(tcf::crypto::ComputeMessageHash(StrToByteArray(concat_string)));
 

@@ -77,7 +77,7 @@ class EnclaveManager:
 
         worker_info = create_json_worker(self, self.config)
         logger.info("Adding enclave workers to workers table")
-        worker_id = utils.strip_begin_end_key(self.enclave_id)
+        worker_id = utils.strip_begin_end_key(self.enclave_id).encode("UTF-8").hex()
         kv_helper.set("workers", worker_id, worker_info)
 
         # Cleanup wo-processing" table
