@@ -16,7 +16,7 @@ import json
 import logging
 from error_code.error_status import ReceiptCreateStatus
 from error_code.error_status import WorkorderError
-from utils.utility import list_difference as list_diff
+import utils.utility as utility
 from itertools import cycle
 from shared_kv.shared_kv_interface import KvStorage
 
@@ -51,12 +51,14 @@ class TCSWorkOrderReceiptHandler:
         """
         Function to process work order request
         Parameters:
-            - wo_id is workorder id
-            - input_json_str is create workorder receipt json as per TCF API 7.2.2 Receipt Create Request Payload
+            - wo_id is work order id
+            - input_json_str is create work order receipt json
+              as per TCF API 7.2.2 Receipt Create Request Payload
             - response is the response object to be returned to client
         """
 
         input_value_json = json.loads(input_json_str)
+        jrpc_id = input_value_json["id"]
         input_value = {}
         input_value['result'] =  input_value_json['params']
         input_value['result']['receiptCurrentStatus'] = ReceiptCreateStatus.PENDING
@@ -64,19 +66,21 @@ class TCSWorkOrderReceiptHandler:
         input_value['result']['updater'] = {}
         input_json_str = json.dumps(input_value)
 
-        response['error'] = {}
         if(self.kv_helper.get("wo-receipts",wo_id) is None):
             value = self.kv_helper.get("wo-requests", wo_id)
             if value:
                 self.kv_helper.set("wo-receipts",wo_id,input_json_str)
-                response['error']['code'] = WorkorderError.SUCCESS
-                response['error']['message'] = 'Receipt created successfully'
+                response = utility.create_error_response(
+                        WorkorderError.SUCCESS, jrpc_id,
+                        "Receipt created successfully")
             else:
-                response['error']['code'] = WorkorderError.INVALID_PARAMETER_FORMAT_OR_VALUE
-                response['error']['message'] = 'Workorder does not exists. Hence invalid parameter'
+                response = utility.create_error_response(
+                        WorkorderError.INVALID_PARAMETER_FORMAT_OR_VALUE, jrpc_id,
+                        "Work order does not exists. Hence invalid parameter")
         else:
-            response['error']['code'] = WorkorderError.INVALID_PARAMETER_FORMAT_OR_VALUE
-            response['error']['message'] = 'WorkorderReceipt already exist in the database. Hence invalid parameter'
+            response = utility.create_error_response(
+                    WorkorderError.INVALID_PARAMETER_FORMAT_OR_VALUE, jrpc_id,
+                    "Work order receipt already exist in the database. Hence invalid parameter")
 
         return response
 # ------------------------------------------------------------------------------------------------
@@ -85,17 +89,20 @@ class TCSWorkOrderReceiptHandler:
         """
         Function to process update work order request
         Parameters:
-            - wo_id is workorder id
-            - input_json_str is workorder receipt update json as per TCF API 7.2.6 Receipt Update Retrieve Request Payload
+            - wo_id is work order id
+            - input_json_str is work order receipt update json as per
+              TCF API 7.2.6 Receipt Update Retrieve Request Payload
             - response is the response object to be returned to client
         """
+
+        input_value = json.loads(input_json_str)
+        jrpc_id = input_value["id"]
 
         # value retrieved is 'result' field as per Spec 7.2.5 Receipt Retrieve Response Payload
         value = self.kv_helper.get("wo-receipts", wo_id)
         response['error'] = {}
 
         if value :
-            input_value = json.loads(input_json_str)
             updater_value = input_value['params']
             # WorkorderId already a part of receipt. And will be not change for a given receipt. Hence it's not stored in updater param.
             del updater_value['workOrderId']
@@ -115,12 +122,15 @@ class TCSWorkOrderReceiptHandler:
 
             value = json.dumps(json_dict)
             self.kv_helper.set("wo-receipts", wo_id, value)
-            response['error']['code'] = WorkorderError.SUCCESS
-            response['error']['message'] = 'Receipt Successfully Updated'
+            response = utility.create_error_response(
+                    WorkorderError.SUCCESS, jrpc_id,
+                    "Receipt Successfully Updated")
         else:
-            response['error']['code'] = WorkorderError.INVALID_PARAMETER_FORMAT_OR_VALUE
-            response['error']['message'] = 'Workorder Id not found in the database. Hence invalid parameter'
-
+            response = utility.create_error_response(
+                WorkorderError.INVALID_PARAMETER_FORMAT_OR_VALUE,
+                jrpc_id,
+                "Work order id not found in the database. \
+                 Hence invalid parameter")
         return response
 # ------------------------------------------------------------------------------------------------
 
@@ -129,11 +139,11 @@ class TCSWorkOrderReceiptHandler:
         work_orders = self.kv_helper.lookup("wo-receipts")
         alter_items = []
 
-        alter_items = list_diff(self.receipt_pool, work_orders)
+        alter_items = utility.list_difference(self.receipt_pool, work_orders)
         for item in alter_items:
             self.receipt_pool.remove(item)
 
-        alter_items = list_diff(work_orders, self.receipt_pool)
+        alter_items = utility.list_difference(work_orders, self.receipt_pool)
         for item in alter_items:
             self.receipt_pool.append(item)
 
@@ -191,9 +201,10 @@ class TCSWorkOrderReceiptHandler:
 
     def __process_workorder_receipt_lookup(self,input_json_str, response):
         """
-        Function to look the set of _workorder receipt available
+        Function to look the set of work order receipts available
         Parameters:
-            - input_json_str is a workorder receipt lookup request json as per TCF API 7.2.8 Receipt Lookup Request Payload
+            - input_json_str is a work order receipt lookup request json
+              as per TCF API 7.2.8 Receipt Lookup Request Payload
             - response is the response object to be returned to client.
         """
 
@@ -203,9 +214,10 @@ class TCSWorkOrderReceiptHandler:
 
     def __process_workorder_receipt_lookup_next(self, input_json_str, response):
         """
-        Function to look the set of workorder receipt newly added
+        Function to look the set of work order receipt newly added
         Parameters:
-            - input_json_str is the workorder receipt lookup next json as per TCF API 7.2.10 Receipt Lookup Next Request Payload
+            - input_json_str is the work order receipt lookup next json
+              as per TCF API 7.2.10 Receipt Lookup Next Request Payload
             - response is the response object to be returned to client.
         """
 
@@ -213,12 +225,14 @@ class TCSWorkOrderReceiptHandler:
         return response
 # ------------------------------------------------------------------------------------------------
 
-    def __process_workorder_receipt_retrieve(self,wo_id, response):
+    def __process_workorder_receipt_retrieve(self,wo_id, jrpc_id, response):
         """
         Function to retrieve the details of worker
         Parameters:
-            - worker_id is the worker id specified in worker request json as per TCF API 7.2.4 Receipt Retrieve Request Payload
-            - response is the response object to be returned to client.
+            - worker_id is the worker id specified in worker request json
+              as per TCF API 7.2.4 Receipt Retrieve Request Payload
+            - response is the response object to be returned to client
+            - jrpc_id is the jrpc id of response object to be returned to client
         """
 
         # value retrieved is 'result' field as per Spec 7.2.5 Receipt Retrieve Response Payload
@@ -233,9 +247,11 @@ class TCSWorkOrderReceiptHandler:
                 #Need to revisit code when actual receipts are created
                 response['result'] = input_value['error']
         else :
-           response['error'] = {}
-           response['error']['code'] = WorkorderError.INVALID_PARAMETER_FORMAT_OR_VALUE
-           response['error']['message'] = "Workorder Id not found in the database. Hence invalid parameter"
+           response = utility.create_error_response(
+                WorkorderError.INVALID_PARAMETER_FORMAT_OR_VALUE,
+                jrpc_id,
+                "Work order id not found in the database. \
+                 Hence invalid parameter")
            return response
 
         return response
@@ -243,20 +259,21 @@ class TCSWorkOrderReceiptHandler:
 
     def __process_workorder_receipt_update_retrieve(self,wo_id, input_json_str, response):
         """
-        Function to process workorder receipt update retrieve
+        Function to process work order receipt update retrieve
         Parameters:
-            - wo_id is workorder id
-            - input_json_str is workorder receipt update json as per TCF API 7.2.6 Receipt Update Retrieve Request Payload
+            - wo_id is work order id
+            - input_json_str is work order receipt update json
+              as per TCF API 7.2.6 Receipt Update Retrieve Request Payload
             - response is the response object to be returned to client
         """
 
+        input_value = json.loads(input_json_str)
+        jrpc_id = input_value["id"]
 
         # value retrieved is 'result' field as per Spec 7.2.5 Receipt Retrieve Response Payload
         value = self.kv_helper.get("wo-receipts",wo_id)
-        response['error'] = {}
 
         if value :
-            input_value = json.loads(input_json_str)
             updater_id = input_value["params"]['updaterId']
             update_index = input_value["params"]['updateIndex']
 
@@ -279,24 +296,28 @@ class TCSWorkOrderReceiptHandler:
             response['result']['updateCount'] = update_count
 
         else:
-            response['error']['code'] = WorkorderError.INVALID_PARAMETER_FORMAT_OR_VALUE
-            response['error']['message'] = 'Workorder Id not found in the database. Hence invalid parameter'
+            response = utility.create_error_response(
+                WorkorderError.INVALID_PARAMETER_FORMAT_OR_VALUE,
+                jrpc_id,
+                "Work order id not found in the database. \
+                 Hence invalid parameter")
 
         return response
 # ------------------------------------------------------------------------------------------------
 
     def workorder_receipt_handler(self, input_json_str):
         """
-        Function to process workorder receipt request
+        Function to process work order receipt request
         Parameters:
-            - input_json_str is a workorder receipt request json as per TCF API 7.2 Direct Model Receipt Handling
+            - input_json_str is a work order receipt request json
+              as per TCF API 7.2 Direct Model Receipt Handling
         """
         input_json = json.loads(input_json_str)
         response = {}
         response['jsonrpc'] = input_json['jsonrpc']
         response['id'] = input_json['id']
 
-        logger.info("Received Workorder Receipt request : %s",input_json['method'])
+        logger.info("Received Work order Receipt request : %s",input_json['method'])
         if(input_json['method'] == "WorkOrderReceiptLookUp") :
             return self.__process_workorder_receipt_lookup(input_json_str, response)
         elif(input_json['method'] == "WorkOrderReceiptLookUpNext") :
@@ -305,17 +326,20 @@ class TCSWorkOrderReceiptHandler:
         if 'workOrderId' in input_json_str:
            wo_id = str(input_json['params']['workOrderId'])
         else :
-           response['error'] = {}
-           response['error']['code'] = WorkorderError.INVALID_PARAMETER_FORMAT_OR_VALUE
-           response['error']['message'] = 'Workorder Id not found in the database. Hence invalid parameter'
+           response = utility.create_error_response(
+                WorkorderError.INVALID_PARAMETER_FORMAT_OR_VALUE,
+                input_json['id'],
+                "Work order id not found in the database. \
+                 Hence invalid parameter")
            return response
 
+        jrpc_id = input_json['id']
         if(input_json['method'] == "WorkOrderReceiptCreate") :
             return self.__process_store_workorder_receipt(wo_id, input_json_str, response)
         elif(input_json['method'] == "WorkOrderReceiptUpdate") :
             return self.__process_workorder_receipt_update(wo_id, input_json_str, response)
         elif(input_json['method'] == "WorkOrderReceiptRetrieve") :
-            return self.__process_workorder_receipt_retrieve(wo_id, response)
+            return self.__process_workorder_receipt_retrieve(wo_id, jrpc_id, response)
         elif(input_json['method'] == "WorkOrderReceiptUpdateRetrieve") :
             return self.__process_workorder_receipt_update_retrieve(wo_id,input_json_str, response)
 # ------------------------------------------------------------------------------------------------

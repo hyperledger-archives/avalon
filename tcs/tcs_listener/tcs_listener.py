@@ -41,6 +41,7 @@ from tcs_workorder_receipt_handler import TCSWorkOrderReceiptHandler
 from tcs_worker_encryption_key_handler import WorkerEncryptionKeyHandler
 from shared_kv.shared_kv_interface import KvStorage
 from error_code.error_status import WorkorderError
+import utils.utility as utility
 
 import logging
 logger = logging.getLogger(__name__)
@@ -119,51 +120,62 @@ class TCSListener(resource.Resource):
             return response
 
     def render_GET(self, request):
-        response = {}
-        response['error'] = {}
-        response['error']['code'] = WorkorderError.INVALID_PARAMETER_FORMAT_OR_VALUE
-        response['error']['message'] = 'Only POST request is supported'
+        # JRPC response with id 0 is returned because id parameter
+        # will not be found in GET request
+        response = utility.create_error_response(
+                WorkorderError.INVALID_PARAMETER_FORMAT_OR_VALUE, "0",
+                "Only POST request is supported")
         logger.error("GET request is not supported. Only POST request is supported")
-        
+
         return response
 
     def render_POST(self, request):
         response = {}
-        response['error'] = {}
-        response['error']['code'] = WorkorderError.UNKNOWN_ERROR
-       
-        logger.info('Received a new request from the client')
 
+        logger.info('Received a new request from the client')
         try :
             # process the message encoding
             encoding = request.getHeader('Content-Type')
             data = request.content.read()
-
             if encoding == 'application/json' :
 
                 try:
-                    input_json = json.loads(data.decode('utf-8'))
-                    response = self._process_request(input_json)
+                    input_json_str = json.loads(data.decode('utf-8'))
+                    input_json = json.loads(input_json_str)
+                    jrpc_id = input_json["id"]
+                    response = self._process_request(input_json_str)
 
                 except AttributeError:
                     logger.error("Error while loading input json")
-                    response['error']['message'] = 'UNKNOWN_ERROR: Error while loading the input JSON file'
+                    response = utility.create_error_response(
+                        WorkorderError.UNKNOWN_ERROR,
+                        jrpc_id,
+                        "UNKNOWN_ERROR: Error while loading the input JSON file")
                     return response
 
             else :
-                response['error']['message'] = 'UNKNOWN_ERROR: unknown message encoding'
+                # JRPC response with 0 as id is returned because id can't be fecthed
+                # from a request with unknown encoding
+                response = utility.create_error_response(
+                        WorkorderError.UNKNOWN_ERROR,
+                        0,
+                        "UNKNOWN_ERROR: unknown message encoding")
                 return response
 
         except :
             logger.exception('exception while decoding http request %s', request.path)
-            response['error']['message'] = 'UNKNOWN_ERROR: unable to decode incoming request '
+            # JRPC response with 0 as id is returned because id can't be
+            # fetched from improper request
+            response = utility.create_error_response(
+                    WorkorderError.UNKNOWN_ERROR,
+                    0,
+                    "UNKNOWN_ERROR: unable to decode incoming request")
             return response
 
         # send back the results
         try :
             if encoding == 'application/json' :
                 response = json.dumps(response)
-
             logger.info('response[%s]: %s', encoding, response)
             request.setHeader('content-type', encoding)
             request.setResponseCode(http.OK)
@@ -171,7 +183,11 @@ class TCSListener(resource.Resource):
 
         except :
             logger.exception('unknown exception while processing request %s', request.path)
-            response['error']['message'] = 'UNKNOWN_ERROR: unknown exception processing http request {0}'.format(request.path)
+            response = utility.create_error_response(
+                    WorkorderError.UNKNOWN_ERROR,
+                    jrpc_id,
+                    "UNKNOWN_ERROR: unknown exception processing http \
+                    request {0}".format(request.path))
             return response
 
 # -----------------------------------------------------------------
