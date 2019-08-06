@@ -4,14 +4,15 @@ from eth_utils.hexadecimal import is_hex
 import base64
 from service_client.generic import GenericServiceClient
 from tcf_connector.work_order_encryption_key_interface import WorkOrderEncryptionKeyInterface
-from tcf.connector.utils import create_jrpc_response
-from tcf_connector.tcf_types import JsonRpcErrorCode
+from tcf_connector.utils import create_jrpc_response
+from utils.tcf_types import JsonRpcErrorCode
+
 
 logging.basicConfig(format="%(asctime)s - %(levelname)s - %(message)s", level=logging.INFO)
 
 class WorkOrderEncryptionKeyJrpcImpl(WorkOrderEncryptionKeyInterface):
     def __init__(self, config):
-        self.__uri_client = GenericServiceClient(config["json_rpc_uri"])
+        self.__uri_client = GenericServiceClient(config["tcf"]["json_rpc_uri"])
 
     def encryption_key_get(self, worker_id, last_used_key_nonce, tag, requester_id,
         signature_nonce, signature, id=None):

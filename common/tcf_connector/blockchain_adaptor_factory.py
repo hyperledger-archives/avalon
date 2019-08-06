@@ -47,8 +47,8 @@ class BlockchainAdaptorFactoryImpl(ConnectorAdaptorFactoryInterface):
                 raise Exception('Could not open config file: %s' % e)
         self.__worker_registry_list = None
         self.__worker_registry = None
-        self.__worker_order = None
-        self.__worker_order_receipts = None
+        self.__work_order = None
+        self.__work_order_receipts = None
         self.__blockchain_type = self.__config['blockchain']['type']
 
     def create_worker_registry_list_adaptor(self):

@@ -1,7 +1,9 @@
 import json
 import logging
 from eth_utils.hexadecimal import is_hex
-from tcc_connector.work_order_receipt_interface import WorkOrderReceiptInterface
+
+from service_client.generic import GenericServiceClient
+from tcf_connector.work_order_receipts.work_order_receipt_interface import WorkOrderReceiptInterface
 from utils.tcf_types import ReceiptCreateStatus
 from tcf_connector.utils import create_jrpc_response,validate_details
 logging.basicConfig(format="%(asctime)s - %(levelname)s - %(message)s", level=logging.INFO)
@@ -10,6 +12,9 @@ class WorkOrderReceiptJRPCImpl(WorkOrderReceiptInterface):
     """
     WorkOrderReceiptJRPCImpl is an implementation of WorkOrderReceiptInterface
     """
+    def __init__(self, config):
+        self.__uri_client = GenericServiceClient(config["tcf"]["json_rpc_uri"])
+
 
     def work_order_receipt_create(self, work_order_id, worker_id,  
         worker_service_id,
