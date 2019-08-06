@@ -206,7 +206,7 @@ class EthereumWorkerRegistryImpl(WorkerRegistryInterface):
         """
         self.__eth_client = EthereumWrapper(config)
         tcf_home = environ.get("TCF_HOME", "../../../")
-        contract_file_name = tcf_home + "/common/tcf_connector/ethereum/contracts/" + \
+        contract_file_name = tcf_home + "/" + \
             config["ethereum"]["worker_registry_contract_file"]
         contract_address = config["ethereum"]["worker_registry_contract_address"]
         self.__contract_instance = self.__eth_client.get_contract_instance(
