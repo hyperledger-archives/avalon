@@ -76,4 +76,21 @@ void db_store_put(
     const std::string& table_b64,
     const std::string& key_b64,
     const std::string& value_b64);
+
+// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+/**
+ * Deletes a key->value pair from the database store
+ *
+ * @param table_b64     base64 encode table name
+ * @param key_b64       base64 encoded key string
+ * @param value_b64     base64 encoded value string
+ *
+ * @return
+ *  Success: void/no return
+ *  Failure: throws exception
+ */
+void db_store_del(
+    const std::string& table_b64,
+    const std::string& key_b64,
+    const std::string& value_b64);
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
