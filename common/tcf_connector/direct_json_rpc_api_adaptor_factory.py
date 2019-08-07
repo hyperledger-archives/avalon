@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
 
 import logging
 from os.path import isfile, realpath
@@ -76,4 +75,3 @@ class DirectJsonRpcApiAdaptorFactory(ConnectorAdaptorFactoryInterface):
         if self.__worker_order_receipt is None:
             self.__worker_order_receipt = WorkOrderReceiptJRPCImpl(config)
         return self.__worker_order_receipt
-

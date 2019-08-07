@@ -22,7 +22,6 @@ from tcf_connector.worker_registry_list_interface import WorkerRegistryListInter
 from tcf_connector.ethereum.ethereum_wrapper import EthereumWrapper
 from utils.tcf_types import RegistryStatus
 
-
 logging.basicConfig(format="%(asctime)s - %(levelname)s - %(message)s", level=logging.INFO)
 
 class EthereumWorkerRegistryListImpl(WorkerRegistryListInterface):
@@ -188,5 +187,3 @@ class EthereumWorkerRegistryListImpl(WorkerRegistryListInterface):
         self.__contract_instance = self.__eth_client.get_contract_instance(
             contract_file_name, contract_address
         )
-
-
