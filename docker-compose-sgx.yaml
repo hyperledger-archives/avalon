@@ -29,7 +29,7 @@ services:
       - ./:/project/TrustedComputeFramework
     devices:
       - "/dev/isgx:/dev/isgx"
-    working_dir: "/project/TrustedComputeFramework/__tools__/build"
+    working_dir: "/project/TrustedComputeFramework/tools/build"
     environment:
       - SGX_MODE=HW
     entrypoint: "bash -c \"\

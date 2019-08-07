@@ -117,7 +117,7 @@ RUN git clone https://github.com/intel/intel-sgx-ssl.git  \
 WORKDIR /project/TrustedComputeFramework
 
 RUN \
- echo "VIRTUAL_ENV=/project/TrustedComputeFramework/__tools__/build/_dev" >> /etc/environment \
+ echo "VIRTUAL_ENV=/project/TrustedComputeFramework/tools/build/_dev" >> /etc/environment \
  && echo "TCF_HOME=/project/TrustedComputeFramework/" >> /etc/environment \
  && if [ ! -z "$http_proxy"  ]; then \
 	echo 'Acquire::http::Proxy "'$http_proxy'";' >> /etc/apt/apt.conf.d/00proxy; \
@@ -152,5 +152,5 @@ ENV SOLC_BINARY=/root/.py-solc/solc-v0.4.25/bin/solc
 ENV WALLET_PRIVATE_KEY="4F611197A6E82715F4D2446FE015D1667E9C40A351411F3A7300F71F285D01B4"
 
 
-WORKDIR /project/TrustedComputeFramework/__tools__/build
+WORKDIR /project/TrustedComputeFramework/tools/build
 
