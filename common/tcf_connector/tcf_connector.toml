@@ -29,9 +29,9 @@ type = "Ethereum"
 
 [ethereum]
 #Direct registry contract file
-direct_registry_contract_file = "WorkerRegistryList.sol"
+direct_registry_contract_file = "common/tcf_connector/ethereum/contracts/WorkerRegistryList.sol"
 #Worker registry contract file
-worker_registry_contract_file = "WorkerRegistry.sol"
+worker_registry_contract_file = "common/tcf_connector/ethereum/contracts/WorkerRegistry.sol"
 #Deployed contract address of direct registry contract address.
 #Initial deploy the contract using eth_cli.py to get the this address
 direct_registry_contract_address = "0xB033aFeb6205Bcc322aa93a713db65511a447DF3"
