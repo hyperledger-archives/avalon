@@ -9,7 +9,7 @@
         "notifyUri": "notifyuri",
         "workOrderId": "0x11",
         "workerId":"",
-        "workloadId": "0x2345",
+        "workloadId": "heart-disease-eval",
         "requesterId": "0x3456",
         "workerEncryptionKey": "0x6789",
         "dataEncryptionAlgorithm": "AES-GCM-256",
@@ -22,12 +22,6 @@
                    {"index": 1,
                     "dataHash": "mhash444",
                     "data": "Heart disease evaluation data: 32 1 1 156  132 125 1 95  1 0 1 1 3 1",
-                    "encryptedDataEncryptionKey": "",
-                    "iv": ""
-                   },
-                   {"index": 0,
-                    "dataHash": "mhash555",
-                    "data": "heart-disease-eval:",
                     "encryptedDataEncryptionKey": "",
                     "iv": ""
                    }

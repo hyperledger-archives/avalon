@@ -27,7 +27,7 @@ ByteArray ConvertStringToByteArray(std::string s) {
 class EchoResult: public tcf::WorkOrderProcessorInterface {
 public:
         void ProcessWorkOrder(
-                std::string code_id,
+                std::string workload_id,
                 const ByteArray& participant_address,
                 const ByteArray& enclave_id,
                 const ByteArray& work_order_id,
@@ -67,7 +67,7 @@ public:
 class HeartDiseaseEvalFactory: public tcf::WorkOrderProcessorInterface {
 public:
         void ProcessWorkOrder(
-                std::string code_id,
+                std::string workload_id,
                 const ByteArray& participant_address,
                 const ByteArray& enclave_id,
                 const ByteArray& work_order_id,
@@ -109,7 +109,7 @@ tcf::WorkOrderProcessorInterface* HeartDiseaseEvalFactory() {
 }
 
 WorkOrderDispatchTableEntry workOrderDispatchTable[] = {
-    { "echo-result:", EchoResultFactory},
-    { "heart-disease-eval:", HeartDiseaseEvalFactory },
+    {"echo-result", EchoResultFactory},
+    {"heart-disease-eval", HeartDiseaseEvalFactory},
     {NULL, NULL}
 };

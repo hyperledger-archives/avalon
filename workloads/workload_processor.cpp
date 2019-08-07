@@ -18,9 +18,9 @@
 #include <iostream>
 #include <string>
 
-tc::WorkOrderProcessorInterface* LookUpWorkOrder(std::string work_order_code) {
+tc::WorkOrderProcessorInterface* LookUpWorkOrder(std::string workload_id) {
     for (int i = 0; workOrderDispatchTable[i].project_name != NULL; i++) {
-        if (work_order_code.compare(workOrderDispatchTable[i].project_name) == 0) {
+        if (workload_id.compare(workOrderDispatchTable[i].project_name) == 0) {
             return workOrderDispatchTable[i].work_order_factory_ptr();
         }
     }
@@ -33,19 +33,19 @@ WorkloadProcessor::WorkloadProcessor() {}
 WorkloadProcessor::~WorkloadProcessor() {}
 
 void WorkloadProcessor::ProcessWorkOrder(
-        std::string code_id,
+        std::string workload_id,
         const ByteArray& participant_address,
         const ByteArray& enclave_id,
         const ByteArray& work_order_id,
         const std::vector<tcf::WorkOrderData>& in_work_order_data,
         std::vector<tcf::WorkOrderData>& out_work_order_data) {
-    tcf::WorkOrderProcessorInterface* work_order = LookUpWorkOrder(code_id);
+    tcf::WorkOrderProcessorInterface* work_order = LookUpWorkOrder(workload_id);
     if (work_order == nullptr) {
 	tcf::error::RuntimeError("Work order not found in Work order lookup table\n");
 	return;
     }
     work_order->ProcessWorkOrder(
-                code_id,
+                workload_id,
                 participant_address,
                 enclave_id,
                 work_order_id,

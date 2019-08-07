@@ -25,7 +25,7 @@ namespace tcf {
     class WorkOrderProcessorInterface {
     public:
         virtual void ProcessWorkOrder(
-			std::string code_id,
+			std::string workload_id,
 			const ByteArray& participant_address,
 			const ByteArray& enclave_id,
 			const ByteArray& work_order_id,

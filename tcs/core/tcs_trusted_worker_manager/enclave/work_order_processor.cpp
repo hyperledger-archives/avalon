@@ -219,31 +219,30 @@ namespace tcf {
 
         if (data_items_in.size() > 0) {
             // data_items_in vector is sorted based out of index
-            // data at index 0 is the identifier of the workorder
-            WorkOrderDataHandler& code_data_item = data_items_in.at(0);
-            // Vector is sorted the first object should have index 0
-            if (code_data_item.workorder_data.index == 0) {
-                for (auto d : data_items_in) {
-                    in_wo_data.emplace_back(d.workorder_data.index, d.workorder_data.decrypted_data);
-                }
+            for (auto d : data_items_in) {
+                in_wo_data.emplace_back(d.workorder_data.index,
+                                        d.workorder_data.decrypted_data);
+            }
 
-                for (auto d : data_items_out) {
-                    out_wo_data.emplace_back(d.workorder_data.index, d.workorder_data.decrypted_data);
-                }
+            for (auto d : data_items_out) {
+                out_wo_data.emplace_back(d.workorder_data.index,
+                                         d.workorder_data.decrypted_data);
+            }
 
-                WorkloadProcessor processor;
-                std::string workload_type = ByteArrayToStr(code_data_item.workorder_data.decrypted_data);
-                processor.ProcessWorkOrder(
+            WorkloadProcessor processor;
+            // Convert workload_id from hex string to string
+            ByteArray workload_bytes = HexStringToBinary(workload_id);
+            std::string workload_type(workload_bytes.begin(), workload_bytes.end());
+            processor.ProcessWorkOrder(
                         workload_type,
                         StrToByteArray(requester_id),
                         StrToByteArray(worker_id),
                         StrToByteArray(work_order_id),
                         in_wo_data,
                         out_wo_data);
-                return out_wo_data;
-            }
+            return out_wo_data;
         }
-        tcf::error::RuntimeError("Work Order inData not  Found\n");
+        tcf::error::RuntimeError("Work order inData not found\n");
         return out_wo_data;
     }
 
