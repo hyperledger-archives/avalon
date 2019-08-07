@@ -111,6 +111,29 @@ namespace tcf {
 
         // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
         /**
+         * Deletes a key/value from the database store
+         * Primary expected use: ocall
+         *
+         * @param table         table name
+         * @param inId          pointer to id byte array
+         * @param inIdSize      length of inId
+         * @param inValue       pointer to value byte array
+         * @param inValueSize   length of inValue
+         *
+         * @return
+         *  TCF_SUCCESS  id->value stored
+         *  else         failed, database store unchanged
+         */
+        tcf_err_t db_store_del(
+            const std::string& table,
+            const uint8_t* inId,
+            const size_t inIdSize,
+            const uint8_t* inValue,
+            const size_t inValueSize);
+
+
+        // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+        /**
          * Gets the size of a value in the database store
          * Primary expected use: python / untrusted side
          *
@@ -166,6 +189,24 @@ namespace tcf {
             const ByteArray& inId,
             const ByteArray& inValue);
 
-    }  /* namespace db_strore */
+        // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+        /**
+         * Deletes a key/value from the database store
+         * Primary expected use: python / untrusted side
+         *
+         * @param table         table name
+         * @param inId      id byte array
+         * @param inValue    data to be written
+         *
+         * @return
+         *  TCF_SUCCESS  id->value deleted
+         *  else         failed, d store unchanged
+         */
+        tcf_err_t db_store_del(
+            const std::string& table,
+            const ByteArray& inId,
+            const ByteArray& inValue);
+
+    }  /* namespace db_store */
 }  /* namespace tcf */
 

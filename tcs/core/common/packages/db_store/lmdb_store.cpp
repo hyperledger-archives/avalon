@@ -289,6 +289,52 @@ tcf_err_t tcf::db_store::db_store_put(
 }
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+tcf_err_t tcf::db_store::db_store_del(
+    const std::string& table,
+    const uint8_t* inId,
+    const size_t inIdSize,
+    const uint8_t* inValue,
+    const size_t inValueSize) {
+    MDB_dbi dbi;
+    MDB_val lmdb_id;
+    MDB_val lmdb_data;
+    int ret;
+
+#if DB_STORE_DEBUG
+   {
+        std::string idStr = BinaryToHexString(inId, inIdSize);
+        // SAFE_LOG(TCF_LOG_DEBUG, "db store Del: %zu bytes '%s' -> %zu bytes '%s'", inIdSize,
+        //   idStr.c_str(), inValueSize, valueStr.c_str());
+   }
+#endif
+
+    SafeThreadLock slock;
+    SafeTransaction stxn(0);
+
+    if (stxn.txn == NULL)
+        return TCF_ERR_SYSTEM;
+
+    ret = mdb_dbi_open(stxn.txn, table.c_str(), MDB_CREATE, &dbi);
+    if (ret != 0) {
+        // SAFE_LOG(TCF_LOG_ERROR, "Failed to open LMDB transaction : %d", ret);
+        return TCF_ERR_SYSTEM;
+    }
+
+    lmdb_id.mv_size = inIdSize;
+    lmdb_id.mv_data = (void*)inId;
+    lmdb_data.mv_size = inValueSize;
+    lmdb_data.mv_data = (void*)inValue;
+
+    ret = mdb_del(stxn.txn, dbi, &lmdb_id, &lmdb_data);
+    if (ret != 0) {
+        // SAFE_LOG(TCF_LOG_ERROR, "Failed to delete from LMDB database : %d", ret);
+        return TCF_ERR_SYSTEM;
+    }
+
+    return TCF_SUCCESS;
+}
+
+// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 tcf_err_t tcf::db_store::db_store_get_value_size(
     const std::string& table,
     const ByteArray& inId,
@@ -347,6 +393,14 @@ tcf_err_t tcf::db_store::db_store_put(
     const ByteArray& inId,
     const ByteArray& inValue) {
     return db_store_put(table, inId.data(), inId.size(), inValue.data(), inValue.size());
+}
+
+// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+tcf_err_t tcf::db_store::db_store_del(
+    const std::string& table,
+    const ByteArray& inId,
+    const ByteArray& inValue) {
+    return db_store_del(table, inId.data(), inId.size(), inValue.data(), inValue.size());
 }
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
