@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 # Copyright 2019 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -114,7 +112,6 @@ class KvStorage:
         Function to get all the keys in a lmdb table 
         Parameters:
            - table is the name of lmdb table.
-           - key is the primary key of the table.
         """
         result = []
         try:
