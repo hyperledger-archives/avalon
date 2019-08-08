@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 # Copyright 2019 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -141,7 +139,7 @@ def main(args=None):
     # TODO: Add mechanism to read the address from config file.
 
     eth_direct_registry = registry.EthereumDirectRegistry("0x8c99670a15047248403a3E5A38eb8FBE7a12533e", \
-                                        '../tcf_connector/DirectRegistry.sol')
+                                        '../connectors/contracts/WorkerRegistryList.sol')
     kv_storage = KvStorage()
     kv_storage.open("kv_storage")
 

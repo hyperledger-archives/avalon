@@ -21,9 +21,9 @@ from os.path import exists, realpath
 from eth_utils.hexadecimal import is_hex
 
 from utility.tcf_types import WorkerStatus, WorkerType
-from tcf_connector.ethereum.ethereum_wrapper import EthereumWrapper
-from tcf_connector.worker_registry_interface import WorkerRegistryInterface
-from tcf_connector.utils import construct_message, validate_details
+from connectors.ethereum.ethereum_wrapper import EthereumWrapper
+from connectors.interfaces.worker_registry_interface import WorkerRegistryInterface
+from connectors.utils import construct_message, validate_details
 
 logging.basicConfig(format="%(asctime)s - %(levelname)s - %(message)s", level=logging.INFO)
 

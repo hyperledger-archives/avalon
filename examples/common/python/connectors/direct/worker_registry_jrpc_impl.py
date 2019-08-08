@@ -16,9 +16,9 @@ import json
 import logging
 from eth_utils.hexadecimal import is_hex
 from service_client.generic import GenericServiceClient
-from tcf_connector.worker_registry_interface import WorkerRegistryInterface
+from connectors.interfaces.worker_registry_interface import WorkerRegistryInterface
 from utility.tcf_types import WorkerType, JsonRpcErrorCode
-from tcf_connector.utils import create_jrpc_response,validate_details
+from connectors.utils import create_jrpc_response,validate_details
 
 logging.basicConfig(format="%(asctime)s - %(levelname)s - %(message)s", level=logging.INFO)
 class WorkerRegistryJRPCImpl(WorkerRegistryInterface):
@@ -41,10 +41,11 @@ class WorkerRegistryJRPCImpl(WorkerRegistryInterface):
             return create_jrpc_response(id, JsonRpcErrorCode.INVALID_PARAMETER,
                 "Invalid organization id")
         if application_type_ids is not None:
-            for appId in application_type_ids:
-                if not is_hex(appId):
+            for app_id in application_type_ids:
+                if not is_hex(app_id):
                     logging.error("Invalid application type id")
-                    return create_jrpc_response(id, JsonRpcErrorCode.INVALID_PARAMETER,
+                    return create_jrpc_response(
+                        id, JsonRpcErrorCode.INVALID_PARAMETER,
                         "Invalid application type id")
                     break
         if details is not None:
@@ -62,7 +63,7 @@ class WorkerRegistryJRPCImpl(WorkerRegistryInterface):
                 "workerType": worker_type.value,
                 "organizationId": org_id,
                 "applicationTypeId": application_type_ids,
-                "details": details
+                "details": json.loads(details)
             }
         }
         response = self.__uri_client._postmsg(json.dumps(json_rpc_request))
@@ -128,70 +129,85 @@ class WorkerRegistryJRPCImpl(WorkerRegistryInterface):
         return response
 
     
-    def worker_lookup(self, worker_type, organization_id, application_type_id,
+    def worker_lookup(self, worker_type=None, organization_id=None,
+        application_type_id=None,
         id=None):
-        """ Worker lookup based on worker type, organization id and application id"""
-        if not isinstance(worker_type, WorkerType):
-            logging.error("Worker type is invalid")
-            return create_jrpc_response(id, JsonRpcErrorCode.INVALID_PARAMETER,
-                "Worker type is invalid")
-        if organization_id is None or not is_hex(organization_id):
-            logging.error("Invalid Organization id")
-            return create_jrpc_response(id, JsonRpcErrorCode.INVALID_PARAMETER,
-                "Invalid Organization id")
-        if application_type_id is not None:
-            for appId in application_type_id:
-                if not is_hex(appId):
-                    logging.error("Invalid application type id")
-                    return create_jrpc_response(id, JsonRpcErrorCode.INVALID_PARAMETER,
-                        "Invalid application type id")
-                    break
-        
-
+        """ Worker lookup based on worker type, organization id 
+        and application id"""
         json_rpc_request = {
             "jsonrpc": "2.0",
             "method": "WorkerLookUp",
             "id": id,
             "params": {
-                "workerType": worker_type.value,
-                "organizationId": organization_id,
-                "applicationTypeId": application_type_id
             }
         }
+
+        if worker_type is not None:
+            if not isinstance(worker_type, WorkerType):
+                logging.error("Invalid worker type")
+                return create_jrpc_response(
+                    id, JsonRpcErrorCode.INVALID_PARAMETER,
+                    "Invalid worker type")
+            json_rpc_request["params"]["workerType"] = worker_type.value
+
+        if organization_id is not None:
+            if not is_hex(organization_id):
+                logging.error("Invalid organization id")
+                return create_jrpc_response(
+                    id, JsonRpcErrorCode.INVALID_PARAMETER,
+                    "Invalid organization id")
+            json_rpc_request["params"]["organizationId"] = organization_id
+
+        if application_type_id is not None:
+            for app_id in application_type_id:
+                if not is_hex(app_id):
+                    logging.error("Invalid application type id")
+                    return create_jrpc_response(
+                        id, JsonRpcErrorCode.INVALID_PARAMETER,
+                        "Invalid application type id")
+            json_rpc_request["params"]["applicationTypeId"] = application_type_id
+        
         response = self.__uri_client._postmsg(json.dumps(json_rpc_request))
         return response
 
     
-    def worker_lookup_next(self, worker_type, organization_id, 
-        application_type_id, lookup_tag, id=None):
+    def worker_lookup_next(self, lookup_tag, worker_type=None, 
+        organization_id=None, application_type_id=None, id=None):
         """ Similar to workerLookUp with additional parameter lookup_tag """
-        if not isinstance(worker_type, WorkerType):
-            logging.error("Worker type is invalid")
-            return create_jrpc_response(id, JsonRpcErrorCode.INVALID_PARAMETER,
-                "Worker type is invalid")
-        if organization_id is None or not is_hex(organization_id):
-            logging.error("Invalid organization id")
-            return create_jrpc_response(id, JsonRpcErrorCode.INVALID_PARAMETER,
-                "Invalid organization id")
-        if application_type_id is not None:
-            for appId in application_type_id:
-                if not is_hex(appId):
-                    logging.error("Invalid application id")
-                    return create_jrpc_response(id, JsonRpcErrorCode.INVALID_PARAMETER,
-                        "Invalid application id")
-                    break
         
-
         json_rpc_request = {
             "jsonrpc": "2.0",
             "method": "WorkerLookUpNext",
             "id": id,
             "params": {
-                "workerType": worker_type.value,
-                "organizationId": organization_id,
-                "applicationTypeId": application_type_id,
                 "lookUpTag": lookup_tag
             }
         }
+
+        if worker_type is not None:
+            if not isinstance(worker_type, WorkerType):
+                logging.error("Invalid worker type2")
+                return create_jrpc_response(
+                    id, JsonRpcErrorCode.INVALID_PARAMETER,
+                    "Invalid worker type")
+            json_rpc_request["params"]["workerType"] = worker_type.value
+
+        if organization_id is not None:
+            if not is_hex(organization_id):
+                logging.error("Invalid organization id")
+                return create_jrpc_response(
+                    id, JsonRpcErrorCode.INVALID_PARAMETER,
+                    "Invalid organization id")
+            json_rpc_request["params"]["organizationId"] = organization_id
+
+        if application_type_id is not None:
+            for app_id in application_type_id:
+                if not is_hex(app_id):
+                    logging.error("Invalid application type id")
+                    return create_jrpc_response(
+                        id, JsonRpcErrorCode.INVALID_PARAMETER,
+                        "Invalid application type id")
+            json_rpc_request["params"]["applicationTypeId"] = application_type_id
+        
         response = self.__uri_client._postmsg(json.dumps(json_rpc_request))
         return response

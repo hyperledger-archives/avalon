@@ -21,8 +21,9 @@ import errno
 import secrets
 import time
 import base64
+import json
 
-from tcf_connector.work_order_jrpc_impl import WorkOrderJRPCImpl
+from connectors.direct.work_order_jrpc_impl import WorkOrderJRPCImpl
 
 logging.basicConfig(format="%(asctime)s - %(levelname)s - %(message)s", level=logging.INFO)
 
@@ -47,7 +48,7 @@ class TestWorkOrderJRPCImpl(unittest.TestCase):
         "notifyUri": "http://notify-uri:8080",
         "workOrderId": self.__work_order_id,
         "workerId": "",
-        "workloadId": secrets.token_hex(32),
+        "workloadId": "heart-disease-eval".encode("utf-8").hex(),
         "requesterId": secrets.token_hex(32),
         "workerEncryptionKey": secrets.token_hex(32),
         "dataEncryptionAlgorithm": "AES-GCM-256",
@@ -94,8 +95,10 @@ class TestWorkOrderJRPCImpl(unittest.TestCase):
 
     def test_work_order_submit(self):
         req_id = 21
-        logging.info("Calling work_order_submit with params %s\n in_data %s\n out_data %s\n",
-        self.__work_order_submit_request, self.__in_data, self.__out_data)
+        logging.info("Calling work_order_submit with params %s\nin_data %s\nout_data %s\n",
+        json.dumps(self.__work_order_submit_request, indent=4), 
+        json.dumps(self.__in_data, indent=4), 
+        json.dumps(self.__out_data, indent=4))
         res = self.__work_order_wrapper.work_order_submit(self.__work_order_submit_request, self.__in_data, self.__out_data, req_id)
         logging.info("Result: %s\n", res)
         self.assertEqual(res['id'], req_id, "work_order_submit Response id doesn't match")
@@ -111,13 +114,10 @@ class TestWorkOrderJRPCImpl(unittest.TestCase):
 
         self.assertEqual(res['id'], req_id, "work_order_get_result Response id doesn't match")
 
-
-
-
 def main():
     logging.info("Running test cases...\n")
     tcf_home = environ.get("TCF_HOME", "../../")
-    test = TestWorkOrderJRPCImpl(tcf_home + "/common/tcf_connector/" + "tcf_connector.toml")
+    test = TestWorkOrderJRPCImpl(tcf_home + "/examples/common/python/connectors/" + "tcf_connector.toml")
     test.test_work_order_submit()
     test.test_work_order_get_result()
     """

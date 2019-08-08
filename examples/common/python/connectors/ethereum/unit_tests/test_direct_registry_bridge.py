@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 # Copyright 2019 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,10 +20,11 @@ import json
 import logging
 
 from shared_kv.shared_kv_interface import KvStorage
-import direct_registry_bridge as registry_helper
+import connectors.ethereum.direct_registry_bridge as registry_helper
 
-sys.path.insert(0, abspath(join(dirname(__file__), '..')) + '/tcf_connector/')
-import EthereumDirectRegistry as dir_registry
+sys.path.insert(0, abspath(join(dirname(__file__), '../..')) + '/connectors/')
+from connectors.ethereum.ethereum_worker_registry_list_impl \
+    import EthereumWorkerRegistryListImpl as dir_registry
 
 logger = logging.getLogger(__name__)
 
@@ -96,7 +95,7 @@ def main():
     logger.info("Testing Direct registry bridge functionality.")
 
     eth_direct_registry = dir_registry.EthereumDirectRegistry("0x8c99670a15047248403a3E5A38eb8FBE7a12533e",
-                                                 '../tcf_connector/DirectRegistry.sol')
+                                                 '../contracts/WorkerRegistryList.sol')
     kv_storage = KvStorage()
     kv_storage.open("kv_storage")
 

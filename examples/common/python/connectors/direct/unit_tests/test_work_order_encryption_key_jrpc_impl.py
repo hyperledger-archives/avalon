@@ -22,7 +22,7 @@ import toml
 import secrets
 
 
-from tcf_connector.work_order_encryption_key_jrpc_impl import WorkOrderEncryptionKeyJrpcImpl
+from connectors.direct.work_order_encryption_key_jrpc_impl import WorkOrderEncryptionKeyJrpcImpl
 
 logging.basicConfig(format="%(asctime)s - %(levelname)s - %(message)s", level=logging.INFO)
 
@@ -69,7 +69,7 @@ class TestWorkOrderEncryptionKeyJRPCImpl(unittest.TestCase):
         logging.info("Calling encryption_key_set with workerId %s\n encryptionKey %s\n \
             encryptionKeyNonce %s\n tag %s\n signatureNonce %s\n signature %s\n",
             self.__workerId, self.__last_used_key_nonce, self.__tag, self.__requester_id,
-            self.__signature_nonce,self.__signature)
+            self.__signature_nonce, self.__signature)
 
         res = self.__wo_enc_updater.encryption_key_set(self.__workerId,
             self.__last_used_key_nonce,
@@ -84,7 +84,7 @@ class TestWorkOrderEncryptionKeyJRPCImpl(unittest.TestCase):
 def main():
     logging.info("Running test cases...\n")
     tcf_home = environ.get("TCF_HOME", "../../")
-    test = TestWorkOrderEncryptionKeyJRPCImpl(tcf_home + "/common/tcf_connector/" + "tcf_connector.toml")
+    test = TestWorkOrderEncryptionKeyJRPCImpl(tcf_home + "/examples/common/python/connectors/" + "tcf_connector.toml")
     test.test_encryption_key_get()
     test.test_encryption_key_set()
 

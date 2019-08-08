@@ -17,9 +17,9 @@ import logging
 from eth_utils.hexadecimal import is_hex
 
 from service_client.generic import GenericServiceClient
-from tcf_connector.work_order_receipts.work_order_receipt_interface import WorkOrderReceiptInterface
+from connectors.interfaces.work_order_receipt_interface import WorkOrderReceiptInterface
 from utility.tcf_types import ReceiptCreateStatus
-from tcf_connector.utils import create_jrpc_response,validate_details
+from connectors.utils import create_jrpc_response,validate_details
 logging.basicConfig(format="%(asctime)s - %(levelname)s - %(message)s", level=logging.INFO)
 
 class WorkOrderReceiptJRPCImpl(WorkOrderReceiptInterface):
@@ -180,86 +180,106 @@ class WorkOrderReceiptJRPCImpl(WorkOrderReceiptInterface):
         response = self.__uri_client._postmsg(json.dumps(json_rpc_request))
         return response
 
-    def work_order_receipt_lookup(self, worker_service_id,
-        worker_id,
-        requester_id,
-        receipt_status, id=None):
+    def work_order_receipt_lookup(self, worker_service_id=None,
+        worker_id=None, requester_id=None, receipt_status=None, id=None):
         """
         Work Order Receipt Lookup
         """
-        if worker_id is None or not is_hex(worker_id):
-            logging.error("Worker id is empty or Invalid")
-            return create_jrpc_response(id, JsonRpcErrorCode.INVALID_PARAMETER,
-                "Worker id is empty or Invalid")
-
-        if worker_service_id is None or not is_hex(worker_service_id):
-            logging.error("Worker service id is empty or Invalid")
-            return create_jrpc_response(id, JsonRpcErrorCode.INVALID_PARAMETER,
-                "Worker service id is empty or Invalid")
-
-        if requester_id is None or not is_hex(requester_id):
-            logging.error("requester id is empty or Invalid")
-            return create_jrpc_response(id, JsonRpcErrorCode.INVALID_PARAMETER,
-                "requester id is empty or Invalid")
-
-        if not isinstance(receipt_status, ReceiptCreateStatus):
-            logging.error("Invalid receipt status")
-            return create_jrpc_response(id, JsonRpcErrorCode.INVALID_PARAMETER,
-                "Invalid receipt status")
-
         json_rpc_request = {
             "jsonrpc": "2.0",
-            "method": "WorkOrderReceiptLookUp",
+            "method": "WorkerLookUp",
             "id": id,
             "params": {
-                "workerServiceId": worker_service_id,
-                "workerId": worker_id,
-                "requesterId": requester_id,
-                "updateIndex": receipt_status
             }
         }
+
+        if worker_service_id is not None:
+            if not is_hex(worker_service_id):
+                logging.error("Worker service id is Invalid")
+                return create_jrpc_response(
+                    id, JsonRpcErrorCode.INVALID_PARAMETER,
+                    "Worker service id is Invalid")
+            json_rpc_request["params"]["workerServiceId"] = worker_service_id
+
+        if worker_id is not None:
+            if not is_hex(worker_id):
+                logging.error("Worker id is Invalid")
+                return create_jrpc_response(
+                    id, JsonRpcErrorCode.INVALID_PARAMETER,
+                    "Worker id is Invalid")
+            json_rpc_request["params"]["workerId"] = worker_id
+
+        if requester_id is not None:
+            if not is_hex(requester_id):
+                logging.error("Requester id is Invalid")
+                return create_jrpc_response(
+                    id, JsonRpcErrorCode.INVALID_PARAMETER,
+                    "Requester id is Invalid")
+            json_rpc_request["params"]["requesterId"] = requester_id
+
+        if receipt_status is not None:
+            if not isinstance(receipt_status, ReceiptCreateStatus):
+                logging.error("Receipt status is Invalid")
+                return create_jrpc_response(
+                    id, JsonRpcErrorCode.INVALID_PARAMETER,
+                    "Receipt status is Invalid")
+            json_rpc_request["params"]["receiptStatus"] = receipt_status
+
         response = self.__uri_client._postmsg(json.dumps(json_rpc_request))
         return response
 
-    def work_order_receipt_lookup_next(self, worker_service_id,
-        worker_id,
-        requester_id,
-        receipt_status,
-        last_lookup_tag, id=None):
+    def work_order_receipt_lookup_next(self, last_lookup_tag,
+        worker_service_id=None, worker_id=None, requester_id=None,
+        receipt_status=None, id=None):
         """
         Work Order Receipt Lookup Next
         """
-        if worker_id is None or not is_hex(worker_id):
-            logging.error("Worker id is empty or Invalid")
-            return create_jrpc_response(id, JsonRpcErrorCode.INVALID_PARAMETER,
-                "Worker id is empty or Invalid")
-
-        if worker_service_id is None or not is_hex(worker_service_id):
-            logging.error("Worker service id is empty or Invalid")
-            return create_jrpc_response(id, JsonRpcErrorCode.INVALID_PARAMETER,
-                "Worker service id is empty or Invalid")
-
-        if requester_id is None or not is_hex(requester_id):
-            logging.error("requester id is empty or Invalid")
-            return create_jrpc_response(id, JsonRpcErrorCode.INVALID_PARAMETER,
-                "requester id is empty or Invalid")
-
-        if not isinstance(receipt_status, ReceiptCreateStatus):
-            logging.error("Invalid receipt status")
-            return create_jrpc_response(id, JsonRpcErrorCode.INVALID_PARAMETER,
-                "Invalid receipt status")
-
         json_rpc_request = {
             "jsonrpc": "2.0",
             "method": "WorkOrderReceiptLookUpNext",
             "id": id,
             "params": {
-                "workerServiceId": worker_service_id,
-                "workerId": worker_id,
-                "requesterId": requester_id,
-                "updateIndex": receipt_status,
                 "lastLookUpTag": last_lookup_tag
             }
         }
+
+        if worker_service_id is not None:
+            if not is_hex(worker_service_id):
+                logging.error("Worker service id is Invalid")
+                return create_jrpc_response(
+                    id, JsonRpcErrorCode.INVALID_PARAMETER,
+                    "Worker service id is Invalid")
+            json_rpc_request["params"]["workerServiceId"] = worker_service_id
+
+        if worker_id is not None:
+            if not is_hex(worker_id):
+                logging.error("Worker id is Invalid")
+                return create_jrpc_response(
+                    id, JsonRpcErrorCode.INVALID_PARAMETER,
+                    "Worker id is Invalid")
+            json_rpc_request["params"]["workerId"] = worker_id
+
+        if requester_id is not None:
+            if not is_hex(requester_id):
+                logging.error("Requester id is Invalid")
+                return create_jrpc_response(
+                    id, JsonRpcErrorCode.INVALID_PARAMETER,
+                    "Requester id is Invalid")
+            json_rpc_request["params"]["requesterId"] = requester_id
+
+        if receipt_status is not None:
+            if not isinstance(receipt_status, ReceiptCreateStatus):
+                logging.error("Invalid receipt status")
+                return create_jrpc_response(
+                    id, JsonRpcErrorCode.INVALID_PARAMETER,
+                    "Invalid receipt status")
+            json_rpc_request["params"]["receiptStatus"] = receipt_status
+
+        if last_lookup_tag is None or not is_hex(last_lookup_tag):
+            logging.error("Last lookup tag is empty or Invalid")
+            return create_jrpc_response(
+                id, JsonRpcErrorCode.INVALID_PARAMETER,
+                "Last lookup tag is empty or Invalid")
+
         response = self.__uri_client._postmsg(json.dumps(json_rpc_request))
         return response

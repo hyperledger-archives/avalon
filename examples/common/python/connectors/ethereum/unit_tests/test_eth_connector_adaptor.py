@@ -15,7 +15,7 @@
 from os import urandom
 import logging
 
-from tcs_core.tcf_connector.BCAdaptorFactory import BCAdaptorFactory
+from connectors.blockchain_adaptor_factory import BlockchainAdaptorFactoryImpl as BCAdaptorFactory
 
 logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s', level=logging.INFO)
 
@@ -23,7 +23,7 @@ class TestEthConnectorAdaptor():
     def __init__(self):
         self.__eth_adaptor = BCAdaptorFactory('tcf_connector.toml')
 
-    def testDirectRegistryAdaptor(self):
+    def test_direct_registry_adaptor(self):
         orgId = urandom(32)
         uri = "http://worker1:8008"
         scAddr = urandom(20)
@@ -35,7 +35,7 @@ class TestEthConnectorAdaptor():
 def main():
     logging.info("Running test cases...")
     test = TestEthConnectorAdaptor()
-    test.testDirectRegistryAdaptor()
+    test.test_direct_registry_adaptor()
     
 if __name__ == '__main__':
     main()
