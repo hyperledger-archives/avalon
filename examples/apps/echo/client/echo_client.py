@@ -18,14 +18,16 @@ import random
 import json
 import argparse
 import logging
+import base64
 
 import config.config as pconfig
 import utility.logger as plogger
 from service_client.generic import GenericServiceClient
-import utility.utility as enclave_helper
+import utility.utility as utility
 import worker.worker_details as worker
-import json_rpc_request as jrpc_request
-from direct_adaptor_factory_wrapper import DirectAdaptorFactoryWrapper
+import json_rpc_request.json_rpc_request as jrpc_request
+from connectors.direct.direct_adaptor_factory_wrapper \
+	import DirectAdaptorFactoryWrapper
 
 # Remove duplicate loggers
 for handler in logging.root.handlers[:]:
@@ -67,7 +69,8 @@ def ParseCommandLine(args) :
 	if options.config:
 		conffiles = [options.config]
 	else:
-		conffiles = [ TCFHOME + "/common/tcf_connector/tcf_connector.toml" ]
+		conffiles = [ TCFHOME + \
+			"/examples/common/python/connectors/tcf_connector.toml" ]
 	confpaths = [ "." ]
 	try :
 		config = pconfig.parse_configuration_files(conffiles, confpaths)
@@ -154,22 +157,25 @@ def Main(args=None):
 	logger.info("**********Worker details Updated with Worker ID" + \
 		"*********\n%s\n", worker_id)
 
-	# Create, sign, and submit workorder 
 	# Convert workloadId to hex
 	workload_id = "echo-result"
 	workload_id = workload_id.encode("UTF-8").hex()
+	# Create work order
 	wo_submit_json = jrpc_request.WorkOrderSubmitJson(3, 6000, "pformat",
 		worker_id, workload_id, "0x2345", 
-		worker_encryption_key=worker_obj.worker_encryption_key, 
+		worker_encryption_key=base64.b64decode(
+			worker_obj.worker_encryption_key).hex(), 
 		data_encryption_algorithm="AES-GCM-256")
 	wo_id = wo_submit_json.get_work_order_id()
-	wo_submit_json.add_in_data("bcde1111", message)
+	wo_submit_json.add_in_data(message)
 
-	private_key = enclave_helper.generate_signing_keys()
-	session_iv = enclave_helper.generate_sessioniv()
-	encrypted_session_key = enclave_helper.generate_encrypted_session_key(
+	# Sign work order
+	private_key = utility.generate_signing_keys()
+	session_iv = utility.generate_sessioniv()
+	encrypted_session_key = utility.generate_encrypted_session_key(
 		session_iv, worker_obj.worker_encryption_key)
 
+	# Submit work order
 	direct_wrapper.init_work_order(config)
 	direct_wrapper.work_order_submit(wo_submit_json, encrypted_session_key, 
 		worker_obj, private_key, session_iv)
