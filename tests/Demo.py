@@ -85,7 +85,8 @@ def LocalMain(config) :
                    #Retrieving the worker id from the "WorkerRetrieve" response and update the worker id information for the further json requests
                    if "result" in response and "ids" in response["result"].keys():
                        input_json_final = json.loads(input_json_str1)
-                       input_json_final["params"]["workerId"] = enclave_helper.strip_begin_end_key(response["result"]["ids"][0])
+                       worker_id = response["result"]["ids"][0]
+                       input_json_final["params"]["workerId"] = worker_id
                        input_json_str1 = json.dumps(input_json_final)
                        logger.info("**********Worker details Updated with Worker ID*********\n%s\n", input_json_str1)
             #-----------------------------------------------------------------------------------

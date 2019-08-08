@@ -55,7 +55,7 @@ namespace tcf {
                 std::string notify_uri;
                 std::string work_order_id;
                 std::string worker_id;
-                std::string work_load_id;
+                std::string workload_id;
                 std::string requester_id;
                 std::string worker_encryption_key;
                 std::string data_encryption_algorithm;

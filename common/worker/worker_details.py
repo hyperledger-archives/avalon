@@ -51,8 +51,11 @@ class WorkerDetails(object):
         self.data_encryption_algorithm = worker_data['dataEncryptionAlgorithm']
         self.worker_typedata_verification_key = worker_data['workerTypeData']['verificationKey']
         self.worker_encryption_key = worker_data['workerTypeData']['encryptionKey']
-        # worker_id - newline, BEGIN PUB KEY and END PUB KEY are removed from worker's verification key
-        self.worker_id = utility.strip_begin_end_key(worker_data['workerTypeData']['verificationKey'])
+
+        ''' worker_id - newline, BEGIN PUB KEY and END PUB KEY are removed
+                        from worker's verification key and converted to hex '''
+        self.worker_id = utility.strip_begin_end_key(
+                worker_data['workerTypeData']['verificationKey']).encode("UTF-8").hex()
         logger.info("Hashing Algorithm : %s", self.hashing_algorithm)
         logger.info("Signing Algorithm : %s", self.signing_algorithm)
 
