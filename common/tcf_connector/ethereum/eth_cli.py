@@ -19,9 +19,7 @@ import abc
 import os,time
 from os.path import exists, realpath
 
-from solc import compile_source
-from web3 import HTTPProvider, Web3
-from tcf_connector.ethereum.ethereum_wrapper import ethereum_wrapper
+from tcf_connector.ethereum.ethereum_wrapper import EthereumWrapper as ethereum_wrapper
 
 logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s', level=logging.INFO)
 
@@ -43,16 +41,18 @@ class eth_cli:
         self.__eth_client = ethereum_wrapper(self.__config)
 
     def deploy_contracts(self):
-        self.deploy_solidity_contract(self.__config['ethereum']['direct_registry_contract_file'])
-        self.deploy_solidity_contract(self.__config['ethereum']['worker_registry_contract_file'])
+        tcf_home = os.environ.get("TCF_HOME", "../../")
+        self.deploy_solidity_contract(tcf_home + "/" + 
+            self.__config['ethereum']['direct_registry_contract_file'])
+        self.deploy_solidity_contract(tcf_home + "/" + 
+            self.__config['ethereum']['worker_registry_contract_file'])
 
     def deploy_solidity_contract(self, contract_file):
         if not exists(contract_file):
             raise FileNotFoundError("File not found at path: {0}".format(realpath(contract_file)))
         compiled_sol = self.__eth_client.compile_source_file(contract_file)
         contract_id, contract_interface = compiled_sol.popitem()
-        address = self.__eth_client.deploy_contract(self.__w3, self.__eth_account_address,
-            self.__eth_private_key, contract_interface, self.__chain_id)
+        address = self.__eth_client.deploy_contract(contract_interface)
         logging.info("Deployed %s to: %s\n", contract_id, address)
         return {"status":"success"}
 

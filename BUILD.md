@@ -42,7 +42,7 @@ Follow the instructions below to execute a Docker-based build and execution.
 3. Open a Docker container shell using following command
    `sudo docker exec -it tcf bash`
 4. Activate a virtual environment in the Docker shell using following command
-   from the Docker working directory, `$TCF_HOME/__tools__/build`,
+   from the Docker working directory, `$TCF_HOME/tools/build`,
    which is set in the `docker-compose.yaml` file:
    ```
    source _dev/bin/activate
@@ -75,7 +75,7 @@ export TCF_HOME=`pwd`
 
 Change to the quickstart build directory:
 ```
-cd $TCF_HOME/__tools__/build
+cd $TCF_HOME/tools/build
 ```
 
 Check that these variables are set before building the code:

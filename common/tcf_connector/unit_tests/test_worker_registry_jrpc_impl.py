@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from tcf_connector.worker_registry_jrpc_impl import WorkerRegistryJRPCImpl
 import logging
 import unittest
 import toml
@@ -21,6 +20,7 @@ import errno
 import secrets
 import json
 
+from tcf_connector.worker_registry_jrpc_impl import WorkerRegistryJRPCImpl
 from utils.tcf_types import WorkerType, WorkerStatus
 
 logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s', level=logging.INFO)

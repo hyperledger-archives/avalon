@@ -18,6 +18,8 @@ from os.path import exists, realpath
 import json
 from eth_utils.hexadecimal import is_hex
 
+from utils.tcf_types import JsonRpcErrorCode
+
 logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s', level=logging.INFO)
 
 def create_jrpc_response(id, code, message, data=None):

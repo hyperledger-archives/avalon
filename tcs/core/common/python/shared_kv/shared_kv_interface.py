@@ -87,14 +87,26 @@ class KvStorage:
         return value
 
 #---------------------------------------------------------------------------------------------------
-    def remove(self, table, key):
+    def remove(self, table, key, value=None):
         """
-        Function to remove the value for a key in a lmdb table 
+        Function to remove the key/value from a lmdb table
         Parameters:
            - table is the name of lmdb table in which key-value pair need to be removed.
            - key is the primary key of the table.
+           - value is data to be removed, If the database does not support sorted duplicate
+             data items (MDB_DUPSORT) the data parameter is ignored. If the database supports
+             sorted duplicates and the data parameter is NULL, all of the duplicate data items
+             for the key will be deleted. Otherwise, if the data parameter is non-NULL only the
+             matching data item will be deleted
         """
-        return self.set(table, key, "")
+        try:
+            if value is None:
+                db_store.db_store_del(table, key, "")
+            else:
+                db_store.db_store_del(table, key, value)
+            return True
+        except:
+            return False
 
 #---------------------------------------------------------------------------------------------------
     def lookup(self, table):

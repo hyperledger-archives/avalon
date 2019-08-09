@@ -66,8 +66,9 @@ WorkOrderSyncUri = "http://localhost:8080"
 WorkOrderAsyncUri = "http://localhost:8080"
 WorkOrderPullUri = "http://localhost:8080"
 WorkOrderNotifyUri = "http://localhost:8080"
-ApplicationTypeId = "Application_01"
-OrganizationId = "Organization_01"
+# Replace ApplicationTypeId and OrganizationId with real hexadecimal values
+ApplicationTypeId = "11aa22bb33cc44dd"
+OrganizationId = "aabbcc1234ddeeff"
 
 # URI used by worker to process work order receipts
 ReceiptInvocationUri = "http://localhost:8080"

@@ -86,4 +86,13 @@ void db_store_put(
     ThrowTCFError(presult);
 }
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-
+void db_store_del(
+    const std::string& table_b64,
+    const std::string& key_b64,
+    const std::string& value_b64) {
+    ByteArray raw_key(key_b64.begin(), key_b64.end());
+    ByteArray raw_value(value_b64.begin(), value_b64.end());
+    tcf_err_t presult = tcf::db_store::db_store_del(table_b64, raw_key, raw_value);
+    ThrowTCFError(presult);
+}
+// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX

@@ -93,10 +93,10 @@ class EthereumWrapper():
                 'from': acct.address,
                 'chainId': self.__channel_id,
                 'gas': self.__gas_limit,
-                'gasPrice': self.__gas_price,
+                'gasPrice': self.get_gas_price(),
                 'nonce': nonce
         })
-        address = execute_transaction(tx_hash)['txn_receipt']['contractAddress']
+        address = self.execute_transaction(tx_hash)['txn_receipt']['contractAddress']
         return address
 
     def execute_transaction(self, tx_dict):

@@ -27,7 +27,7 @@ services:
         - no_proxy
     volumes:
       - ./:/project/TrustedComputeFramework
-    working_dir: "/project/TrustedComputeFramework/__tools__/build"
+    working_dir: "/project/TrustedComputeFramework/tools/build"
     entrypoint: "bash -c \"\
         if [ ${MAKECLEAN:-1} != 0 ]; then echo \\\"Clean build\\\" && make clean; fi \
         && make \
