@@ -15,7 +15,7 @@
 import json
 import logging
 from itertools import cycle
-from utils.utility import list_difference as list_diff
+import utils.utility as utility
 from error_code.error_status import WorkerError
 from error_code.error_status import WorkerStatus
 from shared_kv.shared_kv_interface import KvStorage
@@ -100,10 +100,11 @@ class TCSWorkerRegistryHandler:
         if 'workerId' in input_json_str:
             worker_id = str(input_json['params']['workerId'])
         else :
-            response['error'] = {}
-            response['error']['code'] = WorkerError.INVALID_PARAMETER_FORMAT_OR_VALUE
-            response['error']['message'] = "Worker Id not found in the database. Hence invalid parameter"
-            return response
+            return utility.create_error_response(
+                    WorkerError.INVALID_PARAMETER_FORMAT_OR_VALUE,
+                    input_json["id"],
+                    "Worker Id not found in the database. \
+                     Hence invalid parameter")
 
         if(input_json['method'] == "WorkerRegister"):
             return self.__process_worker_register(worker_id, input_json_str, response)
@@ -124,9 +125,10 @@ class TCSWorkerRegistryHandler:
             - response is the response object to be returned to client.
         """
 
-        response['error'] = {}
+        input_value_json = json.loads(input_json_str)
+        jrpc_id = input_value_json["id"]
+
         if(self.kv_helper.get("workers", worker_id) is None):
-            input_value_json = json.loads(input_json_str)
             input_value = {}
             input_value =  input_value_json['params']
 
@@ -135,11 +137,15 @@ class TCSWorkerRegistryHandler:
 
             input_json_str = json.dumps(input_value)
             self.kv_helper.set("workers", worker_id, input_json_str)
-            response['error']['code'] = WorkerError.SUCCESS
-            response['error']['message'] = "Successfully Registered"
+            response = utility.create_error_response(
+                    WorkerError.SUCCESS, jrpc_id,
+                    "Successfully Registered")
         else:
-            response['error']['code'] = WorkerError.INVALID_PARAMETER_FORMAT_OR_VALUE
-            response['error']['message'] = "Worker Id already exists in the database. Hence invalid parameter"
+            response = utility.create_error_response(
+                WorkerError.INVALID_PARAMETER_FORMAT_OR_VALUE,
+                jrpc_id,
+                "Worker Id already exists in the database. \
+                 Hence invalid parameter")
         return response
 # ------------------------------------------------------------------------------------------------
 
@@ -153,21 +159,26 @@ class TCSWorkerRegistryHandler:
         """
 
         #status can be one of active, offline, decommissioned, or compromised
-        response['error'] = {}
+
+        input_value = json.loads(input_json_str)
+        jrpc_id = input_value["id"]
 
         value = self.kv_helper.get("workers", worker_id)
         if value:
-            input_value = json.loads(input_json_str)
             json_dict = json.loads(value)
             json_dict['status'] = input_value['params']['status']
 
             value = json.dumps(json_dict)
             self.kv_helper.set("workers", worker_id, value)
-            response['error']['code'] = WorkerError.SUCCESS
-            response['error']['message'] = "Successfully Set Status"
+            response = utility.create_error_response(
+                    WorkerError.SUCCESS, jrpc_id,
+                    "Successfully Set Status")
         else:
-            response['error']['code'] = WorkerError.INVALID_PARAMETER_FORMAT_OR_VALUE
-            response['error']['message'] = "Worker Id not found in the database. Hence invalid parameter"
+            response = utility.create_error_response(
+                WorkerError.INVALID_PARAMETER_FORMAT_OR_VALUE,
+                jrpc_id,
+                "Worker Id not found in the database. \
+                 Hence invalid parameter")
 
         return response
 # ------------------------------------------------------------------------------------------------
@@ -177,12 +188,12 @@ class TCSWorkerRegistryHandler:
         work_orders = self.kv_helper.lookup("workers")
 
         alter_items = []
-        alter_items = list_diff(self.worker_pool, work_orders)
+        alter_items = utility.list_difference(self.worker_pool, work_orders)
 
         for item in alter_items:
            self.worker_pool.remove(item)
 
-        alter_items = list_diff(work_orders, self.worker_pool)
+        alter_items = utility.list_difference(work_orders, self.worker_pool)
         for item in alter_items:
            self.worker_pool.append(item)
 
@@ -275,9 +286,11 @@ class TCSWorkerRegistryHandler:
             response["result"]["details"] = json_dict["details"]
             response["result"]["status"] = json_dict["status"]
         else :
-            response['error'] = {}
-            response['error']['code'] = WorkerError.INVALID_PARAMETER_FORMAT_OR_VALUE
-            response['error']['message'] = "Worker Id not found in the database. Hence invalid parameter"
+            jrpc_id = json.loads(response)["id"]
+            response = utility.create_error_response(
+                WorkerError.INVALID_PARAMETER_FORMAT_OR_VALUE,
+                jrpc_id,
+                "Worker Id not found in the database. Hence invalid parameter")
         return response
 # ------------------------------------------------------------------------------------------------
 
@@ -290,10 +303,11 @@ class TCSWorkerRegistryHandler:
             - response is the response object to be returned to client.
         """
 
+        jrpc_id = json.loads(input_json_str)["id"]
+
         # value retrieved is 'result' field as per Spec 5.3.8 Worker Retrieve Response Payload
         value = self.kv_helper.get("workers", worker_id)
-        response['error'] = {}
-                    
+
         if value is not None:
             json_dict = json.loads(value)
             input_value = json.loads(input_json_str)
@@ -303,11 +317,14 @@ class TCSWorkerRegistryHandler:
             
             value = json.dumps(json_dict)
             self.kv_helper.set("workers", worker_id, value)
-            response['error']['code'] = WorkerError.SUCCESS
-            response['error']['message'] = "Successfully Updated"
+            response = utility.create_error_response(
+                    WorkerError.SUCCESS, jrpc_id,
+                    "Successfully Updated")
         else :
-
-            response['error']['code'] = WorkerError.INVALID_PARAMETER_FORMAT_OR_VALUE
-            response['error']['message'] = "Worker Id not found in the database. Hence invalid parameter"
+            response = utility.create_error_response(
+                WorkerError.INVALID_PARAMETER_FORMAT_OR_VALUE,
+                jrpc_id,
+                "Worker Id not found in the database. \
+                 Hence invalid parameter")
         return response
 # ------------------------------------------------------------------------------------------------

@@ -18,6 +18,7 @@ import logging
 import crypto.crypto as crypto
 from error_code.error_status import WorkorderError
 from shared_kv.shared_kv_interface import KvStorage
+import utils.utility as utility
 
 logger = logging.getLogger(__name__)
 
@@ -91,15 +92,18 @@ class TCSWorkOrderHandler:
         if(input_json['method'] == "WorkOrderSubmit"):
             return self.__process_work_order_submission(wo_id, input_json_str, response)
         elif(input_json['method'] == "WorkOrderGetResult"):
-            return self.__process_work_order_get_result(wo_id, response)
+            return self.__process_work_order_get_result(wo_id,
+                                                        input_json['id'],
+                                                        response)
 
 #---------------------------------------------------------------------------------------------
-    def __process_work_order_get_result(self, wo_id, response):
+    def __process_work_order_get_result(self, wo_id, jrpc_id, response):
         """
         Function to process work order get result
         This API corresponds to TCF API 6.1.4 Work Order Pull Request Payload
         Parameters:
-            - wo_id is workorder id
+            - wo_id is work order id
+            - jrpc_id is JRPC id of response
             - response is the response object to be returned
         """
 
@@ -112,15 +116,18 @@ class TCSWorkOrderHandler:
             else:
                 response['result'] = input_value['error']
         else:
-            response['error'] = {}
             if(self.kv_helper.get("wo-timestamps", wo_id) is not None):
                 # work order is yet to be processed
-                response['error']['code'] = WorkorderError.PENDING
-                response['error']['message'] = 'Workorder result is yet to be updated'
+                response = utility.create_error_response(
+                        WorkorderError.PENDING, jrpc_id,
+                        "Work order result is yet to be updated")
             else :
                 # work order not in 'wo-timestamps' table
-                response['error']['code'] = WorkorderError.INVALID_PARAMETER_FORMAT_OR_VALUE
-                response['error']['message'] = 'Workorder Id not found in the database. Hence invalid parameter'
+                response = utility.create_error_response(
+                    WorkorderError.INVALID_PARAMETER_FORMAT_OR_VALUE,
+                    jrpc_id,
+                    "Work order Id not found in the database. \
+                     Hence invalid parameter")
 
         return response
 
@@ -129,12 +136,13 @@ class TCSWorkOrderHandler:
         """
         Function to process work order request
         Parameters:
-            - wo_id is workorder id
+            - wo_id is work order id
             - input_json_str is a work order request json as per TCF API 6.1.1 Work Order Request Payload
             - response is the response object to be returned to client
         """
 
-        response['error'] = {}
+        input_value_json = json.loads(input_json_str)
+        jrpc_id = input_value_json["id"]
 
         if((self.workorder_count + 1) > self.max_workorder_count):
 
@@ -156,8 +164,10 @@ class TCSWorkOrderHandler:
 
             # If no work order is processed then return busy
             if((self.workorder_count + 1) > self.max_workorder_count):
-                response['error']['code'] = WorkorderError.BUSY
-                response['error']['message'] = 'Workorder handler  is busy updating the result'
+                response = utility.create_error_response(
+                    WorkorderError.BUSY,
+                    jrpc_id,
+                    "Work order handler is busy updating the result")
                 return response
 
         if(self.kv_helper.get("wo-timestamps",wo_id) is None):
@@ -174,13 +184,19 @@ class TCSWorkOrderHandler:
             self.workorder_list.append(wo_id)
             self.workorder_count += 1
 
-            response['error']['code'] = WorkorderError.PENDING
-            response['error']['message'] = 'Work Order is computing. Please query for WorkOrderGetResult to view the result.'
+            response = utility.create_error_response(
+                WorkorderError.PENDING,
+                jrpc_id,
+                "Work order is computing. Please query for WorkOrderGetResult \
+                 to view the result")
 
-        else: # Workorder id already exists
-            response['error']['code'] = WorkorderError.INVALID_PARAMETER_FORMAT_OR_VALUE
-            response['error']['message'] = 'Workorder Id already exists in the database. Hence invalid parameter'
+        else:
+            # Workorder id already exists
+            response = utility.create_error_response(
+                WorkorderError.INVALID_PARAMETER_FORMAT_OR_VALUE,
+                jrpc_id,
+                "Work order id already exists in the database. \
+                 Hence invalid parameter")
 
         return response
 #---------------------------------------------------------------------------------------------
-

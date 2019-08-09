@@ -83,6 +83,23 @@ def write_json_file(file_name,input_data, data_dir ='./') :
         json.dump(result_info, file)
 
 #---------------------------------------------------------------------------------------------
+def create_error_response(code, jrpc_id, message):
+    """
+    Function to create error response
+    Parameters:
+        - code: error code enum which corresponds to error response
+        - jrpc_id: JRPC id of the error response
+        - message: error message which corresponds to error response
+    """
+    error_response = {}
+    error_response["jsonrpc"] = "2.0"
+    error_response["id"] = jrpc_id
+    error_response["error"] = {}
+    error_response["error"]["code"] = code
+    error_response["error"]["message"] = message
+    return error_response
+
+#---------------------------------------------------------------------------------------------
 def strip_begin_end_key(key) :
     """
     strips off newline chars, BEGIN PUBLIC KEY and END PUBLIC KEY.

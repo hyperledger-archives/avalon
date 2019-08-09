@@ -15,8 +15,9 @@
 import json
 import logging
 import crypto.crypto as crypto
-from error_code.error_status import WorkorderError
+from error_code.error_status import WorkerError
 from shared_kv.shared_kv_interface import KvStorage
+import utils.utility as utility
 
 logger = logging.getLogger(__name__)
 #No of bytes of encryptionKeyNonce to encrypt data
@@ -72,9 +73,11 @@ class WorkerEncryptionKeyHandler:
             - response is the response object to be returned
         """
 
-        response['error'] = {}
-        response['error']['code'] = WorkorderError.INVALID_PARAMETER_FORMAT_OR_VALUE
-        response['error']['message'] = 'Operation is not supported. Hence invalid parameter'
+        input_json = json.loads(input_json_str)
+        jrpc_id = input_json["id"]
+        response = utility.create_error_response(
+                WorkerError.INVALID_PARAMETER_FORMAT_OR_VALUE, jrpc_id,
+                "Operation is not supported. Hence invalid parameter")
         return response
 
 #---------------------------------------------------------------------------------------------
@@ -87,6 +90,7 @@ class WorkerEncryptionKeyHandler:
         """
 
         input_json = json.loads(input_json_str)
+        jrpc_id = input_json["id"]
         worker_id = str(input_json['params']['workerId'])
         value = self.kv_helper.get("workers", worker_id)
 
@@ -114,9 +118,9 @@ class WorkerEncryptionKeyHandler:
             response["result"]["signature"] = s1
         else :
             # Workorder id already exists
-            response['error'] = {}
-            response['error']['code'] = WorkorderError.INVALID_PARAMETER_FORMAT_OR_VALUE
-            response['error']['message'] = 'Worker Id not found in the database. Hence invalid parameter'
+            response = utility.create_error_response(
+                    WorkerError.INVALID_PARAMETER_FORMAT_OR_VALUE, jrpc_id,
+                    "Worker id not found in the database. Hence invalid parameter")
 
         return response
 #---------------------------------------------------------------------------------------------
