@@ -53,7 +53,7 @@ class DirectJsonRpcApiAdaptorFactory(ConnectorAdaptorFactoryInterface):
         self.__worker_registry_list = None
         self.__worker_registry = None
         self.__work_order = None
-        self.__worker_order_receipt = None
+        self.__work_order_receipts = None
         self.__blockchain_type = self.__config['blockchain']['type']
 
     def create_worker_registry_list_adaptor(self, config):
@@ -73,7 +73,7 @@ class DirectJsonRpcApiAdaptorFactory(ConnectorAdaptorFactoryInterface):
         return self.__work_order
 
     def create_work_order_receipt_adaptor(self, config):
-        if self.__worker_order_receipt is None:
-            self.__worker_order_receipt = WorkOrderReceiptJRPCImpl(config)
-        return self.__worker_order_receipt
+        if self.__work_order_receipts is None:
+            self.__work_order_receipts = WorkOrderReceiptJRPCImpl(config)
+        return self.__work_order_receipts
 
