@@ -134,7 +134,7 @@ def LocalMain(config) :
             #----------------------------------------------------------------------------------
     else :
         logger.info("Input Request %s", input_json_str)
-        response = uri_client._postmsg(input_json_str_1)
+        response = uri_client._postmsg(input_json_str)
         logger.info("Received Response : %s , \n \n ", response);
 
     exit(0)
