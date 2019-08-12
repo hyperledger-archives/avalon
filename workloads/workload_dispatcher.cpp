@@ -38,24 +38,21 @@ public:
         int out_wo_data_size = out_work_order_data.size();
 
         for (auto wo_data : in_work_order_data) {
-            // Skip first work order data index since it is
-            // the identifier for the workload
-            if (i == 0) {
-                i++;
-                continue;
-            }
 
             // Execute the input data
             EchoResultImpl echo_result_impl;
-            result_str = echo_result_impl.Process(ByteArrayToString(wo_data.decrypted_data));
+            result_str = echo_result_impl.Process(
+                ByteArrayToString(wo_data.decrypted_data));
 
             // If the out_work_order_data has entry to hold the data
             if (i < out_wo_data_size) {
                 tcf::WorkOrderData& out_wo_data = out_work_order_data.at(i);
-                out_wo_data.decrypted_data = ConvertStringToByteArray(result_str);
+                out_wo_data.decrypted_data = 
+                    ConvertStringToByteArray(result_str);
             } else {
                 // Create a new entry
-                out_work_order_data.emplace_back(wo_data.index, ConvertStringToByteArray(result_str));
+                out_work_order_data.emplace_back(
+                    wo_data.index, ConvertStringToByteArray(result_str));
             }
 
             i++;
@@ -79,7 +76,8 @@ public:
             // Clear state - to reset totalRisk and count
             executeWorkOrder("");
             for (auto wo_data : in_work_order_data) {
-                std::string inputData = ByteArrayToString(wo_data.decrypted_data);
+                std::string inputData = 
+                    ByteArrayToString(wo_data.decrypted_data);
                 try {
                     result_str = executeWorkOrder(inputData);
                 } catch(...) {
@@ -91,10 +89,12 @@ public:
             // If the out_work_order_data has entry to hold the data
             if (out_wo_data_size) {
                 tcf::WorkOrderData& out_wo_data = out_work_order_data.at(0);
-                out_wo_data.decrypted_data = ConvertStringToByteArray(result_str);
+                out_wo_data.decrypted_data = 
+                    ConvertStringToByteArray(result_str);
             } else {
                 // Create a new entry
-                out_work_order_data.emplace_back(0, ConvertStringToByteArray(result_str));
+                out_work_order_data.emplace_back(
+                    0, ConvertStringToByteArray(result_str));
             }
 
       }
