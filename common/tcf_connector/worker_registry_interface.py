@@ -14,8 +14,6 @@
 
 from abc import ABC,abstractmethod
 
-
-
 class WorkerRegistryInterface(ABC):
     """
     WorkerRegistryInterface is an abstract base class containing abstract APIs
@@ -142,6 +140,3 @@ class WorkerRegistryInterface(ABC):
         3. ids is an array of the Worker ids that match the input parameters.
         """
         pass
-
-    
-

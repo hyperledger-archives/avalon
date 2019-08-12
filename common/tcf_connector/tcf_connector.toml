@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
 
 title = "TCF Connector configuration"
 
@@ -52,5 +51,3 @@ eth_http_provider = "https://ropsten.infura.io/"
 chain_id = 3
 gas_limit = 3000000
 gas_price = "50"
-
-

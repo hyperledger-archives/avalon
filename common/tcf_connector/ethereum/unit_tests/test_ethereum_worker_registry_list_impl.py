@@ -107,8 +107,6 @@ class TestEthereumWorkerRegistryListImpl(unittest.TestCase):
         result = self.__eth_conn.registry_lookup_next(self.__app_type_ids[0], lookup_tag)
         logging.info('registry_lookup_next contract status %s', result)
 
-
-
 def main():
     logging.info("Running test cases...")
     tcf_home = environ.get("TCF_HOME", "../../")

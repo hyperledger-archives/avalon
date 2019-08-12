@@ -212,4 +212,3 @@ class EthereumWorkerRegistryImpl(WorkerRegistryInterface):
         self.__contract_instance = self.__eth_client.get_contract_instance(
             contract_file_name, contract_address
         )
-

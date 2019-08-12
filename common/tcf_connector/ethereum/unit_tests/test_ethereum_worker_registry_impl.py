@@ -23,7 +23,6 @@ import unittest
 from tcf_connector.ethereum.ethereum_worker_registry_impl import EthereumWorkerRegistryImpl
 from utils.tcf_types import WorkerType, WorkerStatus
 
-
 logging.basicConfig(format="%(asctime)s - %(levelname)s - %(message)s", level=logging.INFO)
 
 class TestEthereumWorkerRegistryImpl(unittest.TestCase):
@@ -116,7 +115,6 @@ class TestEthereumWorkerRegistryImpl(unittest.TestCase):
             self.__org_id, self.__application_ids[0], lookUpTag)
         logging.info("worker_lookup_next status %s", result)
         self.assertEqual(result[0], 0, "worker_lookup_next response count doesn't match")
-
 
 def main():
     logging.info("Running test cases...")
