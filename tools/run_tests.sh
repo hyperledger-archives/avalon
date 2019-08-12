@@ -23,6 +23,8 @@ fi
 
 SCRIPTDIR="$(dirname $(readlink --canonicalize ${BASH_SOURCE}))"
 SRCDIR="$(realpath ${SCRIPTDIR}/..)"
+# Read Listener port from config file
+listener_port=`grep listener_port ${TCF_HOME}/config/tcs_config.toml | awk {'print $3'}`
 
 yell() {
     echo "$0: $*" >&2;
@@ -38,7 +40,7 @@ try() {
 }
 
 SAVE_FILE=$(mktemp /tmp/tcf-test.XXXXXXXXX)
-INPUT_FOLDERS=(workorder_receipt json_requests worker work_orders signature)
+INPUT_FOLDERS=(json_requests worker work_orders signature)
 
 function cleanup {
     yell "Clearing enclave files and database files"
@@ -58,12 +60,13 @@ for folder in "${INPUT_FOLDERS[@]}"
 do
     yell "Start testing folder:: $folder ............"
     yell "#------------------------------------------------------------------------------------------------"
-    # 5seconds delay is introduced for user readability
+    # Delay is introduced for user readability
     sleep 5s
-    try python3 ${TCF_HOME}/tests/test_request.py \
+    try python3 ${TCF_HOME}/tests/Demo.py \
         --logfile __screen__ --loglevel warn \
-        --input_dir ${TCF_HOME}/tests/$folder/  \
-        --connect_uri "http://localhost:1947" work_orders/output.json > /dev/null
+        --input_dir ${TCF_HOME}/tests/$folder/ \
+        --connect_uri "http://localhost:$listener_port" work_orders/output.json > /dev/null
+
     yell "#------------------------------------------------------------------------------------------------"
     yell "#------------------------------------------------------------------------------------------------"
 done
