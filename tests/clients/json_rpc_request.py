@@ -15,7 +15,7 @@
 import json
 import random
 import sys
-from utils.tcf_types import WorkerType
+from utility.tcf_types import WorkerType
 
 class JsonRpcRequest:
 	def __init__(self, id, method):

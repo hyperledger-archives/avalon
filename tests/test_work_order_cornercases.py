@@ -24,7 +24,7 @@ from builtins import bytes
 
 from service_client.generic import GenericServiceClient
 import crypto.crypto as crypto
-import utils.signature as signature
+import utility.signature as signature
 import worker.worker as worker
 from shared_kv.shared_kv_interface import KvStorage
 import logging

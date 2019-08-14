@@ -17,7 +17,7 @@
 
 import crypto.crypto as crypto
 import logging
-import utils.signature as signature
+import utility.signature as signature
 
 logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s', level=logging.INFO)
 

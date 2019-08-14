@@ -22,10 +22,10 @@ import logging
 
 from service_client.generic import GenericServiceClient
 import crypto.crypto as crypto
-import utils.signature as signature
+import utility.signature as signature
 import worker.worker_details as worker
 from shared_kv.shared_kv_interface import KvStorage
-import utils.utility as enclave_helper
+import utility.utility as enclave_helper
 import utility.file_utils as futils
 
 logger = logging.getLogger(__name__)
