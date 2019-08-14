@@ -144,7 +144,7 @@ public class CustomDockerClient {
 
         // docker rm
         try {
-            removeContainer(containerId);
+            //removeContainer(containerId);
         } catch (Exception e) {
             throw new TaskExecutionException(workOrderId, "Could not remove container", e);
         }
