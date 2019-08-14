@@ -14,8 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-enclave_manager="${TCF_HOME}/tcs/core/tcs_trusted_worker_manager/tcs_enclave_manager/tcs_enclave_manager.py"
-listener="${TCF_HOME}/tcs/tcs_listener/tcs_listener.py"
+enclave_manager="${TCF_HOME}/examples/enclave_manager/tcf_enclave_manager/enclave_manager.py"
+listener="${TCF_HOME}/examples/connectors/direct/tcs_listener/tcs_listener.py"
 # Read Listener port from config file
 listener_port=`grep listener_port ${TCF_HOME}/config/tcs_config.toml | awk {'print $3'}`
 

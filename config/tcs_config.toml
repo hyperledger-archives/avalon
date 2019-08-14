@@ -54,6 +54,7 @@ ias_api_key = "7eff11484faabcd7b5d62006f4611122"
 
 #enclave library to be used
 enclave_library = "libtcf-enclave.signed.so"
+enclave_library_path = "tc/sgx/trusted_worker_manager/enclave/build/lib/"
 
 # -------------------------------------------------------------
 # TCS Worker configuration details

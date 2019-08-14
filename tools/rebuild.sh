@@ -127,36 +127,44 @@ NUM_CORES=1
 # -----------------------------------------------------------------
 # BUILD
 # -----------------------------------------------------------------
-yell --------------- WORKLOADS ---------------
-cd $SRCDIR/workloads
+yell --------------- COMMON SGX WORKLOAD ---------------
+cd $SRCDIR/common/sgx_workload
 
 mkdir -p build
 cd build
 try cmake ..
 try make "-j$NUM_CORES"
 
-yell --------------- TCS CORE COMMON ---------------
-cd $SRCDIR/tcs/core/common
+yell --------------- EXAMPLE WORKLOADS ---------------
+cd $SRCDIR/examples/apps
 
 mkdir -p build
 cd build
 try cmake ..
 try make "-j$NUM_CORES"
 
-yell --------------- CORE ---------------
-cd $SRCDIR/tcs/core/tcs_trusted_worker_manager/enclave
+yell --------------- TC SGX COMMON ---------------
+cd $SRCDIR/tc/sgx/common
 
 mkdir -p build
 cd build
 try cmake ..
 try make "-j$NUM_CORES"
 
-yell --------------- TCS CORE COMMON PYTHON ---------------
-cd $SRCDIR/tcs/core/common/python
+yell --------------- ENCLAVE ---------------
+cd $SRCDIR/tc/sgx/trusted_worker_manager/enclave
+
+mkdir -p build
+cd build
+try cmake ..
+try make "-j$NUM_CORES"
+
+yell --------------- EXAMPLES COMMON PYTHON ---------------
+cd $SRCDIR/examples/common/python
 try make "-j$NUM_CORES"
 try make install
 
-yell --------------- TCF COMMON PYTHON ---------------
-cd $SRCDIR/common
+yell --------------- ENCLAVE MANAGER ---------------
+cd $SRCDIR/examples/enclave_manager
 try make "-j$NUM_CORES"
 try make install

@@ -22,7 +22,7 @@ import logging
 import config.config as pconfig
 import utility.logger as plogger
 from service_client.generic import GenericServiceClient
-import utils.utility as enclave_helper
+import utility.utility as enclave_helper
 import worker.worker_details as worker
 import json_rpc_request as jrpc_request
 from direct_adaptor_factory_wrapper import DirectAdaptorFactoryWrapper

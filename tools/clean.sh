@@ -30,22 +30,22 @@ rm -f $SRCDIR/enclave.pem
 echo "******** DELETE LMDB FILES **************"
 rm -f $SRCDIR/config/Kv_Shared*
 
-# --------------- TCS CORE COMMON ---------------
-cd $SRCDIR/tcs/core/common/python
+# --------------- EXAMPLES COMMON ---------------
+cd $SRCDIR/examples/common/python
 make clean
 
-# --------------- TCF COMMON ---------------
-cd $SRCDIR/common
-make clean
+# --------------- TOP COMMON ---------------
+#cd $SRCDIR/common
+#make clean
 
-# --------------- CORE ---------------
-cd $SRCDIR/tcs/core/tcs_trusted_worker_manager/enclave
+# --------------- ENCLAVE ---------------
+cd $SRCDIR/tc/sgx/trusted_worker_manager/enclave
 rm -rf build deps
 
-cd $SRCDIR/tcs/core/common
+cd $SRCDIR/tc/sgx/common
 rm -rf build
 
 # --------------- WORKLOADS -------------
-cd $SRCDIR/workloads
+cd $SRCDIR/examples/apps
 rm -rf build
 

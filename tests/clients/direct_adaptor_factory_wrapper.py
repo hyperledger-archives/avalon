@@ -16,12 +16,12 @@ import json
 import logging
 import time
 import sys
-import utils.utility as enclave_helper
-import utils.signature as signature
+import utility.utility as enclave_helper
+import utility.signature as signature
 from service_client.generic import GenericServiceClient
 from tcf_connector.direct_json_rpc_api_adaptor_factory \
 	import DirectJsonRpcApiAdaptorFactory
-import utils.hex_utils as hex_utils
+import utility.hex_utils as hex_utils
 import json_rpc_request
 
 logger = logging.getLogger(__name__)
