@@ -55,11 +55,25 @@ public class CustomDockerClient {
 
     private HostConfig getHostConfig(String chainWorkOrderId) {
         HostConfig.Bind outputBind = createOutputBind(chainWorkOrderId);
+        HostConfig.Bind aesmd = createBind("/var/run/aesmd", "/var/run/aesmd");
 
         if (outputBind == null) return null;
 
+        Device isgx = Device.builder()
+                .pathOnHost("/dev/isgx")
+                .pathInContainer("/dev/isgx")
+                .cgroupPermissions("rwm")
+                .build();
+
+        Device gsgx = Device.builder()
+                .pathOnHost("/dev/gsgx")
+                .pathInContainer("/dev/gsgx")
+                .cgroupPermissions("rwm")
+                .build();
+
         return HostConfig.builder()
-                .appendBinds(outputBind)
+                .appendBinds(outputBind, aesmd)
+                .devices(isgx, gsgx)
                 .build();
     }
 
