@@ -57,7 +57,9 @@ public class TaskExecutionService {
 
         // Input
         String imageUri = params.getAppUri();
-        String cmd = params.getCmd();
+        String cmd[] = new String[params.getArgs().length + 1];
+        cmd[0] = params.getCmd();
+        System.arraycopy(params.getArgs(), 0, params, 1, params.getArgs().length);
         long maxExecutionTime = params.getMaxExecutionTime();
 
         try {
