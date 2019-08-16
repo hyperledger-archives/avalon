@@ -60,7 +60,7 @@ class EnclaveKeys(object) :
     # -------------------------------------------------------
     def __init__(self, verifying_key, encryption_key) :
         """
-        initialize the object
+        Initialize the object
 
         :param verifying_key: PEM encoded ECDSA verifying key
         :param encryption_key: PEM encoded RSA encryption key

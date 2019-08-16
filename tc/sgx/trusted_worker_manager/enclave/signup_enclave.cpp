@@ -136,7 +136,7 @@ tcf_err_t ecall_CreateEnclaveData(const sgx_target_info_t* inTargetInfo,
             inAllocatedSealedEnclaveDataSize < enclaveData.get_sealed_data_size(),
             "Sealed enclave data buffer size is too small");
 
-        // pass back the actual size of the enclave data
+        // Pass back the actual size of the enclave data
         (*outPublicEnclaveDataSize) = enclaveData.get_public_data_size();
         (*outSealedEnclaveDataSize) = enclaveData.get_sealed_data_size();
 

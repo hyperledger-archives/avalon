@@ -19,7 +19,7 @@ import sys
 import subprocess
 import re
 
-# this should only be run with python3
+# This should only be run with python3
 import sys
 if sys.version_info[0] < 3:
     print('ERROR: must run with python3')
@@ -40,7 +40,7 @@ if not sgx_mode_env or (sgx_mode_env != "SIM" and sgx_mode_env != "HW"):
 
 
 ## -----------------------------------------------------------------
-## set up the enclave
+## Set up the enclave
 ## -----------------------------------------------------------------
 debug_flag = os.environ.get('TCF_DEBUG_BUILD',0)
 
@@ -52,9 +52,9 @@ compile_args = [
 ]
 
 
-# by default the extension class adds '-O2' to the compile
+# By default the extension class adds '-O2' to the compile
 # flags, this lets us override since these are appended to
-# the compilation switches
+# the compilation switches.
 if debug_flag :
     compile_args += ['-g']
 

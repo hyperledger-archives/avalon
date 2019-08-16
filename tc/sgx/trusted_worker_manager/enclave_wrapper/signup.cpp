@@ -39,7 +39,7 @@ static size_t CalculateSealedEnclaveDataSize(void) {
     tcf_err_t presult = TCF_SUCCESS;
     sgx_status_t sresult;
 
-    // get the enclave id for passing into the ecall
+    // Get the enclave id for passing into the ecall
     sgx_enclave_id_t enclaveid = g_Enclave[0].GetEnclaveId();
 
     sresult =
@@ -68,7 +68,7 @@ static size_t CalculatePublicEnclaveDataSize(void) {
     tcf_err_t presult = TCF_SUCCESS;
     sgx_status_t sresult;
 
-    // get the enclave id for passing into the ecall
+    // Get the enclave id for passing into the ecall
     sgx_enclave_id_t enclaveid = g_Enclave[0].GetEnclaveId();
 
     sresult =
@@ -106,7 +106,7 @@ tcf_err_t tcf::enclave_api::enclave_data::CreateEnclaveData(
 
         ByteArray sealed_enclave_data_buffer(CalculateSealedEnclaveDataSize());
 
-        // get the enclave id for passing into the ecall
+        // Get the enclave id for passing into the ecall
         sgx_enclave_id_t enclaveid = g_Enclave[0].GetEnclaveId();
 
         // We need target info in order to create signup data report
@@ -155,14 +155,14 @@ tcf_err_t tcf::enclave_api::enclave_data::CreateEnclaveData(
         tcf::error::ThrowSgxError(sresult, "SGX enclave call failed (ecall_CreateSignupData), failed to create signup data");
         g_Enclave[0].ThrowTCFError(presult);
 
-        // reset the size of the public data
+        // Reset the size of the public data
         outPublicEnclaveData.resize(computed_public_enclave_data_size);
 
-        // reset the size of the enclave data and encode it
+        // Reset the size of the enclave data and encode it
         sealed_enclave_data_buffer.resize(computed_sealed_enclave_data_size);
         outSealedEnclaveData = ByteArrayToBase64EncodedString(sealed_enclave_data_buffer);
 
-        // take the report generated and create a quote for it, encode it
+        // Take the report generated and create a quote for it, encode it
         size_t quote_size = tcf::enclave_api::base::GetEnclaveQuoteSize();
         ByteArray enclave_quote_buffer(quote_size);
         g_Enclave[0].CreateQuoteFromReport(&enclave_report, enclave_quote_buffer);

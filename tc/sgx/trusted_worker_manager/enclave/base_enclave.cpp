@@ -43,8 +43,8 @@
 tcf_err_t ecall_Initialize() {
     tcf_err_t result = TCF_SUCCESS;
 
-    // we need to make sure we print a warning if the logging is turned on
-    // since it can break confidentiality of workorder execution
+    // We need to make sure we print a warning if the logging is turned on
+    // since it can break confidentiality of workorder execution.
     SAFE_LOG(TCF_LOG_CRITICAL, "enclave initialized with debugging turned on");
 
     return result;

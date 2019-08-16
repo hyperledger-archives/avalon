@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "pkenc_private_key.h"
 #include <openssl/err.h>
 #include <openssl/pem.h>
@@ -106,7 +107,7 @@ pcrypto::pkenc::PrivateKey::~PrivateKey() {
 }  // pcrypto::pkenc::Private::~PrivateKey
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-// assignment operator overload
+// Assignment operator overload
 // throws RuntimeError
 pcrypto::pkenc::PrivateKey& pcrypto::pkenc::PrivateKey::operator=(
     const pcrypto::pkenc::PrivateKey& privateKey) {

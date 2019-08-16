@@ -13,10 +13,10 @@
 # limitations under the License.
 
 """
-config.py -- functions to load configuration files with support for
+config.py -- Functions to load configuration files with support for
 variable expansion.
 
-NOTE: functions defined in this file are designed to be run
+NOTE: Functions defined in this file are designed to be run
 before logging is enabled.
 """
 

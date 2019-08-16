@@ -1,4 +1,4 @@
-/* Copyright 2018 Intel Corporation
+/* Copyright 2019 Intel Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,19 +33,19 @@
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 EnclaveData::EnclaveData(void) {
-    // do not attempt to catch errors here... let the calling procedure
+    // Do not attempt to catch errors here... let the calling procedure
     // handle the constructor errors
 
-    // generate private signing key
+    // Generate private signing key
     private_signing_key_.Generate();
 
-    // create the public verifying key
+    // Create the public verifying key
     public_signing_key_ = private_signing_key_.GetPublicKey();
 
-    // generate private encryption key
+    // Generate private encryption key
     private_encryption_key_.Generate();
 
-    // create the public encryption key
+    // Create the public encryption key
     public_encryption_key_ = private_encryption_key_.GetPublicKey();
 
     SerializePrivateData();
@@ -60,7 +60,7 @@ EnclaveData::EnclaveData(const uint8_t* inSealedData) {
     uint32_t decrypted_size =
         sgx_get_encrypt_txt_len(reinterpret_cast<const sgx_sealed_data_t*>(inSealedData));
 
-    // need to check for error
+    // Need to check for error
 
     std::vector<uint8_t> decrypted_data;
     decrypted_data.resize(decrypted_size);
@@ -90,7 +90,7 @@ void EnclaveData::DeserializeSealedData(const std::string& inSerializedEnclaveDa
     JSON_Object* keystore_object = json_value_get_object(parsed);
     tcf::error::ThrowIfNull(keystore_object, "Failed to parse the key store object");
 
-    // public signing key
+    // Public signing key
     pvalue = json_object_dotget_string(keystore_object, "SigningKey.PublicKey");
     tcf::error::ThrowIf<tcf::error::ValueError>(
         !pvalue, "Failed to retrieve public signing key from the key store");
@@ -98,7 +98,7 @@ void EnclaveData::DeserializeSealedData(const std::string& inSerializedEnclaveDa
     svalue.assign(pvalue);
     public_signing_key_.Deserialize(svalue);
 
-    // private signing key
+    // Private signing key
     pvalue = json_object_dotget_string(keystore_object, "SigningKey.PrivateKey");
     tcf::error::ThrowIf<tcf::error::ValueError>(
         !pvalue, "Failed to retrieve private signing key from the key store");
@@ -106,7 +106,7 @@ void EnclaveData::DeserializeSealedData(const std::string& inSerializedEnclaveDa
     svalue.assign(pvalue);
     private_signing_key_.Deserialize(svalue);
 
-    // public encryption key
+    // Public encryption key
     pvalue = json_object_dotget_string(keystore_object, "EncryptionKey.PublicKey");
     tcf::error::ThrowIf<tcf::error::ValueError>(
         !pvalue, "Failed to retrieve public encryption key from the key store");
@@ -114,7 +114,7 @@ void EnclaveData::DeserializeSealedData(const std::string& inSerializedEnclaveDa
     svalue.assign(pvalue);
     public_encryption_key_.Deserialize(svalue);
 
-    // private encryption key
+    // Private encryption key
     pvalue = json_object_dotget_string(keystore_object, "EncryptionKey.PrivateKey");
     tcf::error::ThrowIf<tcf::error::ValueError>(
         !pvalue, "Failed to retrieve private encryption key from the key store");
@@ -136,7 +136,7 @@ void EnclaveData::SerializePrivateData(void) {
     JSON_Object* dataObject = json_value_get_object(dataValue);
     tcf::error::ThrowIfNull(dataObject, "Failed to retrieve serialization object");
 
-    // private signing key
+    // Private signing key
     std::string b64_private_signing_key = private_signing_key_.Serialize();
     tcf::error::ThrowIf<tcf::error::RuntimeError>(
         b64_private_signing_key.empty(), "failed to serialize the private signing key");
@@ -146,7 +146,7 @@ void EnclaveData::SerializePrivateData(void) {
     tcf::error::ThrowIf<tcf::error::RuntimeError>(
         jret != JSONSuccess, "enclave data serialization failed on private signing key");
 
-    // public signing key
+    // Public signing key
     std::string b64_public_signing_key = public_signing_key_.Serialize();
     tcf::error::ThrowIf<tcf::error::RuntimeError>(
         b64_public_signing_key.empty(), "failed to serialize the public signing key");
@@ -156,7 +156,7 @@ void EnclaveData::SerializePrivateData(void) {
     tcf::error::ThrowIf<tcf::error::RuntimeError>(
         jret != JSONSuccess, "enclave data serialization failed on public signing key");
 
-    // private encryption key
+    // Private encryption key
     std::string b64_private_encryption_key = private_encryption_key_.Serialize();
     tcf::error::ThrowIf<tcf::error::RuntimeError>(
         b64_private_encryption_key.empty(), "failed to serialize the private encryption key");
@@ -166,7 +166,7 @@ void EnclaveData::SerializePrivateData(void) {
     tcf::error::ThrowIf<tcf::error::RuntimeError>(
         jret != JSONSuccess, "enclave data serialization failed on private encryption key");
 
-    // public encryption key
+    // Public encryption key
     std::string b64_public_encryption_key = public_encryption_key_.Serialize();
     tcf::error::ThrowIf<tcf::error::RuntimeError>(
         b64_public_encryption_key.empty(), "failed to serialize the public encryption key");
@@ -201,7 +201,7 @@ void EnclaveData::SerializePublicData(void) {
     JSON_Object* dataObject = json_value_get_object(dataValue);
     tcf::error::ThrowIfNull(dataObject, "Failed to retrieve serialization object");
 
-    // public signing key
+    // Public signing key
     std::string b64_public_signing_key = public_signing_key_.Serialize();
     tcf::error::ThrowIf<tcf::error::RuntimeError>(
         b64_public_signing_key.empty(), "failed to serialize the public signing key");
@@ -210,7 +210,7 @@ void EnclaveData::SerializePublicData(void) {
     tcf::error::ThrowIf<tcf::error::RuntimeError>(
         jret != JSONSuccess, "enclave data serialization failed on public signing key");
 
-    // public encryption key
+    // Public encryption key
     std::string b64_public_encryption_key = public_encryption_key_.Serialize();
     tcf::error::ThrowIf<tcf::error::RuntimeError>(
         b64_public_encryption_key.empty(), "failed to serialize the public encryption key");

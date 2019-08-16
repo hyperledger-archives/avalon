@@ -82,7 +82,7 @@ def setup_loggers(config) :
         clog.setFormatter(formatter)
         logger.addHandler(clog)
 
-    # process all overrides
+    # Process all overrides
     logoverride = config.get("LogOverride", {})
     for modname, modlevel in logoverride.items() :
         modlogger = logging.getLogger(modname)

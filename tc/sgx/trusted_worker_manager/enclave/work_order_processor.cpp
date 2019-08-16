@@ -200,7 +200,7 @@ namespace tcf {
         for (auto out_data : data_items_out)
             out_data.Pack(data_array);
 
-        // serialize the resulting json
+        // Serialize the resulting json
         size_t serializedSize = json_serialization_size(resp_value);
         ByteArray serialized_response;
         serialized_response.resize(serializedSize);
@@ -409,7 +409,7 @@ namespace tcf {
         JsonSetNumber(error, "code", err_code, "failed to serialize error code");
         JsonSetStr(error, "message", err_message, "failed to serialize error message");
 
-        // serialize the resulting json
+        // Serialize the resulting json
         size_t serializedSize = json_serialization_size(resp_value);
         ByteArray serialized_response;
         serialized_response.resize(serializedSize);

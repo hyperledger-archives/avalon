@@ -30,14 +30,14 @@ __all__ = [
 # -----------------------------------------------------------------
 # -----------------------------------------------------------------
 def find_file_in_path(filename, search_path) :
-    """general utility to search for a file name in a path
+    """General utility to search for a file name in a path
 
     :param str filename: name of the file to locate, absolute path ignores search_path
     :param list(str) search_path: list of directories where the files may be located
     """
 
     # os.path.abspath only works for full paths, not relative paths
-    # this check should catch './abc'
+    # This check should catch './abc'
     if os.path.split(filename)[0] :
         if os.path.isfile(filename) :
             return filename

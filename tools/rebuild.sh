@@ -63,11 +63,11 @@ yell --------------- CONFIG AND ENVIRONMENT CHECK ---------------
 
 # Set proxy for Intel Architectural Enclave Service Manager
 if [[ ${SGX_MODE} &&  "${SGX_MODE}" == "HW" ]]; then
-    #Add proxy settings
+    # Add proxy settings
     echo "proxy type = manual" >> /etc/aesmd.conf
     echo "aesm proxy = $http_proxy" >> /etc/aesmd.conf
 
-    #starting aesm service
+    # Starting aesm service
     echo "Starting aesm service"
     /opt/intel/libsgx-enclave-common/aesm/aesm_service &
 else

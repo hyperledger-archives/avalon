@@ -93,7 +93,7 @@ namespace tcf {
               outEnclaveBasename - A pointer to a buffer that upon return will contain
               the hex encoded enclave basename.
               inEnclaveBasenameLength - The size of the buffer pointed to by
-              outEnclaveBasename.  The value to provide for this parameter may
+              outEnclaveBasename. The value to provide for this parameter may
               be obtained by calling GetEnclaveBasenameSize().
             */
             tcf_err_t GetEnclaveCharacteristics(
@@ -101,7 +101,7 @@ namespace tcf {
                 HexEncodedString& outEnclaveBasename);
 
             /*
-              takes in the results from the IAS server and
+              Takes in the results from the IAS server and
               stores the revocation list for future processing
 
               inSignatureRevocationList - A string containing the signature

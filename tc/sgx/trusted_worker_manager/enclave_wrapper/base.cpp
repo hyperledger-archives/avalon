@@ -138,9 +138,9 @@ size_t tcf::enclave_api::base::GetEnclaveQuoteSize() {
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 size_t tcf::enclave_api::base::GetSignatureSize() {
-    // this is the size of the byte array required for the signature
-    // fixed constant for now until there is one we can get from the
-    // crypto library
+    // This is the size of the byte array required for the signature.
+    // Fixed constant for now until there is one we can get from the
+    // crypto library.
     return tcf::crypto::constants::MAX_SIG_SIZE;
 }
 
