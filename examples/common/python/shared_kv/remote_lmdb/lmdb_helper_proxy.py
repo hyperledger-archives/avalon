@@ -31,6 +31,8 @@ class LMDBHelperProxy:
         self.__uri_client = TextServiceClient(uri)
 
 #------------------------------------------------------------------------------
+    # Requests are serialized as: <cmd>\n<arg1>\n<arg2>...
+
     def set(self, table, key, value):
         """
         Function to set a key-value pair in a lmdb table 
@@ -40,14 +42,18 @@ class LMDBHelperProxy:
            - key is the primary key of the table.
            - value is the value that needs to be inserted in the table.
         """
+        # Set, table, key, value
         request = "S\n" + escape(table) + "\n" + escape(key) + \
             "\n" + escape(value)
         response = self.__uri_client._postmsg(request).decode("utf-8")
         args = response.split("\n")
+        # Set successful (returned True)
         if args[0] == "t" and len(args) == 1:
             return True
+        # Set unsuccessful (returned False)
         elif args[0] == "f" and len(args) == 1:
             return False
+        # Error
         elif args[0] == "e":
             if len(args) != 2:
                 logger.error("Unknown error format")
@@ -65,13 +71,17 @@ class LMDBHelperProxy:
              the key-value pair needs to be retrieved.
            - key is the primary key of the table.
         """
+        # Get, table, key
         request = "G\n" + escape(table) + "\n" + escape(key)
         response = self.__uri_client._postmsg(request).decode("utf-8")
         args = response.split("\n")
+        # Value found
         if args[0] == "v" and len(args) == 2:
             return unescape(args[1])
+        # Value not found
         elif args[0] == "n" and len(args) == 1:
             return None
+        # Error
         elif args[0] == "e":
             if len(args) != 2:
                 logger.error("Unknown error format")
@@ -95,15 +105,19 @@ class LMDBHelperProxy:
              for the key will be deleted. Otherwise, if the data parameter is 
              non-NULL only the matching data item will be deleted.
         """
+        # Remove, table, key
         request = "R\n" + escape(table) + "\n" +  escape(key)
         if value is not None:
             request = "\n" + request + value.replace("\n", "\\n")
         response = self.__uri_client._postmsg(request).decode("utf-8")
         args = response.split("\n")
+        # Remove successful (returned True)
         if args[0] == "t" and len(args) == 1:
             return True
+        # Remove unsuccessful (returned False)
         elif args[0] == "f" and len(args) == 1:
             return False
+        # Error
         elif args[0] == "e":
             if len(args) != 2:
                 logger.error("Unknown error format")
@@ -120,16 +134,21 @@ class LMDBHelperProxy:
            - table is the name of the lmdb table.
         """
         result = []
+        # Lookup, table
         request = "L\n" + escape(table)
         response = self.__uri_client._postmsg(request).decode("utf-8")
         args = response.split("\n")
+        # Lookup result found
         if args[0] == "l":
             if len(args) == 2:
+                # Result is a list of keys separated by commas
                 result = unescape(args[1]).split(",")
             else:
                 logger.error("Unknown response format")
+        # Lookup result not found
         elif args[0] == "n" and len(args) == 1:
             return result
+        # Error
         elif args[0] == "e":
             if len(args) != 2:
                 logger.error("Unknown error format")

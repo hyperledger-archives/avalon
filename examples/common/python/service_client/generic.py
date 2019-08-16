@@ -85,6 +85,10 @@ class GenericServiceClient(object) :
         value = json.loads(content)
         return value
 
+"""
+Class similar to GenericServiceClient that handles UTF8 text instead
+of JSONs
+"""
 class TextServiceClient(object):
 
     def __init__(self, url) :
@@ -93,8 +97,7 @@ class TextServiceClient(object):
 
     def _postmsg(self, request) :
         """
-        Post a transaction message to the validator, 
-        parse the returning JSON and return the corresponding dictionary.
+        Post a request UTF8 text listener and return the response.
         """
 
         data = request.encode('utf-8')
@@ -102,7 +105,7 @@ class TextServiceClient(object):
 
         url = self.ServiceURL
 
-        logger.debug('post transaction to %s with DATALEN=%d, DATA=<%s>', 
+        logger.debug('post request to %s with DATALEN=%d, DATA=<%s>', 
             url, datalen, data)
 
         try :

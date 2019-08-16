@@ -39,12 +39,12 @@ class TestRemoteLMDB(unittest.TestCase):
     def test_set(self):
         set_result = self.proxy.set(self.table, self.key, self.value)
         logger.info(set_result)
-        self.assertEqual(set_result, True, "set Failed")
+        self.assertTrue(set_result, "set Failed")
 
     def test_set2(self):
         set_result2 = self.proxy.set(self.table, self.key2, self.value2)
         logger.info(set_result2)
-        self.assertEqual(set_result2, True, "set Failed")
+        self.assertTrue(set_result2, "set Failed")
 
     def test_lookup(self):
         lookup_result = self.proxy.lookup(self.table)
@@ -67,28 +67,29 @@ class TestRemoteLMDB(unittest.TestCase):
     def test_remove(self):
         remove_result = self.proxy.remove(self.table, self.key)
         logger.info(remove_result)
-        self.assertEqual(remove_result, True, "remove Failed")
+        self.assertTrue(remove_result, "remove Failed")
 
     def test_get_none(self):
         get_none_result = self.proxy.get(self.table, self.key)
         logger.info(get_none_result)
-        self.assertEqual(get_none_result, None, 
-            "get Did not return None for empty value")
+        self.assertIsNone(get_none_result,  
+            "get_none Did not return None for empty value")
 
     def test_remove2(self):
         remove_result2 = self.proxy.remove(self.table, self.key2)
         logger.info(remove_result2)
-        self.assertEqual(remove_result2, True, "remove Failed")
+        self.assertTrue(remove_result2, "remove Failed")
 
     def test_lookup_none(self):
         lookup_none_result = self.proxy.lookup(self.table)
         logger.info(lookup_none_result)
         self.assertEqual(lookup_none_result, [], 
-            "lookup Did not return empty array")
+            "lookup_none Did not return empty array")
 
 # -----------------------------------------------------------------
 def local_main():
-
+    result = unittest.TestResult()
+    result.startTestRun()
     test = TestRemoteLMDB()
     test.test_set()
     test.test_set2()
@@ -99,6 +100,11 @@ def local_main():
     test.test_get_none()
     test.test_remove2()
     test.test_lookup_none()
+    result.stopTestRun()
+    if result.wasSuccessful():
+        logger.info("All tests passed!")
+    else:
+        logger.info("Some tests failed.")
     exit(0)
 
 # -----------------------------------------------------------------

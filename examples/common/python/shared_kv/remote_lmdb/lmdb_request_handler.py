@@ -34,7 +34,7 @@ class LMDBRequestHandler(resource.Resource):
     """
     # The isLeaf instance variable describes whether or not 
     # a resource will have children and only leaf resources get rendered.
-    # TCSListener is the most derived class hence isLeaf is required.
+    # LMDBRequestHandler is the most derived class hence isLeaf is required.
 
     isLeaf = True
 
@@ -62,57 +62,69 @@ class LMDBRequestHandler(resource.Resource):
         logger.info(args)
         cmd = args[0]
 
-        #Lookup
+        # Lookup
         if (cmd=="L"):
             if len(args) == 2:
                 result = self.lookup(args[1])
+                # Lookup result found
                 if result != "":
                     response = "l\n" + escape(result)
+                # No result found
                 else:
                     response = "n"
+            # Error
             else:
                 logger.error("Invalid args for cmd Lookup")
                 response = "e\nInvalid args for cmd Lookup"
 
-        #Get
+        # Get
         elif (cmd=="G"):
             if len(args) == 3:
                 result = self.get(args[1], args[2])
+                # Value found
                 if result is not None:
                     response = "v\n" + escape(result)
+                # Value not found
                 else:
                     response = "n"
+            # Error
             else:
                 logger.error("Invalid args for cmd Get")
                 response = "e\nInvalid args for cmd Get"   
 
-        #Set
+        # Set
         elif (cmd=="S"):
             if len(args) == 4:
                 result = self.set(args[1], args[2], args[3])
+                # Set successful (returned True)
                 if result:
                     response = "t"
+                # Set unsuccessful (returned False)
                 else:
                     response = "f" 
+            # Error
             else:
                 logger.error("Invalid args for cmd Set")
                 response = "e\nInvalid args for cmd Set"  
 
-        #Remove
+        # Remove
         elif (cmd=="R"):
             if len(args) == 3 or len(args) == 4:
                 if len(args) == 3:
                     result = self.remove(args[1], args[2])
                 else:
                     result = self.remove(args[1], args[2], value=args[3])
+                # Remove successful (returned True)
                 if result:
                     response = "t"
+                # Remove unsuccessful (returned False)
                 else:
                     response = "f"
+            # Error
             else:
                 logger.error("Invalid args for cmd Remove")
                 response = "e\nInvalid args for cmd Remove"  
-
+        # Error
         else:
             logger.error("Unknown cmd")
             response = "e\nUnknown cmd"
