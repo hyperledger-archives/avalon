@@ -20,6 +20,7 @@ from twisted.web.error import Error
 import tcf_enclave_manager.tcf_enclave as db_store
 from error_code.error_status import WorkorderError
 from string_escape import escape, unescape
+from shared_kv.shared_kv_interface import KvStorage
 
 import logging
 logger = logging.getLogger(__name__)
@@ -45,13 +46,15 @@ class LMDBRequestHandler(resource.Resource):
             logger.error("Kv Storage path is missing")
             sys.exit(-1)
 
+        self.kv_helper = KvStorage()
+
         storage_path = TCFHOME + '/' + config['KvStorage']['StoragePath']
-        if not self.open(storage_path):
+        if not self.kv_helper.open(storage_path):
             logger.error("Failed to open KV Storage DB")
             sys.exit(-1)
 
     def __del__(self):
-       self.close()
+       self.kv_helper.close()
 
     def _process_request(self, request):
         response = ""
@@ -65,7 +68,13 @@ class LMDBRequestHandler(resource.Resource):
         # Lookup
         if (cmd=="L"):
             if len(args) == 2:
-                result = self.lookup(args[1])
+                result_list = self.kv_helper.lookup(args[1])
+                result = ""
+                for key in result_list:
+                    if result == "":
+                        result = key
+                    else:
+                        result = result + "," + key
                 # Lookup result found
                 if result != "":
                     response = "l\n" + escape(result)
@@ -80,7 +89,7 @@ class LMDBRequestHandler(resource.Resource):
         # Get
         elif (cmd=="G"):
             if len(args) == 3:
-                result = self.get(args[1], args[2])
+                result = self.kv_helper.get(args[1], args[2])
                 # Value found
                 if result is not None:
                     response = "v\n" + escape(result)
@@ -95,7 +104,7 @@ class LMDBRequestHandler(resource.Resource):
         # Set
         elif (cmd=="S"):
             if len(args) == 4:
-                result = self.set(args[1], args[2], args[3])
+                result = self.kv_helper.set(args[1], args[2], args[3])
                 # Set successful (returned True)
                 if result:
                     response = "t"
@@ -111,9 +120,9 @@ class LMDBRequestHandler(resource.Resource):
         elif (cmd=="R"):
             if len(args) == 3 or len(args) == 4:
                 if len(args) == 3:
-                    result = self.remove(args[1], args[2])
+                    result = self.kv_helper.remove(args[1], args[2])
                 else:
-                    result = self.remove(args[1], args[2], value=args[3])
+                    result = self.kv_helper.remove(args[1], args[2], value=args[3])
                 # Remove successful (returned True)
                 if result:
                     response = "t"
@@ -172,99 +181,3 @@ class LMDBRequestHandler(resource.Resource):
             response = 'UNKNOWN_ERROR: unknown exception processing ' + \
                 'http request {0}'.format(request.path)
             return response
-
-#------------------------------------------------------------------------------
-
-    def open(self, lmdb_file):
-        """
-        Function to open the database file
-        Parameters:
-           - lmdb_file is the name and location of lmdb database file
-        """
-        db_store.db_store_init(lmdb_file)
-        return True
-
-#------------------------------------------------------------------------------
-    def close(self):
-        """
-        Function to close the database file
-        """
-        db_store.db_store_close()
-
-#------------------------------------------------------------------------------
-    def set(self, table, key, value):
-        """
-        Function to set a key-value pair in a lmdb table 
-        Parameters:
-           - table is the name of lmdb table in which 
-             the key-value pair needs to be inserted.
-           - key is the primary key of the table.
-           - value is the value that needs to be inserted in the table.
-        """
-        try:
-            db_store.db_store_put(table,key,value)
-            return True
-        except:
-            return False
-
-#------------------------------------------------------------------------------
-    def get(self, table, key):
-        """
-        Function to get the value for a key in a lmdb table 
-        Parameters:
-           - table is the name of lmdb table from which
-             the key-value pair needs to be retrieved.
-           - key is the primary key of the table.
-        """
-        try:
-            if key != "" or lookup_flag == True:
-                value = db_store.db_store_get(table, key)
-            else:
-                value = None
-        except:
-            value = None
-
-        if not value:
-            value = None
-
-        return value
-
-#------------------------------------------------------------------------------
-    def remove(self, table, key, value=None):
-        """
-        Function to remove the value for a key in a lmdb table 
-        Parameters:
-           - table is the name of lmdb table in which 
-             the key-value pair need to be removed.
-           - key is the primary key of the table.
-           - value is data to be removed, If the database does not support 
-             sorted duplicate data items (MDB_DUPSORT) the data parameter 
-             is ignored. If the database supports sorted duplicates and 
-             the data parameter is NULL, all of the duplicate data items
-             for the key will be deleted. Otherwise, if the data parameter is 
-             non-NULL only the matching data item will be deleted.
-        """
-        try:
-            if value is None:
-                db_store.db_store_del(table, key, "")
-            else:
-                db_store.db_store_del(table, key, value)
-            return True
-        except:
-            return False
-
-#------------------------------------------------------------------------------
-    def lookup(self, table):
-        """
-        Function to get all the keys in a lmdb table 
-        Parameters:
-           - table is the name of lmdb table.
-        """
-        try:
-            lookup_flag = True
-            result = db_store.db_store_get(table,"")
-            lookup_flag = False
-        except:
-            result = ""
-        return result
-#------------------------------------------------------------------------------
