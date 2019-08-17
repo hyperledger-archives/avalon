@@ -36,8 +36,7 @@ class GenericServiceClient(object) :
 
     def _postmsg(self, request) :
         """
-        Post a transaction message to the validator, parse the returning 
-        JSON and return the corresponding dictionary.
+        Post a request JSON listener and return the response.
         """
 
         data = json.dumps(request).encode('utf8')
@@ -45,7 +44,7 @@ class GenericServiceClient(object) :
 
         url = self.ServiceURL
 
-        logger.debug('post transaction to %s with DATALEN=%d, DATA=<%s>', 
+        logger.debug('post request to %s with DATALEN=%d, DATA=<%s>', 
             url, datalen, data)
 
         try :
