@@ -175,7 +175,7 @@ def get_enclave_basename():
 # -----------------------------------------------------------------
 def create_signup_info(originator_public_key_hash, nonce):
     """
-    create enclave signup data
+    Create enclave signup data
     """
     # Part of what is returned with the signup data is an enclave quote, we
     # want to update the revocation list first.
@@ -229,7 +229,7 @@ def create_signup_info(originator_public_key_hash, nonce):
         signup_info['enclave_persistent_id'] = verification_report_dict.get('epidPseudonym')
 
     # Now we can finally serialize the signup info and create a corresponding
-    # signup info object.  Because we don't want the sealed signup data in the
+    # signup info object. Because we don't want the sealed signup data in the
     # serialized version, we set it separately.
 
     signup_info_obj = enclave.deserialize_signup_info(json.dumps(signup_info))

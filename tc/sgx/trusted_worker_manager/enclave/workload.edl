@@ -19,7 +19,7 @@ enclave {
     include "sgx_tcrypto.h"
 
     trusted {
-        // inSerializedRequest is binary encoding of the encrypted request
+        // inSerializedRequest is a binary encoding of the encrypted request
         // outSerializedResponseSize is the computed size of the response
         public tcf_err_t ecall_HandleWorkOrderRequest(
             [in, size=inSealedSignupDataSize] const uint8_t* inSealedSignupData,

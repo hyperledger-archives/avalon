@@ -159,7 +159,7 @@ std::map<std::string, std::string> CreateEnclaveData(
 
     // PyLog(TCF_LOG_DEBUG, public_enclave_data.str().c_str());
 
-    // parse the json and save the verifying and encryption keys
+    // Parse the json and save the verifying and encryption keys
     std::string verifying_key;
     std::string encryption_key;
 
@@ -169,7 +169,7 @@ std::map<std::string, std::string> CreateEnclaveData(
         encryption_key);
     ThrowTCFError(presult);
 
-    // save the information
+    // Save the information
     std::map<std::string, std::string> result;
     result["verifying_key"] = verifying_key;
     result["encryption_key"] = encryption_key;
@@ -190,7 +190,7 @@ std::map<std::string, std::string> UnsealEnclaveData(
         public_enclave_data);
     ThrowTCFError(presult);
 
-    // parse the json and save the verifying and encryption keys
+    // Parse the json and save the verifying and encryption keys
     std::string verifying_key;
     std::string encryption_key;
 

@@ -134,7 +134,7 @@ namespace tcf {
     }
 
     void WorkOrderDataHandler::VerifyInputHash(ByteArray input_data, ByteArray input_hash) {
-        // do nothing at the phase 1
+        // Do nothing at the phase 1
     }
 
     void WorkOrderDataHandler::DecryptInputData(ByteArray encrypted_input_data, std::string iv_str) {

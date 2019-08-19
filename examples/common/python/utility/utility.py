@@ -27,7 +27,7 @@ import toml
 logger = logging.getLogger(__name__)
 
 TCFHOME = os.environ.get("TCF_HOME", "../../")
-#No of bytes of encrypted session key to encrypt data
+# No of bytes of encrypted session key to encrypt data
 NO_OF_BYTES = 16
 
 def read_toml_file(input_file, config_name = None, confpaths = [".", TCFHOME + "/" + "config"]):
@@ -102,7 +102,7 @@ def create_error_response(code, jrpc_id, message):
 #---------------------------------------------------------------------------------------------
 def strip_begin_end_key(key) :
     """
-    strips off newline chars, BEGIN PUBLIC KEY and END PUBLIC KEY.
+    Strips off newline chars, BEGIN PUBLIC KEY and END PUBLIC KEY.
     """
     return key.replace("\n", "")\
             .replace("-----BEGIN PUBLIC KEY-----", "").replace("-----END PUBLIC KEY-----", "")
@@ -172,7 +172,7 @@ def decrypt_data(encryption_key, iv, data):
           The default is all zeros.
         - data is the parameter data in outData part of workorder request as per
           TCF API 6.1.7 Work Order Data Formats
-    returns decrypted data as a string
+    Returns decrypted data as a string
     """
     if not data:
         logger.debug("Outdata is empty, nothing to decrypt")
@@ -195,7 +195,7 @@ def decrypted_response(input_json_str, encrypted_session_key):
         - input_json_params is a collection of parameters as per TCF API 6.1.2
           Work Order Response Payload
         - encryption_session_key is the key used to decrypt the encrypted data of response.
-    returns response json object after decrypting output data
+    Returns response json object after decrypting output data
     """
     input_json = json.loads(input_json_str)
     input_json_params = input_json['result']

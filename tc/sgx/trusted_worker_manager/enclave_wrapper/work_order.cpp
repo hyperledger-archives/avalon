@@ -40,9 +40,9 @@ tcf_err_t tcf::enclave_api::workorder::HandleWorkOrderRequest(
         ByteArray sealed_enclave_data = Base64EncodedStringToByteArray(inSealedEnclaveData);
         ByteArray serialized_request = Base64EncodedStringToByteArray(inSerializedRequest);
 
-        // xxxxx call the enclave
+        // xxxxx Call the enclave
 
-        /// get the enclave id for passing into the ecall
+        // Get the enclave id for passing into the ecall
         sgx_enclave_id_t enclaveid = g_Enclave[enclaveIndex].GetEnclaveId();
 
         tcf_err_t presult = TCF_SUCCESS;
@@ -98,9 +98,9 @@ tcf_err_t tcf::enclave_api::workorder::GetSerializedResponse(
         ByteArray serialized_response(inSerializedResponseSize);
         ByteArray sealed_enclave_data = Base64EncodedStringToByteArray(inSealedEnclaveData);
 
-        // xxxxx call the enclave
+        // xxxxx Call the enclave
 
-        /// get the enclave id for passing into the ecall
+        // Get the enclave id for passing into the ecall
         sgx_enclave_id_t enclaveid = g_Enclave[enclaveIndex].GetEnclaveId();
         // tcf::logger::LogV(TCF_LOG_DEBUG, "GetSerializedResponse[%ld] %u ", (long)enclaveid, enclaveIndex);
 

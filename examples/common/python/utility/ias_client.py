@@ -79,7 +79,7 @@ class IasClient(object):
     def post_verify_attestation(self, quote, manifest=None, nonce=None):
         """
         @param quote: base64 encoded quote attestation
-        @return: dictionary of the response from ias.
+        @return: Dictionary of the response from ias.
         """
 
         path = '/attestation/v3/report'
@@ -144,19 +144,19 @@ class IasClient(object):
             logger.error('AVR does not contain a nonce')
             return False
 
-        #leave the status check for last
+        # Leave the status check for last
         if isv_enclave_quote_status.upper() != 'OK':
             self._last_verification_error = isv_enclave_quote_status.upper()
             logger.debug("enclave quote status error: " + self._last_verification_error)
             return False
 
-        #all checks passed
+        # All checks passed
         return True
 
     def last_verification_error(self):
         """
         Errno-like procedure to provide details about where the verification failed.
-        Mostly used for GROUP_OUT_OF_DATE verification report failure
+        Mostly used for GROUP_OUT_OF_DATE verification report failure.
         """
         return self._last_verification_error
 

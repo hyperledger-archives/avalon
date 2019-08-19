@@ -61,9 +61,9 @@ protected:
     std::string serialized_public_data_;
 
 public:
-    // we need some way to compute the required size so the client can
+    // We need some way to compute the required size so the client can
     // allocated storage for the sealed data. There are a number of ways
-    // to do this; for now, the constant will be good enough
+    // to do this; for now, the constant will be good enough.
     static const size_t cMaxSealedDataSize = 8192;
     static const size_t cMaxPublicDataSize = 4096;
 

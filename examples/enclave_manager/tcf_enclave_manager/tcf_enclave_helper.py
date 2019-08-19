@@ -29,7 +29,7 @@ logger = logging.getLogger(__name__)
 
 # -----------------------------------------------------------------
 def initialize_enclave(enclave_config) :
-    """initialize_enclave -- call the initialization function on the
+    """initialize_enclave -- Call the initialization function on the
     enclave module
     """
     return tcf_enclave.initialize_with_configuration(enclave_config)
@@ -43,9 +43,9 @@ class EnclaveHelper(object) :
     # -------------------------------------------------------
     @classmethod
     def create_enclave_signup_data(cls, tcf_instance_keys = None) :
-        """create_enclave_signup_data -- create enclave signup data
+        """create_enclave_signup_data -- Create enclave signup data
 
-        :param tcf_instance_keys: object of type TransactionKeys
+        :param tcf_instance_keys: Object of type TransactionKeys
         """
 
         if tcf_instance_keys is None :
@@ -74,7 +74,7 @@ class EnclaveHelper(object) :
     # -------------------------------------------------------
     def __init__(self, enclave_info, tcf_instance_keys) :
 
-        # initialize the keys that can be used later to
+        # Initialize the keys that can be used later to
         # register the enclave
         self.tcf_instance_keys = tcf_instance_keys
 
@@ -93,7 +93,7 @@ class EnclaveHelper(object) :
     # -------------------------------------------------------
     def send_to_sgx_worker(self, encrypted_request) :
         """
-        Submit workorder request to the  SGX Worker enclave
+        Submit workorder request to the SGX Worker enclave
 
         :param encrypted_request: base64 encoded encrypted workorder request
         """
@@ -104,6 +104,6 @@ class EnclaveHelper(object) :
     # -------------------------------------------------------
     def get_enclave_public_info(self) :
         """
-        return information about the enclave
+        Return information about the enclave
         """
         return tcf_enclave.get_enclave_public_info(self.sealed_data)

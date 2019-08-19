@@ -69,7 +69,7 @@ tcf_err_t ecall_HandleWorkOrderRequest(const uint8_t* inSealedSignupData,
         std::string wo_string(request.begin(), request.end());
         last_result = wo_processor.Process(enclaveData, wo_string);
 
-        // save the response and return the size of the buffer required for it
+        // Save the response and return the size of the buffer required for it
         (*outSerializedResponseSize) = last_result.size();
     } catch (tcf::error::Error& e) {
         SAFE_LOG(TCF_LOG_ERROR,

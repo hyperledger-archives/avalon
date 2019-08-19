@@ -70,7 +70,7 @@ namespace tcf {
             tcf::error::ThrowSgxError(ret, "Failed to get SGX quote size.");
             this->quoteSize = size;
 
-            // initialize the targetinfo and epid variables
+            // Initialize the targetinfo and epid variables
             ret = g_Enclave[0].CallSgx([this] () {
                     return sgx_init_quote(&this->reportTargetInfo, &this->epidGroupId);
                 });
@@ -110,8 +110,8 @@ namespace tcf {
         // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
         void Enclave::Unload() {
             if (this->enclaveId) {
-                // no power or busy retries here....
-                // we don't want to reinitialize just to shutdown.
+                // No power or busy retries here....
+                // We don't want to reinitialize just to shutdown.
                 sgx_destroy_enclave(this->enclaveId);
                 this->enclaveId = 0;
             }
@@ -121,13 +121,13 @@ namespace tcf {
         void Enclave::GetEpidGroup(
             sgx_epid_group_id_t* outEpidGroup) {
             sgx_status_t ret;
-            // retrieve epid by calling init quote
+            // Retrieve epid by calling init quote
             ret = g_Enclave[0].CallSgx([this] () {
                         return sgx_init_quote(&this->reportTargetInfo, &this->epidGroupId);
                     });
             tcf::error::ThrowSgxError(ret, "Failed to get epid group id from init_quote");
 
-            // copy epid group into output parameter
+            // Copy epid group into output parameter
             memcpy_s(
                 outEpidGroup,
                 sizeof(sgx_epid_group_id_t),
@@ -188,7 +188,7 @@ namespace tcf {
             this->ThrowTCFError(tcfRet);
 
             // Properly size a buffer to receive an enclave quote and then
-            // retrieve it.  The enclave quote contains the basename.
+            // retrieve it. The enclave quote contains the basename.
             ByteArray enclaveQuoteBuffer(this->quoteSize);
             sgx_quote_t* enclaveQuote =
                 reinterpret_cast<sgx_quote_t *>(&enclaveQuoteBuffer[0]);
