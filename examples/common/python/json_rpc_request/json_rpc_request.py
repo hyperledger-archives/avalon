@@ -168,13 +168,14 @@ class WorkOrderSubmitJson(WorkOrderJson):
 		self.json_obj["params"]["dataEncryptionAlgorithm"] = \
 			data_encryption_algorithm
 
-	def add_in_data(self, data_hash, data, encrypted_data_encryption_key=None):
+	def add_in_data(self, data, data_hash=None, encrypted_data_encryption_key=None):
 		in_data_copy = self.json_obj["params"]["inData"]
 		index = len(in_data_copy)
 		in_data_copy.append({})
 		in_data_copy[index]["index"] = index
-		in_data_copy[index]["dataHash"] = data_hash
 		in_data_copy[index]["data"] = data
+		if data_hash:
+			in_data_copy[index]["dataHash"] = data_hash
 		if encrypted_data_encryption_key:
 			in_data_copy[index]["encryptedDataEncryptionKey"] = \
 				encrypted_data_encryption_key
@@ -183,13 +184,14 @@ class WorkOrderSubmitJson(WorkOrderJson):
 		in_data_copy[index]["iv"] = ""
 		self.json_obj["params"]["inData"] = in_data_copy
 
-	def add_out_data(self, data_hash, encrypted_data_encryption_key=None):
+	def add_out_data(self, data_hash=None, encrypted_data_encryption_key=None):
 		out_data_copy = self.json_obj["params"]["outData"]
 		index = len(out_data_copy)
 		out_data_copy.append({})
 		out_data_copy[index]["index"] = index
-		out_data_copy[index]["dataHash"] = data_hash
 		out_data_copy[index]["data"] = ""
+		if data_hash:
+			out_data_copy[index]["dataHash"] = data_hash
 		if encrypted_data_encryption_key:
 			out_data_copy[index]["encryptedDataEncryptionKey"] = \
 				encrypted_data_encryption_key

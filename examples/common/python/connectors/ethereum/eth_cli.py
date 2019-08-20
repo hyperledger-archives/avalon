@@ -19,7 +19,7 @@ import abc
 import os,time
 from os.path import exists, realpath
 
-from tcf_connector.ethereum.ethereum_wrapper import EthereumWrapper as ethereum_wrapper
+from connectors.ethereum.ethereum_wrapper import EthereumWrapper as ethereum_wrapper
 
 logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s', level=logging.INFO)
 
@@ -58,7 +58,7 @@ class eth_cli:
 
 def main():
     tcf_home = os.environ.get("TCF_HOME", "../../")
-    eth = eth_cli(tcf_home + "/common/tcf_connector/" + "tcf_connector.toml")
+    eth = eth_cli(tcf_home + "/examples/common/python/connectors/" + "tcf_connector.toml")
     eth.deploy_contracts();
 
 if __name__ == '__main__':

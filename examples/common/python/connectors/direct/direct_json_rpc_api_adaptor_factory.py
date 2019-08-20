@@ -17,23 +17,24 @@ from os.path import isfile, realpath
 import errno
 import toml
 
-from tcf_connector.connector_adaptor_factory_interface import \
+from connectors.interfaces.connector_adaptor_factory_interface import \
     ConnectorAdaptorFactoryInterface
-from tcf_connector.ethereum.ethereum_worker_registry_list_impl import \
+from connectors.ethereum.ethereum_worker_registry_list_impl import \
     EthereumWorkerRegistryListImpl
-from tcf_connector.ethereum.ethereum_worker_registry_impl import \
-    EthereumWorkerRegistryImpl
+from connectors.direct.worker_registry_jrpc_impl import WorkerRegistryJRPCImpl
+from connectors.direct.work_order_jrpc_impl import WorkOrderJRPCImpl
+from connectors.direct.work_order_receipt_jrpc_impl import WorkOrderReceiptJRPCImpl
 
 logger = logging.getLogger(__name__)
 
-class BlockchainAdaptorFactoryImpl(ConnectorAdaptorFactoryInterface):
+class DirectJsonRpcApiAdaptorFactory(ConnectorAdaptorFactoryInterface):
     """
-    Adaptor for Ethereum blockchain
-    It is used in proxy model
+    Adaptor for the direct JSON RPC API provided by the TCS.
+    It is used in direct model
     1. Worker registry list adaptor interact with blockchain
-    2. Worker registry adaptor interact with blockchain
-    3. Work order adaptor interact with blockchain
-    4. Work order receipt interact with blockchain
+    2. Worker registry adaptor interact with json rpc listener
+    3. Work order adaptor interact with json rpc listener
+    4. Work order receipt interact with json rpc listener
     """
     def __init__(self, config_file):
         if not isfile(config_file):
@@ -42,6 +43,10 @@ class BlockchainAdaptorFactoryImpl(ConnectorAdaptorFactoryInterface):
             with open(config_file) as fd:
                 self.__config = toml.load(fd)
         except IOError as e:
+            """
+            Catch the exception related to toml file format except File not exists
+            exception
+            """
             if e.errno != errno.ENOENT:
                 raise Exception('Could not open config file: %s' % e)
         self.__worker_registry_list = None
@@ -50,26 +55,24 @@ class BlockchainAdaptorFactoryImpl(ConnectorAdaptorFactoryInterface):
         self.__work_order_receipts = None
         self.__blockchain_type = self.__config['blockchain']['type']
 
-    def create_worker_registry_list_adaptor(self):
+    def create_worker_registry_list_adaptor(self, config):
         if self.__blockchain_type == "Ethereum":
             if self.__worker_registry_list is None:
                 self.__worker_registry_list = EthereumWorkerRegistryListImpl(config)
             return self.__worker_registry_list
 
     def create_worker_registry_adaptor(self, config):
-        if self.__blockchain_type == "Ethereum":
-            if self.__worker_registry is None:
-                self.__worker_registry = EthereumWorkerRegistryImpl(config)
-            return self.__worker_registry
+        if self.__worker_registry is None:
+            self.__worker_registry = WorkerRegistryJRPCImpl(config)
+        return self.__worker_registry
 
     def create_work_order_adaptor(self, config):
-        """
-        TODO: Yet to implement for proxy model
-        """
-        return None
+        if self.__work_order is None:
+            self.__work_order = WorkOrderJRPCImpl(config)
+        return self.__work_order
 
     def create_work_order_receipt_adaptor(self, config):
-        """
-        TODO: Yet to implement for proxy model
-        """
-        return None
+        if self.__work_order_receipts is None:
+            self.__work_order_receipts = WorkOrderReceiptJRPCImpl(config)
+        return self.__work_order_receipts
+

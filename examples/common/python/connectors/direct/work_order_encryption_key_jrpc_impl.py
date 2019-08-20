@@ -17,8 +17,8 @@ import logging
 from eth_utils.hexadecimal import is_hex
 import base64
 from service_client.generic import GenericServiceClient
-from tcf_connector.work_order_encryption_key_interface import WorkOrderEncryptionKeyInterface
-from tcf_connector.utils import create_jrpc_response
+from connectors.interfaces.work_order_encryption_key_interface import WorkOrderEncryptionKeyInterface
+from connectors.utils import create_jrpc_response
 from utility.tcf_types import JsonRpcErrorCode
 
 

@@ -19,10 +19,10 @@ import sys
 import utility.utility as enclave_helper
 import utility.signature as signature
 from service_client.generic import GenericServiceClient
-from tcf_connector.direct_json_rpc_api_adaptor_factory \
+from connectors.direct.direct_json_rpc_api_adaptor_factory \
 	import DirectJsonRpcApiAdaptorFactory
-import utility.hex_utils as hex_utils
-import json_rpc_request
+from utility.hex_utils import hex_to_utf, pretty_ids
+import json_rpc_request.json_rpc_request
 
 logger = logging.getLogger(__name__)
 # -----------------------------------------------------------------
@@ -51,7 +51,7 @@ class DirectAdaptorFactoryWrapper:
 			lookup_result = self.worker_registry_list.registry_lookup()
 		logger.info("Registry Lookup result: [%d, %s, %s]", 
 			lookup_result[0], lookup_result[1], 
-			hex_utils.pretty_ids(lookup_result[2]))
+			pretty_ids(lookup_result[2]))
 		return lookup_result
 
 	# Retrieve worker registry URI
@@ -62,8 +62,8 @@ class DirectAdaptorFactoryWrapper:
 		retrieve_result = self.worker_registry_list.registry_retrieve(org_id)
 		logger.info("Registry retrieved: [%s, %s, %s, %d]", 
 			retrieve_result[0], 
-			hex_utils.hex_to_utf(retrieve_result[1]), 
-			hex_utils.pretty_ids(retrieve_result[2]), 
+			hex_to_utf(retrieve_result[1]), 
+			pretty_ids(retrieve_result[2]), 
 			retrieve_result[3])
 		return retrieve_result
 

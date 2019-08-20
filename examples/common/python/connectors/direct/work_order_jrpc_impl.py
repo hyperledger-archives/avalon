@@ -17,8 +17,8 @@ import logging
 from eth_utils.hexadecimal import is_hex
 import base64
 from service_client.generic import GenericServiceClient
-from tcf_connector.work_order_interface import WorkOrderInterface
-from tcf_connector.utils import create_jrpc_response
+from connectors.interfaces.work_order_interface import WorkOrderInterface
+from connectors.utils import create_jrpc_response
 from utility.tcf_types import JsonRpcErrorCode
 
 logging.basicConfig(format="%(asctime)s - %(levelname)s - %(message)s", level=logging.INFO)
@@ -58,18 +58,23 @@ class WorkOrderJRPCImpl(WorkOrderInterface):
             }
     
     def __validate_parameters(self, params, in_data, out_data):
-        """Validate parameter dictionary for existence of fields and mandatory fields """
+        """
+        Validate parameter dictionary for existence of 
+        fields and mandatory fields 
+        Returns False and string with error message on failure and 
+        True and empty string on success
+        """
         key_list = []
         for key in params.keys():
             if not key in self.__param_key_map.keys():
                 logging.error("Invalid parameter %s",key)
-                return "Invalid parameter {}".format(key)
+                return False, "Invalid parameter {}".format(key)
             else:
                 key_list.append(key)
         for k, v in self.__param_key_map.items():
             if v == True and not k in key_list:
                 logging.error("Missing parameter %s", k)
-                return "Missing parameter {}".format(k)
+                return False, "Missing parameter {}".format(k)
         """Validate in_data and out_data dictionary for existence of fields
         and mandatory fields """
         
@@ -78,90 +83,114 @@ class WorkOrderJRPCImpl(WorkOrderInterface):
             for key in data.keys():
                 if not key in self.__data_key_map.keys():
                     logging.error("Invalid in data parameter %s",key)
-                    return "Invalid in data parameter {}".format(key)
+                    return False, "Invalid in data parameter {}".format(key)
                 else:
                     in_data_keys.append(key)
             for k, v in self.__data_key_map.items():
                 if v == True and not k in in_data_keys:
                     logging.error("Missing in data parameter %s", k)
-                    return "Missing in data parameter {}".format(k)
+                    return False, "Missing in data parameter {}".format(k)
         
         for data in out_data:
             out_data_keys = []
             for key in data.keys():
                 if not key in self.__data_key_map.keys():
                     logging.error("Invalid out data parameter %s",key)
-                    return "Invalid out data parameter {}".format(key)
+                    return False, "Invalid out data parameter {}".format(key)
                 else:
                     out_data_keys.append(key)
             for k, v in self.__data_key_map.items():
                 if v == True and not k in out_data_keys:
                     logging.error("Missing out data parameter %s", k)
-                    return "Missing out data parameter {}".format(k)
+                    return False, "Missing out data parameter {}".format(k)
 
-        return None
+        return True, ""
     
-    def work_order_submit(self, params, in_data, out_data, id=None):
-        is_valid = self.__validate_parameters(params, in_data, out_data)
-        if is_valid is not None:
-            return create_jrpc_response(id, JsonRpcErrorCode.INVALID_PARAMETER,
-                    is_valid)
+    def __validate_data_format(self, params, in_data, out_data):
+        """
+        Validate data format of the params, in_data and out_data fields 
+        Returns False and string with error message on failure and 
+        True and empty string on success
+        """
         if not is_hex(params["workOrderId"]):
             logging.error("Invalid work order id")
-            return create_jrpc_response(id, JsonRpcErrorCode.INVALID_PARAMETER,
-                "Invalid work order id")
+            return False, "Invalid work order id"
         if not is_hex(params["workloadId"]):
             logging.error("Invalid work load id")
-            return create_jrpc_response(id, JsonRpcErrorCode.INVALID_PARAMETER,
-                "Invalid work load id")
+            return False, "Invalid work load id"
         if not is_hex(params["requesterId"]):
             logging.error("Invalid requester id id")
-            return create_jrpc_response(id, JsonRpcErrorCode.INVALID_PARAMETER,
-                "Invalid requester id id")
+            return False, "Invalid requester id id"
         if not is_hex(params["workerEncryptionKey"]):
             logging.error("Invalid worker encryption key")
-            return create_jrpc_response(id, JsonRpcErrorCode.INVALID_PARAMETER,
-                "Invalid worker encryption key")
+            return False, "Invalid worker encryption key"
         for data in in_data:
-            if not is_hex(data["dataHash"]):
-                logging.error("Invalid data hash of in data")
-                return create_jrpc_response(id, JsonRpcErrorCode.INVALID_PARAMETER,
-                    "Invalid data hash of in data")
-            if not is_hex(data["encryptedDataEncryptionKey"]):
-                logging.error("Invalid Encryption key of in data")
-                return create_jrpc_response(id, JsonRpcErrorCode.INVALID_PARAMETER,
-                    "Invalid Encryption key of in data")
-            if not is_hex(data["iv"]):
+            if "dataHash" in in_data:
+                data_hash = data["dataHash"]
+                if not is_hex(data_hash) and data_hash != "":
+                    logging.error("Invalid data hash of in data")
+                    return False, "Invalid data hash of in data"
+            if "encryptedDataEncryptionKey" in in_data:
+                enc_key = data["encryptedDataEncryptionKey"]
+                if enc_key != "-" and \
+                    enc_key != "" and \
+                    enc_key != "null" and \
+                    not is_hex(enc_key):
+                    logging.error("Invalid Encryption key of in data")
+                    return False, \
+                        "Invalid Encryption key of in data"
+            if data["iv"] != "" and \
+                data["iv"] != "0" and not is_hex(data["iv"]):
                 logging.error("Invalid initialization vector of in data")
-                return create_jrpc_response(id, JsonRpcErrorCode.INVALID_PARAMETER,
-                    "Invalid initialization vector of in data")
+                return False, \
+                    "Invalid initialization vector of in data"
             try:
                 base64.b64decode(data["data"])
             except Exception as e:
                 logging.error("Invalid base64 format of in data")
-                return create_jrpc_response(id, JsonRpcErrorCode.INVALID_PARAMETER,
-                    "Invalid base64 format of in data")
+                return False, \
+                    "Invalid base64 format of in data"
         
         for data in out_data:
-            if not is_hex(data["dataHash"]):
-                logging.error("Invalid data hash of out data")
-                return create_jrpc_response(id, JsonRpcErrorCode.INVALID_PARAMETER,
-                    "Invalid data hash of out data")
-            if not is_hex(data["encryptedDataEncryptionKey"]):
-                logging.error("Invalid Encryption key of out data")
-                return create_jrpc_response(id, JsonRpcErrorCode.INVALID_PARAMETER,
-                    "Invalid Encryption key of out data")
-            if not is_hex(data["iv"]):
+            if "dataHash" in out_data:
+                data_hash = data["dataHash"]
+                if not is_hex(data_hash) and data_hash != "":
+                    logging.error("Invalid data hash of out data")
+                    return False, \
+                        "Invalid data hash of out data"
+            if "encryptedDataEncryptionKey" in in_data:
+                enc_key = data["encryptedDataEncryptionKey"]
+                if enc_key != "-" and \
+                    enc_key != "" and \
+                    enc_key != "null" and \
+                    not is_hex(enc_key):
+                    logging.error("Invalid Encryption key of in data")
+                    return False, \
+                        "Invalid Encryption key of in data"
+            if data["iv"] != "" and \
+                data["iv"] != "0" and not is_hex(data["iv"]):
                 logging.error("Invalid initialization vector of out data")
-                return create_jrpc_response(id, JsonRpcErrorCode.INVALID_PARAMETER,
-                    "Invalid initialization vector of out data")
+                return False, \
+                    "Invalid initialization vector of out data"
             try:
                 base64.b64decode(data["data"])
             except Exception as e:
                 logging.error("Invalid base64 format of out data")
-                return create_jrpc_response(id, JsonRpcErrorCode.INVALID_PARAMETER,
-                    "Invalid base64 format of out data")
+                return False, \
+                    "Invalid base64 format of out data"
+        return True, ""
+    
+    def work_order_submit(self, params, in_data, out_data, id=None):
+        valid, err = self.__validate_parameters(params, in_data, out_data)
+        if not valid:
+            return create_jrpc_response(id, JsonRpcErrorCode.INVALID_PARAMETER,
+                    err)
 
+        valid, err = self.__validate_data_format(params, in_data, out_data)
+        if not valid:
+            return create_jrpc_response(id, JsonRpcErrorCode.INVALID_PARAMETER,
+                    err)
+        
         json_rpc_request = {
             "jsonrpc": "2.0",
             "method": "WorkOrderSubmit",
@@ -183,6 +212,7 @@ class WorkOrderJRPCImpl(WorkOrderInterface):
                 "requesterNonce": params["requesterNonce"],
                 "encryptedRequestHash": params["encryptedRequestHash"],
                 "requesterSignature": params["requesterSignature"],
+                "verifyingKey": params["verifyingKey"],
                 "inData": in_data,
                 "outData": out_data
             }
@@ -192,9 +222,9 @@ class WorkOrderJRPCImpl(WorkOrderInterface):
 
     def work_order_get_result(self, work_order_id, id=None):
         if not is_hex(work_order_id):
-            logging.error("Invalid workOrder Id")
+            logging.error("Invalid work order Id")
             return create_jrpc_response(id, JsonRpcErrorCode.INVALID_PARAMETER,
-                "Invalid workOrder Id")
+                "Invalid work order Id")
 
         json_rpc_request = {
             "jsonrpc": "2.0",

@@ -18,8 +18,8 @@ from eth_utils.hexadecimal import is_hex
 import binascii
 from os import environ
 
-from tcf_connector.worker_registry_list_interface import WorkerRegistryListInterface
-from tcf_connector.ethereum.ethereum_wrapper import EthereumWrapper
+from connectors.interfaces.worker_registry_list_interface import WorkerRegistryListInterface
+from connectors.ethereum.ethereum_wrapper import EthereumWrapper
 from utility.tcf_types import RegistryStatus
 
 logging.basicConfig(format="%(asctime)s - %(levelname)s - %(message)s", level=logging.INFO)
