@@ -312,7 +312,6 @@ class TCSWorkerRegistryHandler:
             json_dict = json.loads(value)
             input_value = json.loads(input_json_str)
             worker_details = input_value ["params"]["details"]
-            worker_details = json.loads(worker_details)
             for item in worker_details:
                 json_dict["details"][item] = worker_details[item]
             
