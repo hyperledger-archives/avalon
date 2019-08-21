@@ -40,10 +40,16 @@ make clean
 
 # --------------- ENCLAVE ---------------
 cd $SRCDIR/tc/sgx/trusted_worker_manager/enclave
-rm -rf build deps
+rm -rf build deps 
+
+cd $SRCDIR/examples/enclave_manager/tcf_enclave_manager
+rm -rf tcf_enclave.py tcf_enclave_wrap.cpp
 
 cd $SRCDIR/tc/sgx/common
 rm -rf build
+
+## wrapper
+rm -f $SRCDIR/tc/sgx/trusted_worker_manager/enclave_wrapper/*_u.*
 
 # --------------- WORKLOADS -------------
 cd $SRCDIR/examples/apps

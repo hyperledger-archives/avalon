@@ -19,8 +19,16 @@ listener="${TCF_HOME}/examples/common/python/connectors/direct/tcs_listener/tcs_
 # Read Listener port from config file
 listener_port=`grep listener_port ${TCF_HOME}/config/tcs_config.toml | awk {'print $3'}`
 
+lmdb_server="${TCF_HOME}/examples/common/python/shared_kv/remote_lmdb/lmdb_listener.py"
+LMDB_SERVER_PORT=9090
+
 start_tcs_components()
 {
+    echo "start the lmdb server"
+    python3 ${lmdb_server} ${LMDB_SERVER_PORT} &
+    sleep 3s
+    echo "lmdb server started"
+
     echo "Starting Enclave manager.."
     python3 $enclave_manager &
     echo "Manager started"

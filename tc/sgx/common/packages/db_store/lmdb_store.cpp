@@ -13,17 +13,17 @@
  * limitations under the License.
  */
 
+#include "c11_support.h"
+#include "error.h"
+#include "hex_string.h"
+#include "lmdb.h"
+#include "tcf_error.h"
+#include "types.h"
 #include <bits/stdc++.h>
 #include <pthread.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
-#include "lmdb.h"
-#include "c11_support.h"
-#include "error.h"
-#include "hex_string.h"
-#include "tcf_error.h"
-#include "types.h"
 //#include "log.h"
 #define MAX_DBS 20
 
@@ -37,7 +37,7 @@
  *
  * Default to an insanely large max size (1 TB)
  */
-#define DEFAULT_DB_STORE_SIZE (1ULL << 40)
+#define DEFAULT_DB_STORE_SIZE (1ULL << 32)
 
 /* -----------------------------------------------------------------
  * CLASS: SafeThreadLock
@@ -49,13 +49,16 @@
 /* Lock to protect access to the database */
 static pthread_mutex_t lmdb_store_lock = PTHREAD_MUTEX_INITIALIZER;
 
-class SafeThreadLock {
+class SafeThreadLock
+{
 public:
-    SafeThreadLock(void) {
+    SafeThreadLock(void)
+    {
         pthread_mutex_lock(&lmdb_store_lock);
     }
 
-    ~SafeThreadLock(void) {
+    ~SafeThreadLock(void)
+    {
         pthread_mutex_unlock(&lmdb_store_lock);
     }
 };
@@ -68,33 +71,38 @@ public:
  * ----------------------------------------------------------------- */
 
 /* Lightning database environment used to store data */
-static MDB_env* lmdb_store_env;
+static MDB_env *lmdb_store_env;
 
-class SafeTransaction {
+class SafeTransaction
+{
 public:
-    MDB_txn* txn = NULL;
+    MDB_txn *txn = NULL;
 
-    SafeTransaction(unsigned int flags) {
+    SafeTransaction(unsigned int flags)
+    {
         int ret = mdb_txn_begin(lmdb_store_env, NULL, flags, &txn);
-        if (ret != MDB_SUCCESS) {
+        if (ret != MDB_SUCCESS)
+        {
             // SAFE_LOG(TCF_LOG_ERROR, "Failed to initialize LMDB transaction; %d", ret);
             txn = NULL;
         }
     }
 
-    ~SafeTransaction(void) {
+    ~SafeTransaction(void)
+    {
         if (txn != NULL)
             mdb_txn_commit(txn);
     }
 };
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-tcf_err_t tcf::lmdb_store::db_store_init(const std::string& db_path) {
+tcf_err_t tcf::lmdb_store::db_store_init(const std::string &db_path)
+{
     int ret;
 
     ret = mdb_env_create(&lmdb_store_env);
     tcf::error::ThrowIf<tcf::error::SystemError>(ret != 0, "Failed to create LMDB environment");
-    ret=mdb_env_set_maxdbs(lmdb_store_env, MAX_DBS);
+    ret = mdb_env_set_maxdbs(lmdb_store_env, MAX_DBS);
     tcf::error::ThrowIf<tcf::error::SystemError>(ret != 0, "Failed to set maximum database");
     ret = mdb_env_set_mapsize(lmdb_store_env, DEFAULT_DB_STORE_SIZE);
     tcf::error::ThrowIf<tcf::error::SystemError>(ret != 0, "Failed to set LMDB default size");
@@ -106,7 +114,8 @@ tcf_err_t tcf::lmdb_store::db_store_init(const std::string& db_path) {
      * before it is written to disk.
      */
     ret = mdb_env_open(lmdb_store_env, db_path.c_str(), MDB_NOSUBDIR | MDB_WRITEMAP | MDB_NOMETASYNC | MDB_MAPASYNC, 0664);
-    if (ret != 0) {
+    if (ret != 0)
+    {
         // SAFE_LOG(TCF_LOG_ERROR, "Failed to open LMDB database; %d", ret);
         return TCF_ERR_SYSTEM;
     }
@@ -114,18 +123,20 @@ tcf_err_t tcf::lmdb_store::db_store_init(const std::string& db_path) {
     return TCF_SUCCESS;
 }
 
-void tcf::lmdb_store::db_store_close() {
+void tcf::lmdb_store::db_store_close()
+{
     if (lmdb_store_env != NULL)
         mdb_env_close(lmdb_store_env);
 }
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 tcf_err_t tcf::db_store::db_store_get_value_size(
-    const std::string& table,
-    const uint8_t* inId,
+    const std::string &table,
+    const uint8_t *inId,
     const size_t inIdSize,
-    bool* outIsPresent,
-    size_t* outValueSize) {
+    bool *outIsPresent,
+    size_t *outValueSize)
+{
     MDB_dbi dbi;
     MDB_val lmdb_id;
     MDB_val lmdb_data;
@@ -138,29 +149,33 @@ tcf_err_t tcf::db_store::db_store_get_value_size(
     }
 #endif
 
-    SafeThreadLock slock;      // lock by construction
+    SafeThreadLock slock; // lock by construction
     SafeTransaction stxn(MDB_RDONLY);
 
-    if (stxn.txn == NULL) {
+    if (stxn.txn == NULL)
+    {
         return TCF_ERR_SYSTEM;
     }
 
     ret = mdb_dbi_open(stxn.txn, table.c_str(), 0, &dbi);
-    if (ret != 0) {
+    if (ret != 0)
+    {
         // SAFE_LOG(TCF_LOG_ERROR, "Failed to open LMDB transaction : %d", ret);
         *outIsPresent = false;
         return TCF_ERR_SYSTEM;
     }
 
     lmdb_id.mv_size = inIdSize;
-    lmdb_id.mv_data = (void*)inId;
-    
+    lmdb_id.mv_data = (void *)inId;
+
     ret = mdb_get(stxn.txn, dbi, &lmdb_id, &lmdb_data);
-    if (ret == MDB_NOTFOUND) {
+    if (ret == MDB_NOTFOUND)
+    {
         *outIsPresent = false;
         return TCF_SUCCESS;
     }
-    else if (ret != 0) {
+    else if (ret != 0)
+    {
         // SAFE_LOG(TCF_LOG_ERROR, "Failed to get from LMDB database : %d", ret);
         *outIsPresent = false;
         return TCF_ERR_SYSTEM;
@@ -171,22 +186,22 @@ tcf_err_t tcf::db_store::db_store_get_value_size(
 #if DB_STORE_DEBUG
     {
         std::string idStr = BinaryToHexString(inId, inIdSize);
-        std::string valueStr = BinaryToHexString((uint8_t*)lmdb_data.mv_data, lmdb_data.mv_size);
+        std::string valueStr = BinaryToHexString((uint8_t *)lmdb_data.mv_data, lmdb_data.mv_size);
         // SAFE_LOG(TCF_LOG_DEBUG, "db store found id: '%s' -> '%s'", idStr.c_str(), valueStr.c_str());
     }
 #endif
- 
+
     return TCF_SUCCESS;
 }
 
-
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 tcf_err_t tcf::db_store::db_store_get(
-    const std::string& table,
-    const uint8_t* inId,
+    const std::string &table,
+    const uint8_t *inId,
     const size_t inIdSize,
-    uint8_t* outValue,
-    const size_t inValueSize) {
+    uint8_t *outValue,
+    const size_t inValueSize)
+{
     MDB_dbi dbi;
     MDB_val lmdb_id;
     MDB_val lmdb_data;
@@ -206,24 +221,28 @@ tcf_err_t tcf::db_store::db_store_get(
         return TCF_ERR_SYSTEM;
 
     ret = mdb_dbi_open(stxn.txn, table.c_str(), 0, &dbi);
-    if (ret != 0) {
+    if (ret != 0)
+    {
         // SAFE_LOG(TCF_LOG_ERROR, "Failed to open LMDB transaction : %d", ret);
         return TCF_ERR_SYSTEM;
     }
 
     lmdb_id.mv_size = inIdSize;
-    lmdb_id.mv_data = (void*)inId;
+    lmdb_id.mv_data = (void *)inId;
 
     ret = mdb_get(stxn.txn, dbi, &lmdb_id, &lmdb_data);
-    if (ret == MDB_NOTFOUND) {
+    if (ret == MDB_NOTFOUND)
+    {
         // SAFE_LOG(TCF_LOG_ERROR, "Failed to find id in db store");
         return TCF_ERR_VALUE;
     }
-    else if (ret != 0) {
+    else if (ret != 0)
+    {
         // SAFE_LOG(TCF_LOG_ERROR, "Failed to get from LMDB database : %d", ret);
         return TCF_ERR_SYSTEM;
     }
-    else if (inValueSize != lmdb_data.mv_size) {
+    else if (inValueSize != lmdb_data.mv_size)
+    {
         // SAFE_LOG(TCF_LOG_ERROR, "Requested db of size %zu but buffer size is %zu", inValueSize,
         //    lmdb_data.mv_size);
         return TCF_ERR_VALUE;
@@ -233,7 +252,7 @@ tcf_err_t tcf::db_store::db_store_get(
 #if DB_STORE_DEBUG
     {
         std::string idStr = BinaryToHexString(inId, inIdSize);
-        std::string valueStr = BinaryToHexString((uint8_t*)lmdb_data.mv_data, lmdb_data.mv_size);
+        std::string valueStr = BinaryToHexString((uint8_t *)lmdb_data.mv_data, lmdb_data.mv_size);
         // SAFE_LOG(TCF_LOG_DEBUG, "db store found id: '%s' -> '%s'", idStr.c_str(), valueStr.c_str());
     }
 #endif
@@ -243,23 +262,24 @@ tcf_err_t tcf::db_store::db_store_get(
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 tcf_err_t tcf::db_store::db_store_put(
-    const std::string& table,
-    const uint8_t* inId,
+    const std::string &table,
+    const uint8_t *inId,
     const size_t inIdSize,
-    const uint8_t* inValue,
-    const size_t inValueSize) {
+    const uint8_t *inValue,
+    const size_t inValueSize)
+{
     MDB_dbi dbi;
     MDB_val lmdb_id;
     MDB_val lmdb_data;
     int ret;
 
 #if DB_STORE_DEBUG
-   {
+    {
         std::string idStr = BinaryToHexString(inId, inIdSize);
         std::string valueStr = BinaryToHexString(inValue, inValueSize);
         // SAFE_LOG(TCF_LOG_DEBUG, "db store Put: %zu bytes '%s' -> %zu bytes '%s'", inIdSize,
         //   idStr.c_str(), inValueSize, valueStr.c_str());
-   }
+    }
 #endif
 
     SafeThreadLock slock;
@@ -269,18 +289,20 @@ tcf_err_t tcf::db_store::db_store_put(
         return TCF_ERR_SYSTEM;
 
     ret = mdb_dbi_open(stxn.txn, table.c_str(), MDB_CREATE, &dbi);
-    if (ret != 0) {
+    if (ret != 0)
+    {
         // SAFE_LOG(TCF_LOG_ERROR, "Failed to open LMDB transaction : %d", ret);
         return TCF_ERR_SYSTEM;
     }
 
     lmdb_id.mv_size = inIdSize;
-    lmdb_id.mv_data = (void*)inId;
+    lmdb_id.mv_data = (void *)inId;
     lmdb_data.mv_size = inValueSize;
-    lmdb_data.mv_data = (void*)inValue;
+    lmdb_data.mv_data = (void *)inValue;
 
     ret = mdb_put(stxn.txn, dbi, &lmdb_id, &lmdb_data, 0);
-    if (ret != 0) {
+    if (ret != 0)
+    {
         // SAFE_LOG(TCF_LOG_ERROR, "Failed to put to LMDB database : %d", ret);
         return TCF_ERR_SYSTEM;
     }
@@ -290,22 +312,23 @@ tcf_err_t tcf::db_store::db_store_put(
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 tcf_err_t tcf::db_store::db_store_del(
-    const std::string& table,
-    const uint8_t* inId,
+    const std::string &table,
+    const uint8_t *inId,
     const size_t inIdSize,
-    const uint8_t* inValue,
-    const size_t inValueSize) {
+    const uint8_t *inValue,
+    const size_t inValueSize)
+{
     MDB_dbi dbi;
     MDB_val lmdb_id;
     MDB_val lmdb_data;
     int ret;
 
 #if DB_STORE_DEBUG
-   {
+    {
         std::string idStr = BinaryToHexString(inId, inIdSize);
         // SAFE_LOG(TCF_LOG_DEBUG, "db store Del: %zu bytes '%s' -> %zu bytes '%s'", inIdSize,
         //   idStr.c_str(), inValueSize, valueStr.c_str());
-   }
+    }
 #endif
 
     SafeThreadLock slock;
@@ -315,18 +338,20 @@ tcf_err_t tcf::db_store::db_store_del(
         return TCF_ERR_SYSTEM;
 
     ret = mdb_dbi_open(stxn.txn, table.c_str(), MDB_CREATE, &dbi);
-    if (ret != 0) {
+    if (ret != 0)
+    {
         // SAFE_LOG(TCF_LOG_ERROR, "Failed to open LMDB transaction : %d", ret);
         return TCF_ERR_SYSTEM;
     }
 
     lmdb_id.mv_size = inIdSize;
-    lmdb_id.mv_data = (void*)inId;
+    lmdb_id.mv_data = (void *)inId;
     lmdb_data.mv_size = inValueSize;
-    lmdb_data.mv_data = (void*)inValue;
+    lmdb_data.mv_data = (void *)inValue;
 
     ret = mdb_del(stxn.txn, dbi, &lmdb_id, &lmdb_data);
-    if (ret != 0) {
+    if (ret != 0)
+    {
         // SAFE_LOG(TCF_LOG_ERROR, "Failed to delete from LMDB database : %d", ret);
         return TCF_ERR_SYSTEM;
     }
@@ -336,23 +361,25 @@ tcf_err_t tcf::db_store::db_store_del(
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 tcf_err_t tcf::db_store::db_store_get_value_size(
-    const std::string& table,
-    const ByteArray& inId,
-    bool* outIsPresent,
-    size_t* outValueSize) {
+    const std::string &table,
+    const ByteArray &inId,
+    bool *outIsPresent,
+    size_t *outValueSize)
+{
     return db_store_get_value_size(table, inId.data(), inId.size(), outIsPresent, outValueSize);
 }
 
-
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 tcf_err_t tcf::db_store::db_store_get(
-    const std::string& table,
-    const ByteArray& inId,
-    ByteArray& outValue) {
+    const std::string &table,
+    const ByteArray &inId,
+    ByteArray &outValue)
+{
     tcf_err_t result = TCF_SUCCESS;
 
     // Get all keys
-    if (inId.size()==0) {
+    if (inId.size() == 0)
+    {
         std::string keys_result;
         keys_result = db_store_get_all(table, inId.data(), inId.size());
         if (keys_result.size() == 0)
@@ -362,17 +389,19 @@ tcf_err_t tcf::db_store::db_store_get(
 
         outValue.resize(keys_result.size());
         memcpy_s(outValue.data(), keys_result.size(), keys_result.c_str(), keys_result.size());
-        result=TCF_SUCCESS;
+        result = TCF_SUCCESS;
         return result;
-
     }
     bool isPresent;
     size_t value_size;
 
     result = db_store_get_value_size(table, inId.data(), inId.size(), &isPresent, &value_size);
-    if (result != TCF_SUCCESS) {
+    if (result != TCF_SUCCESS)
+    {
         return result;
-    } else if (!isPresent) {
+    }
+    else if (!isPresent)
+    {
         return TCF_ERR_VALUE;
     }
 
@@ -381,7 +410,8 @@ tcf_err_t tcf::db_store::db_store_get(
 
     // Fetch the state from the db storage
     result = db_store_get(table, inId.data(), inId.size(), &outValue[0], value_size);
-    if (result != TCF_SUCCESS) {
+    if (result != TCF_SUCCESS)
+    {
         return result;
     }
     return result;
@@ -389,25 +419,28 @@ tcf_err_t tcf::db_store::db_store_get(
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 tcf_err_t tcf::db_store::db_store_put(
-    const std::string& table,
-    const ByteArray& inId,
-    const ByteArray& inValue) {
+    const std::string &table,
+    const ByteArray &inId,
+    const ByteArray &inValue)
+{
     return db_store_put(table, inId.data(), inId.size(), inValue.data(), inValue.size());
 }
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 tcf_err_t tcf::db_store::db_store_del(
-    const std::string& table,
-    const ByteArray& inId,
-    const ByteArray& inValue) {
+    const std::string &table,
+    const ByteArray &inId,
+    const ByteArray &inValue)
+{
     return db_store_del(table, inId.data(), inId.size(), inValue.data(), inValue.size());
 }
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 std::string tcf::db_store::db_store_get_all(
-    const std::string& table,
-    const uint8_t* inId,
-    const size_t inIdSize) {
+    const std::string &table,
+    const uint8_t *inId,
+    const size_t inIdSize)
+{
     MDB_dbi dbi;
     MDB_val lmdb_id;
     MDB_val lmdb_data;
@@ -424,43 +457,48 @@ std::string tcf::db_store::db_store_get_all(
     SafeThreadLock slock;
     SafeTransaction stxn(MDB_RDONLY);
 
-    if (stxn.txn == NULL) {
+    if (stxn.txn == NULL)
+    {
         // return TCF_ERR_SYSTEM;
         return table_keys;
     }
     ret = mdb_dbi_open(stxn.txn, table.c_str(), 0, &dbi);
-    if (ret != 0) {
+    if (ret != 0)
+    {
         // SAFE_LOG(TCF_LOG_ERROR, "Failed to open LMDB transaction : %d", ret);
         return table_keys;
     }
 
     MDB_cursor *cursor;
-    ret= mdb_cursor_open(stxn.txn, dbi, &cursor);
-    if (ret != 0) {
+    ret = mdb_cursor_open(stxn.txn, dbi, &cursor);
+    if (ret != 0)
+    {
         // SAFE_LOG(TCF_LOG_ERROR, "Failed to get from LMDB database : %d", ret);
         return table_keys;
     }
     ret = mdb_cursor_get(cursor, &lmdb_id, &lmdb_data, MDB_FIRST);
-    if (ret != 0) {
+    if (ret != 0)
+    {
         // SAFE_LOG(TCF_LOG_ERROR, "Failed to get from LMDB database : %d", ret);
         return table_keys;
     }
     std::string temp_str;
     int size_key;
-    do {
-        temp_str=(char*)lmdb_id.mv_data;
-        size_key=lmdb_id.mv_size;
-        std::string temp_substr = temp_str.substr (0,size_key);
+    do
+    {
+        temp_str = (char *)lmdb_id.mv_data;
+        size_key = lmdb_id.mv_size;
+        std::string temp_substr = temp_str.substr(0, size_key);
         table_keys.append(temp_substr);
         table_keys.append(",");
-    } while ( mdb_cursor_get(cursor, &lmdb_id, &lmdb_data, MDB_NEXT) == 0);
+    } while (mdb_cursor_get(cursor, &lmdb_id, &lmdb_data, MDB_NEXT) == 0);
 
     table_keys.pop_back();
 
 #if DB_STORE_DEBUG
     {
         std::string idStr = BinaryToHexString(inId, inIdSize);
-        std::string valueStr = BinaryToHexString((uint8_t*)lmdb_data.mv_data, lmdb_data.mv_size);
+        std::string valueStr = BinaryToHexString((uint8_t *)lmdb_data.mv_data, lmdb_data.mv_size);
         // SAFE_LOG(TCF_LOG_DEBUG, "db store found id: '%s' -> '%s'", idStr.c_str(), valueStr.c_str());
     }
 #endif

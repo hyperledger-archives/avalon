@@ -14,6 +14,7 @@
 
 [KvStorage]
 StoragePath = "config/Kv_Shared_tmp"
+database_url = "http://localhost:9090"
 
 # --------------------------------------------------
 # Logging -- configuration of service logging
