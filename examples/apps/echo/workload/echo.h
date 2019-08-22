@@ -16,8 +16,23 @@
 #pragma once
 
 #include <string>
+#include "work_order_data.h"
+#include "work_order_processor_interface.h"
 
-class EchoResultImpl {
+class EchoResult: public tcf::WorkOrderProcessorInterface {
+private:
+    std::string Process(std::string str_in);
+
 public:
-        std::string Process(std::string str_in);
+    EchoResult(void);
+    virtual ~EchoResult(void);
+
+    void ProcessWorkOrder(
+                std::string workload_id,
+                const ByteArray& participant_address,
+                const ByteArray& enclave_id,
+                const ByteArray& work_order_id,
+                const std::vector<tcf::WorkOrderData>& in_work_order_data,
+                std::vector<tcf::WorkOrderData>& out_work_order_data);
 };
+

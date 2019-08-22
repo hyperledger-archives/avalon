@@ -39,7 +39,6 @@ from tcs_work_order_handler import TCSWorkOrderHandler
 from tcs_worker_registry_handler import TCSWorkerRegistryHandler
 from tcs_workorder_receipt_handler import TCSWorkOrderReceiptHandler
 from tcs_worker_encryption_key_handler import WorkerEncryptionKeyHandler
-#from shared_kv.shared_kv_interface import KvStorage
 from shared_kv.remote_lmdb.lmdb_helper_proxy import LMDBHelperProxy
 from error_code.error_status import WorkorderError
 import utility.utility as utility
@@ -68,11 +67,6 @@ class TCSListener(resource.Resource):
             logger.error("Kv Storage path is missing")
             sys.exit(-1)
 
-        #storage_path = TCFHOME + '/' + config['KvStorage']['StoragePath']
-        #self.kv_helper = KvStorage()
-        # if not self.kv_helper.open(storage_path):
-        #    logger.error("Failed to open KV Storage DB")
-        #    sys.exit(-1)
         database_url = config["KvStorage"]["database_url"]
         self.kv_helper = LMDBHelperProxy(database_url)
 

@@ -18,7 +18,6 @@ from error_code.error_status import ReceiptCreateStatus
 from error_code.error_status import WorkorderError
 import utility.utility as utility
 from itertools import cycle
-#from shared_kv.shared_kv_interface import KvStorage
 
 logger = logging.getLogger(__name__)
 
