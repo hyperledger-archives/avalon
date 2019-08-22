@@ -125,12 +125,14 @@ def LocalMain(config) :
                 try:
                     if sig_bool > 0:
                         logger.info("Signature Verified")
+                        enclave_helper.decrypted_response(json.dumps(response), encrypted_session_key)
                     else :
                         logger.info("Signature Failed")
+                        exit(1)
                 except:
                         logger.error("ERROR: Failed to analyze Signature Verification")
+                        exit(1)
 
-                enclave_helper.decrypted_response(json.dumps(response), encrypted_session_key)
             #----------------------------------------------------------------------------------
     else :
         logger.info("Input Request %s", input_json_str)
