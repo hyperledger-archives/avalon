@@ -18,7 +18,6 @@ from itertools import cycle
 import utility.utility as utility
 from error_code.error_status import WorkerError
 from error_code.error_status import WorkerStatus
-#from shared_kv.shared_kv_interface import KvStorage
 
 logger = logging.getLogger(__name__)
 
@@ -314,7 +313,6 @@ class TCSWorkerRegistryHandler:
             json_dict = json.loads(value)
             input_value = json.loads(input_json_str)
             worker_details = input_value["params"]["details"]
-            worker_details = json.loads(worker_details)
             for item in worker_details:
                 json_dict["details"][item] = worker_details[item]
 

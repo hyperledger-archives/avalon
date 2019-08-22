@@ -16,6 +16,8 @@
 #include <string>
 #include <vector>
 
+#include "work_order_data.h"
+#include "work_order_processor_interface.h"
 
 double model_A(double max, double opt, double data);
 
@@ -47,4 +49,36 @@ double score_thaldur(int durationMin);
 
 double score_num(int num);
 
-std::string executeWorkOrder(std::string decrypted_user_input_str);
+//std::string executeWorkOrder(std::string decrypted_user_input_str);
+
+class HeartDiseaseEval: public tcf::WorkOrderProcessorInterface {
+private:
+        std::string executeWorkOrder(std::string decrypted_user_input_str);
+        double model_A(double max, double opt, double data);
+        double model_B(double max, double opt, double data);
+        double score_age(double data);
+        double score_sex(int sex);
+        double score_cp(int cp_type);
+        double score_trestbps(double data);
+        double score_chol(double data);
+        double score_fbs(double data);
+        double score_restecg(int type);
+        double score_thalach(double data);
+        double score_exang_oldpeak(int type);
+        double score_slop(int type);
+        double score_ca(int number);
+        double score_thaldur(int durationMin);
+        double score_num(int num);
+
+public:
+        HeartDiseaseEval(void);
+        virtual ~HeartDiseaseEval(void);
+
+        void ProcessWorkOrder(
+                std::string workload_id,
+                const ByteArray& participant_address,
+                const ByteArray& enclave_id,
+                const ByteArray& work_order_id,
+                const std::vector<tcf::WorkOrderData>& in_work_order_data,
+                std::vector<tcf::WorkOrderData>& out_work_order_data);
+};

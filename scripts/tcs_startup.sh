@@ -20,6 +20,8 @@ listener="${TCF_HOME}/examples/common/python/connectors/direct/tcs_listener/tcs_
 listener_port=`grep listener_port ${TCF_HOME}/config/tcs_config.toml | awk {'print $3'}`
 
 lmdb_server="${TCF_HOME}/examples/common/python/shared_kv/remote_lmdb/lmdb_listener.py"
+# the following port must be synchronized to that of KvStorage.database_url 
+# in config/tcs_config.toml
 LMDB_SERVER_PORT=9090
 
 start_tcs_components()
@@ -48,6 +50,7 @@ start_tcs_components()
                 echo "Program is Successfully Ended"
                 pkill -f "$listener"
                 pkill -f "$enclave_manager"
+                pkill -f "${lmdb_server}"
                 exit;;
             * ) echo " ";;
         esac

@@ -19,97 +19,12 @@
 #include "echo/workload/echo.h"
 #include "heart_disease_eval/workload/heart_disease_evaluation.h"
 
-ByteArray ConvertStringToByteArray(std::string s) {
-    ByteArray ba(s.begin(), s.end());
-    return ba;
-}
-
-class EchoResult: public tcf::WorkOrderProcessorInterface {
-public:
-        void ProcessWorkOrder(
-                std::string workload_id,
-                const ByteArray& participant_address,
-                const ByteArray& enclave_id,
-                const ByteArray& work_order_id,
-                const std::vector<tcf::WorkOrderData>& in_work_order_data,
-                std::vector<tcf::WorkOrderData>& out_work_order_data) {
-        std::string result_str;
-        int i = 0;
-        int out_wo_data_size = out_work_order_data.size();
-
-        for (auto wo_data : in_work_order_data) {
-
-            // Execute the input data
-            EchoResultImpl echo_result_impl;
-            result_str = echo_result_impl.Process(
-                ByteArrayToString(wo_data.decrypted_data));
-
-            // If the out_work_order_data has entry to hold the data
-            if (i < out_wo_data_size) {
-                tcf::WorkOrderData& out_wo_data = out_work_order_data.at(i);
-                out_wo_data.decrypted_data = 
-                    ConvertStringToByteArray(result_str);
-            } else {
-                // Create a new entry
-                out_work_order_data.emplace_back(
-                    wo_data.index, ConvertStringToByteArray(result_str));
-            }
-
-            i++;
-        }
-    };
-} echo_result;
-
-
-class HeartDiseaseEvalFactory: public tcf::WorkOrderProcessorInterface {
-public:
-        void ProcessWorkOrder(
-                std::string workload_id,
-                const ByteArray& participant_address,
-                const ByteArray& enclave_id,
-                const ByteArray& work_order_id,
-                const std::vector<tcf::WorkOrderData>& in_work_order_data,
-                std::vector<tcf::WorkOrderData>& out_work_order_data) {
-            std::string result_str;
-            int out_wo_data_size = out_work_order_data.size();
-
-            // Clear state - to reset totalRisk and count
-            executeWorkOrder("");
-            for (auto wo_data : in_work_order_data) {
-                std::string inputData = 
-                    ByteArrayToString(wo_data.decrypted_data);
-                try {
-                    result_str = executeWorkOrder(inputData);
-                } catch(...) {
-                    // Temp Implementation
-                    result_str = "Failed to process workorder data";
-                }
-            }
-
-            // If the out_work_order_data has entry to hold the data
-            if (out_wo_data_size) {
-                tcf::WorkOrderData& out_wo_data = out_work_order_data.at(0);
-                out_wo_data.decrypted_data = 
-                    ConvertStringToByteArray(result_str);
-            } else {
-                // Create a new entry
-                out_work_order_data.emplace_back(
-                    0, ConvertStringToByteArray(result_str));
-            }
-
-      }
-} heart_disease_eval_worker;
-
-tcf::WorkOrderProcessorInterface* EchoResultFactory() {
-        return &echo_result;
-}
-
-tcf::WorkOrderProcessorInterface* HeartDiseaseEvalFactory() {
-        return &heart_disease_eval_worker;
+template<typename T> tcf::WorkOrderProcessorInterface* createInstance() {
+    return new T;
 }
 
 WorkOrderDispatchTableEntry workOrderDispatchTable[] = {
-    {"echo-result", EchoResultFactory},
-    {"heart-disease-eval", HeartDiseaseEvalFactory},
+    {"echo-result", &createInstance<EchoResult>},
+    {"heart-disease-eval", &createInstance<HeartDiseaseEval>},
     {NULL, NULL}
 };

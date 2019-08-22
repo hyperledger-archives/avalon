@@ -29,9 +29,6 @@ struct WorkOrderDispatchTableEntry {
 };
 
 class WorkloadProcessor : public tc::WorkOrderProcessorInterface {
-private:
-    // Convention: we use the key "IntrinsicState" key to store the value
-    const std::string intrinsic_state_key_ = "IntrinsicState";
 public:
     WorkloadProcessor(void);
     virtual ~WorkloadProcessor(void);
