@@ -34,6 +34,9 @@
 
 FROM ubuntu:bionic
 
+# Ignore timezone prompt in apt
+ENV DEBIAN_FRONTEND=noninteractive
+
 # Add necessary packages
 RUN apt-get update \
  && apt-get install -y -q\
@@ -60,6 +63,7 @@ RUN apt-get update \
     tar \
     liblmdb-dev \
     ocamlbuild \
+    python3-tk \
  && apt-get -y -q upgrade \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
@@ -113,26 +117,26 @@ RUN git clone https://github.com/intel/intel-sgx-ssl.git  \
  && rm -rf /tmp/intel-sgx-ssl \
  && echo "SGX_SSL=/opt/intel/sgxssl" >> /etc/environment
 
-# environment setup
+# Environment setup
 WORKDIR /project/TrustedComputeFramework
 
 RUN \
  echo "VIRTUAL_ENV=/project/TrustedComputeFramework/tools/build/_dev" >> /etc/environment \
  && echo "TCF_HOME=/project/TrustedComputeFramework/" >> /etc/environment \
  && if [ ! -z "$http_proxy"  ]; then \
-	echo 'Acquire::http::Proxy "'$http_proxy'";' >> /etc/apt/apt.conf.d/00proxy; \
+    echo 'Acquire::http::Proxy "'$http_proxy'";' >> /etc/apt/apt.conf.d/00proxy; \
         echo "http_proxy=$http_proxy" >> /etc/wgetrc; \
         echo "http_proxy=$http_proxy" >> /etc/environment; \
         echo "HTTP_PROXY=$(echo $http_proxy | sed 's,[a-zA-Z]*://,,')" >> /etc/environment; \
     fi \
  && if [ ! -z "$ftp_proxy"  ];  then \
-	echo 'Acquire::ftp::Proxy "'$ftp_proxy'";' >> /etc/apt/apt.conf.d/00proxy; \
+    echo 'Acquire::ftp::Proxy "'$ftp_proxy'";' >> /etc/apt/apt.conf.d/00proxy; \
         echo "ftp_proxy=$ftp_proxy" >> /etc/wgetrc; \
         echo "ftp_proxy=$ftp_proxy" >> /etc/environment; \
     fi \
  && if [ ! -z "$https_proxy" ]; then \
-	echo 'Acquire::https::Proxy "'$https_proxy'";' >> /etc/apt/apt.conf.d/00proxy; \
-    	echo "https_proxy=$https_proxy" >> /etc/wgetrc; \
+    echo 'Acquire::https::Proxy "'$https_proxy'";' >> /etc/apt/apt.conf.d/00proxy; \
+        echo "https_proxy=$https_proxy" >> /etc/wgetrc; \
         echo "https_proxy=$https_proxy" >> /etc/environment; \
         echo "HTTPS_PROXY=$(echo $https_proxy | sed 's,[a-zA-Z]*://,,')" >> /etc/environment; \
     fi \
@@ -146,11 +150,12 @@ ENV SGX_SDK=/opt/intel/sgxsdk
 ENV PATH=$PATH:$SGX_SDK/bin:$SGX_SDK/bin/x64
 ENV PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$SGX_SDK/pkgconfig
 ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$SGX_SDK/sdk_libs
-#solc compiler path to compile solidity contract code
+# Solc compiler path to compile solidity contract code
 ENV SOLC_BINARY=/root/.py-solc/solc-v0.4.25/bin/solc
-#Ethereum private key of ethereum account
-ENV WALLET_PRIVATE_KEY="4F611197A6E82715F4D2446FE015D1667E9C40A351411F3A7300F71F285D01B4"
-
+# Ethereum private key of ethereum account
+ENV WALLET_PRIVATE_KEY="B413189C95B48737AE2D9AF4CAE97EB03F4DE40599DF8E6C89DCE4C2E2CBA8DE"
+# Set display, replace value with [IP address of host]:0
+ENV DISPLAY=:0
 
 WORKDIR /project/TrustedComputeFramework/tools/build
 
