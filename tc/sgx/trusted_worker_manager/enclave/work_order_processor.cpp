@@ -32,7 +32,6 @@
 #include "enclave_utils.h"
 #include "enclave_data.h"
 
-#include "work_order_processor_interface.h"
 #include "work_order_data.h"
 #include "work_order_processor.h"
 #include "db_store.h"
@@ -229,11 +228,13 @@ namespace tcf {
                                          d.workorder_data.decrypted_data);
             }
 
-            WorkloadProcessor processor;
             // Convert workload_id from hex string to string
             ByteArray workload_bytes = HexStringToBinary(workload_id);
             std::string workload_type(workload_bytes.begin(), workload_bytes.end());
-            processor.ProcessWorkOrder(
+            WorkloadProcessor *processor = 
+                WorkloadProcessor::CreateWorkloadProcessor(workload_type);
+            tcf::error::ThrowIfNull(processor, "CreateWorkloadProcessor function returned null");
+            processor->ProcessWorkOrder(
                         workload_type,
                         StrToByteArray(requester_id),
                         StrToByteArray(worker_id),
@@ -242,7 +243,7 @@ namespace tcf {
                         out_wo_data);
             return out_wo_data;
         }
-        tcf::error::RuntimeError("Work order inData not found\n");
+        throw tcf::error::RuntimeError("Work order inData not found");
         return out_wo_data;
     }
 

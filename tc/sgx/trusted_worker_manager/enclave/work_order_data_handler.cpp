@@ -32,7 +32,6 @@
 #include "enclave_utils.h"
 #include "enclave_data.h"
 
-#include "work_order_processor_interface.h"
 #include "work_order_processor.h"
 #include "work_order_data_handler.h"
 

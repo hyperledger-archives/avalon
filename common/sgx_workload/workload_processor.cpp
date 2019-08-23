@@ -13,42 +13,47 @@
  * limitations under the License.
  */
 
-#include "workload_processor.h"
-#include "workload_dispatcher.cpp"
-#include <iostream>
 #include <string>
+#include "workload_processor.h"
+#include "enclave_utils.h"
 
-tc::WorkOrderProcessorInterface* LookUpWorkOrder(std::string workload_id) {
-    for (int i = 0; workOrderDispatchTable[i].project_name != NULL; i++) {
-        if (workload_id.compare(workOrderDispatchTable[i].project_name) == 0) {
-            return workOrderDispatchTable[i].work_order_factory_ptr();
-        }
-    }
-    tcf::error::RuntimeError("Work order not found in Work order lookup table\n");
-    return NULL;
-}
+std::map<std::string, WorkloadProcessor*> \
+    WorkloadProcessor::workload_processor_table;
 
 WorkloadProcessor::WorkloadProcessor() {}
 
 WorkloadProcessor::~WorkloadProcessor() {}
 
-void WorkloadProcessor::ProcessWorkOrder(
-        std::string workload_id,
-        const ByteArray& participant_address,
-        const ByteArray& enclave_id,
-        const ByteArray& work_order_id,
-        const std::vector<tcf::WorkOrderData>& in_work_order_data,
-        std::vector<tcf::WorkOrderData>& out_work_order_data) {
-    tcf::WorkOrderProcessorInterface* work_order = LookUpWorkOrder(workload_id);
-    if (work_order == nullptr) {
-	tcf::error::RuntimeError("Work order not found in Work order lookup table\n");
-	return;
-    }
-    work_order->ProcessWorkOrder(
-                workload_id,
-                participant_address,
-                enclave_id,
-                work_order_id,
-                in_work_order_data,
-                out_work_order_data);
+WorkloadProcessor* WorkloadProcessor::RegisterWorkloadProcessor(
+    std::string workload_id,
+    WorkloadProcessor* processor)
+{
+   Log(TCF_LOG_INFO, "Register Workload Processor - %s",
+    workload_id.c_str());
+   workload_processor_table[workload_id] = processor;
+   return processor;
 }
+
+WorkloadProcessor* WorkloadProcessor::CreateWorkloadProcessor(
+    std::string workload_id)
+{
+   WorkloadProcessor* processor;
+
+   // Search the workload processor type in the table
+   auto itr = workload_processor_table.find(workload_id);
+   if (itr == workload_processor_table.end()) {
+       Log(TCF_LOG_ERROR, "Workload Processor not found in table");
+       return nullptr;
+   } else {
+       processor = (*itr).second;
+   }
+
+   // Clone the workload processor and return it.
+   if( processor == nullptr) {
+       Log(TCF_LOG_ERROR,"Workload Processor found, but it's class is nullptr");
+       return nullptr;
+   } else {
+       return processor->Clone();
+   }
+}
+

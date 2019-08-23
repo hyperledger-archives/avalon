@@ -25,6 +25,8 @@ services:
         - http_proxy
         - https_proxy
         - no_proxy
+    environment:
+        - TCF_DEBUG_BUILD=${TCF_DEBUG_BUILD}
     volumes:
       - ./:/project/TrustedComputeFramework
     devices:

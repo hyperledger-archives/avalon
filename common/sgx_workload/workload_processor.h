@@ -17,28 +17,48 @@
 
 #include <map>
 #include <string>
-#include "work_order_processor_interface.h"
+#include "work_order_data.h"
 
-namespace tc = tcf;
-
-typedef tc::WorkOrderProcessorInterface* (*work_order_factory)();
-
-struct WorkOrderDispatchTableEntry {
-    const char* project_name;
-    work_order_factory work_order_factory_ptr;
-};
-
-class WorkloadProcessor : public tc::WorkOrderProcessorInterface {
+// Class to register, create and process the workload
+class WorkloadProcessor {
 public:
     WorkloadProcessor(void);
     virtual ~WorkloadProcessor(void);
 
+    // Clone WorkloadProcessor
+    virtual WorkloadProcessor* Clone() const = 0;
+
+    /* Create WorkloadProcessor
+    * Input parameters:
+    *  - workload_id: workload identifier
+    * Returns - Pointer to WorkloadProcessor
+    */
+    static WorkloadProcessor* CreateWorkloadProcessor(std::string workload_id);
+
+    /* Register WorkloadProcessor. Used by the workloads to register themselves
+    * Input parameters:
+    *  - workload_id: workload identifier
+    * Returns - Pointer to WorkloadProcessor
+    */
+    static WorkloadProcessor* RegisterWorkloadProcessor(std::string workload_id,
+        WorkloadProcessor* processor);
+
+    // Mapping between workload id and WorkloadProcessor
+    static std::map<std::string, WorkloadProcessor*> workload_processor_table;
+
+    // Process the workload
     virtual void ProcessWorkOrder(
                 std::string workload_id,
-                const ByteArray& participant_address,
-                const ByteArray& enclave_id,
+                const ByteArray& requester_id,
+                const ByteArray& worker_id,
                 const ByteArray& work_order_id,
                 const std::vector<tcf::WorkOrderData>& in_work_order_data,
-                std::vector<tcf::WorkOrderData>& out_work_order_data);
+                std::vector<tcf::WorkOrderData>& out_work_order_data) = 0;
 };
 
+#define IMPL_WORKLOAD_PROCESSOR_CLONE(TYPE) \
+   WorkloadProcessor* Clone() const { return new TYPE(*this); }
+
+#define REGISTER_WORKLOAD_PROCESSOR(WORKLOADID_STR,TYPE) \
+   WorkloadProcessor* TYPE##_myProcessor = \
+      WorkloadProcessor::RegisterWorkloadProcessor(WORKLOADID_STR, new TYPE());

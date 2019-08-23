@@ -41,7 +41,7 @@ void Log(int level, const char* fmt, ...) {
     va_start(ap, fmt);
     vsnprintf_s(buf, BUFSIZ, fmt, ap);
     va_end(ap);
-#ifdef DEBUG
+#ifdef TCF_DEBUG_BUILD
     ocall_Log(level, buf);
 #endif
 }  // Log
@@ -49,7 +49,7 @@ void Log(int level, const char* fmt, ...) {
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 uint64_t GetTimer(void) {
     uint64_t value = 0;
-#ifdef ENCLAVE_DEBUG
+#ifdef TCF_DEBUG_BUILD
     ocall_GetTimer(&value);
 #endif
 

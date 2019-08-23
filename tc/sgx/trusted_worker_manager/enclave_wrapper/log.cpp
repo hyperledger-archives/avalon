@@ -75,7 +75,10 @@ namespace tcf {
     static void LogStdOut(
         tcf_log_level_t logLevel,
         const char* message) {
-        printf("%s", message);
+        printf("%s\n", message);
+        // Flush the logs to stdout.
+        // Without flushing, messages are not seen in stdout.
+        fflush(stdout);
     }  // LogStdOut
 
     // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
