@@ -98,7 +98,7 @@ contract WorkerRegistry{
         string memory details) public onlyOwner  {
         // Registry a new worker with associated with details of worker
         // If workerId, workerType and application id matches then it
-        // Updates the organization id, details and applicatioTypeIds
+        // Updates the organization id, details and applicationTypeIds
         require(workerId.length != 0,  "Empty worker id");
         require(isValidWorkerType(workerType) == true, "Invalid workerType");
         // Check if worker already exists, if yes then update the workersMap
@@ -229,7 +229,7 @@ contract WorkerRegistry{
             string memory details,
             WorkerStatus status) {
         // Retrieve worker details identified by worker id
-        // Returns all details assiciated with that worker
+        // Returns all details associated with that worker
         require(workerId.length != 0,  "Empty worker id");
         require(workersMap[workerId].workerId == workerId, "workerId doesn't exist");
         // Do lookup with the given workerId from workerMap
@@ -257,7 +257,7 @@ contract WorkerRegistry{
         // with separator newLookUpTag. First workerLookup should be called
         // If returns non empty lookup tag then this function will be
         // called to get additional worker list
-        // TODO: Funtionality need to be implemented
+        // TODO: Functionality need to be implemented
         require(isValidWorkerType(workerType) == true, "Invalid workerType!!");
         require(applicationTypeId.length != 0,  "Empty Application id");
         require(organizationId.length != 0,  "Empty organization id");

@@ -172,7 +172,7 @@ class TCSWorkOrderHandler:
 
         if(self.kv_helper.get("wo-timestamps",wo_id) is None):
 
-            # Create a new work order entry. Dont change the order of table updation.
+            # Create a new work order entry. Don't change the order of table updation.
             # The order is important for clean up if the TCS is restarted in middle
             epoch_time = str(time.time())
 

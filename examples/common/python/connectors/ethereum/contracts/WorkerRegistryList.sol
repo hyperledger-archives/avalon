@@ -77,7 +77,7 @@ contract DirectRegistry{
         string memory uri,
         bytes32 scAddr,
         bytes32[] memory appTypeIds) public onlyOwner()  {
-        // Add a new registry entry to registy list
+        // Add a new registry entry to registry list
         // with registry list organization id, uri, smart contract
         // address of worker registry contract and application type ids
         require(orgId.length != 0,  "Empty org id");
@@ -128,7 +128,7 @@ contract DirectRegistry{
     }
 
     function registrySetStatus(bytes32 orgId, RegistryStatus status) public {
-        // Set the registry status identified by oganization id
+        // Set the registry status identified by organization id
         require(orgId.length != 0,  "Empty org id");
         require(registryMap[orgId].orgId == orgId, "orgId doesn't exist");
         registryMap[orgId].status = status;

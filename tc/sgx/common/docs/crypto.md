@@ -44,7 +44,7 @@ AES-GCM iv                C++ string           raw binary        No, user define
 AES-GCM ciphertext+tag    C++ string           raw binary        No, user defined
 AES-GCM plaintext         C++ string           raw binary        No, user defined
 SHA256 hash               C++ string           raw binary        No, user defined
-Crypto random bistring    C++ string           raw binary        No, user defined
+Crypto random bitstring   C++ string           raw binary        No, user defined
 
 Security notes
 --------------
