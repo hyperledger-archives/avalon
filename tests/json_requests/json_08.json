@@ -26,6 +26,14 @@
                     "iv": ""
                    }
         ],
+        "outData": [
+                   {"index": 0,
+                    "dataHash": "",
+                    "data": "",
+                    "encryptedDataEncryptionKey": "",
+                    "iv": ""
+                   }
+        ],
         "verifyingKey": ""
     }
 }
