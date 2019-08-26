@@ -49,7 +49,7 @@ class WorkOrderInterface(ABC):
         "inData": [<object>],
         out_data is an array of work order output objects, as defined below.
         "outData": [<object>]
-        1. responseTimeoutMsecs - is a maximum timeout in milliseconds that the caller will wait for
+        1. responseTimeoutMSecs - is a maximum timeout in milliseconds that the caller will wait for
         the response. Setting this timeout to zero means that the work order is submitted in the
         asynchronous (resultUri is present), notify (notifyUri is present), or pull mode 
         (neither resultUri nor notifyUri is present). In this case, the TCS should schedule 

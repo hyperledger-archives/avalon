@@ -55,7 +55,7 @@ namespace tcf {
               inPathToEnclave - A pointer to a string that contains the path to the
               enclave DLL.
               inSpid - A pointer to a string that contains the hex encoded SPID.
-              numOfEnclave -- Number of worker enclaves to create
+              numOfEnclaves -- Number of worker enclaves to create
             */
             tcf_err_t Initialize(
                 const std::string& inPathToEnclave,

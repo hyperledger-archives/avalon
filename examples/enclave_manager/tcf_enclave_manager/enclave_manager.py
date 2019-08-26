@@ -227,7 +227,7 @@ def create_enclave_signup_data():
 # -----------------------------------------------------------------
 def execute_work_order(enclave_data, input_json_str, indent=4):
     """
-    Submits workorder reqeust to Worker enclave and retrieves the response 
+    Submits workorder request to Worker enclave and retrieves the response 
     """
     try:
         wo_request = workorder_request.SgxWorkOrderRequest(
@@ -378,14 +378,14 @@ TCFHOME = os.environ.get("TCF_HOME", "../../../../")
 # -----------------------------------------------------------------
 def parse_command_line(config, args):
     """
-    Parse commond line arguments
+    Parse command line arguments
     """
     # global consensus_file_name
 
     parser = argparse.ArgumentParser()
 
     parser.add_argument("--logfile", help="Name of the log file, __screen__ for standard output", type=str)
-    parser.add_argument("--loglevel", help="Logging leve", type=str)
+    parser.add_argument("--loglevel", help="Logging level", type=str)
 
     options = parser.parse_args(args)
 

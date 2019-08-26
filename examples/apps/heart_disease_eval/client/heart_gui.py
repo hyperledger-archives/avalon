@@ -308,7 +308,7 @@ def GuiMain():
 	ca = radio(v_frame2, "Number of major vessels colored by flouroscopy", 
 		[("0", 0), ("1", 1), ("2", 2), ("3", 3)])
 	thal = radio(v_frame2, "Thallium stress test", 
-		[("Normal", 3), ("Fixed defect", 6), ("Reversable defect", 7)])
+		[("Normal", 3), ("Fixed defect", 6), ("Reversible defect", 7)])
 	num = radio (v_frame2, "Diagnosis of heart disease", 
 		[("<50% diameter narrowing", 0), (">50% diameter narrowing", 1)])
 	var_list = [age, sex, cp, trestbps, chol, fbs, restecg, thalach, 

@@ -29,7 +29,7 @@ namespace crypto {
             friend PublicKey;
             // throws RuntimeError
         public:
-            // Default contructor
+            // Default constructor
             PrivateKey(): private_key_(nullptr) {}
             // copy constructor
             // throws RuntimeError
