@@ -16,10 +16,10 @@
 #pragma once
 
 #include <string>
-#include "work_order_data.h"
-#include "work_order_processor_interface.h"
+#include "workload_processor.h"
 
-class EchoResult: public tcf::WorkOrderProcessorInterface {
+
+class EchoResult: public WorkloadProcessor {
 private:
     std::string Process(std::string str_in);
 
@@ -27,10 +27,12 @@ public:
     EchoResult(void);
     virtual ~EchoResult(void);
 
+    IMPL_WORKLOAD_PROCESSOR_CLONE(EchoResult)
+
     void ProcessWorkOrder(
                 std::string workload_id,
-                const ByteArray& participant_address,
-                const ByteArray& enclave_id,
+                const ByteArray& requester_id,
+                const ByteArray& worker_id,
                 const ByteArray& work_order_id,
                 const std::vector<tcf::WorkOrderData>& in_work_order_data,
                 std::vector<tcf::WorkOrderData>& out_work_order_data);

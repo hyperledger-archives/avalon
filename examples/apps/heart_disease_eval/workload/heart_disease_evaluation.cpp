@@ -19,7 +19,8 @@
 #include <cmath>
 
 #include "heart_disease_evaluation.h"
-#include "work_order_data.h"
+
+REGISTER_WORKLOAD_PROCESSOR("heart-disease-eval",HeartDiseaseEval)
 
 HeartDiseaseEval::HeartDiseaseEval() {}
 
@@ -251,8 +252,8 @@ std::string HeartDiseaseEval::executeWorkOrder(std::string decrypted_user_input_
 
 void HeartDiseaseEval::ProcessWorkOrder(
         std::string workload_id,
-        const ByteArray& participant_address,
-        const ByteArray& enclave_id,
+        const ByteArray& requester_id,
+        const ByteArray& worker_id,
         const ByteArray& work_order_id,
         const std::vector<tcf::WorkOrderData>& in_work_order_data,
         std::vector<tcf::WorkOrderData>& out_work_order_data) {

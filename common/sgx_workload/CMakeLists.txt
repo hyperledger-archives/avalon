@@ -23,7 +23,8 @@ FILE(GLOB PROJECT_HEADERS *.h)
 FILE(GLOB PROJECT_SOURCES *.cpp)
 
 SET(GENERIC_PRIVATE_INCLUDE_DIRS "." "${TCF_TOP_DIR}/tc/sgx/common" 
- "${TCF_TOP_DIR}/tc/sgx/common/work_order_interface" "${TCF_TOP_DIR}/examples/apps")
+	"${TCF_TOP_DIR}/tc/sgx/common/work_order_interface" "${TCF_TOP_DIR}/examples/apps"
+	"${TCF_TOP_DIR}/tc/sgx/trusted_worker_manager/enclave")
 SET(GENERIC_CXX_FLAGS ${DEBUG_FLAGS} "-Wall" "-fPIC" "-Wno-write-strings" "-std=c++11")
 
 SET(WORKLOAD_STATIC_NAME sgx_workload)

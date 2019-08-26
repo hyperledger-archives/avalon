@@ -16,7 +16,8 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.2 FATAL_ERROR)
 
 INCLUDE(CMakeVariables.txt)
 SET(GENERIC_PRIVATE_INCLUDE_DIRS "." "${TCF_TOP_DIR}/tc/sgx/common"
-	"${TCF_TOP_DIR}/tc/sgx/common/work_order_interface")
+	"${TCF_TOP_DIR}/tc/sgx/common/work_order_interface"
+	"${TCF_TOP_DIR}/common/sgx_workload")
 
 ################################################################################
 ADD_SUBDIRECTORY(echo/workload)

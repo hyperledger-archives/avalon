@@ -162,13 +162,13 @@ SOURCE_GROUP("Generated" FILES ${PROJECT_EDGE_SOURCES})
 # you may get some undesirable errors.
 
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -m64")
-IF($ENV{TCF_DEBUG_BUILD})
+IF(DEFINED ENV{TCF_DEBUG_BUILD} AND "$ENV{TCF_DEBUG_BUILD}" STREQUAL "1")
   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Og")
   ADD_DEFINITIONS(-DTCF_DEBUG_BUILD=1)
 ELSE()
   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2")
-  ADD_DEFINITIONS(-DTCF_DEBUG_BUILD=0)
+  REMOVE_DEFINITIONS(-DTCF_DEBUG_BUILD)
 ENDIF()
 
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -nostdinc")
@@ -220,7 +220,14 @@ SGX_SIGN_ENCLAVE(${PROJECT_NAME} ${TCF_ENCLAVE_CODE_SIGN_PEM} ${PROJECT_CONFIG})
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} -Wl,--whole-archive -lsgx_tsgxssl -Wl,--no-whole-archive)
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} -Wl,--whole-archive -l${TRTS_LIBRARY_NAME} -Wl,--no-whole-archive)
 
-TARGET_LINK_LIBRARIES(${PROJECT_NAME} -Wl,--start-group  -lttcf-common -ltcf_work_order_interface -lsgx_workload -lecho_wo -lheart_disease_eval -lsgx_tsgxssl_crypto -lsgx_tstdc -lsgx_tcxx -lsgx_tcrypto  -l${SERVICE_LIBRARY_NAME} -Wl,--end-group)
+TARGET_LINK_LIBRARIES(${PROJECT_NAME} -Wl,--whole-archive -lsgx_workload -ltcf_work_order_interface -Wl,--no-whole-archive)
+
+# Add echo workload
+TARGET_LINK_LIBRARIES(${PROJECT_NAME} -Wl,--whole-archive -lecho_wo -Wl,--no-whole-archive)
+# Add heart disease eval workload
+TARGET_LINK_LIBRARIES(${PROJECT_NAME} -Wl,--whole-archive -lheart_disease_eval -Wl,--no-whole-archive)
+
+TARGET_LINK_LIBRARIES(${PROJECT_NAME} -Wl,--start-group  -lttcf-common -lsgx_tsgxssl_crypto -lsgx_tstdc -lsgx_tcxx -lsgx_tcrypto  -l${SERVICE_LIBRARY_NAME} -Wl,--end-group)
 
 TARGET_INCLUDE_DIRECTORIES( ${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR} ${SGX_ENCLAVE_INCLUDE} ${SGX_INCLUDE})
 TARGET_INCLUDE_DIRECTORIES(${PROJECT_NAME} PRIVATE ${TCF_CORE_DIR}/common/packages/db_store ${TCF_TOP_DIR}/examples/apps)

@@ -15,6 +15,8 @@
 
 #include "echo.h"
 
+REGISTER_WORKLOAD_PROCESSOR("echo-result",EchoResult)
+
 EchoResult::EchoResult() {}
 
 EchoResult::~EchoResult() {}
@@ -25,8 +27,8 @@ std::string EchoResult::Process(std::string str_in) {
 
 void EchoResult::ProcessWorkOrder(
         std::string workload_id,
-        const ByteArray& participant_address,
-        const ByteArray& enclave_id,
+        const ByteArray& requester_id,
+        const ByteArray& worker_id,
         const ByteArray& work_order_id,
         const std::vector<tcf::WorkOrderData>& in_work_order_data,
         std::vector<tcf::WorkOrderData>& out_work_order_data) {
@@ -35,8 +37,7 @@ void EchoResult::ProcessWorkOrder(
     int out_wo_data_size = out_work_order_data.size();
 
     for (auto wo_data : in_work_order_data) {
-        // Execute the input data
-        //EchoResultImpl echo_result_impl;
+        // Process the input data
         result_str = Process(
             ByteArrayToString(wo_data.decrypted_data));
 

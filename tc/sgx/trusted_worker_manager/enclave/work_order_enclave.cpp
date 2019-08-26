@@ -35,16 +35,12 @@
 
 #include "base_enclave.h"
 #include "work_order_enclave.h"
-#include "worker.h"
 #include "enclave_data.h"
 #include "signup_enclave.h"
 
 #include "work_order_processor.h"
 
 ByteArray last_result;
-Worker *worker = NULL;
-static bool worker_initialized = false;
-static bool shutdown_worker = false;
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 tcf_err_t ecall_HandleWorkOrderRequest(const uint8_t* inSealedSignupData,
