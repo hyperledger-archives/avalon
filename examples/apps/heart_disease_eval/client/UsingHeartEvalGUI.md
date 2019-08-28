@@ -3,7 +3,7 @@
 1. In `docker/Dockerfile.tcf-dev` set `ENV DISPLAY` to be `[IP Address of host]:0`
 
    If needed, also update the ethereum account and direct registry contract information in `docker/Dockerfile.tcf-dev`  and `examples/common/python/connectors/tcf_connector.toml`   
-2. Follow instructions in the "Testing" section of the [build document](../../BUILD.md) up to step 2
+2. Follow instructions in the "Testing" section of the [build document](../../../../BUILD.md) up to step 2
 3. In Terminal 2, run `cd $TCF_HOME/tests/clients`
 4. Open a new terminal, Terminal 3.
 5. In Terminal 3 run `xhost +`

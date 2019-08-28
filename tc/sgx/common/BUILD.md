@@ -5,7 +5,7 @@ https://creativecommons.org/licenses/by/4.0/
 # Building the common libraries
 
 Make sure you have environment variables `SGX_SDK` and `SGX_SSL` defined
-(see [BUILD.md](../BUILD.md)) and then run
+(see [BUILD.md](../../../BUILD.md)) and then run
 ```
 mkdir build
 cd build
