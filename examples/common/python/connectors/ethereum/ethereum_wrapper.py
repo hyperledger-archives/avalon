@@ -17,6 +17,7 @@ import os,sys
 from os.path import exists, realpath
 import json
 from eth_utils.hexadecimal import is_hex
+from connectors.utils import construct_message
 
 from solc import compile_source
 from web3 import HTTPProvider, Web3
@@ -105,11 +106,13 @@ class EthereumWrapper():
         and wait for receipts
         """
         signed_txn = self.__w3.eth.account.signTransaction(tx_dict, private_key=self.__eth_private_key)
-        result = self.__w3.eth.sendRawTransaction(signed_txn.rawTransaction)
-        tx_receipt = self.__w3.eth.waitForTransactionReceipt(result, 120)
+        tx_hash = self.__w3.eth.sendRawTransaction(signed_txn.rawTransaction)
+        tx_receipt = self.__w3.eth.waitForTransactionReceipt(tx_hash.hex(), 120)
+        logging.info("executed transaction hash: %s, receipt: %s", format(tx_hash.hex()), format(tx_receipt))
         if tx_receipt is None:
-            return self.construct_message("failed", "timeout");
-
+            return construct_message("failed", "timeout")
+        if tx_receipt.status == 0:
+            return construct_message("failed", "transaction reverted")
         return {'status': 'added', 'txn_receipt': tx_receipt}
 
     def get_channel_id(self):
