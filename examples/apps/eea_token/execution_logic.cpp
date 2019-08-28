@@ -1,9 +1,16 @@
-/*
+/* Copyright 2019 iExec Blockchain Tech
 *
-* EEA Token Execution Logic
-* Lei.zhang@iex.ec
-* iExec Blockchain Tech
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
 *
+*     http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
 */
 
 #include <iostream>
@@ -158,7 +165,7 @@ string issue_burn_tokens (string input)
             if (stringConversion(sub_strings[j++], activityType)
                 && (stringConversion(sub_strings[j++], activityRealized))) {
                 int issue_burn_tokens_number = get_issue_burn_tokens_number(activityType, activityRealized);
-                // calculate the issue_buren token number if this activity have not been checked
+                // calculate the issue_burn token number if this activity have not been checked
                 if (activityArray[activityType] != 1) {
                     issue_burn.number += issue_burn_tokens_number;
                     activityArray[activityType] = 1;
@@ -189,18 +196,18 @@ string issue_burn_tokens (string input)
     // prepare result for issue_burn_token
     string issue_burn_token_str = "";
     for (unsigned int i = 0; i < issue_burn_v.size(); ++i) {
-        string seperate = "";
+        string separate = "";
         if (i < issue_burn_v.size() - 1)
-            seperate = ",";
-        issue_burn_token_str = issue_burn_token_str + issue_burn_v[i].name + "||" + toString(issue_burn_v[i].number) + seperate;
+            separate = ",";
+        issue_burn_token_str = issue_burn_token_str + issue_burn_v[i].name + "||" + toString(issue_burn_v[i].number) + separate;
     }
     // prepare result for individual_reputation
     string individual_reputation_str = "";
     for (unsigned int i = 0; i < individual_reputation_v.size(); ++i) {
-        string seperate = "";
+        string separate = "";
         if (i < individual_reputation_v.size() - 1)
-            seperate = ",";
-        individual_reputation_str = individual_reputation_str + individual_reputation_v[i].name + "||" + toString(individual_reputation_v[i].number) + seperate;
+            separate = ",";
+        individual_reputation_str = individual_reputation_str + individual_reputation_v[i].name + "||" + toString(individual_reputation_v[i].number) + separate;
     }
     resultString = toString(TYPE_ISSUE_BURN_TOKEN) + "\n"
                    + toString(RETURN_CODE) + "\n"
@@ -249,11 +256,11 @@ string redeem_tokens (string input)
     // prepare result for redeem_tokens
     string redeem_tokens_str = "";
     for (unsigned int i = 0; i < redeem_token_v.size(); ++i) {
-        string seperate = "";
+        string separate = "";
         if (i < redeem_token_v.size() - 1)
-            seperate = ",";
+            separate = ",";
         redeem_tokens_str = redeem_tokens_str + redeem_token_v[i].name + "||" 
-                           + toString(redeem_token_v[i].number) + seperate;
+                           + toString(redeem_token_v[i].number) + separate;
     }
     resultString = toString(TYPE_REDEEM_TOKEN) + "\n"
                    + toString(RETURN_CODE) + "\n"
@@ -310,12 +317,12 @@ string share_tokens (string input)
     // prepare result for share_tokens
     string share_tokens_str = "";
     for (unsigned int i = 0; i < share_token_v.size(); ++i) {
-        string seperate = "";
+        string separate = "";
         if (i < share_token_v.size() - 1)
-            seperate = ",";
+            separate = ",";
         share_tokens_str = share_tokens_str + share_token_v[i].from + "||" 
                            + toString(share_token_v[i].number) + "||"
-                           + share_token_v[i].to + seperate;
+                           + share_token_v[i].to + separate;
     }
     resultString = toString(TYPE_SHARE_TOKEN) + "\n"
                    + toString(RETURN_CODE) + "\n"
