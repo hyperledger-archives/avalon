@@ -59,7 +59,7 @@ class eth_cli:
 def main():
     tcf_home = os.environ.get("TCF_HOME", "../../")
     eth = eth_cli(tcf_home + "/examples/common/python/connectors/" + "tcf_connector.toml")
-    eth.deploy_contracts();
+    eth.deploy_contracts()
 
 if __name__ == '__main__':
     main()

@@ -55,6 +55,7 @@ orgId: %s\n applicationIds %s\n details %s",
             hex_to_utf(self.__org_id), pretty_ids(self.__application_ids), self.__details)
         result = self.__eth_conn.worker_register(self.__worker_id, self.__worker_type, 
             self.__org_id, self.__application_ids, self.__details)
+        self.assertIsNotNone(result["txn_receipt"], "transaction execution failed")
         logging.info("worker_register status \n{'status': %s', \n'txn_receipt': %s}", 
             result["status"], 
             json.dumps(json.loads(Web3.toJSON(result["txn_receipt"])), indent=4))
