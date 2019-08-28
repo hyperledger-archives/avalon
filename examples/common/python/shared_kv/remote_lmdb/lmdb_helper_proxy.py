@@ -13,11 +13,14 @@
 # limitations under the License.
 
 from service_client.generic import TextServiceClient
-from string_escape import escape, unescape
+# add the dot prefix to address the ModuleNotFoundError error
+from .string_escape import escape, unescape
 import logging
 
 logger = logging.getLogger(__name__)
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
+
+
 class LMDBHelperProxy:
     """
     LMDBHelperProxy passes commands serialized as strings 
@@ -30,7 +33,7 @@ class LMDBHelperProxy:
     def set_remote_uri(self, uri):
         self.__uri_client = TextServiceClient(uri)
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
     # Requests are serialized as: <cmd>\n<arg1>\n<arg2>...
 
     def set(self, table, key, value):
@@ -62,7 +65,7 @@ class LMDBHelperProxy:
         else:
             logger.error("Unknown response format")
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
     def get(self, table, key):
         """
         Function to get the value for a key in a lmdb table 
@@ -90,7 +93,7 @@ class LMDBHelperProxy:
         else:
             logger.error("Unknown response format")
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
     def remove(self, table, key, value=None):
         """
         Function to remove the value for a key in a lmdb table 
@@ -106,7 +109,7 @@ class LMDBHelperProxy:
              non-NULL only the matching data item will be deleted.
         """
         # Remove, table, key
-        request = "R\n" + escape(table) + "\n" +  escape(key)
+        request = "R\n" + escape(table) + "\n" + escape(key)
         if value is not None:
             request = "\n" + request + value.replace("\n", "\\n")
         response = self.__uri_client._postmsg(request).decode("utf-8")
@@ -126,7 +129,7 @@ class LMDBHelperProxy:
         else:
             logger.error("Unknown response format")
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
     def lookup(self, table):
         """
         Function to get all the keys in a lmdb table 

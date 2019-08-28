@@ -39,6 +39,7 @@ from tcs_work_order_handler import TCSWorkOrderHandler
 from tcs_worker_registry_handler import TCSWorkerRegistryHandler
 from tcs_workorder_receipt_handler import TCSWorkOrderReceiptHandler
 from tcs_worker_encryption_key_handler import WorkerEncryptionKeyHandler
+from shared_kv.remote_lmdb.lmdb_helper_proxy import LMDBHelperProxy
 from shared_kv.shared_kv_interface import KvStorage
 from error_code.error_status import WorkorderError
 import utility.utility as utility
@@ -46,8 +47,10 @@ import utility.utility as utility
 import logging
 logger = logging.getLogger(__name__)
 
-## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+# XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+# XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+
 class TCSListener(resource.Resource):
     """
     TCSListener Class  is comprised of HTTP interface which listens for the end user requests, 
@@ -58,24 +61,31 @@ class TCSListener(resource.Resource):
 
     isLeaf = True
 
-     ## -----------------------------------------------------------------
+    # -----------------------------------------------------------------
     def __init__(self, config):
 
         if config.get('KvStorage') is None:
             logger.error("Kv Storage path is missing")
             sys.exit(-1)
 
-        storage_path = TCFHOME + '/' + config['KvStorage']['StoragePath']
-        self.kv_helper = KvStorage()
-        if  not self.kv_helper.open(storage_path):
-            logger.error("Failed to open KV Storage DB")
-            sys.exit(-1)
+        if config["KvStorage"].get("remote_url") is None:
+            storage_path = TCFHOME + '/' + config['KvStorage']['StoragePath']
+            self.kv_helper = KvStorage()
+            if not self.kv_helper.open(storage_path):
+                logger.error("Failed to open KV Storage DB")
+                sys.exit(-1)
+            logger.info("employ the local LMDB")
+        else:
+            database_url = config["KvStorage"]["remote_url"]
+            logger.info(f"connect to remote LMDB @{database_url}")
+            self.kv_helper = LMDBHelperProxy(database_url)
 
         # Worker registry handler needs to be instantiated before Work order handler. Otherwise, LMDB operations don't operate on updated values.
         # TODO: Needs further investigation on what is causing the above behavior.
 
         self.worker_registry_handler = TCSWorkerRegistryHandler(self.kv_helper)
-        self.workorder_handler = TCSWorkOrderHandler(self.kv_helper, config["Listener"]["max_work_order_count"])
+        self.workorder_handler = TCSWorkOrderHandler(
+            self.kv_helper, config["Listener"]["max_work_order_count"])
         self.workorder_receipt_handler = TCSWorkOrderReceiptHandler(self.kv_helper)
         self.worker_encryption_key_handler = WorkerEncryptionKeyHandler(self.kv_helper)
 
@@ -91,7 +101,7 @@ class TCSListener(resource.Resource):
             return response
 
         if ('jsonrpc' not in input_json or 'id' not in input_json
-            or 'method' not in input_json or 'params' not in input_json):
+                or 'method' not in input_json or 'params' not in input_json):
             response['error']['message'] = 'Error: Json does not have the required field'
             return response
 
@@ -106,8 +116,8 @@ class TCSListener(resource.Resource):
             response['error']['message'] = 'Error: Method has to be of type string'
             return response
 
-        if ( (input_json['method'] == "WorkOrderSubmit")     or
-            (input_json['method'] == "WorkOrderGetResult")):
+        if ((input_json['method'] == "WorkOrderSubmit") or
+                (input_json['method'] == "WorkOrderGetResult")):
             return self.workorder_handler.process_work_order(input_json_str)
         elif("WorkOrderReceipt" in input_json['method']):
             return self.workorder_receipt_handler.workorder_receipt_handler(input_json_str)
@@ -123,8 +133,8 @@ class TCSListener(resource.Resource):
         # JRPC response with id 0 is returned because id parameter
         # will not be found in GET request
         response = utility.create_error_response(
-                WorkorderError.INVALID_PARAMETER_FORMAT_OR_VALUE, "0",
-                "Only POST request is supported")
+            WorkorderError.INVALID_PARAMETER_FORMAT_OR_VALUE, "0",
+            "Only POST request is supported")
         logger.error("GET request is not supported. Only POST request is supported")
 
         return response
@@ -133,11 +143,11 @@ class TCSListener(resource.Resource):
         response = {}
 
         logger.info('Received a new request from the client')
-        try :
+        try:
             # process the message encoding
             encoding = request.getHeader('Content-Type')
             data = request.content.read()
-            if encoding == 'application/json' :
+            if encoding == 'application/json':
 
                 try:
                     input_json_str = json.loads(data.decode('utf-8'))
@@ -153,45 +163,47 @@ class TCSListener(resource.Resource):
                         "UNKNOWN_ERROR: Error while loading the input JSON file")
                     return response
 
-            else :
+            else:
                 # JRPC response with 0 as id is returned because id can't be fecthed
                 # from a request with unknown encoding
                 response = utility.create_error_response(
-                        WorkorderError.UNKNOWN_ERROR,
-                        0,
-                        "UNKNOWN_ERROR: unknown message encoding")
+                    WorkorderError.UNKNOWN_ERROR,
+                    0,
+                    "UNKNOWN_ERROR: unknown message encoding")
                 return response
 
-        except :
+        except:
             logger.exception('exception while decoding http request %s', request.path)
             # JRPC response with 0 as id is returned because id can't be
             # fetched from improper request
             response = utility.create_error_response(
-                    WorkorderError.UNKNOWN_ERROR,
-                    0,
-                    "UNKNOWN_ERROR: unable to decode incoming request")
+                WorkorderError.UNKNOWN_ERROR,
+                0,
+                "UNKNOWN_ERROR: unable to decode incoming request")
             return response
 
         # send back the results
-        try :
-            if encoding == 'application/json' :
+        try:
+            if encoding == 'application/json':
                 response = json.dumps(response)
             logger.info('response[%s]: %s', encoding, response)
             request.setHeader('content-type', encoding)
             request.setResponseCode(http.OK)
             return response.encode('utf8')
 
-        except :
+        except:
             logger.exception('unknown exception while processing request %s', request.path)
             response = utility.create_error_response(
-                    WorkorderError.UNKNOWN_ERROR,
-                    jrpc_id,
-                    "UNKNOWN_ERROR: unknown exception processing http \
+                WorkorderError.UNKNOWN_ERROR,
+                jrpc_id,
+                "UNKNOWN_ERROR: unknown exception processing http \
                     request {0}".format(request.path))
             return response
 
 # -----------------------------------------------------------------
 # -----------------------------------------------------------------
+
+
 def local_main(config):
 
     root = TCSListener(config)
@@ -200,71 +212,75 @@ def local_main(config):
 
     logger.info('TCS Listener started on port %s', bind_uri)
 
-    try :
+    try:
         reactor.run()
     except ReactorNotRunning:
         logger.warn('shutdown')
-    except :
+    except:
         logger.warn('shutdown')
 
     exit(0)
 
-## -----------------------------------------------------------------
+# -----------------------------------------------------------------
+
 
 TCFHOME = os.environ.get("TCF_HOME", "../../../../")
 
 # -----------------------------------------------------------------
 # -----------------------------------------------------------------
-def parse_command_line(config, args) :
+
+
+def parse_command_line(config, args):
 
     global bind_uri
 
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('--logfile', help='Name of the log file, __screen__ for standard output', type=str)
+    parser.add_argument(
+        '--logfile', help='Name of the log file, __screen__ for standard output', type=str)
     parser.add_argument('--loglevel', help='Logging level', type=str)
-    parser.add_argument('--bind_uri', help='URI to listen for requests ',type=str)
+    parser.add_argument('--bind_uri', help='URI to listen for requests ', type=str)
 
     options = parser.parse_args(args)
 
-    if config.get('Logging') is None :
+    if config.get('Logging') is None:
         config['Logging'] = {
-            'LogFile' : '__screen__',
-            'LogLevel' : 'INFO'
+            'LogFile': '__screen__',
+            'LogLevel': 'INFO'
         }
-    if options.logfile :
+    if options.logfile:
         config['Logging']['LogFile'] = options.logfile
-    if options.loglevel :
+    if options.loglevel:
         config['Logging']['LogLevel'] = options.loglevel.upper()
-    if options.bind_uri :
+    if options.bind_uri:
         bind_uri = options.bind_uri
 
 
 # -----------------------------------------------------------------
 # -----------------------------------------------------------------
-def main(args=None) :
+def main(args=None):
     import config.config as pconfig
     import utility.logger as plogger
 
     # parse out the configuration file first
-    conffiles = [ 'tcs_config.toml' ]
-    confpaths = [ ".", TCFHOME + "/config"]
+    conffiles = ['tcs_config.toml']
+    confpaths = [".", TCFHOME + "/config"]
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--config', help='configuration file', nargs = '+')
-    parser.add_argument('--config-dir', help='configuration folder', nargs = '+')
+    parser.add_argument('--config', help='configuration file', nargs='+')
+    parser.add_argument('--config-dir', help='configuration folder', nargs='+')
     (options, remainder) = parser.parse_known_args(args)
 
-    if options.config :
+    if options.config:
         conffiles = options.config
 
-    if options.config_dir :
+    if options.config_dir:
         confpaths = options.config_dir
 
-    try :
+    try:
         config = pconfig.parse_configuration_files(conffiles, confpaths)
         config_json_str = json.dumps(config, indent=4)
-    except pconfig.ConfigurationException as e :
+    except pconfig.ConfigurationException as e:
         logger.error(str(e))
         sys.exit(-1)
 
@@ -274,5 +290,6 @@ def main(args=None) :
 
     parse_command_line(config, remainder)
     local_main(config)
+
 
 main()

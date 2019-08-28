@@ -16,6 +16,7 @@ import os
 import sys
 import argparse
 import json
+from urllib.parse import urlparse
 from twisted.web import server
 from twisted.internet import reactor
 
@@ -27,92 +28,105 @@ logger = logging.getLogger(__name__)
 TCFHOME = os.environ.get("TCF_HOME", "../../../../")
 
 # -----------------------------------------------------------------
+
+
 def local_main(config):
 
     root = LMDBRequestHandler(config)
     site = server.Site(root)
-    reactor.listenTCP(int(bind_port), site)
-
+    reactor.listenTCP(bind_port, site)
     logger.info('LMDB Listener started on port %s', bind_port)
 
-    try :
+    try:
         reactor.run()
     except ReactorNotRunning:
         logger.warn('shutdown')
-    except :
+    except:
         logger.warn('shutdown')
 
     exit(0)
 
 # -----------------------------------------------------------------
-def parse_command_line(config, args) :
+
+
+def parse_command_line(config, args):
 
     global bind_port
 
+    if config.get("KvStorage") is None or config["KvStorage"].get("remote_url") is None:
+        logger.warn("quit due to no suitable config for remote KvStorage")
+        sys.exit(-1)
+
+    # TODO: guard against None url_str
+    url = urlparse(config["KvStorage"]["remote_url"])
+    default_port = url.port
+    logger.info(f"update default_port as {default_port} from TOML")
+
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('--logfile', 
-        help='Name of the log file, __screen__ for standard output', 
-        type=str)
-    parser.add_argument('--loglevel', 
-        help='Logging level', 
-        type=str)
-    parser.add_argument('bind_port', 
-        help='Port to listen for requests',
-        type=str)
+    parser.add_argument('--logfile',
+                        help='Name of the log file, __screen__ for standard output',
+                        type=str)
+    parser.add_argument('--loglevel',
+                        help='Logging level',
+                        type=str)
+    parser.add_argument('--bind_port',
+                        help='Port to listen for requests',
+                        type=int,
+                        default=default_port)
 
     options = parser.parse_args(args)
 
-    if config.get('Logging') is None :
+    if config.get('Logging') is None:
         config['Logging'] = {
-            'LogFile' : '__screen__',
-            'LogLevel' : 'INFO'
+            'LogFile': '__screen__',
+            'LogLevel': 'INFO'
         }
-    if options.logfile :
+    if options.logfile:
         config['Logging']['LogFile'] = options.logfile
-    if options.loglevel :
+    if options.loglevel:
         config['Logging']['LogLevel'] = options.loglevel.upper()
-    if options.bind_port :
+    if options.bind_port:
         bind_port = options.bind_port
 
 # -----------------------------------------------------------------
-def main(args=None) :
+
+
+def main(args=None):
     import config.config as pconfig
     import utility.logger as plogger
 
     # Parse out the configuration file first
-    conffiles = [ 'tcs_config.toml' ]
-    confpaths = [ ".", TCFHOME + "/config"]
+    conffiles = ['tcs_config.toml']
+    confpaths = [".", TCFHOME + "/config"]
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--config', 
-        help='configuration file', 
-        nargs = '+')
-    parser.add_argument('--config-dir', 
-        help='configuration folder', 
-        nargs = '+')
+    parser.add_argument('--config',
+                        help='configuration file',
+                        nargs='+')
+    parser.add_argument('--config-dir',
+                        help='configuration folder',
+                        nargs='+')
     (options, remainder) = parser.parse_known_args(args)
 
-    if options.config :
+    if options.config:
         conffiles = options.config
 
-    if options.config_dir :
+    if options.config_dir:
         confpaths = options.config_dir
 
-    try :
+    try:
         config = pconfig.parse_configuration_files(conffiles, confpaths)
-        config_json_str = json.dumps(config, indent=4)
-    except pconfig.ConfigurationException as e :
+    except pconfig.ConfigurationException as e:
         logger.error(str(e))
         sys.exit(-1)
 
     plogger.setup_loggers(config.get('Logging', {}))
-    sys.stdout = plogger.stream_to_logger(
-        logging.getLogger('STDOUT'), logging.DEBUG)
-    sys.stderr = plogger.stream_to_logger(
-        logging.getLogger('STDERR'), logging.WARN)
+    sys.stdout = plogger.stream_to_logger(logging.getLogger('STDOUT'), logging.DEBUG)
+    sys.stderr = plogger.stream_to_logger(logging.getLogger('STDERR'), logging.WARN)
 
     parse_command_line(config, remainder)
     local_main(config)
+
 
 main()
