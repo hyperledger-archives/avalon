@@ -26,6 +26,9 @@ SRCDIR="$(realpath ${SCRIPTDIR}/..)"
 # Remove private pem file used to sign enclave binary
 rm -f $SRCDIR/enclave.pem
 
+# Remove generated ias-certificate file
+rm -f $SRCDIR/tc/sgx/common/crypto/verify_ias_report/ias-certificates.cpp
+
 # Remove LMDB files
 echo "******** DELETE LMDB FILES **************"
 rm -f $SRCDIR/config/Kv_Shared*

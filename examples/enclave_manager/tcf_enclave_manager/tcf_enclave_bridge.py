@@ -173,6 +173,17 @@ def get_enclave_basename():
 
 # -----------------------------------------------------------------
 # -----------------------------------------------------------------
+def verify_enclave_info(enclave_info, mr_enclave, originator_public_key_hash):
+    """
+    Verifies enclave signup info
+    - enclave_info is a JSON serialised enclave signup info
+      along with IAS attestation report
+    - mr_enclave is enclave measurement value
+    """
+    return enclave.VerifyEnclaveInfo(enclave_info, mr_enclave, originator_public_key_hash)
+
+# -----------------------------------------------------------------
+# -----------------------------------------------------------------
 def create_signup_info(originator_public_key_hash, nonce):
     """
     Create enclave signup data
@@ -222,16 +233,20 @@ def create_signup_info(originator_public_key_hash, nonce):
                 'ias_report_signature': response['ias_signature'],
                 'ias_report_signing_certificate': response['ias_certificate']
             })
-
         # Grab the EPID pseudonym and put it in the enclave-persistent ID for the
         # signup info
         verification_report_dict = json.loads(response['verification_report'])
         signup_info['enclave_persistent_id'] = verification_report_dict.get('epidPseudonym')
 
+        mr_enclave = get_enclave_measurement()
+        status = verify_enclave_info(json.dumps(signup_info), mr_enclave, originator_public_key_hash)
+        if status != 0:
+            logger.error("Verification of enclave signup info failed")
+        else:
+            logger.info("Verification of enclave signup info passed")
     # Now we can finally serialize the signup info and create a corresponding
     # signup info object. Because we don't want the sealed signup data in the
     # serialized version, we set it separately.
-
     signup_info_obj = enclave.deserialize_signup_info(json.dumps(signup_info))
     signup_info_obj.sealed_signup_data = signup_data['sealed_enclave_data']
 

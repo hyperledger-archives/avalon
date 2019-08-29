@@ -105,6 +105,7 @@ RUN OPENSSL_VER=1.1.1d \
  && make test \
  && make install -j$THREADS \
  && ldconfig \
+ && ln -s /etc/ssl/certs/* /usr/local/ssl/certs/ \
  && cd .. \
  && rm -rf openssl-$OPENSSL_VER \
  && git clone https://github.com/intel/intel-sgx-ssl.git  \

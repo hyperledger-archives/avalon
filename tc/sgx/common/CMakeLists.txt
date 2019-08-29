@@ -23,11 +23,22 @@ INCLUDE(CMakeVariables.txt)
 # Common components for both trusted and untrusted common libraries
 ################################################################################
 
-FILE(GLOB PROJECT_HEADERS *.h crypto/*.h packages/base64/*.h packages/parson/*.h)
-FILE(GLOB PROJECT_SOURCES *.cpp crypto/*.cpp packages/base64/*.cpp packages/parson/*.cpp)
+FILE(GLOB PROJECT_HEADERS *.h crypto/*.h crypto/verify_ias_report/*.h packages/base64/*.h packages/parson/*.h)
+FILE(GLOB PROJECT_SOURCES *.cpp crypto/*.cpp crypto/verify_ias_report/*.cpp packages/base64/*.cpp packages/parson/*.cpp)
 
-SET(COMMON_PRIVATE_INCLUDE_DIRS "." "tests" "crypto" "packages/base64" "packages/parson" "state")
+SET(COMMON_PRIVATE_INCLUDE_DIRS "." "tests" "crypto" "crypto/verify_ias_report" "packages/base64" "packages/parson" "state")
 SET(COMMON_CXX_FLAGS ${DEBUG_FLAGS} "-m64" "-fvisibility=hidden" "-fpie" "-fPIC" "-fstack-protector" "-std=c++11" "-Wall")
+
+################################################################################
+# Generated source
+################################################################################
+
+SET(PROJECT_GENERATED_IAS_SOURCES ${CMAKE_CURRENT_BINARY_DIR}/../crypto/verify_ias_report/ias-certificates.cpp)
+add_custom_command(OUTPUT  ${PROJECT_GENERATED_IAS_SOURCES}
+                     COMMAND ./build_ias_certificates_cpp.sh
+                     DEPENDS crypto/verify_ias_report/ias-certificates.template crypto/verify_ias_report/build_ias_certificates_cpp.sh
+                     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../crypto/verify_ias_report
+)
 
 ################################################################################
 # Untrusted Common Library
@@ -38,7 +49,7 @@ PROJECT(${UNTRUSTED_LIB_NAME} CXX)
 
 pkg_check_modules (OPENSSL REQUIRED openssl>=1.1.0h)
 
-ADD_LIBRARY(${UNTRUSTED_LIB_NAME} STATIC ${PROJECT_HEADERS} ${PROJECT_SOURCES})
+ADD_LIBRARY(${UNTRUSTED_LIB_NAME} STATIC ${PROJECT_HEADERS} ${PROJECT_GENERATED_IAS_SOURCES} ${PROJECT_SOURCES})
 
 TARGET_INCLUDE_DIRECTORIES(${UNTRUSTED_LIB_NAME} PRIVATE ${COMMON_PRIVATE_INCLUDE_DIRS})
 TARGET_INCLUDE_DIRECTORIES(${UNTRUSTED_LIB_NAME} PUBLIC ${SGX_SDK}/include)
@@ -76,7 +87,7 @@ if(NOT UNTRUSTED_ONLY)
 	SET(TRUSTED_LIB_NAME ttcf-common)
 	PROJECT(${TRUSTED_LIB_NAME} CXX)
 
-	ADD_LIBRARY(${TRUSTED_LIB_NAME} STATIC ${PROJECT_HEADERS} ${PROJECT_SOURCES})
+	ADD_LIBRARY(${TRUSTED_LIB_NAME} STATIC ${PROJECT_HEADERS} ${PROJECT_GENERATED_IAS_SOURCES} ${PROJECT_SOURCES})
 
 	TARGET_INCLUDE_DIRECTORIES(${TRUSTED_LIB_NAME} PRIVATE ${COMMON_PRIVATE_INCLUDE_DIRS})
 	TARGET_INCLUDE_DIRECTORIES(${TRUSTED_LIB_NAME} PUBLIC ${SGX_SDK}/include)

@@ -143,7 +143,6 @@ std::map<std::string, std::string> CreateEnclaveData(
     const std::string& originator_public_key_hash
     ) {
     tcf_err_t presult;
-
     // Create some buffers for receiving the output parameters
     StringArray public_enclave_data(0);  // CreateEnclaveData will resize appropriately
     Base64EncodedString sealed_enclave_data;
@@ -206,3 +205,15 @@ std::map<std::string, std::string> UnsealEnclaveData(
 
     return result;
 }  // _unseal_signup_data
+
+// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+size_t VerifyEnclaveInfo(const std::string& enclaveInfo,
+                            const std::string& mr_enclave,
+                            const std::string& originator_public_key_hash) {
+    tcf_err_t result = tcf::enclave_api::enclave_data::VerifyEnclaveInfo(enclaveInfo,
+                    mr_enclave, originator_public_key_hash);
+    size_t verify_status = result;
+    return verify_status;
+}  // VerifyEnclaveInfo
+
+

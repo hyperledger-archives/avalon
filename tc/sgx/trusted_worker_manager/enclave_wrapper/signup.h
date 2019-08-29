@@ -34,6 +34,9 @@ namespace tcf {
                 const Base64EncodedString& inSealedEnclaveData,
                 StringArray& outPublicEnclaveData);
 
+            tcf_err_t VerifyEnclaveInfo(const std::string& enclaveInfo,
+                const std::string& mr_enclave,
+                const std::string& originator_public_key_hash);
         }  /* namespace signup */
 
     }  /* namespace enclave_api */

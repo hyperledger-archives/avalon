@@ -45,7 +45,8 @@ test -e AttestationReportSigningCACert.pem
 echo ""
 echo -n "Building ias-certificates.cpp ... "
 #replace the placemark in the template with the der certificate
-sed -e '/IAS_REPORT_SIGNING_CA_CERT_PEM_PLACEMARK/ r ./AttestationReportSigningCACert.pem' -e 's/IAS_REPORT_SIGNING_CA_CERT_PEM_PLACEMARK//' < ias-certificates.template > ias-certificates.cpp
+sed -e '/IAS_REPORT_SIGNING_CA_CERT_PEM_PLACEMARK/ r ./AttestationReportSigningCACert.pem' \
+    -e 's/IAS_REPORT_SIGNING_CA_CERT_PEM_PLACEMARK//' < ias-certificates.template > ias-certificates.cpp
 test -e ias-certificates.cpp
 echo "done"
 
