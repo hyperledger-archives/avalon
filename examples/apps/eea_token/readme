@@ -1,7 +1,9 @@
 
-EEA token execution logic allows running the execution logic based on token requests, alse see check https://github.com/EntEthAlliance/Trusted-Token
-token_validation.cpp is for Scone platform execution.
-Please directly call the method "string token_valid_procedure(string input)" in execution_logic.cpp for other SGX frameworks.
+EEA token execution logic allows running the execution logic based on token requests,
+alse see check https://github.com/EntEthAlliance/Trusted-Token token_validation.cpp
+is for Scone platform execution.
+Please directly call the method "string token_valid_procedure(string input)" in
+execution_logic.cpp for other SGX frameworks.
 
 
 **********************************************************************

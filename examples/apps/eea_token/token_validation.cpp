@@ -1,12 +1,16 @@
-/*
+/* Copyright 2019 iExec Blockchain Tech
 *
-* EEA Token Validation
-* Lei.zhang@iex.ec
-* iExec Blockchain Tech
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
 *
-* Note: This file is ONLY for Scone platform execution
-* Please check execution_logic.c if you want to run Token execution logic 
+*     http://www.apache.org/licenses/LICENSE-2.0
 *
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
 */
 
 #include <stdio.h>
@@ -44,7 +48,7 @@ char* read_file(const char* filename, size_t* size)
 
     char *string = (char *)malloc(fsize + 1);
     if (string == NULL) {
-        fprintf(stderr, "cannot allocated sufficient memory '%ld' for file '%s'\n", fsize, filename);
+        fprintf(stderr, "cannot allocate sufficient memory '%ld' for file '%s'\n", fsize, filename);
         fclose(f);
         return NULL;
     }
@@ -182,7 +186,7 @@ static int checkAllInputFiles(char* curpath, char* const path, const char* prefi
 }
 
 /*
-* copyies files from directory  "/encryptedInputs" to "/encryptedOutputs"
+* Copies files from directory  "/encryptedInputs" to "/encryptedOutputs"
 *
 * note that the files in "/encryptedInputs" will be transparently decrypted by SCONE
 * note that the files in "/encryptedOutputs" will be transparently encrypted by SCONE
@@ -192,7 +196,7 @@ int main(int argc, char** argv) {
     //TEST
     // token_validation("test/token_request","test/output");
 
-    /* This is for transparently encryption and decryption for Scone secure container */
+    /* This is for transparent encryption and decryption for Scone secure container */
     printf("%s: # arguments = %d", argv[0], argc);
     for (int i = 1 ; i < argc ; ++i)
         printf("   argument %d: %s", i, argv[i]);
