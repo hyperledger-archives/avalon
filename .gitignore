@@ -1,0 +1,27 @@
+# IDE
+.vscode/
+
+# build files
+common/sgx_workload/build/
+config/Kv_Shared_tmp
+config/Kv_Shared_tmp-lock
+enclave.pem
+examples/apps/build/
+examples/common/python/build/
+examples/common/python/connectors/direct/tcs_listener/__pycache__/
+examples/common/python/crypto/crypto.py
+examples/common/python/crypto/crypto_wrap.cpp
+examples/common/python/dist/
+examples/common/python/tcf_examples_common.egg-info/
+examples/enclave_manager/build/
+examples/enclave_manager/dist/
+examples/enclave_manager/tcf_enclave_manager.egg-info/
+examples/enclave_manager/tcf_enclave_manager/__pycache__/
+examples/enclave_manager/tcf_enclave_manager/tcf_enclave.py
+examples/enclave_manager/tcf_enclave_manager/tcf_enclave_wrap.cpp
+tc/sgx/common/build/
+tc/sgx/trusted_worker_manager/enclave/build/
+tc/sgx/trusted_worker_manager/enclave/deps/
+tc/sgx/trusted_worker_manager/enclave_wrapper/enclave_u.c
+tc/sgx/trusted_worker_manager/enclave_wrapper/enclave_u.h
+tools/build/_dev/
