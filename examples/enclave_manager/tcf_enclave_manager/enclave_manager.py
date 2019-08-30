@@ -22,6 +22,7 @@ import json
 
 import tcf_enclave_helper as enclave_helper
 from error_code.error_status import WorkOrderStatus
+from shared_kv.remote_lmdb.lmdb_helper_proxy import LMDBHelperProxy
 from shared_kv.shared_kv_interface import KvStorage
 import workorder_request.sgx_workorder_request as workorder_request
 from utility.tcf_types import WorkerStatus, WorkerType
@@ -34,11 +35,14 @@ logger = logging.getLogger(__name__)
 # representation of the enclave data
 enclave_data = None
 
-## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+# XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+
 class EnclaveManager:
     """
     Wrapper for managing Worker data
     """
+
     def __init__(self, config, signup_data, measurements):
         self.config = config
 
@@ -94,13 +98,14 @@ class EnclaveManager:
                 try:
                     wo_resp = json.loads(wo_json_resp)
                 except ValueError as e:
-                    logger.error("Invalid JSON format found for the response for workorder %s - %s", wo, e)
+                    logger.error(
+                        "Invalid JSON format found for the response for workorder %s - %s", wo, e)
                     if wo_processed is None:
                         kv_helper.set("wo-processed", wo, WorkOrderStatus.FAILED.name)
                     kv_helper.remove("wo-processing", wo)
                     continue
 
-                if "Response" in wo_resp and wo_resp["Response"]["Status"] ==  WorkOrderStatus.FAILED:
+                if "Response" in wo_resp and wo_resp["Response"]["Status"] == WorkOrderStatus.FAILED:
                     if wo_processed is None:
                         kv_helper.set("wo-processed", wo, WorkOrderStatus.FAILED.name)
                     logger.error("Work order processing failed, removing it from wo-processing table")
@@ -118,7 +123,7 @@ class EnclaveManager:
                 if wo_processed is None:
                     kv_helper.set("wo-processed", wo, WorkOrderStatus.SUCCESS.name)
             else:
-                logger.info("No response found for the workorder %s," \
+                logger.info("No response found for the workorder %s,"
                             "hence placing the workorder request back in wo-scheduled", wo)
                 kv_helper.set("wo-scheduled", wo,  WorkOrderStatus.SCHEDULED.name)
 
@@ -152,14 +157,14 @@ class EnclaveManager:
                 # Get JSON workorder request corresponding to wo_id
                 wo_json_req = kv_helper.get("wo-requests", wo_id)
                 if wo_json_req is None:
-                    logger.error("Received empty work order corresponding to id %s" \
-                                        "from wo-requests table", wo_id)
+                    logger.error("Received empty work order corresponding to id %s"
+                                 "from wo-requests table", wo_id)
                     kv_helper.remove("wo-processing", wo_id)
                     return
 
             except Exception as e:
-                logger.error("Problem while reading the work order %s" \
-                                    "from wo-requests table", wo_id)
+                logger.error("Problem while reading the work order %s"
+                             "from wo-requests table", wo_id)
                 kv_helper.remove("wo-processing", wo_id)
                 return
 
@@ -173,8 +178,9 @@ class EnclaveManager:
             validation_status = validate_request(wo_json_req)
 
             if not validation_status:
-                logger.error("JSON validation for Workorder %s failed. Handling Failure scenarios", wo_id)
-                wo_response["Response"]["Status"] =  WorkOrderStatus.FAILED
+                logger.error(
+                    "JSON validation for Workorder %s failed. Handling Failure scenarios", wo_id)
+                wo_response["Response"]["Status"] = WorkOrderStatus.FAILED
                 wo_response["Response"]["Message"] = "Workorder JSON request is invalid"
                 kv_helper.set("wo-responses", wo_id, json.dumps(wo_response))
                 kv_helper.set("wo-processed", wo_id,  WorkOrderStatus.FAILED.name)
@@ -185,7 +191,7 @@ class EnclaveManager:
             logger.info("Execute workorder with id %s", wo_id)
             wo_json_resp = execute_work_order(self.enclave_data, wo_json_req)
             wo_resp = json.loads(wo_json_resp)
-            if "Response" in wo_resp and wo_resp["Response"]["Status"] ==  WorkOrderStatus.FAILED:
+            if "Response" in wo_resp and wo_resp["Response"]["Status"] == WorkOrderStatus.FAILED:
                 logger.error("error in Response")
                 kv_helper.set("wo-processed", wo_id, WorkOrderStatus.FAILED.name)
                 kv_helper.set("wo-responses", wo_id, wo_json_resp)
@@ -225,6 +231,8 @@ def create_enclave_signup_data():
     return enclave_signup_data
 
 # -----------------------------------------------------------------
+
+
 def execute_work_order(enclave_data, input_json_str, indent=4):
     """
     Submits workorder request to Worker enclave and retrieves the response 
@@ -239,13 +247,13 @@ def execute_work_order(enclave_data, input_json_str, indent=4):
             json_response = json.dumps(wo_response, indent=indent)
         except:
             logger.error("ERROR: Failed to serialize JSON")
-            wo_response["Response"]["Status"] =  WorkOrderStatus.FAILED
+            wo_response["Response"]["Status"] = WorkOrderStatus.FAILED
             wo_response["Response"]["Message"] = "Failed to serialize JSON"
             json_response = json.dumps(wo_response)
 
     except Exception as e:
         logger.error("failed to execute work order; %s", str(e))
-        wo_response["Response"]["Status"] =  WorkOrderStatus.FAILED
+        wo_response["Response"]["Status"] = WorkOrderStatus.FAILED
         wo_response["Response"]["Message"] = str(e)
         json_response = json.dumps(wo_response)
 
@@ -298,8 +306,10 @@ def create_json_worker(enclave_data, config):
     details_info["workOrderPullUri"] = config.get("WorkerConfig")["WorkOrderPullUri"]
     details_info["workOrderNotifyUri"] = config.get("WorkerConfig")["WorkOrderNotifyUri"]
     details_info["receiptInvocationUri"] = config.get("WorkerConfig")["ReceiptInvocationUri"]
-    details_info["workOrderInvocationAddress"] = config.get("WorkerConfig")["WorkOrderInvocationAddress"]
-    details_info["receiptInvocationAddress"] = config.get("WorkerConfig")["ReceiptInvocationAddress"]
+    details_info["workOrderInvocationAddress"] = config.get(
+        "WorkerConfig")["WorkOrderInvocationAddress"]
+    details_info["receiptInvocationAddress"] = config.get(
+        "WorkerConfig")["ReceiptInvocationAddress"]
     details_info["fromAddress"] = config.get("WorkerConfig")["FromAddress"]
     details_info["hashingAlgorithm"] = config.get("WorkerConfig")["HashingAlgorithm"]
     details_info["signingAlgorithm"] = config.get("WorkerConfig")["SigningAlgorithm"]
@@ -342,8 +352,17 @@ def start_enclave_manager(config):
     logger.info("Enclave manager started")
 
     try:
-        kv_helper = KvStorage()
-        kv_helper.open(TCFHOME + "/" + config["KvStorage"]["StoragePath"])
+        if config["KvStorage"].get("remote_url") is None:
+            storage_path = TCFHOME + '/' + config['KvStorage']['StoragePath']
+            kv_helper = KvStorage()
+            if not kv_helper.open(storage_path):
+                logger.error("Failed to open KV Storage DB")
+                sys.exit(-1)
+            logger.info("employ the local LMDB")
+        else:
+            database_url = config["KvStorage"]["remote_url"]
+            logger.info(f"connect to remote LMDB @{database_url}")
+            kv_helper = LMDBHelperProxy(database_url)
     except:
         logger.error("Failed to open KV storage interface, Exiting SGX Enclave manager...")
         exit(1)
@@ -372,10 +391,13 @@ def start_enclave_manager(config):
         logger.error("Error while processing work-order. Shutting down enclave manager")
         exit(1)
 
+
 TCFHOME = os.environ.get("TCF_HOME", "../../../../")
 
 # -----------------------------------------------------------------
 # -----------------------------------------------------------------
+
+
 def parse_command_line(config, args):
     """
     Parse command line arguments
@@ -384,8 +406,9 @@ def parse_command_line(config, args):
 
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("--logfile", help="Name of the log file, __screen__ for standard output", type=str)
-    parser.add_argument("--loglevel", help="Logging level", type=str)
+    parser.add_argument(
+        "--logfile", help="Name of the log file, __screen__ for standard output", type=str)
+    parser.add_argument("--loglevel", help="Logging leve", type=str)
 
     options = parser.parse_args(args)
 

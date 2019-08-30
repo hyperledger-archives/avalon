@@ -16,15 +16,16 @@ import json
 import logging
 import crypto.crypto as crypto
 from error_code.error_status import WorkerError
-from shared_kv.shared_kv_interface import KvStorage
 import utility.utility as utility
 
 logger = logging.getLogger(__name__)
-#No of bytes of encryptionKeyNonce to encrypt data
+# No of bytes of encryptionKeyNonce to encrypt data
 NO_OF_BYTES = 16
 
-## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+# XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+# XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+
 class WorkerEncryptionKeyHandler:
     """
     TCSEncryptionKeyHandler processes Workers Encryption Key Direct API requests. 
@@ -32,7 +33,8 @@ class WorkerEncryptionKeyHandler:
     in section Appendix A: Worker Specific Detailed Data.
     """
 # ------------------------------------------------------------------------------------------------
-    def __init__(self,kv_helper):
+
+    def __init__(self, kv_helper):
         """
         Function to perform init activity
         Parameters:
@@ -41,7 +43,7 @@ class WorkerEncryptionKeyHandler:
 
         self.kv_helper = kv_helper
 
-#---------------------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------------------------
     def process_encryption_key(self, input_json_str):
         """
         Function to process encryption key request
@@ -51,7 +53,7 @@ class WorkerEncryptionKeyHandler:
         """
 
         input_json = json.loads(input_json_str)
-        logger.info("Received encryption key request : %s",input_json['method'])
+        logger.info("Received encryption key request : %s", input_json['method'])
 
         response = {}
         response['jsonrpc'] = '2.0'
@@ -61,10 +63,10 @@ class WorkerEncryptionKeyHandler:
             return self.__process_encryption_key_get(input_json_str, response)
         elif(input_json['method'] == "EncryptionKeySet"):
             return self.__process_encryption_key_set(input_json_str, response)
-        else :
+        else:
             return None
 
-#---------------------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------------------------
     def __process_encryption_key_set(self, input_json_str, response):
         """
         Function to process set encryption key request.
@@ -76,11 +78,11 @@ class WorkerEncryptionKeyHandler:
         input_json = json.loads(input_json_str)
         jrpc_id = input_json["id"]
         response = utility.create_error_response(
-                WorkerError.INVALID_PARAMETER_FORMAT_OR_VALUE, jrpc_id,
-                "Operation is not supported. Hence invalid parameter")
+            WorkerError.INVALID_PARAMETER_FORMAT_OR_VALUE, jrpc_id,
+            "Operation is not supported. Hence invalid parameter")
         return response
 
-#---------------------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------------------------
     def __process_encryption_key_get(self, input_json_str, response):
         """
         Function to process get encryption key request.
@@ -99,29 +101,29 @@ class WorkerEncryptionKeyHandler:
             response["result"] = {}
             response["result"]["workerId"] = worker_id
             encryptionKey = json_dict["details"]["workerTypeData"]["encryptionKey"]
-            try :
+            try:
                 encryptionKeyNonce = json_dict["details"]["workerTypeData"]["encryptionKeyNonce"]
-            except :
+            except:
                 encryptionKeyNonce = crypto.random_bit_string(NO_OF_BYTES)
             tag = ""
             response["result"]["encryptionKey"] = encryptionKey
             response["result"]["encryptionKeyNonce"] = encryptionKeyNonce
             response["result"]["tag"] = tag
-            #calculate signature
-            concat_string = worker_id.encode('UTF-8') + encryptionKey.encode('UTF-8') + encryptionKeyNonce.encode('UTF-8') + tag.encode('UTF-8')
-            concat_hash =  bytes()
-            concat_hash =  bytes(concat_string)
+            # calculate signature
+            concat_string = worker_id.encode(
+                'UTF-8') + encryptionKey.encode('UTF-8') + encryptionKeyNonce.encode('UTF-8') + tag.encode('UTF-8')
+            concat_hash = bytes()
+            concat_hash = bytes(concat_string)
             hash_1 = crypto.compute_message_hash(concat_hash)
             s1 = crypto.byte_array_to_base64(hash_1)
             # Requires worker private key to sign.
             # signature =  self.PrivateKey.SignMessage(hash)
             response["result"]["signature"] = s1
-        else :
+        else:
             # Workorder id already exists
             response = utility.create_error_response(
-                    WorkerError.INVALID_PARAMETER_FORMAT_OR_VALUE, jrpc_id,
-                    "Worker id not found in the database. Hence invalid parameter")
+                WorkerError.INVALID_PARAMETER_FORMAT_OR_VALUE, jrpc_id,
+                "Worker id not found in the database. Hence invalid parameter")
 
         return response
-#---------------------------------------------------------------------------------------------
-
+# ---------------------------------------------------------------------------------------------

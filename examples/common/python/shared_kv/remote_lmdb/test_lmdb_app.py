@@ -26,6 +26,8 @@ logger = logging.getLogger(__name__)
 
 TCFHOME = os.environ.get("TCF_HOME", "../../../../")
 # -----------------------------------------------------------------
+
+
 class TestRemoteLMDB(unittest.TestCase):
     def __init__(self):
         super(TestRemoteLMDB, self).__init__()
@@ -49,20 +51,20 @@ class TestRemoteLMDB(unittest.TestCase):
     def test_lookup(self):
         lookup_result = self.proxy.lookup(self.table)
         logger.info(lookup_result)
-        self.assertEqual(lookup_result, [self.key, self.key2], 
-            "lookup Returned wrong keys")
+        self.assertEqual(lookup_result, [self.key, self.key2],
+                         "lookup Returned wrong keys")
 
     def test_get_value(self):
         get_value_result = self.proxy.get(self.table, self.key)
         logger.info(get_value_result)
-        self.assertEqual(get_value_result, self.value, 
-            "get_value Retrieved incorrect value")
+        self.assertEqual(get_value_result, self.value,
+                         "get_value Retrieved incorrect value")
 
     def test_get_value2(self):
         get_value_result2 = self.proxy.get(self.table, self.key2)
         logger.info(get_value_result2)
-        self.assertEqual(get_value_result2, self.value2, 
-            "get_value Retrieved incorrect value")
+        self.assertEqual(get_value_result2, self.value2,
+                         "get_value Retrieved incorrect value")
 
     def test_remove(self):
         remove_result = self.proxy.remove(self.table, self.key)
@@ -72,8 +74,8 @@ class TestRemoteLMDB(unittest.TestCase):
     def test_get_none(self):
         get_none_result = self.proxy.get(self.table, self.key)
         logger.info(get_none_result)
-        self.assertIsNone(get_none_result,  
-            "get_none Did not return None for empty value")
+        self.assertIsNone(get_none_result,
+                          "get_none Did not return None for empty value")
 
     def test_remove2(self):
         remove_result2 = self.proxy.remove(self.table, self.key2)
@@ -83,10 +85,12 @@ class TestRemoteLMDB(unittest.TestCase):
     def test_lookup_none(self):
         lookup_none_result = self.proxy.lookup(self.table)
         logger.info(lookup_none_result)
-        self.assertEqual(lookup_none_result, [], 
-            "lookup_none Did not return empty array")
+        self.assertEqual(lookup_none_result, [],
+                         "lookup_none Did not return empty array")
 
 # -----------------------------------------------------------------
+
+
 def local_main():
     result = unittest.TestResult()
     result.startTestRun()
@@ -108,63 +112,68 @@ def local_main():
     exit(0)
 
 # -----------------------------------------------------------------
-def parse_command_line(config, args) :
+
+
+def parse_command_line(config, args):
 
     global bind_uri
 
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('--logfile', 
-        help='Name of the log file, __screen__ for standard output', 
-        type=str)
-    parser.add_argument('--loglevel', 
-        help='Logging level', 
-        type=str)
-    parser.add_argument('bind_uri', 
-        help='URI to send requests to',
-        type=str)
+    parser.add_argument('--logfile',
+                        help='Name of the log file, __screen__ for standard output',
+                        type=str)
+    parser.add_argument('--loglevel',
+                        help='Logging level',
+                        type=str)
+    parser.add_argument('--bind_uri',
+                        help='URI to send requests to',
+                        type=str,
+                        default='http://localhost:9091')
 
     options = parser.parse_args(args)
 
-    if config.get('Logging') is None :
+    if config.get('Logging') is None:
         config['Logging'] = {
-            'LogFile' : '__screen__',
-            'LogLevel' : 'INFO'
+            'LogFile': '__screen__',
+            'LogLevel': 'INFO'
         }
-    if options.logfile :
+    if options.logfile:
         config['Logging']['LogFile'] = options.logfile
-    if options.loglevel :
+    if options.loglevel:
         config['Logging']['LogLevel'] = options.loglevel.upper()
-    if options.bind_uri :
+    if options.bind_uri:
         bind_uri = options.bind_uri
 
 # -----------------------------------------------------------------
 # -----------------------------------------------------------------
-def main(args=None) :
+
+
+def main(args=None):
     import config.config as pconfig
     import utility.logger as plogger
 
     # Parse out the configuration file first
-    conffiles = [ 'tcs_config.toml' ]
-    confpaths = [ ".", TCFHOME + "/config"]
+    conffiles = ['tcs_config.toml']
+    confpaths = [".", TCFHOME + "/config"]
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--config', help='configuration file', 
-        nargs = '+')
-    parser.add_argument('--config-dir', help='configuration folder', 
-        nargs = '+')
+    parser.add_argument('--config', help='configuration file',
+                        nargs='+')
+    parser.add_argument('--config-dir', help='configuration folder',
+                        nargs='+')
     (options, remainder) = parser.parse_known_args(args)
 
-    if options.config :
+    if options.config:
         conffiles = options.config
 
-    if options.config_dir :
+    if options.config_dir:
         confpaths = options.config_dir
 
-    try :
+    try:
         config = pconfig.parse_configuration_files(conffiles, confpaths)
         config_json_str = json.dumps(config, indent=4)
-    except pconfig.ConfigurationException as e :
+    except pconfig.ConfigurationException as e:
         logger.error(str(e))
         sys.exit(-1)
 
@@ -176,5 +185,6 @@ def main(args=None) :
 
     parse_command_line(config, remainder)
     local_main()
+
 
 main()

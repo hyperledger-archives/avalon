@@ -17,19 +17,21 @@ import json
 import logging
 import crypto.crypto as crypto
 from error_code.error_status import WorkorderError
-from shared_kv.shared_kv_interface import KvStorage
 import utility.utility as utility
 
 logger = logging.getLogger(__name__)
 
-## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-## XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+# XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+# XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+
 class TCSWorkOrderHandler:
     """
     TCSWorkOrderHandler processes Worker Order Direct API requests. It puts a new work order requests into the KV storage or it reads appropriate work order information from the KV storage when processing “getter” and enumeration requests. Actual work order processing is done by the SGX Enclave Manager within the enclaves its manages.
     """
 # ------------------------------------------------------------------------------------------------
-    def __init__(self,kv_helper, max_wo_count):
+
+    def __init__(self, kv_helper, max_wo_count):
         """
         Function to perform init activity
         Parameters:
@@ -43,7 +45,7 @@ class TCSWorkOrderHandler:
 
         self.__work_order_handler_on_boot()
 
-#---------------------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------------------------
     def __work_order_handler_on_boot(self):
         """
         Function to perform on-boot process of work order handler
@@ -65,15 +67,15 @@ class TCSWorkOrderHandler:
                 if(self.kv_helper.get("wo-receipts", wo_id) is not None):
                     self.kv_helper.remove("wo-receipts", wo_id)
 
-                #TODO: uncomment after fixing lmbd error
+                # TODO: uncomment after fixing lmbd error
                 self.kv_helper.remove("wo-timestamps", wo_id)
 
             else:
-                #Add to the internal FIFO
+                # Add to the internal FIFO
                 self.workorder_list.append(wo_id)
                 self.workorder_count += 1
 
-#---------------------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------------------------
     def process_work_order(self, input_json_str):
         """
         Function to process work order request
@@ -82,7 +84,7 @@ class TCSWorkOrderHandler:
         """
 
         input_json = json.loads(input_json_str)
-        logger.info("Received Work Order request : %s",input_json['method'])
+        logger.info("Received Work Order request : %s", input_json['method'])
 
         response = {}
         response['jsonrpc'] = '2.0'
@@ -96,7 +98,7 @@ class TCSWorkOrderHandler:
                                                         input_json['id'],
                                                         response)
 
-#---------------------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------------------------
     def __process_work_order_get_result(self, wo_id, jrpc_id, response):
         """
         Function to process work order get result
@@ -111,7 +113,7 @@ class TCSWorkOrderHandler:
         value = self.kv_helper.get("wo-responses", wo_id)
         if value:
             input_value = json.loads(value)
-            if 'result' in value :
+            if 'result' in value:
                 response['result'] = input_value['result']
             else:
                 response['result'] = input_value['error']
@@ -119,9 +121,9 @@ class TCSWorkOrderHandler:
             if(self.kv_helper.get("wo-timestamps", wo_id) is not None):
                 # work order is yet to be processed
                 response = utility.create_error_response(
-                        WorkorderError.PENDING, jrpc_id,
-                        "Work order result is yet to be updated")
-            else :
+                    WorkorderError.PENDING, jrpc_id,
+                    "Work order result is yet to be updated")
+            else:
                 # work order not in 'wo-timestamps' table
                 response = utility.create_error_response(
                     WorkorderError.INVALID_PARAMETER_FORMAT_OR_VALUE,
@@ -131,7 +133,7 @@ class TCSWorkOrderHandler:
 
         return response
 
-#---------------------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------------------------
     def __process_work_order_submission(self, wo_id, input_json_str, response):
         """
         Function to process work order request
@@ -146,7 +148,7 @@ class TCSWorkOrderHandler:
 
         if((self.workorder_count + 1) > self.max_workorder_count):
 
-            #if max count reached clear a processed entry
+            # if max count reached clear a processed entry
             work_orders = self.kv_helper.lookup("wo-timestamps")
             for id in work_orders:
 
@@ -170,7 +172,7 @@ class TCSWorkOrderHandler:
                     "Work order handler is busy updating the result")
                 return response
 
-        if(self.kv_helper.get("wo-timestamps",wo_id) is None):
+        if(self.kv_helper.get("wo-timestamps", wo_id) is None):
 
             # Create a new work order entry. Don't change the order of table updation.
             # The order is important for clean up if the TCS is restarted in middle
@@ -180,7 +182,7 @@ class TCSWorkOrderHandler:
             self.kv_helper.set("wo-timestamps", wo_id, epoch_time)
             self.kv_helper.set("wo-requests", wo_id, input_json_str)
             self.kv_helper.set("wo-scheduled", wo_id, input_json_str)
-            #Add to the internal FIFO
+            # Add to the internal FIFO
             self.workorder_list.append(wo_id)
             self.workorder_count += 1
 
@@ -199,4 +201,4 @@ class TCSWorkOrderHandler:
                  Hence invalid parameter")
 
         return response
-#---------------------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------------------------

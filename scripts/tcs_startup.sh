@@ -19,8 +19,19 @@ listener="${TCF_HOME}/examples/common/python/connectors/direct/tcs_listener/tcs_
 # Read Listener port from config file
 listener_port=`grep listener_port ${TCF_HOME}/config/tcs_config.toml | awk {'print $3'}`
 
+lmdb_server="${TCF_HOME}/examples/common/python/shared_kv/remote_lmdb/lmdb_listener.py"
+
 start_tcs_components()
 {
+    # if remote_url is set, bootstrap the LMDB server
+    lmdb_remote_url=$(grep ^remote_url ${TCF_HOME}/config/tcs_config.toml)
+    if [ -n "${lmdb_remote_url}" ]; then
+        echo "start the lmdb server"
+        python3 ${lmdb_server} &
+        sleep 3s
+        echo "lmdb server started"
+    fi
+
     echo "Starting Enclave manager.."
     python3 $enclave_manager &
     echo "Manager started"
@@ -40,6 +51,7 @@ start_tcs_components()
                 echo "Program is Successfully Ended"
                 pkill -f "$listener"
                 pkill -f "$enclave_manager"
+                pkill -f "${lmdb_server}"
                 exit;;
             * ) echo " ";;
         esac

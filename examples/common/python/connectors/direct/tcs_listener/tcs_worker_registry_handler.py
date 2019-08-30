@@ -18,16 +18,17 @@ from itertools import cycle
 import utility.utility as utility
 from error_code.error_status import WorkerError
 from error_code.error_status import WorkerStatus
-from shared_kv.shared_kv_interface import KvStorage
 
 logger = logging.getLogger(__name__)
+
 
 class TCSWorkerRegistryHandler:
     """
      TCSWorkerRegistryHandler processes worker registry requests defined in the TC API spec at Worker Registry Direct API and Worker Type Data API . It reads appropriate worker information from the KV storage to generate the response
     """
 # ------------------------------------------------------------------------------------------------
-    def __init__(self,kv_helper):
+
+    def __init__(self, kv_helper):
         """
         Function to perform init activity
         Parameters:
@@ -43,18 +44,18 @@ class TCSWorkerRegistryHandler:
         """
         Function to perform on-boot process of worker registry handler
         """
-    
+
         worker_list = []
         worker_list = self.kv_helper.lookup("workers")
 
-        #Initial Worker details are loaded
+        # Initial Worker details are loaded
         self.worker_pool = worker_list
         organisation_id = self.kv_helper.lookup("registries")
         for o_id in organisation_id:
             self.kv_helper.remove("registries", o_id)
 
-        #Adding a new entry that corresponds to this handler, its URI, etc.
-        #json with byte32 orgID, string uri, byte32 scAddr, bytes32[] appTypeIds)
+        # Adding a new entry that corresponds to this handler, its URI, etc.
+        # json with byte32 orgID, string uri, byte32 scAddr, bytes32[] appTypeIds)
         new_registry = {}
         new_registry["orgID"] = "regid"
         new_registry["uri"] = "http://localhost:2020"
@@ -78,7 +79,7 @@ class TCSWorkerRegistryHandler:
         return response
 # ------------------------------------------------------------------------------------------------
 
-    def worker_registry_handler(self,input_json_str):
+    def worker_registry_handler(self, input_json_str):
         """
         Function to process worker request
         Parameters:
@@ -90,30 +91,30 @@ class TCSWorkerRegistryHandler:
         response['jsonrpc'] = '2.0'
         response['id'] = input_json['id']
 
-        logger.info("Received Worker request : %s",input_json['method'])
+        logger.info("Received Worker request : %s", input_json['method'])
 
         if(input_json['method'] == "WorkerLookUp"):
-           return self.__process_worker_lookup(input_json_str, response)
+            return self.__process_worker_lookup(input_json_str, response)
         elif(input_json['method'] == "WorkerLookUpNext"):
-           return self.__process_worker_lookup_next(input_json_str, response)
+            return self.__process_worker_lookup_next(input_json_str, response)
 
         if 'workerId' in input_json_str:
             worker_id = str(input_json['params']['workerId'])
-        else :
+        else:
             return utility.create_error_response(
-                    WorkerError.INVALID_PARAMETER_FORMAT_OR_VALUE,
-                    input_json["id"],
-                    "Worker Id not found in the database. \
+                WorkerError.INVALID_PARAMETER_FORMAT_OR_VALUE,
+                input_json["id"],
+                "Worker Id not found in the database. \
                      Hence invalid parameter")
 
         if(input_json['method'] == "WorkerRegister"):
             return self.__process_worker_register(worker_id, input_json_str, response)
         elif(input_json['method'] == "WorkerSetStatus"):
-           return self.__process_worker_set_status(worker_id, input_json_str, response)
+            return self.__process_worker_set_status(worker_id, input_json_str, response)
         elif(input_json['method'] == "WorkerRetrieve"):
-           return self.__process_worker_retrieve(worker_id, response)
+            return self.__process_worker_retrieve(worker_id, response)
         elif(input_json['method'] == "WorkerUpdate"):
-           return self.__process_worker_update(worker_id, input_json_str, response)
+            return self.__process_worker_update(worker_id, input_json_str, response)
 # ------------------------------------------------------------------------------------------------
 
     def __process_worker_register(self, worker_id, input_json_str, response):
@@ -130,7 +131,7 @@ class TCSWorkerRegistryHandler:
 
         if(self.kv_helper.get("workers", worker_id) is None):
             input_value = {}
-            input_value =  input_value_json['params']
+            input_value = input_value_json['params']
 
             # Worker Initial Status is set to Active
             input_value["status"] = WorkerStatus.ACTIVE
@@ -138,8 +139,8 @@ class TCSWorkerRegistryHandler:
             input_json_str = json.dumps(input_value)
             self.kv_helper.set("workers", worker_id, input_json_str)
             response = utility.create_error_response(
-                    WorkerError.SUCCESS, jrpc_id,
-                    "Successfully Registered")
+                WorkerError.SUCCESS, jrpc_id,
+                "Successfully Registered")
         else:
             response = utility.create_error_response(
                 WorkerError.INVALID_PARAMETER_FORMAT_OR_VALUE,
@@ -158,7 +159,7 @@ class TCSWorkerRegistryHandler:
             - response is the response object to be returned to client.
         """
 
-        #status can be one of active, offline, decommissioned, or compromised
+        # status can be one of active, offline, decommissioned, or compromised
 
         input_value = json.loads(input_json_str)
         jrpc_id = input_value["id"]
@@ -171,8 +172,8 @@ class TCSWorkerRegistryHandler:
             value = json.dumps(json_dict)
             self.kv_helper.set("workers", worker_id, value)
             response = utility.create_error_response(
-                    WorkerError.SUCCESS, jrpc_id,
-                    "Successfully Set Status")
+                WorkerError.SUCCESS, jrpc_id,
+                "Successfully Set Status")
         else:
             response = utility.create_error_response(
                 WorkerError.INVALID_PARAMETER_FORMAT_OR_VALUE,
@@ -191,11 +192,11 @@ class TCSWorkerRegistryHandler:
         alter_items = utility.list_difference(self.worker_pool, work_orders)
 
         for item in alter_items:
-           self.worker_pool.remove(item)
+            self.worker_pool.remove(item)
 
         alter_items = utility.list_difference(work_orders, self.worker_pool)
         for item in alter_items:
-           self.worker_pool.append(item)
+            self.worker_pool.append(item)
 
         input_value = json.loads(input_json_str)
         total_count = 0
@@ -208,27 +209,27 @@ class TCSWorkerRegistryHandler:
                     lookup_bool = False
                     continue
                 else:
-                    continue	
+                    continue
 
-            value = self.kv_helper.get("workers",worker_id)
+            value = self.kv_helper.get("workers", worker_id)
             json_dict = json.loads(value)
             checkcount = 0
             actualcount = 0
-            if value :
+            if value:
                 if "workerType" in input_json_str:
-                    checkcount=checkcount+1
+                    checkcount = checkcount+1
                     if int(json_dict["workerType"]) == int(input_value["params"]["workerType"]):
-                       actualcount=actualcount+1
-                
+                        actualcount = actualcount+1
+
                 if "organizationId" in input_json_str:
-                    checkcount=checkcount+1
+                    checkcount = checkcount+1
                     if json_dict["organizationId"] == input_value["params"]["organizationId"]:
-                       actualcount=actualcount+1
-                    
+                        actualcount = actualcount+1
+
                 if "applicationTypeId" in input_json_str:
-                    checkcount=checkcount+1
+                    checkcount = checkcount+1
                     if json_dict["applicationTypeId"] == input_value["params"]["applicationTypeId"]:
-                       actualcount=actualcount+1
+                        actualcount = actualcount+1
 
             if(checkcount == actualcount):
                 total_count = total_count+1
@@ -254,7 +255,7 @@ class TCSWorkerRegistryHandler:
         return response
 # ------------------------------------------------------------------------------------------------
 
-    def __process_worker_lookup_next(self,input_json_str, response):
+    def __process_worker_lookup_next(self, input_json_str, response):
         """
         Function to look the set of worker newly added
         Parameters:
@@ -285,7 +286,7 @@ class TCSWorkerRegistryHandler:
             response["result"]["applicationTypeId"] = json_dict["applicationTypeId"]
             response["result"]["details"] = json_dict["details"]
             response["result"]["status"] = json_dict["status"]
-        else :
+        else:
             jrpc_id = json.loads(response)["id"]
             response = utility.create_error_response(
                 WorkerError.INVALID_PARAMETER_FORMAT_OR_VALUE,
@@ -311,16 +312,16 @@ class TCSWorkerRegistryHandler:
         if value is not None:
             json_dict = json.loads(value)
             input_value = json.loads(input_json_str)
-            worker_details = input_value ["params"]["details"]
+            worker_details = input_value["params"]["details"]
             for item in worker_details:
                 json_dict["details"][item] = worker_details[item]
-            
+
             value = json.dumps(json_dict)
             self.kv_helper.set("workers", worker_id, value)
             response = utility.create_error_response(
-                    WorkerError.SUCCESS, jrpc_id,
-                    "Successfully Updated")
-        else :
+                WorkerError.SUCCESS, jrpc_id,
+                "Successfully Updated")
+        else:
             response = utility.create_error_response(
                 WorkerError.INVALID_PARAMETER_FORMAT_OR_VALUE,
                 jrpc_id,
