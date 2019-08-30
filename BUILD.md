@@ -100,9 +100,9 @@ you will the see this prompt: `(_dev)`
 
 # <a name="testing"></a>Testing
 
-Run the test suite to check that the installation is working correctly.
-Once the code is successfully built, follow these steps to run
-the `Demo_Apl22.py` testcase:
+Once the code is successfully built, run the test suite to check that the
+installation is working correctly.
+Follow these steps to run the `Demo.py` testcase:
 
 **NOTE**: Skip step 1 in the case of Docker-based builds, since
 `docker-compose.yaml` will run the TCS startup script.
@@ -114,11 +114,12 @@ the `Demo_Apl22.py` testcase:
    4. Wait for the listener to start. You should see the message
       `TCS Listener started on port 1947`
    5. To run the Demo testcase, open a new terminal, Terminal 2
-2. For Docker-based builds, Terminal 1 is running `docker-compose` and
-   Terminal 2 is running the "tcf" Docker container shell from the previous
-   build steps
+2. For Docker-based builds:
+   1. Follow the steps above for ["Docker-based Build and Execution"](#dockerbuild)
+   2. Terminal 1 is running `docker-compose` and Terminal 2 is running the
+      "tcf" Docker container shell from the previous build steps
 3. In Terminal 2, run `cd $TCF_HOME/tests`
-4. In Terminal 2, use this command to run the Demo test:
+4. In Terminal 2, use this command to run the `Demo.py` test:
    ```
    python3 Demo.py --input_dir ./json_requests/ \
            --connect_uri "http://localhost:1947" work_orders/output.json
@@ -129,6 +130,9 @@ the `Demo_Apl22.py` testcase:
 7. If you wish to exit the TCF program, press `y` and `Enter` at Terminal 1
    for standalone builds.
    For Docker-based builds, press `Ctrl-c`
+
+A GUI is also available to run this demo.
+See [examples/apps/heart_disease_eval](examples/apps/heart_disease_eval]
 
 ## <a name="troubleshooting"></a>Troubleshooting
 - If you see the message
