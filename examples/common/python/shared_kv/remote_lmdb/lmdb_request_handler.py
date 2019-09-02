@@ -49,7 +49,8 @@ class LMDBRequestHandler(resource.Resource):
         self.kv_helper = KvStorage()
 
         storage_path = TCFHOME + '/' + config['KvStorage']['StoragePath']
-        if not self.kv_helper.open(storage_path):
+        storage_size = config['KvStorage']['StorageSize']
+        if not self.kv_helper.open(storage_path, storage_size):
             logger.error("Failed to open KV Storage DB")
             sys.exit(-1)
 

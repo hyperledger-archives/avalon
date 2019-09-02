@@ -354,8 +354,9 @@ def start_enclave_manager(config):
     try:
         if config["KvStorage"].get("remote_url") is None:
             storage_path = TCFHOME + '/' + config['KvStorage']['StoragePath']
+            storage_size = config['KvStorage']['StorageSize']
             kv_helper = KvStorage()
-            if not kv_helper.open(storage_path):
+            if not kv_helper.open(storage_path, storage_size):
                 logger.error("Failed to open KV Storage DB")
                 sys.exit(-1)
             logger.info("employ the local LMDB")

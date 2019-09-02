@@ -21,34 +21,47 @@ Lookup method will retrieve all the keys of the provided table name.
 
 import json
 import tcf_enclave_manager.tcf_enclave as db_store
+import utility.utility as utility
 import logging
 
 logger = logging.getLogger(__name__)
 lookup_flag = False
 
-#---------------------------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------------------------------
+
+
 class KvStorage:
     """
     KvStorage interface maintains information about registries supported by the TCS in direct model.
     """
 
-    def open(self, lmdb_file):
+    def open(self, lmdb_file, map_size="1 TB"):
         """
         Function to open the database file
         Parameters:
            - lmdb_file is the name and location of lmdb database file
+           - map_size is the maximum size of the database, it must be a multiple of the page size (4096)
+             and default to an insanely large max size (1 TB)
         """
-        db_store.db_store_init(lmdb_file)
-        return True
+        try:
+            map_size = utility.human_read_to_byte(map_size)
+            if map_size % 4096 != 0:
+                logger.error(
+                    "Invalid KV Storage Size, it must be a multiple of the page size (4096)")
+                raise Exception("Invalid Map Storage Size")
+            db_store.db_store_init(lmdb_file, map_size)
+            return True
+        except:
+            return False
 
-#---------------------------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------------------------------
     def close(self):
         """
         Function to close the database file
         """
         db_store.db_store_close()
 
-#---------------------------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------------------------------
     def set(self, table, key, value):
         """
         Function to set a key-value pair in a lmdb table 
@@ -58,12 +71,12 @@ class KvStorage:
            - value is the value that needs to be inserted in the table.
         """
         try:
-            db_store.db_store_put(table,key,value)
+            db_store.db_store_put(table, key, value)
             return True
         except:
             return False
 
-#---------------------------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------------------------------
     def get(self, table, key):
         """
         Function to get the value for a key in a lmdb table 
@@ -84,7 +97,7 @@ class KvStorage:
 
         return value
 
-#---------------------------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------------------------------
     def remove(self, table, key, value=None):
         """
         Function to remove the key/value from a lmdb table
@@ -106,7 +119,7 @@ class KvStorage:
         except:
             return False
 
-#---------------------------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------------------------------
     def lookup(self, table):
         """
         Function to get all the keys in a lmdb table 
@@ -116,14 +129,13 @@ class KvStorage:
         result = []
         try:
             lookup_flag = True
-            table_keys = db_store.db_store_get(table,"")
+            table_keys = db_store.db_store_get(table, "")
             lookup_flag = False
             table_keys = table_keys.split(",")
             for i in table_keys:
-               result.append(i)
+                result.append(i)
         except:
             result = []
 
         return result
-#---------------------------------------------------------------------------------------------------
-
+# ---------------------------------------------------------------------------------------------------
