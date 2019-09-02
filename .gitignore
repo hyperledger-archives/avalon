@@ -25,3 +25,6 @@ tc/sgx/trusted_worker_manager/enclave/deps/
 tc/sgx/trusted_worker_manager/enclave_wrapper/enclave_u.c
 tc/sgx/trusted_worker_manager/enclave_wrapper/enclave_u.h
 tools/build/_dev/
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
