@@ -225,3 +225,13 @@ def decrypted_response(input_json_str, encrypted_session_key):
     return input_json_params
 
 #---------------------------------------------------------------------------------------------
+
+def human_read_to_byte(size):
+    size_name = ("B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB")
+    size = size.split() # divide '1 GB' into ['1', 'GB']
+    if len(size) !=2 or int(size[0]) <= 0:
+        raise Exception("Invalid size")
+    num, unit = int(size[0]), size[1]
+    idx = size_name.index(unit)
+    factor = 1024 ** idx
+    return num * factor

@@ -28,8 +28,8 @@
 
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-void db_store_init(const std::string& db_path) {
-    tcf_err_t presult = tcf::lmdb_store::db_store_init(db_path);
+void db_store_init(const std::string& db_path, const size_t map_size) {
+    tcf_err_t presult = tcf::lmdb_store::db_store_init(db_path, map_size);
     ThrowTCFError(presult);
 }
 

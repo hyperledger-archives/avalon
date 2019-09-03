@@ -28,11 +28,14 @@ namespace tcf {
          *   The path to the LMDB (lightning memory mapped database) which provides
          *   the back-end to this database store implementation
          *
+         * @param map_size
+         *   The maximum size of the database
+         *
          * @return
          *  Success (return TCF_SUCCESS) - database store ready to use
          *  Failure (return nonzero) - database store is unusable
          */
-        tcf_err_t db_store_init(const std::string& db_path);
+        tcf_err_t db_store_init(const std::string& db_path, const size_t map_size);
 
         /**
          * Close the database store and flush the data to disk

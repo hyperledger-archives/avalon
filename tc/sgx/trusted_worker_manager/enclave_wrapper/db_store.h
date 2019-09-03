@@ -20,13 +20,13 @@
  * Initialize the database store - must be called before performing gets/puts
  *
  * @param db_path       path to the persistent database store database
+ * @param map_size      the maximum size of the database
  */
-void db_store_init(const std::string& db_path);
+void db_store_init(const std::string& db_path, const size_t map_size);
 
 /**
  * Close the database store - must be called when exiting
  *
- * @param db_path       path to the persistent database store database
  */
 void db_store_close();
 

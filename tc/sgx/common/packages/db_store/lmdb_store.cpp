@@ -32,12 +32,6 @@
 /* API for this specific LMDB-backed database store */
 #include "lmdb_store.h"
 
-/*
- * This must be a multiple of the page size (4096)
- *
- * Default to an insanely large max size (1 TB)
- */
-#define DEFAULT_DB_STORE_SIZE (1ULL << 40)
 
 /* -----------------------------------------------------------------
  * CLASS: SafeThreadLock
@@ -89,14 +83,14 @@ public:
 };
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-tcf_err_t tcf::lmdb_store::db_store_init(const std::string& db_path) {
+tcf_err_t tcf::lmdb_store::db_store_init(const std::string& db_path, const size_t map_size) {
     int ret;
 
     ret = mdb_env_create(&lmdb_store_env);
     tcf::error::ThrowIf<tcf::error::SystemError>(ret != 0, "Failed to create LMDB environment");
     ret=mdb_env_set_maxdbs(lmdb_store_env, MAX_DBS);
     tcf::error::ThrowIf<tcf::error::SystemError>(ret != 0, "Failed to set maximum database");
-    ret = mdb_env_set_mapsize(lmdb_store_env, DEFAULT_DB_STORE_SIZE);
+    ret = mdb_env_set_mapsize(lmdb_store_env, map_size);
     tcf::error::ThrowIf<tcf::error::SystemError>(ret != 0, "Failed to set LMDB default size");
 
     /*
