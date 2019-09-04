@@ -22,8 +22,7 @@ import json
 
 import tcf_enclave_helper as enclave_helper
 from error_code.error_status import WorkOrderStatus
-from shared_kv.remote_lmdb.lmdb_helper_proxy import LMDBHelperProxy
-from shared_kv.shared_kv_interface import KvStorage
+from database import connector
 import workorder_request.sgx_workorder_request as workorder_request
 from utility.tcf_types import WorkerStatus, WorkerType
 import utility.utility as utils
@@ -235,7 +234,7 @@ def create_enclave_signup_data():
 
 def execute_work_order(enclave_data, input_json_str, indent=4):
     """
-    Submits workorder request to Worker enclave and retrieves the response 
+    Submits workorder request to Worker enclave and retrieves the response
     """
     try:
         wo_request = workorder_request.SgxWorkOrderRequest(
@@ -352,21 +351,10 @@ def start_enclave_manager(config):
     logger.info("Enclave manager started")
 
     try:
-        if config["KvStorage"].get("remote_url") is None:
-            storage_path = TCFHOME + '/' + config['KvStorage']['StoragePath']
-            storage_size = config['KvStorage']['StorageSize']
-            kv_helper = KvStorage()
-            if not kv_helper.open(storage_path, storage_size):
-                logger.error("Failed to open KV Storage DB")
-                sys.exit(-1)
-            logger.info("employ the local LMDB")
-        else:
-            database_url = config["KvStorage"]["remote_url"]
-            logger.info(f"connect to remote LMDB @{database_url}")
-            kv_helper = LMDBHelperProxy(database_url)
-    except:
-        logger.error("Failed to open KV storage interface, Exiting SGX Enclave manager...")
-        exit(1)
+        (kv_helper, _) = connector.open(config)
+    except Exception as err:
+        logger.error(f"Failed to open KV storage interface, Exiting SGX Enclave manager: {err}")
+        sys.exit(-1)
 
     try:
         logger.info("----------------------- Starting Boot time flow -----------------------")
