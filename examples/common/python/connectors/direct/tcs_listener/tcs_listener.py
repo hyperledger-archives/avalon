@@ -39,8 +39,7 @@ from tcs_work_order_handler import TCSWorkOrderHandler
 from tcs_worker_registry_handler import TCSWorkerRegistryHandler
 from tcs_workorder_receipt_handler import TCSWorkOrderReceiptHandler
 from tcs_worker_encryption_key_handler import WorkerEncryptionKeyHandler
-from shared_kv.remote_lmdb.lmdb_helper_proxy import LMDBHelperProxy
-from shared_kv.shared_kv_interface import KvStorage
+from database import connector
 from error_code.error_status import WorkorderError
 import utility.utility as utility
 
@@ -63,23 +62,11 @@ class TCSListener(resource.Resource):
 
     # -----------------------------------------------------------------
     def __init__(self, config):
-
-        if config.get('KvStorage') is None:
-            logger.error("Kv Storage path is missing")
+        try:
+            (self.kv_helper, _) = connector.open(config)
+        except Exception as err:
+            logger.error(f"failed to open db: {err}")
             sys.exit(-1)
-
-        if config["KvStorage"].get("remote_url") is None:
-            storage_path = TCFHOME + '/' + config['KvStorage']['StoragePath']
-            storage_size = config['KvStorage']['StorageSize']
-            self.kv_helper = KvStorage()
-            if not self.kv_helper.open(storage_path, storage_size):
-                logger.error("Failed to open KV Storage DB")
-                sys.exit(-1)
-            logger.info("employ the local LMDB")
-        else:
-            database_url = config["KvStorage"]["remote_url"]
-            logger.info(f"connect to remote LMDB @{database_url}")
-            self.kv_helper = LMDBHelperProxy(database_url)
 
         # Worker registry handler needs to be instantiated before Work order handler. Otherwise, LMDB operations don't operate on updated values.
         # TODO: Needs further investigation on what is causing the above behavior.
