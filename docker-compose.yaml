@@ -26,7 +26,8 @@ services:
         - https_proxy
         - no_proxy
     environment:
-        - TCF_DEBUG_BUILD=${TCF_DEBUG_BUILD}
+        - TCF_DEBUG_BUILD=${TCF_DEBUG_BUILD:-}
+        - DISPLAY=${DISPLAY:-}
     volumes:
       - ./:/project/TrustedComputeFramework
       - /tmp/.X11-unix:/tmp/.X11-unix
