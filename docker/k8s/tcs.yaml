@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tcs-pool
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tcs
+  template:
+    metadata:
+      name: tcs
+      labels:
+        app: tcs
+    spec:
+      containers:
+      - image: sammyne/hyperledger-tcf
+        name: tcs
+        command: ["/bin/bash"]
+        args: ["$(TCF_K8S_HOME)/scripts/tcs_listener.sh"]
+        env:
+        - name: TCF_K8S_HOME
+          value: /project/TrustedComputeFramework/docker/k8s
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tcs
+spec:
+  ports:
+  - port: 8080
+    targetPort: 8080
+  selector:
+    app: tcs

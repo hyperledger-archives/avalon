@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: database
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: lmdb
+  template:
+    metadata:
+      name: lmdb
+      labels:
+        app: lmdb
+    spec:
+      containers:
+      - image: sammyne/hyperledger-tcf
+        name: lmdb-server
+        command: ["/bin/bash"]
+        args: ["$(TCF_K8S_HOME)/scripts/lmdb.sh"]
+        env:
+        - name: TCF_K8S_HOME
+          value: /project/TrustedComputeFramework/docker/k8s
+        ports:
+        - containerPort: 9090
+          protocol: TCP
+        volumeMounts:
+        - name: db
+          mountPath: /lmdb
+      volumes:
+      - name: db
+        emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: lmdb
+spec:
+  ports:
+  - port: 9090
+    targetPort: 9090
+  selector:
+    app: lmdb
