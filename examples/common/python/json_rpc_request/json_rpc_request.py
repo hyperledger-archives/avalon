@@ -103,12 +103,13 @@ class WorkOrderJson(JsonRpcRequest):
 		return self.json_obj["params"]["workOrderId"]
 
 class WorkOrderSubmitJson(WorkOrderJson):
-	def __init__(self, id, response_timeout_msecs, payload_format, 
-		worker_id, workload_id, requester_id, 
-		result_uri=None, notify_uri=None, worker_encryption_key=None, 
+	def __init__(self, id, response_timeout_msecs, payload_format,
+		work_order_id, worker_id, workload_id,
+		requester_id, encrypted_session_key, session_key_iv,
+		requester_nonce, result_uri=None, notify_uri=None, worker_encryption_key=None,
 		data_encryption_algorithm=None):
 		super().__init__(id, "WorkOrderSubmit", 
-			hex(random.randint(1, 2**64 - 1)))
+			work_order_id)
 		self.set_response_timeout_msecs(response_timeout_msecs)
 		self.set_payload_format(payload_format)
 		if result_uri:
@@ -130,14 +131,15 @@ class WorkOrderSubmitJson(WorkOrderJson):
 			self.set_data_encryption_algorithm(data_encryption_algorithm)
 		else:
 			self.set_data_encryption_algorithm("")
-		self.json_obj["params"]["encryptedSessionKey"] = ""
-		self.json_obj["params"]["sessionKeyIv"] = ""
-		self.json_obj["params"]["requesterNonce"] = ""
-		self.json_obj["params"]["encryptedRequestHash"] = ""
-		self.json_obj["params"]["requesterSignature"] = ""
+
+		self.set_encrypted_session_key(encrypted_session_key)
+		self.set_session_key_iv(session_key_iv)
+		self.set_requester_nonce(requester_nonce)
+		self.update_encrypted_request_hash()
+		self.update_requester_signature()
 		self.json_obj["params"]["inData"] = []
 		self.json_obj["params"]["outData"] = []
-		self.json_obj["params"]["verifyingKey"] = ""
+
 
 	def set_response_timeout_msecs(self, response_timeout_msecs):
 		self.json_obj["params"]["responseTimeoutMSecs"] = \
@@ -168,8 +170,25 @@ class WorkOrderSubmitJson(WorkOrderJson):
 		self.json_obj["params"]["dataEncryptionAlgorithm"] = \
 			data_encryption_algorithm
 
-	def add_in_data(self, data, data_hash=None,
-                        encrypted_data_encryption_key=None, iv=None):
+	def set_encrypted_session_key(self, encrypted_session_key):
+		self.json_obj["params"]["encryptedSessionKey"] = encrypted_session_key
+
+	def set_session_key_iv(self, session_key_iv):
+		self.json_obj["params"]["sessionKeyIv"] = session_key_iv
+
+	def set_requester_nonce(self, requester_nonce):
+		self.json_obj["params"]["requesterNonce"] = requester_nonce
+
+	def update_encrypted_request_hash(self):
+		self.json_obj["params"]["encryptedRequestHash"] = ""
+
+	def update_requester_signature(self):
+		self.json_obj["params"]["requesterSignature"] = ""
+
+	def set_verifying_key(self, verifying_key):
+		self.json_obj["params"]["verifyingKey"] = verifying_key
+
+	def add_in_data(self, data, data_hash=None, encrypted_data_encryption_key=None):
 		in_data_copy = self.json_obj["params"]["inData"]
 		index = len(in_data_copy)
 		in_data_copy.append({})

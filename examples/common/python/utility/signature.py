@@ -225,7 +225,7 @@ class ClientSignature(object) :
 
         encrypted_session_key_str = ''.join(format(i, '02x') for i in encrypted_session_key)
         self.__encrypt_workorder_indata(input_json_params, session_key,
-                session_iv, worker.worker_encryption_key, data_key, data_iv)
+                session_iv, worker.encryption_key, data_key, data_iv)
         # [NO_OF_BYTES] 16 BYTES for nonce, is the recommendation by NIST to
         # avoid collisions by the "Birthday Paradox".
         nonce =  crypto.random_bit_string(NO_OF_BYTES)
@@ -303,7 +303,7 @@ class ClientSignature(object) :
         concat_hash = bytes(concat_string, 'UTF-8')
         final_hash = crypto.compute_message_hash(concat_hash)
 
-        verify_key = worker.worker_typedata_verification_key
+        verify_key = worker.verification_key
 
         try:
             _verifying_key = crypto.SIG_PublicKey(verify_key)

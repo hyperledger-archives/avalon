@@ -21,6 +21,7 @@ import json
 import argparse
 import logging
 import base64
+import secrets
 
 import tkinter as tk
 import tkinter.messagebox as messagebox
@@ -153,6 +154,7 @@ class radio:
 			button.config(state=tk.DISABLED)
 
 class resultWindow(tk.Toplevel):
+
 	def __init__(self, parent, message):
 		tk.Toplevel.__init__(self, parent)
 		self.config(background="pale goldenrod")
@@ -201,7 +203,6 @@ class resultWindow(tk.Toplevel):
 
 		self.evaluate(message)
 
-	# Submit work order and retrieve result
 	def evaluate(self, message):
 		self.result_text.set("Waiting for evaluation result...")
 		self.update()
@@ -210,30 +211,34 @@ class resultWindow(tk.Toplevel):
 		# Convert workloadId to hex
 		workload_id = "heart-disease-eval"
 		workload_id = workload_id.encode("UTF-8").hex()
-		wo_submit_json = jrpc_request.WorkOrderSubmitJson(3, 6000, "pformat",
-			worker_id, workload_id, "0x1234", 
+		session_iv = utility.generate_iv()
+		session_key = utility.generate_key()
+		encrypted_session_key = utility.generate_encrypted_key(
+			session_key, worker_obj.encryption_key)
+		requester_nonce = secrets.token_hex(32)
+		work_order_id = secrets.token_hex(32)
+		requester_id = secrets.token_hex(32)
+		wo_submit_json = jrpc_request.WorkOrderSubmitJson(3, 6000, "JSON-RPC",
+			work_order_id, worker_id, workload_id, requester_id,
+			encrypted_session_key, session_iv, requester_nonce,
 			worker_encryption_key=base64.b64decode(
-				worker_obj.worker_encryption_key).hex(),
+				worker_obj.encryption_key).hex(),
 			data_encryption_algorithm="AES-GCM-256")
-		wo_id = wo_submit_json.get_work_order_id()
 		wo_submit_json.add_in_data(message)
 
 		private_key = utility.generate_signing_keys()
-		session_iv = utility.generate_sessioniv()
-		encrypted_session_key = utility.generate_encrypted_session_key(
-			session_iv, worker_obj.worker_encryption_key)
 		direct_wrapper.init_work_order(config)
 		# Set text for JSON sidebar
 		self.request_json = json.dumps(json.loads(
 			direct_wrapper.work_order_submit(
 				wo_submit_json, encrypted_session_key,
-				worker_obj, private_key, session_iv)), indent=4)
+				worker_obj, private_key, session_key, session_iv)), indent=4)
 
 		# Retrieve result and set GUI result text
-		wo_get_result_json = jrpc_request.WorkOrderGetResultJson(4, wo_id)
+		wo_get_result_json = jrpc_request.WorkOrderGetResultJson(4, work_order_id)
 		self.result_json = json.dumps(
 			direct_wrapper.work_order_get_result(
-				wo_get_result_json, encrypted_session_key), indent=4)
+				wo_get_result_json, session_key, session_iv), indent=4)
 		# Set text for JSON sidebar
 		self.result_text.set(
 			json.loads(self.result_json)["outData"][0]["data"])
@@ -241,7 +246,7 @@ class resultWindow(tk.Toplevel):
 		# Retrieve receipt
 		direct_wrapper.init_work_order_receipt(config)
 		wo_receipt_retrieve_json = \
-			jrpc_request.WorkOrderReceiptRetrieveJson(5, wo_id)
+			jrpc_request.WorkOrderReceiptRetrieveJson(5, work_order_id)
 		# Set text for JSON sidebar
 		self.receipt_json = \
 			json.dumps(direct_wrapper.work_order_receipt_retrieve(
@@ -432,7 +437,7 @@ def ParseCommandLine(args) :
 	worker_id = options.worker_id
 
 	# Initializing Worker Object
-	worker_obj = worker.WorkerDetails()
+	worker_obj = worker.SGXWorkerDetails()
 
 def Main(args=None):
 	ParseCommandLine(args)

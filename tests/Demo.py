@@ -77,7 +77,7 @@ def LocalMain(config) :
                 session_iv = enclave_helper.generate_iv()
                 session_key = enclave_helper.generate_key()
                 encrypted_session_key = enclave_helper.generate_encrypted_key(session_key,
-                        worker_obj.worker_encryption_key)
+                        worker_obj.encryption_key)
 
                 input_json_str1 = sig_obj.generate_client_signature(input_json_str1,
                         worker_obj, private_key, session_key, session_iv,
@@ -223,7 +223,7 @@ def ParseCommandLine(config, args) :
 
     # Initializing Signature object, Worker Object
     sig_obj = signature.ClientSignature()
-    worker_obj = worker.WorkerDetails()
+    worker_obj = worker.SGXWorkerDetails()
 
     # -----------------------------------------------------------------
 def Main(args=None):
