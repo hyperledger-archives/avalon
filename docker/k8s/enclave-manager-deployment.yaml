@@ -17,7 +17,7 @@ spec:
       - image: sammyne/hyperledger-tcf
         name: tee
         command: ["/bin/bash"]
-        args: ["$(TCF_K8S_HOME)/scripts/enclave_manager.sh"]
+        args: ["$(TCF_HOME)/scripts/enclave_manager.sh"]
         env:
-        - name: TCF_K8S_HOME
-          value: /project/TrustedComputeFramework/docker/k8s
+        - name: TCF_HOME
+          value: /project/TrustedComputeFramework
