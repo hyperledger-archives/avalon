@@ -453,7 +453,7 @@ def Main(args=None):
 	sys.stderr = plogger.stream_to_logger(
 		logging.getLogger("STDERR"), logging.WARN)
 
-	logger.info("***************** INTEL TRUSTED COMPUTE FRAMEWORK (TCF)" + \
+	logger.info("***************** TRUSTED COMPUTE FRAMEWORK (TCF)" + \
 		" *****************") 
 
 	# Retrieve Worker Registry

@@ -150,7 +150,7 @@ TCFHOME = os.environ.get("TCF_HOME", "../../")
 
 # ------------------------------------------------------------------------------------
 def ParseCommandLine(config, args) :
-    logger.info('***************** INTEL TRUSTED COMPUTE FRAMEWORK (TCF)*****************')
+    logger.info('***************** TRUSTED COMPUTE FRAMEWORK (TCF)*****************')
     global input_json_str
     global input_json_dir
     global server_uri
