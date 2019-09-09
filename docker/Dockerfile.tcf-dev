@@ -101,6 +101,7 @@ RUN wget https://www.openssl.org/source/openssl-1.1.1b.tar.gz \
  && rm -rf openssl-1.1.1b
 # Note: we do _not_ delete openssl-1.1.1b.tar.gz as we re-use it below ..
 
+# py-solc 3.2.0 requires an older version of the solc compiler, 0.4.25
 RUN mkdir -p $HOME/.py-solc/solc-v0.4.25/bin \
   && curl -LsS https://github.com/ethereum/solidity/releases/download/v0.4.25/solc-static-linux -o /root/.py-solc/solc-v0.4.25/bin/solc \
   && chmod 0755 /root/.py-solc/solc-v0.4.25/bin/solc
