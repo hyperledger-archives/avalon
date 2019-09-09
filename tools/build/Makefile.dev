@@ -1,0 +1,15 @@
+# This serves for the local development only. After the first building by 
+# `make`, running `make -f Makefile.dev` should avoid the unnecessary 
+# rebuilding of the python virtual environment every time.
+
+SRCDIR?=$(dir $(abspath $(lastword $(MAKEFILE_LIST))))
+DSTDIR?=$(abspath $(SRCDIR)/_dev)
+
+PKGGEN=$(abspath $(SRCDIR)/../rebuild.sh)
+
+all: packages
+
+packages:
+	. $(abspath $(DSTDIR)/bin/activate) ; $(PKGGEN)
+
+.PHONY: packages
