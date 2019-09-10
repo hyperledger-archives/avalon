@@ -74,10 +74,14 @@ def LocalMain(config) :
                 input_json_str1 = json.dumps(input_json_obj)
 
                 #Generate session iv an encrypted session key
-                session_iv = enclave_helper.generate_sessioniv()
-                encrypted_session_key = enclave_helper.generate_encrypted_session_key(session_iv, worker_obj.worker_encryption_key)
+                session_iv = enclave_helper.generate_iv()
+                session_key = enclave_helper.generate_key()
+                encrypted_session_key = enclave_helper.generate_encrypted_key(session_key,
+                        worker_obj.worker_encryption_key)
 
-                input_json_str1 = sig_obj.generate_client_signature(input_json_str1, worker_obj, private_key, session_iv, encrypted_session_key)
+                input_json_str1 = sig_obj.generate_client_signature(input_json_str1,
+                        worker_obj, private_key, session_key, session_iv,
+                        encrypted_session_key)
 
                 if input_json_str1 is None:
                     continue
@@ -85,7 +89,7 @@ def LocalMain(config) :
 
             # Update the worker ID
             if response:
-                if "workerId" in input_json_str1 :
+                if "workerId" in input_json_str1:
                    #Retrieving the worker id from the "WorkerRetrieve" response and update the worker id information for the further json requests
                    if "result" in response and "ids" in response["result"].keys():
                        input_json_final = json.loads(input_json_str1)
@@ -121,11 +125,12 @@ def LocalMain(config) :
 
             #Verify the signature
             if ( "WorkOrderGetResult" in input_json_str1 ):
-                sig_bool = sig_obj.verify_signature(json.dumps(response),worker_obj)
+                sig_bool = sig_obj.verify_signature(json.dumps(response), worker_obj)
                 try:
                     if sig_bool > 0:
                         logger.info("Signature Verified")
-                        enclave_helper.decrypted_response(json.dumps(response), encrypted_session_key)
+                        enclave_helper.decrypted_response(json.dumps(response),
+                                   session_key, session_iv)
                     else :
                         logger.info("Signature Failed")
                         exit(1)

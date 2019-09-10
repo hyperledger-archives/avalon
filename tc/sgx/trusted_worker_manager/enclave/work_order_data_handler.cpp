@@ -35,27 +35,29 @@
 #include "work_order_processor.h"
 #include "work_order_data_handler.h"
 
-
-
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 namespace tcf {
+
     void WorkOrderDataHandler::Unpack(EnclaveData& enclaveData,
-                                      const JSON_Object* object,
-                                      std::string encryptedSessionKey) {
+                                      const JSON_Object* object) {
         ByteArray encrypted_input_data;
         std::string input_data_hash;
 
         workorder_data.index = GetJsonNumber(object, "index");
         iv = GetJsonStr(object, "iv");
-
         enc_data_key_str = GetJsonStr(object, "encryptedDataEncryptionKey");
         if (enc_data_key_str.empty() || "null" == enc_data_key_str) {
-            data_encryption_key = HexStringToBinary(encryptedSessionKey);
+            data_encryption_key = session_key;
+            data_iv = session_key_iv;
         } else if ("-" == enc_data_key_str) {
             data_encryption_key = {};
+            data_iv = {};
         } else {
             ByteArray enc_data_key = HexStringToBinary(enc_data_key_str);
-            data_encryption_key = enclaveData.decrypt_message(enc_data_key);
+            data_iv = HexStringToBinary(iv);
+            ByteArray encrypted_key = tcf::crypto::skenc::DecryptMessage(
+                   session_key, enc_data_key);
+            data_encryption_key = enclaveData.decrypt_message(encrypted_key);
         }
 
         std::string data_b64 = GetJsonStr(object, "data");
@@ -67,13 +69,16 @@ namespace tcf {
 
         input_data_hash = GetJsonStr(object, "dataHash");
         if (!encrypted_input_data.empty()) {
-            DecryptInputData(encrypted_input_data, iv);
-
+            DecryptData(encrypted_input_data);
             if (!input_data_hash.empty()) {
-                VerifyInputHash(workorder_data.decrypted_data, HexStringToBinary(input_data_hash));
+                VerifyInputHash(workorder_data.decrypted_data,
+				HexStringToBinary(input_data_hash));
             }
+        } else {
+            tcf::error::ThrowIf<tcf::error::ValueError>(!input_data_hash.empty(),
+               "Invalid case: input data is empty but dataHash is non empty");
+            workorder_data.decrypted_data = encrypted_input_data;
         }
-
         concat_string = input_data_hash + data_b64 + enc_data_key_str + iv;
         data_b64.clear();
     }
@@ -103,10 +108,9 @@ namespace tcf {
                    "data",
                    encrypted_output_str.c_str(),
                    "failed to serialize encrypted output data");
-
         JsonSetStr(data_item_object,
                    "encryptedDataEncryptionKey",
-                   enc_data_key_str .c_str(),
+                   enc_data_key_str.c_str(),
                    "failed to serialize encryptedDataEncryptionKey");
 
         JsonSetStr(data_item_object,
@@ -119,44 +123,44 @@ namespace tcf {
                 jret != JSONSuccess, "failed to add item to the data array");
     }
 
-    void WorkOrderDataHandler::ComputeHashString(std::string session_key_iv) {
-        ByteArray iv_byte;
-        if (iv.empty() && (enc_data_key_str.empty() || "null" == enc_data_key_str)) {
-            iv = session_key_iv;
-        }
-
-        std::string encrypted_output_str = EncryptOutputData(iv);
+    void WorkOrderDataHandler::ComputeHashString() {
+        std::string b64_encrypted_data = EncryptData();
         hash = tcf::crypto::ComputeMessageHash(workorder_data.decrypted_data);
         Base64EncodedString hash_str = ByteArrayToHexEncodedString(hash);
-        concat_string = hash_str + encrypted_output_str + enc_data_key_str + iv;
+        concat_string = hash_str + b64_encrypted_data + enc_data_key_str + iv;
 
     }
 
-    void WorkOrderDataHandler::VerifyInputHash(ByteArray input_data, ByteArray input_hash) {
+    void WorkOrderDataHandler::VerifyInputHash(ByteArray input_data,
+		                               ByteArray input_hash) {
         // Do nothing at the phase 1
     }
 
-    void WorkOrderDataHandler::DecryptInputData(ByteArray encrypted_input_data, std::string iv_str) {
+    void WorkOrderDataHandler::DecryptData(ByteArray encrypted_input_data) {
 
         if (data_encryption_key.size() > 0) {
-            workorder_data.decrypted_data = tcf::crypto::skenc::DecryptMessage(data_encryption_key, HexStringToBinary(iv_str), encrypted_input_data);
+            workorder_data.decrypted_data = tcf::crypto::skenc::DecryptMessage(
+		   data_encryption_key, data_iv, encrypted_input_data);
         } else {
             workorder_data.decrypted_data = encrypted_input_data;
         }
     }
 
-    std::string WorkOrderDataHandler::EncryptOutputData(std::string iv_str) {
-        std::string encrypted_str;
+    std::string WorkOrderDataHandler::EncryptData() {
+        std::string b64_encrypted_data;
         if (workorder_data.decrypted_data.empty()) {
-            encrypted_str.clear();
+            encrypted_data = workorder_data.decrypted_data;
+            b64_encrypted_data.clear();
         } else if (data_encryption_key.size() > 0) {
-            encrypted_data = tcf::crypto::skenc::EncryptMessage(data_encryption_key, HexStringToBinary(iv_str), workorder_data.decrypted_data);
-            encrypted_str = base64_encode(encrypted_data);
+            encrypted_data = tcf::crypto::skenc::EncryptMessage(
+		   data_encryption_key, data_iv, workorder_data.decrypted_data);
+            b64_encrypted_data = base64_encode(encrypted_data);
         } else {
             encrypted_data = workorder_data.decrypted_data;
-            encrypted_str.assign(workorder_data.decrypted_data.begin(), workorder_data.decrypted_data.end());
+            b64_encrypted_data.assign(workorder_data.decrypted_data.begin(),
+			    workorder_data.decrypted_data.end());
         }
-        return encrypted_str;
+        return b64_encrypted_data;
     }
 
 }  // namespace tcf

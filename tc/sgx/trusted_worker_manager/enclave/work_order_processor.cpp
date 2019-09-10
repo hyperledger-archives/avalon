@@ -131,25 +131,27 @@ namespace tcf {
             "requesterSignature",
             "invalid request; failed to retrieve requester signature");
 
-
+        // Decrypt Encryption key
+        ByteArray encrypted_session_key_bytes = HexStringToBinary(encrypted_session_key);
+        session_key = enclaveData.decrypt_message(encrypted_session_key_bytes);
+        ByteArray session_key_iv_bytes = HexStringToBinary(session_key_iv);
         JSON_Array* data_array = json_object_get_array(params_object, "inData");
 
         size_t count = json_array_get_count(data_array);
         size_t i;
         for (i = 0; i < count; i++) {
             JSON_Object* data_object = json_array_get_object(data_array, i);
-            WorkOrderDataHandler wo_data;
-            wo_data.Unpack(enclaveData, data_object, encrypted_session_key);
+            WorkOrderDataHandler wo_data(session_key, session_key_iv_bytes);
+            wo_data.Unpack(enclaveData, data_object);
             data_items_in.emplace_back(wo_data);
         }
-
         data_array = json_object_get_array(params_object, "outData");
 
         count = json_array_get_count(data_array);
         for (i = 0; i < count; i++) {
             JSON_Object* data_object = json_array_get_object(data_array, i);
-            WorkOrderDataHandler wo_data;
-            wo_data.Unpack(enclaveData, data_object, encrypted_session_key);
+            WorkOrderDataHandler wo_data(session_key, session_key_iv_bytes);
+            wo_data.Unpack(enclaveData, data_object);
             data_items_out.emplace_back(wo_data);
         }
 
@@ -215,7 +217,6 @@ namespace tcf {
     std::vector<tcf::WorkOrderData> WorkOrderProcessor::ExecuteWorkOrder() {
         std::vector<tcf::WorkOrderData> in_wo_data;
         std::vector<tcf::WorkOrderData> out_wo_data;
-
         if (data_items_in.size() > 0) {
             // data_items_in vector is sorted based out of index
             for (auto d : data_items_in) {
@@ -274,11 +275,9 @@ namespace tcf {
         std::string hash_3;
         for (i = 0; i < data_items_out.size(); i++) {
             tcf::WorkOrderDataHandler& d = data_items_out.at(i);
-            if (!d.concat_string.empty()) {
-                concat_hashes = StrToByteArray(d.concat_string);
-                hash_data =  tcf::crypto::ComputeMessageHash(concat_hashes);
-                hash_3 = hash_3 + base64_encode(hash_data);
-            }
+            concat_hashes = StrToByteArray(d.concat_string);
+            hash_data =  tcf::crypto::ComputeMessageHash(concat_hashes);
+            hash_3 = hash_3 + base64_encode(hash_data);
         }
 
         concat_string = base64_encode(hash_1) + hash_2 + hash_3;
@@ -286,12 +285,13 @@ namespace tcf {
         return tcf::crypto::ComputeMessageHash(concat_hashes);
     }
 
-    tcf_err_t WorkOrderProcessor::VerifyRequestEncryption() {
+    tcf_err_t WorkOrderProcessor::VerifyEncryptedRequestHash() {
         tcf_err_t verify_status = TCF_SUCCESS;
         ByteArray decrypt_request_hash;
-
         try {
-            decrypt_request_hash = tcf::crypto::skenc::DecryptMessage(HexStringToBinary(encrypted_session_key), HexStringToBinary(session_key_iv), HexStringToBinary(encrypted_request_hash));
+            decrypt_request_hash = tcf::crypto::skenc::DecryptMessage(session_key,
+	                                         HexStringToBinary(session_key_iv),
+		                                 HexStringToBinary(encrypted_request_hash));
         } catch (tcf::error::ValueError& e) {
             Log(TCF_LOG_ERROR, "error::DecryptMessage - %d - %s", e.error_code(), e.what());
             return TCF_ERR_CRYPTO;
@@ -305,7 +305,6 @@ namespace tcf {
 
         // Compare the request hash and decrypted request hash
         ByteArray request_hash = ComputeRequestHash();
-
         if ( std::equal(request_hash.begin(), request_hash.end(), decrypt_request_hash.begin()) ) {
             Log(TCF_LOG_INFO, "Decrypted request hash matched with original request hash.. PASS");
         } else {
@@ -340,7 +339,7 @@ namespace tcf {
         std::string concat_string = worker_nonce + work_order_id +
 				worker_id + workload_id + requester_id;
 
-        std::string hash_1 =  base64_encode(tcf::crypto::ComputeMessageHash(StrToByteArray(concat_string)));
+        std::string hash_1 = base64_encode(tcf::crypto::ComputeMessageHash(StrToByteArray(concat_string)));
 
         int i = 0;
         int out_data_size = data_items_out.size();
@@ -349,13 +348,23 @@ namespace tcf {
             if (i < out_data_size) {
                 tcf::WorkOrderDataHandler& out_data = data_items_out.at(i);
                 out_data.workorder_data.decrypted_data = data.decrypted_data;
-                out_data.ComputeHashString(session_key_iv);
+                out_data.ComputeHashString();
             } else {
-                tcf::WorkOrderDataHandler out_data(data, encrypted_session_key);
-                out_data.ComputeHashString(session_key_iv);
+                // Assign data_encryption_key, iv, data_iv and encrypted_data_encryption_key
+                // params with corresponging values from inData
+                ByteArray encryption_key = data_items_in[i].GetEncryptionKey();
+                std::string iv = data_items_in[i].GetIv();
+                std::string encrypted_data_encrption_key =
+                        data_items_in[i].GetEncryptedDataEncryptionKey();
+                ByteArray data_iv = data_items_in[i].GetDataIv();
+                tcf::WorkOrderDataHandler out_data(data, encryption_key,
+                        data_iv, encrypted_data_encrption_key, iv);
+                out_data.ComputeHashString();
                 data_items_out.emplace_back(out_data);
             }
-
+            tcf::WorkOrderDataHandler& out_data = data_items_out.at(i);
+            out_data.workorder_data.decrypted_data = data.decrypted_data;
+            out_data.ComputeHashString();
             i++;
         }
 
@@ -427,14 +436,13 @@ namespace tcf {
     ByteArray WorkOrderProcessor::Process(EnclaveData& enclaveData, std::string json_str) {
         try {
             ParseJsonInput(enclaveData, json_str);
-            tcf::error::ThrowIf<tcf::error::ValueError>(VerifyRequestEncryption()!= TCF_SUCCESS,
+            tcf::error::ThrowIf<tcf::error::ValueError>(VerifyEncryptedRequestHash()!= TCF_SUCCESS,
                             "Decryption of client request hash failed. Request is tampered.");
             tcf::error::ThrowIf<tcf::error::ValueError>(VerifySignature()!= true,
                             "Signature Verification of client request failed. Request is tampered.");
             std::vector<tcf::WorkOrderData> wo_data = ExecuteWorkOrder();
             int i = 0;
             int out_data_size = data_items_out.size();
-
             ByteArray hash = ResponseHashCalculate(wo_data);
             ComputeSignature(enclaveData, hash);
             return CreateJsonOutput();

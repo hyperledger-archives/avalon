@@ -31,28 +31,74 @@ namespace tcf {
         public:
             WorkOrderDataHandler() {}
 
-            explicit WorkOrderDataHandler(const WorkOrderData& wo_data, std::string encrypted_session_key) {
-                workorder_data = wo_data;
-                data_encryption_key = HexEncodedStringToByteArray(encrypted_session_key);
+            explicit WorkOrderDataHandler(ByteArray session_key,
+                                          ByteArray session_key_iv) {
+                this->session_key = session_key;
+                this->session_key_iv = session_key_iv;
+                this->data_encryption_key = {};
+                this->data_iv = {};
             }
 
-            void Unpack(EnclaveData& enclaveData, const JSON_Object* object, std::string encryptedSessionKey);
+            // Used when input request doesn't have OutData
+            explicit WorkOrderDataHandler(const WorkOrderData& wo_data,
+                                          ByteArray data_encryption_key,
+                                          ByteArray data_iv,
+                                          std::string enc_data_key_str,
+                                          std::string iv) {
+                workorder_data = wo_data;
+                this->data_encryption_key = data_encryption_key;
+                this->data_iv = data_iv;
+
+                this->enc_data_key_str = enc_data_key_str;
+                this->iv = iv;
+            }
+
+            void Unpack(EnclaveData& enclaveData,
+                        const JSON_Object* object);
+
             void Pack(JSON_Array* json_array);
 
-            void ComputeHashString(std::string session_key_iv);
+            ByteArray GetEncryptionKey() {
+                return this->data_encryption_key;
+            }
+
+            std::string GetIv() {
+                return this->iv;
+            }
+
+            std::string GetEncryptedDataEncryptionKey() {
+                return this->enc_data_key_str;
+            }
+
+            ByteArray GetDataIv() {
+                return this->data_iv;
+            }
+
+            void ComputeHashString();
             tcf::WorkOrderData workorder_data;
             std::string concat_string;
 
         private:
+            // iv is used for calculating hash during signuature verification
+            // and signature computation
             std::string iv;
+            // enc_data_key_str is encryptedDataEncryptionKey
+            // used to decrypt input data
             std::string enc_data_key_str;
             ByteArray encrypted_data = {};
             ByteArray hash = {};
 
+            // data_encryption_key is a symmetric key used for
+            // both encryption and decryption of data
+            ByteArray data_encryption_key = {};
+            // data_iv is used for encryption and decryption of data
+            ByteArray data_iv = {};
+
+            ByteArray session_key = {};
+            ByteArray session_key_iv = {};
             void ComputeOutputHash();
             void VerifyInputHash(ByteArray input_data, ByteArray input_hash);
-            void DecryptInputData(ByteArray encrypted_input_data, std::string iv_str);
-            std::string EncryptOutputData(std::string iv_str);
-            ByteArray data_encryption_key = {};
+            void DecryptData(ByteArray encrypted_input_data);
+            std::string EncryptData();
         };
 }  // namespace tcf

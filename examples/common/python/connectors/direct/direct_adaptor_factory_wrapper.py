@@ -115,16 +115,17 @@ class DirectAdaptorFactoryWrapper:
 
 	# Encrypt work order and submit
 	def work_order_submit(self, wo_submit_json, encrypted_session_key, 
-		worker_obj, private_key, session_iv):
+		worker_obj, private_key, session_key, session_iv, data_key=None, data_iv=None):
 		if self.work_order == None:
 			logger.error("ERROR: Work order adaptor not initialized")
 			sys.exit(1)
 
 		input_json_str = wo_submit_json.get_json_str()
 		sig_obj = signature.ClientSignature()
+
 		input_json_str = sig_obj.generate_client_signature(
-			input_json_str, worker_obj,
-			private_key, session_iv, encrypted_session_key)
+			input_json_str, worker_obj, private_key,
+			session_key, session_iv, encrypted_session_key, data_key, data_iv)
 		wo_submit_json.load_from_str(input_json_str)
 
 		logger.info("*********Request Json********* \n%s\n", 
@@ -139,7 +140,8 @@ class DirectAdaptorFactoryWrapper:
 		return input_json_str
 
 	# Retrieve work order result and decrypt response
-	def work_order_get_result(self, wo_get_result_json, encrypted_session_key):
+	def work_order_get_result(self, wo_get_result_json, session_key,
+                              session_iv, data_key=None, data_iv=None):
 		if self.work_order == None:
 			logger.error("ERROR: Work order adaptor not initialized")
 			sys.exit(1)
@@ -167,7 +169,7 @@ class DirectAdaptorFactoryWrapper:
 					json.dumps(response, indent=4))
 
 		return enclave_helper.decrypted_response(
-			json.dumps(response), encrypted_session_key)
+			json.dumps(response), session_key, session_iv, data_key, data_iv)
 
 	def init_work_order_receipt(self, config):
 		self.work_order_receipt = \

@@ -36,11 +36,10 @@ namespace tcf {
                 std::vector<tcf::WorkOrderData> ExecuteWorkOrder();
                 ByteArray ComputeRequestHash();
                 ByteArray ResponseHashCalculate(std::vector<tcf::WorkOrderData>& wo_data);
-                tcf_err_t VerifyRequestEncryption();
+                tcf_err_t VerifyEncryptedRequestHash();
                 int VerifySignature();
                 void ComputeSignature(EnclaveData& enclaveData, ByteArray& message_hash);
                 void ConcatHash(ByteArray& dst, ByteArray& src);
-
                 /***Required for work order processing **/
                 std::string tc_service_address;
                 std::string participant_address;
@@ -67,6 +66,7 @@ namespace tcf {
                 int json_request_id;
                 std::string worker_nonce;
                 std::string worker_signature;
+                ByteArray session_key = {};
 
                 /** TODO: Temp Implementation **/
                 /** verifying_key is client's public key used for signature verification.
