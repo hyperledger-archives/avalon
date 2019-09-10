@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tcf-config
+data:
+  HOME: /project/TrustedComputeFramework
+  TCS_LISTENER_PORT: "8080"

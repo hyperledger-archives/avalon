@@ -1,0 +1,20 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: propose-request
+spec:
+  template:
+    metadata:
+      labels:
+        app: request
+    spec:
+      restartPolicy: OnFailure
+      containers:
+      - name: request-proposer
+        image: sammyne/hyperledger-tcf
+        envFrom:
+        - prefix: TCF_
+          configMapRef:
+            name: tcf-config
+        command: ["/bin/bash"]
+        args: ["$(TCF_HOME)/scripts/propose_requests.sh"]
