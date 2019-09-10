@@ -16,8 +16,9 @@ spec:
       containers:
       - image: sammyne/hyperledger-tcf
         name: tee
+        envFrom:
+        - prefix: TCF_
+          configMapRef:
+            name: tcf-config
         command: ["/bin/bash"]
         args: ["$(TCF_HOME)/scripts/enclave_manager.sh"]
-        env:
-        - name: TCF_HOME
-          value: /project/TrustedComputeFramework

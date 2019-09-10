@@ -16,11 +16,12 @@ spec:
       containers:
       - image: sammyne/hyperledger-tcf
         name: lmdb-server
+        envFrom:
+        - prefix: TCF_
+          configMapRef:
+            name: tcf-config
         command: ["/bin/bash"]
         args: ["$(TCF_HOME)/scripts/lmdb.sh"]
-        env:
-        - name: TCF_HOME
-          value: /project/TrustedComputeFramework
         ports:
         - containerPort: 9090
           protocol: TCP

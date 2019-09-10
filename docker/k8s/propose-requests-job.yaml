@@ -12,8 +12,9 @@ spec:
       containers:
       - name: request-proposer
         image: sammyne/hyperledger-tcf
+        envFrom:
+        - prefix: TCF_
+          configMapRef:
+            name: tcf-config
         command: ["/bin/bash"]
         args: ["$(TCF_HOME)/scripts/propose_requests.sh"]
-        env:
-        - name: TCF_HOME
-          value: /project/TrustedComputeFramework

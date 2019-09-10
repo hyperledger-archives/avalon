@@ -10,12 +10,16 @@ in SGX-SIM mode.
 
 ## Running 
 
-1. Start the LMDB server
+1. Initialize the common configuration as a ConfigMap
+    ```bash
+    kubectl create -f tcf-config-map.yaml
+    ```
+2. Start the LMDB server
     ```bash
     # bootstrap the deployment and service
     kubectl create -f lmdb.yaml
     ```
-2. Start the `EnclaveManager` (to manage SGX enclaves) and `TCSServer` (to 
+3. Start the `EnclaveManager` (to manage SGX enclaves) and `TCSServer` (to 
    accept and handle requests from clients)  
     ```bash
     kubectl create -f enclave-manager-deployment.yaml

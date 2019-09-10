@@ -16,11 +16,12 @@ spec:
       containers:
       - image: sammyne/hyperledger-tcf
         name: tcs
+        envFrom:
+        - prefix: TCF_
+          configMapRef:
+            name: tcf-config
         command: ["/bin/bash"]
         args: ["$(TCF_HOME)/scripts/tcs_listener.sh"]
-        env:
-        - name: TCF_HOME
-          value: /project/TrustedComputeFramework
 ---
 apiVersion: v1
 kind: Service
@@ -29,6 +30,7 @@ metadata:
 spec:
   ports:
   - port: 8080
+    # targetPort should be sync to TCS_LISTENER_PORT in tcf-config-map.yaml
     targetPort: 8080
   selector:
     app: tcs
