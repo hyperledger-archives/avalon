@@ -14,7 +14,6 @@
 
 import json
 import logging
-from itertools import cycle
 import utility.utility as utility
 from error_code.error_status import WorkerError
 from error_code.error_status import WorkerStatus
@@ -184,62 +183,47 @@ class TCSWorkerRegistryHandler:
         return response
 # ------------------------------------------------------------------------------------------------
 
-    def __lookup_basic(self, lookup_bool, input_json_str, response):
-        work_orders = []
-        work_orders = self.kv_helper.lookup("workers")
-
-        alter_items = []
-        alter_items = utility.list_difference(self.worker_pool, work_orders)
-
-        for item in alter_items:
-            self.worker_pool.remove(item)
-
-        alter_items = utility.list_difference(work_orders, self.worker_pool)
-        for item in alter_items:
-            self.worker_pool.append(item)
+    def __lookup_basic(self, is_lookup_next, input_json_str, response):
+        # sync the work pool to that of DB
+        self.worker_pool = self.kv_helper.lookup("workers")
 
         input_value = json.loads(input_json_str)
         total_count = 0
         ids = []
         lookupTag = ""
 
+        params = input_value["params"]
         for worker_id in self.worker_pool:
-            if lookup_bool:
-                if (worker_id == input_value["params"]["lookUpTag"]):
-                    lookup_bool = False
-                    continue
-                else:
-                    continue
+            if is_lookup_next:
+                # loop until found the expected lookUpTag
+                is_lookup_next = (worker_id != params["lookupTag"])
+                continue
 
+            matched = True
             value = self.kv_helper.get("workers", worker_id)
-            json_dict = json.loads(value)
-            checkcount = 0
-            actualcount = 0
             if value:
-                if "workerType" in input_json_str:
-                    checkcount = checkcount+1
-                    if int(json_dict["workerType"]) == int(input_value["params"]["workerType"]):
-                        actualcount = actualcount+1
+                worker = json.loads(value)
+                criteria = ["workerType", "organizationId", "applicationTypeId"]
 
-                if "organizationId" in input_json_str:
-                    checkcount = checkcount+1
-                    if json_dict["organizationId"] == input_value["params"]["organizationId"]:
-                        actualcount = actualcount+1
+                for c in criteria:
+                    if params.get(c) is None:
+                        continue
 
-                if "applicationTypeId" in input_json_str:
-                    checkcount = checkcount+1
-                    if json_dict["applicationTypeId"] == input_value["params"]["applicationTypeId"]:
-                        actualcount = actualcount+1
+                    matched = (worker[c] == params[c])
+                    if not matched:
+                        break
 
-            if(checkcount == actualcount):
+            if matched:
                 total_count = total_count+1
                 ids.append(worker_id)
                 lookupTag = worker_id
 
-        response["result"] = {}
-        response["result"]["totalCount"] = total_count
-        response["result"]["lookupTag"] = lookupTag
-        response["result"]["ids"] = ids
+        response["result"] = {
+            "totalCount": total_count,
+            "lookupTag": lookupTag,
+            "ids": ids,
+        }
+
         return response
 # ------------------------------------------------------------------------------------------------
 
