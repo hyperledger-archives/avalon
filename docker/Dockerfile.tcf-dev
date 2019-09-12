@@ -39,7 +39,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 # Add necessary packages
 RUN apt-get update \
- && apt-get install -y -q\
+ && apt-get install -y -q \
     build-essential \
     ca-certificates \
     cmake \
@@ -86,11 +86,19 @@ RUN wget https://download.01.org/intel-sgx/linux-2.3.1/ubuntu18.04/sgx_linux_x64
  && rm sgx_linux_x64_sdk_2.3.101.46683.bin \
  && echo ". /opt/intel/sgxsdk/environment" >> /etc/environment
 
-# ("Untrusted") OpenSSL
 WORKDIR /tmp
-RUN wget https://www.openssl.org/source/openssl-1.1.1d.tar.gz \
- && tar -zxvf openssl-1.1.1d.tar.gz \
- && cd openssl-1.1.1d/ \
+# py-solc 3.2.0 requires an older version of the solc compiler, 0.4.25
+RUN mkdir -p $HOME/.py-solc/solc-v0.4.25/bin \
+  && curl -LsS https://github.com/ethereum/solidity/releases/download/v0.4.25/solc-static-linux -o /root/.py-solc/solc-v0.4.25/bin/solc \
+  && chmod 0755 /root/.py-solc/solc-v0.4.25/bin/solc
+
+# Build ("Untrusted") OpenSSL, then build ("trusted") SGX OpenSSL
+# Note: The latter will compile in HW or SIM mode depending on the
+# availability of /dev/isgx and /var/run/aesmd/aesm.socket
+RUN OPENSSL_VER=1.1.1d \
+ && wget https://www.openssl.org/source/openssl-$OPENSSL_VER.tar.gz \
+ && tar -zxf openssl-$OPENSSL_VER.tar.gz \
+ && cd openssl-$OPENSSL_VER/ \
  && ./config \
  && THREADS=8 \
  && make -j$THREADS \
@@ -98,22 +106,15 @@ RUN wget https://www.openssl.org/source/openssl-1.1.1d.tar.gz \
  && make install -j$THREADS \
  && ldconfig \
  && cd .. \
- && rm -rf openssl-1.1.1d
-# Note: we do _not_ delete openssl-1.1.1d.tar.gz as we re-use it below ..
-
-# py-solc 3.2.0 requires an older version of the solc compiler, 0.4.25
-RUN mkdir -p $HOME/.py-solc/solc-v0.4.25/bin \
-  && curl -LsS https://github.com/ethereum/solidity/releases/download/v0.4.25/solc-static-linux -o /root/.py-solc/solc-v0.4.25/bin/solc \
-  && chmod 0755 /root/.py-solc/solc-v0.4.25/bin/solc
-
-# ("trusted") SGX OpenSSL
-# Note: This will compile in HW or SIM mode depending on the availability of
-# /dev/isgx and /var/run/aesmd/aesm.socket
-WORKDIR /tmp
-RUN git clone https://github.com/intel/intel-sgx-ssl.git  \
+ && rm -rf openssl-$OPENSSL_VER \
+ && git clone https://github.com/intel/intel-sgx-ssl.git  \
  && . /opt/intel/sgxsdk/environment \
- && (cd intel-sgx-ssl/openssl_source; mv /tmp/openssl-1.1.1d.tar.gz . ) \
- && (cd intel-sgx-ssl/Linux; if ([ -c /dev/isgx ] && [ -S /var/run/aesmd/aesm.socket ]); then SGX_MODE=HW; else SGX_MODE=SIM; fi; make SGX_MODE=${SGX_MODE} DESTDIR=/opt/intel/sgxssl all test ) \
+ && (cd intel-sgx-ssl/openssl_source; mv /tmp/openssl-$OPENSSL_VER.tar.gz . ) \
+ && (cd intel-sgx-ssl/Linux; \
+    if ([ -c /dev/isgx ] && [ -S /var/run/aesmd/aesm.socket ]); then SGX_MODE=HW; \
+    else SGX_MODE=SIM; \
+    fi; \
+    make SGX_MODE=${SGX_MODE} DESTDIR=/opt/intel/sgxssl all test ) \
  && (cd intel-sgx-ssl/Linux; make install ) \
  && rm -rf /tmp/intel-sgx-ssl \
  && echo "SGX_SSL=/opt/intel/sgxssl" >> /etc/environment
@@ -123,6 +124,8 @@ WORKDIR /project/TrustedComputeFramework
 
 RUN \
  echo "VIRTUAL_ENV=/project/TrustedComputeFramework/tools/build/_dev" >> /etc/environment \
+ && echo "SOLC_BINARY=/root/.py-solc/solc-v0.4.25/bin/solc" >> /etc/environment \
+ && echo "WALLET_PRIVATE_KEY=B413189C95B48737AE2D9AF4CAE97EB03F4DE40599DF8E6C89DCE4C2E2CBA8DE" >> /etc/environment \
  && echo "TCF_HOME=/project/TrustedComputeFramework/" >> /etc/environment \
  && if [ ! -z "$http_proxy"  ]; then \
     echo 'Acquire::http::Proxy "'$http_proxy'";' >> /etc/apt/apt.conf.d/00proxy; \
@@ -140,8 +143,7 @@ RUN \
         echo "https_proxy=$https_proxy" >> /etc/wgetrc; \
         echo "https_proxy=$https_proxy" >> /etc/environment; \
         echo "HTTPS_PROXY=$(echo $https_proxy | sed 's,[a-zA-Z]*://,,')" >> /etc/environment; \
-    fi \
- && sed -i '1s;^;source /etc/environment\nexport $(grep -v "^. " /etc/environment| cut -d= -f1)\n;' /etc/environment
+    fi
 
 ENV http_proxy=$http_proxy
 ENV https_proxy=$https_proxy
