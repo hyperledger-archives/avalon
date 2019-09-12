@@ -22,28 +22,14 @@ To use:
     `docker-compose` . Terminal 2 is running the Docker container shell
     with the `(_dev)` prompt
 4.  In Terminal 2 run `cd $TCF_HOME/examples/apps/echo/client`
-5.  In Terminal 2 install the Solidity compiler as follows:
-    ```bash
-    mkdir -p $HOME/.py-solc/solc-v0.4.25/bin \
-    && curl -LsS https://github.com/ethereum/solidity/releases/download/v0.4.25/solc-static-linux \
-            -o /root/.py-solc/solc-v0.4.25/bin/solc \
-    && chmod 0755 /root/.py-solc/solc-v0.4.25/bin/solc &&
-    export SOLC_BINARY=/root/.py-solc/solc-v0.4.25/bin/solc
-    ```
-6. In Terminal 2, set environment variable `WALLET_PRIVATE_KEY` if not set.
-    This should match the value in file `docker/Dockerfile.tcf-dev`
-    from step 3 above:
-    ```bash
-    export WALLET_PRIVATE_KEY="B413189C95B48737AE2D9AF4CAE97EB03F4DE40599DF8E6C89DCE4C2E2CBA8DE"
-    ```
-7.  In Terminal 2, run `./echo_client.py -m "Hello world"` .
+5.  In Terminal 2, run `./echo_client.py -m "Hello world"` .
     Use the `-h` option to see other available options
 
-8.  You will see output showing:
+6.  You will see output showing:
     1. The client searches the registry for an "echo" worker
     2. Sends a request to the worker
     3. Waits for and receives a response.
     4. The messages sent and received are encrypted with the key specified
        in the JSON packet, then encoded in Base64.
-9.  In Terminal 1, press Ctrl-c to stop the TCF Enclave Manager and Listener
+7.  In Terminal 1, press Ctrl-c to stop the TCF Enclave Manager and Listener
 
