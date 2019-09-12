@@ -19,6 +19,7 @@ import json
 import argparse
 import logging
 import base64
+import secrets
 
 import config.config as pconfig
 import utility.logger as plogger
@@ -102,7 +103,7 @@ def ParseCommandLine(args) :
 		message = "Test Message"
 
 	# Initializing Worker Object
-	worker_obj = worker.WorkerDetails()
+	worker_obj = worker.SGXWorkerDetails()
 
 def Main(args=None):
 	ParseCommandLine(args)
@@ -158,36 +159,39 @@ def Main(args=None):
 		"*********\n%s\n", worker_id)
 
 	# Convert workloadId to hex
-	workload_id = "echo-result"
-	workload_id = workload_id.encode("UTF-8").hex()
+	workload_id = "echo-result".encode("UTF-8").hex()
+	work_order_id = secrets.token_hex(32)
+	requester_id = secrets.token_hex(32)
+	session_iv = utility.generate_iv()
+	session_key = utility.generate_key()
+	encrypted_session_key = utility.generate_encrypted_key(
+		session_key, worker_obj.encryption_key)
+	requester_nonce = secrets.token_hex(32)
 	# Create work order
-	wo_submit_json = jrpc_request.WorkOrderSubmitJson(3, 6000, "pformat",
-		worker_id, workload_id, "0x2345", 
+	wo_submit_json = jrpc_request.WorkOrderSubmitJson(3, 6000, "JSON-RPC",
+		work_order_id, worker_id, workload_id, requester_id,
+		encrypted_session_key, session_iv, requester_nonce,
 		worker_encryption_key=base64.b64decode(
-			worker_obj.worker_encryption_key).hex(), 
+			worker_obj.encryption_key).hex(),
 		data_encryption_algorithm="AES-GCM-256")
-	wo_id = wo_submit_json.get_work_order_id()
 	wo_submit_json.add_in_data(message)
 
 	# Sign work order
 	private_key = utility.generate_signing_keys()
-	session_iv = utility.generate_sessioniv()
-	encrypted_session_key = utility.generate_encrypted_session_key(
-		session_iv, worker_obj.worker_encryption_key)
 
 	# Submit work order
 	direct_wrapper.init_work_order(config)
 	direct_wrapper.work_order_submit(wo_submit_json, encrypted_session_key, 
-		worker_obj, private_key, session_iv)
+		worker_obj, private_key, session_key, session_iv)
 
 	# Retrieve result
-	wo_get_result_json = jrpc_request.WorkOrderGetResultJson(4, wo_id)
+	wo_get_result_json = jrpc_request.WorkOrderGetResultJson(4, work_order_id)
 	direct_wrapper.work_order_get_result(
-		wo_get_result_json, encrypted_session_key)
+		wo_get_result_json, session_key, session_iv)
 
 	# Retrieve receipt
 	wo_receipt_retrieve_json = \
-		jrpc_request.WorkOrderReceiptRetrieveJson(5, wo_id)
+		jrpc_request.WorkOrderReceiptRetrieveJson(5, work_order_id)
 	direct_wrapper.init_work_order_receipt(config)
 	direct_wrapper.work_order_receipt_retrieve(wo_receipt_retrieve_json)
 
