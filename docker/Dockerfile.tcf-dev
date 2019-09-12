@@ -88,9 +88,9 @@ RUN wget https://download.01.org/intel-sgx/linux-2.3.1/ubuntu18.04/sgx_linux_x64
 
 # ("Untrusted") OpenSSL
 WORKDIR /tmp
-RUN wget https://www.openssl.org/source/openssl-1.1.1b.tar.gz \
- && tar -zxvf openssl-1.1.1b.tar.gz \
- && cd openssl-1.1.1b/ \
+RUN wget https://www.openssl.org/source/openssl-1.1.1d.tar.gz \
+ && tar -zxvf openssl-1.1.1d.tar.gz \
+ && cd openssl-1.1.1d/ \
  && ./config \
  && THREADS=8 \
  && make -j$THREADS \
@@ -98,8 +98,8 @@ RUN wget https://www.openssl.org/source/openssl-1.1.1b.tar.gz \
  && make install -j$THREADS \
  && ldconfig \
  && cd .. \
- && rm -rf openssl-1.1.1b
-# Note: we do _not_ delete openssl-1.1.1b.tar.gz as we re-use it below ..
+ && rm -rf openssl-1.1.1d
+# Note: we do _not_ delete openssl-1.1.1d.tar.gz as we re-use it below ..
 
 # py-solc 3.2.0 requires an older version of the solc compiler, 0.4.25
 RUN mkdir -p $HOME/.py-solc/solc-v0.4.25/bin \
@@ -112,7 +112,7 @@ RUN mkdir -p $HOME/.py-solc/solc-v0.4.25/bin \
 WORKDIR /tmp
 RUN git clone https://github.com/intel/intel-sgx-ssl.git  \
  && . /opt/intel/sgxsdk/environment \
- && (cd intel-sgx-ssl/openssl_source; mv /tmp/openssl-1.1.1b.tar.gz . ) \
+ && (cd intel-sgx-ssl/openssl_source; mv /tmp/openssl-1.1.1d.tar.gz . ) \
  && (cd intel-sgx-ssl/Linux; if ([ -c /dev/isgx ] && [ -S /var/run/aesmd/aesm.socket ]); then SGX_MODE=HW; else SGX_MODE=SIM; fi; make SGX_MODE=${SGX_MODE} DESTDIR=/opt/intel/sgxssl all test ) \
  && (cd intel-sgx-ssl/Linux; make install ) \
  && rm -rf /tmp/intel-sgx-ssl \
