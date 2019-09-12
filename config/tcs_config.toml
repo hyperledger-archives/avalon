@@ -14,7 +14,7 @@
 
 [KvStorage]
 StoragePath = "config/Kv_Shared_tmp"
-StorageSize = "1 TB"
+StorageSize = "1 GB"
 # the remote version is of higher priority if enabled
 #remote_url = "http://localhost:9090"
 
