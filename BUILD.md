@@ -25,7 +25,7 @@ Follow the instructions below to execute a Docker-based build and execution.
    `TrustedComputeFramework` repository.
 
    **SGX SIM mode**:
-   1. Run `sudo docker-compose up`
+   1. Run `sudo docker-compose up --build`
    2. For the subsequent builds on the same workspace, build time can be
       reduced by executing this command:
       `MAKECLEAN=0 sudo -E docker-compose up`
@@ -34,7 +34,7 @@ Follow the instructions below to execute a Docker-based build and execution.
    1. Refer to Intel SGX in Hardware-mode section in
       [PREREQUISITES document](PREREQUISITES.md) to install SGX pre-requisites
       and to configure IAS keys.
-   2. Run `sudo docker-compose -f docker-compose-sgx.yaml up`
+   2. Run `sudo docker-compose -f docker-compose-sgx.yaml up --build`
    3. For the subsequent builds on the same workspace, build time can be
       reduced by executing this command:
       `MAKECLEAN=0 sudo -E docker-compose -f docker-compose-sgx.yaml up`
