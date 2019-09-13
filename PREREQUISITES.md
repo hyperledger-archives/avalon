@@ -49,8 +49,8 @@ activation script (e.g. `source /opt/intel/sgxsdk/environment`)
 
 - `PKG_CONFIG_PATH` and `LD_LIBRARY_PATH` also contain the the path to
   [OpenSSL](#openssl) package config files and libraries, respectively,
-  if you build your own OpenSSL. You need to do this when OpenSSL version 1.1.0h
-  or later is not available
+  if you build your own OpenSSL. You need to do this when OpenSSL
+  version 1.1.1d or later is not available
 
 - `SGX_MODE`
 This variable is used to switch between the Intel SGX simulator and hardware
@@ -241,23 +241,23 @@ export SGX_MODE=SIM
 **The OpenSSL steps apply only to standalone builds.**
 
 OpenSSL is a popular cryptography library. This project requires OpenSSL
-version 1.1.0h or later.
+version 1.1.1d or later.
 
 Many Linux distributions have an older version of OpenSSL installed by default.
 If your version of OpenSSL is too old, follow these steps to compile a newer
-version from source. If you already have a newer version, 1.1.0h or later,
+version from source. If you already have a newer version, 1.1.1d or later,
 you can skip this.
 
 If using a Debian-based Linux distribution (Ubuntu, Mint, etc.) the recommended
 path is to download and install pre-build OpenSSL packages for your system.
 Check for available versions
 [here](http://http.us.debian.org/debian/pool/main/o/openssl/).
-For example, to install OpenSSL v1.1.0h on an Ubuntu system:
+For example, to install OpenSSL v1.1.1d on an Ubuntu system:
 ```
-wget 'http://http.us.debian.org/debian/pool/main/o/openssl/libssl1.1_1.1.0h-4_amd64.deb'
-wget 'http://http.us.debian.org/debian/pool/main/o/openssl/libssl-dev_1.1.0h-4_amd64.deb'
-sudo dpkg -i libssl1.1_1.1.0h-4_amd64.deb
-sudo dpkg -i libssl-dev_1.1.0h-4_amd64.deb
+wget 'http://http.us.debian.org/debian/pool/main/o/openssl/libssl1.1_1.1.1d-4_amd64.deb'
+wget 'http://http.us.debian.org/debian/pool/main/o/openssl/libssl-dev_1.1.1d-4_amd64.deb'
+sudo dpkg -i libssl1.1_1.1.1d-4_amd64.deb
+sudo dpkg -i libssl-dev_1.1.1d-4_amd64.deb
 sudo apt-get install -f
 dpkg -l libssl1.1 libssl-dev
 ```
@@ -268,9 +268,9 @@ the package directly as described above you do *not* need to do this. These
 steps detail installing OpenSSL to the `install` directory under your current
 working directory.
 ```
-wget https://www.openssl.org/source/openssl-1.1.0h.tar.gz
-tar -xzf openssl-1.1.0h.tar.gz
-cd openssl-1.1.0h/
+wget https://www.openssl.org/source/openssl-1.1.1d.tar.gz
+tar -xzf openssl-1.1.1d.tar.gz
+cd openssl-1.1.1d/
 mkdir ../install
 ./Configure --prefix=$PWD/../install
 ./config --prefix=$PWD/../install
@@ -300,7 +300,7 @@ export LD_LIBRARY_PATH="$PWD/install/lib/${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
 Intel SGX OpenSSL is a compilation of OpenSSL specifically for use with
 Intel SGX secure enclaves.
 This project specifically requires Intel SGX OpenSSL based on
-OpenSSL version 1.1.0h or later.
+OpenSSL version 1.1.1d or later.
 It should match the version installed on your host system or set up
 in the previous step.
 
@@ -322,12 +322,6 @@ problems.
 
 - Download the latest SGX SSL git repository for your version of OpenSSL:
 
-  If you are using OpenSSL 1.1.0 (the usual case):
-  ```
-  git clone -b openssl_1.1.0 'https://github.com/intel/intel-sgx-ssl.git'
-  ```
-
-  If you are using the newer OpenSSL 1.1.1:
   ```
   git clone 'https://github.com/intel/intel-sgx-ssl.git'
   ```
@@ -335,17 +329,9 @@ problems.
 - Download the OpenSSL source package for your version of OpenSSL.
   This will form the base of this Intel SGX SSL install:
 
-  If you are using OpenSSL 1.1.0 (the usual case):
   ```
   cd intel-sgx-ssl/openssl_source
-  wget 'https://www.openssl.org/source/openssl-1.1.0h.tar.gz'
-  cd ..
-  ```
-
-  If you are using the newer OpenSSL 1.1.1:
-  ```
-  cd intel-sgx-ssl/openssl_source
-  wget 'https://www.openssl.org/source/openssl-1.1.1b.tar.gz'
+  wget 'https://www.openssl.org/source/openssl-1.1.1d.tar.gz'
   cd ..
   ```
 
@@ -387,8 +373,13 @@ problems.
   If you installed libprotobuf elsewhere, add the directory to `LD_LIBRARY_PATH`
 - If you get the error:
   `crypto/rand/rand_lib.c:14:10: fatal error: internal/rand_int.h: No such file or directory`
-  you are using OpenSSL 1.1.0 and need to clone the `openssl_1.1.0` branch of
-  `intel-sgx-ssl` in the step above
+  you are using an old version of OpenSSL and need to clone the
+  `openssl_1.1.1` branch of `intel-sgx-ssl` in the step above
+
+- If you get the error:
+  `rand_lib.c:151:16: error: too many arguments to function 'rand_pool_new'`
+  you are using an old version of OpenSSL and need to clone the
+  `openssl_1.1.1` branch of `intel-sgx-ssl` in the step above
 
 - If you get the error
   `failed to initialize enclave; . . . ('Cannot connect to proxy.', . . .)`
@@ -402,3 +393,15 @@ problems.
   from your IAS subscription as instructed in the
   [Intel SGX](#sgx) section
 
+- If you are running in Intel SGX hardware mode, make sure you have device
+  `/dev/isgx` (and not `/dev/sgx`).  Review the Intel SGX device driver
+  installation instructions above.  If you have `/dev/sgx` the
+  device driver must be removed first.
+
+- If you are running in Intel SGX hardware mode, you need to modify
+  the `ias_api_key` in `config/tcs_config.toml` with your
+  IAS Subscription key obtained in the instructions above
+
+- If you are not running in a corporate proxy environment (and not connected
+  directly to Internet), comment out the `https_proxy` line in
+  `config/tcs_config.toml.
