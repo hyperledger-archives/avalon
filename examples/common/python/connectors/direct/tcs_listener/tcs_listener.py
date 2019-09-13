@@ -40,7 +40,7 @@ from tcs_worker_registry_handler import TCSWorkerRegistryHandler
 from tcs_workorder_receipt_handler import TCSWorkOrderReceiptHandler
 from tcs_worker_encryption_key_handler import WorkerEncryptionKeyHandler
 from database import connector
-from error_code.error_status import WorkorderError
+from error_code.error_status import WorkOrderStatus
 import utility.utility as utility
 
 import logging
@@ -80,7 +80,7 @@ class TCSListener(resource.Resource):
     def _process_request(self, input_json_str):
         response = {}
         response['error'] = {}
-        response['error']['code'] = WorkorderError.INVALID_PARAMETER_FORMAT_OR_VALUE
+        response['error']['code'] = WorkOrderStatus.INVALID_PARAMETER_FORMAT_OR_VALUE
 
         try:
             input_json = json.loads(input_json_str)
@@ -121,7 +121,7 @@ class TCSListener(resource.Resource):
         # JRPC response with id 0 is returned because id parameter
         # will not be found in GET request
         response = utility.create_error_response(
-            WorkorderError.INVALID_PARAMETER_FORMAT_OR_VALUE, "0",
+            WorkOrderStatus.INVALID_PARAMETER_FORMAT_OR_VALUE, "0",
             "Only POST request is supported")
         logger.error("GET request is not supported. Only POST request is supported")
 
@@ -146,7 +146,7 @@ class TCSListener(resource.Resource):
                 except AttributeError:
                     logger.error("Error while loading input json")
                     response = utility.create_error_response(
-                        WorkorderError.UNKNOWN_ERROR,
+                        WorkOrderStatus.UNKNOWN_ERROR,
                         jrpc_id,
                         "UNKNOWN_ERROR: Error while loading the input JSON file")
                     return response
@@ -155,7 +155,7 @@ class TCSListener(resource.Resource):
                 # JRPC response with 0 as id is returned because id can't be fecthed
                 # from a request with unknown encoding
                 response = utility.create_error_response(
-                    WorkorderError.UNKNOWN_ERROR,
+                    WorkOrderStatus.UNKNOWN_ERROR,
                     0,
                     "UNKNOWN_ERROR: unknown message encoding")
                 return response
@@ -165,7 +165,7 @@ class TCSListener(resource.Resource):
             # JRPC response with 0 as id is returned because id can't be
             # fetched from improper request
             response = utility.create_error_response(
-                WorkorderError.UNKNOWN_ERROR,
+                WorkOrderStatus.UNKNOWN_ERROR,
                 0,
                 "UNKNOWN_ERROR: unable to decode incoming request")
             return response
@@ -182,7 +182,7 @@ class TCSListener(resource.Resource):
         except:
             logger.exception('unknown exception while processing request %s', request.path)
             response = utility.create_error_response(
-                WorkorderError.UNKNOWN_ERROR,
+                WorkOrderStatus.UNKNOWN_ERROR,
                 jrpc_id,
                 "UNKNOWN_ERROR: unknown exception processing http \
                     request {0}".format(request.path))

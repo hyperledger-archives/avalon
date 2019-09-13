@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import json
+import time
 import logging
 from eth_utils.hexadecimal import is_hex
 import base64
@@ -20,6 +21,7 @@ from service_client.generic import GenericServiceClient
 from connectors.interfaces.work_order_interface import WorkOrderInterface
 from connectors.utils import create_jrpc_response
 from utility.tcf_types import JsonRpcErrorCode
+from error_code.error_status import WorkOrderStatus
 
 logging.basicConfig(format="%(asctime)s - %(levelname)s - %(message)s", level=logging.INFO)
 
@@ -53,8 +55,8 @@ class WorkOrderJRPCImpl(WorkOrderInterface):
             "index":True,
             "dataHash":False,
             "data":True,
-            "encryptedDataEncryptionKey":True,
-            "iv":True
+            "encryptedDataEncryptionKey":False,
+            "iv":False
             }
     
     def __validate_parameters(self, params):
@@ -124,7 +126,7 @@ class WorkOrderJRPCImpl(WorkOrderInterface):
                     logging.error("Invalid Encryption key of in data")
                     return False, \
                         "Invalid Encryption key of in data"
-            if data_item["iv"] != "" and \
+            if "iv" in data_item and data_item["iv"] != "" and \
                 data_item["iv"] != "0" and not is_hex(data_item["iv"]):
                 logging.error("Invalid initialization vector of in data")
                 return False, \
@@ -158,35 +160,23 @@ class WorkOrderJRPCImpl(WorkOrderInterface):
         json_rpc_request = {
             "jsonrpc": "2.0",
             "method": "WorkOrderSubmit",
-            "id": id,
-            "params": 
-            {
-                "responseTimeoutMSecs": params["responseTimeoutMSecs"],
-                "payloadFormat": params["payloadFormat"],
-                "resultUri": params["resultUri"],
-                "notifyUri": params["notifyUri"],
-                "workOrderId": params["workOrderId"],
-                "workerId": params["workerId"],
-                "workloadId": params["workloadId"],
-                "requesterId": params["requesterId"],
-                "workerEncryptionKey": params["workerEncryptionKey"],
-                "dataEncryptionAlgorithm": params["dataEncryptionAlgorithm"],
-                "encryptedSessionKey": params["encryptedSessionKey"],
-                "sessionKeyIv": params["sessionKeyIv"],
-                "requesterNonce": params["requesterNonce"],
-                "encryptedRequestHash": params["encryptedRequestHash"],
-                "requesterSignature": params["requesterSignature"],
-                "verifyingKey": params["verifyingKey"],
-                "inData": in_data,
-            }
+            "id": id
         }
+        json_rpc_request["params"] = params
+        json_rpc_request["params"]["inData"] = in_data
+
         if out_data is not None:
             json_rpc_request["outData"] = out_data
-        
+
+        logging.debug("Work order request %s", json.dumps(json_rpc_request))
         response = self.__uri_client._postmsg(json.dumps(json_rpc_request))
         return response
 
-    def work_order_get_result(self, work_order_id, id=None):
+    def work_order_get_result_nonblocking(self, work_order_id, id=None):
+        """
+        Get the work order result in non-blocking way.
+        It return json rpc response of dictionary type
+        """
         if not is_hex(work_order_id):
             logging.error("Invalid work order Id")
             return create_jrpc_response(id, JsonRpcErrorCode.INVALID_PARAMETER,
@@ -202,3 +192,21 @@ class WorkOrderJRPCImpl(WorkOrderInterface):
         }
         response = self.__uri_client._postmsg(json.dumps(json_rpc_request))
         return response
+
+    def work_order_get_result(self, work_order_id, id=None):
+        """
+        Get the work order result in blocking way until it get the result/error
+        It return json rpc response of dictionary type
+        """
+        response = self.work_order_get_result_nonblocking(work_order_id, id)
+        if "error" in response:
+            if response["error"]["code"] != WorkOrderStatus.PENDING:
+                return response
+            else:
+                while "error" in response and \
+                    response["error"]["code"] == WorkOrderStatus.PENDING:
+                    response = self.work_order_get_result_nonblocking(work_order_id, id)
+                    # TODO: currently pooling after every 2 sec interval forever.
+                    # We should implement feature to timeout after responseTimeoutMsecs in the request
+                    time.sleep(2)
+                return response

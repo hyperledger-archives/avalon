@@ -211,9 +211,9 @@ def decrypted_response(input_json_str, session_key, session_iv, data_key=None, d
         - session_iv is an initialization vector corresponding to session_key.
         - data_key is a one time key geneated by participant used to encrypt
           work order indata
-        - data_iv is an intialization vector used along with data_key.
+        - data_iv is an initialization vector used along with data_key.
           Default is all zeros.
-    returns response json object after decrypting output data
+    returns out data json object in response after decrypting output data
     """
     input_json = json.loads(input_json_str)
     input_json_params = input_json['result']
@@ -234,7 +234,7 @@ def decrypted_response(input_json_str, session_key, session_iv, data_key=None, d
             iv = data_iv
         if not do_decrypt:
             input_json_params['outData'][i]['data'] = data
-            logger.info("Work order response data not encrypted, data in plain is %s",
+            logger.debug("Work order response data not encrypted, data in plain is %s",
                 base64.b64decode(data))
         else:
             logger.debug("encrypted_key: %s", data_encryption_key_byte)
@@ -243,7 +243,7 @@ def decrypted_response(input_json_str, session_key, session_iv, data_key=None, d
                     data_encryption_key_byte, item['data'], iv)
             input_json_params['outData'][i]['data'] = data_in_plain
         i = i + 1
-    return input_json_params
+    return input_json_params['outData']
 
 #---------------------------------------------------------------------------------------------
 

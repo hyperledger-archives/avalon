@@ -21,17 +21,18 @@ error_code_handler.py -- Error code defined for handlers
 
 from enum import IntEnum, unique
 @unique
-class WorkorderError(IntEnum):
+class WorkOrderStatus(IntEnum):
     SUCCESS = 0
-    UNKNOWN_ERROR = 1
+    FAILED = 1
     INVALID_PARAMETER_FORMAT_OR_VALUE = 2
     ACCESS_DENIED = 3
     INVALID_SIGNATURE = 4
     PENDING = 5
-    PROCESSING = 6
-    BUSY = 7
+    SCHEDULED = 6
+    PROCESSING = 7
+    BUSY = 8
+    UNKNOWN_ERROR = 9
 
-from enum import IntEnum, unique
 @unique
 class WorkerStatus(IntEnum):
     ACTIVE = 0
@@ -39,7 +40,6 @@ class WorkerStatus(IntEnum):
     DECOMMISSIONED = 2
     COMPROMISED = 3
     
-from enum import IntEnum, unique
 @unique
 class WorkerError(IntEnum):
     SUCCESS = 0
@@ -50,7 +50,6 @@ class WorkerError(IntEnum):
     NO_MORE_LOOKUP_RESULTS = 5
     UNSUPPORTED_MODE = 6
 
-from enum import IntEnum, unique
 @unique
 class ReceiptCreateStatus(IntEnum):
     PENDING = 0
@@ -59,7 +58,6 @@ class ReceiptCreateStatus(IntEnum):
     FAILED = 3
     REJECTED = 4
 
-from enum import IntEnum, unique
 @unique
 class SignatureStatus(IntEnum):
     PASSED = 1
@@ -68,12 +66,4 @@ class SignatureStatus(IntEnum):
     INVALID_SIGNATURE_FORMAT = -1
     ERROR_RESPONSE = -2
     INVALID_VERIFICATION_KEY = -3
-
-from enum import IntEnum, unique
-@unique
-class WorkOrderStatus(IntEnum):
-    SUCCESS = 0
-    FAILED = 1
-    PROCESSING = 2
-    SCHEDULED = 3
 

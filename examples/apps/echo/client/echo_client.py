@@ -27,10 +27,13 @@ import config.config as pconfig
 import utility.logger as plogger
 from service_client.generic import GenericServiceClient
 import utility.utility as utility
+from utility.tcf_types import WorkerType
 import worker.worker_details as worker
-import json_rpc_request.json_rpc_request as jrpc_request
-from connectors.direct.direct_adaptor_factory_wrapper \
-	import DirectAdaptorFactoryWrapper
+from work_order.work_order_params import WorkOrderParams
+from connectors.direct.direct_json_rpc_api_adaptor_factory \
+	import DirectJsonRpcApiAdaptorFactory
+import crypto.crypto as crypto
+from error_code.error_status import WorkOrderStatus
 
 # Remove duplicate loggers
 for handler in logging.root.handlers[:]:
@@ -70,20 +73,20 @@ def ParseCommandLine(args) :
 	options = parser.parse_args(args)
 
 	if options.config:
-		conffiles = [options.config]
+		conf_files = [options.config]
 	else:
-		conffiles = [ TCFHOME + \
+		conf_files = [ TCFHOME + \
 			"/examples/common/python/connectors/tcf_connector.toml" ]
 	confpaths = [ "." ]
 	try :
-		config = pconfig.parse_configuration_files(conffiles, confpaths)
+		config = pconfig.parse_configuration_files(conf_files, confpaths)
 		config_json_str = json.dumps(config)
 	except pconfig.ConfigurationException as e :
 		logger.error(str(e))
 		sys.exit(-1)
 
-	global direct_wrapper
-	direct_wrapper = DirectAdaptorFactoryWrapper(conffiles[0])
+	global direct_jrpc
+	direct_jrpc = DirectJsonRpcApiAdaptorFactory(conf_files[0])
 
 	# Whether or not to connect to the registry list on the blockchain
 	off_chain = False
@@ -121,27 +124,43 @@ def Main(args=None):
 	sys.stderr = plogger.stream_to_logger(
 		logging.getLogger("STDERR"), logging.WARN)
 
-	logger.info("***************** TRUSTED COMPUTE FRAMEWORK (TCF)" + \
+	logger.info("***************** TRUSTED COMPUTE FRAMEWORK (TCF)" +
 		" *****************") 
 
 	# Connect to registry list and retrieve registry
 	if not off_chain:
-		direct_wrapper.init_worker_registry_list(config)
-		registry_lookup_result = direct_wrapper.registry_lookup()
-		if (registry_lookup_result[0] == 0):
+		registry_list_instance = direct_jrpc.create_worker_registry_list_adaptor(
+			config
+		)
+		# Lookup returns tuple, first element is number of registries and
+		# second is element is lookup tag and third is list of organization ids.
+		registry_count, lookup_tag, registry_list = registry_list_instance.registry_lookup()
+		logger.info("\n Registry lookup response: registry count: {} lookup tag: {} registry list: {}\n".format(
+			registry_count, lookup_tag, registry_list
+		))
+		if (registry_count == 0):
 			logger.warn("No registries found")
 			sys.exit(1)
-		registry_retrieve_result = direct_wrapper.registry_retrieve(
-			registry_lookup_result[2][0])
+		# Retrieve the fist registry details.
+		registry_retrieve_result = registry_list_instance.registry_retrieve(registry_list[0])
+		logger.info("\n Registry retrieve response: {}\n".format(
+			registry_retrieve_result
+		))
 		config["tcf"]["json_rpc_uri"] = registry_retrieve_result[0]
 
 	# Prepare worker
-	direct_wrapper.init_worker_registry(config)
-
 	global worker_id
 	if not worker_id:
-		worker_lookup_json = jrpc_request.WorkerLookupJson(1, worker_type=1)
-		worker_lookup_result = direct_wrapper.worker_lookup(worker_lookup_json)
+		req_id = 31
+		worker_registry_instance = direct_jrpc.create_worker_registry_adaptor(
+			config
+		)
+		worker_lookup_result = worker_registry_instance.worker_lookup(
+			worker_type=WorkerType.TEE_SGX, id=req_id
+		)
+		logger.info("\n Worker lookup response: {}\n".format(
+			json.dumps(worker_lookup_result, indent=4)
+		))
 		if "result" in worker_lookup_result and \
 			"ids" in worker_lookup_result["result"].keys():
 			if worker_lookup_result["result"]["totalCount"] != 0:
@@ -152,10 +171,14 @@ def Main(args=None):
 		else:
 			logger.error("ERROR: Failed to lookup worker")
 			sys.exit(1)
-
-	worker_retrieve_json = jrpc_request.WorkerRetrieveJson(2, worker_id)
-	worker_obj.load_worker(
-		direct_wrapper.worker_retrieve(worker_retrieve_json))
+	req_id += 1
+	worker_retrieve_result = worker_registry_instance.worker_retrieve(
+		worker_id,req_id
+	)
+	logger.info("\n Worker retrieve response: {}\n".format(
+		json.dumps(worker_retrieve_result, indent=4)
+	))
+	worker_obj.load_worker(worker_retrieve_result)
 
 	logger.info("**********Worker details Updated with Worker ID" + \
 		"*********\n%s\n", worker_id)
@@ -166,36 +189,69 @@ def Main(args=None):
 	requester_id = secrets.token_hex(32)
 	session_iv = utility.generate_iv()
 	session_key = utility.generate_key()
-	encrypted_session_key = utility.generate_encrypted_key(
-		session_key, worker_obj.encryption_key)
-	requester_nonce = secrets.token_hex(32)
+	requester_nonce = secrets.token_hex(16)
 	# Create work order
-	wo_submit_json = jrpc_request.WorkOrderSubmitJson(3, 6000, "JSON-RPC",
+	wo_params = WorkOrderParams(
 		work_order_id, worker_id, workload_id, requester_id,
-		encrypted_session_key, session_iv, requester_nonce,
-		worker_encryption_key=base64.b64decode(
-			worker_obj.encryption_key).hex(),
-		data_encryption_algorithm="AES-GCM-256")
-	wo_submit_json.add_in_data(message)
+		session_key, session_iv, requester_nonce,
+		result_uri=" ", notify_uri=" ",
+		worker_encryption_key=worker_obj.encryption_key,
+		data_encryption_algorithm="AES-GCM-256"
+	)
+	# Add worker input data
+	wo_params.add_in_data(message)
 
 	# Sign work order
 	private_key = utility.generate_signing_keys()
-
+	wo_params.add_encrypted_request_hash()
+	wo_params.add_requester_signature(private_key)
 	# Submit work order
-	direct_wrapper.init_work_order(config)
-	direct_wrapper.work_order_submit(wo_submit_json, encrypted_session_key, 
-		worker_obj, private_key, session_key, session_iv)
+	logger.info("Work order submit request : %s, \n \n ",
+        wo_params.to_string())
+	work_order_instance = direct_jrpc.create_work_order_adaptor(
+		config
+	)
+	req_id += 1
+	response = work_order_instance.work_order_submit(
+		wo_params.get_params(),
+		wo_params.get_in_data(),
+		wo_params.get_out_data(),
+		id=req_id
+	)
+	logger.info("Work order submit response : {}\n ".format(
+		json.dumps(response, indent=4)
+	))
 
+	if "error" in response and response["error"]["code"] != WorkOrderStatus.PENDING:
+		sys.exit(1)
 	# Retrieve result
-	wo_get_result_json = jrpc_request.WorkOrderGetResultJson(4, work_order_id)
-	direct_wrapper.work_order_get_result(
-		wo_get_result_json, session_key, session_iv)
+	req_id += 1
+	res = work_order_instance.work_order_get_result(
+		work_order_id,
+		req_id
+	)
+
+	logger.info("Work order get result : {}\n ".format(
+		json.dumps(res, indent=4)
+	))
+	if "result" in res:
+		decrypted_res = utility.decrypted_response(
+			json.dumps(res), session_key, session_iv)
+		logger.info("\nDecrypted response:\n {}".format(decrypted_res))
+	else:
+		sys.exit(1)
 
 	# Retrieve receipt
-	wo_receipt_retrieve_json = \
-		jrpc_request.WorkOrderReceiptRetrieveJson(5, work_order_id)
-	direct_wrapper.init_work_order_receipt(config)
-	direct_wrapper.work_order_receipt_retrieve(wo_receipt_retrieve_json)
-
+	wo_receipt_instance = direct_jrpc.create_work_order_receipt_adaptor(
+		config
+	)
+	req_id += 1
+	receipt_res = wo_receipt_instance.work_order_receipt_retrieve(
+		work_order_id,
+		id=req_id
+	)
+	logger.info("\Retrieve receipt response:\n {}".format(
+		json.dumps(receipt_res, indent= 4)
+	))
 #------------------------------------------------------------------------------
 Main()

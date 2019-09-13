@@ -16,7 +16,7 @@ import time
 import json
 import logging
 import crypto.crypto as crypto
-from error_code.error_status import WorkorderError
+from error_code.error_status import WorkOrderStatus
 import utility.utility as utility
 
 logger = logging.getLogger(__name__)
@@ -121,12 +121,12 @@ class TCSWorkOrderHandler:
             if(self.kv_helper.get("wo-timestamps", wo_id) is not None):
                 # work order is yet to be processed
                 response = utility.create_error_response(
-                    WorkorderError.PENDING, jrpc_id,
+                    WorkOrderStatus.PENDING, jrpc_id,
                     "Work order result is yet to be updated")
             else:
                 # work order not in 'wo-timestamps' table
                 response = utility.create_error_response(
-                    WorkorderError.INVALID_PARAMETER_FORMAT_OR_VALUE,
+                    WorkOrderStatus.INVALID_PARAMETER_FORMAT_OR_VALUE,
                     jrpc_id,
                     "Work order Id not found in the database. \
                      Hence invalid parameter")
@@ -167,7 +167,7 @@ class TCSWorkOrderHandler:
             # If no work order is processed then return busy
             if((self.workorder_count + 1) > self.max_workorder_count):
                 response = utility.create_error_response(
-                    WorkorderError.BUSY,
+                    WorkOrderStatus.BUSY,
                     jrpc_id,
                     "Work order handler is busy updating the result")
                 return response
@@ -187,18 +187,18 @@ class TCSWorkOrderHandler:
             self.workorder_count += 1
 
             response = utility.create_error_response(
-                WorkorderError.PENDING,
+                WorkOrderStatus.PENDING,
                 jrpc_id,
-                "Work order is computing. Please query for WorkOrderGetResult \
-                 to view the result")
+                "Work order is computing. Please query for WorkOrderGetResult" +
+                " to view the result")
 
         else:
             # Workorder id already exists
             response = utility.create_error_response(
-                WorkorderError.INVALID_PARAMETER_FORMAT_OR_VALUE,
+                WorkOrderStatus.INVALID_PARAMETER_FORMAT_OR_VALUE,
                 jrpc_id,
-                "Work order id already exists in the database. \
-                 Hence invalid parameter")
+                "Work order id already exists in the database." +
+                " Hence invalid parameter")
 
         return response
 # ---------------------------------------------------------------------------------------------
