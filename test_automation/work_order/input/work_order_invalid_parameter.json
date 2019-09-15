@@ -13,10 +13,10 @@
         "requesterId": "0x3456",
         "workerEncryptionKey": "",
         "dataEncryptionAlgorithm": "AES-GCM-256",
-        "encryptedSessionKey": "sessionkey",
+        "encryptedSessionKey": "",
         "sessionKeyIv": "Iv",
         "requesterNonce": "",
-        "encryptedRequestHash": "requesthash",
+        "encryptedRequestHash": "",
         "requesterSignature": "",
         "inData": [
                    {"index": 2,
