@@ -41,7 +41,7 @@ def test_work_order_success(setup_config):
 
     if err_cd == 0:
         (err_cd, decrypted_data) = (work_order_utility.
-        decrypt_work_order_response(response, enc_session_key))
+        decrypt_work_order_response(response, session_key, session_iv))
 
     if err_cd == 0:
         logger.info('''Test Case Success : Work Order Processed successfully

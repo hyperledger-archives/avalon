@@ -59,11 +59,11 @@ def sign_work_order_request(input_json_str1, worker_obj, sig_obj, private_key):
     logger.info("----- Signing WorkOrderSubmit -----")
 
     # create session_iv through enclave_helper
-    session_iv = enclave_helper.generate_sessioniv()
+    session_iv = enclave_helper.generate_iv()
     session_key = enclave_helper.generate_key()
     # create encrypted_session_key from session_iv and worker_encryption_key
-    encrypted_session_key = (enclave_helper.generate_encrypted_session_key
-    (session_key, worker_obj.worker_encryption_key))
+    encrypted_session_key = (enclave_helper.generate_encrypted_key
+    (session_key, worker_obj.encryption_key))
     # sign work order submit request
     input_json_str1 = sig_obj.generate_client_signature(input_json_str1,
     worker_obj, private_key, session_key, session_iv, encrypted_session_key)
@@ -197,11 +197,11 @@ def verify_work_order_signature(response, sig_obj, worker_obj):
 
     return err_cd
 
-def decrypt_work_order_response(response, encrypted_session_key):
+def decrypt_work_order_response(response, session_key, session_iv):
     decrypted_data = ""
     try:
         decrypted_data = enclave_helper.decrypted_response(json.dumps(response),
-                         encrypted_session_key)
+                         session_key, session_iv)
         err_cd = 0
         logger.info('''Success: Work Order Response Decrypted''')
     except:
