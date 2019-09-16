@@ -93,9 +93,9 @@ class TCSWorkerRegistryHandler:
         logger.info("Received Worker request : %s", input_json['method'])
 
         if(input_json['method'] == "WorkerLookUp"):
-            return self.__process_worker_lookup(input_json_str, response)
+            return self.__process_worker_lookup(input_json, response)
         elif(input_json['method'] == "WorkerLookUpNext"):
-            return self.__process_worker_lookup_next(input_json_str, response)
+            return self.__process_worker_lookup_next(input_json, response)
 
         if 'workerId' in input_json_str:
             worker_id = str(input_json['params']['workerId'])
@@ -107,16 +107,16 @@ class TCSWorkerRegistryHandler:
                      Hence invalid parameter")
 
         if(input_json['method'] == "WorkerRegister"):
-            return self.__process_worker_register(worker_id, input_json_str, response)
+            return self.__process_worker_register(worker_id, input_json, response)
         elif(input_json['method'] == "WorkerSetStatus"):
-            return self.__process_worker_set_status(worker_id, input_json_str, response)
+            return self.__process_worker_set_status(worker_id, input_json, response)
         elif(input_json['method'] == "WorkerRetrieve"):
             return self.__process_worker_retrieve(worker_id, response)
         elif(input_json['method'] == "WorkerUpdate"):
-            return self.__process_worker_update(worker_id, input_json_str, response)
+            return self.__process_worker_update(worker_id, input_json, response)
 # ------------------------------------------------------------------------------------------------
 
-    def __process_worker_register(self, worker_id, input_json_str, response):
+    def __process_worker_register(self, worker_id, input_value_json, response):
         """
         Function to register a new worker to the enclave
         Parameters:
@@ -125,7 +125,6 @@ class TCSWorkerRegistryHandler:
             - response is the response object to be returned to client.
         """
 
-        input_value_json = json.loads(input_json_str)
         jrpc_id = input_value_json["id"]
 
         if(self.kv_helper.get("workers", worker_id) is None):
@@ -149,7 +148,7 @@ class TCSWorkerRegistryHandler:
         return response
 # ------------------------------------------------------------------------------------------------
 
-    def __process_worker_set_status(self, worker_id, input_json_str, response):
+    def __process_worker_set_status(self, worker_id, input_value, response):
         """
         Function to set the status of worker
         Parameters:
@@ -160,7 +159,6 @@ class TCSWorkerRegistryHandler:
 
         # status can be one of active, offline, decommissioned, or compromised
 
-        input_value = json.loads(input_json_str)
         jrpc_id = input_value["id"]
 
         value = self.kv_helper.get("workers", worker_id)
@@ -183,11 +181,10 @@ class TCSWorkerRegistryHandler:
         return response
 # ------------------------------------------------------------------------------------------------
 
-    def __lookup_basic(self, is_lookup_next, input_json_str, response):
+    def __lookup_basic(self, is_lookup_next, input_value, response):
         # sync the work pool to that of DB
         self.worker_pool = self.kv_helper.lookup("workers")
 
-        input_value = json.loads(input_json_str)
         total_count = 0
         ids = []
         lookupTag = ""
@@ -227,27 +224,27 @@ class TCSWorkerRegistryHandler:
         return response
 # ------------------------------------------------------------------------------------------------
 
-    def __process_worker_lookup(self, input_json_str, response):
+    def __process_worker_lookup(self, input_json, response):
         """
         Function to look the set of workers available
         Parameters:
-            - input_json_str is a worker request json as per TCF API 5.3.4 Worker Lookup JSON Payload
+            - input_json is a worker request as per TCF API 5.3.4 Worker Lookup JSON Payload
             - response is the response object to be returned to client.
         """
 
-        self.__lookup_basic(False, input_json_str, response)
+        self.__lookup_basic(False, input_json, response)
         return response
 # ------------------------------------------------------------------------------------------------
 
-    def __process_worker_lookup_next(self, input_json_str, response):
+    def __process_worker_lookup_next(self, input_json, response):
         """
         Function to look the set of worker newly added
         Parameters:
-            - input_json_str is a worker request json as per TCF API 5.3.5 Worker Lookup Next JSON Payload
+            - input_json is a worker request as per TCF API 5.3.5 Worker Lookup Next JSON Payload
             - response is the response object to be returned to client.
         """
 
-        self.__lookup_basic(True, input_json_str, response)
+        self.__lookup_basic(True, input_json, response)
         return response
 # ------------------------------------------------------------------------------------------------
 
@@ -279,23 +276,22 @@ class TCSWorkerRegistryHandler:
         return response
 # ------------------------------------------------------------------------------------------------
 
-    def __process_worker_update(self, worker_id, input_json_str, response):
+    def __process_worker_update(self, worker_id, input_value, response):
         """
         Function to update the worker details.
         Parameters:
             - worker_id is the worker id specified in the input json str.
-            - input_json_str is a worker request json as per TCF API 5.3.2 Worker Update JSON Payload
+            - input_json is a worker request as per TCF API 5.3.2 Worker Update JSON Payload
             - response is the response object to be returned to client.
         """
 
-        jrpc_id = json.loads(input_json_str)["id"]
+        jrpc_id = input_value["id"]
 
         # value retrieved is 'result' field as per Spec 5.3.8 Worker Retrieve Response Payload
         value = self.kv_helper.get("workers", worker_id)
 
         if value is not None:
             json_dict = json.loads(value)
-            input_value = json.loads(input_json_str)
             worker_details = input_value["params"]["details"]
             for item in worker_details:
                 json_dict["details"][item] = worker_details[item]
