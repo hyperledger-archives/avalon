@@ -13,17 +13,14 @@
 * limitations under the License.
 */
 
-#include "echo.h"
+#include "echo_plug-in.h"
+#include "echo_logic.h"
 
 REGISTER_WORKLOAD_PROCESSOR("echo-result",EchoResult)
 
 EchoResult::EchoResult() {}
 
 EchoResult::~EchoResult() {}
-
-std::string EchoResult::Process(std::string str_in) {
-        return "RESULT: " + str_in;
-}
 
 void EchoResult::ProcessWorkOrder(
         std::string workload_id,
