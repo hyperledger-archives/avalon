@@ -46,5 +46,12 @@ enclave {
             size_t inAllocatedPublicEnclaveDataSize,
             [out] size_t* outPublicEnclaveDataSize
             );
+
+         public tcf_err_t ecall_VerifyEnclaveInfo(
+             [in, string] const char* inEnclaveInfo,
+             [in, string] const char* mr_enclave,
+             [in, string] const char* originator_public_key_hash
+         );
+
     };
 };

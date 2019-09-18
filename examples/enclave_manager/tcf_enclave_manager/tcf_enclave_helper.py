@@ -107,3 +107,4 @@ class EnclaveHelper(object) :
         Return information about the enclave
         """
         return tcf_enclave.get_enclave_public_info(self.sealed_data)
+    # -------------------------------------------------------

@@ -15,6 +15,7 @@
 
 #include "enclave_u.h"
 
+#include <stdio.h>
 #include <algorithm>
 #include <string>
 #include <vector>
@@ -30,7 +31,6 @@
 #include "enclave.h"
 #include "base.h"
 #include "signup.h"
-
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 static size_t CalculateSealedEnclaveDataSize(void) {
@@ -235,3 +235,45 @@ tcf_err_t tcf::enclave_api::enclave_data::UnsealEnclaveData(
 
     return result;
 }  // tcf::enclave_api::base::UnsealSignupData
+
+// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+tcf_err_t tcf::enclave_api::enclave_data::VerifyEnclaveInfo(
+    const std::string& enclaveInfo,
+    const std::string& mr_enclave,
+    const std::string& originator_public_key_hash) {
+    tcf_err_t result = TCF_SUCCESS;
+    try {
+        // xxxxx call the enclave
+        sgx_enclave_id_t enclaveid = g_Enclave[0].GetEnclaveId();
+        tcf_err_t presult = TCF_SUCCESS;
+        sgx_status_t sresult = g_Enclave[0].CallSgx(
+            [ enclaveid,
+              &presult,
+              enclaveInfo,
+              mr_enclave,
+              originator_public_key_hash ] () {
+              sgx_status_t sresult =
+              ecall_VerifyEnclaveInfo(
+                             enclaveid,
+                             &presult,
+                             enclaveInfo.c_str(),
+                             mr_enclave.c_str(),
+                             originator_public_key_hash.c_str());
+	      return tcf::error::ConvertErrorStatus(sresult, presult);
+	});
+
+        tcf::error::ThrowSgxError(sresult, "SGX enclave call failed (ecall_VerifyEnclaveInfo)");
+        g_Enclave[0].ThrowTCFError(presult);
+
+    } catch (tcf::error::Error& e) {
+        tcf::enclave_api::base::SetLastError(e.what());
+        result = e.error_code();
+    } catch (std::exception& e) {
+        tcf::enclave_api::base::SetLastError(e.what());
+        result = TCF_ERR_UNKNOWN;
+    } catch (...) {
+        tcf::enclave_api::base::SetLastError("Unexpected exception");
+        result = TCF_ERR_UNKNOWN;
+    }
+    return result;
+}  // tcf::enclave_api::base::VerifyEnclaveInfo

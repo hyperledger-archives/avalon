@@ -24,6 +24,7 @@ tc/sgx/trusted_worker_manager/enclave/build/
 tc/sgx/trusted_worker_manager/enclave/deps/
 tc/sgx/trusted_worker_manager/enclave_wrapper/enclave_u.c
 tc/sgx/trusted_worker_manager/enclave_wrapper/enclave_u.h
+tc/sgx/common/crypto/verify_ias_report/intel/ias-certificates.cpp
 tools/build/_dev/
 
 # Byte-compiled / optimized / DLL files

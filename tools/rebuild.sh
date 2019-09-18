@@ -61,6 +61,12 @@ function try() {
 # -----------------------------------------------------------------
 yell --------------- CONFIG AND ENVIRONMENT CHECK ---------------
 
+: "${TCF_HOME?Missing environment variable TCF_HOME}"
+: "${TCF_ENCLAVE_CODE_SIGN_PEM?Missing environment variable TCF_ENCLAVE_CODE_SIGN_PEM}"
+: "${SGX_SSL?Missing environment variable SGX_SSL}"
+: "${SGX_SDK?Missing environment variable SGXSDKInstallPath}"
+: "${PKG_CONFIG_PATH?Missing environment variable PKG_CONFIG_PATH}"
+
 # Set proxy for Intel Architectural Enclave Service Manager
 if [[ ${SGX_MODE} &&  "${SGX_MODE}" == "HW" ]]; then
     # Add proxy settings
@@ -75,13 +81,6 @@ else
     # Setting default SGX mode as SIM
     export SGX_MODE=SIM
 fi
-
-: "${TCF_HOME?Missing environment variable TCF_HOME}"
-: "${TCF_ENCLAVE_CODE_SIGN_PEM?Missing environment variable TCF_ENCLAVE_CODE_SIGN_PEM}"
-: "${SGX_SSL?Missing environment variable SGX_SSL}"
-: "${SGX_SDK?Missing environment variable SGXSDKInstallPath}"
-: "${SGX_MODE:?Missing environment variable SGX_MODE, set it to HW or SIM}"
-: "${PKG_CONFIG_PATH?Missing environment variable PKG_CONFIG_PATH}"
 
 try command -v python
 PY3_VERSION=$(python3 --version | sed 's/Python 3\.\([0-9]\).*/\1/')

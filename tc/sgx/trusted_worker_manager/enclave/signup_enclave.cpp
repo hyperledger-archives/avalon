@@ -32,6 +32,8 @@
 #include "error.h"
 #include "tcf_error.h"
 #include "zero.h"
+#include "jsonvalue.h"
+#include "parson.h"
 
 #include "auto_handle_sgx.h"
 
@@ -39,6 +41,7 @@
 #include "enclave_data.h"
 #include "enclave_utils.h"
 #include "signup_enclave.h"
+#include "verify-report.h"
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 // XX Declaration of static helper functions                         XX
@@ -46,6 +49,11 @@
 
 static void CreateSignupReportData(const char* pOriginatorPublicKeyHash,
     const EnclaveData& enclaveData,
+    sgx_report_data_t* pReportData);
+
+void CreateReportData(const char* pOriginatorPublicKeyHash,
+    std::string& enclaveId,
+    std::string& enclaveEncryptKey,
     sgx_report_data_t* pReportData);
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -266,3 +274,152 @@ void CreateSignupReportData(const char* pOriginatorPublicKeyHash,
         reinterpret_cast<sgx_sha256_hash_t*>(pReportData));
     tcf::error::ThrowSgxError(ret, "Failed to retrieve SHA256 hash of report data");
 }  // CreateSignupReportData
+
+// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+tcf_err_t ecall_VerifyEnclaveInfo(const char* enclave_info,
+                                  const char* mr_enclave,
+                                  const char* originator_public_key_hash) {
+    tcf_err_t result = TCF_SUCCESS;
+    // Parse the enclave_info
+    JsonValue enclave_info_parsed(json_parse_string(enclave_info));
+    tcf::error::ThrowIfNull(enclave_info_parsed.value, "Failed to parse the enclave info, badly formed JSON");
+
+    JSON_Object* enclave_info_object = json_value_get_object(enclave_info_parsed);
+    tcf::error::ThrowIfNull(enclave_info_object, "Invalid enclave_info, expecting object");
+
+    const char* svalue = nullptr;
+    svalue = json_object_dotget_string(enclave_info_object, "verifying_key");
+    tcf::error::ThrowIfNull(svalue, "Invalid verifying_key");
+    std::string enclave_id(svalue);
+
+    svalue = json_object_dotget_string(enclave_info_object, "encryption_key");
+    tcf::error::ThrowIfNull(svalue, "Invalid encryption_key");
+    std::string enclave_encrypt_key(svalue);
+
+    // Parse proof data
+    svalue = json_object_dotget_string(enclave_info_object, "proof_data");
+    std::string proof_data(svalue);
+
+    JsonValue proof_data_parsed(json_parse_string(proof_data.c_str()));
+    tcf::error::ThrowIfNull(proof_data_parsed.value, "Failed to parse the proofData, badly formed JSON");
+    JSON_Object* proof_object = json_value_get_object(proof_data_parsed);
+    tcf::error::ThrowIfNull(proof_object, "Invalid proof, expecting object");
+
+    svalue = json_object_dotget_string(proof_object, "ias_report_signature");
+    tcf::error::ThrowIfNull(svalue, "Invalid proof_signature");
+    const std::string proof_signature(svalue);
+
+    //Parse verification report
+    svalue = json_object_dotget_string(proof_object, "verification_report");
+    tcf::error::ThrowIfNull(svalue, "Invalid proof_verification_report");
+    const std::string verification_report(svalue);
+
+    JsonValue verification_report_parsed(json_parse_string(verification_report.c_str()));
+    tcf::error::ThrowIfNull(verification_report_parsed.value, "Failed to parse the verificationReport, badly formed JSON");
+
+    JSON_Object* verification_report_object = json_value_get_object(verification_report_parsed);
+    tcf::error::ThrowIfNull(verification_report_object, "Invalid verification_report, expecting object");
+
+    svalue = json_object_dotget_string(verification_report_object, "isvEnclaveQuoteBody");
+    tcf::error::ThrowIfNull(svalue, "Invalid enclave_quote_body");
+    const std::string enclave_quote_body(svalue);
+
+    svalue = json_object_dotget_string(verification_report_object, "epidPseudonym");
+    tcf::error::ThrowIfNull(svalue, "Invalid epid_pseudonym");
+    const std::string epid_pseudonym(svalue);
+
+    // Verify verification report signature
+    // Verify good quote, but group-of-date is not considered ok
+    int r = verify_enclave_quote_status(verification_report.c_str(), verification_report.length(), 1);
+    tcf::error::ThrowIf<tcf::error::ValueError>(
+        r!=VERIFY_SUCCESS, "Invalid Enclave Quote:  group-of-date NOT OKAY");
+
+    const char* ias_report_cert = json_object_dotget_string(proof_object, "ias_report_signing_certificate");
+
+    std::vector<char> verification_report_vec(verification_report.begin(), verification_report.end());
+    verification_report_vec.push_back('\0');
+    char* verification_report_arr = &verification_report_vec[0];
+
+    std::vector<char> proof_signature_vec(proof_signature.begin(), proof_signature.end());
+    proof_signature_vec.push_back('\0');
+    char* proof_signature_arr = &proof_signature_vec[0];
+
+    //verify IAS signature
+    r = verify_ias_report_signature(ias_report_cert,
+                                    verification_report_arr,
+                                    strlen(verification_report_arr),
+                                    proof_signature_arr,
+                                    strlen(proof_signature_arr));
+    tcf::error::ThrowIf<tcf::error::ValueError>(
+    r!=VERIFY_SUCCESS, "Invalid verificationReport; Invalid Signature");
+
+    //Extract ReportData and MR_ENCLAVE from isvEnclaveQuoteBody in Verification Report
+    sgx_quote_t* quote_body = reinterpret_cast<sgx_quote_t*>(Base64EncodedStringToByteArray(enclave_quote_body).data());
+    sgx_report_body_t* report_body = &quote_body->report_body;
+    sgx_report_data_t expected_report_data = *(&report_body->report_data);
+    sgx_measurement_t mr_enclave_from_report = *(&report_body->mr_enclave);
+    sgx_basename_t mr_basename_from_report = *(&quote_body->basename);
+
+    ByteArray mr_enclave_bytes = HexEncodedStringToByteArray(mr_enclave);
+    //CHECK MR_ENCLAVE
+    tcf::error::ThrowIf<tcf::error::ValueError>(
+        memcmp(mr_enclave_from_report.m, mr_enclave_bytes.data(), SGX_HASH_SIZE)  != 0,
+        "Invalid MR_ENCLAVE");
+
+    //Verify Report Data by comparing hash of report data in Verification Report with computed report data
+    sgx_report_data_t computed_report_data = {0};
+    CreateReportData(originator_public_key_hash, enclave_id, enclave_encrypt_key, &computed_report_data);
+
+    //Compare computedReportData with expectedReportData
+    tcf::error::ThrowIf<tcf::error::ValueError>(
+        memcmp(computed_report_data.d, expected_report_data.d, SGX_REPORT_DATA_SIZE)  != 0,
+        "Invalid Report data: computedReportData does not match expectedReportData");
+
+    return result;
+}  // ecall_VerifyEnclaveInfo
+
+// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+void CreateReportData(const char* originator_public_key_hash,
+    std::string& enclave_id,
+    std::string& enclave_encrypt_key,
+    sgx_report_data_t* report_data)
+{
+    // We will put the following in the report data SHA256(PPK|PEK|OPK_HASH)
+
+    // WARNING - WARNING - WARNING - WARNING - WARNING - WARNING - WARNING
+    //
+    // If anything in this code changes the way in which the actual enclave
+    // report data is represented, the corresponding code that creates
+    // the report data has to be change accordingly.
+    //
+    // WARNING - WARNING - WARNING - WARNING - WARNING - WARNING - WARNING
+    std::string hash_string;
+
+    tcf::crypto::sig::PublicKey signing_key(enclave_id);
+    tcf::crypto::pkenc::PublicKey enclave_key(enclave_encrypt_key);
+
+    hash_string.append(signing_key.Serialize());
+    hash_string.append(enclave_key.Serialize());
+
+    // Canonicalize the originator public key hash string to ensure a consistent
+    // format.
+    std::transform(originator_public_key_hash,
+        originator_public_key_hash + strlen(originator_public_key_hash), std::back_inserter(hash_string),
+        [](char c) {
+            return c;  // do nothing
+        });
+
+    // Now we put the SHA256 hash into the report data for the
+    // report we will request.
+    //
+    // NOTE - we are putting the hash directly into the report
+    // data structure because it is (64 bytes) larger than the SHA256
+    // hash (32 bytes) but we zero it out first to ensure that it is
+    // padded with known data.
+    Zero(report_data, sizeof(*report_data));
+    sgx_status_t ret = sgx_sha256_msg(reinterpret_cast<const uint8_t*>(hash_string.c_str()),
+        static_cast<uint32_t>(hash_string.size()),
+        reinterpret_cast<sgx_sha256_hash_t*>(report_data));
+    tcf::error::ThrowSgxError(ret, "Failed to retrieve SHA256 hash of report data");
+}  // CreateReportData
+

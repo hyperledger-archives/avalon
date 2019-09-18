@@ -62,3 +62,7 @@ std::map<std::string, std::string> CreateEnclaveData(
 
 std::map<std::string, std::string> UnsealEnclaveData(
     const std::string& sealed_enclave_data);
+
+size_t VerifyEnclaveInfo(const std::string& enclaveInfo,
+    const std::string& mr_enclave,
+    const std::string& originator_public_key_hash);
