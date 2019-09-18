@@ -18,10 +18,7 @@
 #include <string>
 #include "workload_processor.h"
 
-
 class EchoResult: public WorkloadProcessor {
-private:
-    std::string Process(std::string str_in);
 
 public:
     EchoResult(void);
