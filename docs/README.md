@@ -5,6 +5,9 @@
 * [Trusted Compute Framework (TCF) Project](https://wiki.hyperledger.org/pages/viewpage.action?pageId=16324764). Overview of the TCF project, members, motivation, proposed solutions, current effort, and FAQ
 * [Ecosystem Support for EEA Trusted Compute Specification v1.0 Improves Blockchain Privacy and Scalability](https://software.intel.com/en-us/articles/ecosystem-support-for-eea-trusted-compute-specification-v10-improves-blockchain-privacy-and). Introductory TCF Blog, by Michael Reed (2019)
 
+## Tutorial
+* [Workload Application Tutorial](workload-tutorial/)
+
 ## Source Code
 * [TCF source code repository, https://github.com/hyperledger-labs/trusted-compute-framework](https://github.com/hyperledger-labs/trusted-compute-framework)
 * [Building source code](../BUILD.md)
