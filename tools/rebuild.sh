@@ -23,17 +23,17 @@ export TCF_ENCLAVE_CODE_SIGN_PEM=${SCRIPTDIR}/../enclave.pem
 
 # -----------------------------------------------------------------
 # -----------------------------------------------------------------
-cred=`tput setaf 1`
-cgrn=`tput setaf 2`
-cblu=`tput setaf 4`
-cmag=`tput setaf 5`
-cwht=`tput setaf 7`
-cbld=`tput bold`
-bred=`tput setab 1`
-bgrn=`tput setab 2`
-bblu=`tput setab 4`
-bwht=`tput setab 7`
-crst=`tput sgr0`
+cred=`tput setaf 1 2>/dev/null`
+cgrn=`tput setaf 2 2>/dev/null`
+cblu=`tput setaf 4 2>/dev/null`
+cmag=`tput setaf 5 2>/dev/null`
+cwht=`tput setaf 7 2>/dev/null`
+cbld=`tput bold    2>/dev/null`
+bred=`tput setab 1 2>/dev/null`
+bgrn=`tput setab 2 2>/dev/null`
+bblu=`tput setab 4 2>/dev/null`
+bwht=`tput setab 7 2>/dev/null`
+crst=`tput sgr0    2>/dev/null`
 
 function recho () {
     echo "${cbld}${cred}" $@ "${crst}" >&2
@@ -88,17 +88,22 @@ if [[ "$PY3_VERSION" -lt 5 ]]; then
     die "must use python3, activate virtualenv first"
 fi
 
-# OpenSSL library version >= 1.1.0h.
+# OpenSSL library version >= $DESIRED_OPENSSL_VER
+DESIRED_OPENSSL_VER="1.1.1"
 # Get library version when possible, otherwise get command version.
 try command -v openssl
-OPENSSL_VERSION=$(openssl version -v;openssl version -v | sed 's/.*Library: //' \
+OPENSSL_VERSION=$(openssl version -v | sed 's/OpenSSL //g' \
+   | sed 's/.*Library: //' \
    | sed 's/.*OpenSSL \([^ ]*\) .*/\1/')
-echo $OPENSSL_VERSION | egrep -q '^1.1.0[h-z]|^1.1.[1-9]|^1.[2-9]|^[2-9]|^[1-9][0-9]'
+echo $OPENSSL_VERSION | egrep -q '^1.1.[1-9]|^1.[2-9]|^[2-9]|^[1-9][0-9]'
 if [ $? -ne 0 ] ; then
-   echo "WARNING: openssl version is $OPENSSL_VERSION; expecting >= 1.1.0h" >&2
-   echo 'Note: openssl can be a different version as long as libssl and libssl-dev are >= 1.1.0h' >&2
+   echo "WARNING: openssl version is $OPENSSL_VERSION;" \
+        " expecting >= $DESIRED_OPENSSL_VER" >&2
+   echo "Note: openssl can be a different version as long as" \
+        " libssl and libssl-dev are >= $DESIRED_OPENSSL_VER" >&2
 fi
 
+# protoc version must be >= 3.
 try command -v protoc
 PROTOC_VERSION=$(protoc --version | sed 's/libprotoc \([0-9]\).*/\1/')
 if [[ "$PROTOC_VERSION" -lt 3 ]]; then
