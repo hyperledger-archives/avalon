@@ -1,4 +1,4 @@
-/* Copyright 2018 Intel Corporation
+/* Copyright 2019 Intel Corporation
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -12,19 +12,13 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-
-// This demo application predicts the probability of heart disease.
-
 #include <string>
 #include <cmath>
+#include "heart_disease_evaluation_logic.h"
 
-#include "heart_disease_evaluation.h"
+HeartDiseaseEvalLogic::HeartDiseaseEvalLogic() {}
 
-REGISTER_WORKLOAD_PROCESSOR("heart-disease-eval",HeartDiseaseEval)
-
-HeartDiseaseEval::HeartDiseaseEval() {}
-
-HeartDiseaseEval::~HeartDiseaseEval() {}
+HeartDiseaseEvalLogic::~HeartDiseaseEvalLogic() {}
 
 template<typename Out>
 void split(const std::string &str, char delim, Out result) {
@@ -50,7 +44,7 @@ std::vector<std::string> split(const std::string &s, char delim) {
     return elems;
 }
 
-double HeartDiseaseEval::model_A(double max, double opt, double data) {
+double HeartDiseaseEvalLogic::model_A(double max, double opt, double data) {
     double score = 0.0;
     if (data < opt)
         score = 100;
@@ -59,7 +53,7 @@ double HeartDiseaseEval::model_A(double max, double opt, double data) {
     return score;
 }
 
-double HeartDiseaseEval::model_B(double max, double opt, double data) {
+double HeartDiseaseEvalLogic::model_B(double max, double opt, double data) {
     double score = 0.0;
     double delta = std::abs(data - opt);
     if ( delta < max - opt)
@@ -67,15 +61,15 @@ double HeartDiseaseEval::model_B(double max, double opt, double data) {
     return score;
 }
 
-double HeartDiseaseEval::score_age(double data) {
+double HeartDiseaseEvalLogic::score_age(double data) {
     return model_A(100, 18, data);
 }
 
-double HeartDiseaseEval::score_sex(int sex) {
+double HeartDiseaseEvalLogic::score_sex(int sex) {
     return (sex == 0) ? 100 : 0;
 }
 
-double HeartDiseaseEval::score_cp(int cp_type) {
+double HeartDiseaseEvalLogic::score_cp(int cp_type) {
     double score = 0.0;
     switch (cp_type) {
         case 1:
@@ -96,19 +90,19 @@ double HeartDiseaseEval::score_cp(int cp_type) {
     return score;
 }
 
-double HeartDiseaseEval::score_trestbps(double data) {
+double HeartDiseaseEvalLogic::score_trestbps(double data) {
     return model_A(218, 108, data);
 }
 
-double HeartDiseaseEval::score_chol(double data) {
+double HeartDiseaseEvalLogic::score_chol(double data) {
     return model_A(309, 126, data);
 }
 
-double HeartDiseaseEval::score_fbs(double data) {
+double HeartDiseaseEvalLogic::score_fbs(double data) {
     return model_A(248, 98, data);
 }
 
-double HeartDiseaseEval::score_restecg(int type) {
+double HeartDiseaseEvalLogic::score_restecg(int type) {
     double score = 0.0;
     switch (type) {
         case 0:
@@ -126,12 +120,12 @@ double HeartDiseaseEval::score_restecg(int type) {
     return score;
 }
 
-double HeartDiseaseEval::score_thalach(double data) {
+double HeartDiseaseEvalLogic::score_thalach(double data) {
     return model_B(198, 61, data);
 
 }
 
-double HeartDiseaseEval::score_exang_oldpeak(int type) {
+double HeartDiseaseEvalLogic::score_exang_oldpeak(int type) {
     double score = 0.0;
     switch (type) {
         case 0:
@@ -146,7 +140,7 @@ double HeartDiseaseEval::score_exang_oldpeak(int type) {
     return score;
 }
 
-double HeartDiseaseEval::score_slop(int type) {
+double HeartDiseaseEvalLogic::score_slop(int type) {
     double score = 0.0;
     switch (type) {
         case 0:
@@ -161,7 +155,7 @@ double HeartDiseaseEval::score_slop(int type) {
     return score;
 }
 
-double HeartDiseaseEval::score_ca(int number) {
+double HeartDiseaseEvalLogic::score_ca(int number) {
     double score = 0.0;
     switch (number) {
         case 0:
@@ -180,7 +174,7 @@ double HeartDiseaseEval::score_ca(int number) {
     return score;
 }
 
-double HeartDiseaseEval::score_thaldur(int durationMin) {
+double HeartDiseaseEvalLogic::score_thaldur(int durationMin) {
     double score = 0.0;
     if ((durationMin >= 3) && (durationMin < 6))
         score = 45.0;
@@ -191,7 +185,7 @@ double HeartDiseaseEval::score_thaldur(int durationMin) {
     return score;
 }
 
-double HeartDiseaseEval::score_num(int num) {
+double HeartDiseaseEvalLogic::score_num(int num) {
     double score = 0.0;
     if (num == 0)
         score = 100.0;
@@ -200,12 +194,7 @@ double HeartDiseaseEval::score_num(int num) {
     return score;
 }
 
-ByteArray ConvertStringToByteArray(std::string s) {
-    ByteArray ba(s.begin(), s.end());
-    return ba;
-}
-
-std::string HeartDiseaseEval::executeWorkOrder(std::string decrypted_user_input_str) {
+std::string HeartDiseaseEvalLogic::executeWorkOrder(std::string decrypted_user_input_str) {
     // Variables to accumulate multiple results
     static int totalRisk = 0;
     static int count = 0;
@@ -248,39 +237,4 @@ std::string HeartDiseaseEval::executeWorkOrder(std::string decrypted_user_input_
     // Use accumulated data to calculate the result
     std::string resultString = "You have a risk of " + std::to_string(totalRisk/count) + "% to have heart disease.";
     return resultString;
-}
-
-void HeartDiseaseEval::ProcessWorkOrder(
-        std::string workload_id,
-        const ByteArray& requester_id,
-        const ByteArray& worker_id,
-        const ByteArray& work_order_id,
-        const std::vector<tcf::WorkOrderData>& in_work_order_data,
-        std::vector<tcf::WorkOrderData>& out_work_order_data) {
-    std::string result_str;
-    int out_wo_data_size = out_work_order_data.size();
-
-    // Clear state - to reset totalRisk and count
-    executeWorkOrder("");
-    for (auto wo_data : in_work_order_data) {
-        std::string inputData =
-              ByteArrayToString(wo_data.decrypted_data);
-        try {
-            result_str = executeWorkOrder(inputData);
-        } catch(...) {
-            result_str = "Failed to process workorder data";
-        }
-    }
-
-    // If the out_work_order_data has entry to hold the data
-    if (out_wo_data_size) {
-        tcf::WorkOrderData& out_wo_data = out_work_order_data.at(0);
-        out_wo_data.decrypted_data =
-                    ConvertStringToByteArray(result_str);
-    } else {
-        // Create a new entry
-        out_work_order_data.emplace_back(
-                    0, ConvertStringToByteArray(result_str));
-    }
-
 }
