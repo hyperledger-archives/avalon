@@ -36,19 +36,29 @@ class DirectJsonRpcApiAdaptorFactory(ConnectorAdaptorFactoryInterface):
     3. Work order adaptor interact with json rpc listener
     4. Work order receipt interact with json rpc listener
     """
-    def __init__(self, config_file):
-        if not isfile(config_file):
-            raise FileNotFoundError("File not found at path: {0}".format(realpath(config_file)))
-        try:
-            with open(config_file) as fd:
-                self.__config = toml.load(fd)
-        except IOError as e:
-            """
-            Catch the exception related to toml file format except File not exists
-            exception
-            """
-            if e.errno != errno.ENOENT:
-                raise Exception('Could not open config file: %s' % e)
+    def __init__(self, config_file=None,config=None):
+	"""
+	config_file is config file path as a string
+	config is a dictionary loaded from config_file
+	either one of config_file or config needs to be passed
+	if both are passed config takes precedence
+	"""
+        if(config is not None):
+            self.__config = config
+        else:
+            if not isfile(config_file):
+                raise FileNotFoundError("File not found at path: {0}".format(realpath(config_file)))
+            try:
+                with open(config_file) as fd:
+                    self.__config = toml.load(fd)
+            except IOError as e:
+                """
+                Catch the exception related to toml file format except File not exists
+                exception
+                """
+                if e.errno != errno.ENOENT:
+                    raise Exception('Could not open config file: %s' % e)
+
         self.__worker_registry_list = None
         self.__worker_registry = None
         self.__work_order = None
