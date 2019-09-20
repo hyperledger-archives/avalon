@@ -147,7 +147,7 @@ class ClientSignature(object) :
         return result_hash
 
 #---------------------------------------------------------------------------------------------
-    def __calculate_datahash(self, data_objects):
+    def calculate_datahash(self, data_objects):
         """
         Function to calculate a hash value of the array concatenating dataHash, data,
         encryptedDataEncryptionKey, iv for each item in the inData/outData array
@@ -158,11 +158,15 @@ class ClientSignature(object) :
         hash_str = ""
         for item in data_objects:
             datahash = "".encode('UTF-8')
+            e_key = "".encode('UTF-8')
+            iv = "".encode('UTF-8')
             if 'dataHash' in item:
                 datahash = item['dataHash'].encode('UTF-8')
             data = item['data'].encode('UTF-8')
-            e_key = item['encryptedDataEncryptionKey'].encode('UTF-8')
-            iv = item['iv'].encode('UTF-8')
+            if 'encryptedDataEncryptionKey' in item:
+                e_key = item['encryptedDataEncryptionKey'].encode('UTF-8')
+            if 'iv' in item:
+                iv = item['iv'].encode('UTF-8')
             concat_string =  datahash + data + e_key + iv
             concat_hash = bytes(concat_string)
             hash = crypto.compute_message_hash(concat_hash)
@@ -170,7 +174,7 @@ class ClientSignature(object) :
 
         return hash_str
 #---------------------------------------------------------------------------------------------
-    def __generate_signature(self, hash, private_key):
+    def generate_signature(self, hash, private_key):
         """
         Function to generate signature object
         Parameters:
@@ -234,13 +238,13 @@ class ClientSignature(object) :
         nonce_hash = (crypto.byte_array_to_base64(request_nonce_hash)).encode('UTF-8')
         hash_string_1 = self.__calculate_hash_on_concatenated_string(input_json_params, nonce_hash)
         data_objects = input_json_params['inData']
-        hash_string_2 = self.__calculate_datahash(data_objects)
+        hash_string_2 = self.calculate_datahash(data_objects)
 
         hash_string_3 = ""
         if 'outData' in input_json_params:
             data_objects = input_json_params['outData']
             data_objects.sort(key = lambda x:x['index'])
-            hash_string_3 = self.__calculate_datahash(data_objects)
+            hash_string_3 = self.calculate_datahash(data_objects)
 
         concat_string = hash_string_1 + hash_string_2 + hash_string_3
         concat_hash = bytes(concat_string, 'UTF-8')
@@ -252,7 +256,7 @@ class ClientSignature(object) :
 
         #Update the input json params
         input_json_params["encryptedRequestHash"] = encrypted_request_hash_str
-        input_json_params['requesterSignature'] = self.__generate_signature(final_hash, private_key)
+        input_json_params['requesterSignature'] = self.generate_signature(final_hash, private_key)
         input_json_params["encryptedSessionKey"] = encrypted_session_key_str
         # Temporary mechanism to share client's public key. Not a part of Spec
         input_json_params['verifyingKey'] =  self.public_key
@@ -298,7 +302,7 @@ class ClientSignature(object) :
         hash_string_1 = self.__calculate_hash_on_concatenated_string(input_json_params, nonce)
         data_objects = input_json_params['outData']
         data_objects.sort(key = lambda x:x['index'])
-        hash_string_2 = self.__calculate_datahash(data_objects)
+        hash_string_2 = self.calculate_datahash(data_objects)
         concat_string =  hash_string_1+ hash_string_2
         concat_hash = bytes(concat_string, 'UTF-8')
         final_hash = crypto.compute_message_hash(concat_hash)

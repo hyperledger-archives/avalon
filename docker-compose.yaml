@@ -28,9 +28,11 @@ services:
     environment:
         - TCF_DEBUG_BUILD=${TCF_DEBUG_BUILD:-}
         - DISPLAY=${DISPLAY:-}
+        - XAUTHORITY=~/.Xauthority
     volumes:
       - ./:/project/TrustedComputeFramework
       - /tmp/.X11-unix:/tmp/.X11-unix
+      - ~/.Xauthority:/root/.Xauthority
     working_dir: "/project/TrustedComputeFramework/tools/build"
     entrypoint: "bash -c \"\
         if [ ${MAKECLEAN:-1} != 0 ]; then echo \\\"Clean build\\\" && make clean; fi \

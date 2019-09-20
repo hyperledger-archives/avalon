@@ -15,7 +15,7 @@
 import json
 import logging
 from error_code.error_status import ReceiptCreateStatus
-from error_code.error_status import WorkorderError
+from error_code.error_status import WorkOrderStatus
 import utility.utility as utility
 from itertools import cycle
 
@@ -72,15 +72,15 @@ class TCSWorkOrderReceiptHandler:
             if value:
                 self.kv_helper.set("wo-receipts", wo_id, input_json_str)
                 response = utility.create_error_response(
-                    WorkorderError.SUCCESS, jrpc_id,
+                    WorkOrderStatus.SUCCESS, jrpc_id,
                     "Receipt created successfully")
             else:
                 response = utility.create_error_response(
-                    WorkorderError.INVALID_PARAMETER_FORMAT_OR_VALUE, jrpc_id,
+                    WorkOrderStatus.INVALID_PARAMETER_FORMAT_OR_VALUE, jrpc_id,
                     "Work order does not exists. Hence invalid parameter")
         else:
             response = utility.create_error_response(
-                WorkorderError.INVALID_PARAMETER_FORMAT_OR_VALUE, jrpc_id,
+                WorkOrderStatus.INVALID_PARAMETER_FORMAT_OR_VALUE, jrpc_id,
                 "Work order receipt already exist in the database. Hence invalid parameter")
 
         return response
@@ -124,11 +124,11 @@ class TCSWorkOrderReceiptHandler:
             value = json.dumps(json_dict)
             self.kv_helper.set("wo-receipts", wo_id, value)
             response = utility.create_error_response(
-                WorkorderError.SUCCESS, jrpc_id,
+                WorkOrderStatus.SUCCESS, jrpc_id,
                 "Receipt Successfully Updated")
         else:
             response = utility.create_error_response(
-                WorkorderError.INVALID_PARAMETER_FORMAT_OR_VALUE,
+                WorkOrderStatus.INVALID_PARAMETER_FORMAT_OR_VALUE,
                 jrpc_id,
                 "Work order id not found in the database. \
                  Hence invalid parameter")
@@ -249,7 +249,7 @@ class TCSWorkOrderReceiptHandler:
                 response['result'] = input_value['error']
         else:
             response = utility.create_error_response(
-                WorkorderError.INVALID_PARAMETER_FORMAT_OR_VALUE,
+                WorkOrderStatus.INVALID_PARAMETER_FORMAT_OR_VALUE,
                 jrpc_id,
                 "Work order id not found in the database. \
                  Hence invalid parameter")
@@ -298,7 +298,7 @@ class TCSWorkOrderReceiptHandler:
 
         else:
             response = utility.create_error_response(
-                WorkorderError.INVALID_PARAMETER_FORMAT_OR_VALUE,
+                WorkOrderStatus.INVALID_PARAMETER_FORMAT_OR_VALUE,
                 jrpc_id,
                 "Work order id not found in the database. \
                  Hence invalid parameter")
@@ -328,7 +328,7 @@ class TCSWorkOrderReceiptHandler:
             wo_id = str(input_json['params']['workOrderId'])
         else:
             response = utility.create_error_response(
-                WorkorderError.INVALID_PARAMETER_FORMAT_OR_VALUE,
+                WorkOrderStatus.INVALID_PARAMETER_FORMAT_OR_VALUE,
                 input_json['id'],
                 "Work order id not found in the database. \
                  Hence invalid parameter")
