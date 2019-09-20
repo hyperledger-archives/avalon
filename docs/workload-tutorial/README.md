@@ -6,7 +6,7 @@ a new directory, `hello_world/workload/`.
 Then we show how to modify the files to create a workload application.
 
 The example we create will be a workload application that takes a name as
-input and echos back "Hello, *name*".
+input and echos back "Hello *name*".
 
 Under directory `hello_world/` are the desired results of modifying the
 template files, `hello_world/stage_1` and, with further modifications,
@@ -35,7 +35,6 @@ The directory structure for this tutorial is as follows:
     * [logic.cpp](hello_world/stage_1/logic.cpp) Modified with worker code added
     * [plug-in.h](hello_world/stage_1/plug-in.h)
     * [plug-in.cpp](hello_world/stage_1/plug-in.cpp) Modified to call worker
-  * [workload/](hello_world/workload/) New directory you create for this tutorial
 
 ## Prerequisites
 
@@ -55,7 +54,8 @@ Before beginning this tutorial, review the following items:
     ` REGISTER_WORKLOAD_PROCESSOR()`
     (see file [templates/plug-in.cpp](templates/plug-in.cpp))
 
-* Review the universal command line client at **[TBD]**
+* Review the generic command line client at
+  [$TCF_HOME/examples/apps/generic_client/](../../examples/apps/generic_client/)
   * This component is optional, but it can be useful because it allows early
     testing of the workload without first creating a custom requester
     application
@@ -64,8 +64,8 @@ Before beginning this tutorial, review the following items:
     If other data types are needed (numbers, binaries), then create
     a custom test application
     (potentially by modifying this application)
-  * Workload ID and input parameters sent by the client must match the
-    workload requirements for this worker (HelloWorld)
+  * The Workload ID (`hello-world`) and input parameters (a name string)
+    sent by the client must match the workload requirements for this worker
 
 As a best practice, this tutorial separates the actual workload-specific logic
 from the the TCF plumbing required to link the workload to the TCF framework
@@ -108,7 +108,7 @@ will be created next in [Phase 2](#phase2).
   add this line to the end of
   [$TCF_HOME/examples/apps/CMakeLists.txt](../../examples/apps/CMakeLists.txt) :
 
-  ```bash
+  ```
   ADD_SUBDIRECTORY(hello_world/workload)
   ```
 
@@ -130,14 +130,28 @@ will be created next in [Phase 2](#phase2).
 * Rebuild the framework (see [$TCF_HOME/BUILD.md](../../BUILD.md)).
   It should include the new workload (with the hard-coded placeholder string)
 
-* Load the framework and use the universal command line utility to test the
-  newly-added workload
+* Load the framework and use the generic command line utility to test the
+  newly-added workload:
+  ```bash
+  ../generic_client/generic_client.py --uri "http://localhost:1947" \
+      --workload_id "hello-world" --in_data "Dan"
+  ```
 
 * The Hello World worker should return the string `Error: under construction`
-  as the result (hard-coded placeholder string in `plug-in.cpp`)
- 
-To see what the updated files should look like, refer to the files in directory
-[hello_world/stage_1/](docs/workload-tutorial/hello_world/stage_1/).
+  as the result (hard-coded placeholder string in `plug-in.cpp`):
+  ```
+  [17:35:06 INFO    utility.utility]
+  Decryption result at client - Error: under construction
+  [17:35:06 INFO    __main__]
+  Decrypted response:
+   [{'index': 0, 'dataHash':
+     '60AEBCFC13614F392352DC5683486C05F5519C927FA35DC254204CA0E5045348',
+     'data': 'Error: under construction', 'encryptedDataEncryptionKey': '',
+     'iv': ''}]
+  ```
+
+To see what the updated source files should look like, refer to the files in
+directory [hello_world/stage_1/](docs/workload-tutorial/hello_world/stage_1/).
 
 
 ### <a name="phase2"></a>Phase 2: Worker-specific Code
@@ -183,13 +197,25 @@ In this example we name the worker-specific function `ProcessHelloWorld()`.
 * Rebuild the framework (see [$TCF_HOME/BUILD.md](../../BUILD.md)).
   It should now include the new workload
 
-* Load the framework and use the universal command line utility to test the
-  newly-added workload
+* Load the framework and use the generic command line utility to test the
+  newly-added workload:
+  ```bash
+  ../generic_client/generic_client.py --uri "http://localhost:1947" \
+      --workload_id "hello-world" --in_data "Dan"
+  ```
 
 * The Hello World worker should return a string
-  `Hello, name` where `name` is the string sent in the first
+  `Hello name` where `name` is the string sent in the first
   input parameter
+  ```
+  [17:47:48 INFO    utility.utility] Decryption result at client - Hello Dan
+  [17:47:48 INFO    __main__]
+  Decrypted response:
+  [{'index': 0, 'dataHash':
+    '02D0D64CA3F5BC43B29304DA25AE9D240A48DE0374C3296A564CE55FB63E0B8C',
+    'data': 'Hello Dan', 'encryptedDataEncryptionKey': '', 'iv': ''}]
+  ```
 
-To see what the updated files should look like, refer to the files in directory
-[hello_world/stage_2/](docs/workload-tutorial/hello_world/stage_2/).
+To see what the updated source files should look like, refer to the files in
+directory [hello_world/stage_2/](docs/workload-tutorial/hello_world/stage_2/).
 

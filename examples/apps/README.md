@@ -16,3 +16,6 @@ create and write new applications.
   a person.
   Clients are available in a X Windows GUI and command line versions
 
+- [Generic Workload Client](generic_client)
+  This is a generic client for testing with any worker
+
