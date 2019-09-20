@@ -136,7 +136,7 @@ See [examples/apps/heart_disease_eval](examples/apps/heart_disease_eval]
 
 ## <a name="troubleshooting"></a>Troubleshooting
 - If you see the message
-  `ModuleNotFoundError: No module named 'service_client'`, you did not run
+  `ModuleNotFoundError: No module named '...'`, you did not run
   `source _dev/bin/activate`
 
 ## <a name="troubleshootingstandalone"></a>Troubleshooting: Standalone build

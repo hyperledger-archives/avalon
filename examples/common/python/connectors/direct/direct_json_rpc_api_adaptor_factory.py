@@ -37,12 +37,12 @@ class DirectJsonRpcApiAdaptorFactory(ConnectorAdaptorFactoryInterface):
     4. Work order receipt interact with json rpc listener
     """
     def __init__(self, config_file=None,config=None):
-	"""
-	config_file is config file path as a string
-	config is a dictionary loaded from config_file
-	either one of config_file or config needs to be passed
-	if both are passed config takes precedence
-	"""
+        """
+        "config_file" is config file path as a string.
+        "config" is a dictionary loaded from config_file.
+        Either one of config_file or config needs to be passed.
+        If both are passed config takes precedence.
+        """
         if(config is not None):
             self.__config = config
         else:
