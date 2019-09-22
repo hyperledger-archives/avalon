@@ -4,7 +4,7 @@
     "id": 13,
     "params": {
         "responseTimeoutMSecs": 6000,
-        "payloadFormat": "pformat",
+        "payloadFormat": "JSON-RPC",
         "resultUri": "resulturi",
         "notifyUri": "notifyuri",
         "workOrderId": "0x23",

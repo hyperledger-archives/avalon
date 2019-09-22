@@ -12,18 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import binascii
-import string
-# Return list of binary hex ids as list of UTF strings
-def pretty_ids(ids):
-    pretty_list = []
-    for id in ids:
-        pretty_list.append(hex_to_utf(id))
-    return pretty_list
+from enum import IntEnum, unique
+@unique
+class EnclaveError(IntEnum):
+    ENCLAVE_SUCCESS = 0,
+    ENCLAVE_ERR_UNKNOWN = -1,
+    ENCLAVE_ERR_MEMORY = -2,
+    ENCLAVE_ERR_IO = -3,
+    ENCLAVE_ERR_RUNTIME = -4,
+    ENCLAVE_ERR_INDEX = -5,
+    ENCLAVE_ERR_DIVIDE_BY_ZERO = -6,
+    ENCLAVE_ERR_OVERFLOW = -7,
+    ENCLAVE_ERR_VALUE = -8,
+    ENCLAVE_ERR_SYSTEM = -9,
+    ENCLAVE_ERR_CRYPTO = -11,
+    ENCLAVE_ERR_SYSTEM_BUSY = -10
 
-# Return binary hex as UTF string
-def hex_to_utf(binary):
-    return binascii.hexlify(binary).decode("UTF-8")
-
-def is_hex(s):
-    return all(c in string.hexdigits for c in s)

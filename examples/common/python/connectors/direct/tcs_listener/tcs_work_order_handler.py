@@ -17,6 +17,7 @@ import json
 import logging
 import crypto.crypto as crypto
 from error_code.error_status import WorkOrderStatus
+from error_code.enclave_error import EnclaveError
 import utility.utility as utility
 
 logger = logging.getLogger(__name__)
@@ -112,11 +113,15 @@ class TCSWorkOrderHandler:
         # Work order is processed if it is in wo-response table
         value = self.kv_helper.get("wo-responses", wo_id)
         if value:
-            input_value = json.loads(value)
-            if 'result' in value:
-                response['result'] = input_value['result']
-            else:
-                response['result'] = input_value['error']
+            response = json.loads(value)
+            if "error" in response:
+                # Mapping standard enclave error codes to JSON RPC error codes
+                if response["error"]["code"] == EnclaveError.ENCLAVE_ERR_VALUE:
+                    response["error"]["code"] = WorkOrderStatus.INVALID_PARAMETER_FORMAT_OR_VALUE
+                elif response["error"]["code="] == EnclaveError.ENCLAVE_ERR_UNKNOWN:
+                    response["error"]["code"] = WorkOrderStatus.UNKNOWN_ERROR
+                else:
+                    response["error"]["code"] = WorkOrderStatus.FAILED
         else:
             if(self.kv_helper.get("wo-timestamps", wo_id) is not None):
                 # work order is yet to be processed

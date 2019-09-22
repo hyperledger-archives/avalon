@@ -232,7 +232,9 @@ class resultWindow(tk.Toplevel):
 
 		private_key = utility.generate_signing_keys()
 		wo_params.add_encrypted_request_hash()
-		wo_params.add_requester_signature(private_key)
+		if wo_params.add_requester_signature(private_key) == False:
+			logger.info("Work order request signing failed\n")
+			sys.exit(1)
 		# Set text for JSON sidebar
 		req_id = 51
 		self.request_json = wo_params.to_string()

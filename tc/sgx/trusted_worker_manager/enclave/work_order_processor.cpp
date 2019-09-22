@@ -131,13 +131,25 @@ namespace tcf {
             "requesterSignature",
             "invalid request; failed to retrieve requester signature");
 
+        if (data_encryption_algorithm.length() > 0) {
+            tcf::error::ThrowIf<tcf::error::ValueError>(data_encryption_algorithm != "AES-GCM-256",
+                "Unsupported dataEncryptionAlgorithm found in the request");
+        }
+
+        // Convert payload_format to lower case
+        std::transform(payload_format.begin(), payload_format.end(),
+            payload_format.begin(), ::tolower);
+        tcf::error::ThrowIf<tcf::error::ValueError>(payload_format != "json-rpc",
+            "Unsupported payload format found in the input");
+
         // Decrypt Encryption key
         ByteArray encrypted_session_key_bytes = HexStringToBinary(encrypted_session_key);
         session_key = enclaveData.decrypt_message(encrypted_session_key_bytes);
         ByteArray session_key_iv_bytes = HexStringToBinary(session_key_iv);
         JSON_Array* data_array = json_object_get_array(params_object, "inData");
-
         size_t count = json_array_get_count(data_array);
+        tcf::error::ThrowIf<tcf::error::ValueError>(count == 0, "Indata is empty");
+
         size_t i;
         for (i = 0; i < count; i++) {
             JSON_Object* data_object = json_array_get_object(data_array, i);
