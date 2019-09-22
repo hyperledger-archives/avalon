@@ -15,7 +15,7 @@
 # limitations under the License.
 
 """
-error_code_handler.py -- Error code defined for handlers 
+Error code defined for handlers
 
 """
 

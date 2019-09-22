@@ -13,10 +13,14 @@
 # limitations under the License.
 
 import json
+import logging
+from os import sys
 
 import crypto.crypto as crypto
 import utility.utility as utility
 import utility.signature as signature
+
+logger = logging.getLogger(__name__)
 
 class WorkOrderParams():
 	def __init__(self,
@@ -137,13 +141,19 @@ class WorkOrderParams():
 		and set the requesterSignature parameter in the request
 		"""
 		sig_obj = signature.ClientSignature()
-		self.params_obj["requesterSignature"] = sig_obj.generate_signature(
+		status, sign = sig_obj.generate_signature(
 			self.final_hash,
 			private_key
 		)
-		# public signing key is shared to enclave manager to verify the signature.
-		# It is temporary approach to share the key with the worker.
-		self.set_verifying_key(private_key.GetPublicKey().Serialize())
+		if status == True:
+			self.params_obj["requesterSignature"] = sign
+			# public signing key is shared to enclave manager to verify the signature.
+			# It is temporary approach to share the key with the worker.
+			self.set_verifying_key(private_key.GetPublicKey().Serialize())
+			return True
+		else:
+			logger.error("Signing request failed")
+			return False
 
 	def set_verifying_key(self, verifying_key):
 		self.params_obj["verifyingKey"] = verifying_key

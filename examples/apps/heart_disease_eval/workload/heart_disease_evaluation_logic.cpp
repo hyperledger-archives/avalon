@@ -205,36 +205,41 @@ std::string HeartDiseaseEvalLogic::executeWorkOrder(std::string decrypted_user_i
         return "";
     }
 
-    std::string dataString;
-    std::vector<std::string> inputString = split(decrypted_user_input_str, ':');
-    if (inputString.size() > 1)
-        dataString = inputString[1];
+    std::string resultString;
+    try {
+        std::string dataString;
+        std::vector<std::string> inputString = split(decrypted_user_input_str, ':');
+        if (inputString.size() > 1)
+            dataString = inputString[1];
 
-    std::vector<std::string> medData = split(dataString, ' ');
-    if (medData.size() != 14)
-        return "Error with missing or incorrect input format";
+        std::vector<std::string> medData = split(dataString, ' ');
+        if (medData.size() != 14)
+            return "Error with missing or incorrect input format";
 
-    int risk = 100 -
-        int( score_age(std::stoi(medData[0])) * 0.03
-        + score_sex(std::stoi(medData[1])) * 0.01
-        + score_cp(std::stoi(medData[2])) * 0.21
-        + score_trestbps(std::stoi(medData[3])) * 0.05
-        + score_chol(std::stoi(medData[4])) * 0.05
-        + score_fbs(std::stoi(medData[5])) * 0.04
-        + score_restecg(std::stoi(medData[6])) * 0.19
-        + score_thalach(std::stoi(medData[7])) * 0.06
-        + score_exang_oldpeak(std::stoi(medData[8])) * 0.18
-        + score_exang_oldpeak(std::stoi(medData[9])) * 0.05
-        + score_slop(std::stoi(medData[10])) * 0.03
-        + score_ca(std::stoi(medData[11])) * 0.04
-        + score_thaldur(std::stoi(medData[12])) * 0.02
-        + score_num(std::stoi(medData[13])) * 0.04 );
+        int risk = 100 -
+            int( score_age(std::stoi(medData[0])) * 0.03
+            + score_sex(std::stoi(medData[1])) * 0.01
+            + score_cp(std::stoi(medData[2])) * 0.21
+            + score_trestbps(std::stoi(medData[3])) * 0.05
+            + score_chol(std::stoi(medData[4])) * 0.05
+            + score_fbs(std::stoi(medData[5])) * 0.04
+            + score_restecg(std::stoi(medData[6])) * 0.19
+            + score_thalach(std::stoi(medData[7])) * 0.06
+            + score_exang_oldpeak(std::stoi(medData[8])) * 0.18
+            + score_exang_oldpeak(std::stoi(medData[9])) * 0.05
+            + score_slop(std::stoi(medData[10])) * 0.03
+            + score_ca(std::stoi(medData[11])) * 0.04
+            + score_thaldur(std::stoi(medData[12])) * 0.02
+            + score_num(std::stoi(medData[13])) * 0.04 );
 
-    // Update accumulation
-    totalRisk += risk;
-    count++;
-
-    // Use accumulated data to calculate the result
-    std::string resultString = "You have a risk of " + std::to_string(totalRisk/count) + "% to have heart disease.";
+        // Update accumulation
+        totalRisk += risk;
+        count++;
+        // Use accumulated data to calculate the result
+        resultString = "You have a risk of " +
+            std::to_string(totalRisk/count) + "% to have heart disease.";
+    } catch (...) {
+        resultString = "Caught exception while processing workload data";
+    }
     return resultString;
 }

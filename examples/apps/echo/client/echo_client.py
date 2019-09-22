@@ -204,7 +204,9 @@ def Main(args=None):
 	# Sign work order
 	private_key = utility.generate_signing_keys()
 	wo_params.add_encrypted_request_hash()
-	wo_params.add_requester_signature(private_key)
+	if wo_params.add_requester_signature(private_key) == False:
+		logger.info("Work order request signing failed\n")
+		sys.exit(1)
 	# Submit work order
 	logger.info("Work order submit request : %s, \n \n ",
         wo_params.to_string())

@@ -130,7 +130,6 @@ class TCSWorkerRegistryHandler:
         if(self.kv_helper.get("workers", worker_id) is None):
             input_value = {}
             input_value = input_value_json['params']
-
             # Worker Initial Status is set to Active
             input_value["status"] = WorkerStatus.ACTIVE
 
@@ -146,8 +145,24 @@ class TCSWorkerRegistryHandler:
                 "Worker Id already exists in the database. \
                  Hence invalid parameter")
         return response
-# ------------------------------------------------------------------------------------------------
 
+# ------------------------------------------------------------------------------------------------
+    def __validate_input_worker_status(self, input_json):
+        """
+        Function to validate the worker status.
+        It should be valid status(ACTIVE, OFF_LINE, DECOMMISSIONED or COMPROMISED)
+        Returns true if it is valid status otherwise false
+        """
+        try:
+            worker_status = input_json["params"]["status"]
+            status = int(worker_status)
+            wo_status = WorkerStatus(status)
+            return True
+        except:
+            logger.error("Invalid worker status code")
+            return False
+
+# ------------------------------------------------------------------------------------------------
     def __process_worker_set_status(self, worker_id, input_value, response):
         """
         Function to set the status of worker
@@ -164,8 +179,14 @@ class TCSWorkerRegistryHandler:
         value = self.kv_helper.get("workers", worker_id)
         if value:
             json_dict = json.loads(value)
-            json_dict['status'] = input_value['params']['status']
+            if self.__validate_input_worker_status(input_value) == False:
+                response = utility.create_error_response(
+                           WorkerError.INVALID_PARAMETER_FORMAT_OR_VALUE,
+                           jrpc_id,
+                           "Invalid parameter: worker status code")
+                return response
 
+            json_dict['status'] = input_value['params']['status']
             value = json.dumps(json_dict)
             self.kv_helper.set("workers", worker_id, value)
             response = utility.create_error_response(

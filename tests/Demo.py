@@ -27,6 +27,8 @@ import worker.worker_details as worker
 from shared_kv.shared_kv_interface import KvStorage
 import utility.utility as enclave_helper
 import utility.file_utils as futils
+from error_code.error_status import SignatureStatus
+
 
 logger = logging.getLogger(__name__)
 
@@ -79,10 +81,12 @@ def LocalMain(config) :
                 encrypted_session_key = enclave_helper.generate_encrypted_key(session_key,
                         worker_obj.encryption_key)
 
-                input_json_str1 = sig_obj.generate_client_signature(input_json_str1,
+                input_json_str1, status = sig_obj.generate_client_signature(input_json_str1,
                         worker_obj, private_key, session_key, session_iv,
                         encrypted_session_key)
-
+                if status != SignatureStatus.PASSED:
+                    logger.info("Generate signature failed\n")
+                    exit(1)
                 if input_json_str1 is None:
                     continue
             #----------------------------------------------------------------------------------
@@ -132,7 +136,7 @@ def LocalMain(config) :
                         enclave_helper.decrypted_response(json.dumps(response),
                                    session_key, session_iv)
                     else :
-                        logger.info("Signature Failed")
+                        logger.info("Signature verification Failed")
                         exit(1)
                 except:
                         logger.error("ERROR: Failed to analyze Signature Verification")
