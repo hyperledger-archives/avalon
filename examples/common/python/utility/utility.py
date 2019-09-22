@@ -100,6 +100,17 @@ def create_error_response(code, jrpc_id, message):
     return error_response
 
 #---------------------------------------------------------------------------------------------
+def is_valid_hex_string(input_str):
+    '''
+    Function to validate hex string
+    '''
+    try:
+        int(input_str, 16)
+    except:
+        return False
+    return True
+
+#---------------------------------------------------------------------------------------------
 def strip_begin_end_key(key) :
     """
     Strips off newline chars, BEGIN PUBLIC KEY and END PUBLIC KEY.

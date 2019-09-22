@@ -79,7 +79,7 @@ def LocalMain(config) :
                 encrypted_session_key = enclave_helper.generate_encrypted_key(session_key,
                         worker_obj.encryption_key)
 
-                input_json_str1 = sig_obj.generate_client_signature(input_json_str1,
+                input_json_str1, status = sig_obj.generate_client_signature(input_json_str1,
                         worker_obj, private_key, session_key, session_iv,
                         encrypted_session_key)
 

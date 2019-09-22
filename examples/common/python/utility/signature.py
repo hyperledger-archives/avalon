@@ -177,16 +177,20 @@ class ClientSignature(object) :
     def generate_signature(self, hash, private_key):
         """
         Function to generate signature object
+        Return a tuple containing signature and status
         Parameters:
             - hash is the combined array of all hashes calculated on the message
             - private_key is Client private key
         """
-
-        self.private_key = private_key
-        self.public_key =  self.private_key.GetPublicKey().Serialize()
-        signature_result =  self.private_key.SignMessage(hash)
-        signature_base64  =  crypto.byte_array_to_base64(signature_result)
-        return  signature_base64
+        try:
+            self.private_key = private_key
+            self.public_key =  self.private_key.GetPublicKey().Serialize()
+            signature_result =  self.private_key.SignMessage(hash)
+            signature_base64  =  crypto.byte_array_to_base64(signature_result)
+        except:
+            logger.error("Exception occured during signature generation")
+            return (None, SignatureStatus.FAILED)
+        return  signature_base64, SignatureStatus.PASSED
 
 #---------------------------------------------------------------------------------------------
     def generate_client_signature(self, input_json_str,
@@ -194,6 +198,7 @@ class ClientSignature(object) :
             data_key=None, data_iv=None):
         """
         Function to generate client signature
+        Returns a tuple containing signature and status
         Parameters:
             - input_json_str is requester Work Order Request payload in a
               JSON-RPC based format defined 6.1.1 Work Order Request Payload
@@ -230,9 +235,14 @@ class ClientSignature(object) :
         encrypted_session_key_str = ''.join(format(i, '02x') for i in encrypted_session_key)
         self.__encrypt_workorder_indata(input_json_params, session_key,
                 session_iv, worker.encryption_key, data_key, data_iv)
-        # [NO_OF_BYTES] 16 BYTES for nonce, is the recommendation by NIST to
-        # avoid collisions by the "Birthday Paradox".
-        nonce =  crypto.random_bit_string(NO_OF_BYTES)
+
+        if input_json_params["requesterNonce"] and \
+                utility.is_valid_hex_string(input_json_params["requesterNonce"]):
+            nonce = crypto.string_to_byte_array(input_json_params["requesterNonce"])
+        else:
+            # [NO_OF_BYTES] 16 BYTES for nonce, is the recommendation by NIST to
+            # avoid collisions by the "Birthday Paradox".
+            nonce =  crypto.random_bit_string(NO_OF_BYTES)
 
         request_nonce_hash = crypto.compute_message_hash(nonce)
         nonce_hash = (crypto.byte_array_to_base64(request_nonce_hash)).encode('UTF-8')
@@ -256,7 +266,10 @@ class ClientSignature(object) :
 
         #Update the input json params
         input_json_params["encryptedRequestHash"] = encrypted_request_hash_str
-        input_json_params['requesterSignature'] = self.generate_signature(final_hash, private_key)
+        signature, status = self.generate_signature(final_hash, private_key)
+        if status == SignatureStatus.FAILED:
+            return (None, SignatureStatus.FAILED)
+        input_json_params['requesterSignature'] = signature 
         input_json_params["encryptedSessionKey"] = encrypted_session_key_str
         # Temporary mechanism to share client's public key. Not a part of Spec
         input_json_params['verifyingKey'] =  self.public_key
@@ -265,7 +278,7 @@ class ClientSignature(object) :
         input_json_str = json.dumps(input_json)
         logger.info("Request Json successfully Signed")
 
-        return input_json_str
+        return (input_json_str, SignatureStatus.PASSED)
 
 #---------------------------------------------------------------------------------------------
     def verify_signature(self,response_str,worker):
