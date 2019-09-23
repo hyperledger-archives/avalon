@@ -29,3 +29,37 @@ tools/build/_dev/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
+
+.gradle
+/build/
+!gradle/wrapper/gradle-wrapper.jar
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+/out/
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+examples/common/java/src/main/java/org/eea/tcf/worker/utils/version/Version.java
+
+/bin/
+.vscode/
+.DS_Store
+
