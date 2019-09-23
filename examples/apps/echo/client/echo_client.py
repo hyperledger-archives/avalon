@@ -149,12 +149,12 @@ def Main(args=None):
 		config["tcf"]["json_rpc_uri"] = registry_retrieve_result[0]
 
 	# Prepare worker
+	req_id = 31
 	global worker_id
+	worker_registry_instance = direct_jrpc.create_worker_registry_adaptor(
+		config
+	)
 	if not worker_id:
-		req_id = 31
-		worker_registry_instance = direct_jrpc.create_worker_registry_adaptor(
-			config
-		)
 		worker_lookup_result = worker_registry_instance.worker_lookup(
 			worker_type=WorkerType.TEE_SGX, id=req_id
 		)
