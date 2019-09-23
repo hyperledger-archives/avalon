@@ -47,11 +47,16 @@ Before beginning this tutorial, review the following items:
   Observe the following:
   * Each workload must implement method `ProcessWorkOrder()`
     (see file [templates/plug-in.cpp](templates/plug-in.cpp))
-  * Each workload class definition must include macro
-    `IMPL_WORKLOAD_PROCESSOR_CLONE()`
+  * Each workload class definition must include the macro
+    `IMPL_WORKLOAD_PROCESSOR_CLONE()`.
+    This macro clones an instance of class `WorkloadProcessor` for a worker
     (see file [templates/plug-in.h](templates/plug-in.h))
-  * Each workload class implementation must include macro
-    ` REGISTER_WORKLOAD_PROCESSOR()`
+  * Each workload class implementation must include the macro
+    ` REGISTER_WORKLOAD_PROCESSOR()`.
+    This macro registers a workload processor for a specific application.
+    It associates a string with a worker class.
+    This is the same string that is passed in the work order request
+    JSON payload
     (see file [templates/plug-in.cpp](templates/plug-in.cpp))
 
 * Review the generic command line client at
@@ -66,6 +71,8 @@ Before beginning this tutorial, review the following items:
     (potentially by modifying this application)
   * The Workload ID (`hello-world`) and input parameters (a name string)
     sent by the client must match the workload requirements for this worker
+
+* Review how to build TCF at [$TCF_HOME/BUILD.md](../../BUILD.md)
 
 As a best practice, this tutorial separates the actual workload-specific logic
 from the the TCF plumbing required to link the workload to the TCF framework
@@ -86,6 +93,7 @@ will be created next in [Phase 2](#phase2).
 * From the top-level TCF source repository directory, `$TCF_HOME`,
   create a new workload directory and change into it:
   ```bash
+  cd $TCF_HOME
   mkdir -p examples/apps/hello_world/workload
   cd examples/apps/hello_world/workload
   ```
@@ -127,14 +135,15 @@ will be created next in [Phase 2](#phase2).
   TARGET_LINK_LIBRARIES(${PROJECT_NAME} -Wl,--whole-archive -lhello_world -Wl,--no-whole-archive)
   ```
 
-* Rebuild the framework (see [$TCF_HOME/BUILD.md](../../BUILD.md)).
-  It should include the new workload (with the hard-coded placeholder string)
+* Change to the top-level TCF source repository directory, `$TCF_HOME`,
+  and rebuild the framework (see [$TCF_HOME/BUILD.md](../../BUILD.md)).
+  It should now include the new workload
 
 * Load the framework and use the generic command line utility to test the
   newly-added workload:
   ```bash
-  ../generic_client/generic_client.py --uri "http://localhost:1947" \
-      --workload_id "hello-world" --in_data "Dan"
+  examples/apps/generic_client/generic_client.py
+      --uri "http://localhost:1947" --workload_id "hello-world" --in_data "Dan"
   ```
 
 * The Hello World worker should return the string `Error: under construction`
@@ -151,7 +160,8 @@ will be created next in [Phase 2](#phase2).
   ```
 
 To see what the updated source files should look like, refer to the files in
-directory [hello_world/stage_1/](docs/workload-tutorial/hello_world/stage_1/).
+directory
+[$TCF_HOME/docs/workload-tutorial/hello_world/stage_1/](hello_world/stage_1/).
 
 
 ### <a name="phase2"></a>Phase 2: Worker-specific Code
@@ -161,6 +171,11 @@ worker-specific logic and call it from the plug-in code.
 As a best practice, we separate worker-specific logic from the
 TCF framework code that calls it into separate files.
 In this example we name the worker-specific function `ProcessHelloWorld()`.
+
+* Change back into the "Hello World" workload directory:
+  ```bash
+  cd $TCF_HOME/examples/apps/hello_world/workload
+  ```
 
 * Add the `ProcessHelloWorld()` function definition to `logic.h`:
   ```cpp
@@ -194,14 +209,15 @@ In this example we name the worker-specific function `ProcessHelloWorld()`.
       wo_data.decrypted_data));
   ```
 
-* Rebuild the framework (see [$TCF_HOME/BUILD.md](../../BUILD.md)).
+* Change to the top-level TCF source repository directory, `$TCF_HOME`,
+  and rebuild the framework (see [$TCF_HOME/BUILD.md](../../BUILD.md)).
   It should now include the new workload
 
 * Load the framework and use the generic command line utility to test the
   newly-added workload:
   ```bash
-  ../generic_client/generic_client.py --uri "http://localhost:1947" \
-      --workload_id "hello-world" --in_data "Dan"
+  examples/apps/generic_client/generic_client.py
+      --uri "http://localhost:1947" --workload_id "hello-world" --in_data "Dan"
   ```
 
 * The Hello World worker should return a string
@@ -217,5 +233,6 @@ In this example we name the worker-specific function `ProcessHelloWorld()`.
   ```
 
 To see what the updated source files should look like, refer to the files in
-directory [hello_world/stage_2/](docs/workload-tutorial/hello_world/stage_2/).
+directory
+[$TCF_HOME/docs/workload-tutorial/hello_world/stage_2/](hello_world/stage_2/).
 
