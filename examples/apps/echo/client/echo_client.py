@@ -30,8 +30,8 @@ import utility.utility as utility
 from utility.tcf_types import WorkerType
 import worker.worker_details as worker
 from work_order.work_order_params import WorkOrderParams
-from connectors.direct.direct_json_rpc_api_adaptor_factory \
-	import DirectJsonRpcApiAdaptorFactory
+from connectors.direct.direct_json_rpc_api_connector \
+	import DirectJsonRpcApiConnector
 import crypto.crypto as crypto
 from error_code.error_status import WorkOrderStatus
 
@@ -86,7 +86,7 @@ def ParseCommandLine(args) :
 		sys.exit(-1)
 
 	global direct_jrpc
-	direct_jrpc = DirectJsonRpcApiAdaptorFactory(conf_files[0])
+	direct_jrpc = DirectJsonRpcApiConnector(conf_files[0])
 
 	# Whether or not to connect to the registry list on the blockchain
 	off_chain = False
@@ -129,7 +129,7 @@ def Main(args=None):
 
 	# Connect to registry list and retrieve registry
 	if not off_chain:
-		registry_list_instance = direct_jrpc.create_worker_registry_list_adaptor(
+		registry_list_instance = direct_jrpc.create_worker_registry_list(
 			config
 		)
 		# Lookup returns tuple, first element is number of registries and
@@ -208,7 +208,7 @@ def Main(args=None):
 	# Submit work order
 	logger.info("Work order submit request : %s, \n \n ",
         wo_params.to_string())
-	work_order_instance = direct_jrpc.create_work_order_adaptor(
+	work_order_instance = direct_jrpc.create_work_order(
 		config
 	)
 	req_id += 1
@@ -242,7 +242,7 @@ def Main(args=None):
 		sys.exit(1)
 
 	# Retrieve receipt
-	wo_receipt_instance = direct_jrpc.create_work_order_receipt_adaptor(
+	wo_receipt_instance = direct_jrpc.create_work_order_receipt(
 		config
 	)
 	req_id += 1
