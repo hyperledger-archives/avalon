@@ -1,0 +1,9 @@
+${Ansi.YELLOW}
+${Ansi.YELLOW}  ______ ______            _______ _____ ______
+${Ansi.YELLOW} |  ____|  ____|   /\     |__   __/ ____|  ____|
+${Ansi.YELLOW} | |__  | |__     /  \ ______| | | |    | |__
+${Ansi.YELLOW} |  __| |  __|   / /\ \______| | | |    |  __|
+${Ansi.YELLOW} | |____| |____ / ____ \     | | | |____| |
+${Ansi.YELLOW} |______|______/_/    \_\    |_|  \_____|_|
+${Ansi.YELLOW}
+${Ansi.YELLOW} :: Spring Boot${spring-boot.formatted-version} :: ${Ansi.DEFAULT}

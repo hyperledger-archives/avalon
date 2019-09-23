@@ -1,0 +1,38 @@
+version: '3.4'
+
+
+networks:
+  eea-net:
+    external: true
+
+services:
+  worker:
+    image: nexus.eea/eea-tcf-worker:${WORKER_VERSION}
+    container_name: worker
+    environment:
+      - EEA_CORE_HOST=core
+      - EEA_CORE_PORT=18090
+      - EEA_WORKER_NAME=worker
+      - EEA_TEE_ENABLED:false
+      - EEA_WORKER_WALLET_PATH=/eea-wallets/encrypted-wallet_worker1.json
+      - EEA_WORKER_BASE_DIR=/tmp/eea-worker
+    ports:
+      - 18091:18091
+    volumes:
+      - ./src/main/resources/wallet/encrypted-wallet_worker1.json:/eea-wallets/encrypted-wallet_worker1.json
+      - /tmp/eea-worker/worker:/tmp/eea-worker/worker
+      - /var/run/docker.sock:/var/run/docker.sock
+    restart: on-failure
+    networks:
+      - eea-net
+
+  eea-las:
+    image: nexus.eea/eea-tcf-worker:${EEA_LAS_VERSION}
+    container_name: eea-las
+    ports:
+      - 18766:18766
+    networks:
+      - eea-net
+    devices:
+      - /dev/isgx
+
