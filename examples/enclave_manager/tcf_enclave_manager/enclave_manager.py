@@ -23,7 +23,7 @@ import json
 import tcf_enclave_helper as enclave_helper
 from error_code.error_status import WorkOrderStatus
 from database import connector
-import workorder_request.sgx_workorder_request as workorder_request
+import sgx_work_order_request as work_order_request
 from utility.tcf_types import WorkerStatus, WorkerType
 import utility.utility as utils
 
@@ -237,10 +237,10 @@ def execute_work_order(enclave_data, input_json_str, indent=4):
     Submits workorder request to Worker enclave and retrieves the response
     """
     try:
-        wo_request = workorder_request.SgxWorkOrderRequest(
+        wo_request = work_order_request.SgxWorkOrderRequest(
             enclave_data,
             input_json_str)
-        wo_response = wo_request.evaluate()
+        wo_response = wo_request.execute()
 
         try:
             json_response = json.dumps(wo_response, indent=indent)
