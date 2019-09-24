@@ -17,8 +17,8 @@ from os.path import isfile, realpath
 import errno
 import toml
 
-from connectors.interfaces.connector_adaptor_factory_interface import \
-    ConnectorAdaptorFactoryInterface
+from connectors.interfaces.connector_interface import \
+    ConnectorInterface
 from connectors.ethereum.ethereum_worker_registry_list_impl import \
     EthereumWorkerRegistryListImpl
 from connectors.direct.worker_registry_jrpc_impl import WorkerRegistryJRPCImpl
@@ -27,14 +27,14 @@ from connectors.direct.work_order_receipt_jrpc_impl import WorkOrderReceiptJRPCI
 
 logger = logging.getLogger(__name__)
 
-class DirectJsonRpcApiAdaptorFactory(ConnectorAdaptorFactoryInterface):
+class DirectJsonRpcApiConnector(ConnectorInterface):
     """
-    Adaptor for the direct JSON RPC API provided by the TCS.
+    Connector for the direct JSON RPC API.
     It is used in direct model
-    1. Worker registry list adaptor interact with blockchain
-    2. Worker registry adaptor interact with json rpc listener
-    3. Work order adaptor interact with json rpc listener
-    4. Work order receipt interact with json rpc listener
+    1. Worker registry list interacts with blockchain.
+    2. Worker registry interacts with json rpc listener.
+    3. Work order interacts with json rpc listener.
+    4. Work order receipt interacts with json rpc listener.
     """
     def __init__(self, config_file=None,config=None):
         """
@@ -65,23 +65,23 @@ class DirectJsonRpcApiAdaptorFactory(ConnectorAdaptorFactoryInterface):
         self.__work_order_receipts = None
         self.__blockchain_type = self.__config['blockchain']['type']
 
-    def create_worker_registry_list_adaptor(self, config):
+    def create_worker_registry_list(self, config):
         if self.__blockchain_type == "Ethereum":
             if self.__worker_registry_list is None:
                 self.__worker_registry_list = EthereumWorkerRegistryListImpl(config)
             return self.__worker_registry_list
 
-    def create_worker_registry_adaptor(self, config):
+    def create_worker_registry(self, config):
         if self.__worker_registry is None:
             self.__worker_registry = WorkerRegistryJRPCImpl(config)
         return self.__worker_registry
 
-    def create_work_order_adaptor(self, config):
+    def create_work_order(self, config):
         if self.__work_order is None:
             self.__work_order = WorkOrderJRPCImpl(config)
         return self.__work_order
 
-    def create_work_order_receipt_adaptor(self, config):
+    def create_work_order_receipt(self, config):
         if self.__work_order_receipts is None:
             self.__work_order_receipts = WorkOrderReceiptJRPCImpl(config)
         return self.__work_order_receipts

@@ -14,32 +14,32 @@
 
 from abc import ABC,abstractmethod
 
-class ConnectorAdaptorFactoryInterface(ABC):
+class ConnectorInterface(ABC):
     """
-    ConnectorAdaptorFactoryInterface create 4 adaptor factor methods
-    1. Direct registry list adaptor
-    2. Worker registry adaptor
-    3. Work order adaptor
-    4. Work order receipt adaptor
+    ConnectorInterface has below methods
+    1. Create worker registry list.
+    2. Create worker registry.
+    3. Create work order.
+    4. Create work order receipt.
     Parameter “config” is a dictionary containing configuration in TOML format. 
-    The type of the adaptor is chosen based on the configuration
+    The type of the adaptor(direct/proxy) is chosen based on the configuration.
     The configuration also contains information required to construct 
     and initialize the adaptor, e.g.  URI, user key/log-in info, smart contract address, etc.
-    Return value of “adaptor” is “None” on error or an instantiated adaptor object on success.
+    Return value is “None” on error or an instantiated object on success.
 
     """
     def __init__(self):
         super().__init__()
 
     @abstractmethod
-    def create_worker_registry_list_adaptor(self, config):
+    def create_worker_registry_list(self, config):
         pass
     @abstractmethod
-    def create_worker_registry_adaptor(self, config):
+    def create_worker_registry(self, config):
         pass
     @abstractmethod
-    def create_work_order_adaptor(self, config):
+    def create_work_order(self, config):
         pass
     @abstractmethod
-    def create_work_order_receipt_adaptor(self, config):
+    def create_work_order_receipt(self, config):
         pass

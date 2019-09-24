@@ -32,8 +32,8 @@ import utility.utility as utility
 import worker.worker_details as worker
 from utility.tcf_types import WorkerType
 from work_order.work_order_params import WorkOrderParams
-from connectors.direct.direct_json_rpc_api_adaptor_factory \
-	import DirectJsonRpcApiAdaptorFactory
+from connectors.direct.direct_json_rpc_api_connector \
+	import DirectJsonRpcApiConnector
 import config.config as pconfig
 import utility.logger as plogger
 import crypto.crypto as crypto
@@ -237,7 +237,7 @@ class resultWindow(tk.Toplevel):
 		req_id = 51
 		self.request_json = wo_params.to_string()
 
-		work_order_instance = direct_jrpc.create_work_order_adaptor(
+		work_order_instance = direct_jrpc.create_work_order(
 			config
 		)
 		response = work_order_instance.work_order_submit(
@@ -269,7 +269,7 @@ class resultWindow(tk.Toplevel):
 
 		# Retrieve receipt
 		# Set text for JSON sidebar
-		wo_receipt_instance = direct_jrpc.create_work_order_receipt_adaptor(
+		wo_receipt_instance = direct_jrpc.create_work_order_receipt(
 			config
 		)
 		req_id += 1
@@ -442,7 +442,7 @@ def ParseCommandLine(args) :
 		sys.exit(-1)
 
 	global direct_jrpc
-	direct_jrpc = DirectJsonRpcApiAdaptorFactory(conf_files[0])
+	direct_jrpc = DirectJsonRpcApiConnector(conf_files[0])
 
 	# Whether or not to connect to the registry list on the blockchain
 	off_chain = False
@@ -492,7 +492,7 @@ def Main(args=None):
 
 	# Retrieve Worker Registry
 	if not off_chain:
-		registry_list_instance = direct_jrpc.create_worker_registry_list_adaptor(
+		registry_list_instance = direct_jrpc.create_worker_registry_list(
 			config
 		)
 		registry_count, lookup_tag, registry_list = registry_list_instance.registry_lookup()
@@ -515,7 +515,7 @@ def Main(args=None):
 
 	global worker_id
 	if not worker_id:
-		worker_registry_instance = direct_jrpc.create_worker_registry_adaptor(
+		worker_registry_instance = direct_jrpc.create_worker_registry(
 			config
 		)
 		req_id = 31

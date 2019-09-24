@@ -27,8 +27,8 @@ import utility.utility as utility
 from utility.tcf_types import WorkerType
 import worker.worker_details as worker_details
 from work_order.work_order_params import WorkOrderParams
-from connectors.direct.direct_json_rpc_api_adaptor_factory \
-	import DirectJsonRpcApiAdaptorFactory
+from connectors.direct.direct_json_rpc_api_connector \
+	import DirectJsonRpcApiConnector
 from error_code.error_status import WorkOrderStatus
 
 # Remove duplicate loggers
@@ -138,7 +138,7 @@ def Main(args=None):
 		" *****************")
 
 	global direct_jrpc
-	direct_jrpc = DirectJsonRpcApiAdaptorFactory(config_file=None,config=config)
+	direct_jrpc = DirectJsonRpcApiConnector(config_file=None,config=config)
 
 	global address
 	if mode == "registry" and address:
@@ -148,7 +148,7 @@ def Main(args=None):
 	# Connect to registry list and retrieve registry
 	global uri
 	if not uri and mode == "listing":
-		registry_list_instance = direct_jrpc.create_worker_registry_list_adaptor(
+		registry_list_instance = direct_jrpc.create_worker_registry_list(
 			config
 		)
 		# Lookup returns tuple, first element is number of registries and
@@ -171,7 +171,7 @@ def Main(args=None):
 	req_id = 31
 	global worker_id
 	if not worker_id:
-		worker_registry_instance = direct_jrpc.create_worker_registry_adaptor(
+		worker_registry_instance = direct_jrpc.create_worker_registry(
 			config
 		)
 		worker_lookup_result = worker_registry_instance.worker_lookup(
@@ -237,7 +237,7 @@ def Main(args=None):
 	# Submit work order
 	logger.info("Work order submit request : %s, \n \n ",
         wo_params.to_string())
-	work_order_instance = direct_jrpc.create_work_order_adaptor(
+	work_order_instance = direct_jrpc.create_work_order(
 		config
 	)
 	req_id += 1
@@ -271,7 +271,7 @@ def Main(args=None):
 		sys.exit(1)
 
 	# Retrieve receipt
-	wo_receipt_instance = direct_jrpc.create_work_order_receipt_adaptor(
+	wo_receipt_instance = direct_jrpc.create_work_order_receipt(
 		config
 	)
 	req_id += 1
