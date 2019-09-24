@@ -54,7 +54,7 @@ Before beginning this tutorial, review the following items:
   * Each workload class implementation must include the macro
     ` REGISTER_WORKLOAD_PROCESSOR()`.
     This macro registers a workload processor for a specific application.
-    It associates a string with a worker class.
+    It associates a string with a workload.
     This is the same string that is passed in the work order request
     JSON payload
     (see file [templates/plug-in.cpp](templates/plug-in.cpp))
