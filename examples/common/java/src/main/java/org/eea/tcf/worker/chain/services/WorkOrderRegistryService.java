@@ -123,7 +123,7 @@ public class WorkOrderRegistryService {
             log.error("Work order complete [workOrderId:{}, returnCode:{}, gasUsed:{}]",
                     workOrderId, returnCode, completeReceipt.getGasUsed());
         } catch (Exception e) {
-            log.error("Failed to call WorkOrderComplete [workOrderId:{}, returnCode:{}, exeption:{}]",
+            log.error("Failed to call WorkOrderComplete [workOrderId:{}, returnCode:{}, exception:{}]",
                     workOrderId, returnCode, e.getMessage());
             return false;
         }
