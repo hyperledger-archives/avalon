@@ -33,7 +33,7 @@ tools/build/_dev/
 __pycache__/
 
 .gradle
-/build/
+examples/common/java/*/*/build/
 !gradle/wrapper/gradle-wrapper.jar
 
 ### STS ###
@@ -50,7 +50,7 @@ __pycache__/
 *.iws
 *.iml
 *.ipr
-/out/
+examples/common/java/*/*/out/
 
 ### NetBeans ###
 /nbproject/private/
@@ -59,9 +59,9 @@ __pycache__/
 /nbdist/
 /.nb-gradle/
 
-examples/common/java/src/main/java/org/eea/tcf/worker/utils/version/Version.java
+examples/common/java/direct/worker/src/main/java/org/eea/tcf/worker/utils/version/Version.java
 
-/bin/
+examples/common/java/*/bin/
 .vscode/
 .DS_Store
 
