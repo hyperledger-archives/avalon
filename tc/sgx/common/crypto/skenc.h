@@ -22,10 +22,10 @@
 namespace tcf {
 namespace crypto {
     namespace constants {
-        //***AES-GCM 128 for authenticated encryption
+        //***AES-GCM 256 for authenticated encryption
         const int IV_LEN = 12;       // AES-GCM IV length
-        const int SYM_KEY_LEN = 16;  // AES-GCM Key length. move to 32 for post-quantum security
-        const int TAG_LEN = 16;      // AES-GCM TAG length, move to 32 for post-quantum security
+        const int SYM_KEY_LEN = 32;  // AES-GCM Key length.
+        const int TAG_LEN = 16;      // AES-GCM TAG length.
     }  // namespace constants
 
     // Authenticated encryption
