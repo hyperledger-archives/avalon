@@ -12,6 +12,7 @@ This document describes how to get and compile these required components.
 # Table of Contents
 - [Required Packages](#packages)
 - [Environment Variables](#environment)
+- [Docker](#docker)
 - [Intel&reg; Software Guard Extensions (Intel SGX)](#sgx)
 - [OpenSSL](#openssl)
 - [Intel SGX OpenSSL](#sgxssl)
@@ -54,7 +55,7 @@ activation script (e.g. `source /opt/intel/sgxsdk/environment`)
 
 - `SGX_MODE`
 This variable is used to switch between the Intel SGX simulator and hardware
-mode.  Set `SGX_MODE` to either `HW` or `SIM`.
+mode. Set `SGX_MODE` to either `HW` or `SIM`
 
 - `SGX_SSL`
 Used to locate an Intel SGX-compatible version of OpenSSL
@@ -69,7 +70,12 @@ yourself using OpenSSL, then export the path to it:
 
 - `TCF_HOME`
 Used to locate the top level build directory.
-It is described in the [BUILD document](BUILD.md#buildtcf).
+It is described in the [BUILD document](BUILD.md#buildtcf)
+
+- `TCF_DEBUG_BUILD`
+Optional variable for enabling debug output. Set to `1` enable.
+For example: `export TCF_DEBUG_BUILD=1` for standalone builds
+or`TCF_DEBUG_BUILD=1 docker-compose up` for Docker-based builds
 
 
 # <a name="packages"></a>Required Packages
@@ -79,37 +85,44 @@ distributions will require similar packages.
 sudo apt-get update
 sudo apt-get install -y cmake swig pkg-config python3-dev python3-venv python \
      software-properties-common virtualenv curl xxd git unzip dh-autoreconf \
-     ocaml ocamlbuild liblmdb-dev
+     ocaml ocamlbuild liblmdb-dev protobuf-compiler
 ```
 
 
-# <a name="protobuf"></a>Protobuf Compiler
-Many components of the project use Google's Protocol Buffers (including
-Intel SGX), so installing support for them early is recommended.
-Protobuf v3 or later support is required - check your package manager first
-to see what is available.
-On Ubuntu 18 or greater, install package `protobuf-compiler`
-and verify it supports Protobuf v3 or later:
+# <a name="docker"></a>Docker
+Docker may be used instead of building TCF directly (standalone mode) and
+is recommended.  If you build using Docker, you need to install Docker Engine
+and Docker Compose if it is not already installed.
+
+To install Docker CE Engine:
 
 ```
+sudo apt-get install apt-transport-https ca-certificates
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+sudo add-apt-repository \
+   "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
 sudo apt-get update
-sudo apt-get install -y protobuf-compiler
-protoc --version
+sudo apt-get install docker-ce
 ```
 
-If a Protobuf v3 package is not available, follow these steps to compile and
-install protobuf tools manually to `/usr/local`:
+To verify a correct installation, run `sudo docker run hello-world`
 
+To install Docker Compose:
 ```
-wget https://github.com/google/protobuf/releases/download/v3.5.1/protobuf-python-3.5.1.tar.gz
-tar -xzf protobuf-python-3.5.1.tar.gz
-cd protobuf-3.5.1
-./configure
-make
-make check
-sudo make install
-sudo ldconfig
+sudo curl -L \
+   https://github.com/docker/compose/releases/download/1.24.1/docker-compose-`uname -s`-`uname -m` \
+   -o /usr/local/bin/docker-compose
+/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
 ```
+
+To verify a correct installation, run `docker-compose version`
+
+For details on Docker installation, see 
+https://docs.docker.com/engine/installation/linux/ubuntu
+and
+https://docs.docker.com/compose/install/#install-compose
+
 
 # <a name="sgx"></a>Intel&reg; Software Guard Extensions (Intel SGX)
 Hyperledger Trusted Compute Framework is intended to be run on
@@ -120,9 +133,10 @@ on platforms that do not have hardware support for Intel SGX.
 ## Intel SGX SDK
 The Intel SGX SDK is required for both Intel SGX platforms and
 Intel SGX simulator mode.
-Download the Intel SGX SDK 2.0 from
+Download the Intel SGX SDK 2.3 from
 [here](https://01.org/intel-software-guard-extensions/downloads)
-for your distribution.
+for your distribution. For Ubuntu 18, download
+https://download.01.org/intel-sgx/linux-2.3.1/ubuntu18.04/sgx_linux_x64_sdk_2.3.101.46683.bin .
 It is recommended to install Intel SGX SDK in `/opt/intel/sgxsdk/`
 because the Intel SGX OpenSSL library expects the Intel SGX SDK in this location
 by default. Type the following to install Intel SGX SDK
@@ -130,7 +144,8 @@ by default. Type the following to install Intel SGX SDK
 ```
 sudo mkdir -p /opt/intel
 cd /opt/intel
-sudo bash /var/tmp/sgx_linux_x64_sdk_*.bin
+wget https://download.01.org/intel-sgx/linux-2.3.1/ubuntu18.04/sgx_linux_x64
+echo "yes" | sudo bash ./ubuntu18.04/sgx_linux_x64_sdk_2.3.101.46683.bin
 ```
 
 This will install the Intel SGX SDK in the recommended location,
@@ -140,6 +155,7 @@ Source the Intel SGX SDK activation script to set
 ```
 source /opt/intel/sgxsdk/environment
 ```
+Consider adding this line to your login shell script (`~/.bashrc` or similar)
 
 To learn more about Intel SGX read the
 [Intel SGX SDK documentation](https://software.intel.com/en-us/sgx-sdk/documentation) or
@@ -150,9 +166,10 @@ visit the [Intel SGX homepage](https://software.intel.com/en-us/sgx).
 If you plan to run this on Intel SGX-enabled hardware, you will need
 to install packages `libsgx-enclave-common` and `libelf-dev` and
 install the Intel SGX driver for both standalone and docker builds.
-Additionally for standalone builds, we need to install Intel SGX SDK manually.
+Additionally for standalone builds, we need to install the Intel SGX SDK
+manually.
 
-Steps to install above packages are as follows.
+Steps to install the above packages are as follows.
 
 ### Remove Old `/dev/sgx` Intel SGX Driver
 If device file `/dev/sgx` is present, remove the old driver:
@@ -249,25 +266,30 @@ version from source. If you already have a newer version, 1.1.1d or later,
 you can skip this.
 
 If using a Debian-based Linux distribution (Ubuntu, Mint, etc.) the recommended
-path is to download and install pre-build OpenSSL packages for your system.
+path is to download and install pre-built OpenSSL packages for your system.
 Check for available versions
 [here](http://http.us.debian.org/debian/pool/main/o/openssl/).
 For example, to install OpenSSL v1.1.1d on an Ubuntu system:
+
 ```
-wget 'http://http.us.debian.org/debian/pool/main/o/openssl/libssl1.1_1.1.1d-4_amd64.deb'
-wget 'http://http.us.debian.org/debian/pool/main/o/openssl/libssl-dev_1.1.1d-4_amd64.deb'
-sudo dpkg -i libssl1.1_1.1.1d-4_amd64.deb
-sudo dpkg -i libssl-dev_1.1.1d-4_amd64.deb
+cd /var/tmp
+wget 'http://http.us.debian.org/debian/pool/main/o/openssl/libssl1.1_1.1.1d-1_amd64.deb'
+wget 'http://http.us.debian.org/debian/pool/main/o/openssl/libssl-dev_1.1.1d-1_amd64.deb'
+sudo dpkg -i libssl1.1_1.1.1d-1_amd64.deb
+sudo dpkg -i libssl-dev_1.1.1d-1_amd64.deb
 sudo apt-get install -f
 dpkg -l libssl1.1 libssl-dev
 ```
 
-If you are unable to locate a suitable precompiled package for your system you
+## Alternate method: OpenSSL Build
+If you are unable to locate a suitable pre-compiled package for your system, you
 can build OpenSSL from source using the following commands. If you installed
 the package directly as described above you do *not* need to do this. These
 steps detail installing OpenSSL to the `install` directory under your current
 working directory.
+
 ```
+cd /var/tmp
 wget https://www.openssl.org/source/openssl-1.1.1d.tar.gz
 tar -xzf openssl-1.1.1d.tar.gz
 cd openssl-1.1.1d/
@@ -394,8 +416,8 @@ problems.
   [Intel SGX](#sgx) section
 
 - If you are running in Intel SGX hardware mode, make sure you have device
-  `/dev/isgx` (and not `/dev/sgx`).  Review the Intel SGX device driver
-  installation instructions above.  If you have `/dev/sgx` the
+  `/dev/isgx` (and not `/dev/sgx`). Review the Intel SGX device driver
+  installation instructions above. If you have `/dev/sgx` the
   device driver must be removed first.
 
 - If you are running in Intel SGX hardware mode, you need to modify
