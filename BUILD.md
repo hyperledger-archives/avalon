@@ -9,6 +9,10 @@ In order to build, install, and run Hyperledger Trusted Compute Framework
 The following instructions will guide you through the installation and build
 process for Hyperledger Trusted Compute Framework.
 
+You have a choice of [Docker-based build](#dockerbuild)
+or a [Standalone-based build](#standalonebuild).
+The Docker-based build is recommended.
+
 ## Table of Contents
 
 - [Docker-based Build and Execution](#dockerbuild)
@@ -21,16 +25,19 @@ process for Hyperledger Trusted Compute Framework.
 
 # <a name="dockerbuild"></a>Docker-based Build and Execution
 Follow the instructions below to execute a Docker-based build and execution.
-1. Build and run the Docker image from the top-level directory of your
-   `TrustedComputeFramework` repository.
 
-   **SGX SIM mode**:
+1. Install Docker Engine and Docker Compose, if not already installed.
+   See [PREREQUISITES](PREREQUISITES.md#docker) for instructions
+2. Build and run the Docker image from the top-level directory of your
+   `trusted-compute-framework` source repository.
+
+   **Intel SGX Simulator mode (for hosts without Intel SGX)**:
    1. Run `sudo docker-compose up --build`
    2. For the subsequent builds on the same workspace, build time can be
       reduced by executing this command:
       `MAKECLEAN=0 sudo -E docker-compose up`
 
-   **SGX HW mode**:
+   **SGX Hardware mode (for hosts with Intel SGX)**:
    1. Refer to Intel SGX in Hardware-mode section in
       [PREREQUISITES document](PREREQUISITES.md) to install SGX pre-requisites
       and to configure IAS keys.
@@ -38,19 +45,20 @@ Follow the instructions below to execute a Docker-based build and execution.
    3. For the subsequent builds on the same workspace, build time can be
       reduced by executing this command:
       `MAKECLEAN=0 sudo -E docker-compose -f docker-compose-sgx.yaml up`
-2. On a successful run, you should see the message `BUILD SUCCESS`
-3. Open a Docker container shell using following command
+3. On a successful run, you should see the message `BUILD SUCCESS`
+4. Open a Docker container shell using following command
    `sudo docker exec -it tcf bash`
-4. Activate a virtual environment in the Docker shell using following command
-   from the Docker working directory, `$TCF_HOME/tools/build`,
+5. Activate a Python virtual environment in the Docker shell using following
+   command from the Docker working directory, `$TCF_HOME/tools/build`,
    which is set in the `docker-compose.yaml` file:
    ```
    source _dev/bin/activate
    ```
    If the virtual environment for the current shell session is activated,
    you will the see this prompt: `(_dev)`
-5. To execute test cases refer to [Testing](#testing) section below
-6. To exit the TCF program, press `Ctrl-c`
+7. To execute test cases refer to [Testing](#testing) section below
+7. To exit the TCF program, press `Ctrl-c`
+
 
 # <a name="standalonebuild"></a>Standalone Build
 ## <a name="prerequisites"></a>Standalone: Prerequisites
@@ -64,9 +72,9 @@ scripts to compile and install TCF.
 First, make sure environment variables are set as described in the
 [PREREQUISITES document](PREREQUISITES.md).
 
-The steps below will set up a python virtual environment to install things
+The steps below will set up a Python virtual environment to install things
 into. Set `TCF_HOME` to the top level directory of your
-`TrustedComputeFramework` repository.
+`trusted-compute-framework` source repository.
 You will need these environment variables set in every shell session
 where you interact with TCF.
 ```
@@ -83,15 +91,15 @@ SGX_DEBUG, SGX_MODE, SGX_SSL, TCF_ENCLAVE_CODE_SIGN_PEM
 Refer to the [PREREQUISITES document](PREREQUISITES.md)
 for more details on the above variables.
 
-Build the virtual environment and install TCF components into it:
+Build the Python virtual environment and install TCF components into it:
 ```
-make clean
+sudo make clean
 make
 ```
 
-Activate the new virtual environment for the current shell session. You will
-need to do this in each new shell session (in addition to exporting environment
-variables).
+Activate the new Python virtual environment for the current shell session.
+You will need to do this in each new shell session (in addition to
+exporting environment variables).
 ```
 source _dev/bin/activate
 ```
@@ -110,12 +118,15 @@ Follow these steps to run the `Demo.py` testcase:
 1. For standalone builds only:
    1. Open a new terminal, Terminal 1
    2. `cd $TCF_HOME/scripts`
-   3. Run `tcs_startup.sh`
-   4. Wait for the listener to start. You should see the message
+   3.  `source $TCF_HOME/tools/build/_dev/bin/activate`
+   4. Run `./tcs_startup.sh`
+   5. Wait for the listener to start. You should see the message
       `TCS Listener started on port 1947`
-   5. To run the Demo testcase, open a new terminal, Terminal 2
+   6. To run the Demo test case, open a new terminal, Terminal 2
+   7. In Terminal 2, run `source $TCF_HOME/tools/build/_dev/bin/activate`
 2. For Docker-based builds:
-   1. Follow the steps above for ["Docker-based Build and Execution"](#dockerbuild)
+   1. Follow the steps above for
+      ["Docker-based Build and Execution"](#dockerbuild)
    2. Terminal 1 is running `docker-compose` and Terminal 2 is running the
       "tcf" Docker container shell from the previous build steps
 3. In Terminal 2, run `cd $TCF_HOME/tests`
@@ -132,7 +143,7 @@ Follow these steps to run the `Demo.py` testcase:
    For Docker-based builds, press `Ctrl-c`
 
 A GUI is also available to run this demo.
-See [examples/apps/heart_disease_eval](examples/apps/heart_disease_eval]
+See [examples/apps/heart_disease_eval](examples/apps/heart_disease_eval)
 
 ## <a name="troubleshooting"></a>Troubleshooting
 - If you see the message
@@ -140,11 +151,22 @@ See [examples/apps/heart_disease_eval](examples/apps/heart_disease_eval]
   `source _dev/bin/activate`
 
 ## <a name="troubleshootingstandalone"></a>Troubleshooting: Standalone build
-- Verify your [environment variables](PREREQUISITES.md#environment) are set correctly and the paths exist
-- If the Demo test code breaks due to some error, please perform the following steps
-before re-running.
-  1. `rm $TCF_HOME/config/KV* `
-  2. `pkill -f tcs_listener/tcs_listener.py`
-  3. `pkill -f tcs_enclave_manager/tcs_enclave_manager.py`
+- Verify your [environment variables](PREREQUISITES.md#environment)
+  are set correctly and the paths exist
+- If the Demo test code breaks due to some error, please perform the following
+  steps before re-running:
+  1. `rm $TCF_HOME/config/Kv*`
+  2. `pkill -f tcs_listener.py`
+  3. `pkill -f enclave_manager.py`
   4. You can re-run the test now
+
+- If you see the message `No package 'openssl' found`, you do not have
+  OpenSSL libraries or the correct version of OpenSSL libraries.
+  See [PREREQUISITES](PREREQUISITES.md#openssl) for installation instructions
+
+- If you see the message
+  `ImportError: ...: cannot open shared object file: No such file or directory`,
+  then you need to set `LD_LIBRARY_PATH` with:
+  `source /opt/intel/sgxsdk/environment` .
+  For details, see [PREREQUISITES](PREREQUISITES.md)
 
