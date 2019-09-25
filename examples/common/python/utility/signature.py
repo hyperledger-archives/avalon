@@ -282,33 +282,19 @@ class ClientSignature(object) :
         return input_json_str, SignatureStatus.PASSED
 
 #---------------------------------------------------------------------------------------------
-    def verify_signature(self,response_str,worker):
+    def verify_signature(self, input_json, verification_key):
         """
         Function to verify the signature received from the enclave
         Parameters:
-            - response_str is json payload returned by the Worker Service in response to successful workorder submit request as per TCF API 6.1.2 Work Order Result Payload
-            - worker is a worker object to store all the common details of worker as per TCF API 8.1 Common Data for All Worker Types
+            - input_json is dictionary contains payload returned by the
+              Worker Service in response to successful workorder submit request
+              as per TCF API 6.1.2 Work Order Result Payload
+            - verification_key is ECDSA/SECP256K1 public key used to verify signatures
+              created by the Enclave
+        Returns enum type SignatureStatus
         """
 
-        input_json = json.loads(response_str)
-
-        if ( self.tcs_worker['HashingAlgorithm'] !=  worker.hashing_algorithm ):
-            logger.error("ERROR: Signing the request failed. Hashing algorithm is not supported for %s", worker.hashing_algorithm )
-            return SignatureStatus.ERROR_RESPONSE
-
-        if ( self.tcs_worker['SigningAlgorithm'] !=  worker.signing_algorithm):
-            logger.error("ERROR: Signing the request failed. Signing algorithm is not supported for %s", worker.signing_algorithm )
-            return SignatureStatus.ERROR_RESPONSE
-
-        #Checking for a error response.
-        if  'error' in input_json.keys():
-            return SignatureStatus.ERROR_RESPONSE
-
         input_json_params = input_json['result']
-
-        #Checking if error is response
-        if  'code' in input_json_params.keys() and input_json_params['code'] < 0 :
-            return SignatureStatus.ERROR_RESPONSE
 
         nonce = (input_json_params['workerNonce']).encode('UTF-8')
         signature = input_json_params['workerSignature']
@@ -321,10 +307,8 @@ class ClientSignature(object) :
         concat_hash = bytes(concat_string, 'UTF-8')
         final_hash = crypto.compute_message_hash(concat_hash)
 
-        verify_key = worker.verification_key
-
         try:
-            _verifying_key = crypto.SIG_PublicKey(verify_key)
+            _verifying_key = crypto.SIG_PublicKey(verification_key)
         except Exception as error:
             logger.info("Error in verification key : %s", error)
             return SignatureStatus.INVALID_VERIFICATION_KEY
@@ -332,11 +316,11 @@ class ClientSignature(object) :
         decoded_signature = crypto.base64_to_byte_array(signature)
         sig_result =_verifying_key.VerifySignature(final_hash, decoded_signature)
 
-        if sig_result == 1 :
+        if sig_result == 1:
             return SignatureStatus.PASSED
-        elif sig_result == 0 :
+        elif sig_result == 0:
             return SignatureStatus.FAILED
-        else :
+        else:
             return SignatureStatus.INVALID_SIGNATURE_FORMAT
 
 #---------------------------------------------------------------------------------------------

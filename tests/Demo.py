@@ -129,11 +129,11 @@ def LocalMain(config) :
 
             #Verify the signature
             if ( "WorkOrderGetResult" in input_json_str1 ):
-                sig_bool = sig_obj.verify_signature(json.dumps(response), worker_obj)
+                sig_bool = sig_obj.verify_signature(response, worker_obj.verification_key)
                 try:
                     if sig_bool > 0:
                         logger.info("Signature Verified")
-                        enclave_helper.decrypted_response(json.dumps(response),
+                        enclave_helper.decrypted_response(response,
                                    session_key, session_iv)
                     else :
                         logger.info("Signature verification Failed")
