@@ -79,7 +79,7 @@ namespace tcf {
             std::string concat_string;
 
         private:
-            // iv is used for calculating hash during signuature verification
+            // iv is used for calculating hash during signature verification
             // and signature computation
             std::string iv;
             // enc_data_key_str is encryptedDataEncryptionKey

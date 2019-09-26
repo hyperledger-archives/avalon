@@ -363,14 +363,14 @@ namespace tcf {
                 out_data.ComputeHashString();
             } else {
                 // Assign data_encryption_key, iv, data_iv and encrypted_data_encryption_key
-                // params with corresponging values from inData
+                // params with corresponding values from inData
                 ByteArray encryption_key = data_items_in[i].GetEncryptionKey();
                 std::string iv = data_items_in[i].GetIv();
-                std::string encrypted_data_encrption_key =
+                std::string encrypted_data_encryption_key =
                         data_items_in[i].GetEncryptedDataEncryptionKey();
                 ByteArray data_iv = data_items_in[i].GetDataIv();
                 tcf::WorkOrderDataHandler out_data(data, encryption_key,
-                        data_iv, encrypted_data_encrption_key, iv);
+                        data_iv, encrypted_data_encryption_key, iv);
                 out_data.ComputeHashString();
                 data_items_out.emplace_back(out_data);
             }
