@@ -91,7 +91,7 @@ sudo apt-get install -y cmake swig pkg-config python3-dev python3-venv python \
 
 # <a name="docker"></a>Docker
 Docker may be used instead of building TCF directly (standalone mode) and
-is recommended.  If you build using Docker, you need to install Docker Engine
+is recommended. If you build using Docker, you need to install Docker Engine
 and Docker Compose if it is not already installed.
 
 To install Docker CE Engine:
@@ -131,45 +131,49 @@ on platforms that do not have hardware support for Intel SGX.
 
 
 ## Intel SGX SDK
-The Intel SGX SDK is required for both Intel SGX platforms and
+The Intel SGX SDK is required for both Intel SGX hardware platform and
 Intel SGX simulator mode.
-Download the Intel SGX SDK 2.3 from
-[here](https://01.org/intel-software-guard-extensions/downloads)
-for your distribution. For Ubuntu 18, download
-https://download.01.org/intel-sgx/linux-2.3.1/ubuntu18.04/sgx_linux_x64_sdk_2.3.101.46683.bin .
-It is recommended to install Intel SGX SDK in `/opt/intel/sgxsdk/`
-because the Intel SGX OpenSSL library expects the Intel SGX SDK in this location
-by default. Type the following to install Intel SGX SDK
-(replace `/var/tmp` with your download directory):
+The following instructions download the Intel SGX SDK 2.3 and installs it in
+`/opt/intel/sgxsdk/` :
+
 ```
 sudo mkdir -p /opt/intel
 cd /opt/intel
-wget https://download.01.org/intel-sgx/linux-2.3.1/ubuntu18.04/sgx_linux_x64
+wget https://download.01.org/intel-sgx/linux-2.3.1/ubuntu18.04/sgx_linux_x64_sdk_2.3.101.46683.bin
 echo "yes" | sudo bash ./ubuntu18.04/sgx_linux_x64_sdk_2.3.101.46683.bin
 ```
 
-This will install the Intel SGX SDK in the recommended location,
+This installs the Intel SGX SDK in the recommended location,
 `/opt/intel/sgxsdk` .
-Source the Intel SGX SDK activation script to set
+The Intel SGX OpenSSL library expects the SDK to be here by default.
+
+After installing, source the Intel SGX SDK activation script to set
 `$SGX_SDK`, `$PATH`, `$PKG_CONFIG_PATH`, and `$LD_LIBRARY_PATH`:
 ```
 source /opt/intel/sgxsdk/environment
 ```
-Consider adding this line to your login shell script (`~/.bashrc` or similar)
+Add this line to your login shell script (`~/.bashrc` or similar)
 
 To learn more about Intel SGX read the
 [Intel SGX SDK documentation](https://software.intel.com/en-us/sgx-sdk/documentation) or
 visit the [Intel SGX homepage](https://software.intel.com/en-us/sgx).
+Downloads are listed at
+[Intel SGX Downloads for Linux](https://01.org/intel-software-guard-extensions/downloads).
 
 
 ## Intel SGX in Hardware Mode
+
 If you plan to run this on Intel SGX-enabled hardware, you will need
 to install packages `libsgx-enclave-common` and `libelf-dev` and
 install the Intel SGX driver for both standalone and docker builds.
-Additionally for standalone builds, we need to install the Intel SGX SDK
-manually.
+You need to install the Intel SGX driver whether you build TCF standalone
+or using Docker.
 
-Steps to install the above packages are as follows.
+First install these Intel SGX-required packages:
+
+```
+sudo apt-get install libsgx-enclave-common libelf-dev
+````
 
 ### Remove Old `/dev/sgx` Intel SGX Driver
 If device file `/dev/sgx` is present, remove the old driver:
@@ -177,7 +181,7 @@ If device file `/dev/sgx` is present, remove the old driver:
 sudo /opt/intel/sgxdriver/uninstall.sh
 ```
 
-If the `uninstall.sh` script is missing, uninstall as follows:
+If the `uninstall.sh` script is missing or fails, uninstall as follows:
 ```
 if [ -c /dev/sgx ] ; then
     sudo service aesmd stop
@@ -192,41 +196,40 @@ fi
 After uninstalling, reboot with `sudo shutdown -r 0`
 
 ### Install New `/dev/isgx` Intel SGX Driver
-Install `SGX driver` 2.3.1 version from
-[here](https://01.org/intel-software-guard-extensions/downloads):
+Install the Intel SGX driver:
+
 ```
-wget https://download.01.org/intel-sgx/linux-2.3.1/ubuntu18.04/sgx_linux_x64_driver_4d69b9c.bin
-chmod +x sgx_linux_x64_driver_4d69b9c.bin
-sudo ./sgx_linux_x64_driver_4d69b9c.bin
+wget https://download.01.org/intel-sgx/linux-2.6/ubuntu18.04-server/sgx_linux_x64_driver_2.5.0_2605efa.bin
+sudo bash ./sgx_linux_x64_driver_2.5.0_2605efa.bin
 ```
 
-If installation of driver fails due to absence of `libelf-dev` package on the
-host system, install it using this command:
-```
-sudo apt-get install libelf-dev
-```
-
-Download and install `libsgx-enclave-common` version 2.3.101:
-```
-wget https://download.01.org/intel-sgx/linux-2.3.1/ubuntu18.04/libsgx-enclave-common_2.3.101.46683-1_amd64.deb
-sudo dpkg -i libsgx-enclave-common_2.3.101.46683-1_amd64.deb
-```
+If installation of the Intel SGX driver fails due to syntax errors,
+you may need to install a newer version of a non-DCAP Intel SGX driver
+for your version of Linux. See
+https://01.org/intel-software-guard-extensions/downloads
 
 You will need to obtain an Intel IAS subscription key and SPID from the portal
 https://api.portal.trustedservices.intel.com/
 
 Replace the SPID and IAS Subscription key values in file
 `$TCF_HOME/config/tcs_config.toml` with the actual hexadecimal values
-(the IAS key may be either your Primary key or Secondary key).
+(the IAS key may be either your Primary key or Secondary key):
 
-Also, either update the `https_proxy` line, if you are behind a
-corporate proxy, or comment out the `https_proxy` line:
 ```
 spid = '<spid obtained from portal>'
 ias_api_key = '<ias subscription key obtained from portal>'
+```
 
+In the same file, if you are behind a corporate proxy,
+update the https_proxy line:
+
+```
+https_proxy = "http://your-proxy:your-port/"
+```
+If you are not behind a corporate proxy (the usual case),
+then comment out the https_proxy line:
+```
 #https_proxy = "http://your-proxy:your-port/"
-
 ```
 
 **The following steps apply only to standalone builds.**
@@ -241,6 +244,7 @@ Set `SGX_MODE` as follows:
 ```
 export SGX_MODE=HW
 ```
+Add this line to your login shell script (`~/.bashrc` or similar)
 
 
 ## Intel SGX in Simulator-mode
@@ -252,6 +256,7 @@ Set `SGX_MODE` as follows:
 ```
 export SGX_MODE=SIM
 ```
+Add this line to your login shell script (`~/.bashrc` or similar)
 
 # <a name="openssl"></a>OpenSSL
 
