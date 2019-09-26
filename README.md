@@ -32,7 +32,7 @@ TCF leverages the existence of a distributed ledger to
 TCF uses the
 [ _Off-Chain Trusted Compute Specification_](https://entethalliance.github.io/trusted-computing/spec.html)
 defined by Enterprise Ethereum Alliance (EEA) Task Force as a starting point to
-apply a consistant and compatible approach to all supported blockchains.
+apply a consistent and compatible approach to all supported blockchains.
 
 ## Initial Committers
 * Manjunath A C (manju956)
