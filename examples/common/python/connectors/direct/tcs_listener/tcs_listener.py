@@ -126,7 +126,16 @@ class TCSListener(resource.Resource):
         logger.error("GET request is not supported. Only POST request is supported")
 
         return response
+    
+    # A method many CORS-compliant web frameworks call to verify cross-origin connections permissions
+    def render_OPTIONS(self, request):
+        request.setHeader('Access-Control-Allow-Origin', '*')
+        request.setHeader('Access-Control-Allow-Headers', 'Origin, Accept, content-type, authorization')
+        request.setHeader("Access-Control-Allow-Methods", " GET, POST, OPTION")
+        request.setResponseCode(http.OK)
+        return "<html>These are the OPTIONS</html>".encode('utf-8')
 
+    
     def render_POST(self, request):
         response = {}
 
