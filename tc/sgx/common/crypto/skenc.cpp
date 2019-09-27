@@ -111,7 +111,7 @@ ByteArray pcrypto::skenc::EncryptMessage(
         throw Error::RuntimeError(msg);
     }
 
-    if (EVP_EncryptInit_ex(context.get(), EVP_aes_128_gcm(), NULL, NULL, NULL) != 1) {
+    if (EVP_EncryptInit_ex(context.get(), EVP_aes_256_gcm(), NULL, NULL, NULL) != 1) {
         std::string msg(
             "Crypto Error (EncryptMessage): OpenSSL could not "
             "initialize EVP_CIPHER_CTX with "
@@ -148,9 +148,9 @@ ByteArray pcrypto::skenc::EncryptMessage(
     }
     ct.resize(ct_len);
     ByteArray out;
-    out.insert(out.end(), tag, tag + constants::TAG_LEN);
-    // build output string
+    // build output string - Add cipter text and append tag.
     out.insert(out.end(), ct.begin(), ct.end());
+    out.insert(out.end(), tag, tag + constants::TAG_LEN);
 
     return out;
 }  // pcrypto::skenc::EncryptMessage
@@ -214,7 +214,7 @@ ByteArray pcrypto::skenc::DecryptMessage(
         throw Error::RuntimeError(msg);
     }
 
-    if (!EVP_DecryptInit_ex(context.get(), EVP_aes_128_gcm(), NULL, NULL, NULL)) {
+    if (!EVP_DecryptInit_ex(context.get(), EVP_aes_256_gcm(), NULL, NULL, NULL)) {
         std::string msg(
             "Crypto Error (DecryptMessage): OpenSSL could not "
             "initialize EVP_CIPHER_CTX with "
@@ -231,7 +231,7 @@ ByteArray pcrypto::skenc::DecryptMessage(
     }
 
     if (!EVP_DecryptUpdate(
-            context.get(), pt.data(), &len, ct + constants::TAG_LEN, ct_len - constants::TAG_LEN)) {
+            context.get(), pt.data(), &len, ct, ct_len - constants::TAG_LEN)) {
         std::string msg(
             "Crypto Error (DecryptMessage): OpenSSL could not decrypt "
             "with AES-GCM");
@@ -239,7 +239,8 @@ ByteArray pcrypto::skenc::DecryptMessage(
     }
     pt_len = len;
 
-    if (!EVP_CIPHER_CTX_ctrl(context.get(), EVP_CTRL_GCM_SET_TAG, constants::TAG_LEN, ct)) {
+    if (!EVP_CIPHER_CTX_ctrl(context.get(), EVP_CTRL_GCM_SET_TAG, constants::TAG_LEN,
+                  ct + ct_len - constants::TAG_LEN)) {
         std::string msg("Crypto Error (DecryptMessage): OpenSSL could not get AES-GCM TAG");
         throw Error::RuntimeError(msg);
     }
@@ -261,7 +262,9 @@ ByteArray pcrypto::skenc::DecryptMessage(
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 // Decrypt message.data() using authenticated encryption
-// expects IV prepended to message ciphertext
+// expects IV prepended to message ciphertext and authentication tag
+// appended to cipther text.
+// message = IV + ciphertext + authentication tag
 // throws RuntimeError, ValueError
 ByteArray pcrypto::skenc::DecryptMessage(const ByteArray& key, const ByteArray& message) {
     int res;
@@ -293,7 +296,7 @@ ByteArray pcrypto::skenc::DecryptMessage(const ByteArray& key, const ByteArray& 
         throw Error::RuntimeError(msg);
     }
 
-    if (!EVP_DecryptInit_ex(context.get(), EVP_aes_128_gcm(), NULL, NULL, NULL)) {
+    if (!EVP_DecryptInit_ex(context.get(), EVP_aes_256_gcm(), NULL, NULL, NULL)) {
         std::string msg(
             "Crypto Error (DecryptMessage): OpenSSL could not "
             "initialize EVP_CIPHER_CTX with "
@@ -310,7 +313,7 @@ ByteArray pcrypto::skenc::DecryptMessage(const ByteArray& key, const ByteArray& 
     }
 
     if (!EVP_DecryptUpdate(context.get(), pt.data(), &len,
-            ct + constants::IV_LEN + constants::TAG_LEN,
+            ct + constants::IV_LEN,
             ct_len - constants::IV_LEN - constants::TAG_LEN)) {
         std::string msg(
             "Crypto Error (DecryptMessage): OpenSSL could not decrypt "
@@ -320,7 +323,8 @@ ByteArray pcrypto::skenc::DecryptMessage(const ByteArray& key, const ByteArray& 
     pt_len = len;
 
     if (!EVP_CIPHER_CTX_ctrl(
-            context.get(), EVP_CTRL_GCM_SET_TAG, constants::TAG_LEN, ct + constants::IV_LEN)) {
+            context.get(), EVP_CTRL_GCM_SET_TAG, constants::TAG_LEN,
+            ct + ct_len - constants::TAG_LEN)) {
         std::string msg("Crypto Error (DecryptMessage): OpenSSL could not get AES-GCM TAG");
         throw Error::RuntimeError(msg);
     }
