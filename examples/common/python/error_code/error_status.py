@@ -67,3 +67,7 @@ class SignatureStatus(IntEnum):
     ERROR_RESPONSE = -2
     INVALID_VERIFICATION_KEY = -3
 
+@unique
+class QuoteStatus(IntEnum):
+    GROUP_OUT_OF_DATE_OK = 1
+    GROUP_OUT_OF_DATE_NOT_OK = 2

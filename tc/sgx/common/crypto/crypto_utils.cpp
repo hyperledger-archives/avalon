@@ -12,25 +12,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+#include <string.h>
+#include <assert.h>
 #include "crypto_utils.h"
 #include <openssl/err.h>
 #include <openssl/rand.h>
 #include <openssl/sha.h>
+#include <openssl/x509v3.h>
+#include <openssl/pem.h>
 #include <algorithm>
 #include <memory>
 #include <vector>
-#include "base64.h"  //simple base64 enc/dec routines
+#include "base64.h"  // Simple base64 enc/dec routines
 #include "crypto_shared.h"
 #include "error.h"
 #include "hex_string.h"
-/***Conditional compile untrusted/trusted***/
+#include "c11_support.h"
+/*** Conditional compile untrusted/trusted ***/
 #if _UNTRUSTED_
 #include <openssl/crypto.h>
 #include <stdio.h>
 #else
 #include "tSgxSSL_api.h"
 #endif
-/***END Conditional compile untrusted/trusted***/
+/*** END Conditional compile untrusted/trusted ***/
 
 namespace pcrypto = tcf::crypto;
 namespace constants = tcf::crypto::constants;
@@ -72,3 +78,32 @@ ByteArray pcrypto::ComputeMessageHash(const ByteArray& message) {
     SHA256((const unsigned char*)message.data(), message.size(), hash.data());
     return hash;
 }  // pcrypto::ComputeMessageHash
+
+int pcrypto::EVP_DecodeBlock_wrapper(unsigned char* out,
+                                     int out_len,
+                                     const unsigned char* in,
+                                     int in_len) {
+    /* Use a temporary output buffer. We do not want to disturb the
+       original output buffer with extraneous \0 bytes. */
+    unsigned char buf[in_len];
+
+    int ret = EVP_DecodeBlock(buf, in, in_len);
+    assert(ret != -1);
+    if (in[in_len - 1] == '=' && in[in_len - 2] == '=')
+    {
+        ret -= 2;
+    }
+    else if (in[in_len - 1] == '=')
+    {
+        ret -= 1;
+    }
+
+    memcpy_s(out, out_len, buf, ret);
+    return ret;
+}
+
+int pcrypto::decode_base64_block(unsigned char *decoded_data,
+                                 const unsigned char *base64_data,
+                                 int num_of_blocks) {
+    return EVP_DecodeBlock(decoded_data, base64_data, num_of_blocks);
+}

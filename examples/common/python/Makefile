@@ -40,6 +40,7 @@ install:
 clean:
 	rm -rf build deps dist *.egg-info
 	rm -f crypto/crypto.py crypto/crypto_wrap.cpp
+	rm -f verify_report/verify_report.py verify_report/verify_report_wrap.cpp
 	find . -iname '*.pyc' -delete
 	find . -iname '__pycache__' -delete
 
