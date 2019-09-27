@@ -5,6 +5,10 @@
 * [Trusted Compute Framework (TCF) Project](https://wiki.hyperledger.org/pages/viewpage.action?pageId=16324764). Overview of the TCF project, members, motivation, proposed solutions, current effort, and FAQ
 * [Ecosystem Support for EEA Trusted Compute Specification v1.0 Improves Blockchain Privacy and Scalability](https://software.intel.com/en-us/articles/ecosystem-support-for-eea-trusted-compute-specification-v10-improves-blockchain-privacy-and). Introductory TCF Blog, by Michael Reed (2019)
 
+## Community
+* [RocketChat](https://chat.hyperledger.org/channel/avalon)
+* [Email list](https://lists.hyperledger.org/g/avalon)
+
 ## Tutorial
 * [Workload Application Tutorial](workload-tutorial/)
 

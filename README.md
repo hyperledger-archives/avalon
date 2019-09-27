@@ -51,6 +51,10 @@ apply a consistent and compatible approach to all supported blockchains.
 
 To build TCF, follow instructions in the [build document](BUILD.md).
 
+## Documentation
+
+See [docs](docs) for TCF Documentation.
+
 ## Contributing
 
 See the [contributing document](CONTRIBUTING.md)
