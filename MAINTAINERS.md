@@ -6,6 +6,6 @@
 | Srinath Duraisamy | [srinathduraisamy](https://github.com/srinathduraisamy) | |
 | Manoj Gopalakrishnan | [manojgop](https://github.com/manojgop) | @manojgop |
 | Karthika Murthy | [Karthika](https://github.com/Karthika) | @karthikamurthy |
-| Ramakrishna Srinivasamurthy | [Ramakrishna](https://github.com/Ramakrishna) | @ram-srini | |
-| Yevgeniy Y Yarmosh Y | [EugeneYYY](https://github.com/EugeneYYY) | @EugeneYYY |
+| Ramakrishna Srinivasamurthy | [ram-srini](https://github.com/ram-srini) | @ram-srini | |
+| Yevgeniy Y Yarmosh | [EugeneYYY](https://github.com/EugeneYYY) | @EugeneYYY |
 
