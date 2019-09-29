@@ -61,20 +61,29 @@ namespace tcf {
             "payloadFormat",
             "invalid request; failed to retrieve payload format");
 
+        /* verifyingKey is optional field. This parameter is not described
+           in spec and the purpose of this parameter is to verify
+           requester signature. Hence don't throw exception
+           if param is not there or empty value.
+        */
         verifying_key = GetJsonStr(
             params_object,
             "verifyingKey",
-            "invalid request; failed to retrieve verifyingKey");
+            nullptr);
 
+        // resultUri is optional field. Hence don't throw exception
+        // if param is not there or empty in the request.
         result_uri = GetJsonStr(
             params_object,
             "resultUri",
-            "invalid request; failed to retrieve result uri");
+            nullptr);
 
+        // notifyUri is optional field. Hence don't throw exception
+        // if param is not there or empty in the request.
         notify_uri = GetJsonStr(
             params_object,
             "notifyUri",
-            "invalid request; failed to retrieve notify uri");
+            nullptr);
 
         work_order_id = GetJsonStr(
             params_object,
@@ -96,15 +105,19 @@ namespace tcf {
             "requesterId",
             "invalid request; failed to retrieve requester id");
 
+        // workerEncryptionKey is optional field. Hence don't throw exception
+        // if param is not there or empty in the request.
         worker_encryption_key = GetJsonStr(
             params_object,
             "workerEncryptionKey",
-            "invalid request; failed to retrieve worker encryption key");
+            nullptr);
 
+        // dataEncryptionAlgorithm is optional field. Hence don't throw exception
+        // if param is not there or empty in the request.
         data_encryption_algorithm = GetJsonStr(
             params_object,
             "dataEncryptionAlgorithm",
-            "invalid request; failed to retrieve encryption algorithm");
+            nullptr);
 
         encrypted_session_key = GetJsonStr(
             params_object,
@@ -126,10 +139,12 @@ namespace tcf {
             "encryptedRequestHash",
             "invalid request; failed to retrieve encrypted request hash");
 
+        // requesterSignature is optional field. Hence don't throw exception
+        // if param is not there or empty in the request.
         requester_signature = GetJsonStr(
             params_object,
             "requesterSignature",
-            "invalid request; failed to retrieve requester signature");
+            nullptr);
 
         if (data_encryption_algorithm.length() > 0) {
             tcf::error::ThrowIf<tcf::error::ValueError>(data_encryption_algorithm != "AES-GCM-256",
@@ -327,7 +342,7 @@ namespace tcf {
         return verify_status;
     }
 
-    int WorkOrderProcessor::VerifySignature() {
+    int WorkOrderProcessor::VerifyRequesterSignature() {
         ByteArray final_hash = ComputeRequestHash();
         ByteArray Signature_byte = base64_decode(requester_signature);
 
@@ -449,9 +464,11 @@ namespace tcf {
         try {
             ParseJsonInput(enclaveData, json_str);
             tcf::error::ThrowIf<tcf::error::ValueError>(VerifyEncryptedRequestHash()!= TCF_SUCCESS,
-                            "Decryption of client request hash failed. Request is tampered.");
-            tcf::error::ThrowIf<tcf::error::ValueError>(VerifySignature()!= true,
-                            "Signature Verification of client request failed. Request is tampered.");
+                "Decryption of client request hash failed. Request is tampered.");
+            if (!requester_signature.empty()) {
+                tcf::error::ThrowIf<tcf::error::ValueError>(VerifyRequesterSignature()!= true,
+                    "Signature verification of client request failed. Request is tampered.");
+            }
             std::vector<tcf::WorkOrderData> wo_data = ExecuteWorkOrder();
             int i = 0;
             int out_data_size = data_items_out.size();

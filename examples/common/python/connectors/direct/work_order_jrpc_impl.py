@@ -49,7 +49,7 @@ class WorkOrderJRPCImpl(WorkOrderInterface):
             "requesterNonce":True,
             "encryptedRequestHash":True,
             "requesterSignature":False,
-            "verifyingKey":True
+            "verifyingKey":False
             }
         self.__data_key_map = {
             "index":True,
