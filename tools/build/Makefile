@@ -41,6 +41,7 @@ $(PYTHON_DIR) : $(DSTDIR)
 	. $(abspath $(DSTDIR)/bin/activate) ; pip install --upgrade colorlog
 	. $(abspath $(DSTDIR)/bin/activate) ; pip install --upgrade twisted
 	. $(abspath $(DSTDIR)/bin/activate) ; pip install --upgrade protobuf
+	. $(abspath $(DSTDIR)/bin/activate) ; pip install --upgrade json-rpc
 
 $(DSTDIR) :
 	mkdir -p $(DSTDIR)
