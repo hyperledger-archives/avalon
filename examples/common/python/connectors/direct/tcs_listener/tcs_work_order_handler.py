@@ -19,6 +19,10 @@ import crypto.crypto as crypto
 from error_code.error_status import WorkorderError
 import utility.utility as utility
 
+from jsonrpc import JSONRPCResponseManager
+from jsonrpc.dispatcher import Dispatcher
+from jsonrpc.exceptions import JSONRPCDispatchException
+
 logger = logging.getLogger(__name__)
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -44,6 +48,14 @@ class TCSWorkOrderHandler:
         self.workorder_list = []
 
         self.__work_order_handler_on_boot()
+
+        self.dispatcher = Dispatcher()
+        rpc_methods = {
+            "WorkOrderSubmit": self.__process_work_order_submission,
+            "WorkOrderGetResult": self.__process_work_order_get_result,
+        }
+        for k in rpc_methods:
+            self.dispatcher.add_method(rpc_methods[k], k)
 
 # ---------------------------------------------------------------------------------------------
     def __work_order_handler_on_boot(self):
@@ -83,23 +95,18 @@ class TCSWorkOrderHandler:
             - input_json_str is a work order request json as per TCF API 6.1 Work Order Direct Mode Invocation
         """
 
-        input_json = json.loads(input_json_str)
-        logger.info("Received Work Order request : %s", input_json['method'])
+        req = json.loads(input_json_str)
+        logger.info("Received Work Order request : %s", req['method'])
+        # save the full json for __process_work_order_submission
+        req["params"]["raw"] = input_json_str
 
-        response = {}
-        response['jsonrpc'] = '2.0'
-        response['id'] = input_json['id']
-        wo_id = str(input_json['params']['workOrderId'])
-
-        if(input_json['method'] == "WorkOrderSubmit"):
-            return self.__process_work_order_submission(wo_id, input_json_str, response)
-        elif(input_json['method'] == "WorkOrderGetResult"):
-            return self.__process_work_order_get_result(wo_id,
-                                                        input_json['id'],
-                                                        response)
+        data = json.dumps(req).encode('utf-8')
+        response = JSONRPCResponseManager.handle(data, self.dispatcher)
+        return response.data
 
 # ---------------------------------------------------------------------------------------------
-    def __process_work_order_get_result(self, wo_id, jrpc_id, response):
+    # def __process_work_order_get_result(self, wo_id, jrpc_id, response):
+    def __process_work_order_get_result(self, **params):
         """
         Function to process work order get result
         This API corresponds to TCF API 6.1.4 Work Order Pull Request Payload
@@ -109,32 +116,30 @@ class TCSWorkOrderHandler:
             - response is the response object to be returned
         """
 
+        wo_id = params["workOrderId"]
         # Work order is processed if it is in wo-response table
         value = self.kv_helper.get("wo-responses", wo_id)
         if value:
             input_value = json.loads(value)
-            if 'result' in value:
-                response['result'] = input_value['result']
+            if 'result' in input_value:
+                return input_value['result']
             else:
-                response['result'] = input_value['error']
-        else:
-            if(self.kv_helper.get("wo-timestamps", wo_id) is not None):
-                # work order is yet to be processed
-                response = utility.create_error_response(
-                    WorkorderError.PENDING, jrpc_id,
-                    "Work order result is yet to be updated")
-            else:
-                # work order not in 'wo-timestamps' table
-                response = utility.create_error_response(
-                    WorkorderError.INVALID_PARAMETER_FORMAT_OR_VALUE,
-                    jrpc_id,
-                    "Work order Id not found in the database. \
-                     Hence invalid parameter")
+                return input_value['error']
 
-        return response
+        if(self.kv_helper.get("wo-timestamps", wo_id) is not None):
+            # work order is yet to be processed
+            raise JSONRPCDispatchException(
+                WorkorderError.PENDING,
+                "Work order result is yet to be updated")
+
+        # work order not in 'wo-timestamps' table
+        raise JSONRPCDispatchException(
+            WorkorderError.INVALID_PARAMETER_FORMAT_OR_VALUE,
+            "Work order Id not found in the database. Hence invalid parameter")
 
 # ---------------------------------------------------------------------------------------------
-    def __process_work_order_submission(self, wo_id, input_json_str, response):
+    # def __process_work_order_submission(self, wo_id, input_json_str, response):
+    def __process_work_order_submission(self, **params):
         """
         Function to process work order request
         Parameters:
@@ -143,8 +148,8 @@ class TCSWorkOrderHandler:
             - response is the response object to be returned to client
         """
 
-        input_value_json = json.loads(input_json_str)
-        jrpc_id = input_value_json["id"]
+        wo_id = params["workOrderId"]
+        input_json_str = params["raw"]
 
         if((self.workorder_count + 1) > self.max_workorder_count):
 
@@ -166,11 +171,9 @@ class TCSWorkOrderHandler:
 
             # If no work order is processed then return busy
             if((self.workorder_count + 1) > self.max_workorder_count):
-                response = utility.create_error_response(
+                raise JSONRPCDispatchException(
                     WorkorderError.BUSY,
-                    jrpc_id,
                     "Work order handler is busy updating the result")
-                return response
 
         if(self.kv_helper.get("wo-timestamps", wo_id) is None):
 
@@ -186,19 +189,15 @@ class TCSWorkOrderHandler:
             self.workorder_list.append(wo_id)
             self.workorder_count += 1
 
-            response = utility.create_error_response(
+            raise JSONRPCDispatchException(
                 WorkorderError.PENDING,
-                jrpc_id,
                 "Work order is computing. Please query for WorkOrderGetResult \
                  to view the result")
 
-        else:
-            # Workorder id already exists
-            response = utility.create_error_response(
-                WorkorderError.INVALID_PARAMETER_FORMAT_OR_VALUE,
-                jrpc_id,
-                "Work order id already exists in the database. \
-                 Hence invalid parameter")
+        # Workorder id already exists
+        raise JSONRPCDispatchException(
+            WorkorderError.INVALID_PARAMETER_FORMAT_OR_VALUE,
+            "Work order id already exists in the database. \
+                Hence invalid parameter")
 
-        return response
 # ---------------------------------------------------------------------------------------------
