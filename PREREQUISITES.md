@@ -2,7 +2,9 @@
 Licensed under Creative Commons Attribution 4.0 International License
 https://creativecommons.org/licenses/by/4.0/
 -->
+
 # Trusted Compute Framework Prerequisites
+
 Trusted Compute Framework (TCF) depends on several freely available
 software components. These must be installed and configured before
 compiling TCF.
@@ -50,17 +52,20 @@ activation script (e.g. `source /opt/intel/sgxsdk/environment`)
 
 - `PKG_CONFIG_PATH` and `LD_LIBRARY_PATH` also contain the the path to
   [OpenSSL](#openssl) package config files and libraries, respectively,
-  if you build your own OpenSSL. You need to do this when OpenSSL
-  version 1.1.1d or later is not available
+  if you build your own OpenSSL. You need to do this when pre-built OpenSSL
+  version 1.1.1d or later packages are not available for your system
 
 - `SGX_MODE`
 This variable is used to switch between the Intel SGX simulator and hardware
-mode. Set `SGX_MODE` to either `HW` or `SIM`
+mode. Set `SGX_MODE` to either `HW` (Intel SGX available) or
+`SIM` (use Intel SGX simulator)
 
 - `SGX_SSL`
-Used to locate an Intel SGX-compatible version of OpenSSL
+Used to locate an Intel SGX-compatible version of OpenSSL.
+Usualy set to `/opt/intel/sgxssl`
 
 - `TCF_ENCLAVE_CODE_SIGN_PEM`
+Use only with `SGX_MODE=HW`.
 This needs to be set to a valid enclave signing key. You can generate one
 yourself using OpenSSL, then export the path to it:
   ```
@@ -69,11 +74,11 @@ yourself using OpenSSL, then export the path to it:
   ```
 
 - `TCF_HOME`
-Used to locate the top level build directory.
+Used to locate the top level TCF build directory.
 It is described in the [BUILD document](BUILD.md#buildtcf)
 
 - `TCF_DEBUG_BUILD`
-Optional variable for enabling debug output. Set to `1` enable.
+Optional variable for enabling TCF debug output. Set to `1` enable.
 For example: `export TCF_DEBUG_BUILD=1` for standalone builds
 or`TCF_DEBUG_BUILD=1 docker-compose up` for Docker-based builds
 
@@ -97,12 +102,12 @@ and Docker Compose if it is not already installed.
 To install Docker CE Engine:
 
 ```
-sudo apt-get install apt-transport-https ca-certificates
+sudo apt-get install -y apt-transport-https ca-certificates
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
 sudo add-apt-repository \
    "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
 sudo apt-get update
-sudo apt-get install docker-ce
+sudo apt-get install -y docker-ce
 ```
 
 To verify a correct installation, run `sudo docker run hello-world`
@@ -112,7 +117,6 @@ To install Docker Compose:
 sudo curl -L \
    https://github.com/docker/compose/releases/download/1.24.1/docker-compose-`uname -s`-`uname -m` \
    -o /usr/local/bin/docker-compose
-/bin/docker-compose
 sudo chmod +x /usr/local/bin/docker-compose
 ```
 
@@ -140,7 +144,7 @@ The following instructions download the Intel SGX SDK 2.3 and installs it in
 sudo mkdir -p /opt/intel
 cd /opt/intel
 wget https://download.01.org/intel-sgx/linux-2.3.1/ubuntu18.04/sgx_linux_x64_sdk_2.3.101.46683.bin
-echo "yes" | sudo bash ./ubuntu18.04/sgx_linux_x64_sdk_2.3.101.46683.bin
+echo "yes" | sudo bash ./sgx_linux_x64_sdk_2.3.101.46683.bin
 ```
 
 This installs the Intel SGX SDK in the recommended location,
@@ -148,15 +152,16 @@ This installs the Intel SGX SDK in the recommended location,
 The Intel SGX OpenSSL library expects the SDK to be here by default.
 
 After installing, source the Intel SGX SDK activation script to set
-`$SGX_SDK`, `$PATH`, `$PKG_CONFIG_PATH`, and `$LD_LIBRARY_PATH`:
+`$SGX_SDK`, `$PATH`, `$PKG_CONFIG_PATH`, and `$LD_LIBRARY_PATH`.
+Append this line to your login shell script (`~/.bashrc` or similar):
 ```
 source /opt/intel/sgxsdk/environment
+echo "source /opt/intel/sgxsdk/environment" >>~/.bashrc
 ```
-Add this line to your login shell script (`~/.bashrc` or similar)
 
 To learn more about Intel SGX read the
-[Intel SGX SDK documentation](https://software.intel.com/en-us/sgx-sdk/documentation) or
-visit the [Intel SGX homepage](https://software.intel.com/en-us/sgx).
+[Intel SGX SDK documentation](https://software.intel.com/en-us/sgx-sdk/documentation)
+or visit the [Intel SGX homepage](https://software.intel.com/en-us/sgx).
 Downloads are listed at
 [Intel SGX Downloads for Linux](https://01.org/intel-software-guard-extensions/downloads).
 
@@ -172,7 +177,7 @@ or using Docker.
 First install these Intel SGX-required packages:
 
 ```
-sudo apt-get install libsgx-enclave-common libelf-dev
+sudo apt-get install -y libsgx-enclave-common libelf-dev
 ````
 
 ### Remove Old `/dev/sgx` Intel SGX Driver
@@ -239,24 +244,26 @@ variables active for your current shell session before continuing.
 They are normally set by sourcing the Intel SGX SDK activation script
 (e.g. `source /opt/intel/sgxsdk/environment`).
 
-Set `SGX_MODE` as follows:
+Set `SGX_MODE` as follows.
+Append this line to your login shell script (`~/.bashrc` or similar):
 
 ```
 export SGX_MODE=HW
+echo "export SGX_MODE=HW" >>~/.bashrc
 ```
-Add this line to your login shell script (`~/.bashrc` or similar)
 
 
 ## Intel SGX in Simulator-mode
 If running only in simulator mode (no hardware support), you only
 need the Intel SGX SDK.
 
-Set `SGX_MODE` as follows:
+Set `SGX_MODE` as follows.
+Append this line to your login shell script (`~/.bashrc` or similar):
 
 ```
 export SGX_MODE=SIM
+echo "export SGX_MODE=SIM" >>~/.bashrc
 ```
-Add this line to your login shell script (`~/.bashrc` or similar)
 
 # <a name="openssl"></a>OpenSSL
 
@@ -287,11 +294,11 @@ dpkg -l libssl1.1 libssl-dev
 ```
 
 ## Alternate method: OpenSSL Build
-If you are unable to locate a suitable pre-compiled package for your system, you
-can build OpenSSL from source using the following commands. If you installed
-the package directly as described above you do *not* need to do this. These
-steps detail installing OpenSSL to the `install` directory under your current
-working directory.
+If you are unable to locate a suitable pre-compiled package for your system,
+you can build OpenSSL from source using the following commands. If you
+installed the package directly as described above you do *not* need to do this.
+These steps detail installing OpenSSL to the `install` directory under your
+current working directory.
 
 ```
 cd /var/tmp
@@ -368,25 +375,27 @@ problems.
   cd Linux
   make DESTDIR=/opt/intel/sgxssl all test
   sudo make install
-  cd ../..
+  cd ../../..
   ```
 
 - Export the `SGX_SSL` environment variable to enable the build utilities to
   find and link this library.
-  Consider adding this to your login shell script (`~/.bashrc` or similar)
+  Append this line to your login shell script (`~/.bashrc` or similar):
   ```
   export SGX_SSL=/opt/intel/sgxssl
+  echo "export SGX_SSL=/opt/intel/sgxssl" >>~/.bashrc
   ```
 
 # <a name="troubleshooting"></a>Troubleshooting Installation
 - Verify your [environment variables](#environment) are set correctly and the
   paths exist
 - If you get the error:
-  `./test_app/TestApp: error while loading shared libraries: libprotobuf.so.9: cannot open shared object file: No such file or directory`
+  `./test_app/TestApp: error while loading shared libraries: libprotobuf.so.9:
+   cannot open shared object file: No such file or directory`
   you may not have libprotobuf installed. You can install it via:
   ```
   sudo apt-get update
-  sudo apt-get install libprotobuf-dev
+  sudo apt-get install -y libprotobuf-dev
   ```
 - If you still get the above error about libprotobuf.so.9, your distribution
   may not include the .so.9 version of libprotobuf. You can work around this
@@ -399,7 +408,8 @@ problems.
   run `ldconfig` .
   If you installed libprotobuf elsewhere, add the directory to `LD_LIBRARY_PATH`
 - If you get the error:
-  `crypto/rand/rand_lib.c:14:10: fatal error: internal/rand_int.h: No such file or directory`
+  `crypto/rand/rand_lib.c:14:10: fatal error: internal/rand_int.h:
+   No such file or directory`
   you are using an old version of OpenSSL and need to clone the
   `openssl_1.1.1` branch of `intel-sgx-ssl` in the step above
 
@@ -423,7 +433,7 @@ problems.
 - If you are running in Intel SGX hardware mode, make sure you have device
   `/dev/isgx` (and not `/dev/sgx`). Review the Intel SGX device driver
   installation instructions above. If you have `/dev/sgx` the
-  device driver must be removed first.
+  device driver must be removed first
 
 - If you are running in Intel SGX hardware mode, you need to modify
   the `ias_api_key` in `config/tcs_config.toml` with your
@@ -431,4 +441,5 @@ problems.
 
 - If you are not running in a corporate proxy environment (and not connected
   directly to Internet), comment out the `https_proxy` line in
-  `config/tcs_config.toml.
+  `config/tcs_config.toml`
+

@@ -73,12 +73,20 @@ First, make sure environment variables are set as described in the
 [PREREQUISITES document](PREREQUISITES.md).
 
 The steps below will set up a Python virtual environment to install things
-into. Set `TCF_HOME` to the top level directory of your
+into.  Download the TCF source repository if you have not already done this:
+```
+git clone https://github.com/hyperledger-labs/trusted-compute-framework
+cd trusted-compute-framework
+```
+
+ Set `TCF_HOME` to the top level directory of your
 `trusted-compute-framework` source repository.
 You will need these environment variables set in every shell session
 where you interact with TCF.
+Append this line (with `pwd` expanded) to your login shell script (`~/.bashrc` or similar):
 ```
 export TCF_HOME=`pwd`
+echo "export TCF_HOME=$TCF_HOME" >> ~/.bashrc
 ```
 
 Change to the quickstart build directory:
@@ -87,7 +95,8 @@ cd $TCF_HOME/tools/build
 ```
 
 Check that these variables are set before building the code:
-SGX_DEBUG, SGX_MODE, SGX_SSL, TCF_ENCLAVE_CODE_SIGN_PEM
+`SGX_DEBUG`, `SGX_MODE`, `SGX_SSL`.
+If `SGX_MODE` is `HW`, also check that `TCF_ENCLAVE_CODE_SIGN_PEM` is set.
 Refer to the [PREREQUISITES document](PREREQUISITES.md)
 for more details on the above variables.
 
