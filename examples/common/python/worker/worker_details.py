@@ -18,6 +18,7 @@ Worker.py -- functions to perform worker related functions based on Spec 1.0 com
 """
 
 import logging
+import json
 import utility.utility as utility
 
 logger = logging.getLogger(__name__)
@@ -77,6 +78,11 @@ class SGXWorkerDetails(WorkerDetails):
         self.data_encryption_algorithm = worker_data['dataEncryptionAlgorithm']
         self.verification_key = worker_data['workerTypeData']['verificationKey']
         self.encryption_key = worker_data['workerTypeData']['encryptionKey']
+        if worker_data['workerTypeData']['proofData']:
+            # proofData will be initialized only in HW mode by tcf_enclave_bridge
+            # module when signup info is obtained from worker.
+            self.proof_data = json.loads(worker_data['workerTypeData']['proofData'])
+
         self.worker_id = utility.strip_begin_end_key(
                 worker_data['workerTypeData']['verificationKey']).encode("UTF-8").hex()
         ''' worker_id - newline, BEGIN PUB KEY and END PUB KEY are removed

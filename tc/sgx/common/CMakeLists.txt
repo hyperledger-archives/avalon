@@ -23,21 +23,21 @@ INCLUDE(CMakeVariables.txt)
 # Common components for both trusted and untrusted common libraries
 ################################################################################
 
-FILE(GLOB PROJECT_HEADERS *.h crypto/*.h crypto/verify_ias_report/*.h packages/base64/*.h packages/parson/*.h)
-FILE(GLOB PROJECT_SOURCES *.cpp crypto/*.cpp crypto/verify_ias_report/*.cpp packages/base64/*.cpp packages/parson/*.cpp)
+FILE(GLOB PROJECT_HEADERS *.h crypto/*.h verify_ias_report/*.h packages/base64/*.h packages/parson/*.h)
+FILE(GLOB PROJECT_SOURCES *.cpp crypto/*.cpp verify_ias_report/*.cpp packages/base64/*.cpp packages/parson/*.cpp)
 
-SET(COMMON_PRIVATE_INCLUDE_DIRS "." "tests" "crypto" "crypto/verify_ias_report" "packages/base64" "packages/parson" "state")
+SET(COMMON_PRIVATE_INCLUDE_DIRS "." "tests" "crypto" "verify_ias_report" "packages/base64" "packages/parson" "state")
 SET(COMMON_CXX_FLAGS ${DEBUG_FLAGS} "-m64" "-fvisibility=hidden" "-fpie" "-fPIC" "-fstack-protector" "-std=c++11" "-Wall")
 
 ################################################################################
 # Generated source
 ################################################################################
 
-SET(PROJECT_GENERATED_IAS_SOURCES ${CMAKE_CURRENT_BINARY_DIR}/../crypto/verify_ias_report/ias-certificates.cpp)
+SET(PROJECT_GENERATED_IAS_SOURCES ${CMAKE_CURRENT_BINARY_DIR}/../verify_ias_report/ias-certificates.cpp)
 add_custom_command(OUTPUT  ${PROJECT_GENERATED_IAS_SOURCES}
                      COMMAND ./build_ias_certificates_cpp.sh
-                     DEPENDS crypto/verify_ias_report/ias-certificates.template crypto/verify_ias_report/build_ias_certificates_cpp.sh
-                     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../crypto/verify_ias_report
+                     DEPENDS verify_ias_report/ias-certificates.template verify_ias_report/build_ias_certificates_cpp.sh
+                     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../verify_ias_report
 )
 
 ################################################################################

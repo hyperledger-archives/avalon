@@ -330,9 +330,9 @@ tcf_err_t ecall_VerifyEnclaveInfo(const char* enclave_info,
 
     // Verify verification report signature
     // Verify good quote, but group-of-date is not considered ok
-    int r = verify_enclave_quote_status(verification_report.c_str(), verification_report.length(), 1);
+    bool r = verify_enclave_quote_status(verification_report.c_str(), verification_report.length(), 1);
     tcf::error::ThrowIf<tcf::error::ValueError>(
-        r!=VERIFY_SUCCESS, "Invalid Enclave Quote:  group-of-date NOT OKAY");
+        r!=true, "Invalid Enclave Quote:  group-of-date NOT OKAY");
 
     const char* ias_report_cert = json_object_dotget_string(proof_object, "ias_report_signing_certificate");
 
@@ -351,7 +351,7 @@ tcf_err_t ecall_VerifyEnclaveInfo(const char* enclave_info,
                                     proof_signature_arr,
                                     strlen(proof_signature_arr));
     tcf::error::ThrowIf<tcf::error::ValueError>(
-    r!=VERIFY_SUCCESS, "Invalid verificationReport; Invalid Signature");
+    r!=true, "Invalid verificationReport; Invalid Signature");
 
     //Extract ReportData and MR_ENCLAVE from isvEnclaveQuoteBody in Verification Report
     sgx_quote_t* quote_body = reinterpret_cast<sgx_quote_t*>(Base64EncodedStringToByteArray(enclave_quote_body).data());

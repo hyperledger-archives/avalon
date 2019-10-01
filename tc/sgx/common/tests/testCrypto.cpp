@@ -750,32 +750,32 @@ int pcrypto::testVerifyReport() {
     get_quote_from_report(mock_verification_report, mock_report_len, &q);
     printf("verify_report: get_quote_from_report: successful\n");
 
-    int r;
+    bool r;
     //verify good quote, but group-of-date is not considered ok
     r = verify_enclave_quote_status((char*)mock_verification_report, mock_report_len, 0);
-    assert(r==VERIFY_FAILURE); //failure because group_out_of_date not ok
+    assert(r==false); //failure because group_out_of_date not ok
     printf("verify_report: verify_enclave_quote_status: successful\n");
 
     //verify good quote and group-of-date is considered ok
     r = verify_enclave_quote_status((char*)mock_verification_report, mock_report_len, 1);
-    assert(r==VERIFY_SUCCESS);
+    assert(r==true);
     printf("verify_report: verify_enclave_quote_status: successful\n");
 
     //verify chain of hard-coded certificates
     r = verify_ias_certificate_chain(NULL, 0);
 #ifdef IAS_CA_CERT_REQUIRED
-    assert(r==VERIFY_SUCCESS);
+    assert(r==true);
 #else
-    assert(r==VERIFY_FAILURE);
+    assert(r==false);
 #endif
     printf("verify_report: verify_ias_certificate_chain: successful\n");
 
     //verify the passed certificate (though it's the one stored) against the hard-coded CA certificate
     r = verify_ias_certificate_chain((char*)ias_report_signing_cert_der, ias_report_signing_cert_der_len);
 #ifdef IAS_CA_CERT_REQUIRED
-    assert(r==VERIFY_SUCCESS);
+    assert(r==true);
 #else
-    assert(r==VERIFY_FAILURE);
+    assert(r==false);
 #endif
     printf("verify_report: verify_ias_certificate_chain: successful\n");
 
@@ -786,7 +786,7 @@ int pcrypto::testVerifyReport() {
                                         mock_report_len,
                                         (char*)mock_signature,
                                         strlen((char*)mock_signature));
-    assert(r==VERIFY_SUCCESS);
+    assert(r==true);
     printf("verify_report: verify_ias_report_signature: successful\n");
 
     //change one byte of report and recheck
@@ -798,7 +798,7 @@ int pcrypto::testVerifyReport() {
                                         mock_report_len,
                                         (char*)mock_signature,
                                         strlen((char*)mock_signature));
-    assert(r==VERIFY_FAILURE);
+    assert(r==false);
     printf("verify_report: verify_ias_report_signature: successful\n");
     return 0;
 } //int pcrypto::testVerifyReport()

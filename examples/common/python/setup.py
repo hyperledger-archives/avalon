@@ -31,6 +31,11 @@ tcf_root_dir = os.environ.get('TCF_HOME', '../../..')
 version = subprocess.check_output(
     os.path.join(tcf_root_dir, 'bin/get_version')).decode('ascii').strip()
 
+sgx_mode_env = os.environ.get('SGX_MODE', None)
+if not sgx_mode_env or (sgx_mode_env != "SIM" and sgx_mode_env != "HW"):
+    print("error: SGX_MODE value must be HW or SIM, current value is: ", sgx_mode_env)
+    sys.exit(2)
+
 openssl_cflags = subprocess.check_output(['pkg-config', 'openssl', '--cflags']).decode('ascii').strip().split()
 openssl_include_dirs = list(
     filter(None, re.split('\s*-I', subprocess.check_output(['pkg-config', 'openssl', '--cflags-only-I']).decode('ascii').strip())))
@@ -54,11 +59,17 @@ compile_args = [
 if debug_flag :
     compile_args += ['-g']
 
-include_dirs = [
+crypto_include_dirs = [
     os.path.join(tcf_root_dir, 'tc/sgx/common/crypto'),
     os.path.join(tcf_root_dir, 'tc/sgx/common'),
     os.path.join(os.environ['SGX_SDK'],"include"),
 ] + openssl_include_dirs
+
+verify_report_include_dirs = [
+    os.path.join(tcf_root_dir, 'tc/sgx/common/verify_ias_report'),
+    os.path.join(tcf_root_dir, 'tc/sgx/common'),
+    os.path.join(os.environ['SGX_SDK'],"include"),
+]
 
 library_dirs = [
     os.path.join(tcf_root_dir, "tc/sgx/common/build"),
@@ -71,6 +82,12 @@ libraries = [
     'utcf-common'
 ] + openssl_libs
 
+if sgx_mode_env == "HW":
+    libraries.append('sgx_urts')
+    libraries.append('sgx_uae_service')
+if sgx_mode_env == "SIM":
+    libraries.append('sgx_urts_sim')
+    libraries.append('sgx_uae_service_sim')
 
 libraries.append('sgx_usgxssl')
 libraries = libraries + openssl_libs
@@ -82,9 +99,22 @@ crypto_modulefiles = [
 crypto_module = Extension(
     'crypto._crypto',
     crypto_modulefiles,
-    swig_opts=['-c++'] + openssl_cflags + ['-I%s' % i for i in include_dirs],
+    swig_opts=['-c++'] + openssl_cflags + ['-I%s' % i for i in crypto_include_dirs],
     extra_compile_args=compile_args,
-    include_dirs=include_dirs,
+    include_dirs=crypto_include_dirs,
+    library_dirs=library_dirs,
+    libraries=libraries)
+
+verify_report_modulefiles = [
+    "verify_report/verify_report.i"
+]
+
+verify_report_module = Extension(
+    'verify_report._verify_report',
+    verify_report_modulefiles,
+    swig_opts=['-c++'] + ['-I%s' % i for i in verify_report_include_dirs],
+    extra_compile_args=compile_args,
+    include_dirs=verify_report_include_dirs,
     library_dirs=library_dirs,
     libraries=libraries)
 
@@ -97,7 +127,7 @@ setup(
     url = 'http://www.intel.com',
     packages = find_packages(),
     install_requires = [],
-    ext_modules=[crypto_module],
+    ext_modules=[crypto_module, verify_report_module],
     data_files=[],
     entry_points = {})
 
