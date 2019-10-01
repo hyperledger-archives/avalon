@@ -49,6 +49,8 @@ def ParseCommandLine(args) :
 	global mode
 	global uri
 	global address
+	global show_receipt
+	global show_decrypted_output
 
 	parser = argparse.ArgumentParser()
 	mutually_excl_group = parser.add_mutually_exclusive_group()
@@ -56,7 +58,8 @@ def ParseCommandLine(args) :
 		help="The config file containing the Ethereum contract information",
 		type=str)
 	mutually_excl_group.add_argument("-u", "--uri",
-		help="Direct API listener endpoint",
+		help="Direct API listener endpoint, default is http://localhost:1947",
+		default="http://localhost:1947",		
 		type=str)
 	mutually_excl_group.add_argument("-a", "--address",
 		help="an address (hex string) of the smart contract (e.g. Worker registry listing)",
@@ -72,7 +75,14 @@ def ParseCommandLine(args) :
 		type=str)
 	parser.add_argument("-i", "--in_data",
 		help='Input data',
+		nargs="+",
 		type=str)
+	parser.add_argument("-r", "--receipt",
+		help="If present, retrieve and display work order receipt",
+		action='store_true')
+	parser.add_argument("-o", "--decrypted_output",
+		help="If present, display decrypted output as JSON",
+		action='store_true')
 
 	options = parser.parse_args(args)
 
@@ -119,8 +129,8 @@ def ParseCommandLine(args) :
 		sys.exit(-1)
 
 	in_data = options.in_data
-
-
+	show_receipt = options.receipt
+	show_decrypted_output = options.decrypted_output
 
 def Main(args=None):
 	ParseCommandLine(args)
@@ -230,7 +240,9 @@ def Main(args=None):
 	)
 	# Add worker input data
 	global in_data
-	wo_params.add_in_data(in_data)
+	
+	for value in in_data:
+		wo_params.add_in_data(value)
 
 	# Sign work order
 	private_key = utility.generate_signing_keys()
@@ -267,6 +279,7 @@ def Main(args=None):
 	logger.info("Work order get result : {}\n ".format(
 		json.dumps(res, indent=4)
 	))
+	
 	if "result" in res:
 		sig_obj = signature.ClientSignature()
 		status = sig_obj.verify_signature(res, worker_obj.verification_key)
@@ -275,7 +288,9 @@ def Main(args=None):
 				logger.info("Signature verification Successful")
 				decrypted_res = utility.decrypted_response(
 					res, session_key, session_iv)
-				logger.info("\nDecrypted response:\n {}".format(decrypted_res))
+				if show_decrypted_output:
+					logger.info("\nDecrypted response:\n {}"
+						.format(decrypted_res))
 			else:
 				logger.info("Signature verification Failed")
 				sys.exit(1)
@@ -288,17 +303,18 @@ def Main(args=None):
 		))
 		sys.exit(1)
 
-	# Retrieve receipt
-	wo_receipt_instance = direct_jrpc.create_work_order_receipt(
-		config
-	)
-	req_id += 1
-	receipt_res = wo_receipt_instance.work_order_receipt_retrieve(
-		work_order_id,
-		id=req_id
-	)
-	logger.info("\Retrieve receipt response:\n {}".format(
-		json.dumps(receipt_res, indent= 4)
-	))
+	if show_receipt:	
+		# Retrieve receipt
+		wo_receipt_instance = direct_jrpc.create_work_order_receipt(
+			config
+		)
+		req_id += 1
+		receipt_res = wo_receipt_instance.work_order_receipt_retrieve(
+			work_order_id,
+			id=req_id
+		)
+		logger.info("\Retrieve receipt response:\n {}".format(
+			json.dumps(receipt_res, indent= 4)
+		))
 #------------------------------------------------------------------------------
 Main()

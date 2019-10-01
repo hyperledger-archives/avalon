@@ -103,10 +103,10 @@ will be created next in [Phase 2](#phase2).
   cp ../../../../docs/workload-tutorial/templates/* .
   ```
 
-* Change placeholders `$CLASS_NAME$` in files `plug-in.h` and `plug-in.cpp`
+* Change placeholders `$NameSpace$` (two locations) in file `plug-in.h` 
   to an appropriate workload class name, `HelloWorld`
 
-* Change placeholder `$WORKLOAD_STRING_ID$` in file `plug-in.cpp` to an
+* Change placeholder `$WorkloadId$` (one location) in file `plug-in.h` to an
   appropriate workload ID, `hello-world` (note the dash, `-`)
 
 * Change placeholder `$WORKLOAD_STATIC_NAME$` in file `CMakeLists.txt`
@@ -143,7 +143,7 @@ will be created next in [Phase 2](#phase2).
   newly-added workload:
   ```bash
   examples/apps/generic_client/generic_client.py
-      --uri "http://localhost:1947" --workload_id "hello-world" --in_data "Dan"
+      --workload_id "hello-world" --in_data "Jane" "Dan"
   ```
 
 * The Hello World worker should return the string `Error: under construction`
@@ -199,15 +199,26 @@ In this example we name the worker-specific function `ProcessHelloWorld()`.
   ```cpp
   // Replace the dummy implementation below with invocation of
   // actual logic defined in logic.h and implemented in logic.cpp.
-  result_str.assign("Error: under construction");
+  std::string result_str("Error: under construction");
+  ByteArray ba(result_str.begin(), result_str.end());
+  AddOutput(0, out_work_order_data, ba);
   ```
   to
 
   ```cpp
-  // Process the input data
-  result_str = ProcessHelloWorld(ByteArrayToString(
-      wo_data.decrypted_data));
+  for (auto wo_data : in_work_order_data) {
+     // Process the input data
+     std::string result_str =
+             ProcessHelloWorld(ByteArrayToString(wo_data.decrypted_data));
+
+     ByteArray ba(result_str.begin(), result_str.end());
+     AddOutput(wo_data.index, out_work_order_data, ba);
+  }
+
   ```
+  After these changes, the workload will prepend "Hello " to each input data 
+  item and will return each resulting string as a separate output data item. 
+
 
 * Change to the top-level TCF source repository directory, `$TCF_HOME`,
   and rebuild the framework (see [$TCF_HOME/BUILD.md](../../BUILD.md)).

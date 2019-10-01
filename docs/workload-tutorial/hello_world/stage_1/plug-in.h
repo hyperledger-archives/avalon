@@ -19,9 +19,13 @@
 #include "workload_processor.h"
 
 
-class HelloWorld : public WorkloadProcessor {
+namespace HelloWorld {
+
+const char* workload_id="hello-world";
+
+class Workload : public WorkloadProcessor {
 public:
-    IMPL_WORKLOAD_PROCESSOR_CLONE(HelloWorld)
+    IMPL_WORKLOAD_PROCESSOR_CLONE(Workload)
 
     void ProcessWorkOrder(
         std::string workload_id,
@@ -30,4 +34,24 @@ public:
         const ByteArray& work_order_id,
         const std::vector<tcf::WorkOrderData>& in_work_order_data,
         std::vector<tcf::WorkOrderData>& out_work_order_data);
+
+
+    void AddOutput(int index,
+                   std::vector<tcf::WorkOrderData>& out_work_order_data,
+                   ByteArray& data){
+        int out_wo_data_size = out_work_order_data.size();
+        // If the out_work_order_data has entry to hold the data
+        if (index < out_wo_data_size) {
+            tcf::WorkOrderData& out_wo_data = out_work_order_data.at(index);
+            out_wo_data.decrypted_data = data;
+        } else {
+            // Create a new entry
+            out_work_order_data.emplace_back(index, data);
+        }
+    };
 };
+
+}  // namespace HelloWorld
+
+using namespace HelloWorld;
+
