@@ -22,6 +22,7 @@ FILE(GLOB PROJECT_SOURCES "*.cpp")
 
 SET(GENERIC_CXX_FLAGS ${DEBUG_FLAGS} "-Wall" "-fPIC" "-Wno-write-strings" "-std=c++11")
 
+# Replace $WORKLOAD_STATIC_NAME$ below with a workload build name, e.g. hello_world
 SET(WORK_ORDER_STATIC_NAME hello_world)
 PROJECT(${WORK_ORDER_STATIC_NAME} CXX)
 
