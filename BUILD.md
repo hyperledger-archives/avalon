@@ -164,10 +164,9 @@ See [examples/apps/heart_disease_eval](examples/apps/heart_disease_eval)
   are set correctly and the paths exist
 - If the Demo test code breaks due to some error, please perform the following
   steps before re-running:
-  1. `rm $TCF_HOME/config/Kv*`
-  2. `pkill -f tcs_listener.py`
-  3. `pkill -f enclave_manager.py`
-  4. You can re-run the test now
+  1. `sudo rm $TCF_HOME/config/Kv*`
+  2. `$TCF_HOME/scripts/tcs_startup.sh -t`
+  3. You can re-run the test now
 
 - If you see the message `No package 'openssl' found`, you do not have
   OpenSSL libraries or the correct version of OpenSSL libraries.
