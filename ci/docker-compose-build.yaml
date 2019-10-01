@@ -17,7 +17,7 @@ version: '3.5'
 services:
   tcf:
     container_name: tcf
-    image: tcf-ci-build
+    image: tcf-ci-build:${ISOLATION_ID}
 
     build:
       context: .
@@ -33,4 +33,3 @@ services:
         if [ ${MAKECLEAN:-1} != 0 ]; then echo \\\"Clean build\\\" && make clean; fi \
         && make \
         && echo \\\"BUILD SUCCESS\\\" \""
-    stop_signal: SIGKILL

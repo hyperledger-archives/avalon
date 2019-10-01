@@ -28,6 +28,11 @@ pipeline {
         buildDiscarder(logRotator(daysToKeepStr: '31'))
     }
 
+    environment {
+        ISOLATION_ID = sh(returnStdout: true,
+                          script: 'printf $BUILD_TAG | sha256sum | cut -c1-64').trim()
+    }
+
     stages {
         stage('Check for Signed-Off Commits') {
             steps {
