@@ -30,6 +30,8 @@ from work_order.work_order_params import WorkOrderParams
 from connectors.direct.direct_json_rpc_api_connector \
 	import DirectJsonRpcApiConnector
 from error_code.error_status import WorkOrderStatus
+import utility.signature as signature
+from error_code.error_status import SignatureStatus
 
 # Remove duplicate loggers
 for handler in logging.root.handlers[:]:
@@ -266,10 +268,24 @@ def Main(args=None):
 		json.dumps(res, indent=4)
 	))
 	if "result" in res:
-		decrypted_res = utility.decrypted_response(
-			json.dumps(res), session_key, session_iv)
-		logger.info("\nDecrypted response:\n {}".format(decrypted_res))
+		sig_obj = signature.ClientSignature()
+		status = sig_obj.verify_signature(res, worker_obj.verification_key)
+		try:
+			if status == SignatureStatus.PASSED:
+				logger.info("Signature verification Successful")
+				decrypted_res = utility.decrypted_response(
+					res, session_key, session_iv)
+				logger.info("\nDecrypted response:\n {}".format(decrypted_res))
+			else:
+				logger.info("Signature verification Failed")
+				sys.exit(1)
+		except:
+			logger.info("ERROR: Failed to decrypt response")
+			sys.exit(1)
 	else:
+		logger.info("\n Work order get result failed {}\n".format(
+			res
+		))
 		sys.exit(1)
 
 	# Retrieve receipt
