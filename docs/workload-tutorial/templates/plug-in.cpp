@@ -18,35 +18,18 @@
 #include "logic.h"
 
 
-REGISTER_WORKLOAD_PROCESSOR("hello-world", HelloWorld)
+REGISTER_WORKLOAD_PROCESSOR(workload_id, Workload)
 
-void HelloWorld::ProcessWorkOrder(
+void Workload::ProcessWorkOrder(
         std::string workload_id,
         const ByteArray& requester_id,
         const ByteArray& worker_id,
         const ByteArray& work_order_id,
         const std::vector<tcf::WorkOrderData>& in_work_order_data,
         std::vector<tcf::WorkOrderData>& out_work_order_data) {
-    std::string result_str;
-    int out_wo_data_size = out_work_order_data.size();
-    int i = 0;
+    
+    std::string result_str("Error: under construction");
 
-    for (auto wo_data : in_work_order_data) {
-        // Replace the dummy implementation below with invocation of
-        // actual logic defined in logic.h and implemented in logic.cpp.
-        result_str.assign("Error: under construction");
-
-        // If the out_work_order_data has entry to hold the data
-        if (i < out_wo_data_size) {
-            tcf::WorkOrderData& out_wo_data = out_work_order_data.at(i);
-            out_wo_data.decrypted_data =
-                ByteArray(result_str.begin(), result_str.end());
-        } else {
-            // Create a new entry
-            out_work_order_data.emplace_back(wo_data.index,
-                ByteArray(result_str.begin(), result_str.end()));
-        }
-
-        i++;
-    }
+    ByteArray ba(result_str.begin(), result_str.end());
+    AddOutput(0, out_work_order_data, ba);
 }

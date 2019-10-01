@@ -16,6 +16,8 @@
 #include <string>
 #include "logic.h"
 
+// Add actual workload implementation here ...
 std::string ProcessHelloWorld(std::string in_str) {
     return "Hello " + in_str;
 }
+

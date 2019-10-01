@@ -17,5 +17,6 @@
 
 #include <string>
 
+// Add actual workload definitions here ...
 extern std::string ProcessHelloWorld(std::string in_str);
 
