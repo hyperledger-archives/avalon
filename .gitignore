@@ -11,6 +11,8 @@ examples/common/python/build/
 examples/common/python/connectors/direct/tcs_listener/__pycache__/
 examples/common/python/crypto/crypto.py
 examples/common/python/crypto/crypto_wrap.cpp
+examples/common/python/verify_report/verify_report.py
+examples/common/python/verify_report/verify_report_wrap.cpp
 examples/common/python/dist/
 examples/common/python/tcf_examples_common.egg-info/
 examples/enclave_manager/build/
@@ -24,7 +26,7 @@ tc/sgx/trusted_worker_manager/enclave/build/
 tc/sgx/trusted_worker_manager/enclave/deps/
 tc/sgx/trusted_worker_manager/enclave_wrapper/enclave_u.c
 tc/sgx/trusted_worker_manager/enclave_wrapper/enclave_u.h
-tc/sgx/common/crypto/verify_ias_report/intel/ias-certificates.cpp
+tc/sgx/common/verify_ias_report/ias-certificates.cpp
 tools/build/_dev/
 
 # Byte-compiled / optimized / DLL files
