@@ -1,8 +1,7 @@
 # TCF Worker Application Development Tutorial
 
 This tutorial describes how to build a trusted workload application.
-We begin by copying files under directory (folder) `templates/` to
-a new directory, `hello_world/workload/`.
+We begin by copying template files to a new directory.
 Then we show how to modify the files to create a workload application.
 
 The example we create will be a workload application that takes a name as
@@ -16,7 +15,8 @@ The directory structure for this tutorial is as follows:
 
 * [README.md](README.md) This file
 * [templates/](templates/) Templates to copy to create a workload application
-  * [CMakeLists.txt](templates/CMakeLists.txt) CMake file to build this application
+  * [CMakeLists.txt](templates/CMakeLists.txt) CMake file to build this
+    application
   * [logic.h](templates/logic.h) Header file defining worker-specific code
   * [logic.cpp](templates/logic.cpp) C file for worker-specific code
   * [plug-in.h](templates/plug-in.h) Header file defining generic plug-in code
@@ -24,16 +24,17 @@ The directory structure for this tutorial is as follows:
 * [hello_world/](hello_world/) Example workload application
   * [stage_1/](hello_world/stage_1/) Intermediate results from modifying
     template files
-    * [CMakeLists.txt](hello_world/stage_1/CMakeLists.txt) Modified to build worker
+    * [CMakeLists.txt](hello_world/stage_1/CMakeLists.txt) Modified to build
+      worker
     * [logic.h](hello_world/stage_1/logic.h)
     * [logic.cpp](hello_world/stage_1/logic.cpp)
-    * [plug-in.h](hello_world/stage_1/plug-in.h) Modified to define worker framework
-    * [plug-in.cpp](hello_world/stage_1/plug-in.cpp) Modified to implement worker framework
+    * [plug-in.h](hello_world/stage_1/plug-in.h) Modified to define worker
+      framework
+    * [plug-in.cpp](hello_world/stage_1/plug-in.cpp)
   * [stage_2/](hello_world/stage_2/) Final results from adding worker code
-    * [CMakeLists.txt](hello_world/stage_1/CMakeLists.txt)
-    * [logic.h](hello_world/stage_1/logic.h) Modified with worker definitions added
+    * [logic.h](hello_world/stage_1/logic.h) Modified with worker definitions
+      added
     * [logic.cpp](hello_world/stage_1/logic.cpp) Modified with worker code added
-    * [plug-in.h](hello_world/stage_1/plug-in.h)
     * [plug-in.cpp](hello_world/stage_1/plug-in.cpp) Modified to call worker
 
 ## Prerequisites
@@ -103,7 +104,7 @@ will be created next in [Phase 2](#phase2).
   cp ../../../../docs/workload-tutorial/templates/* .
   ```
 
-* Change placeholders `$NameSpace$` (two locations) in file `plug-in.h` 
+* Change placeholders `$NameSpace$` (two locations) in file `plug-in.h`
   to an appropriate workload class name, `HelloWorld`
 
 * Change placeholder `$WorkloadId$` (one location) in file `plug-in.h` to an
@@ -139,10 +140,10 @@ will be created next in [Phase 2](#phase2).
   and rebuild the framework (see [$TCF_HOME/BUILD.md](../../BUILD.md)).
   It should now include the new workload
 
-* Load the framework and use the generic command line utility to test the
-  newly-added workload:
+* From the `$TCF_HOME` directory, load the framework and use the
+  generic command line utility to test the newly-added workload:
   ```bash
-  examples/apps/generic_client/generic_client.py
+  examples/apps/generic_client/generic_client.py \
       --workload_id "hello-world" --in_data "Jane" "Dan"
   ```
 
@@ -179,7 +180,7 @@ In this example we name the worker-specific function `ProcessHelloWorld()`.
 
 * Add the `ProcessHelloWorld()` function definition to `logic.h`:
   ```cpp
-  extern std::string ProcessHelloWorld(std:string in_str);
+  extern std::string ProcessHelloWorld(std::string in_str);
   ```
 
 * Add the `ProcessHelloWorld()` function implementation to `logic.cpp`
@@ -216,8 +217,8 @@ In this example we name the worker-specific function `ProcessHelloWorld()`.
   }
 
   ```
-  After these changes, the workload will prepend "Hello " to each input data 
-  item and will return each resulting string as a separate output data item. 
+  After these changes, the workload will prepend "Hello " to each input data
+  item and will return each resulting string as a separate output data item.
 
 
 * Change to the top-level TCF source repository directory, `$TCF_HOME`,

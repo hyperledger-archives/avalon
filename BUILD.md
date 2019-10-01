@@ -33,8 +33,10 @@ Follow the instructions below to execute a Docker-based build and execution.
 
    **Intel SGX Simulator mode (for hosts without Intel SGX)**:
    1. Run `sudo docker-compose up --build`
-   2. For the subsequent builds on the same workspace, build time can be
-      reduced by executing this command:
+   2. For subsequent runs on the same workspace, if you changed a
+      source or configuration file, run the above command again
+   3. For subsequent runs on the same workspace, if you did not make any
+      changes, startup and build time can be reduced by running:
       `MAKECLEAN=0 sudo -E docker-compose up`
 
    **SGX Hardware mode (for hosts with Intel SGX)**:
@@ -42,10 +44,13 @@ Follow the instructions below to execute a Docker-based build and execution.
       [PREREQUISITES document](PREREQUISITES.md) to install SGX pre-requisites
       and to configure IAS keys.
    2. Run `sudo docker-compose -f docker-compose-sgx.yaml up --build`
-   3. For the subsequent builds on the same workspace, build time can be
-      reduced by executing this command:
+   3. For subsequent runs on the same workspace, if you changed a
+      source or configuration file, run the above command again
+   4. For subsequent runs on the same workspace, if you did not make any
+      changes, startup and build time can be reduced by running:
       `MAKECLEAN=0 sudo -E docker-compose -f docker-compose-sgx.yaml up`
 3. On a successful run, you should see the message `BUILD SUCCESS`
+   followed by a repetitive message `Enclave manager sleeping for 10 secs`
 4. Open a Docker container shell using following command
    `sudo docker exec -it tcf bash`
 5. Activate a Python virtual environment in the Docker shell using following
@@ -68,52 +73,53 @@ components on which TCF depends.
 ## <a name="installtcf"></a>Standalone: Installing TCF Using Scripts
 This section describes how to get started with TCF quickly using provided
 scripts to compile and install TCF.
+The steps below will set up a Python virtual environment to run TCF.
 
-First, make sure environment variables are set as described in the
-[PREREQUISITES document](PREREQUISITES.md).
+1. Make sure environment variables are set as described in the
+   [PREREQUISITES document](PREREQUISITES.md)
 
-The steps below will set up a Python virtual environment to install things
-into.  Download the TCF source repository if you have not already done this:
-```
-git clone https://github.com/hyperledger-labs/trusted-compute-framework
-cd trusted-compute-framework
-```
+2. Download the TCF source repository if you have not already done this:
+   ```
+   git clone https://github.com/hyperledger-labs/trusted-compute-framework
+   cd trusted-compute-framework
+   ```
 
- Set `TCF_HOME` to the top level directory of your
-`trusted-compute-framework` source repository.
-You will need these environment variables set in every shell session
-where you interact with TCF.
-Append this line (with `pwd` expanded) to your login shell script (`~/.bashrc` or similar):
-```
-export TCF_HOME=`pwd`
-echo "export TCF_HOME=$TCF_HOME" >> ~/.bashrc
-```
+3. Set `TCF_HOME` to the top level directory of your
+   `trusted-compute-framework` source repository.
+   You will need these environment variables set in every shell session
+   where you interact with TCF.
+   Append this line (with `pwd` expanded) to your login shell script
+   (`~/.bashrc` or similar):
+   ```
+   export TCF_HOME=`pwd`
+   echo "export TCF_HOME=$TCF_HOME" >> ~/.bashrc
+   ```
 
-Change to the quickstart build directory:
-```
-cd $TCF_HOME/tools/build
-```
+4. Change to the quickstart build directory:
+   ```
+   cd $TCF_HOME/tools/build
+   ```
 
-Check that these variables are set before building the code:
-`SGX_DEBUG`, `SGX_MODE`, `SGX_SSL`.
-If `SGX_MODE` is `HW`, also check that `TCF_ENCLAVE_CODE_SIGN_PEM` is set.
-Refer to the [PREREQUISITES document](PREREQUISITES.md)
-for more details on the above variables.
+5. Check that these variables are set before building the code:
+   `SGX_DEBUG`, `SGX_MODE`, `SGX_SSL`.
+   If `SGX_MODE` is `HW`, also check that `TCF_ENCLAVE_CODE_SIGN_PEM` is set.
+   Refer to the [PREREQUISITES document](PREREQUISITES.md)
+   for more details on the above variables
 
-Build the Python virtual environment and install TCF components into it:
-```
-sudo make clean
-make
-```
+6. Build the Python virtual environment and install TCF components into it:
+   ```
+   sudo make clean
+   make
+   ```
 
-Activate the new Python virtual environment for the current shell session.
-You will need to do this in each new shell session (in addition to
-exporting environment variables).
-```
-source _dev/bin/activate
-```
-If the virtual environment for the current shell session is activated,
-you will the see this prompt: `(_dev)`
+7. Activate the new Python virtual environment for the current shell session.
+   You will need to do this in each new shell session (in addition to
+   exporting environment variables).
+   ```
+   source _dev/bin/activate
+   ```
+   If the virtual environment for the current shell session is activated,
+   you will the see this prompt: `(_dev)`
 
 # <a name="testing"></a>Testing
 
@@ -127,12 +133,15 @@ Follow these steps to run the `Demo.py` testcase:
 1. For standalone builds only:
    1. Open a new terminal, Terminal 1
    2. `cd $TCF_HOME/scripts`
-   3.  `source $TCF_HOME/tools/build/_dev/bin/activate`
+   3. Run `source $TCF_HOME/tools/build/_dev/bin/activate` .
+      You should see the `(_dev)` prompt
    4. Run `./tcs_startup.sh`
    5. Wait for the listener to start. You should see the message
-      `TCS Listener started on port 1947`
+      `TCS Listener started on port 1947`,
+      followed by a repetitive message `Enclave manager sleeping for 10 secs`
    6. To run the Demo test case, open a new terminal, Terminal 2
-   7. In Terminal 2, run `source $TCF_HOME/tools/build/_dev/bin/activate`
+   7. In Terminal 2, run `source $TCF_HOME/tools/build/_dev/bin/activate`.
+      You should see the `(_dev)` prompt
 2. For Docker-based builds:
    1. Follow the steps above for
       ["Docker-based Build and Execution"](#dockerbuild)
