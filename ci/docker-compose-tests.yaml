@@ -17,7 +17,7 @@ version: '3.5'
 services:
   tcf:
     container_name: tcf
-    image: tcf-ci-build
+    image: tcf-ci-build:${ISOLATION_ID}
     build:
       context: .
       args:
@@ -33,4 +33,3 @@ services:
         && source tcs_startup.sh -y \
         && sleep 5 \
         && source ../tools/run_tests.sh \""
-    stop_signal: SIGKILL
