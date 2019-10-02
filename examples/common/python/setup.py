@@ -31,7 +31,9 @@ tcf_root_dir = os.environ.get('TCF_HOME', '../../..')
 version = subprocess.check_output(
     os.path.join(tcf_root_dir, 'bin/get_version')).decode('ascii').strip()
 
-sgx_mode_env = os.environ.get('SGX_MODE', None)
+sgx_sdk_env = os.environ.get('SGX_SDK', '/opt/intel/sgxsdk')
+sgx_ssl_env = os.environ.get('SGX_SSL', '/opt/intel/sgxssl')
+sgx_mode_env = os.environ.get('SGX_MODE', 'SIM')
 if not sgx_mode_env or (sgx_mode_env != "SIM" and sgx_mode_env != "HW"):
     print("error: SGX_MODE value must be HW or SIM, current value is: ", sgx_mode_env)
     sys.exit(2)
@@ -62,20 +64,20 @@ if debug_flag :
 crypto_include_dirs = [
     os.path.join(tcf_root_dir, 'tc/sgx/common/crypto'),
     os.path.join(tcf_root_dir, 'tc/sgx/common'),
-    os.path.join(os.environ['SGX_SDK'],"include"),
+    os.path.join(sgx_sdk_env,  'include'),
 ] + openssl_include_dirs
 
 verify_report_include_dirs = [
     os.path.join(tcf_root_dir, 'tc/sgx/common/verify_ias_report'),
     os.path.join(tcf_root_dir, 'tc/sgx/common'),
-    os.path.join(os.environ['SGX_SDK'],"include"),
+    os.path.join(sgx_sdk_env,  'include'),
 ]
 
 library_dirs = [
     os.path.join(tcf_root_dir, "tc/sgx/common/build"),
-    os.path.join(os.environ['SGX_SDK'], 'lib64'),
-    os.path.join(os.environ['SGX_SSL'], 'lib64'),
-    os.path.join(os.environ['SGX_SSL'], 'lib64', 'release')
+    os.path.join(sgx_sdk_env, 'lib64'),
+    os.path.join(sgx_ssl_env, 'lib64'),
+    os.path.join(sgx_ssl_env, 'lib64', 'release')
 ] + openssl_lib_dirs
 
 libraries = [

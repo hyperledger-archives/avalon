@@ -50,27 +50,28 @@ These are used to find the Intel Software Guard Extensions (SGX) Software
 Development Kit (SDK). They are normally set by sourcing the Intel SGX SDK
 activation script (e.g. `source /opt/intel/sgxsdk/environment`)
 
-- `PKG_CONFIG_PATH` and `LD_LIBRARY_PATH` also contain the the path to
-  [OpenSSL](#openssl) package config files and libraries, respectively,
-  if you build your own OpenSSL. You need to do this when pre-built OpenSSL
-  version 1.1.1d or later packages are not available for your system
+- If you build your own OpenSSL (not the usual case),
+  `PKG_CONFIG_PATH` and `LD_LIBRARY_PATH` also contain the the path to
+  [OpenSSL](#openssl) package config files and libraries, respectively.
+  You need to do this when pre-built OpenSSL version 1.1.1d or later
+  packages are not available for your system
 
 - `SGX_MODE`
-This variable is used to switch between the Intel SGX simulator and hardware
-mode. Set `SGX_MODE` to either `HW` (Intel SGX available) or
-`SIM` (use Intel SGX simulator)
+Optional variable used to switch between the Intel SGX simulator and hardware
+mode. Set `SGX_MODE` to `HW` (Intel SGX available) or
+`SIM` (use Intel SGX simulator). If not set, the default is `SIM` .
 
 - `SGX_SSL`
-Used to locate an Intel SGX-compatible version of OpenSSL.
-Usualy set to `/opt/intel/sgxssl`
+Optional variable to locate an Intel SGX-compatible version of OpenSSL.
+Default directory is `/opt/intel/sgxssl`
 
 - `TCF_ENCLAVE_CODE_SIGN_PEM`
 Use only with `SGX_MODE=HW`.
 This needs to be set to a valid enclave signing key. You can generate one
 yourself using OpenSSL, then export the path to it:
   ```
-  openssl genrsa -3 -out private_rsa_key.pem 3072
-  export TCF_ENCLAVE_CODE_SIGN_PEM=$PWD/private_rsa_key.pem
+  openssl genrsa -3 -out $TCF_HOME/enclave.pem 3072
+  export TCF_ENCLAVE_CODE_SIGN_PEM=$TCF_HOME/enclave.pem
   ```
 
 - `TCF_HOME`
@@ -90,9 +91,14 @@ distributions will require similar packages.
 sudo apt-get update
 sudo apt-get install -y cmake swig pkg-config python3-dev python3-venv python \
      software-properties-common virtualenv curl xxd git unzip dh-autoreconf \
-     ocaml ocamlbuild liblmdb-dev protobuf-compiler
+     ocaml ocamlbuild liblmdb-dev protobuf-compiler python3-pip python3-toml \
+     python3-requests python3-colorlog python3-twisted
 ```
 
+Also, install following pip packages
+```
+sudo pip3 install --upgrade setuptools json-rpc py-solc web3 wheel
+```
 
 # <a name="docker"></a>Docker
 Docker may be used instead of building TCF directly (standalone mode) and
@@ -122,7 +128,7 @@ sudo chmod +x /usr/local/bin/docker-compose
 
 To verify a correct installation, run `docker-compose version`
 
-For details on Docker installation, see 
+For details on Docker installation, see
 https://docs.docker.com/engine/installation/linux/ubuntu
 and
 https://docs.docker.com/compose/install/#install-compose
@@ -132,6 +138,8 @@ https://docs.docker.com/compose/install/#install-compose
 Hyperledger Trusted Compute Framework is intended to be run on
 Intel SGX-enabled platforms. However, it can also be run in "simulator mode"
 on platforms that do not have hardware support for Intel SGX.
+Support for other hardware-based Trusted Execution Environments (TEEs)
+can be added by submitting a Pull Request.
 
 
 ## Intel SGX SDK
@@ -143,7 +151,7 @@ The following instructions download the Intel SGX SDK 2.3 and installs it in
 ```
 sudo mkdir -p /opt/intel
 cd /opt/intel
-wget https://download.01.org/intel-sgx/linux-2.3.1/ubuntu18.04/sgx_linux_x64_sdk_2.3.101.46683.bin
+sudo wget https://download.01.org/intel-sgx/linux-2.3.1/ubuntu18.04/sgx_linux_x64_sdk_2.3.101.46683.bin
 echo "yes" | sudo bash ./sgx_linux_x64_sdk_2.3.101.46683.bin
 ```
 
@@ -174,11 +182,17 @@ install the Intel SGX driver for both standalone and docker builds.
 You need to install the Intel SGX driver whether you build TCF standalone
 or using Docker.
 
-First install these Intel SGX-required packages:
+First install this package:
 
 ```
-sudo apt-get install -y libsgx-enclave-common libelf-dev
+sudo apt-get install -y libelf-dev
 ````
+
+Download and install libsgx-enclave-common version 2.3.101:
+```
+wget https://download.01.org/intel-sgx/linux-2.3.1/ubuntu18.04/libsgx-enclave-common_2.3.101.46683-1_amd64.deb
+sudo dpkg -i libsgx-enclave-common_2.3.101.46683-1_amd64.deb
+```
 
 ### Remove Old `/dev/sgx` Intel SGX Driver
 If device file `/dev/sgx` is present, remove the old driver:
@@ -204,6 +218,7 @@ After uninstalling, reboot with `sudo shutdown -r 0`
 Install the Intel SGX driver:
 
 ```
+cd /var/tmp
 wget https://download.01.org/intel-sgx/linux-2.6/ubuntu18.04-server/sgx_linux_x64_driver_2.5.0_2605efa.bin
 sudo bash ./sgx_linux_x64_driver_2.5.0_2605efa.bin
 ```
@@ -226,16 +241,13 @@ ias_api_key = '<ias subscription key obtained from portal>'
 ```
 
 In the same file, if you are behind a corporate proxy,
-update the https_proxy line:
+uncomment and update the https_proxy line:
 
-```
-https_proxy = "http://your-proxy:your-port/"
-```
-If you are not behind a corporate proxy (the usual case),
-then comment out the https_proxy line:
 ```
 #https_proxy = "http://your-proxy:your-port/"
 ```
+If you are not behind a corporate proxy (the usual case),
+then leave this line commented out.
 
 **The following steps apply only to standalone builds.**
 
@@ -257,13 +269,8 @@ echo "export SGX_MODE=HW" >>~/.bashrc
 If running only in simulator mode (no hardware support), you only
 need the Intel SGX SDK.
 
-Set `SGX_MODE` as follows.
-Append this line to your login shell script (`~/.bashrc` or similar):
-
-```
-export SGX_MODE=SIM
-echo "export SGX_MODE=SIM" >>~/.bashrc
-```
+`SGX_MODE` is optional. If set, it must be set to `SIM` (the default).
+Verify `SGX_MODE` is not set, or is set to `SIM`, with `echo $SGX_MODE` .
 
 # <a name="openssl"></a>OpenSSL
 
@@ -290,29 +297,28 @@ wget 'http://http.us.debian.org/debian/pool/main/o/openssl/libssl-dev_1.1.1d-1_a
 sudo dpkg -i libssl1.1_1.1.1d-1_amd64.deb
 sudo dpkg -i libssl-dev_1.1.1d-1_amd64.deb
 sudo apt-get install -f
-dpkg -l libssl1.1 libssl-dev
 ```
+
+To verify installation, type `dpkg -l libssl1.1 libssl-dev` .
 
 ## Alternate method: OpenSSL Build
 If you are unable to locate a suitable pre-compiled package for your system,
 you can build OpenSSL from source using the following commands. If you
 installed the package directly as described above you do *not* need to do this.
-These steps detail installing OpenSSL to the `install` directory under your
-current working directory.
+These steps detail installing OpenSSL to the `~/openssl/install` directory.
 
 ```
-cd /var/tmp
+mkdir -p ~/openssl/install
+cd ~/openssl
 wget https://www.openssl.org/source/openssl-1.1.1d.tar.gz
 tar -xzf openssl-1.1.1d.tar.gz
 cd openssl-1.1.1d/
-mkdir ../install
 ./Configure --prefix=$PWD/../install
 ./config --prefix=$PWD/../install
-THREADS=8
-make -j$THREADS
+make
 make test
-make install -j$THREADS
-cd ..
+make install
+cd ../..
 ```
 
 If the above succeeds, define/extend the `PKG_CONFIG_PATH` environment variable
@@ -378,9 +384,11 @@ problems.
   cd ../../..
   ```
 
-- Export the `SGX_SSL` environment variable to enable the build utilities to
+- If SGX SSL is not located at the default directory, `/opt/intel/sgxssl`,
+  export the `SGX_SSL` environment variable to enable the build utilities to
   find and link this library.
-  Append this line to your login shell script (`~/.bashrc` or similar):
+  Append this line to your login shell script (`~/.bashrc` or similar)
+  after changing the directory name:
   ```
   export SGX_SSL=/opt/intel/sgxssl
   echo "export SGX_SSL=/opt/intel/sgxssl" >>~/.bashrc

@@ -53,9 +53,11 @@ namespace crypto {
             // Deserialize EC point (X,Y) to hex string
             // throws RuntimeError, ValueError
             void DeserializeXYFromHex(const std::string& hexXY);
-            // Verify signature signature.data() on message.data() and return 1 if signature is
-            // valid, 0 if signature is not valid or -1 if there was an internal error
-            int VerifySignature(const ByteArray& message, const ByteArray& signature) const;
+            // Verify signature signature.data() on hashMessage.data() and
+            // return 1 if signature is valid,
+            // 0 if signature is not valid or -1 if there was an internal error
+            int VerifySignature(const ByteArray& hashMessage,
+                const ByteArray& signature) const;
 
         private:
             EC_KEY* public_key_;

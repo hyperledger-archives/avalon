@@ -1,0 +1,69 @@
+{
+    "jsonrpc": "2.0",
+    "method": "WorkOrderSubmit",
+    "id": 14,
+    "params": {
+        "responseTimeoutMSecs": 6000,
+        "payloadFormat": "JSON-RPC",
+        "resultUri": "resulturi",
+        "notifyUri": "notifyuri",
+        "workOrderId": "0x11ABCB",
+        "workerId":"",
+        "workloadId": "aml-result",
+        "keepState": "true",
+        "requesterId": "0x3456",
+        "workerEncryptionKey": "",
+        "dataEncryptionAlgorithm": "AES-GCM-256",
+        "encryptedSessionKey": "sessionkey",
+        "sessionKeyIv": "Iv",
+        "requesterNonce": "",
+        "encryptedRequestHash": "requesthash",
+        "requesterSignature": "",
+        "inData": [
+                    {"index": 0,
+                    "dataHash": "",
+                    "data": "PL_ES_UK",
+                    "encryptedDataEncryptionKey": "",
+                    "iv": ""
+                    },
+                    {"index": 1,
+                    "dataHash": "",
+                    "data": "UK,3,2",
+                    "encryptedDataEncryptionKey": "",
+                    "iv": ""
+                    },
+                   {"index": 2,
+                    "dataHash": "",
+                    "data": "UK_1,Mikel Eichmann",
+                    "encryptedDataEncryptionKey": "",
+                    "iv": ""
+                   },
+                   {"index": 3,
+                    "dataHash": "",
+                    "data": "UK_2,Linda Dickinson",
+                    "encryptedDataEncryptionKey": "",
+                    "iv": ""
+                   },
+                   {"index": 4,
+                    "dataHash": "",
+                    "data": "UK_3,Demario Goodwin",
+                    "encryptedDataEncryptionKey": "",
+                    "iv": ""
+                   },
+                   {"index": 5,
+                    "dataHash": "",
+                    "data": "UK_3,PL_7,1200.14,EUR,Sun Jun 02 2019 22:53:54 GMT+0000 (UTC)",
+                    "encryptedDataEncryptionKey": "",
+                    "iv": ""
+                    },
+                    {"index": 6,
+                    "dataHash": "",
+                    "data": "UK_7,ES_9,294.11,EUR,Sat Jun 01 2019 02:29:01 GMT+0000 (UTC)",
+                    "encryptedDataEncryptionKey": "",
+                    "iv": ""
+                    }
+
+        ]
+    }
+}
+

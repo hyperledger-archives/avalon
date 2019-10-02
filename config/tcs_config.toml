@@ -25,9 +25,9 @@ StorageSize = "1 TB"
 LogLevel = "INFO"
 LogFile  = "__screen__"
 
-# --------------------------------------------------------------
-# EnclaveManager -- configuration of SGX Enclave EnclaveManager
-# --------------------------------------------------------------
+# -------------------------------------------------------------------
+# EnclaveManager -- configuration of Intel SGX Enclave EnclaveManager
+# -------------------------------------------------------------------
 [EnclaveManager]
 sleep_interval = "10"
 
@@ -35,12 +35,13 @@ sleep_interval = "10"
 listener_port = 1947
 max_work_order_count = 10
 
-# --------------------------------------------------
-# EnclaveModule -- configuration of the SGX Enclave
-# --------------------------------------------------
+# -------------------------------------------------------
+# EnclaveModule -- configuration of the Intel SGX Enclave
+# -------------------------------------------------------
 [EnclaveModule]
-# spid is a 32-digit hex string tied to the enclave implementation
-# Replace dummy SPID with value obtained after subscription to run TCS in SGX HW mode
+# Service Provider ID (SPID) is a 32-digit hex string tied to the
+# enclave implementation. Replace dummy SPID with value obtained after
+# subscription to run TCS in Intel SGX HW mode.
 spid = "DEADBEEF00000000DEADBEEF00000000"
 
 num_of_enclaves = "1"
@@ -48,14 +49,16 @@ num_of_enclaves = "1"
 # ias_url is the URL of the Intel Attestation Service (IAS) server.
 ias_url = "https://api.trustedservices.intel.com/sgx/dev"
 
-# Proxy for https. Change to your corporate proxy or comment out below line for direct Internet connections.
-https_proxy = "http://proxy-iind.intel.com:912/"
+# Proxy for https. Leave commented out for direct Internet connections or
+# uncomment and change to your corporate proxy.
+#https_proxy = "http://your-proxy:your-port/"
 
-# IAS api key is subscription key used for authentication of requests submitted to IAS server.
-# this can be obtained by subscribing in the portal https://api.portal.trustedservices.intel.com.
-ias_api_key = "7eff11484faabcd7b5d62006f4611122"
+# IAS API key is a 32-digit hex string subscription key used for authentication
+# of requests submitted to the IAS server. Obtain the key by subscribing in
+# the portal https://api.portal.trustedservices.intel.com/
+ias_api_key = "112233445566778899aabbccddeeff00"
 
-#enclave library to be used
+# TEE enclave library to use.
 enclave_library = "libtcf-enclave.signed.so"
 enclave_library_path = "tc/sgx/trusted_worker_manager/enclave/build/lib/"
 
@@ -65,7 +68,8 @@ enclave_library_path = "tc/sgx/trusted_worker_manager/enclave/build/lib/"
 [WorkerConfig]
 ProofDataType = "TEE-SGX-IAS"
 
-# Following URIs are used in direct model to submit work orders in synchronous, asynchronous, pull and notification modes
+# The Following URIs are used in direct model to submit work orders in
+# synchronous, asynchronous, pull and notification modes.
 WorkOrderSyncUri = "http://localhost:8080"
 WorkOrderAsyncUri = "http://localhost:8080"
 WorkOrderPullUri = "http://localhost:8080"
@@ -88,10 +92,12 @@ FromAddress = ""
 HashingAlgorithm = "SHA-256"
 # Optional - Comma separated list of signing algorithms. Default is SECP256K1
 SigningAlgorithm = "SECP256K1"
-# Asymmetric encryption algorithm used to encrypt Symmetric data encryption key. Default is RSA-OAEP-3072
+# Asymmetric encryption algorithm used to encrypt Symmetric data encryption key.
+# Default is RSA-OAEP-3072
 KeyEncryptionAlgorithm = "RSA-OAEP-3072"
 # Comma separated list of encryption algorithms. Default is AES-GCM-256
 DataEncryptionAlgorithm = "AES-GCM-256"
-# Supported Work order formats are JSON-RPC, JSON-RPC-JWT and Custom format starting with tilde "~"
+# Supported work order formats are JSON-RPC, JSON-RPC-JWT, and Custom format
+# starting with tilde "~"
 workOrderPayloadFormats = "JSON-RPC"
 

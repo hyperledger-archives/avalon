@@ -1,0 +1,62 @@
+{
+    "jsonrpc": "2.0",
+    "method": "WorkOrderSubmit",
+    "id": 12,
+    "params": {
+        "responseTimeoutMSecs": 6000,
+        "payloadFormat": "JSON-RPC",
+        "resultUri": "resulturi",
+        "notifyUri": "notifyuri",
+        "workOrderId": "0x11ABCE",
+        "workerId":"",
+        "workloadId": "aml-result",
+        "keepState": "true",
+        "requesterId": "0x3456",
+        "workerEncryptionKey": "",
+        "dataEncryptionAlgorithm": "AES-GCM-256",
+        "encryptedSessionKey": "sessionkey",
+        "sessionKeyIv": "Iv",
+        "requesterNonce": "",
+        "encryptedRequestHash": "requesthash",
+        "requesterSignature": "",
+        "inData": [
+                    {"index": 0,
+                    "dataHash": "",
+                    "data": "PL_ES_UK",
+                    "encryptedDataEncryptionKey": "",
+                    "iv": ""
+                    },
+                    {"index": 1,
+                    "dataHash": "",
+                    "data": "ES,2,2",
+                    "encryptedDataEncryptionKey": "",
+                    "iv": ""
+                    },
+                    {"index": 2,
+                    "dataHash": "",
+                    "data": "ES_5,Ester Ramos",
+                    "encryptedDataEncryptionKey": "",
+                    "iv": ""
+                    },
+                    {"index": 3,
+                    "dataHash": "",
+                    "data": "ES_6,Carolina Ponce",
+                    "encryptedDataEncryptionKey": "",
+                    "iv": ""
+                    },
+                    {"index": 4,
+                    "dataHash": "",
+                    "data": "ES_5,UK_3,1200.15,EUR,Sat Jun 22 2019 22:55:26 GMT+0000 (UTC)",
+                    "encryptedDataEncryptionKey": "",
+                    "iv": ""
+                    },
+                    {"index": 5,
+                    "dataHash": "",
+                    "data": "ES_0,ES_1,397.13,EUR,Fri Jun 07 2019 02:07:27 GMT+0000 (UTC)",
+                    "encryptedDataEncryptionKey": "",
+                    "iv": ""
+                    }
+        ]
+    }
+}
+

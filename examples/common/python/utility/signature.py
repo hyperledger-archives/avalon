@@ -30,7 +30,7 @@ import logging
 import crypto.crypto as crypto
 import utility.file_utils as putils
 import utility.utility as utility
-from utility.hex_utils import is_hex
+from utility.hex_utils import is_valid_hex_str, byte_array_to_hex_str
 import worker.worker_details as worker
 from error_code.error_status import SignatureStatus
 
@@ -231,14 +231,14 @@ class ClientSignature(object) :
 
         input_json = json.loads(input_json_str)
         input_json_params = input_json['params']
-        input_json_params["sessionKeyIv"] = ''.join(format(i, '02x') for i in session_iv)
+        input_json_params["sessionKeyIv"] = byte_array_to_hex_str(session_iv)
 
-        encrypted_session_key_str = ''.join(format(i, '02x') for i in encrypted_session_key)
+        encrypted_session_key_str = byte_array_to_hex_str(encrypted_session_key)
         self.__encrypt_workorder_indata(input_json_params, session_key,
                 session_iv, worker.encryption_key, data_key, data_iv)
 
         if input_json_params["requesterNonce"] and \
-            is_hex(input_json_params["requesterNonce"]):
+            is_valid_hex_str(input_json_params["requesterNonce"]):
             nonce = crypto.string_to_byte_array(input_json_params["requesterNonce"])
         else:
             # [NO_OF_BYTES] 16 BYTES for nonce, is the recommendation by NIST to
@@ -262,7 +262,7 @@ class ClientSignature(object) :
         final_hash = crypto.compute_message_hash(concat_hash)
 
         encrypted_request_hash = utility.encrypt_data(final_hash, session_key, session_iv)
-        encrypted_request_hash_str = ''.join(format(i, '02x') for i in encrypted_request_hash)
+        encrypted_request_hash_str = byte_array_to_hex_str(encrypted_request_hash)
         logger.debug("encrypted request hash: \n%s", encrypted_request_hash_str)
 
         #Update the input json params

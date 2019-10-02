@@ -37,7 +37,7 @@ namespace tcf {
                 ByteArray ComputeRequestHash();
                 ByteArray ResponseHashCalculate(std::vector<tcf::WorkOrderData>& wo_data);
                 tcf_err_t VerifyEncryptedRequestHash();
-                int VerifySignature();
+                int VerifyRequesterSignature();
                 void ComputeSignature(EnclaveData& enclaveData, ByteArray& message_hash);
                 void ConcatHash(ByteArray& dst, ByteArray& src);
                 /***Required for work order processing **/
@@ -55,6 +55,7 @@ namespace tcf {
                 std::string work_order_id;
                 std::string worker_id;
                 std::string workload_id;
+                std::string keepState;
                 std::string requester_id;
                 std::string worker_encryption_key;
                 std::string data_encryption_algorithm;

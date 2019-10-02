@@ -206,16 +206,15 @@ std::string pcrypto::sig::PrivateKey::Serialize() const {
 }  // pcrypto::sig::PrivateKey::Serialize
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-// Computes SHA256 hash of message.data(), signs with ECDSA privkey and
-// returns ByteArray containing raw binary data
+// Signs hashMessage.data() with ECDSA privkey and returns ByteArray
+// containing raw binary data. It's expected that caller of this function
+// passes hash value of original message to this function for signing.
 // throws RuntimeError
-ByteArray pcrypto::sig::PrivateKey::SignMessage(const ByteArray& message) const {
-    unsigned char hash[SHA256_DIGEST_LENGTH];
-    // Hash
-    SHA256((const unsigned char*)message.data(), message.size(), hash);
-
-    // Then Sign
-    ECDSA_SIG_ptr sig(ECDSA_do_sign((const unsigned char*)hash, SHA256_DIGEST_LENGTH, private_key_),
+ByteArray pcrypto::sig::PrivateKey::SignMessage(
+    const ByteArray& hashMessage) const {
+    // Sign
+    ECDSA_SIG_ptr sig(ECDSA_do_sign((const unsigned char*)hashMessage.data(),
+        hashMessage.size(), private_key_),
         ECDSA_SIG_free);
     if (!sig) {
         std::string msg("Crypto Error (SignMessage): Could not compute ECDSA signature");

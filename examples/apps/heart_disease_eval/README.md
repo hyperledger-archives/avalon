@@ -1,16 +1,52 @@
 # Running the Heart Evaluation Demo
 
 This demo performs a heart disease evaluation based on input parameters.
-It is available in both a command line client and GUI client.
+Three clients are available: batch command line client, interactive command line client, and GUI client.
 
 
-## Using the Heart Evaluation Command Line Client
+## Using the Heart Evaluation Batch Command Line Client
 
 The command line client, `Demo.py`, runs a set of pre-built JSON requests.
 To run, follow the instructions in the "Testing" section of the
 [build document](../../../BUILD.md#testing).
 You may run the CLI demo in standalone mode or in a Docker container.
 
+
+## Using the Heart Evaluation Interactive Command Line Client
+
+The command line client `generic_client.py` allows you to submit
+requests on the command line.
+
+1.  If needed, update the Ethereum account and direct registry contract
+    information in `docker/Dockerfile.tcf-dev` and
+    `examples/common/python/connectors/tcf_connector.toml`
+2.  Follow instructions in the "Docker-based Build and Execution" section of
+    the [build document](../../../BUILD.md#dockerbuild) through step 4
+    (activating a virtual environment)
+3.  Terminal 1 is running the TCF Enclave Manager and Listener with
+    `docker-compose` . Terminal 2 is running the Docker container shell
+    with the `(_dev)` prompt
+4.  In Terminal 2, set environment variable `WALLET_PRIVATE_KEY` if not set.
+    This should match the value in file `docker/Dockerfile.tcf-dev`
+    from step 3 above:
+    ```bash
+    export WALLET_PRIVATE_KEY="B413189C95B48737AE2D9AF4CAE97EB03F4DE40599DF8E6C89DCE4C2E2CBA8DE"
+    ```
+5.  In Terminal 2 run `cd $TCF_HOME/examples/apps/generic_client`
+6.  In Terminal 2, run
+    ``` bash
+    ./generic_client.py --uri "http://localhost:1947" \
+        --workload_id "heart-disease-eval" \
+        --in_data "Data: 25 10 1 67 102 125 1 95 5 10 1 11 36 1"
+    ```
+7.  The data will be submitted to the worker and the results will appear shortly:
+    ```
+    [04:31:55 INFO    utility.utility] Decryption result at client -
+    You have a risk of 46% to have heart disease.
+    ```
+8.  Optionally submit another request.
+    Use the `--help` option to see other available options
+9.  In Terminal 1, press Ctrl-c to stop the TCF Enclave Manager and Listener
 
 ## Using the Heart Evaluation GUI Client
 
@@ -43,7 +79,7 @@ The TCF Enclave Manager and TCF Listener run in a Docker container.
     && chmod 0755 /root/.py-solc/solc-v0.4.25/bin/solc &&
     export SOLC_BINARY=/root/.py-solc/solc-v0.4.25/bin/solc
     ```
-8. In Terminal 2, set environment variable `WALLET_PRIVATE_KEY` if not set.
+8.  In Terminal 2, set environment variable `WALLET_PRIVATE_KEY` if not set.
     This should match the value in file `docker/Dockerfile.tcf-dev`
     from step 3 above:
     ```bash

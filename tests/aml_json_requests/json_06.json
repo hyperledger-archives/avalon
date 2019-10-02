@@ -1,0 +1,62 @@
+{
+    "jsonrpc": "2.0",
+    "method": "WorkOrderSubmit",
+    "id": 13,
+    "params": {
+        "responseTimeoutMSecs": 6000,
+        "payloadFormat": "JSON-RPC",
+        "resultUri": "resulturi",
+        "notifyUri": "notifyuri",
+        "workOrderId": "0x11ABCC",
+        "workerId":"",
+        "workloadId": "aml-result",
+        "keepState": "true",
+        "requesterId": "0x3456",
+        "workerEncryptionKey": "",
+        "dataEncryptionAlgorithm": "AES-GCM-256",
+        "encryptedSessionKey": "sessionkey",
+        "sessionKeyIv": "Iv",
+        "requesterNonce": "",
+        "encryptedRequestHash": "requesthash",
+        "requesterSignature": "",
+        "inData": [
+                    {"index": 0,
+                    "dataHash": "",
+                    "data": "PL_ES_UK",
+                    "encryptedDataEncryptionKey": "",
+                    "iv": ""
+                    },
+                    {"index": 1,
+                    "dataHash": "",
+                    "data": "PL,2,2",
+                    "encryptedDataEncryptionKey": "",
+                    "iv": ""
+                    },
+                   {"index": 3,
+                    "dataHash": "",
+                    "data": "PL_7,Hugo Zyla",
+                    "encryptedDataEncryptionKey": "",
+                    "iv": ""
+                   },
+                   {"index": 9,
+                    "dataHash": "",
+                    "data": "PL_8,Alfred Zawadzki",
+                    "encryptedDataEncryptionKey": "",
+                    "iv": ""
+                   },
+                    {"index": 12,
+                    "dataHash": "",
+                    "data": "PL_6,PL_5,681.10,EUR,Mon Jun 03 2019 08:08:33 GMT+0000 (UTC)",
+                    "encryptedDataEncryptionKey": "",
+                    "iv": ""
+                    },
+                    {"index": 13,
+                    "dataHash": "",
+                    "data": "PL_7,ES_5,1200.32,EUR,Tue Jun 25 2019 04:05:48 GMT+0000 (UTC)",
+                    "encryptedDataEncryptionKey": "",
+                    "iv": ""
+                    }
+        ]
+    }
+}
+

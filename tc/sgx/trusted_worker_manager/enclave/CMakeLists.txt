@@ -35,7 +35,8 @@ endif()
 
 SET(SGX_MODE "$ENV{SGX_MODE}")
 if("${SGX_MODE} " STREQUAL " ")
-    message(FATAL_ERROR "SGX_MODE environment variable not defined!")
+    SET(SGX_MODE "SIM")
+    message(STATUS "Setting default SGX_MODE=${SGX_MODE}")
 endif()
 IF("${SGX_MODE}" STREQUAL "SIM")
     OPTION(SGX_USE_SIMULATOR "Use the sgx simulator" TRUE)
@@ -49,7 +50,8 @@ if("${SGX_SDK} " STREQUAL " ")
 endif()
 SET(SGX_SSL "$ENV{SGX_SSL}")
 if("${SGX_SSL} " STREQUAL " ")
-    message(FATAL_ERROR "SGX_SSL environment variable not defined!")
+    SET(SGX_SSL "/opt/intel/sgxssl")
+    message(STATUS "Setting default SGX_SSL=${SGX_SSL}")
 endif()
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -199,6 +201,7 @@ SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,-L,${TCF_CORE_DI
 SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,-L,${TCF_TOP_DIR}/common/sgx_workload/build")
 SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,-L,${TCF_TOP_DIR}/examples/apps/build/echo/workload")
 SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,-L,${TCF_TOP_DIR}/examples/apps/build/heart_disease_eval/workload")
+SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,-L,${TCF_TOP_DIR}/examples/apps/build/aml/workload")
 SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,-L,$ENV{SGX_SSL}/lib64")
 # Remove all the default windows libraries (kernel32, etc)
 SET(CMAKE_C_STANDARD_LIBRARIES_INIT "")
@@ -227,6 +230,8 @@ TARGET_LINK_LIBRARIES(${PROJECT_NAME} -Wl,--whole-archive -lsgx_workload -ltcf_w
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} -Wl,--whole-archive -lecho_wo -Wl,--no-whole-archive)
 # Add heart disease eval workload
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} -Wl,--whole-archive -lheart_disease_eval -Wl,--no-whole-archive)
+# ADD aml workload
+TARGET_LINK_LIBRARIES(${PROJECT_NAME} -Wl,--whole-archive -laml_wo -Wl,--no-whole-archive)
 
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} -Wl,--start-group  -lttcf-common -lsgx_tsgxssl_crypto -lsgx_tstdc -lsgx_tcxx -lsgx_tcrypto  -l${SERVICE_LIBRARY_NAME} -Wl,--end-group)
 

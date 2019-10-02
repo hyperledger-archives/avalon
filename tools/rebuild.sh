@@ -15,11 +15,14 @@
 # limitations under the License.
 
 SCRIPTDIR="$(dirname $(readlink --canonicalize ${BASH_SOURCE}))"
-SRCDIR="$(realpath ${SCRIPTDIR}/..)"
-TCF_ENCLAVE_CODE_SIGN_PEM=${SCRIPTDIR}/../enclave.pem
+if [[ -z "$TCF_HOME" ]] ; then
+    export TCF_HOME="$(realpath ${SCRIPTDIR}/..)"
+fi
+if [[ -z "$TCF_ENCLAVE_CODE_SIGN_PEM" ]] ; then
+   export TCF_ENCLAVE_CODE_SIGN_PEM="$TCF_HOME/enclave.pem"
+   echo "Setting default TCF_ENCLAVE_CODE_SIGN_PEM=$TCF_ENCLAVE_CODE_SIGN_PEM"
+fi
 
-#TCF_ENCLAVE_CODE_SIGN_PEM is used by other files, hence setting environment
-export TCF_ENCLAVE_CODE_SIGN_PEM=${SCRIPTDIR}/../enclave.pem
 
 # -----------------------------------------------------------------
 # -----------------------------------------------------------------
@@ -60,25 +63,36 @@ function try() {
 # CHECK ENVIRONMENT
 # -----------------------------------------------------------------
 yell --------------- CONFIG AND ENVIRONMENT CHECK ---------------
+if [ -z "$SGX_SSL" -a -d "/opt/intel/sgxssl" ] ; then
+    export SGX_SSL="/opt/intel/sgxssl"
+    echo "Setting default SGX_SSL=$SGX_SSL"
+fi
 
 : "${TCF_HOME?Missing environment variable TCF_HOME}"
-: "${TCF_ENCLAVE_CODE_SIGN_PEM?Missing environment variable TCF_ENCLAVE_CODE_SIGN_PEM}"
 : "${SGX_SSL?Missing environment variable SGX_SSL}"
-: "${SGX_SDK?Missing environment variable SGXSDKInstallPath}"
+: "${SGX_SDK?Missing environment variable SGX_SDK}"
 : "${PKG_CONFIG_PATH?Missing environment variable PKG_CONFIG_PATH}"
 
-# Set proxy for Intel Architectural Enclave Service Manager
+# Set proxy for Intel Architectural Enclave Service Manager (AESM) and start
 if [[ ${SGX_MODE} &&  "${SGX_MODE}" == "HW" ]]; then
-    # Add proxy settings
-    echo "proxy type = manual" >> /etc/aesmd.conf
-    echo "aesm proxy = $http_proxy" >> /etc/aesmd.conf
+
+    # Add proxy settings, if proxy is present and not set
+    grep -qs "^proxy type" /etc/aesmd.conf
+    if [ $? -ne 0 -a -n "$http_proxy" ] ; then
+       echo "Setting AESMD proxy type"
+       echo "proxy type = manual" >> /etc/aesmd.conf
+    fi
+    grep -qs "^aesm proxy" /etc/aesmd.conf
+    if [ $? -ne 0 -a -n "$http_proxy" ] ; then
+       echo "Setting AESMD proxy"
+       echo "aesm proxy = $http_proxy" >> /etc/aesmd.conf
+    fi
 
     # Starting aesm service
     echo "Starting aesm service"
     /opt/intel/libsgx-enclave-common/aesm/aesm_service &
 else
-    echo "Setting default SGX mode to SIM"
-    # Setting default SGX mode as SIM
+    echo "Setting default SGX mode=SIM"
     export SGX_MODE=SIM
 fi
 
@@ -132,7 +146,7 @@ NUM_CORES=1
 # BUILD
 # -----------------------------------------------------------------
 yell --------------- COMMON SGX WORKLOAD ---------------
-cd $SRCDIR/common/sgx_workload
+cd $TCF_HOME/common/sgx_workload
 
 mkdir -p build
 cd build
@@ -140,7 +154,7 @@ try cmake ..
 try make "-j$NUM_CORES"
 
 yell --------------- EXAMPLE WORKLOADS ---------------
-cd $SRCDIR/examples/apps
+cd $TCF_HOME/examples/apps
 
 mkdir -p build
 cd build
@@ -148,7 +162,7 @@ try cmake ..
 try make "-j$NUM_CORES"
 
 yell --------------- TC SGX COMMON ---------------
-cd $SRCDIR/tc/sgx/common
+cd $TCF_HOME/tc/sgx/common
 
 mkdir -p build
 cd build
@@ -156,7 +170,7 @@ try cmake ..
 try make "-j$NUM_CORES"
 
 yell --------------- ENCLAVE ---------------
-cd $SRCDIR/tc/sgx/trusted_worker_manager/enclave
+cd $TCF_HOME/tc/sgx/trusted_worker_manager/enclave
 
 mkdir -p build
 cd build
@@ -164,11 +178,11 @@ try cmake ..
 try make "-j$NUM_CORES"
 
 yell --------------- EXAMPLES COMMON PYTHON ---------------
-cd $SRCDIR/examples/common/python
+cd $TCF_HOME/examples/common/python
 try make "-j$NUM_CORES"
 try make install
 
 yell --------------- ENCLAVE MANAGER ---------------
-cd $SRCDIR/examples/enclave_manager
+cd $TCF_HOME/examples/enclave_manager
 try make "-j$NUM_CORES"
 try make install

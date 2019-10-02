@@ -33,7 +33,9 @@ enclave_dir = os.path.realpath(os.path.join(tcf_root_dir, 'tc/sgx/trusted_worker
 module_path = 'tc/sgx/trusted_worker_manager/enclave_wrapper'
 module_src_path = os.path.join(tcf_root_dir, module_path)
 
-sgx_mode_env = os.environ.get('SGX_MODE', None)
+sgx_sdk_env = os.environ.get('SGX_SDK', '/opt/intel/sgxsdk')
+sgx_ssl_env = os.environ.get('SGX_SSL', '/opt/intel/sgxssl')
+sgx_mode_env = os.environ.get('SGX_MODE', 'SIM')
 if not sgx_mode_env or (sgx_mode_env != "SIM" and sgx_mode_env != "HW"):
     print("error: SGX_MODE value must be HW or SIM, current value is: ", sgx_mode_env)
     sys.exit(2)
@@ -63,7 +65,7 @@ include_dirs = [
     os.path.join(tcf_root_dir, 'tc/sgx/common'),
     os.path.join(tcf_root_dir, 'tc/sgx/common/crypto'),
     os.path.join(module_src_path, 'build'),
-    os.path.join(os.environ['SGX_SDK'],"include"),
+    os.path.join(sgx_sdk_env,  'include'),
     os.path.join(tcf_root_dir, 'tc/sgx/common/packages/db_store'),
     os.path.join(tcf_root_dir, 'tc/sgx/common/packages/base64')
 ]
@@ -71,8 +73,8 @@ include_dirs = [
 library_dirs = [
     os.path.join(tcf_root_dir, "tc/sgx/common/build"),
     os.path.join(os.environ['SGX_SDK'], 'lib64'),
-    os.path.join(os.environ['SGX_SSL'], 'lib64'),
-    os.path.join(os.environ['SGX_SSL'], 'lib64', 'release')
+    os.path.join(sgx_ssl_env, 'lib64'),
+    os.path.join(sgx_ssl_env, 'lib64', 'release')
 ]
 
 libraries = [

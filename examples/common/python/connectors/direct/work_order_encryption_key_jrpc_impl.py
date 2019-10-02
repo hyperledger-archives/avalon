@@ -14,7 +14,7 @@
 
 import json
 import logging
-from eth_utils.hexadecimal import is_hex
+from utility.hex_utils import is_valid_hex_str
 import base64
 from service_client.generic import GenericServiceClient
 from connectors.interfaces.work_order_encryption_key_interface import WorkOrderEncryptionKeyInterface
@@ -30,23 +30,23 @@ class WorkOrderEncryptionKeyJrpcImpl(WorkOrderEncryptionKeyInterface):
 
     def encryption_key_get(self, worker_id, last_used_key_nonce, tag, requester_id,
         signature_nonce, signature, id=None):
-        if not is_hex(worker_id):
+        if not is_valid_hex_str(worker_id):
             logging.error("Invalid Worker id")
             return create_jrpc_response(id, JsonRpcErrorCode.INVALID_PARAMETER,
                 "Invalid Worker id")
-        if last_used_key_nonce is not None and not is_hex(last_used_key_nonce):
+        if last_used_key_nonce is not None and not is_valid_hex_str(last_used_key_nonce):
             logging.error("Invalid last used key nonce")
             return create_jrpc_response(id, JsonRpcErrorCode.INVALID_PARAMETER,
                 "Invalid last used key nonce")
-        if tag is not None and not is_hex(tag):
+        if tag is not None and not is_valid_hex_str(tag):
             logging.error("Invalid tag")
             return create_jrpc_response(id, JsonRpcErrorCode.INVALID_PARAMETER,
                 "Invalid tag")
-        if requester_id is not None and not is_hex(requester_id):
+        if requester_id is not None and not is_valid_hex_str(requester_id):
             logging.error("Invalid requester id")
             return create_jrpc_response(id, JsonRpcErrorCode.INVALID_PARAMETER,
                 "Invalid requester id")
-        if signature_nonce is not None and not is_hex(signature_nonce):
+        if signature_nonce is not None and not is_valid_hex_str(signature_nonce):
             logging.error("Invalid signature nonce")
             return create_jrpc_response(id, JsonRpcErrorCode.INVALID_PARAMETER,
                 "Invalid signature nonce")
@@ -76,23 +76,23 @@ class WorkOrderEncryptionKeyJrpcImpl(WorkOrderEncryptionKeyInterface):
 
     def encryption_key_set(self, worker_id, encryption_key, encryption_key_nonce, tag,
         signature_nonce, signature, id=None):
-        if not is_hex(worker_id):
+        if not is_valid_hex_str(worker_id):
             logging.error("Invalid Worker id")
             return create_jrpc_response(id, JsonRpcErrorCode.INVALID_PARAMETER,
                 "Invalid Worker id")
-        if not is_hex(encryption_key):
+        if not is_valid_hex_str(encryption_key):
             logging.error("Invalid encryption key")
             return create_jrpc_response(id, JsonRpcErrorCode.INVALID_PARAMETER,
                 "Invalid encryption key")
-        if encryption_key_nonce is not None and not is_hex(encryption_key_nonce):
+        if encryption_key_nonce is not None and not is_valid_hex_str(encryption_key_nonce):
             logging.error("Invalid encryption nonce")
             return create_jrpc_response(id, JsonRpcErrorCode.INVALID_PARAMETER,
                 "Invalid encryption nonce")
-        if tag is not None and not is_hex(tag):
+        if tag is not None and not is_valid_hex_str(tag):
             logging.error("Invalid tag")
             return create_jrpc_response(id, JsonRpcErrorCode.INVALID_PARAMETER,
                 "Invalid tag")
-        if signature_nonce is not None and not is_hex(signature_nonce):
+        if signature_nonce is not None and not is_valid_hex_str(signature_nonce):
             logging.error("Invalid signature nonce")
             return create_jrpc_response(id, JsonRpcErrorCode.INVALID_PARAMETER,
                 "Invalid signature nonce")

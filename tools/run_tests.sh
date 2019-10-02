@@ -1,4 +1,4 @@
-#!/bin/bash
+#! /bin/bash
 
 # Copyright 2018 Intel Corporation
 #
@@ -23,6 +23,7 @@ fi
 
 SCRIPTDIR="$(dirname $(readlink --canonicalize ${BASH_SOURCE}))"
 SRCDIR="$(realpath ${SCRIPTDIR}/..)"
+echo_client_path="${TCF_HOME}/examples/apps/echo/client"
 # Read Listener port from config file
 listener_port=`grep listener_port ${TCF_HOME}/config/tcs_config.toml | awk {'print $3'}`
 
@@ -70,6 +71,14 @@ do
     yell "#------------------------------------------------------------------------------------------------"
     yell "#------------------------------------------------------------------------------------------------"
 done
+
+yell "Start testing echo client ................"
+yell "#------------------------------------------------------------------------------------------------"
+# Testing echo client with enabling requester signature and input data hash
+try $echo_client_path/echo_client.py -m "Hello world" -rs -dh
+
+yell "#------------------------------------------------------------------------------------------------"
+yell "#------------------------------------------------------------------------------------------------"
 
 yell completed all tests
 yell "#------------------------------------------------------------------------------------------------"

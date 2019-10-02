@@ -12,4 +12,9 @@ git pull requests.  Each commit must include a DCO line in the git commit messag
 This sign-off means you agree the commit satisfies the
 [Developer Certificate of Origin (DCO).](https://developercertificate.org/)
 
+For other ways to contribute, see
+[Get involved: How to Contribute to Hyperledger](https://www.hyperledger.org/blog/2018/07/11/get-involved-how-to-contribute-to-hyperledger)
+and our
+[community links](https://github.com/hyperledger-labs/trusted-compute-framework/tree/master/docs#community).
+
 © Copyright 2019, Intel Corporation.

@@ -12,9 +12,12 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
+
 #include <string>
 #include <cmath>
 #include "heart_disease_evaluation_logic.h"
+
+// Calculate risk of having heart disease given input parameters.
 
 HeartDiseaseEvalLogic::HeartDiseaseEvalLogic() {}
 
@@ -28,7 +31,7 @@ void split(const std::string &str, char delim, Out result) {
         while (current != std::string::npos) {
                 std::string item = str.substr(previous, current - previous);
                 if (item.compare("") != 0)
-                        *(result++) = item; 
+                        *(result++) = item;
                 previous = current + 1;
                 current = str.find(delim, previous);
         }
@@ -44,6 +47,7 @@ std::vector<std::string> split(const std::string &s, char delim) {
     return elems;
 }
 
+// Compute a percentage near optimum (<=opt is 100%, >=max is 0%)
 double HeartDiseaseEvalLogic::model_A(double max, double opt, double data) {
     double score = 0.0;
     if (data < opt)
@@ -53,6 +57,7 @@ double HeartDiseaseEvalLogic::model_A(double max, double opt, double data) {
     return score;
 }
 
+// Compute a percentage near or above max (<=opt is 0%, >=max is 100%)
 double HeartDiseaseEvalLogic::model_B(double max, double opt, double data) {
     double score = 0.0;
     double delta = std::abs(data - opt);
@@ -61,27 +66,31 @@ double HeartDiseaseEvalLogic::model_B(double max, double opt, double data) {
     return score;
 }
 
+// Score several risk factors
+
 double HeartDiseaseEvalLogic::score_age(double data) {
     return model_A(100, 18, data);
 }
 
 double HeartDiseaseEvalLogic::score_sex(int sex) {
+    // Sex: 0=female, 1=male
     return (sex == 0) ? 100 : 0;
 }
 
 double HeartDiseaseEvalLogic::score_cp(int cp_type) {
+    // Chest pain type
     double score = 0.0;
     switch (cp_type) {
-        case 1:
+        case 1: // typical angina
             score = 0.0;
             break;
-        case 2:
+        case 2: // atypical angina
             score = 12.0;
             break;
-        case 3:
+        case 3: // non-anginal pain
             score = 35.0;
             break;
-        case 4:
+        case 4: // asymptomatic
             score = 100.0;
             break;
         default:
@@ -91,27 +100,31 @@ double HeartDiseaseEvalLogic::score_cp(int cp_type) {
 }
 
 double HeartDiseaseEvalLogic::score_trestbps(double data) {
+    // Resting blood pressure (mm Hg)
     return model_A(218, 108, data);
 }
 
 double HeartDiseaseEvalLogic::score_chol(double data) {
+    // Serum cholesterol (mg/dl)
     return model_A(309, 126, data);
 }
 
 double HeartDiseaseEvalLogic::score_fbs(double data) {
+    // Fasting blood sugar (mg/dl)
     return model_A(248, 98, data);
 }
 
 double HeartDiseaseEvalLogic::score_restecg(int type) {
+    // Resting electrocardiographic results
     double score = 0.0;
     switch (type) {
-        case 0:
+        case 0: // normal
             score = 100.0;
             break;
-        case 1:
+        case 1: // ST-T wave abnormality
             score = 9.0;
             break;
-        case 2:
+        case 2: // hypertrophy
             score = 7.0;
             break;
         default:
@@ -121,17 +134,19 @@ double HeartDiseaseEvalLogic::score_restecg(int type) {
 }
 
 double HeartDiseaseEvalLogic::score_thalach(double data) {
+    // Maximum heart rate achieved
     return model_B(198, 61, data);
 
 }
 
-double HeartDiseaseEvalLogic::score_exang_oldpeak(int type) {
+double HeartDiseaseEvalLogic::score_exang(int type) {
+    // Exercise induced angina
     double score = 0.0;
     switch (type) {
-        case 0:
+        case 0: // no
             score = 100.0;
             break;
-        case 1:
+        case 1: // yes
             score = 0.0;
             break;
         default:
@@ -140,15 +155,22 @@ double HeartDiseaseEvalLogic::score_exang_oldpeak(int type) {
     return score;
 }
 
+double HeartDiseaseEvalLogic::score_oldpeak(double depression) {
+    // ST depression induced by exercise relative to rest
+    return model_A(100.0, 0.0, depression);
+}
+
 double HeartDiseaseEvalLogic::score_slop(int type) {
+    // Slope of the peak exercise ST segment
     double score = 0.0;
     switch (type) {
-        case 0:
+        case 0: // upsloping
             score = 49.0;
             break;
-        case 1:
+        case 1: // flat
             score = 100.0;
             break;
+        case 2: // downsloping
         default:
             score = 63.0;
     }
@@ -156,6 +178,7 @@ double HeartDiseaseEvalLogic::score_slop(int type) {
 }
 
 double HeartDiseaseEvalLogic::score_ca(int number) {
+    // Number of major vessels colored by flouroscopy
     double score = 0.0;
     switch (number) {
         case 0:
@@ -175,7 +198,9 @@ double HeartDiseaseEvalLogic::score_ca(int number) {
 }
 
 double HeartDiseaseEvalLogic::score_thaldur(int durationMin) {
+    // Thallium stress test
     double score = 0.0;
+    // 3=normal, 6=fixed defect, 7=reversable defect
     if ((durationMin >= 3) && (durationMin < 6))
         score = 45.0;
     else if ((durationMin >= 6) && (durationMin < 8))
@@ -186,15 +211,18 @@ double HeartDiseaseEvalLogic::score_thaldur(int durationMin) {
 }
 
 double HeartDiseaseEvalLogic::score_num(int num) {
+    // Diagnosis of heart disease
     double score = 0.0;
-    if (num == 0)
+    if (num == 0) // <50% diameter narrowing
         score = 100.0;
-    else
+    else // 1, >50% diameter narrowing
         score = 0.0;
     return score;
 }
 
-std::string HeartDiseaseEvalLogic::executeWorkOrder(std::string decrypted_user_input_str) {
+// Process work order input for heart disease risk factors
+std::string HeartDiseaseEvalLogic::executeWorkOrder(
+        std::string decrypted_user_input_str) {
     // Variables to accumulate multiple results
     static int totalRisk = 0;
     static int count = 0;
@@ -208,7 +236,8 @@ std::string HeartDiseaseEvalLogic::executeWorkOrder(std::string decrypted_user_i
     std::string resultString;
     try {
         std::string dataString;
-        std::vector<std::string> inputString = split(decrypted_user_input_str, ':');
+        std::vector<std::string> inputString =
+            split(decrypted_user_input_str, ':');
         if (inputString.size() > 1)
             dataString = inputString[1];
 
@@ -225,8 +254,8 @@ std::string HeartDiseaseEvalLogic::executeWorkOrder(std::string decrypted_user_i
             + score_fbs(std::stoi(medData[5])) * 0.04
             + score_restecg(std::stoi(medData[6])) * 0.19
             + score_thalach(std::stoi(medData[7])) * 0.06
-            + score_exang_oldpeak(std::stoi(medData[8])) * 0.18
-            + score_exang_oldpeak(std::stoi(medData[9])) * 0.05
+            + score_exang(std::stoi(medData[8])) * 0.18
+            + score_oldpeak(std::stoi(medData[9])) * 0.05
             + score_slop(std::stoi(medData[10])) * 0.03
             + score_ca(std::stoi(medData[11])) * 0.04
             + score_thaldur(std::stoi(medData[12])) * 0.02
@@ -236,8 +265,8 @@ std::string HeartDiseaseEvalLogic::executeWorkOrder(std::string decrypted_user_i
         totalRisk += risk;
         count++;
         // Use accumulated data to calculate the result
-        resultString = "You have a risk of " +
-            std::to_string(totalRisk/count) + "% to have heart disease.";
+        resultString = "You have a " +
+            std::to_string(totalRisk/count) + "% risk of heart disease";
     } catch (...) {
         resultString = "Caught exception while processing workload data";
     }

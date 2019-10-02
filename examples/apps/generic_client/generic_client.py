@@ -51,6 +51,7 @@ def ParseCommandLine(args) :
 	global address
 	global show_receipt
 	global show_decrypted_output
+	global requester_signature
 
 	parser = argparse.ArgumentParser()
 	mutually_excl_group = parser.add_mutually_exclusive_group()
@@ -83,7 +84,9 @@ def ParseCommandLine(args) :
 	parser.add_argument("-o", "--decrypted_output",
 		help="If present, display decrypted output as JSON",
 		action='store_true')
-
+	parser.add_argument("-rs", "--requester_signature",
+		help="Enable requester signature for work order requests",
+		action="store_true")
 	options = parser.parse_args(args)
 
 	if options.config:
@@ -131,6 +134,8 @@ def ParseCommandLine(args) :
 	in_data = options.in_data
 	show_receipt = options.receipt
 	show_decrypted_output = options.decrypted_output
+	requester_signature = options.requester_signature
+
 
 def Main(args=None):
 	ParseCommandLine(args)
@@ -244,12 +249,15 @@ def Main(args=None):
 	for value in in_data:
 		wo_params.add_in_data(value)
 
-	# Sign work order
-	private_key = utility.generate_signing_keys()
+	# Encrypt work order request hash
 	wo_params.add_encrypted_request_hash()
-	if wo_params.add_requester_signature(private_key) == False:
-		logger.info("Work order request signing failed\n")
-		sys.exit(1)
+
+	if requester_signature:
+		private_key = utility.generate_signing_keys()
+		# Add requester signature and requester verifying_key
+		if wo_params.add_requester_signature(private_key) == False:
+			logger.info("Work order request signing failed")
+			exit(1)
 	# Submit work order
 	logger.info("Work order submit request : %s, \n \n ",
         wo_params.to_string())

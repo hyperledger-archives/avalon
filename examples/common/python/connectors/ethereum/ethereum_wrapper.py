@@ -16,7 +16,6 @@ import logging
 import os,sys
 from os.path import exists, realpath
 import json
-from eth_utils.hexadecimal import is_hex
 from connectors.utils import construct_message
 
 from solc import compile_source

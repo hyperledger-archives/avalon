@@ -19,3 +19,6 @@ create and write new applications.
 - [Generic Workload Client](generic_client)
   This is a generic client for testing with any worker
 
+- [Anti Money Laundering Use Case](aml)
+  This application consists on a practical stateful use case that allows several different parties to extract conclusions over a the data consolidated from what each of them has sent but without showing that data consolidation to any of the participants.
+

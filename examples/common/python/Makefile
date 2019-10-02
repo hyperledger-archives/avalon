@@ -12,18 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-PY_VERSION=${shell python3 --version | sed 's/Python \(3\.[0-9]\).*/\1/'}
+PY_VERSION=${shell python3 --version | sed 's/Python \(3\.[0-9]\).*/\1/' | tr -d .}
 MOD_VERSION=${shell ../../../bin/get_version}
 
-EGG_FILE=dist/tcf_examples_common-${MOD_VERSION}-py${PY_VERSION}-linux-x86_64.egg
+# Format of wheel package is <pkg_name>-{python-tag}-{abi-tag}-{platform}
+WHEEL_FILE=dist/tcf_examples_common-${MOD_VERSION}-cp${PY_VERSION}-cp${PY_VERSION}m-linux_x86_64.whl
 SOURCE_DIR=$(shell pwd)
 
 
-all : $(EGG_FILE)
+all : $(WHEEL_FILE)
 
-$(EGG_FILE) : build_ext
+$(WHEEL_FILE) : build_ext
 	@echo Build Distribution
-	python3 setup.py bdist_egg
+	python3 setup.py bdist_wheel
 	
 build_ext :
 	@echo Build build_ext
@@ -34,10 +35,11 @@ build :
 	cd $@ 
 
 install:
-	@echo INSTALLING EGG FILE =================
-	easy_install $(EGG_FILE)
+	@echo INSTALLING WHEEL FILE =================
+	pip3 install $(WHEEL_FILE)
 
 clean:
+	pip3 uninstall --yes $(WHEEL_FILE)
 	rm -rf build deps dist *.egg-info
 	rm -f crypto/crypto.py crypto/crypto_wrap.cpp
 	rm -f verify_report/verify_report.py verify_report/verify_report_wrap.cpp

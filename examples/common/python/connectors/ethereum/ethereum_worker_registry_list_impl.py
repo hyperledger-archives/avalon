@@ -14,7 +14,7 @@
 
 import logging
 
-from eth_utils.hexadecimal import is_hex
+from utility.hex_utils import is_valid_hex_str
 import binascii
 from os import environ
 
@@ -36,17 +36,17 @@ class EthereumWorkerRegistryListImpl(WorkerRegistryListInterface):
 
     def registry_add(self, org_id, uri, sc_addr, app_type_ids):
         if (self.__contract_instance != None):
-            if (is_hex(binascii.hexlify(org_id).decode("utf8")) == False):
+            if (is_valid_hex_str(binascii.hexlify(org_id).decode("utf8")) == False):
                 logging.info("Invalid Org id {}".format(org_id))
                 return construct_message("failed", "Invalid Org id")
-            if (sc_addr is not None and is_hex(binascii.hexlify(sc_addr).decode("utf8")) == False):
+            if (sc_addr is not None and is_valid_hex_str(binascii.hexlify(sc_addr).decode("utf8")) == False):
                 logging.info("Invalid smart contract address {}")
                 return construct_message("failed", "Invalid smart contract address")
             if (not uri):
                 logging.info("Empty uri {}".format(uri))
                 return construct_message("failed", "Empty uri")
             for aid in app_type_ids:
-                if (is_hex(binascii.hexlify(aid).decode("utf8")) == False):
+                if (is_valid_hex_str(binascii.hexlify(aid).decode("utf8")) == False):
                     logging.info("Invalid application id {}".format(aid))
                     return construct_message("failed", "Invalid application id")
 
@@ -68,17 +68,17 @@ class EthereumWorkerRegistryListImpl(WorkerRegistryListInterface):
 
     def registry_update(self, org_id, uri, sc_addr, app_type_ids):
         if (self.__contract_instance != None):
-            if (is_hex(binascii.hexlify(org_id).decode("utf8")) == False):
+            if (is_valid_hex_str(binascii.hexlify(org_id).decode("utf8")) == False):
                 logging.error("Invalid Org id {}".format(org_id))
                 return construct_message("failed", "Invalid Org id")
-            if (sc_addr is not None and is_hex(binascii.hexlify(sc_addr).decode("utf8")) == False):
+            if (sc_addr is not None and is_valid_hex_str(binascii.hexlify(sc_addr).decode("utf8")) == False):
                 logging.error("Invalid smart contract address {}".format(sc_addr))
                 return construct_message("failed", "Invalid smart contract address")
             if (not uri):
                 logging.error("Empty uri {}".format(uri))
                 return construct_message("failed", "Empty uri")
             for aid in app_type_ids:
-                if (is_hex(binascii.hexlify(aid).decode("utf8")) == False):
+                if (is_valid_hex_str(binascii.hexlify(aid).decode("utf8")) == False):
                     logging.error("Invalid application id {}".format(aid))
                     return construct_message("failed", "Invalid application id")
 
@@ -99,7 +99,7 @@ class EthereumWorkerRegistryListImpl(WorkerRegistryListInterface):
 
     def registry_set_status(self, org_id, status):
         if (self.__contract_instance != None):
-            if (is_hex(binascii.hexlify(org_id).decode("utf8")) == False):
+            if (is_valid_hex_str(binascii.hexlify(org_id).decode("utf8")) == False):
                 logging.info("Invalid Org id {}".format(org_id))
                 return construct_message("failed", "Invalid argument")
             if not isinstance(status, RegistryStatus):
@@ -123,7 +123,7 @@ class EthereumWorkerRegistryListImpl(WorkerRegistryListInterface):
     def registry_lookup(self, app_type_id=None):
         if (self.__contract_instance != None):
             if app_type_id != None:
-                if is_hex(binascii.hexlify(app_type_id).decode("utf8")):
+                if is_valid_hex_str(binascii.hexlify(app_type_id).decode("utf8")):
                     lookupResult = self.__contract_instance.functions.registryLookUp(
                         app_type_id).call()
                 else:
@@ -138,7 +138,7 @@ class EthereumWorkerRegistryListImpl(WorkerRegistryListInterface):
         
     def registry_retrieve(self, org_id):
         if (self.__contract_instance != None):
-            if (is_hex(binascii.hexlify(org_id).decode("utf8")) == False):
+            if (is_valid_hex_str(binascii.hexlify(org_id).decode("utf8")) == False):
                 logging.info("Invalid Org id {}".format(org_id))
                 return construct_message("failed", "Invalid Org id")
             else:
@@ -151,7 +151,7 @@ class EthereumWorkerRegistryListImpl(WorkerRegistryListInterface):
 
     def registry_lookup_next(self, app_type_id, lookup_tag):
         if (self.__contract_instance != None):
-            if is_hex(binascii.hexlify(app_type_id).decode("utf8")):
+            if is_valid_hex_str(binascii.hexlify(app_type_id).decode("utf8")):
                 lookupResult = self.__contract_instance.functions.registryLookUpNext(app_type_id, lookup_tag).call()
                 return lookupResult
             else:

@@ -34,11 +34,12 @@ services:
       - /tmp/.X11-unix:/tmp/.X11-unix
       - ~/.Xauthority:/root/.Xauthority
     working_dir: "/project/TrustedComputeFramework/tools/build"
+    environment:
+      - SGX_MODE=SIM
     entrypoint: "bash -c \"\
         if [ ${MAKECLEAN:-1} != 0 ]; then echo \\\"Clean build\\\" && make clean; fi \
         && make \
         && echo \\\"BUILD SUCCESS\\\" \
-        && source _dev/bin/activate \
         && cd ../../scripts \
         && source tcs_startup.sh -y \
         && tail -f /dev/null \""

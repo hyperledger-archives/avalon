@@ -20,6 +20,8 @@
 std::map<std::string, WorkloadProcessor*> \
     WorkloadProcessor::workload_processor_table;
 
+std::map<std::string, WorkloadProcessor*> WorkloadProcessor::initialized_processors;
+
 WorkloadProcessor::WorkloadProcessor() {}
 
 WorkloadProcessor::~WorkloadProcessor() {}
@@ -35,25 +37,36 @@ WorkloadProcessor* WorkloadProcessor::RegisterWorkloadProcessor(
 }
 
 WorkloadProcessor* WorkloadProcessor::CreateWorkloadProcessor(
-    std::string workload_id)
+    std::string workload_id, std::string worker_id, std::string keepState)
 {
    WorkloadProcessor* processor;
+   std::string workload_tag = worker_id + "_" + workload_id;
 
-   // Search the workload processor type in the table
-   auto itr = workload_processor_table.find(workload_id);
-   if (itr == workload_processor_table.end()) {
-       Log(TCF_LOG_ERROR, "Workload Processor not found in table");
-       return nullptr;
+   auto itr_aux = initialized_processors.find(workload_tag);
+
+   if (itr_aux == initialized_processors.end() || keepState != "true") {
+      // Search the workload processor type in the table
+     auto itr = workload_processor_table.find(workload_id);
+     if (itr == workload_processor_table.end()) {
+         Log(TCF_LOG_ERROR, "Workload Processor not found in table");
+         return nullptr;
+     } else {
+         processor = (*itr).second;
+     }
+
+     // Clone the workload processor and return it.
+     if( processor == nullptr) {
+         Log(TCF_LOG_ERROR,"Workload Processor found, but it's class is nullptr");
+         return nullptr;
+     } else {
+          WorkloadProcessor* cloned_processor = processor->Clone();
+          initialized_processors[workload_tag] = cloned_processor;
+          return cloned_processor;
+     }
    } else {
-       processor = (*itr).second;
+      processor = (*itr_aux).second;
+      return processor;
    }
 
-   // Clone the workload processor and return it.
-   if( processor == nullptr) {
-       Log(TCF_LOG_ERROR,"Workload Processor found, but it's class is nullptr");
-       return nullptr;
-   } else {
-       return processor->Clone();
-   }
+   
 }
-

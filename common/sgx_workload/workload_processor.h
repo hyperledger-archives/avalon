@@ -33,7 +33,7 @@ public:
     *  - workload_id: workload identifier
     * Returns - Pointer to WorkloadProcessor
     */
-    static WorkloadProcessor* CreateWorkloadProcessor(std::string workload_id);
+    static WorkloadProcessor* CreateWorkloadProcessor(std::string workload_id, std::string worker_id, std::string keepState);
 
     /* Register WorkloadProcessor. Used by the workloads to register themselves
     * Input parameters:
@@ -45,6 +45,7 @@ public:
 
     // Mapping between workload id and WorkloadProcessor
     static std::map<std::string, WorkloadProcessor*> workload_processor_table;
+    static std::map<std::string, WorkloadProcessor*> initialized_processors;
 
     // Process the workload
     virtual void ProcessWorkOrder(

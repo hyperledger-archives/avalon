@@ -40,7 +40,6 @@ services:
         if [ ${MAKECLEAN:-1} != 0 ]; then echo \\\"Clean build\\\" && make clean; fi \
         && make \
         && echo \\\"BUILD SUCCESS\\\" \
-        && source _dev/bin/activate \
         && cd ../../scripts \
         && source tcs_startup.sh -y \
         && tail -f /dev/null \""

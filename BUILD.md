@@ -95,24 +95,25 @@ The steps below will set up a Python virtual environment to run TCF.
    echo "export TCF_HOME=$TCF_HOME" >> ~/.bashrc
    ```
 
-4. Change to the quickstart build directory:
+4. If you are using Intel SGX hardware, check that `SGX_MODE=HW` before
+   building the code.
+   By default `SGX_MODE=SIM` indicating use the Intel SGX simulator.
+
+   If `SGX_MODE=HW`, also check that `TCF_ENCLAVE_CODE_SIGN_PEM` is set.
+   Refer to the [PREREQUISITES document](PREREQUISITES.md)
+   for more details on these variables
+
+5. Create Python virtual environment, Build and Install TCF
+   components into it:
    ```
    cd $TCF_HOME/tools/build
-   ```
-
-5. Check that these variables are set before building the code:
-   `SGX_DEBUG`, `SGX_MODE`, `SGX_SSL`.
-   If `SGX_MODE` is `HW`, also check that `TCF_ENCLAVE_CODE_SIGN_PEM` is set.
-   Refer to the [PREREQUISITES document](PREREQUISITES.md)
-   for more details on the above variables
-
-6. Build the Python virtual environment and install TCF components into it:
-   ```
+   # Create virtual environment directory with name _dev
+   python3 -m venv _dev
    sudo make clean
    make
    ```
 
-7. Activate the new Python virtual environment for the current shell session.
+6. Activate the new Python virtual environment for the current shell session.
    You will need to do this in each new shell session (in addition to
    exporting environment variables).
    ```
@@ -159,6 +160,10 @@ Follow these steps to run the `Demo.py` testcase:
 7. If you wish to exit the TCF program, press `y` and `Enter` at Terminal 1
    for standalone builds.
    For Docker-based builds, press `Ctrl-c`
+8. For standalone mode, delete virtual environment
+   ```
+   rm -rf $TCF_HOME/tools/build/_dev/
+   ```
 
 A GUI is also available to run this demo.
 See [examples/apps/heart_disease_eval](examples/apps/heart_disease_eval)
@@ -176,6 +181,8 @@ See [examples/apps/heart_disease_eval](examples/apps/heart_disease_eval)
   1. `sudo rm $TCF_HOME/config/Kv*`
   2. `$TCF_HOME/scripts/tcs_startup.sh -t`
   3. You can re-run the test now
+
+- If you get build errors rerunning `make`, try `sudo make clean` first
 
 - If you see the message `No package 'openssl' found`, you do not have
   OpenSSL libraries or the correct version of OpenSSL libraries.

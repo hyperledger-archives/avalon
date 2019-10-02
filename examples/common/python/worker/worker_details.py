@@ -78,7 +78,7 @@ class SGXWorkerDetails(WorkerDetails):
         self.data_encryption_algorithm = worker_data['dataEncryptionAlgorithm']
         self.verification_key = worker_data['workerTypeData']['verificationKey']
         self.encryption_key = worker_data['workerTypeData']['encryptionKey']
-        if worker_data['workerTypeData']['proofData']:
+        if 'proofData' in worker_data['workerTypeData'] and worker_data['workerTypeData']['proofData']:
             # proofData will be initialized only in HW mode by tcf_enclave_bridge
             # module when signup info is obtained from worker.
             self.proof_data = json.loads(worker_data['workerTypeData']['proofData'])
