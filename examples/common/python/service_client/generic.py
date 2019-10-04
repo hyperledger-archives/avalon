@@ -36,10 +36,10 @@ class GenericServiceClient(object) :
 
     def _postmsg(self, request) :
         """
-        Post a request JSON listener and return the response.
+        Post a request JSON string and return the response.
         """
 
-        data = json.dumps(request).encode('utf8')
+        data = request.encode('utf8')
         datalen = len(data)
 
         url = self.ServiceURL

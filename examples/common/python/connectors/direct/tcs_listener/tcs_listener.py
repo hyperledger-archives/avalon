@@ -138,7 +138,7 @@ class TCSListener(resource.Resource):
             if encoding == 'application/json':
 
                 try:
-                    input_json_str = json.loads(data.decode('utf-8'))
+                    input_json_str = data.decode('utf-8')
                     input_json = json.loads(input_json_str)
                     jrpc_id = input_json["id"]
                     response = self._process_request(input_json_str)
