@@ -38,6 +38,8 @@ optional arguments:
                         If present, display JSON output items
   -r, --receipt
                         If present, retrieve and display work order receipt 
+  -rs, --requester_signature
+                        If present, enable requester signature for work order requests
 ```
 
 The `--mode` option is used only with an Ethereum smart contract address.

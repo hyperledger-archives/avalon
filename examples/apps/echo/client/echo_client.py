@@ -50,6 +50,7 @@ def ParseCommandLine(args) :
 	global message
 	global config
 	global off_chain
+	global requester_signature
 
 	parser = argparse.ArgumentParser()
 	use_service = parser.add_mutually_exclusive_group()
@@ -71,6 +72,9 @@ def ParseCommandLine(args) :
 	parser.add_argument("-m", "--message", 
 		help='text message to be included in the JSON request payload', 
 		type=str)
+	parser.add_argument("-rs", "--requester_signature",
+		help="Enable requester signature for work order requests",
+		action="store_true")
 
 	options = parser.parse_args(args)
 
@@ -103,6 +107,8 @@ def ParseCommandLine(args) :
 
 	if options.off_chain:
 		off_chain = True
+
+	requester_signature = options.requester_signature
 
 	worker_id = options.worker_id
 	message = options.message
@@ -203,12 +209,16 @@ def Main(args=None):
 	# Add worker input data
 	wo_params.add_in_data(message)
 
-	# Sign work order
-	private_key = utility.generate_signing_keys()
+	# Encrypt work order request hash
 	wo_params.add_encrypted_request_hash()
-	if wo_params.add_requester_signature(private_key) == False:
-		logger.info("Work order request signing failed\n")
-		sys.exit(1)
+
+	if requester_signature:
+		private_key = utility.generate_signing_keys()
+		# Add requester signature and requester verifying_key
+		if wo_params.add_requester_signature(private_key) == False:
+			logger.info("Work order request signing failed")
+			exit(1)
+
 	# Submit work order
 	logger.info("Work order submit request : %s, \n \n ",
         wo_params.to_string())

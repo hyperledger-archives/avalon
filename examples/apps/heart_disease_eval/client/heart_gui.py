@@ -232,11 +232,15 @@ class resultWindow(tk.Toplevel):
 		)
 		wo_params.add_in_data(message)
 
-		private_key = utility.generate_signing_keys()
 		wo_params.add_encrypted_request_hash()
-		if wo_params.add_requester_signature(private_key) == False:
-			logger.info("Work order request signing failed\n")
-			sys.exit(1)
+
+		if requester_signature:
+			private_key = utility.generate_signing_keys()
+			# Add requester signature and requester verifying_key
+			if wo_params.add_requester_signature(private_key) == False:
+				logger.info("Work order request signing failed")
+				exit(1)
+
 		# Set text for JSON sidebar
 		req_id = 51
 		self.request_json = wo_params.to_string()
@@ -423,6 +427,7 @@ def ParseCommandLine(args) :
 	global verbose
 	global config
 	global off_chain
+	global requester_signature
 
 	parser = argparse.ArgumentParser()
 	use_service = parser.add_mutually_exclusive_group()
@@ -443,6 +448,9 @@ def ParseCommandLine(args) :
 		type=str)
 	parser.add_argument("-v", "--verbose", 
 		help="increase output verbosity", 
+		action="store_true")
+	parser.add_argument("-rs", "--requester_signature",
+		help="Enable requester signature for work order requests",
 		action="store_true")
 
 	options = parser.parse_args(args)
@@ -480,6 +488,8 @@ def ParseCommandLine(args) :
 		service_uri = config["tcf"].get("json_rpc_uri")
 		off_chain = True
 		uri_client = GenericServiceClient(service_uri) 
+
+	requester_signature = options.requester_signature
 
 	service_uri = options.service_uri
 	verbose = options.verbose
