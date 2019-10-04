@@ -16,6 +16,7 @@ from enum import Enum, unique
 
 @unique
 class RegistryStatus(Enum):
+    SUSPENDED = 0
     ACTIVE = 1
     OFF_LINE = 2
     DECOMMISSIONED = 3

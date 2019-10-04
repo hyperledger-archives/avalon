@@ -91,7 +91,7 @@ sc_addr: %s\n application_ids: %s', hex_to_utf(self.__org_id),
             "Registry lookup response not matched for org id")
 
     def test_registry_retrieve(self):
-        logging.info('Calling registry_retrieve..\n org_id: %s', hex_to_utf(self.__org_id))
+        logging.info('Calling registry_retrieve..\n org_id: %s:%s', self.__org_id, hex_to_utf(self.__org_id))
         result = self.__eth_conn.registry_retrieve(self.__org_id)
         logging.info('registry_retrieve contract status [%s, %s, %s, %d]', 
             result[0], hex_to_utf(result[1]), pretty_ids(result[2]), result[3])

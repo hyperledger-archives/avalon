@@ -71,7 +71,7 @@ class EthereumWrapper():
             logging.error("Missing parameter gas price")
             return False
         return True
-    
+
     def compile_source_file(self, file_path):
         """
         Compile solidity contract file and returns contract instance object

@@ -14,6 +14,8 @@ examples/common/python/crypto/crypto_wrap.cpp
 examples/common/python/verify_report/verify_report.py
 examples/common/python/verify_report/verify_report_wrap.cpp
 examples/common/python/dist/
+examples/common/python/kv_storage
+examples/common/python/kv_storage-lock
 examples/common/python/tcf_examples_common.egg-info/
 examples/enclave_manager/build/
 examples/enclave_manager/dist/
@@ -31,3 +33,6 @@ tools/build/_dev/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
+
+kv_storage
+kv_storage-lock
