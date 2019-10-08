@@ -95,24 +95,19 @@ The steps below will set up a Python virtual environment to run TCF.
    echo "export TCF_HOME=$TCF_HOME" >> ~/.bashrc
    ```
 
-4. Change to the quickstart build directory:
-   ```
-   cd $TCF_HOME/tools/build
-   ```
-
-5. Check that these variables are set before building the code:
-   `SGX_DEBUG`, `SGX_MODE`, `SGX_SSL`.
+4. Check that `SGX_MODE` is set before building the code.
    If `SGX_MODE` is `HW`, also check that `TCF_ENCLAVE_CODE_SIGN_PEM` is set.
    Refer to the [PREREQUISITES document](PREREQUISITES.md)
    for more details on the above variables
 
-6. Build the Python virtual environment and install TCF components into it:
+5. Build the Python virtual environment and install TCF components into it:
    ```
+   cd $TCF_HOME/tools/build
    sudo make clean
    make
    ```
 
-7. Activate the new Python virtual environment for the current shell session.
+6. Activate the new Python virtual environment for the current shell session.
    You will need to do this in each new shell session (in addition to
    exporting environment variables).
    ```

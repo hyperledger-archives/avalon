@@ -60,11 +60,15 @@ function try() {
 # CHECK ENVIRONMENT
 # -----------------------------------------------------------------
 yell --------------- CONFIG AND ENVIRONMENT CHECK ---------------
+if [ -z "$SGX_SSL" -a -d "/opt/intel/sgxssl" ] ; then
+    export SGX_SSL="/opt/intel/sgxssl"
+    echo "Setting default SGX_SSL=$SGX_SSL"
+fi
 
 : "${TCF_HOME?Missing environment variable TCF_HOME}"
 : "${TCF_ENCLAVE_CODE_SIGN_PEM?Missing environment variable TCF_ENCLAVE_CODE_SIGN_PEM}"
 : "${SGX_SSL?Missing environment variable SGX_SSL}"
-: "${SGX_SDK?Missing environment variable SGXSDKInstallPath}"
+: "${SGX_SDK?Missing environment variable SGX_SDK}"
 : "${PKG_CONFIG_PATH?Missing environment variable PKG_CONFIG_PATH}"
 
 # Set proxy for Intel Architectural Enclave Service Manager
