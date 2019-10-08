@@ -61,16 +61,16 @@ mode. Set `SGX_MODE` to either `HW` (Intel SGX available) or
 `SIM` (use Intel SGX simulator)
 
 - `SGX_SSL`
-Used to locate an Intel SGX-compatible version of OpenSSL.
-Usualy set to `/opt/intel/sgxssl`
+Optional variable to locate an Intel SGX-compatible version of OpenSSL.
+Default directory is `/opt/intel/sgxssl`
 
 - `TCF_ENCLAVE_CODE_SIGN_PEM`
 Use only with `SGX_MODE=HW`.
 This needs to be set to a valid enclave signing key. You can generate one
 yourself using OpenSSL, then export the path to it:
   ```
-  openssl genrsa -3 -out private_rsa_key.pem 3072
-  export TCF_ENCLAVE_CODE_SIGN_PEM=$PWD/private_rsa_key.pem
+  openssl genrsa -3 -out $TCF_HOME/enclave.pem 3072
+  export TCF_ENCLAVE_CODE_SIGN_PEM=$TCF_HOME/enclave.pem
   ```
 
 - `TCF_HOME`
@@ -377,9 +377,11 @@ problems.
   cd ../../..
   ```
 
-- Export the `SGX_SSL` environment variable to enable the build utilities to
+- If SGX SSL is not located at the default directory, `/opt/intel/sgxssl`,
+  export the `SGX_SSL` environment variable to enable the build utilities to
   find and link this library.
-  Append this line to your login shell script (`~/.bashrc` or similar):
+  Append this line to your login shell script (`~/.bashrc` or similar)
+  after changing the directory name:
   ```
   export SGX_SSL=/opt/intel/sgxssl
   echo "export SGX_SSL=/opt/intel/sgxssl" >>~/.bashrc

@@ -49,7 +49,8 @@ if("${SGX_SDK} " STREQUAL " ")
 endif()
 SET(SGX_SSL "$ENV{SGX_SSL}")
 if("${SGX_SSL} " STREQUAL " ")
-    message(FATAL_ERROR "SGX_SSL environment variable not defined!")
+    SET(SGX_SSL "/opt/intel/sgxssl")
+    message(STATUS "Setting default SGX_SSL=${SGX_SSL}")
 endif()
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
