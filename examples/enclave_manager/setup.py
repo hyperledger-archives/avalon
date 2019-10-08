@@ -35,7 +35,7 @@ module_src_path = os.path.join(tcf_root_dir, module_path)
 
 sgx_sdk_env = os.environ.get('SGX_SDK', '/opt/intel/sgxsdk')
 sgx_ssl_env = os.environ.get('SGX_SSL', '/opt/intel/sgxssl')
-sgx_mode_env = os.environ.get('SGX_MODE', None)
+sgx_mode_env = os.environ.get('SGX_MODE', 'SIM')
 if not sgx_mode_env or (sgx_mode_env != "SIM" and sgx_mode_env != "HW"):
     print("error: SGX_MODE value must be HW or SIM, current value is: ", sgx_mode_env)
     sys.exit(2)
