@@ -118,7 +118,7 @@ contract WorkOrderRegistry
 			errorCode,
 			VERSION);
 
-		return 0;
+		return errorCode;
 	}
 
 	function workOrderGet(
