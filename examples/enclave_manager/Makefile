@@ -12,12 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# Set SGX_MODE default (which can be overridden with an environment variable):
+SGX_MODE?=SIM
+
 PY_VERSION=${shell python3 --version | sed 's/Python \(3\.[0-9]\).*/\1/'}
 MOD_VERSION=${shell ../../bin/get_version}
-
-ifndef SGX_MODE
-$(error Incomplete configuration, SGX_MODE is not defined)
-endif
 
 EGG_FILE=dist/tcf_enclave_manager-${MOD_VERSION}-py${PY_VERSION}-linux-x86_64.egg
 SOURCE_DIR=$(shell pwd)

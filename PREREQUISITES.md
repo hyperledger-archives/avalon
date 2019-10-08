@@ -56,9 +56,9 @@ activation script (e.g. `source /opt/intel/sgxsdk/environment`)
   version 1.1.1d or later packages are not available for your system
 
 - `SGX_MODE`
-This variable is used to switch between the Intel SGX simulator and hardware
-mode. Set `SGX_MODE` to either `HW` (Intel SGX available) or
-`SIM` (use Intel SGX simulator)
+Optional variable used to switch between the Intel SGX simulator and hardware
+mode. Set `SGX_MODE` to `HW` (Intel SGX available) or
+`SIM` (use Intel SGX simulator). If not set, the default is `SIM` .
 
 - `SGX_SSL`
 Optional variable to locate an Intel SGX-compatible version of OpenSSL.
@@ -257,13 +257,8 @@ echo "export SGX_MODE=HW" >>~/.bashrc
 If running only in simulator mode (no hardware support), you only
 need the Intel SGX SDK.
 
-Set `SGX_MODE` as follows.
-Append this line to your login shell script (`~/.bashrc` or similar):
-
-```
-export SGX_MODE=SIM
-echo "export SGX_MODE=SIM" >>~/.bashrc
-```
+`SGX_MODE` is optional. If set, it must be set to `SIM` (the default).
+Verify `SGX_MODE` is not set, or is set to `SIM`, with `echo $SGX_MODE` .
 
 # <a name="openssl"></a>OpenSSL
 
