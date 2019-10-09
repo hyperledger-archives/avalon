@@ -296,13 +296,13 @@ std::string pcrypto::sig::PublicKey::SerializeXYToHex() const {
 }  // SerializeXYToHex
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-// Verifies SHA256 ECDSA signature of message
+// Verifies ECDSA signature of message. It's expected that caller of
+// this function passes hash value of the original message.
 // input signature ByteArray contains raw binary data
 // returns 1 if signature is valid, 0 if signature is invalid and -1 if there is
 // an internal error
 int pcrypto::sig::PublicKey::VerifySignature(
-    const ByteArray& message, const ByteArray& signature) const {
-    unsigned char hash[SHA256_DIGEST_LENGTH];
+    const ByteArray& hashMessage, const ByteArray& signature) const {
     // Decode signature B64 -> DER -> ECDSA_SIG
     const unsigned char* der_SIG = (const unsigned char*)signature.data();
     ECDSA_SIG_ptr sig(
@@ -310,8 +310,8 @@ int pcrypto::sig::PublicKey::VerifySignature(
     if (!sig) {
         return -1;
     }
-    SHA256((const unsigned char*)message.data(), message.size(), hash);
     // Verify
     return ECDSA_do_verify(
-        (const unsigned char*)hash, SHA256_DIGEST_LENGTH, sig.get(), public_key_);
+        (const unsigned char*)hashMessage.data(), hashMessage.size(),
+        sig.get(), public_key_);
 }  // pcrypto::sig::PublicKey::VerifySignature

@@ -52,9 +52,10 @@ namespace crypto {
             PublicKey GetPublicKey() const;
             // throws RuntimeError
             std::string Serialize() const;
-            // Sign message.data() and return ByteArray containing raw binary signature
+            // Sign hashMessage.data() and return ByteArray containing
+            // raw binary signature
             // throws RuntimeError
-            ByteArray SignMessage(const ByteArray& message) const;
+            ByteArray SignMessage(const ByteArray& hashMessage) const;
 
         private:
             EC_KEY* private_key_;
