@@ -72,7 +72,7 @@ public class Web3jService {
             }
         } catch (IOException ignored) {
         }
-        
+
         int fewSeconds = 5;
         WaitUtils.sleep(fewSeconds);
         log.error("Failed to connect to ethereum node (will retry) [chainNodeAddress:{}, retryIn:{}]",
@@ -107,7 +107,7 @@ public class Web3jService {
     // blockNumber is different than 0 only for status the require a check on the blockchain, so the scheduler should
     // already have this block, otherwise it should wait for a maximum of 10 blocks.
     public boolean isBlockAvailable(long blockNumber) {
-        // if the blocknumer is already available then simply returns true
+        // if the blockNumber is already available then simply returns true
         if (blockNumber <= getLatestBlockNumber())
             return true;
 
