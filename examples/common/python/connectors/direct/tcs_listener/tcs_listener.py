@@ -43,6 +43,9 @@ from database import connector
 from error_code.error_status import WorkOrderStatus
 import utility.utility as utility
 
+from jsonrpc import JSONRPCResponseManager
+from jsonrpc.dispatcher import Dispatcher
+
 import logging
 logger = logging.getLogger(__name__)
 
@@ -74,8 +77,18 @@ class TCSListener(resource.Resource):
         self.worker_registry_handler = TCSWorkerRegistryHandler(self.kv_helper)
         self.workorder_handler = TCSWorkOrderHandler(
             self.kv_helper, config["Listener"]["max_work_order_count"])
-        self.workorder_receipt_handler = TCSWorkOrderReceiptHandler(self.kv_helper)
-        self.worker_encryption_key_handler = WorkerEncryptionKeyHandler(self.kv_helper)
+        self.workorder_receipt_handler = TCSWorkOrderReceiptHandler(
+            self.kv_helper)
+        self.worker_encryption_key_handler = WorkerEncryptionKeyHandler(
+            self.kv_helper)
+
+        self.dispatcher = Dispatcher()
+        rpc_methods = [
+            self.workorder_handler.WorkOrderSubmit,
+            self.workorder_handler.WorkOrderGetResult,
+        ]
+        for m in rpc_methods:
+            self.dispatcher.add_method(m)
 
     def _process_request(self, input_json_str):
         response = {}
@@ -104,18 +117,24 @@ class TCSListener(resource.Resource):
             response['error']['message'] = 'Error: Method has to be of type string'
             return response
 
-        if ((input_json['method'] == "WorkOrderSubmit") or
-                (input_json['method'] == "WorkOrderGetResult")):
-            return self.workorder_handler.process_work_order(input_json_str)
-        elif("WorkOrderReceipt" in input_json['method']):
-            return self.workorder_receipt_handler.workorder_receipt_handler(input_json_str)
+        if ("WorkOrderReceipt" in input_json['method']):
+            return self.workorder_receipt_handler.workorder_receipt_handler(
+                input_json_str)
         elif ("Worker" in input_json['method']):
-            return self.worker_registry_handler.worker_registry_handler(input_json_str)
+            return self.worker_registry_handler.worker_registry_handler(
+                input_json_str)
         elif ("EncryptionKey" in input_json['method']):
-            return self.worker_encryption_key_handler.process_encryption_key(input_json_str)
+            return self.worker_encryption_key_handler.process_encryption_key(
+                input_json_str)
         else:
-            response['error']['message'] = 'Error: Invalid method field'
-            return response
+            logger.info("Received Work Order request : %s",
+                        input_json['method'])
+            # save the full json for WorkOrderSubmit
+            input_json["params"]["raw"] = input_json_str
+
+            data = json.dumps(input_json).encode('utf-8')
+            response = JSONRPCResponseManager.handle(data, self.dispatcher)
+            return response.data
 
     def render_GET(self, request):
         # JRPC response with id 0 is returned because id parameter
@@ -123,7 +142,8 @@ class TCSListener(resource.Resource):
         response = utility.create_error_response(
             WorkOrderStatus.INVALID_PARAMETER_FORMAT_OR_VALUE, "0",
             "Only POST request is supported")
-        logger.error("GET request is not supported. Only POST request is supported")
+        logger.error(
+            "GET request is not supported. Only POST request is supported")
 
         return response
 
@@ -161,7 +181,8 @@ class TCSListener(resource.Resource):
                 return response
 
         except:
-            logger.exception('exception while decoding http request %s', request.path)
+            logger.exception(
+                'exception while decoding http request %s', request.path)
             # JRPC response with 0 as id is returned because id can't be
             # fetched from improper request
             response = utility.create_error_response(
@@ -180,7 +201,8 @@ class TCSListener(resource.Resource):
             return response.encode('utf8')
 
         except:
-            logger.exception('unknown exception while processing request %s', request.path)
+            logger.exception(
+                'unknown exception while processing request %s', request.path)
             response = utility.create_error_response(
                 WorkOrderStatus.UNKNOWN_ERROR,
                 jrpc_id,
@@ -227,7 +249,8 @@ def parse_command_line(config, args):
     parser.add_argument(
         '--logfile', help='Name of the log file, __screen__ for standard output', type=str)
     parser.add_argument('--loglevel', help='Logging level', type=str)
-    parser.add_argument('--bind_uri', help='URI to listen for requests ', type=str)
+    parser.add_argument(
+        '--bind_uri', help='URI to listen for requests ', type=str)
 
     options = parser.parse_args(args)
 
@@ -267,14 +290,15 @@ def main(args=None):
 
     try:
         config = pconfig.parse_configuration_files(conffiles, confpaths)
-        config_json_str = json.dumps(config, indent=4)
     except pconfig.ConfigurationException as e:
         logger.error(str(e))
         sys.exit(-1)
 
     plogger.setup_loggers(config.get('Logging', {}))
-    sys.stdout = plogger.stream_to_logger(logging.getLogger('STDOUT'), logging.DEBUG)
-    sys.stderr = plogger.stream_to_logger(logging.getLogger('STDERR'), logging.WARN)
+    sys.stdout = plogger.stream_to_logger(
+        logging.getLogger('STDOUT'), logging.DEBUG)
+    sys.stderr = plogger.stream_to_logger(
+        logging.getLogger('STDERR'), logging.WARN)
 
     parse_command_line(config, remainder)
     local_main(config)
