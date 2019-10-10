@@ -46,6 +46,10 @@ for handler in logging.root.handlers[:]:
     logging.root.removeHandler(handler)
 logger = logging.getLogger(__name__)
 TCFHOME = os.environ.get("TCF_HOME", "../../")
+BACKGROUND = "light sky blue"
+ENTRY_COLOR = "light grey"
+BUTTON_COLOR = "deep sky blue"
+RESULT_BACKGROUND = "pale goldenrod"
 
 # -----------------------------------------------------------------
 # Validates that input is a non-negative int
@@ -68,15 +72,15 @@ def _float_validate(text):
 	except ValueError:
 		return False
 
-# User entry for ints
+# User entry for non-negative integer
 class intEntry:
 	def __init__(self, master, name):
 		global cur_row
-		label = tk.Label(master, text=name)
+		label = tk.Label(master, text=name, background=BACKGROUND)
 		label.grid(row=cur_row, column=0, sticky="e", pady=(5,0))
 		validate = (master.register(_int_validate))
-		self.entry = tk.Entry(master, validate="all", 
-			validatecommand=(validate, "%P"))
+		self.entry = tk.Entry(master, validate="all",
+			validatecommand=(validate, "%P"), width=5, background=ENTRY_COLOR)
 		self.entry.grid(row=cur_row, column=1, padx=(10,0), pady=(5,0),
 			sticky="w")
 		cur_row += 1
@@ -94,16 +98,17 @@ class intEntry:
 	def disable(self):
 		self.entry.config(state=tk.DISABLED)
 
-# User entry for floats
+# User entry for non-negative, non-special floating point number
 class floatEntry:
 	def __init__(self, master, name):
 		global cur_row
-		label = tk.Label(master, text=name)
+		label = tk.Label(master, text=name, background=BACKGROUND)
 		label.grid(row=cur_row, column=0, sticky="e", pady=(5,))
 		validate = (master.register(_float_validate))
-		self.entry = tk.Entry(master, validate="all", 
-			validatecommand=(validate, "%P"))
-		self.entry.grid(row=cur_row, column=1, padx=(10,0), pady=(5,), 
+		self.entry = tk.Entry(master, validate="all",
+			validatecommand=(validate, "%P"), width=10,
+			background=ENTRY_COLOR)
+		self.entry.grid(row=cur_row, column=1, padx=(10,0), pady=(5,),
 			sticky="w")
 		cur_row += 1
 
@@ -119,7 +124,7 @@ class floatEntry:
 	def disable(self):
 		self.entry.config(state=tk.DISABLED)
 
-#Radio button
+# User entry for a radio button
 class radio:
 	# Options is a list of text-value pairs
 	def __init__(self, master, name, options):
@@ -130,16 +135,18 @@ class radio:
 
 		self.var = tk.IntVar()
 		self.var.set(None)
-		label = tk.Label(master, text=name)
+		label = tk.Label(master, text=name, background=BACKGROUND)
 		label.grid(row=cur_row, column=0, pady=(5,0), sticky="e")
 
 		self.button_list = []
 		for i in range(len(options)):
-			button = tk.Radiobutton(master, text=options[i][0], 
-				variable=self.var, value=options[i][1])
+			button = tk.Radiobutton(master, text=options[i][0],
+				variable=self.var, value=options[i][1],
+				background=BACKGROUND)
 			self.button_list.append(button)
 			if i==0:
-				button.grid(row=cur_row, column=1, pady=(5,0), sticky="w")
+				button.grid(row=cur_row, column=1, pady=(5,0),
+					sticky="w")
 			else:
 				button.grid(row=cur_row, column=1, sticky="w")
 			cur_row += 1
@@ -158,11 +165,12 @@ class radio:
 		for button in self.button_list:
 			button.config(state=tk.DISABLED)
 
+# Create result window that appears after clicking "Evaluate"
 class resultWindow(tk.Toplevel):
 
 	def __init__(self, parent, message):
 		tk.Toplevel.__init__(self, parent)
-		self.config(background="pale goldenrod")
+		self.config(background=RESULT_BACKGROUND)
 		self.parent = parent
 		# Lock main window
 		self.transient(parent)
@@ -173,37 +181,43 @@ class resultWindow(tk.Toplevel):
 		self.protocol("WM_DELETE_WINDOW", self.close)
 
 		# Main content
-		self.main_frame = tk.Frame(self, background="pale goldenrod")
+		self.main_frame = tk.Frame(self, background=RESULT_BACKGROUND)
 		self.main_frame.pack()
 
 		self.frame1 = tk.Frame(self.main_frame)
 		self.frame1.pack(side=tk.LEFT)
 		self.result_text = tk.StringVar()
-		self.label = tk.Label(self.frame1, textvariable=self.result_text,
-			width=45, background="pale goldenrod")
+		self.label = tk.Label(self.frame1,
+			textvariable=self.result_text, width=45,
+			background=RESULT_BACKGROUND)
 		default_font = font.Font(font="TkDefaultFont")
 		new_font = default_font
 		new_font.config(weight=font.BOLD)
 		self.label.config(font=new_font)
 		self.label.pack()
-		self.frame2 = tk.Frame(self.main_frame, background="pale goldenrod")
+		self.frame2 = tk.Frame(self.main_frame,
+			background=RESULT_BACKGROUND)
 		self.frame2.pack(side=tk.LEFT)
 
 		# JSON sidebar
 		self.request_button = tk.Button(
-			self.frame2, text="View Request", command=self.request)
+			self.frame2, text="View Request", command=self.request,
+			background=BUTTON_COLOR)
 		self.request_button.pack(fill=tk.X, padx=(0,10), pady=(10,0))
 
 		self.result_button = tk.Button(
-			self.frame2, text="View Result", command=self.result)
+			self.frame2, text="View Result", command=self.result,
+			background=BUTTON_COLOR)
 		self.result_button.pack(fill=tk.X, padx=(0,10),pady=(10,0))
 
 		self.receipt_button = tk.Button(
-			self.frame2, text="View Receipt", command=self.receipt)
+			self.frame2, text="View Receipt",
+			command=self.receipt, background=BUTTON_COLOR)
 		self.receipt_button.pack(fill=tk.X, padx=(0,10),pady=(10,0))
 
 		# Close button
-		self.close_button = tk.Button(self, text="Close", command=self.close)
+		self.close_button = tk.Button(self, text="Close",
+			command=self.close, background=BUTTON_COLOR)
 		self.close_button.pack(pady=(0,5))
 
 		self.evaluate(message)
@@ -212,8 +226,8 @@ class resultWindow(tk.Toplevel):
 		self.result_text.set("Waiting for evaluation result...")
 		self.update()
 
-		# Create, sign, and submit workorder 
-		# Convert workloadId to hex
+		# Create, sign, and submit workorder.
+		# Convert workloadId to hex.
 		workload_id = "heart-disease-eval"
 		workload_id = workload_id.encode("UTF-8").hex()
 		session_iv = utility.generate_iv()
@@ -318,7 +332,7 @@ class resultWindow(tk.Toplevel):
 		self.parent.focus_set()
 		self.destroy()
 
-# Template for JSON display
+# Template for JSON display (from clicking View Request/Result/Receipt buttons)
 class jsonWindow(tk.Toplevel):
 	def __init__(self, parent, json, title):
 		tk.Toplevel.__init__(self, parent)
@@ -337,11 +351,12 @@ class jsonWindow(tk.Toplevel):
 def GuiMain():
 	root = tk.Tk()
 	root.title("Heart Disease Evaluation")
-	var_root = tk.Frame(root)
+	root.config(background=BACKGROUND)
+	var_root = tk.Frame(root, background=BACKGROUND)
 	var_root.pack(pady=(10,0))
-	v_frame1 = tk.Frame(var_root)
+	v_frame1 = tk.Frame(var_root, background=BACKGROUND)
 	v_frame1.pack(fill=tk.Y, side=tk.LEFT, padx=(10,0))
-	v_frame2 = tk.Frame(var_root)
+	v_frame2 = tk.Frame(var_root, background=BACKGROUND)
 	v_frame2.pack(fill=tk.Y, side=tk.LEFT, padx=(0,10))
 	# Organizes parameter grid
 	global cur_row
@@ -350,31 +365,32 @@ def GuiMain():
 	# Parameter grid
 	age = intEntry(v_frame1, "Age")
 	sex = radio(v_frame1, "Sex", [("Male", 1), ("Female", 0)])
-	cp = radio(v_frame1, "Chest pain type", [("Typical angina", 1), 
-		("Atypical angina", 2), ("Non-anginal pain", 3), ("Asymptomatic", 4)])
+	cp = radio(v_frame1, "Chest pain type", [("Typical angina", 1),
+		("Atypical angina", 2), ("Non-anginal pain", 3),
+		("Asymptomatic", 4)])
 	trestbps = intEntry(v_frame1, "Resting blood pressure (mm Hg)")
 	chol = intEntry(v_frame1, "Serum cholesterol (mg/dl)")
 	fbs = intEntry(v_frame1, "Fasting blood sugar (mg/dl)")
-	restecg = radio(v_frame1, "Resting electrocardiographic results", 
-		[("Normal", 0), ("Having ST-T wave abnormality", 1), 
+	restecg = radio(v_frame1, "Resting electrocardiographic results",
+		[("Normal", 0), ("Having ST-T wave abnormality", 1),
 		("Showing hypertrophy", 2)])
 	thalach = intEntry(v_frame1, "Maximum heart rate achieved")
-	exang = radio(v_frame2, "Exercise induced angina", 
+	exang = radio(v_frame2, "Exercise induced angina",
 		[("Yes", 1), ("No", 0)])
-	oldpeak = floatEntry(v_frame2, 
+	oldpeak = floatEntry(v_frame2,
 		"ST depression induced by exercise relative to rest")
-	slope = radio(v_frame2, "Slope of the peak exercise ST segment", 
+	slope = radio(v_frame2, "Slope of the peak exercise ST segment",
 		[("Upsloping", 1), ("Flat", 2), ("Downsloping", 3)])
-	ca = radio(v_frame2, "Number of major vessels colored by flouroscopy", 
+	ca = radio(v_frame2, "Number of major vessels colored by flouroscopy",
 		[("0", 0), ("1", 1), ("2", 2), ("3", 3)])
-	thal = radio(v_frame2, "Thallium stress test", 
+	thal = radio(v_frame2, "Thallium stress test",
 		[("Normal", 3), ("Fixed defect", 6), ("Reversible defect", 7)])
-	num = radio (v_frame2, "Diagnosis of heart disease", 
+	num = radio (v_frame2, "Diagnosis of heart disease",
 		[("<50% diameter narrowing", 0), (">50% diameter narrowing", 1)])
-	var_list = [age, sex, cp, trestbps, chol, fbs, restecg, thalach, 
+	var_list = [age, sex, cp, trestbps, chol, fbs, restecg, thalach,
 		exang, oldpeak, slope, ca, thal, num]
 
-	# Disable/enable other variable entries/buttons based on 
+	# Disable/enable other variable entries/buttons based on
 	# whether string input option is selected
 	def string_toggle():
 		if string_use.get()==1:
@@ -387,15 +403,19 @@ def GuiMain():
 			string_entry.config(state=tk.DISABLED)
 
 	# Input vars as string option
-	string_frame = tk.Frame(root)
+	string_frame = tk.Frame(root, background=ENTRY_COLOR)
 	string_frame.pack()
-	string_label = tk.Label(string_frame, text="Input variables as string")
+	string_label = tk.Label(string_frame,
+		text="Check to input variables as space-separated numbers (radio buttons begin at 1)",
+		background=BACKGROUND)
 	string_label.pack(side=tk.LEFT)
 	string_use = tk.IntVar()
 	string_check = tk.Checkbutton(
-		string_frame, command=string_toggle, variable=string_use)
+		string_frame, command=string_toggle, variable=string_use,
+		background=BACKGROUND)
 	string_check.pack(side=tk.LEFT)
-	string_entry = tk.Entry(string_frame, state=tk.DISABLED)
+	string_entry = tk.Entry(string_frame, state=tk.DISABLED, width=50,
+		background=ENTRY_COLOR)
 	string_entry.pack(side=tk.LEFT)
 
 	# Open window that will submit work order and retrieve evaluation result
@@ -406,19 +426,22 @@ def GuiMain():
 		else:
 			for var in var_list:
 				if var.get()==None:
-					messagebox.showwarning("Error", "Must input all variables")
+					messagebox.showwarning("Error",
+						"Must input all variables")
 					return
 				message = message + str(var.get()) + " "
 		root.wait_window(resultWindow(root, message))
 
 	# "Evaluate" button
 	eval_text = tk.StringVar()
-	eval_label = tk.Label(root, textvariable=eval_text)
+	eval_label = tk.Label(root, textvariable=eval_text,
+		background=BACKGROUND)
 	eval_label.pack()
-	eval_button = tk.Button(root, text="Evaluate", command=evaluate)
+	eval_button = tk.Button(root, text="Evaluate", command=evaluate,
+		background=BUTTON_COLOR)
 	eval_button.pack(pady=(0,10))
 
-	root.mainloop() 
+	root.mainloop()
 
 def ParseCommandLine(args) :
 
@@ -431,23 +454,23 @@ def ParseCommandLine(args) :
 
 	parser = argparse.ArgumentParser()
 	use_service = parser.add_mutually_exclusive_group()
-	parser.add_argument("-c", "--config", 
-		help="the config file containing the Ethereum contract information", 
+	parser.add_argument("-c", "--config",
+		help="the config file containing the Ethereum contract information",
 		type=str)
-	use_service.add_argument("-r", "--registry-list", 
-		help="the Ethereum address of the registry list", 
+	use_service.add_argument("-r", "--registry-list",
+		help="the Ethereum address of the registry list",
 		type=str)
-	use_service.add_argument("-s", "--service-uri", 
-		help="skip URI lookup and send to specified URI", 
+	use_service.add_argument("-s", "--service-uri",
+		help="skip URI lookup and send to specified URI",
 		type=str)
-	use_service.add_argument("-o", "--off-chain", 
-		help="skip URI lookup and use the registry in the config file", 
+	use_service.add_argument("-o", "--off-chain",
+		help="skip URI lookup and use the registry in the config file",
 		action="store_true")
-	parser.add_argument("-w", "--worker-id", 
-		help="skip worker lookup and retrieve specified worker", 
+	parser.add_argument("-w", "--worker-id",
+		help="skip worker lookup and retrieve specified worker",
 		type=str)
-	parser.add_argument("-v", "--verbose", 
-		help="increase output verbosity", 
+	parser.add_argument("-v", "--verbose",
+		help="increase output verbosity",
 		action="store_true")
 	parser.add_argument("-rs", "--requester_signature",
 		help="Enable requester signature for work order requests",
@@ -482,12 +505,12 @@ def ParseCommandLine(args) :
 	if options.service_uri:
 		service_uri = options.service_uri
 		off_chain = True
-		uri_client = GenericServiceClient(service_uri) 
+		uri_client = GenericServiceClient(service_uri)
 
 	if options.off_chain:
 		service_uri = config["tcf"].get("json_rpc_uri")
 		off_chain = True
-		uri_client = GenericServiceClient(service_uri) 
+		uri_client = GenericServiceClient(service_uri)
 
 	requester_signature = options.requester_signature
 
@@ -518,14 +541,15 @@ def Main(args=None):
 		logging.getLogger("STDERR"), logging.WARN)
 
 	logger.info("***************** TRUSTED COMPUTE FRAMEWORK (TCF)" + \
-		" *****************") 
+		" *****************")
 
 	# Retrieve Worker Registry
 	if not off_chain:
 		registry_list_instance = direct_jrpc.create_worker_registry_list(
 			config
 		)
-		registry_count, lookup_tag, registry_list = registry_list_instance.registry_lookup()
+		registry_count, lookup_tag, registry_list = \
+			registry_list_instance.registry_lookup()
 		logger.info("\n Registry lookup response : registry count {}\
 			lookup tag {} registry list {}\n".format(
 			registry_count, lookup_tag, registry_list
@@ -533,8 +557,9 @@ def Main(args=None):
 		if (registry_count == 0):
 			logger.warn("No registries found")
 			sys.exit(1)
-		registry_retrieve_result = registry_list_instance.registry_retrieve(
-			registry_list[0]
+		registry_retrieve_result = \
+			registry_list_instance.registry_retrieve(
+				registry_list[0]
 		)
 		logger.info("\n Registry retrieve response : {}\n".format(
 			registry_retrieve_result
