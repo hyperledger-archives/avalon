@@ -35,6 +35,7 @@ from connectors.direct.direct_json_rpc_api_connector \
 import crypto.crypto as crypto
 from error_code.error_status import WorkOrderStatus
 import utility.signature as signature
+import utility.hex_utils as hex_utils
 from error_code.error_status import SignatureStatus
 
 # Remove duplicate loggers
@@ -51,6 +52,7 @@ def ParseCommandLine(args) :
 	global config
 	global off_chain
 	global requester_signature
+	global input_data_hash
 
 	parser = argparse.ArgumentParser()
 	use_service = parser.add_mutually_exclusive_group()
@@ -72,8 +74,11 @@ def ParseCommandLine(args) :
 	parser.add_argument("-m", "--message", 
 		help='text message to be included in the JSON request payload', 
 		type=str)
-	parser.add_argument("-rs", "--requester_signature",
+	parser.add_argument("-rs", "--requester-signature",
 		help="Enable requester signature for work order requests",
+		action="store_true")
+	parser.add_argument("-dh", "--data-hash",
+		help="Enable input data hash for work order requests",
 		action="store_true")
 
 	options = parser.parse_args(args)
@@ -109,7 +114,7 @@ def ParseCommandLine(args) :
 		off_chain = True
 
 	requester_signature = options.requester_signature
-
+	input_data_hash = options.data_hash
 	worker_id = options.worker_id
 	message = options.message
 	if options.message == None or options.message == "":
@@ -198,6 +203,7 @@ def Main(args=None):
 	session_iv = utility.generate_iv()
 	session_key = utility.generate_key()
 	requester_nonce = secrets.token_hex(16)
+
 	# Create work order
 	wo_params = WorkOrderParams(
 		work_order_id, worker_id, workload_id, requester_id,
@@ -207,7 +213,14 @@ def Main(args=None):
 		data_encryption_algorithm="AES-GCM-256"
 	)
 	# Add worker input data
-	wo_params.add_in_data(message)
+	if input_data_hash:
+		# Compute data hash for data params inData
+		data_hash = utility.compute_data_hash(message)
+		# Convert data_hash to hex
+		data_hash = hex_utils.byte_array_to_hex_str(data_hash)
+		wo_params.add_in_data(message, data_hash)
+	else:
+		wo_params.add_in_data(message)
 
 	# Encrypt work order request hash
 	wo_params.add_encrypted_request_hash()
@@ -257,6 +270,12 @@ def Main(args=None):
 				decrypted_res = utility.decrypted_response(
 					res, session_key, session_iv)
 				logger.info("\nDecrypted response:\n {}".format(decrypted_res))
+				if input_data_hash:
+					decrypted_data = decrypted_res[0]["data"]
+					data_hash_in_resp = (decrypted_res[0]["dataHash"]).upper()
+					# Verify data hash in response
+					if utility.verify_data_hash(decrypted_data, data_hash_in_resp) == False:
+						sys.exit(1)
 			else:
 				logger.info("Signature verification Failed")
 				sys.exit(1)

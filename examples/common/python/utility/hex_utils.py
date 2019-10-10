@@ -27,3 +27,9 @@ def hex_to_utf(binary):
 
 def is_hex(s):
     return all(c in string.hexdigits for c in s)
+
+def byte_array_to_hex_str(in_byte_array):
+    '''
+    Converts tuple of bytes to hex string
+    '''
+    return ''.join(format(i, '02x') for i in in_byte_array)
