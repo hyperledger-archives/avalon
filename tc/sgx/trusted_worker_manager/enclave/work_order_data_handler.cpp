@@ -71,8 +71,10 @@ namespace tcf {
         if (!encrypted_input_data.empty()) {
             DecryptData(encrypted_input_data);
             if (!input_data_hash.empty()) {
-                VerifyInputHash(workorder_data.decrypted_data,
-				HexStringToBinary(input_data_hash));
+                tcf_err_t status = VerifyInputHash(workorder_data.decrypted_data,
+                    HexStringToBinary(input_data_hash));
+                tcf::error::ThrowIf<tcf::error::ValueError>(
+                    status != TCF_SUCCESS, "input data hash verification failed");
             }
         } else {
             tcf::error::ThrowIf<tcf::error::ValueError>(!input_data_hash.empty(),
@@ -131,9 +133,18 @@ namespace tcf {
 
     }
 
-    void WorkOrderDataHandler::VerifyInputHash(ByteArray input_data,
-		                               ByteArray input_hash) {
-        // Do nothing at the phase 1
+    tcf_err_t WorkOrderDataHandler::VerifyInputHash(ByteArray input_data,
+                                                    ByteArray input_hash) {
+        tcf_err_t verify_status = TCF_SUCCESS;
+        ByteArray hash = tcf::crypto::ComputeMessageHash(input_data);
+        if (std::equal(hash.begin(), hash.end(), input_hash.begin())) {
+            Log(TCF_LOG_INFO, "input data hash verification passed");
+        } else {
+            Log(TCF_LOG_ERROR, "input data hash verification failed");
+            verify_status = TCF_ERR_CRYPTO;
+        }
+
+        return verify_status;
     }
 
     void WorkOrderDataHandler::DecryptData(ByteArray encrypted_input_data) {

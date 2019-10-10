@@ -97,7 +97,8 @@ namespace tcf {
             ByteArray session_key = {};
             ByteArray session_key_iv = {};
             void ComputeOutputHash();
-            void VerifyInputHash(ByteArray input_data, ByteArray input_hash);
+            tcf_err_t VerifyInputHash(ByteArray input_data,
+                                      ByteArray input_hash);
             void DecryptData(ByteArray encrypted_input_data);
             std::string EncryptData();
         };
