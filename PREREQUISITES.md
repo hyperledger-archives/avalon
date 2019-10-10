@@ -50,10 +50,11 @@ These are used to find the Intel Software Guard Extensions (SGX) Software
 Development Kit (SDK). They are normally set by sourcing the Intel SGX SDK
 activation script (e.g. `source /opt/intel/sgxsdk/environment`)
 
-- `PKG_CONFIG_PATH` and `LD_LIBRARY_PATH` also contain the the path to
-  [OpenSSL](#openssl) package config files and libraries, respectively,
-  if you build your own OpenSSL. You need to do this when pre-built OpenSSL
-  version 1.1.1d or later packages are not available for your system
+- If you build your own OpenSSL (not the usual case),
+  `PKG_CONFIG_PATH` and `LD_LIBRARY_PATH` also contain the the path to
+  [OpenSSL](#openssl) package config files and libraries, respectively.
+  You need to do this when pre-built OpenSSL version 1.1.1d or later
+  packages are not available for your system
 
 - `SGX_MODE`
 Optional variable used to switch between the Intel SGX simulator and hardware
@@ -132,6 +133,8 @@ https://docs.docker.com/compose/install/#install-compose
 Hyperledger Trusted Compute Framework is intended to be run on
 Intel SGX-enabled platforms. However, it can also be run in "simulator mode"
 on platforms that do not have hardware support for Intel SGX.
+Support for other hardware-based Trusted Execution Environments (TEEs)
+can be added by submitting a Pull Request.
 
 
 ## Intel SGX SDK

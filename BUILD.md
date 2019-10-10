@@ -95,10 +95,13 @@ The steps below will set up a Python virtual environment to run TCF.
    echo "export TCF_HOME=$TCF_HOME" >> ~/.bashrc
    ```
 
-4. Check that `SGX_MODE` is set before building the code.
-   If `SGX_MODE` is `HW`, also check that `TCF_ENCLAVE_CODE_SIGN_PEM` is set.
+4. If you are using Intel SGX hardware, check that `SGX_MODE=HW` before
+   building the code.
+   By default `SGX_MODE=SIM` indicating use the Intel SGX simulator.
+
+   If `SGX_MODE=HW`, also check that `TCF_ENCLAVE_CODE_SIGN_PEM` is set.
    Refer to the [PREREQUISITES document](PREREQUISITES.md)
-   for more details on the above variables
+   for more details on these variables
 
 5. Build the Python virtual environment and install TCF components into it:
    ```
@@ -171,6 +174,8 @@ See [examples/apps/heart_disease_eval](examples/apps/heart_disease_eval)
   1. `sudo rm $TCF_HOME/config/Kv*`
   2. `$TCF_HOME/scripts/tcs_startup.sh -t`
   3. You can re-run the test now
+
+- If you get build errors rerunning `make`, try `sudo make clean` first
 
 - If you see the message `No package 'openssl' found`, you do not have
   OpenSSL libraries or the correct version of OpenSSL libraries.
