@@ -174,11 +174,17 @@ install the Intel SGX driver for both standalone and docker builds.
 You need to install the Intel SGX driver whether you build TCF standalone
 or using Docker.
 
-First install these Intel SGX-required packages:
+First install this package:
 
 ```
-sudo apt-get install -y libsgx-enclave-common libelf-dev
+sudo apt-get install -y libelf-dev
 ````
+
+Download and install libsgx-enclave-common version 2.3.101:
+```
+wget https://download.01.org/intel-sgx/linux-2.3.1/ubuntu18.04/libsgx-enclave-common_2.3.101.46683-1_amd64.deb
+sudo dpkg -i libsgx-enclave-common_2.3.101.46683-1_amd64.deb
+```
 
 ### Remove Old `/dev/sgx` Intel SGX Driver
 If device file `/dev/sgx` is present, remove the old driver:
@@ -204,6 +210,7 @@ After uninstalling, reboot with `sudo shutdown -r 0`
 Install the Intel SGX driver:
 
 ```
+cd /var/tmp
 wget https://download.01.org/intel-sgx/linux-2.6/ubuntu18.04-server/sgx_linux_x64_driver_2.5.0_2605efa.bin
 sudo bash ./sgx_linux_x64_driver_2.5.0_2605efa.bin
 ```
@@ -226,16 +233,13 @@ ias_api_key = '<ias subscription key obtained from portal>'
 ```
 
 In the same file, if you are behind a corporate proxy,
-update the https_proxy line:
+uncomment and update the https_proxy line:
 
-```
-https_proxy = "http://your-proxy:your-port/"
-```
-If you are not behind a corporate proxy (the usual case),
-then comment out the https_proxy line:
 ```
 #https_proxy = "http://your-proxy:your-port/"
 ```
+If you are not behind a corporate proxy (the usual case),
+then leave this line commented out.
 
 **The following steps apply only to standalone builds.**
 
