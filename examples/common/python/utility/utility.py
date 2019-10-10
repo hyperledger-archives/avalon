@@ -19,6 +19,7 @@ import base64
 import os
 import json
 import utility.file_utils as putils
+import utility.hex_utils as hex_utils
 import crypto.crypto as crypto
 import config.config as pconfig
 import logging
@@ -153,6 +154,15 @@ def list_difference(list_1, list_2):
     """
     list_dif = [i for i in list_1 + list_2 if i not in list_2]
     return list_dif
+
+# -----------------------------------------------------------------
+def compute_data_hash(data):
+    '''
+    Computes SHA-256 hash of data
+    '''
+    data_hash = crypto.compute_message_hash(data.encode("UTF-8"))
+    return data_hash
+
 # -----------------------------------------------------------------
 def encrypt_data(data, encryption_key, iv=None):
     """
@@ -233,8 +243,8 @@ def decrypted_response(input_json, session_key, session_iv, data_key=None, data_
             iv = data_iv
         if not do_decrypt:
             input_json_params['outData'][i]['data'] = data
-            logger.debug("Work order response data not encrypted, data in plain is %s",
-                base64.b64decode(data))
+            logger.info("Work order response data not encrypted, data in plain - %s",
+                base64.b64decode(data).decode('UTF-8'))
         else:
             logger.debug("encrypted_key: %s", data_encryption_key_byte)
             # Decrypt output data
@@ -245,7 +255,25 @@ def decrypted_response(input_json, session_key, session_iv, data_key=None, data_
     return input_json_params['outData']
 
 #---------------------------------------------------------------------------------------------
+def verify_data_hash(msg, data_hash):
+    '''
+    Function to verify data hash
+    msg - Input text
+    data_hash - hash of the data in hex format
+    '''
+    verify_success = True
+    msg_hash = compute_data_hash(msg)
+    # Convert both hash hex string values to upper case
+    msg_hash_hex = hex_utils.byte_array_to_hex_str(msg_hash).upper()
+    data_hash = data_hash.upper()
+    if msg_hash_hex == data_hash:
+        logger.info("Computed hash of message matched with data hash")
+    else:
+        logger.error("Computed hash of message does not match with data hash")
+        verify_success = False
+    return verify_success
 
+#---------------------------------------------------------------------------------------------
 def human_read_to_byte(size):
     size_name = ("B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB")
     size = size.split() # divide '1 GB' into ['1', 'GB']
