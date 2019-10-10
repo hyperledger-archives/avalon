@@ -1,3 +1,9 @@
+<!--
+Licensed under Creative Commons Attribution 4.0 International License
+https://creativecommons.org/licenses/by/4.0/
+-->
+# Maintainers
+
 | Name | GitHub | [Rocket.Chat](https://chat.hyperledger.org/channel/avalon) |
 | ---- | ------ | --------------------------------------------------------- |
 | A C Manjunath | [manju956](https://github.com/manju956) | @manju.ac |
