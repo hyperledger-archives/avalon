@@ -106,16 +106,15 @@ class TCSWorkOrderHandler:
                 return response['result']
 
             # response without a result should have an error
-            err = response["error"]
-            err_code = err["code"]
+            err_code = response["error"]["code"]
+            err_msg = response["error"]["message"]
             if err_code == EnclaveError.ENCLAVE_ERR_VALUE:
-                err["code"] = WorkOrderStatus.INVALID_PARAMETER_FORMAT_OR_VALUE
+                err_code = WorkOrderStatus.INVALID_PARAMETER_FORMAT_OR_VALUE
             elif err_code == EnclaveError.ENCLAVE_ERR_UNKNOWN:
-                err["code"] = WorkOrderStatus.UNKNOWN_ERROR
+                err_code = WorkOrderStatus.UNKNOWN_ERROR
             else:
-                err["code"] = WorkOrderStatus.FAILED
-
-            return err
+                err_code = WorkOrderStatus.FAILED
+            raise JSONRPCDispatchException(err_code, err_msg)
 
         if(self.kv_helper.get("wo-timestamps", wo_id) is not None):
             # work order is yet to be processed

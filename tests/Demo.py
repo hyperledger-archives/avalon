@@ -27,7 +27,7 @@ import worker.worker_details as worker
 from shared_kv.shared_kv_interface import KvStorage
 import utility.utility as enclave_helper
 import utility.file_utils as futils
-from error_code.error_status import SignatureStatus
+from error_code.error_status import SignatureStatus, WorkOrderStatus
 
 
 logger = logging.getLogger(__name__)
@@ -120,7 +120,7 @@ def LocalMain(config) :
 
             # Polling for the "WorkOrderGetResult" and break when you get the result
             while("WorkOrderGetResult" in input_json_str1 and "result" not in response):
-                if response["error"]["code"] == 9:
+                if response["error"]["code"] != WorkOrderStatus.PENDING:
                     break
                 response = uri_client._postmsg(input_json_str1)
                 logger.info("Received Response : %s, \n \n ", response)
@@ -129,6 +129,11 @@ def LocalMain(config) :
 
             #Verify the signature
             if ( "WorkOrderGetResult" in input_json_str1 ):
+                if "error" in response:
+                    # Response has error, hence skip Signature verification
+                    logger.info("Work order response has error, " \
+                                "skipping signature verification")
+                    continue
                 sig_bool = sig_obj.verify_signature(response, worker_obj.verification_key)
                 try:
                     if sig_bool > 0:
