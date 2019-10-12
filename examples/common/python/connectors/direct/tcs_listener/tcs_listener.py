@@ -84,6 +84,12 @@ class TCSListener(resource.Resource):
 
         self.dispatcher = Dispatcher()
         rpc_methods = [
+            self.worker_registry_handler.WorkerLookUp,
+            self.worker_registry_handler.WorkerLookUpNext,
+            self.worker_registry_handler.WorkerRegister,
+            self.worker_registry_handler.WorkerSetStatus,
+            self.worker_registry_handler.WorkerRetrieve,
+            self.worker_registry_handler.WorkerUpdate,
             self.workorder_handler.WorkOrderSubmit,
             self.workorder_handler.WorkOrderGetResult,
         ]
@@ -120,15 +126,11 @@ class TCSListener(resource.Resource):
         if ("WorkOrderReceipt" in input_json['method']):
             return self.workorder_receipt_handler.workorder_receipt_handler(
                 input_json_str)
-        elif ("Worker" in input_json['method']):
-            return self.worker_registry_handler.worker_registry_handler(
-                input_json_str)
         elif ("EncryptionKey" in input_json['method']):
             return self.worker_encryption_key_handler.process_encryption_key(
                 input_json_str)
         else:
-            logger.info("Received Work Order request : %s",
-                        input_json['method'])
+            logger.info("Received request: %s", input_json['method'])
             # save the full json for WorkOrderSubmit
             input_json["params"]["raw"] = input_json_str
 
