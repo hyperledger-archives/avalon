@@ -30,7 +30,7 @@ import logging
 import crypto.crypto as crypto
 import utility.file_utils as putils
 import utility.utility as utility
-from utility.hex_utils import is_hex, byte_array_to_hex_str
+from utility.hex_utils import is_valid_hex_str, byte_array_to_hex_str
 import worker.worker_details as worker
 from error_code.error_status import SignatureStatus
 
@@ -238,7 +238,7 @@ class ClientSignature(object) :
                 session_iv, worker.encryption_key, data_key, data_iv)
 
         if input_json_params["requesterNonce"] and \
-            is_hex(input_json_params["requesterNonce"]):
+            is_valid_hex_str(input_json_params["requesterNonce"]):
             nonce = crypto.string_to_byte_array(input_json_params["requesterNonce"])
         else:
             # [NO_OF_BYTES] 16 BYTES for nonce, is the recommendation by NIST to

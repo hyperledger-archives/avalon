@@ -19,6 +19,9 @@ import crypto.crypto as crypto
 from error_code.error_status import WorkOrderStatus
 from error_code.enclave_error import EnclaveError
 import utility.utility as utility
+from utility.tcf_types import JsonRpcErrorCode
+from work_order.work_order_request_validator import WorkOrderRequestValidator
+from utility.hex_utils import is_valid_hex_str
 
 from jsonrpc.exceptions import JSONRPCDispatchException
 
@@ -92,12 +95,18 @@ class TCSWorkOrderHandler:
         Function to process work order get result
         This API corresponds to TCF API 6.1.4 Work Order Pull Request Payload
         Parameters:
-            - wo_id is work order id
-            - jrpc_id is JRPC id of response
-            - response is the response object to be returned
+            - params is variable-length arugment list containing work request
+              as defined in EEA spec 6.1.4
+        Returns jrpc response as defined in EEA spec 6.1.2
         """
-
         wo_id = params["workOrderId"]
+        if not is_valid_hex_str(wo_id):
+            logging.error("Invalid work order Id")
+            raise JSONRPCDispatchException(
+                JsonRpcErrorCode.INVALID_PARAMETER,
+                "Invalid work order Id"
+            )
+
         # Work order is processed if it is in wo-response table
         value = self.kv_helper.get("wo-responses", wo_id)
         if value:
@@ -132,13 +141,43 @@ class TCSWorkOrderHandler:
         """
         Function to process work order request
         Parameters:
-            - wo_id is work order id
-            - input_json_str is a work order request json as per TCF API 6.1.1 Work Order Request Payload
-            - response is the response object to be returned to client
+            - params is variable-length arugment list containing work request
+              as defined in EEA spec 6.1.1
+        Returns jrpc response as defined in EEA spec 6.1.3
         """
 
         wo_id = params["workOrderId"]
         input_json_str = params["raw"]
+        input_value_json = json.loads(input_json_str)
+
+        req_validator = WorkOrderRequestValidator()
+        valid, err_msg = req_validator.validate_parameters(input_value_json["params"])
+        if not valid:
+            raise JSONRPCDispatchException(
+                JsonRpcErrorCode.INVALID_PARAMETER,
+                err_msg
+            )
+
+        if "inData" in input_value_json["params"]:
+            valid, err_msg = req_validator.validate_data_format(
+                input_value_json["params"]["inData"])
+            if not valid:
+                raise JSONRPCDispatchException(
+                    JsonRpcErrorCode.INVALID_PARAMETER,
+                    err_msg)
+        else:
+            raise JSONRPCDispatchException(
+                JsonRpcErrorCode.INVALID_PARAMETER,
+                "Missing inData parameter"
+            )
+
+        if "outData" in input_value_json["params"]:
+            valid, err_msg = req_validator.validate_data_format(
+                input_value_json["params"]["outData"])
+            if not valid:
+                raise JSONRPCDispatchException(
+                    JsonRpcErrorCode.INVALID_PARAMETER,
+                    err_msg)
 
         if((self.workorder_count + 1) > self.max_workorder_count):
 

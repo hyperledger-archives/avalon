@@ -16,7 +16,7 @@ import logging
 import os,sys
 from os.path import exists, realpath
 import json
-from eth_utils.hexadecimal import is_hex
+from utility.hex_utils import is_valid_hex_str
 
 from utility.tcf_types import JsonRpcErrorCode
 
@@ -80,64 +80,64 @@ def validate_details(details):
                 return "Invalid argument {}".format(key)
 
     if ("workOrderSyncUri" in details_dict.keys() and \
-        not is_hex(details_dict['workOrderSyncUri'])):
+        not is_valid_hex_str(details_dict['workOrderSyncUri'])):
         return "Invalid argument workOrderSyncUri"
 
     if ("workOrderAsyncUri" in details_dict.keys() and \
-        not is_hex(details_dict['workOrderAsyncUri'])):
+        not is_valid_hex_str(details_dict['workOrderAsyncUri'])):
         return "Invalid argument workOrderAsyncUri"
 
     if ("workOrderPullUri" in details_dict.keys() and \
-        not is_hex(details_dict['workOrderPullUri'])):
+        not is_valid_hex_str(details_dict['workOrderPullUri'])):
         return "Invalid argument workOrderPullUri"
 
     if ("workOrderNotifyUri" in details_dict.keys() and \
-        not is_hex(details_dict['workOrderNotifyUri'])):
+        not is_valid_hex_str(details_dict['workOrderNotifyUri'])):
         return "Invalid argument workOrderNotifyUri"
 
     if ("receiptInvocationUri" in details_dict.keys() and \
-        not is_hex(details_dict['receiptInvocationUri'])):
+        not is_valid_hex_str(details_dict['receiptInvocationUri'])):
         return "Invalid argument receiptInvocationUri"
 
     if ("workOrderInvocationAddress" in details_dict.keys() and \
-        not is_hex(details_dict['workOrderInvocationAddress'])):
+        not is_valid_hex_str(details_dict['workOrderInvocationAddress'])):
         return "Invalid argument workOrderInvocationAddress"
 
     if ("receiptInvocationAddress" in details_dict.keys() and \
-        not is_hex(details_dict['receiptInvocationAddress'])):
+        not is_valid_hex_str(details_dict['receiptInvocationAddress'])):
         return "Invalid argument receiptInvocationAddress"
 
     if ("fromAddress" in details_dict.keys() and \
-        not is_hex(details_dict['fromAddress'])):
+        not is_valid_hex_str(details_dict['fromAddress'])):
         return "Invalid argument fromAddress"
 
     if ("workOrderPayloadFormats" in details_dict.keys() and \
-        not is_hex(details_dict['workOrderPayloadFormats'])):
+        not is_valid_hex_str(details_dict['workOrderPayloadFormats'])):
         return "Invalid argument workOrderPayloadFormats"
 
     if ("workerTypeData" in details_dict.keys()):
         if ("verificationKey" in details_dict["workerTypeData"].keys() and \
-            not is_hex(details_dict["workerTypeData"]["verificationKey"])):
+            not is_valid_hex_str(details_dict["workerTypeData"]["verificationKey"])):
             return "Invalid argument verificationKey"
 
         if ("proofDataType" in details_dict["workerTypeData"].keys() and \
-            not is_hex(details_dict["workerTypeData"]["proofDataType"])):
+            not is_valid_hex_str(details_dict["workerTypeData"]["proofDataType"])):
             return "Invalid argument proofDataType"
 
         if ("encryptionKey" in details_dict["workerTypeData"].keys() and \
-            not is_hex(details_dict["workerTypeData"]["encryptionKey"])):
+            not is_valid_hex_str(details_dict["workerTypeData"]["encryptionKey"])):
             return "Invalid argument encryptionKey"
 
         if ("encryptionKeyNonce" in details_dict["workerTypeData"].keys() and \
-            not is_hex(details_dict["workerTypeData"]["encryptionKeyNonce"])):
+            not is_valid_hex_str(details_dict["workerTypeData"]["encryptionKeyNonce"])):
             return "Invalid argument encryptionKeyNonce"
 
         if ("encryptionKeySignature" in details_dict["workerTypeData"].keys() and \
-            not is_hex(details_dict["workerTypeData"]["encryptionKeySignature"])):
+            not is_valid_hex_str(details_dict["workerTypeData"]["encryptionKeySignature"])):
             return "Invalid argument encryptionKeySignature"
 
         if ("enclaveCertificate" in details_dict["workerTypeData"].keys() and \
-            not is_hex(details_dict["workerTypeData"]["enclaveCertificate"])):
+            not is_valid_hex_str(details_dict["workerTypeData"]["enclaveCertificate"])):
             return "Invalid argument enclaveCertificate"
     return None
 
