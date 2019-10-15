@@ -14,7 +14,7 @@
 
 import json
 import logging
-from eth_utils.hexadecimal import is_hex
+from utility.hex_utils import is_valid_hex_str
 from service_client.generic import GenericServiceClient
 from connectors.interfaces.worker_registry_interface import WorkerRegistryInterface
 from utility.tcf_types import WorkerType, JsonRpcErrorCode
@@ -28,7 +28,7 @@ class WorkerRegistryJRPCImpl(WorkerRegistryInterface):
     def worker_register(self, worker_id, worker_type, org_id, application_type_ids,
         details, id=None):
         """ Adds worker details to registry """
-        if worker_id is None or not is_hex(worker_id):
+        if worker_id is None or not is_valid_hex_str(worker_id):
             logging.error("Worker id is empty or Invalid")
             return create_jrpc_response(id, JsonRpcErrorCode.INVALID_PARAMETER,
                 "Worker id is empty or Invalid")
@@ -36,13 +36,13 @@ class WorkerRegistryJRPCImpl(WorkerRegistryInterface):
             logging.error("Invalid worker type")
             return create_jrpc_response(id, JsonRpcErrorCode.INVALID_PARAMETER,
                 "Invalid worker type")
-        if org_id is not None and not is_hex(org_id):
+        if org_id is not None and not is_valid_hex_str(org_id):
             logging.error("Invalid organization id")
             return create_jrpc_response(id, JsonRpcErrorCode.INVALID_PARAMETER,
                 "Invalid organization id")
         if application_type_ids is not None:
             for app_id in application_type_ids:
-                if not is_hex(app_id):
+                if not is_valid_hex_str(app_id):
                     logging.error("Invalid application type id")
                     return create_jrpc_response(
                         id, JsonRpcErrorCode.INVALID_PARAMETER,
@@ -71,7 +71,7 @@ class WorkerRegistryJRPCImpl(WorkerRegistryInterface):
     
     def worker_update(self, worker_id, details, id=None):
         """ Update worker with new information """
-        if worker_id is None or not is_hex(worker_id):
+        if worker_id is None or not is_valid_hex_str(worker_id):
             logging.error("Worker id is empty or invalid")
             return create_jrpc_response(id, JsonRpcErrorCode.INVALID_PARAMETER,
                 "Worker id is empty or Invalid")
@@ -92,7 +92,7 @@ class WorkerRegistryJRPCImpl(WorkerRegistryInterface):
         """ Set the worker status to active, offline, decommissioned 
         or compromised state 
         """
-        if worker_id is None or not is_hex(worker_id):
+        if worker_id is None or not is_valid_hex_str(worker_id):
             logging.error("Worker id is empty or Invalid")
             return create_jrpc_response(id, JsonRpcErrorCode.INVALID_PARAMETER,
                 "Worker id is empty or Invalid")
@@ -112,7 +112,7 @@ class WorkerRegistryJRPCImpl(WorkerRegistryInterface):
 
     def worker_retrieve(self, worker_id, id=None):
         """ Retrieve the worker identified by worker id """
-        if worker_id is None or not is_hex(worker_id):
+        if worker_id is None or not is_valid_hex_str(worker_id):
             logging.error("Worker id is empty or Invalid")
             return create_jrpc_response(id, JsonRpcErrorCode.INVALID_PARAMETER,
                 "Worker id is empty or Invalid")
@@ -151,7 +151,7 @@ class WorkerRegistryJRPCImpl(WorkerRegistryInterface):
             json_rpc_request["params"]["workerType"] = worker_type.value
 
         if organization_id is not None:
-            if not is_hex(organization_id):
+            if not is_valid_hex_str(organization_id):
                 logging.error("Invalid organization id")
                 return create_jrpc_response(
                     id, JsonRpcErrorCode.INVALID_PARAMETER,
@@ -160,7 +160,7 @@ class WorkerRegistryJRPCImpl(WorkerRegistryInterface):
 
         if application_type_id is not None:
             for app_id in application_type_id:
-                if not is_hex(app_id):
+                if not is_valid_hex_str(app_id):
                     logging.error("Invalid application type id")
                     return create_jrpc_response(
                         id, JsonRpcErrorCode.INVALID_PARAMETER,
@@ -193,7 +193,7 @@ class WorkerRegistryJRPCImpl(WorkerRegistryInterface):
             json_rpc_request["params"]["workerType"] = worker_type.value
 
         if organization_id is not None:
-            if not is_hex(organization_id):
+            if not is_valid_hex_str(organization_id):
                 logging.error("Invalid organization id")
                 return create_jrpc_response(
                     id, JsonRpcErrorCode.INVALID_PARAMETER,
@@ -202,7 +202,7 @@ class WorkerRegistryJRPCImpl(WorkerRegistryInterface):
 
         if application_type_id is not None:
             for app_id in application_type_id:
-                if not is_hex(app_id):
+                if not is_valid_hex_str(app_id):
                     logging.error("Invalid application type id")
                     return create_jrpc_response(
                         id, JsonRpcErrorCode.INVALID_PARAMETER,
