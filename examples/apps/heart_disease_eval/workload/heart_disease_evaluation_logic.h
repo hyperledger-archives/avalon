@@ -28,7 +28,8 @@ private:
         double score_fbs(double data);
         double score_restecg(int type);
         double score_thalach(double data);
-        double score_exang_oldpeak(int type);
+        double score_exang(int type);
+        double score_oldpeak(double depression);
         double score_slop(int type);
         double score_ca(int number);
         double score_thaldur(int durationMin);
