@@ -16,7 +16,6 @@ version: '3.5'
 
 services:
   tcf:
-    container_name: tcf
     image: tcf-ci-build:${ISOLATION_ID}
 
     build:
