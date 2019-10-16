@@ -15,20 +15,19 @@
 # Set SGX_MODE default (which can be overridden with an environment variable):
 SGX_MODE?=SIM
 
-PY_VERSION=${shell python3 --version | sed 's/Python \(3\.[0-9]\).*/\1/'}
+PY_VERSION=${shell python3 --version | sed 's/Python \(3\.[0-9]\).*/\1/' | tr -d .}
 MOD_VERSION=${shell ../../bin/get_version}
 
-EGG_FILE=dist/tcf_enclave_manager-${MOD_VERSION}-py${PY_VERSION}-linux-x86_64.egg
+WHEEL_FILE=dist/tcf_enclave_manager-${MOD_VERSION}-cp${PY_VERSION}-cp${PY_VERSION}m-linux_x86_64.whl
 SOURCE_DIR=$(shell pwd)
 EDL_PATH=$(SOURCE_DIR)/../../tc/sgx/trusted_worker_manager/enclave
 ENCLAVE_WRAPPER=$(SOURCE_DIR)/../../tc/sgx/trusted_worker_manager/enclave_wrapper
 
+all : $(WHEEL_FILE)
 
-all : $(EGG_FILE)
-
-$(EGG_FILE) : build_ext
+$(WHEEL_FILE) : build_ext
 	@echo Build Distribution
-	python3 setup.py bdist_egg
+	python3 setup.py bdist_wheel
 
 build_ext :
 	$(SGX_SDK)/bin/x64/sgx_edger8r --untrusted $(EDL_PATH)/enclave.edl --search-path $(SGX_SDK)/include --search-path $(SGX_SSL)/include/ --search-path $(EDL_PATH)
@@ -44,10 +43,11 @@ build :
 	mkdir $@
 
 install:
-	@echo INSTALLING EGG FILE =================
-	easy_install $(EGG_FILE)
+	@echo INSTALLING WHEEL FILE =================
+	pip3 install $(WHEEL_FILE)
 
 clean:
+	pip3 uninstall --yes $(WHEEL_FILE)
 	rm -f $(addprefix $(ENCLAVE_WRAPPER), /enclave_u.c /enclave_u.h)
 	rm -f tcf_enclave_manager/tcf_enclave.py tcf_enclave_manager/tcf_enclave_wrap.cpp
 	rm -rf build deps dist *.egg-info
