@@ -91,9 +91,14 @@ distributions will require similar packages.
 sudo apt-get update
 sudo apt-get install -y cmake swig pkg-config python3-dev python3-venv python \
      software-properties-common virtualenv curl xxd git unzip dh-autoreconf \
-     ocaml ocamlbuild liblmdb-dev protobuf-compiler
+     ocaml ocamlbuild liblmdb-dev protobuf-compiler python3-pip python3-toml \
+     python3-requests python3-colorlog python3-twisted
 ```
 
+Also, install following pip packages
+```
+sudo pip3 install --upgrade setuptools json-rpc py-solc web3
+```
 
 # <a name="docker"></a>Docker
 Docker may be used instead of building TCF directly (standalone mode) and
