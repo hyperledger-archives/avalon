@@ -1,3 +1,5 @@
+#!/bin/bash
+#
 # Copyright 2019 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -11,20 +13,19 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+# ------------------------------------------------------------------------------
 
-version: '3.5'
+# Exit on non-zero exit code from subcommand
+set -e
 
-services:
-  tcf:
-    image: tcf-ci-build:${ISOLATION_ID}
-    build:
-      context: .
-      args:
-        - http_proxy
-        - https_proxy
-        - no_proxy
-    working_dir: "/project/TrustedComputeFramework/"
-    entrypoint: "bash -c \"\
-        source scripts/tcs_startup.sh -y \
-        && sleep 5 \
-        && source tools/run_tests.sh \""
+# Set trusted-compute-framework project directory relative to this file
+PROJECT_DIR=$(cd $(dirname $(dirname $0)) && pwd)
+
+# Make sawtooth scripts accessible
+PATH=$PROJECT_DIR/bin:$PATH
+
+main() {
+    run_docker_test ./ci/tcf-tests.yaml
+}
+
+main
