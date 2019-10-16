@@ -23,31 +23,13 @@ PKGGEN=$(abspath $(SRCDIR)/../rebuild.sh)
 PY_VERSION=${shell python3 --version | sed 's/Python \(3\.[0-9]\).*/\1/'}
 PYTHON_DIR=$(DSTDIR)/lib/python$(PY_VERSION)/site-packages/
 
-all: environment template enclavekey packages
+all: template enclavekey packages
 
 clean :
-	rm -rf $(DSTDIR); $(abspath $(SRCDIR)/../clean.sh)
-
-environment : $(PYTHON_DIR)
-
-$(PYTHON_DIR) : $(DSTDIR)
-	virtualenv -p python3 --no-download $(DSTDIR)
-	. $(abspath $(DSTDIR)/bin/activate) ; pip install --upgrade pip
-	. $(abspath $(DSTDIR)/bin/activate) ; pip install --upgrade setuptools
-	. $(abspath $(DSTDIR)/bin/activate) ; pip install --upgrade toml
-	. $(abspath $(DSTDIR)/bin/activate) ; pip install --upgrade py-solc
-	. $(abspath $(DSTDIR)/bin/activate) ; pip install --upgrade web3
-	. $(abspath $(DSTDIR)/bin/activate) ; pip install --upgrade requests
-	. $(abspath $(DSTDIR)/bin/activate) ; pip install --upgrade colorlog
-	. $(abspath $(DSTDIR)/bin/activate) ; pip install --upgrade twisted
-	. $(abspath $(DSTDIR)/bin/activate) ; pip install --upgrade protobuf
-	. $(abspath $(DSTDIR)/bin/activate) ; pip install --upgrade json-rpc
-
-$(DSTDIR) :
-	mkdir -p $(DSTDIR)
+	$(abspath $(SRCDIR)/../clean.sh)
 
 packages :
-	. $(abspath $(DSTDIR)/bin/activate) ; $(PKGGEN)
+	$(PKGGEN)
 
 enclavekey :
 	openssl genrsa -3 -out $(SRCDIR)/../../enclave.pem 3072
@@ -55,4 +37,4 @@ enclavekey :
 template :
 	mkdir -p $(DSTDIR)/opt/tcf/logs
 
-.PHONY : environment packages template
+.PHONY : packages template

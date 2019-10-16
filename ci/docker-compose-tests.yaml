@@ -28,8 +28,7 @@ services:
       - ../:/project/TrustedComputeFramework
     working_dir: "/project/TrustedComputeFramework/tools/build"
     entrypoint: "bash -c \"\
-        source _dev/bin/activate \
-        && cd ../../scripts \
+        cd ../../scripts \
         && source tcs_startup.sh -y \
         && sleep 5 \
         && source ../tools/run_tests.sh \""

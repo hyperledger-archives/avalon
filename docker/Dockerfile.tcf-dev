@@ -49,9 +49,13 @@ RUN apt-get update \
     cmake \
     protobuf-compiler \
     libprotobuf-dev \
-    python \
     python3-dev \
     virtualenv \
+    python3-pip \
+    python3-toml \
+    python3-requests \
+    python3-colorlog \
+    python3-twisted \
     swig \
     software-properties-common \
     curl \
@@ -67,6 +71,13 @@ RUN apt-get update \
  && apt-get -y -q upgrade \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
+
+# Install setuptools, py-solc and web3 packages using pip because
+# these are not available in apt repository.
+RUN pip3 install --upgrade setuptools json-rpc py-solc web3
+
+# Make Python3 default
+RUN ln -s /usr/bin/python3 /usr/bin/python
 
 # SGX common library and SDK are installed in /opt/intel directory.
 # Installation of SGX libsgx-common packages requires /etc/init directory. In docker image this directory doesn't exist.
