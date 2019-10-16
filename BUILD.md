@@ -100,9 +100,12 @@ The steps below will set up a Python virtual environment to run TCF.
    Refer to the [PREREQUISITES document](PREREQUISITES.md)
    for more details on the above variables
 
-5. Build the Python virtual environment and install TCF components into it:
+5. Create Python virtual environment, Build and Install TCF
+   components into it:
    ```
    cd $TCF_HOME/tools/build
+   # Create virtual environment directory with name _dev
+   python3 -m venv _dev
    sudo make clean
    make
    ```
@@ -154,6 +157,10 @@ Follow these steps to run the `Demo.py` testcase:
 7. If you wish to exit the TCF program, press `y` and `Enter` at Terminal 1
    for standalone builds.
    For Docker-based builds, press `Ctrl-c`
+8. For standalone mode, delete virtual environment
+   ```
+   rm -rf $TCF_HOME/tools/build/_dev/
+   ```
 
 A GUI is also available to run this demo.
 See [examples/apps/heart_disease_eval](examples/apps/heart_disease_eval)
