@@ -84,6 +84,8 @@ class TCSListener(resource.Resource):
 
         self.dispatcher = Dispatcher()
         rpc_methods = [
+            self.worker_encryption_key_handler.EncryptionKeyGet,
+            self.worker_encryption_key_handler.EncryptionKeySet,
             self.worker_registry_handler.WorkerLookUp,
             self.worker_registry_handler.WorkerLookUpNext,
             self.worker_registry_handler.WorkerRegister,
@@ -126,17 +128,14 @@ class TCSListener(resource.Resource):
         if ("WorkOrderReceipt" in input_json['method']):
             return self.workorder_receipt_handler.workorder_receipt_handler(
                 input_json_str)
-        elif ("EncryptionKey" in input_json['method']):
-            return self.worker_encryption_key_handler.process_encryption_key(
-                input_json_str)
-        else:
-            logger.info("Received request: %s", input_json['method'])
-            # save the full json for WorkOrderSubmit
-            input_json["params"]["raw"] = input_json_str
 
-            data = json.dumps(input_json).encode('utf-8')
-            response = JSONRPCResponseManager.handle(data, self.dispatcher)
-            return response.data
+        logger.info("Received request: %s", input_json['method'])
+        # save the full json for WorkOrderSubmit
+        input_json["params"]["raw"] = input_json_str
+
+        data = json.dumps(input_json).encode('utf-8')
+        response = JSONRPCResponseManager.handle(data, self.dispatcher)
+        return response.data
 
     def render_GET(self, request):
         # JRPC response with id 0 is returned because id parameter
