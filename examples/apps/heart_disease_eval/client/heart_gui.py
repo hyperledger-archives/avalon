@@ -30,7 +30,7 @@ import tkinter as tk
 import tkinter.messagebox as messagebox
 import tkinter.font as font
 
-# TCF imports
+# Avalon imports
 from service_client.generic import GenericServiceClient
 import utility.utility as utility
 import worker.worker_details as worker
@@ -507,7 +507,7 @@ def gui_main():
 		"""
 
 		message = "Heart disease evaluation data: "
-		if string_use.get() == 1:
+		if string_use.get() == 1: # input is space-separated numbers
 			input_data = string_entry.get()
 			if input_data is None or len(input_data) == 0:
 				messagebox.showwarning("Error",
@@ -531,6 +531,14 @@ def gui_main():
 				message = message + str(var.get()) + " "
 		root.wait_window(resultWindow(root, message))
 
+	def aggregate():
+		"""Open window that will submit work order to retrieve
+		   an aggregate result.
+		"""
+
+		message = "Heart disease aggregate data: "
+		root.wait_window(resultWindow(root, message))
+
 	# "Evaluate" button
 	eval_text = tk.StringVar()
 	eval_label = tk.Label(root, textvariable=eval_text,
@@ -538,7 +546,17 @@ def gui_main():
 	eval_label.pack()
 	eval_button = tk.Button(root, text="Evaluate", command=evaluate,
 		background=BUTTON_COLOR)
-	eval_button.pack(pady=(0,10))
+	eval_button.pack()
+
+	# "Aggregate" button
+	aggr_text = tk.StringVar()
+	aggr_label = tk.Label(root, textvariable=aggr_text,
+		background=BACKGROUND)
+	aggr_label.pack()
+	aggr_button = tk.Button(root, text="Aggregate all data",
+		command=aggregate,
+		background=BUTTON_COLOR)
+	aggr_button.pack(pady=(0,10))
 
 	root.mainloop()
 
@@ -643,10 +661,9 @@ def initialize_logging(config):
 		logging.getLogger("STDERR"), logging.WARN)
 
 def initialize_tcf(config):
-	"""Initialize TCF: get TCF worker instance."""
+	"""Initialize Avalon: get Avalon worker instance."""
 
-	logger.info("***************** TRUSTED COMPUTE FRAMEWORK (TCF)" + \
-		" *****************")
+	logger.info("***************** Avalon *****************")
 
 	# Retrieve Worker Registry
 	if not off_chain:
