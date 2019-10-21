@@ -135,8 +135,7 @@ RUN OPENSSL_VER=1.1.1d \
 WORKDIR /project/TrustedComputeFramework
 
 RUN \
- echo "VIRTUAL_ENV=/project/TrustedComputeFramework/tools/build/_dev" >> /etc/environment \
- && echo "SOLC_BINARY=/root/.py-solc/solc-v0.4.25/bin/solc" >> /etc/environment \
+ echo "SOLC_BINARY=/root/.py-solc/solc-v0.4.25/bin/solc" >> /etc/environment \
  && echo "WALLET_PRIVATE_KEY=B413189C95B48737AE2D9AF4CAE97EB03F4DE40599DF8E6C89DCE4C2E2CBA8DE" >> /etc/environment \
  && echo "TCF_HOME=/project/TrustedComputeFramework/" >> /etc/environment \
  && if [ ! -z "$http_proxy"  ]; then \
