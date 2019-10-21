@@ -53,16 +53,8 @@ Follow the instructions below to execute a Docker-based build and execution.
    followed by a repetitive message `Enclave manager sleeping for 10 secs`
 4. Open a Docker container shell using following command
    `sudo docker exec -it tcf bash`
-5. Activate a Python virtual environment in the Docker shell using following
-   command from the Docker working directory, `$TCF_HOME/tools/build`,
-   which is set in the `docker-compose.yaml` file:
-   ```
-   source _dev/bin/activate
-   ```
-   If the virtual environment for the current shell session is activated,
-   you will the see this prompt: `(_dev)`
-7. To execute test cases refer to [Testing](#testing) section below
-7. To exit the Avalon program, press `Ctrl-c`
+5. To execute test cases refer to [Testing](#testing) section below
+6. To exit the TCF program, press `Ctrl-c`
 
 
 # <a name="standalonebuild"></a>Standalone Build
