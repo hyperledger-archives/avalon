@@ -97,7 +97,7 @@ sudo apt-get install -y cmake swig pkg-config python3-dev python3-venv python \
 
 Also, install following pip packages
 ```
-sudo pip3 install --upgrade setuptools json-rpc py-solc web3
+sudo pip3 install --upgrade setuptools json-rpc py-solc web3 wheel
 ```
 
 # <a name="docker"></a>Docker
