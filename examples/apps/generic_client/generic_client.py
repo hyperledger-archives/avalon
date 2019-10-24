@@ -66,7 +66,9 @@ def ParseCommandLine(args) :
 		help="an address (hex string) of the smart contract (e.g. Worker registry listing)",
 		type=str)
 	parser.add_argument("-m", "--mode",
-		help="should be one of listing or registry",
+		help="should be one of listing or registry (default)",
+		default="registry",		
+		choices={"registry", "listing"},
 		type=str)
 	parser.add_argument("-w", "--worker_id",
 		help="worker id (hex string) to use to submit a work order",
@@ -117,18 +119,12 @@ def ParseCommandLine(args) :
 			logger.error("\n Only Worker registry listing address is supported." +
                                 "Worker registry address is unsupported \n");
 			sys.exit(-1)
-		else:
-			logger.error("Mode should be either registry or listing")
-
-	else:
-		if not mode:
-			logger.error("Address needs to be passed with mode option")
 
 	worker_id = options.worker_id
 
 	workload_id = options.workload_id
 	if not workload_id:
-		logger.info("\nWorkload id is mandatory\n");
+		logger.error("\nWorkload id is mandatory\n");
 		sys.exit(-1)
 
 	in_data = options.in_data
@@ -159,7 +155,7 @@ def Main(args=None):
 
 	global address
 	if mode == "registry" and address:
-		logger.info("\n Worker registry contract address is unsupported \n");
+		logger.error("\n Worker registry contract address is unsupported \n");
 		sys.exit(-1)
 
 	# Connect to registry list and retrieve registry
@@ -175,7 +171,7 @@ def Main(args=None):
 			registry_count, lookup_tag, registry_list
 		))
 		if (registry_count == 0):
-			logger.warn("No registries found")
+			logger.error("No registries found")
 			sys.exit(1)
 		# Retrieve the fist registry details.
 		registry_retrieve_result = registry_list_instance.registry_retrieve(registry_list[0])
@@ -300,13 +296,13 @@ def Main(args=None):
 					logger.info("\nDecrypted response:\n {}"
 						.format(decrypted_res))
 			else:
-				logger.info("Signature verification Failed")
+				logger.error("Signature verification Failed")
 				sys.exit(1)
 		except:
-			logger.info("ERROR: Failed to decrypt response")
+			logger.error("ERROR: Failed to decrypt response")
 			sys.exit(1)
 	else:
-		logger.info("\n Work order get result failed {}\n".format(
+		logger.error("\n Work order get result failed {}\n".format(
 			res
 		))
 		sys.exit(1)
