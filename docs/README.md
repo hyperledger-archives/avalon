@@ -6,11 +6,13 @@
 * [Ecosystem Support for EEA Trusted Compute Specification v1.0 Improves Blockchain Privacy and Scalability](https://software.intel.com/en-us/articles/ecosystem-support-for-eea-trusted-compute-specification-v10-improves-blockchain-privacy-and). Introductory TCF Blog, by Michael Reed (2019)
 
 ## Community
+* [Project Wiki](https://wiki.hyperledger.org/display/avalon/Hyperledger+Avalon)
 * [RocketChat](https://chat.hyperledger.org/channel/avalon)
 * [Email list](https://lists.hyperledger.org/g/avalon)
 
 ## Tutorial
 * [Workload Application Tutorial](workload-tutorial/)
+* [Example Applications](../examples/apps/)
 
 ## Source Code
 * [TCF source code repository, https://github.com/hyperledger-labs/trusted-compute-framework](https://github.com/hyperledger-labs/trusted-compute-framework)
