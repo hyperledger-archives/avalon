@@ -23,11 +23,8 @@ services:
         - http_proxy
         - https_proxy
         - no_proxy
-    volumes:
-      - ../:/project/TrustedComputeFramework
-    working_dir: "/project/TrustedComputeFramework/tools/build"
+    working_dir: "/project/TrustedComputeFramework/"
     entrypoint: "bash -c \"\
-        cd ../../scripts \
-        && source tcs_startup.sh -y \
+        source scripts/tcs_startup.sh -y \
         && sleep 5 \
-        && source ../tools/run_tests.sh \""
+        && source tools/run_tests.sh \""

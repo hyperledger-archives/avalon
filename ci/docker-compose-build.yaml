@@ -19,16 +19,9 @@ services:
     image: tcf-ci-build:${ISOLATION_ID}
 
     build:
-      context: .
-      dockerfile: ../docker/Dockerfile.tcf-dev
+      context: ..
+      dockerfile: docker/Dockerfile.tcf-dev
       args:
         - http_proxy
         - https_proxy
         - no_proxy
-    volumes:
-      - ../:/project/TrustedComputeFramework
-    working_dir: "/project/TrustedComputeFramework/tools/build"
-    entrypoint: "bash -c \"\
-        if [ ${MAKECLEAN:-1} != 0 ]; then echo \\\"Clean build\\\" && make clean; fi \
-        && make \
-        && echo \\\"BUILD SUCCESS\\\" \""
