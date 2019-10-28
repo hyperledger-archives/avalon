@@ -2,12 +2,12 @@
 Licensed under Creative Commons Attribution 4.0 International License
 https://creativecommons.org/licenses/by/4.0/
 -->
-# Building Trusted Compute Framework
+# Building Hyperledger Avalon
 
-In order to build, install, and run Hyperledger Trusted Compute Framework
-(TCF), a number of additional components must be installed and configured.
+In order to build, install, and run Hyperledger Avalon
+a number of additional components must be installed and configured.
 The following instructions will guide you through the installation and build
-process for Hyperledger Trusted Compute Framework.
+process for Hyperledger Avalon.
 
 You have a choice of [Docker-based build](#dockerbuild)
 or a [Standalone-based build](#standalonebuild).
@@ -18,7 +18,7 @@ The Docker-based build is recommended.
 - [Docker-based Build and Execution](#dockerbuild)
 - [Standalone Build](#standalonebuild)
     - [Prerequisites](#prerequisites)
-    - [Installing TCF Using Scripts](#installtcf)
+    - [Installing Avalon Using Scripts](#installtcf)
 - [Testing](#testing)
     - [Troubleshooting](#troubleshooting)
     - [Troubleshooting: Standalone Build](#troubleshootingstandalone)
@@ -62,23 +62,23 @@ Follow the instructions below to execute a Docker-based build and execution.
    If the virtual environment for the current shell session is activated,
    you will the see this prompt: `(_dev)`
 7. To execute test cases refer to [Testing](#testing) section below
-7. To exit the TCF program, press `Ctrl-c`
+7. To exit the Avalon program, press `Ctrl-c`
 
 
 # <a name="standalonebuild"></a>Standalone Build
 ## <a name="prerequisites"></a>Standalone: Prerequisites
 Follow the [PREREQUISITES document](PREREQUISITES.md) to install and configure
-components on which TCF depends.
+components on which Hyperledger Avalon depends.
 
-## <a name="installtcf"></a>Standalone: Installing TCF Using Scripts
-This section describes how to get started with TCF quickly using provided
-scripts to compile and install TCF.
-The steps below will set up a Python virtual environment to run TCF.
+## <a name="installtcf"></a>Standalone: Installing Avalon Using Scripts
+This section describes how to get started with Avalon quickly using provided
+scripts to compile and install Avalon.
+The steps below will set up a Python virtual environment to run Avalon.
 
 1. Make sure environment variables are set as described in the
    [PREREQUISITES document](PREREQUISITES.md)
 
-2. Download the TCF source repository if you have not already done this:
+2. Download the Avalon source repository if you have not already done this:
    ```
    git clone https://github.com/hyperledger-labs/trusted-compute-framework
    cd trusted-compute-framework
@@ -87,7 +87,7 @@ The steps below will set up a Python virtual environment to run TCF.
 3. Set `TCF_HOME` to the top level directory of your
    `trusted-compute-framework` source repository.
    You will need these environment variables set in every shell session
-   where you interact with TCF.
+   where you interact with Avalon.
    Append this line (with `pwd` expanded) to your login shell script
    (`~/.bashrc` or similar):
    ```
@@ -103,7 +103,7 @@ The steps below will set up a Python virtual environment to run TCF.
    Refer to the [PREREQUISITES document](PREREQUISITES.md)
    for more details on these variables
 
-5. Create Python virtual environment, Build and Install TCF
+5. Create Python virtual environment, Build and Install Avalon
    components into it:
    ```
    cd $TCF_HOME/tools/build
@@ -154,10 +154,10 @@ Follow these steps to run the `Demo.py` testcase:
    python3 Demo.py --input_dir ./json_requests/ \
            --connect_uri "http://localhost:1947" work_orders/output.json
    ```
-5. The response to the TCF listener and Intel&reg; SGX enclave Manager can be
+5. The response to the Avalon listener and Intel&reg; SGX enclave Manager can be
    seen at Terminal 1
 6. The response to the test case request can be seen at Terminal 2
-7. If you wish to exit the TCF program, press `y` and `Enter` at Terminal 1
+7. If you wish to exit the Avalon program, press `y` and `Enter` at Terminal 1
    for standalone builds.
    For Docker-based builds, press `Ctrl-c`
 8. For standalone mode, delete virtual environment
