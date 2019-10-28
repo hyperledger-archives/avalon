@@ -1,10 +1,8 @@
 #Ignore Kv files
 config/Kv*
 
-#Ignore build directories
-workloads/build*
-tcs/core/common/build*
-tcs/core/tcs_trusted_worker_manager/enclave/build*
-tcs/core/common/python/build*
-common/build*
+#Ignore documentation files
+*.md
+docs/*
+CODEOWNERS
 

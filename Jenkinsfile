@@ -63,8 +63,7 @@ pipeline {
 
         stage('Build TCF') {
             steps {
-                sh 'docker-compose -f ci/docker-compose-build.yaml up'
-                sh 'docker-compose -f ci/docker-compose-build.yaml down'
+                sh 'docker-compose -f ci/docker-compose-build.yaml build'
             }
         }
 
@@ -89,7 +88,6 @@ pipeline {
 
     post {
         always {
-            sh 'docker-compose -f ci/docker-compose-build.yaml down'
             sh 'docker-compose -f ci/docker-compose-tests.yaml down'
         }
         success {
