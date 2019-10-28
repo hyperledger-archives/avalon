@@ -3,11 +3,11 @@ Licensed under Creative Commons Attribution 4.0 International License
 https://creativecommons.org/licenses/by/4.0/
 -->
 
-# Trusted Compute Framework Prerequisites
+# Hyperledger Avalon Prerequisites
 
-Trusted Compute Framework (TCF) depends on several freely available
+Hyperledger Avalon depends on several freely available
 software components. These must be installed and configured before
-compiling TCF.
+compiling Avalon.
 This document describes how to get and compile these required components.
 
 
@@ -22,26 +22,17 @@ This document describes how to get and compile these required components.
 
 
 # Recommended host system
-The recommended host-system configuration for Trusted Compute Framework is to
-separate the Trusted Compute Framework components from the Sawtooth components.
-This means (at least) two different physical systems if using
-Intel&reg; SGX-enabled hardware.
-If running in Intel SGX simulation mode, this could be two virtual machines or
-containers.
+Hyperledger Avalon services (specifically the enclave manager and
+listener) should be ran on Ubuntu 18.04. Avalon has been tested on Ubuntu 18.04.
 
-Sawtooth (and the TCF transaction processors for Sawtooth) should be run on
-Ubuntu 18.04.
-Trusted Compute Framework services (specifically the enclave manager and
-listener) should be ran on Ubuntu 18.04. TCF has been tested on Ubuntu 18.04.
-
-Sawtooth and TCF may run on other Linux distributions, but the installation
+Avalon may run on other Linux distributions, but the installation
 process is likely to be more complicated, and the use of other distributions is
 not supported by their respective communities at this time.
 
 
 # <a name="environment"></a>Environment Variables
 Summary of all environment variables required to build
-Trusted Compute Framework.
+Hyperledger Avalon.
 Follow the instructions in the remainder of this document to install
 and configure these components.
 
@@ -75,18 +66,18 @@ yourself using OpenSSL, then export the path to it:
   ```
 
 - `TCF_HOME`
-Used to locate the top level TCF build directory.
+Used to locate the top level Avalon build directory.
 It is described in the [BUILD document](BUILD.md#buildtcf)
 
 - `TCF_DEBUG_BUILD`
-Optional variable for enabling TCF debug output. Set to `1` enable.
+Optional variable for enabling Avalon debug output. Set to `1` enable.
 For example: `export TCF_DEBUG_BUILD=1` for standalone builds
 or`TCF_DEBUG_BUILD=1 docker-compose up` for Docker-based builds
 
 
 # <a name="packages"></a>Required Packages
-On a minimal Ubuntu system, the following packages are required. Other
-distributions will require similar packages.
+On a minimal Ubuntu system, Hyperledger Avalon requires the following packages.
+Other distributions will require similar packages.
 ```
 sudo apt-get update
 sudo apt-get install -y cmake swig pkg-config python3-dev python3-venv python \
@@ -95,14 +86,15 @@ sudo apt-get install -y cmake swig pkg-config python3-dev python3-venv python \
      python3-requests python3-colorlog python3-twisted
 ```
 
-Also, install following pip packages
+Also, install the following pip packages
 ```
 sudo pip3 install --upgrade setuptools json-rpc py-solc web3 wheel
 ```
 
 # <a name="docker"></a>Docker
-Docker may be used instead of building TCF directly (standalone mode) and
-is recommended. If you build using Docker, you need to install Docker Engine
+Docker may be used instead of building Hyperledger Avalon directly
+(standalone mode) and is recommended.
+If you build using Docker, you need to install Docker Engine
 and Docker Compose if it is not already installed.
 
 To install Docker CE Engine:
@@ -135,7 +127,7 @@ https://docs.docker.com/compose/install/#install-compose
 
 
 # <a name="sgx"></a>Intel&reg; Software Guard Extensions (Intel SGX)
-Hyperledger Trusted Compute Framework is intended to be run on
+Hyperledger Avalon is intended to be run on
 Intel SGX-enabled platforms. However, it can also be run in "simulator mode"
 on platforms that do not have hardware support for Intel SGX.
 Support for other hardware-based Trusted Execution Environments (TEEs)
@@ -179,7 +171,7 @@ Downloads are listed at
 If you plan to run this on Intel SGX-enabled hardware, you will need
 to install packages `libsgx-enclave-common` and `libelf-dev` and
 install the Intel SGX driver for both standalone and docker builds.
-You need to install the Intel SGX driver whether you build TCF standalone
+You need to install the Intel SGX driver whether you build Avalon standalone
 or using Docker.
 
 First install this package:
