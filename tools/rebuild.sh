@@ -22,6 +22,7 @@ if [[ -z "$TCF_ENCLAVE_CODE_SIGN_PEM" ]] ; then
    export TCF_ENCLAVE_CODE_SIGN_PEM="$TCF_HOME/enclave.pem"
    echo "Setting default TCF_ENCLAVE_CODE_SIGN_PEM=$TCF_ENCLAVE_CODE_SIGN_PEM"
 fi
+VERSION="$(cat $TCF_HOME/VERSION)"
 
 
 # -----------------------------------------------------------------
@@ -62,6 +63,7 @@ function try() {
 # -----------------------------------------------------------------
 # CHECK ENVIRONMENT
 # -----------------------------------------------------------------
+yell --------------- AVALON $VERSION BUILD  ---------------
 yell --------------- CONFIG AND ENVIRONMENT CHECK ---------------
 if [ -z "$SGX_SSL" -a -d "/opt/intel/sgxssl" ] ; then
     export SGX_SSL="/opt/intel/sgxssl"
