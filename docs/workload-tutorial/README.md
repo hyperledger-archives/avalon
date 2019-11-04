@@ -1,4 +1,4 @@
-# TCF Worker Application Development Tutorial
+# Avalon Worker Application Development Tutorial
 
 This tutorial describes how to build a trusted workload application.
 We begin by copying template files to a new directory.
@@ -73,10 +73,10 @@ Before beginning this tutorial, review the following items:
   * The Workload ID (`hello-world`) and input parameters (a name string)
     sent by the client must match the workload requirements for this worker
 
-* Review how to build TCF at [$TCF_HOME/BUILD.md](../../BUILD.md)
+* Review how to build Avalon at [$TCF_HOME/BUILD.md](../../BUILD.md)
 
 As a best practice, this tutorial separates the actual workload-specific logic
-from the the TCF plumbing required to link the workload to the TCF framework
+from the Avalon plumbing required to link the workload to the Avalon framework
 into separate files.
 
 ## Tutorial
@@ -85,13 +85,13 @@ This tutorial creates a workload application in two phases:
 1. [Create generic plug-in logic](#phase1)
 2. [Incrementally add workload-specific logic](#phase2)
 
-### <a name="phase1"></a>Phase 1: TCF Plug-in Code
+### <a name="phase1"></a>Phase 1: Avalon Plug-in Code
 
-For the first phase copy and modify template code to create TCF plug-in code.
-This code contains TCF framework code to invoke worker-specific logic that
+For the first phase copy and modify template code to create the plug-in code.
+This code contains Avalon framework code to invoke worker-specific logic that
 will be created next in [Phase 2](#phase2).
 
-* From the top-level TCF source repository directory, `$TCF_HOME`,
+* From the top-level Avalon source repository directory, `$TCF_HOME`,
   create a new workload directory and change into it:
   ```bash
   cd $TCF_HOME
@@ -136,7 +136,7 @@ will be created next in [Phase 2](#phase2).
   TARGET_LINK_LIBRARIES(${PROJECT_NAME} -Wl,--whole-archive -lhello_world -Wl,--no-whole-archive)
   ```
 
-* Change to the top-level TCF source repository directory, `$TCF_HOME`,
+* Change to the top-level Avalon source repository directory, `$TCF_HOME`,
   and rebuild the framework (see [$TCF_HOME/BUILD.md](../../BUILD.md)).
   It should now include the new workload
 
@@ -167,10 +167,10 @@ directory
 
 ### <a name="phase2"></a>Phase 2: Worker-specific Code
 
-Now that we have TCF plug-in framework code, we incrementally add
+Now that we have Avalon plug-in framework code, we incrementally add
 worker-specific logic and call it from the plug-in code.
 As a best practice, we separate worker-specific logic from the
-TCF framework code that calls it into separate files.
+Avalon framework code that calls it into separate files.
 In this example we name the worker-specific function `ProcessHelloWorld()`.
 
 * Change back into the "Hello World" workload directory:
@@ -192,7 +192,7 @@ In this example we name the worker-specific function `ProcessHelloWorld()`.
 
   For this example, the worker-specific logic is trivial. Usually
   the logic is much more complex so it is in a separate file to
-  separate it from TCF-specific plug-in code
+  separate it from Avalon-specific plug-in code
 
 * Modify the `ProcessWorkOrder()` method in `plug-in.cpp`
   to call `ProcessHelloWorld()`.  That is, change:
@@ -221,7 +221,7 @@ In this example we name the worker-specific function `ProcessHelloWorld()`.
   item and will return each resulting string as a separate output data item.
 
 
-* Change to the top-level TCF source repository directory, `$TCF_HOME`,
+* Change to the top-level Avalon source repository directory, `$TCF_HOME`,
   and rebuild the framework (see [$TCF_HOME/BUILD.md](../../BUILD.md)).
   It should now include the new workload
 

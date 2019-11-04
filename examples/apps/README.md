@@ -1,7 +1,7 @@
-# TCF Example Applications
+# Avalon Example Applications
 
-The following TCF example applications are available.
-They are intended as introductions to the TCF API to learn how to
+The following Avalon example applications are available.
+They are intended as introductions to the Avalon API to learn how to
 create and write new applications.
 
 - [Echo](echo)
