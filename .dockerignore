@@ -6,3 +6,5 @@ config/Kv*
 docs/*
 CODEOWNERS
 
+#Ignore Pytest Automation Test Results
+tests/validation_suite/results/*
