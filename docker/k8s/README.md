@@ -1,7 +1,7 @@
-# Kubernetes playground for trusted-compute-framework 
+# Kubernetes playground for Avalon 
 
 This serves as a playground for developing 
-[hyperledger-labs/trusted-compute-framework](https://github.com/hyperledger-labs/trusted-compute-framework)
+[hyperledger/avalon](https://github.com/hyperledger/avalon)
 in SGX-SIM mode.
 
 ## Prerequisites

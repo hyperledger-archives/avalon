@@ -11,7 +11,8 @@ trusted (SGX Enclave) code.
 
 This code is written in C++, but a Python wrapper is also available (see [../README.md](../README.md))
 
-TCF applications are free to use third-party cryptographic implementations (such as what a programming language binding may provide) or the cryptographic interfaces provided here.
+Avalon applications are free to use third-party cryptographic implementations (such as what a
+programming language binding may provide) or the cryptographic interfaces provided here.
 
 
 Software Components Required
