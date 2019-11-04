@@ -174,11 +174,21 @@ install the Intel SGX driver for both standalone and docker builds.
 You need to install the Intel SGX driver whether you build Avalon standalone
 or using Docker.
 
-First install this package:
-
+Before installing Intel SGX software, install this package:
 ```
-sudo apt-get install -y libelf-dev
+sudo apt-get install -y libelf-dev cpuid
 ````
+
+Verify your processor supports Intel SGX with:
+`cpuid | grep SGX:`
+
+Verify Intel SGX is enabled in BIOS.
+Enter BIOS by pressing the BIOS key during boot.
+The BIOS key varies by manufacturer and could be F10, F2, F12, F1, DEL, or ESC.
+Usually Intel SGX is disabled by default.
+If disabled, enter BIOS and find the Intel SGX feature
+(it is usually under the "Advanced" or "Security" menu),
+enable Intel SGX, save your BIOS settings, and exit BIOS.
 
 Download and install libsgx-enclave-common version 2.3.101:
 ```
@@ -389,6 +399,7 @@ problems.
 # <a name="troubleshooting"></a>Troubleshooting Installation
 - Verify your [environment variables](#environment) are set correctly and the
   paths exist
+
 - If you get the error:
   `./test_app/TestApp: error while loading shared libraries: libprotobuf.so.9:
    cannot open shared object file: No such file or directory`
@@ -407,6 +418,7 @@ problems.
 - If you installed libprotobuf in a standard location (e.g., `/usr/local/lib`),
   run `ldconfig` .
   If you installed libprotobuf elsewhere, add the directory to `LD_LIBRARY_PATH`
+
 - If you get the error:
   `crypto/rand/rand_lib.c:14:10: fatal error: internal/rand_int.h:
    No such file or directory`
@@ -417,6 +429,9 @@ problems.
   `rand_lib.c:151:16: error: too many arguments to function 'rand_pool_new'`
   you are using an old version of OpenSSL and need to clone the
   `openssl_1.1.1` branch of `intel-sgx-ssl` in the step above
+
+- If the message  `intel_sgx: SGX is not enabled` appears in `/var/log/syslog`
+  Intel SGX needs to be enabled in BIOS
 
 - If you get the error
   `failed to initialize enclave; . . . ('Cannot connect to proxy.', . . .)`
