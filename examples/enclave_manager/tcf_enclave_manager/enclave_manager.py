@@ -14,20 +14,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import argparse
+import json
+import logging
 import os
 import sys
 import time
-import argparse
-import json
+import random
 
-import tcf_enclave_helper as enclave_helper
-from error_code.error_status import WorkOrderStatus
-from database import connector
 import sgx_work_order_request as work_order_request
-from utility.tcf_types import WorkerStatus, WorkerType
+import tcf_enclave_helper as enclave_helper
+import utility.signature as signature
 import utility.utility as utils
-
-import logging
+import crypto.crypto as crypto
+from database import connector
+from error_code.error_status import ReceiptCreateStatus, WorkOrderStatus
+from utility.tcf_types import WorkerStatus, WorkerType
+from work_order_receipt.work_order_receipt_request import WorkOrderReceiptRequest
 
 logger = logging.getLogger(__name__)
 
@@ -61,6 +64,11 @@ class EnclaveManager:
         # TODO: Read ProofDataType from config file
         self.proof_data_type = config.get("WorkerConfig")["ProofDataType"]
         self.proof_data = signup_data.proof_data
+
+        # Key pair for work order receipt signing
+        # This is temporary approach
+        self.private_key = utils.generate_signing_keys()
+        self.public_key =  self.private_key.GetPublicKey().Serialize()
 
     def manager_on_boot(self, kv_helper):
         """
@@ -112,12 +120,11 @@ class EnclaveManager:
                     continue
 
                 wo_receipt = kv_helper.get("wo-receipts", wo)
-                if wo_receipt is None:
-                    # create receipt
-                    logger.info("Creating receipt in boot flow")
-                    wo_receipt = create_receipt(wo, wo_json_resp)
-                    logger.info("Receipt created for workorder %s during boot", wo_receipt)
-                    kv_helper.set("wo-receipts", wo, wo_receipt)
+                if wo_receipt:
+                    # update receipt
+                    logger.info("Updating receipt in boot flow")
+                    self.__update_receipt(kv_helper, wo, wo_json_resp)
+                    logger.info("Receipt updated for workorder %s during boot", wo)
 
                 if wo_processed is None:
                     kv_helper.set("wo-processed", wo, WorkOrderStatus.SUCCESS.name)
@@ -187,9 +194,14 @@ class EnclaveManager:
                 return
 
             # Execute work order request
+
             logger.info("Execute workorder with id %s", wo_id)
             wo_json_resp = execute_work_order(self.enclave_data, wo_json_req)
             wo_resp = json.loads(wo_json_resp)
+
+            logger.info("Update workorder receipt for workorder %s", wo_id)
+            receipt = self.__update_receipt(kv_helper, wo_id, wo_resp)
+
             if "Response" in wo_resp and wo_resp["Response"]["Status"] == WorkOrderStatus.FAILED:
                 logger.error("error in Response")
                 kv_helper.set("wo-processed", wo_id, WorkOrderStatus.FAILED.name)
@@ -203,17 +215,59 @@ class EnclaveManager:
             logger.info("Create entry in wo-responses table for workorder %s", wo_id)
             kv_helper.set("wo-responses", wo_id, wo_json_resp)
 
-            logger.info("Create workorder receipt for workorder %s", wo_id)
-            receipt = create_receipt(wo_id, wo_json_resp)
-            logger.info("receipt for the workorder id %s is %s", wo_id, receipt)
-
-            logger.info("Create entry in wo-receipts table for workorder %s", wo_id)
-            kv_helper.set("wo-receipts", wo_id, receipt)
-
             logger.info("Delete workorder entry %s from wo-processing table", wo_id)
             kv_helper.remove("wo-processing", wo_id)
 
         # end of for loop
+
+    # -----------------------------------------------------------------
+
+    def __update_receipt(self, kv_helper, wo_id, wo_json_resp):
+        """
+        Update the existing work order receipt with the status as in wo_json_
+        Parameters:
+            - kv_helper is lmdb instance to access database
+            - wo_id is work order id of request for which receipt is to be created.
+            - wo_json_resp is json rpc response of the work order execution.
+            status of the work order receipt and updater signature update in
+            the receipt.
+        """
+        receipt_entry = kv_helper.get("wo-receipts", wo_id)
+        if receipt_entry:
+            update_type = None
+            if "error" in wo_json_resp and \
+            wo_json_resp["error"]["code"] != WorkOrderStatus.PENDING.value:
+                update_type = ReceiptCreateStatus.FAILED.value
+            else:
+                update_type = ReceiptCreateStatus.PROCESSED.value
+            receipt_obj = WorkOrderReceiptRequest()
+            wo_receipt = receipt_obj.update_receipt(
+                wo_id,
+                update_type,
+                wo_json_resp,
+                self.private_key
+            )
+            updated_receipt = None
+            # load previous updates to receipt
+            updates_to_receipt = kv_helper.get("wo-receipt-updates", wo_id)
+            # If it is first update to receipt
+            if updates_to_receipt is None:
+                updated_receipt = []
+            else:
+                updated_receipt = json.loads(updates_to_receipt)
+                # Get the last update to receipt
+                last_receipt = updated_receipt[len(updated_receipt)-1]
+                # If receipt updateType is completed then no further update allowed
+                if last_receipt["updateType"] == ReceiptCreateStatus.COMPLETED.value:
+                    logger.info("Receipt for the workorder id %s is completed and no further updates are allowed",
+                        wo_id)
+                    return
+            updated_receipt.append(wo_receipt)
+            # Since receipts_json is jrpc request updating only params object.
+            kv_helper.set("wo-receipt-updates", wo_id, json.dumps(updated_receipt))
+            logger.info("Receipt for the workorder id %s is updated to %s", wo_id, wo_receipt)
+        else:
+            logger.info("Work order receipt is not created, so skipping the update")
 
 
 # -----------------------------------------------------------------
@@ -230,7 +284,6 @@ def create_enclave_signup_data():
     return enclave_signup_data
 
 # -----------------------------------------------------------------
-
 
 def execute_work_order(enclave_data, input_json_str, indent=4):
     """
@@ -258,17 +311,8 @@ def execute_work_order(enclave_data, input_json_str, indent=4):
 
     return json_response
 
-
 # -----------------------------------------------------------------
-def create_receipt(wo_id, wo_response):
-    """
-    Create work order receipt corresponding to workorder id
-    """
-    # Storing wo-response as receipt as of now. Receipt structure may get modified in future.
-    return wo_response
 
-
-# -----------------------------------------------------------------
 def validate_request(wo_request):
     """
     Validate JSON workorder request
@@ -376,8 +420,9 @@ def start_enclave_manager(config):
             enclave_manager.process_work_orders(kv_helper)
             logger.info("Enclave manager sleeping for %d secs", sleep_interval)
             time.sleep(sleep_interval)
-    except:
+    except Exception as inst:
         logger.error("Error while processing work-order. Shutting down enclave manager")
+        logger.error("Exception: {} args {} details {}".format(type(inst), inst.args, inst))
         exit(1)
 
 

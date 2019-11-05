@@ -30,50 +30,35 @@ class WorkOrderReceiptJRPCImpl(WorkOrderReceiptInterface):
         self.__uri_client = GenericServiceClient(config["tcf"]["json_rpc_uri"])
 
 
-    def work_order_receipt_create(self, work_order_id, worker_id,  
+    def work_order_receipt_create(self, work_order_id,
         worker_service_id,
+        worker_id,
         requester_id,
         receipt_create_status,
-        work_order_request_hash, id=None):
+        work_order_request_hash,
+        requester_nonce,
+        requester_signature,
+        signature_rules,
+        receipt_verification_key,
+        id=None):
         """
         Creating a Work Order Receipt json rpc request and submit tcs listener
         """
-        if work_order_id is None or not is_valid_hex_str(work_order_id):
-            logging.error("Work order id is empty or Invalid")
-            return create_jrpc_response(id, JsonRpcErrorCode.INVALID_PARAMETER,
-                "Worker id is empty or Invalid")
-
-        if worker_id is None or not is_valid_hex_str(worker_id):
-            logging.error("Worker id is empty or Invalid")
-            return create_jrpc_response(id, JsonRpcErrorCode.INVALID_PARAMETER,
-                "Worker id is empty or Invalid")
-
-        if not isinstance(worker_type, ReceiptCreateStatus):
-            logging.error("Invalid receipt create status")
-            return create_jrpc_response(id, JsonRpcErrorCode.INVALID_PARAMETER,
-                "Invalid receipt create status")
-
-        if worker_service_id is None or not is_valid_hex_str(worker_service_id):
-            logging.error("Worker service id is empty or Invalid")
-            return create_jrpc_response(id, JsonRpcErrorCode.INVALID_PARAMETER,
-                "Worker service id is empty or Invalid")
-
-        if requester_id is None or not is_valid_hex_str(requester_id):
-            logging.error("requester id is empty or Invalid")
-            return create_jrpc_response(id, JsonRpcErrorCode.INVALID_PARAMETER,
-                "requester id is empty or Invalid")
-
         json_rpc_request = {
             "jsonrpc": "2.0",
             "method": "WorkOrderReceiptCreate",
             "id": id,
             "params": {
                 "workOrderId": work_order_id,
-                "workerId": worker_id,
                 "workerServiceId": worker_service_id,
+                "workerId": worker_id,
                 "requesterId": requester_id,
                 "receiptCreateStatus": receipt_create_status,
-                "workOrderRequestHash": work_order_request_hash
+                "workOrderRequestHash": work_order_request_hash,
+                "requesterGeneratedNonce": requester_nonce,
+                "requesterSignature": requester_signature,
+                "signatureRules": signature_rules,
+                "receiptVerificationKey": receipt_verification_key
             }
         }
         response = self.__uri_client._postmsg(json.dumps(json_rpc_request))
@@ -88,31 +73,6 @@ class WorkOrderReceiptJRPCImpl(WorkOrderReceiptInterface):
         """
         Update a Work Order Receipt json rpc request and submit tcs listener
         """
-        if work_order_id is None or not is_valid_hex_str(work_order_id):
-            logging.error("Work order id is empty or Invalid")
-            return create_jrpc_response(id, JsonRpcErrorCode.INVALID_PARAMETER,
-                "Worker id is empty or Invalid")
-
-        if updater_id is None or not is_valid_hex_str(updater_id):
-            logging.error("Updater id is empty or Invalid")
-            return create_jrpc_response(id, JsonRpcErrorCode.INVALID_PARAMETER,
-                "Worker id is empty or Invalid")
-
-        if not isinstance(update_type, ReceiptCreateStatus):
-            logging.error("Invalid Update type")
-            return create_jrpc_response(id, JsonRpcErrorCode.INVALID_PARAMETER,
-                "Invalid update type")
-
-        if update_data is None or not is_valid_hex_str(update_data):
-            logging.error("Update data is empty or Invalid")
-            return create_jrpc_response(id, JsonRpcErrorCode.INVALID_PARAMETER,
-                "Update data is empty or Invalid")
-
-        if update_signature is None or not is_valid_hex_str(update_signature):
-            logging.error("update signature is empty or Invalid")
-            return create_jrpc_response(id, JsonRpcErrorCode.INVALID_PARAMETER,
-                "update signature is empty or Invalid")
-
         json_rpc_request = {
             "jsonrpc": "2.0",
             "method": "WorkOrderReceiptUpdate",
@@ -134,11 +94,6 @@ class WorkOrderReceiptJRPCImpl(WorkOrderReceiptInterface):
         """
         Retrieve a Work Order Receipt json rpc request and submit tcs listener
         """
-        if work_order_id is None or not is_valid_hex_str(work_order_id):
-            logging.error("Work order id is empty or Invalid")
-            return create_jrpc_response(id, JsonRpcErrorCode.INVALID_PARAMETER,
-                "Worker id is empty or Invalid")
-
         json_rpc_request = {
             "jsonrpc": "2.0",
             "method": "WorkOrderReceiptRetrieve",
@@ -157,16 +112,6 @@ class WorkOrderReceiptJRPCImpl(WorkOrderReceiptInterface):
         """
         Retrieving a Work Order Receipt Update
         """
-        if work_order_id is None or not is_valid_hex_str(work_order_id):
-            logging.error("Work order id is empty or Invalid")
-            return create_jrpc_response(id, JsonRpcErrorCode.INVALID_PARAMETER,
-                "Worker id is empty or Invalid")
-
-        if updater_id is None or not is_valid_hex_str(updater_id):
-            logging.error("Updater id is empty or Invalid")
-            return create_jrpc_response(id, JsonRpcErrorCode.INVALID_PARAMETER,
-                "Worker id is empty or Invalid")
-
         json_rpc_request = {
             "jsonrpc": "2.0",
             "method": "WorkOrderReceiptUpdateRetrieve",
@@ -187,43 +132,23 @@ class WorkOrderReceiptJRPCImpl(WorkOrderReceiptInterface):
         """
         json_rpc_request = {
             "jsonrpc": "2.0",
-            "method": "WorkerLookUp",
+            "method": "WorkOrderReceiptLookUp",
             "id": id,
             "params": {
             }
         }
 
         if worker_service_id is not None:
-            if not is_valid_hex_str(worker_service_id):
-                logging.error("Worker service id is Invalid")
-                return create_jrpc_response(
-                    id, JsonRpcErrorCode.INVALID_PARAMETER,
-                    "Worker service id is Invalid")
             json_rpc_request["params"]["workerServiceId"] = worker_service_id
 
         if worker_id is not None:
-            if not is_valid_hex_str(worker_id):
-                logging.error("Worker id is Invalid")
-                return create_jrpc_response(
-                    id, JsonRpcErrorCode.INVALID_PARAMETER,
-                    "Worker id is Invalid")
             json_rpc_request["params"]["workerId"] = worker_id
 
         if requester_id is not None:
-            if not is_valid_hex_str(requester_id):
-                logging.error("Requester id is Invalid")
-                return create_jrpc_response(
-                    id, JsonRpcErrorCode.INVALID_PARAMETER,
-                    "Requester id is Invalid")
             json_rpc_request["params"]["requesterId"] = requester_id
 
         if receipt_status is not None:
-            if not isinstance(receipt_status, ReceiptCreateStatus):
-                logging.error("Receipt status is Invalid")
-                return create_jrpc_response(
-                    id, JsonRpcErrorCode.INVALID_PARAMETER,
-                    "Receipt status is Invalid")
-            json_rpc_request["params"]["receiptStatus"] = receipt_status
+            json_rpc_request["params"]["requestCreateStatus"] = receipt_status
 
         response = self.__uri_client._postmsg(json.dumps(json_rpc_request))
         return response
@@ -244,42 +169,16 @@ class WorkOrderReceiptJRPCImpl(WorkOrderReceiptInterface):
         }
 
         if worker_service_id is not None:
-            if not is_valid_hex_str(worker_service_id):
-                logging.error("Worker service id is Invalid")
-                return create_jrpc_response(
-                    id, JsonRpcErrorCode.INVALID_PARAMETER,
-                    "Worker service id is Invalid")
             json_rpc_request["params"]["workerServiceId"] = worker_service_id
 
         if worker_id is not None:
-            if not is_valid_hex_str(worker_id):
-                logging.error("Worker id is Invalid")
-                return create_jrpc_response(
-                    id, JsonRpcErrorCode.INVALID_PARAMETER,
-                    "Worker id is Invalid")
             json_rpc_request["params"]["workerId"] = worker_id
 
         if requester_id is not None:
-            if not is_valid_hex_str(requester_id):
-                logging.error("Requester id is Invalid")
-                return create_jrpc_response(
-                    id, JsonRpcErrorCode.INVALID_PARAMETER,
-                    "Requester id is Invalid")
             json_rpc_request["params"]["requesterId"] = requester_id
 
         if receipt_status is not None:
-            if not isinstance(receipt_status, ReceiptCreateStatus):
-                logging.error("Invalid receipt status")
-                return create_jrpc_response(
-                    id, JsonRpcErrorCode.INVALID_PARAMETER,
-                    "Invalid receipt status")
-            json_rpc_request["params"]["receiptStatus"] = receipt_status
-
-        if last_lookup_tag is None or not is_valid_hex_str(last_lookup_tag):
-            logging.error("Last lookup tag is empty or Invalid")
-            return create_jrpc_response(
-                id, JsonRpcErrorCode.INVALID_PARAMETER,
-                "Last lookup tag is empty or Invalid")
+            json_rpc_request["params"]["requestCreateStatus"] = receipt_status
 
         response = self.__uri_client._postmsg(json.dumps(json_rpc_request))
         return response
