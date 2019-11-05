@@ -51,7 +51,7 @@ logger = logging.getLogger(__name__)
 
 class TCSListener(resource.Resource):
     """
-    TCSListener Class  is comprised of HTTP interface which listens for the end user requests, 
+    TCSListener Class  is comprised of HTTP interface which listens for the end user requests,
     Worker Registry Handler, Work Order Handler and Work Order Receipts Handler .
     """
     # The isLeaf instance variable describes whether or not a resource will have children and only leaf resources get rendered.
@@ -66,9 +66,6 @@ class TCSListener(resource.Resource):
         except Exception as err:
             logger.error(f"failed to open db: {err}")
             sys.exit(-1)
-
-        # Worker registry handler needs to be instantiated before Work order handler. Otherwise, LMDB operations don't operate on updated values.
-        # TODO: Needs further investigation on what is causing the above behavior.
 
         self.worker_registry_handler = TCSWorkerRegistryHandler(self.kv_helper)
         self.workorder_handler = TCSWorkOrderHandler(
@@ -90,6 +87,12 @@ class TCSListener(resource.Resource):
             self.worker_registry_handler.WorkerUpdate,
             self.workorder_handler.WorkOrderSubmit,
             self.workorder_handler.WorkOrderGetResult,
+            self.workorder_receipt_handler.WorkOrderReceiptCreate,
+            self.workorder_receipt_handler.WorkOrderReceiptUpdate,
+            self.workorder_receipt_handler.WorkOrderReceiptRetrieve,
+            self.workorder_receipt_handler.WorkOrderReceiptUpdateRetrieve,
+            self.workorder_receipt_handler.WorkOrderReceiptLookUp,
+            self.workorder_receipt_handler.WorkOrderReceiptLookUpNext
         ]
         for m in rpc_methods:
             self.dispatcher.add_method(m)
@@ -102,28 +105,13 @@ class TCSListener(resource.Resource):
         try:
             input_json = json.loads(input_json_str)
         except:
-            response['error']['message'] = 'Error: Improper Json. Unable to load'
+            response = {
+                "error": {
+                    "code": WorkOrderStatus.INVALID_PARAMETER_FORMAT_OR_VALUE,
+                    "message": "Error: Improper Json. Unable to load",
+                },
+            }
             return response
-
-        if ('jsonrpc' not in input_json or 'id' not in input_json
-                or 'method' not in input_json or 'params' not in input_json):
-            response['error']['message'] = 'Error: Json does not have the required field'
-            return response
-
-        if not isinstance(input_json['id'], int):
-            response['error']['message'] = 'Error: Id should be of type integer'
-            return response
-
-        response['jsonrpc'] = input_json['jsonrpc']
-        response['id'] = input_json['id']
-
-        if not isinstance(input_json['method'], str):
-            response['error']['message'] = 'Error: Method has to be of type string'
-            return response
-
-        if ("WorkOrderReceipt" in input_json['method']):
-            return self.workorder_receipt_handler.workorder_receipt_handler(
-                input_json_str)
 
         logger.info("Received request: %s", input_json['method'])
         # save the full json for WorkOrderSubmit

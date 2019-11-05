@@ -263,7 +263,7 @@ class ClientSignature(object) :
         status, signature = self.generate_signature(final_hash, private_key)
         if status == False:
             return SignatureStatus.FAILED
-        input_json_params['requesterSignature'] = signature 
+        input_json_params['requesterSignature'] = signature
         input_json_params["encryptedSessionKey"] = encrypted_session_key_str
         # Temporary mechanism to share client's public key. Not a part of Spec
         input_json_params['verifyingKey'] =  self.public_key
@@ -317,4 +317,106 @@ class ClientSignature(object) :
             return SignatureStatus.INVALID_SIGNATURE_FORMAT
 
 #---------------------------------------------------------------------------------------------
+    def verify_update_receipt_signature(self, input_json):
+        """
+        Function to verify the signature of work order receipt update
+        Parameters:
+            - input_json is dictionary contains payload returned by the
+              WorkOrderReceiptUpdateRetrieve API as define EEA spec 7.2.7
+        Returns enum type SignatureStatus
+        """
+        input_json_params = input_json['result']
+
+        concat_string = input_json_params["workOrderId"] + \
+            str(input_json_params["updateType"]) + \
+            input_json_params["updateData"]
+        concat_hash = bytes(concat_string, 'UTF-8')
+        final_hash = crypto.compute_message_hash(concat_hash)
+        signature = input_json_params["updateSignature"]
+        verification_key = input_json_params["receiptVerificationKey"]
+
+        try:
+            _verifying_key = crypto.SIG_PublicKey(verification_key)
+        except Exception as error:
+            logger.info("Error in verification key : %s", error)
+            return SignatureStatus.INVALID_VERIFICATION_KEY
+
+        decoded_signature = crypto.base64_to_byte_array(signature)
+        sig_result = _verifying_key.VerifySignature(final_hash, decoded_signature)
+
+        if sig_result == 1:
+            return SignatureStatus.PASSED
+        elif sig_result == 0:
+            return SignatureStatus.FAILED
+        else:
+            return SignatureStatus.INVALID_SIGNATURE_FORMAT
+
+#---------------------------------------------------------------------------------------------
+    def verify_create_receipt_signature(self, input_json):
+        """
+        Function to verify the signature of work order receipt create
+        Parameters:
+            - input_json is dictionary contains request payload of
+              WorkOrderReceiptRetrieve API as define EEA spec 7.2.2
+        Returns enum type SignatureStatus
+        """
+        input_json_params = input_json['params']
+
+        concat_string = input_json_params["workOrderId"] + \
+            input_json_params["workerServiceId"] + \
+            input_json_params["workerId"] + \
+            input_json_params["requesterId"] + \
+            str(input_json_params["receiptCreateStatus"]) + \
+            input_json_params["workOrderRequestHash"] + \
+            input_json_params["requesterGeneratedNonce"]
+        concat_hash = bytes(concat_string, "UTF-8")
+        final_hash = crypto.compute_message_hash(concat_hash)
+        signature = input_json_params["requesterSignature"]
+        verification_key = input_json_params["receiptVerificationKey"]
+        try:
+            _verifying_key = crypto.SIG_PublicKey(verification_key)
+        except Exception as error:
+            logger.info("Error in verification key : %s", error)
+            return SignatureStatus.INVALID_VERIFICATION_KEY
+
+        decoded_signature = crypto.base64_to_byte_array(signature)
+        sig_result = _verifying_key.VerifySignature(final_hash, decoded_signature)
+
+        if sig_result == 1:
+            return SignatureStatus.PASSED
+        elif sig_result == 0:
+            return SignatureStatus.FAILED
+        else:
+            return SignatureStatus.INVALID_SIGNATURE_FORMAT
+
+#---------------------------------------------------------------------------------------------
+    def calculate_request_hash(self, input_json):
+        """
+        Function to create the work order reuest hash
+        as defined in EEA spec 6.1.8.1
+        Parameters:
+            - input_json is dictionary contains work order request payload
+              as define EEA spec 6.1.1
+        Returns hash of work order request as string
+        """
+        wo_request_params = input_json["params"]
+        concat_string = wo_request_params["requesterNonce"] + \
+            wo_request_params["workOrderId"] + \
+            wo_request_params["workerId"] + \
+            wo_request_params["workloadId"] + \
+            wo_request_params["requesterId"]
+        concat_bytes = bytes(concat_string, "UTF-8")
+        #SHA-256 hashing is used
+        hash_1 = crypto.byte_array_to_base64(
+            crypto.compute_message_hash(concat_bytes)
+        )
+        hash_2 = self.calculate_datahash(wo_request_params["inData"])
+        hash_3 = ""
+        if "outData" in wo_request_params and len(wo_request_params["outData"]) > 0:
+            hash_3 = self.calculate_datahash(wo_request_params["outData"])
+        concat_hash = hash_1 + hash_2 + hash_3
+        concat_hash = bytes(concat_hash, "UTF-8")
+        final_hash = crypto.compute_message_hash(concat_hash)
+        final_hash_str = crypto.byte_array_to_hex(final_hash)
+        return final_hash_str
 

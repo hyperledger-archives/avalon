@@ -249,6 +249,20 @@ class WorkOrderParams():
 			enc_data = utility.encrypt_data(data, encrypted_data_encryption_key, data_iv)
 			return crypto.byte_array_to_base64(enc_data)
 
-	def to_string(self):
-		return json.dumps(self.params_obj, indent=4)
+	def to_string(self, id):
+		"""
+		Create jrpc request in string format using
+		work order params object
+		Parameters
+			- id is jrpc request id
+		Returns
+			work order jrpc request as string
+		"""
+		json_request = {
+			"jsonrpc": "2.0",
+			"method": "WorkOrderSubmit",
+			"id": id,
+			"params": self.params_obj
+		}
+		return json.dumps(json_request, indent=4)
 
