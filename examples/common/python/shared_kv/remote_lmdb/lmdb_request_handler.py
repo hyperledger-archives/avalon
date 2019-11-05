@@ -13,11 +13,7 @@
 # limitations under the License.
 
 import os
-import urllib.request
-import urllib.error
 from twisted.web import resource, http
-from twisted.web.error import Error
-import tcf_enclave_manager.tcf_enclave as db_store
 from string_escape import escape, unescape
 from shared_kv.shared_kv_interface import KvStorage
 

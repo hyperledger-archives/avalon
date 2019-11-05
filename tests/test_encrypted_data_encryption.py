@@ -74,7 +74,7 @@ def ParseCommandLine(args) :
         confpaths = [ "." ]
         try :
                 config = pconfig.parse_configuration_files(conffiles, confpaths)
-                config_json_str = json.dumps(config)
+                json.dumps(config)
         except pconfig.ConfigurationException as e :
                 logger.error(str(e))
                 sys.exit(-1)

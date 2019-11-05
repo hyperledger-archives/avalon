@@ -20,10 +20,6 @@ NOTE: Functions defined in this file are designed to be run
 before logging is enabled.
 """
 
-import os
-import sys
-import warnings
-
 import re
 import toml
 from string import Template

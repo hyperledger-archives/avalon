@@ -18,20 +18,11 @@ functions based on Spec 1.0 compatibility
 
 """
 
-import base64
-import os
-import sys
-import json
-import urllib.request
-import urllib.error
-import random
 import json
 import logging
 import crypto.crypto as crypto
-import utility.file_utils as putils
 import utility.utility as utility
 from utility.hex_utils import is_valid_hex_str, byte_array_to_hex_str
-import worker.worker_details as worker
 from error_code.error_status import SignatureStatus
 
 logger = logging.getLogger(__name__)

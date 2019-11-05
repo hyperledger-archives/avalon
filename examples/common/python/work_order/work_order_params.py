@@ -14,7 +14,6 @@
 
 import json
 import logging
-from os import sys
 
 import crypto.crypto as crypto
 import utility.utility as utility

@@ -92,7 +92,6 @@ class WorkerEncryptionKeyHandler:
         # calculate signature
         concat_string = worker_id.encode('UTF-8') + encryptionKey.encode(
             'UTF-8') + encryptionKeyNonce.encode('UTF-8') + tag.encode('UTF-8')
-        concat_hash = bytes()
         concat_hash = bytes(concat_string)
         hash_1 = crypto.compute_message_hash(concat_hash)
         s1 = crypto.byte_array_to_base64(hash_1)

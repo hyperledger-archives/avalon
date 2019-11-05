@@ -14,10 +14,7 @@
 
 ''' this Component acts as bridge between smart contract deployed in blockchain and KV storage'''
 
-import os
 import sys
-from os import urandom
-import argparse
 import time
 import json
 import logging

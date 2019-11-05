@@ -23,7 +23,6 @@ import json
 import argparse
 import logging
 import secrets
-import time
 
 # Tkinter imports
 import tkinter as tk
@@ -285,8 +284,6 @@ class resultWindow(tk.Toplevel):
 		workload_id = workload_id.encode("UTF-8").hex()
 		session_iv = utility.generate_iv()
 		session_key = utility.generate_key()
-		encrypted_session_key = utility.generate_encrypted_key(
-			session_key, worker_obj.encryption_key)
 		requester_nonce = secrets.token_hex(16)
 		work_order_id = secrets.token_hex(32)
 		requester_id = secrets.token_hex(32)
@@ -524,7 +521,7 @@ def gui_main():
 			message = message + input_data
 		else:
 			for var in var_list:
-				if var.get()==None:
+				if var.get() is None:
 					messagebox.showwarning("Error",
 						"Must input all variables")
 					return
@@ -607,7 +604,7 @@ def parse_command_line(args):
 	try :
 		config = pconfig.parse_configuration_files(conf_files,
 			conf_paths)
-		config_json_str = json.dumps(config, indent=4)
+		json.dumps(config, indent=4)
 	except pconfig.ConfigurationException as e :
 		logger.error(str(e))
 		sys.exit(-1)
@@ -625,16 +622,13 @@ def parse_command_line(args):
 	if options.service_uri:
 		service_uri = options.service_uri
 		off_chain = True
-		uri_client = GenericServiceClient(service_uri)
 
 	if options.off_chain:
 		service_uri = config["tcf"].get("json_rpc_uri")
 		off_chain = True
-		uri_client = GenericServiceClient(service_uri)
 
 	requester_signature = options.requester_signature
 
-	service_uri = options.service_uri
 	verbose = options.verbose
 	worker_id = options.worker_id
 
