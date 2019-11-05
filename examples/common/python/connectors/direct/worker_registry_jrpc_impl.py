@@ -47,7 +47,6 @@ class WorkerRegistryJRPCImpl(WorkerRegistryInterface):
                     return create_jrpc_response(
                         id, JsonRpcErrorCode.INVALID_PARAMETER,
                         "Invalid application type id")
-                    break
         if details is not None:
             is_valid = validate_details(details)
             if is_valid is not None:

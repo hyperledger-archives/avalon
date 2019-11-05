@@ -13,9 +13,8 @@
 # limitations under the License.
 
 import logging
-import os,sys
+import os
 from os.path import exists, realpath
-import json
 from connectors.utils import construct_message
 
 from solc import compile_source

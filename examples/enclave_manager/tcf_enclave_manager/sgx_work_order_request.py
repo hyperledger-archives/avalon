@@ -14,10 +14,8 @@
 import os
 import json
 import logging
-import base64
 
 import crypto.crypto as crypto
-import utility.keys as keys
 
 logger = logging.getLogger(__name__)
 

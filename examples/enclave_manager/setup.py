@@ -17,7 +17,6 @@
 import os
 import sys
 import subprocess
-import re
 
 # This should only be run with python3
 import sys

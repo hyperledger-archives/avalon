@@ -23,7 +23,6 @@ import utility.hex_utils as hex_utils
 import crypto.crypto as crypto
 import config.config as pconfig
 import logging
-import toml
 
 logger = logging.getLogger(__name__)
 

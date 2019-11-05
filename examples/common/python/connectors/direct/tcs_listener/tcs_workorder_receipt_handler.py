@@ -17,7 +17,6 @@ import logging
 from error_code.error_status import ReceiptCreateStatus
 from error_code.error_status import WorkOrderStatus
 import utility.utility as utility
-from itertools import cycle
 
 logger = logging.getLogger(__name__)
 

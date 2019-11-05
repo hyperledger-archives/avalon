@@ -13,10 +13,8 @@
 # limitations under the License.
 
 import binascii
-import json
 import logging
 from os import environ
-from os.path import exists, realpath
 
 from utility.hex_utils import is_valid_hex_str
 

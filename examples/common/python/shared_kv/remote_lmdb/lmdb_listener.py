@@ -15,7 +15,6 @@
 import os
 import sys
 import argparse
-import json
 from urllib.parse import urlparse
 from twisted.web import server
 from twisted.internet import reactor
