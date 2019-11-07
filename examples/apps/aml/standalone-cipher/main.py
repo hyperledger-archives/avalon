@@ -175,11 +175,15 @@ class App():
             inData_json_aux["index"] = index
             index+=1
 
-            inData_aux = preprocess + "|" + (country + "," + str(numberUsers) + "," + str(numberTransactions))
+            inData_aux = (preprocess + "|" 
+                + (country + "," + str(numberUsers) + "," + str(numberTransactions)))
         for i in range(0,numberUsers):
-            inData_aux = inData_aux + "|" + users['userId'][i] + "," + users['name'][i]
+            inData_aux = (inData_aux + "|" + users['userId'][i] 
+                + "," + users['name'][i])
         for j in range(0,numberTransactions):
-            inData_aux = inData_aux + "|" + transactions['from'][j] + "," + transactions['to'][j] + "," + str(transactions['amount'][j]) + "," + transactions['currency'][j] + "," + transactions['date'][j]
+            inData_aux = (inData_aux + "|" + transactions['from'][j] 
+                + "," + transactions['to'][j] + "," + str(transactions['amount'][j]) 
+                + "," + transactions['currency'][j] + "," + transactions['date'][j])
 
         inData_json_aux["data"] = inData_aux
 
@@ -275,7 +279,8 @@ class App():
         
         enc_session_key = sig_obj.generate_encrypted_key(session_key,worker_obj.encryption_key)
 
-        request_json = sig_obj.generate_client_signature(workload_str,worker_obj,signing_key, session_key, session_iv, enc_session_key)
+        request_json = sig_obj.generate_client_signature(workload_str,worker_obj,
+            signing_key, session_key, session_iv, enc_session_key)
 
         enc_json_file = open(enc_json_file, "w")
         enc_json_file.write(request_json)

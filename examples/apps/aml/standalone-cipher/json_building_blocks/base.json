@@ -10,8 +10,6 @@
         "workOrderId": "0x11ABCE",
         "workerId":"",
         "workloadId": "aml-result",
-        "keepState" : "",
-        "keepState": "true",
         "requesterId": "0x3456",
         "dataEncryptionAlgorithm": "AES-GCM-256",
         "encryptedSessionKey": "sessionkey",
