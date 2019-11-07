@@ -102,7 +102,8 @@ std::string AmlResultLogic::findSuspects() {
                     wholeSuspectList += ")";
                 }
             }
-            wholeSuspectList += ", suspicious of moving " + std::to_string(infoPerCountry[0].transactionList[i].amount) + " " + infoPerCountry[0].transactionList[i].currency + " in cycles " ;
+            wholeSuspectList += ", suspicious of moving " + std::to_string(infoPerCountry[0].transactionList[i].amount)
+                + " " + infoPerCountry[0].transactionList[i].currency + " in cycles " ;
             numFound++;
         }
         traveledCountriesSize = 0;
@@ -131,7 +132,8 @@ bool newCountry(std::string from, std::string to, std::vector<std::string> trave
     return newCountry;
 }
 
-bool AmlResultLogic::findNextSuspect(int *traveledCountriesSize, std::vector<std::string> &traveledCountries, std::vector<std::string> &suspectIds, std::string lastId, std::string nextId, int amount){
+bool AmlResultLogic::findNextSuspect(int *traveledCountriesSize, std::vector<std::string> &traveledCountries,
+    std::vector<std::string> &suspectIds, std::string lastId, std::string nextId, int amount){
     bool found = false;
     if(*traveledCountriesSize < numberTotalCountries - 1){
         std::string country = nextId.substr(0,2);
@@ -143,7 +145,8 @@ bool AmlResultLogic::findNextSuspect(int *traveledCountriesSize, std::vector<std
         }
         int j = 0;
         while (!found && j < infoPerCountry[i].actTransactions){
-            if(newCountry(infoPerCountry[i].transactionList[j].from,infoPerCountry[i].transactionList[j].to,traveledCountries) && infoPerCountry[i].transactionList[j].amount == amount){
+            if(newCountry(infoPerCountry[i].transactionList[j].from,infoPerCountry[i].transactionList[j].to,traveledCountries)
+                && infoPerCountry[i].transactionList[j].amount == amount){
                 std::string nextId_n = infoPerCountry[i].transactionList[j].to;
                 int amount_n = infoPerCountry[i].transactionList[j].amount;
                 (*traveledCountriesSize)++;
@@ -164,7 +167,8 @@ bool AmlResultLogic::findNextSuspect(int *traveledCountriesSize, std::vector<std
         }
         int j = 0;
         while (!found && j < infoPerCountry[i].actTransactions){
-            if(infoPerCountry[i].transactionList[j].from == nextId && infoPerCountry[i].transactionList[j].to == lastId && infoPerCountry[i].transactionList[j].amount == amount){
+            if(infoPerCountry[i].transactionList[j].from == nextId && infoPerCountry[i].transactionList[j].to
+                == lastId && infoPerCountry[i].transactionList[j].amount == amount){
                 (*traveledCountriesSize)++;
                 suspectIds.resize(*traveledCountriesSize);
                 suspectIds[(*traveledCountriesSize) - 1] = infoPerCountry[i].transactionList[j].from;

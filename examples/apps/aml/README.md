@@ -1,3 +1,8 @@
+<!--
+Licensed under Creative Commons Attribution 4.0 International License
+https://creativecommons.org/licenses/by/4.0/
+-->
+
 The aml example is composed by 3 different parts.
 1. standalone-cipher: This is an example of a standalone cipher that is proposed as a possible solution. This tool has several functionalities.
 	- It allows you to create a well formatted JSONs that you can send to the platform just by inputing the CSVs with the information about both the users and the transactions.
@@ -8,5 +13,7 @@ The aml example is composed by 3 different parts.
 	- download the workerInfo of a concrete worker.
 	- send already encrypted JSONs to be processed by the server side.
 	- retrieve the result of a work order and update the state of the algorithm.
+
+	[Web Client README](web-client/README.md)
 
 3. workload: Contains the logic used for this aml use case. The algorithm consist on a simplified version of Anti Money Laundering, it searches for money going round in circles and outputs the list of people suspicious of doing so.

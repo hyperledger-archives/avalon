@@ -57,7 +57,8 @@ private:
 
     std::string getNameFromId(std::string id);
     std::string findSuspects();
-    bool findNextSuspect(int *traveledCountriesSize, std::vector<std::string> &traveledCountries, std::vector<std::string> &suspectIds, std::string lastId, std::string nextId, int amount);
+    bool findNextSuspect(int *traveledCountriesSize, std::vector<std::string> &traveledCountries,
+        std::vector<std::string> &suspectIds, std::string lastId, std::string nextId, int amount);
 
 
 public:
