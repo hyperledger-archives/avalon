@@ -55,7 +55,10 @@ def read_json_file(input_file, data_dir = ['./', '../', '/']) :
     """
     Utility function to read a JSON file
     """
-    file_name = find_file_in_path(input_file, data_dir)
+    file_name = find_file_in_paths(input_file, data_dir)
     with open(file_name, "r") as input_json_file :
-        input_json = input_json_file.read().rstrip('\n')
-    return input_json
+        input_lines = input_json_file.read().splitlines()
+    flattened_json = ""
+    for line in input_lines :
+        flattened_json += line
+    return flattened_json
