@@ -20,6 +20,10 @@ NOTE: Functions defined in this file are designed to be run
 before logging is enabled.
 """
 
+import os
+import sys
+import warnings
+import logging
 import re
 import toml
 from string import Template
@@ -30,7 +34,12 @@ __all__ = [ "ConfigurationException",
     "parse_configuration_file",
     "read_config_from_toml" ]
 
-TCFHOME = os.environ.get("TCF_HOME", "../../")
+logger = logging.getLogger(__name__)
+
+try:
+    TCFHOME = os.environ["TCF_HOME"]
+except KeyError:
+    raise KeyError("'TCF_HOME' environment variable not set.")
 
 # -----------------------------------------------------------------
 # -----------------------------------------------------------------
@@ -109,7 +118,7 @@ def parse_configuration_file(filename, variable_map) :
 # -----------------------------------------------------------------
 # -----------------------------------------------------------------
 
-def read_config_from_toml(input_file, config_name = None, confpaths = [".", TCFHOME + "/" + "config"]):
+def read_config_from_toml(input_file, config_name = None, confpaths=[".", TCFHOME + "/" + "config"]):
     """
     Function to read toml file and returns the toml content as a list
     Parameters:
@@ -125,7 +134,5 @@ def read_config_from_toml(input_file, config_name = None, confpaths = [".", TCFH
         result = config.get(config_name)
         if result is None:
             logger.error("%s is missing in toml file %s", config_name, input_file )
-            return None
-        else :
-            return result
+        return result
 

@@ -56,20 +56,17 @@ def find_file_in_paths(filename, search_paths) :
     raise FileNotFoundError(errno.ENOENT, "unable to locate file in search path", filename)
 
 # -----------------------------------------------------------------
-def read_json_file(input_file, data_dir = ['./', '../', '/']) :
+def read_json_file(input_file, data_dir=['./', '../', '/']) :
     """
     Utility function to read a JSON file
     """
     file_name = find_file_in_paths(input_file, data_dir)
     with open(file_name, "r") as input_json_file :
         input_lines = input_json_file.read().splitlines()
-    flattened_json = ""
-    for line in input_lines :
-        flattened_json += line
-    return flattened_json
+    return "".join(input_lines)
 
 #---------------------------------------------------------------------------------------------
-def write_result_data_to_json_file(file_name, input_data, data_dir ='./') :
+def write_result_data_to_json_file(file_name, input_data, data_dir='./') :
     """
     Function to store result data as json file
     Parameters:
