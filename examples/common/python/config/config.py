@@ -23,9 +23,14 @@ before logging is enabled.
 import re
 import toml
 from string import Template
-from utility.file_utils import find_file_in_path
+from utility.file_utils import find_file_in_paths
 
-__all__ = [ "ConfigurationException", "parse_configuration_files", "parse_configuration_file" ]
+__all__ = [ "ConfigurationException", 
+    "parse_configuration_files",
+    "parse_configuration_file",
+    "read_config_from_toml" ]
+
+TCFHOME = os.environ.get("TCF_HOME", "../../")
 
 # -----------------------------------------------------------------
 # -----------------------------------------------------------------
@@ -54,7 +59,7 @@ def parse_configuration_files(cfiles, search_path, variable_map = None) :
 
     try :
         for cfile in cfiles :
-            files_found.append(find_file_in_path(cfile, search_path))
+            files_found.append(find_file_in_paths(cfile, search_path))
     except FileNotFoundError as e :
         raise ConfigurationException(e.filename, e.strerror)
 
@@ -100,3 +105,27 @@ def parse_configuration_file(filename, variable_map) :
         text = Template(text).substitute(variable_map)
 
     return toml.loads(text)
+
+# -----------------------------------------------------------------
+# -----------------------------------------------------------------
+
+def read_config_from_toml(input_file, config_name = None, confpaths = [".", TCFHOME + "/" + "config"]):
+    """
+    Function to read toml file and returns the toml content as a list
+    Parameters:
+        - input_file is any toml file which need to be read
+        - config_name is particular configuration to pull
+        - confpaths is the directory structure in which the toml file exists
+    """
+    conf_files = [input_file]
+    config = parse_configuration_files(conf_files, confpaths)
+    if config_name is None:
+        return config
+    else :
+        result = config.get(config_name)
+        if result is None:
+            logger.error("%s is missing in toml file %s", config_name, input_file )
+            return None
+        else :
+            return result
+

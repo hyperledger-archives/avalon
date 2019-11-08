@@ -20,6 +20,8 @@ Worker.py -- functions to perform worker related functions based on Spec 1.0 com
 import logging
 import json
 import utility.utility as utility
+import utility.file_utils as futils
+import config.config as pconfig
 
 logger = logging.getLogger(__name__)
 
@@ -31,7 +33,7 @@ class WorkerDetails():
         """
         Function to set the member variables of this class with default value as per TCf Spec
         """
-        tcs_worker = utility.read_toml_file("tcs_config.toml","WorkerConfig")
+        tcs_worker = pconfig.read_config_from_toml("tcs_config.toml","WorkerConfig")
         self.work_order_sync_uri = ""
         self.work_order_async_uri = ""
         self.work_order_pull_uri = ""

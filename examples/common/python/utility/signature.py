@@ -21,9 +21,11 @@ functions based on Spec 1.0 compatibility
 import json
 import logging
 import crypto.crypto as crypto
+import utility.file_utils as futils
 import utility.utility as utility
 from utility.hex_utils import is_valid_hex_str, byte_array_to_hex_str
 from error_code.error_status import SignatureStatus
+import config.config as pconfig
 
 logger = logging.getLogger(__name__)
 #No of bytes of encrypted session key to encrypt data
@@ -38,7 +40,7 @@ class ClientSignature(object) :
         self.private_key = None
         self.public_key = None
         self.param_pool = ["requesterNonce", "workOrderId", "workerId", "requesterId","inData"]
-        self.tcs_worker = utility.read_toml_file("tcs_config.toml","WorkerConfig")
+        self.tcs_worker = pconfig.read_config_from_toml("tcs_config.toml","WorkerConfig")
 
 #---------------------------------------------------------------------------------------------
     def __payload_json_check(self, json_data):
