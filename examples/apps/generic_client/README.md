@@ -9,35 +9,34 @@ The command line client, `generic_client.py`, sends a message to the worker.
 For command line options, type `./generic_client.py -h` from this directory.
 
 ```
-usage: generic_client.py [-h] [-c CONFIG] [-u URI | -a ADDRESS] [-m MODE]
-                         [-w WORKER_ID] [-l WORKLOAD_ID] [-i IN_DATA]
+usage: generic_client.py [-h] [-c CONFIG] [-u URI | -a ADDRESS]
+                         [-m {listing,registry}] [-w WORKER_ID]
+                         [-l WORKLOAD_ID] [-i IN_DATA [IN_DATA ...]] [-r] [-o]
+                         [-rs]
 
 optional arguments:
-  -h, --help
-                        show this help message and exit
+  -h, --help            show this help message and exit
   -c CONFIG, --config CONFIG
                         The config file containing the Ethereum contract
                         information
-  -u URI, --uri URI
-                        Direct API listener endpoint,
-                        default is "http://localhost:1947"
+  -u URI, --uri URI     Direct API listener endpoint, default is
+                        http://localhost:1947
   -a ADDRESS, --address ADDRESS
                         an address (hex string) of the smart contract (e.g.
                         Worker registry listing)
-  -m MODE, --mode MODE
-                        should be one of listing or registry
+  -m {listing,registry}, --mode {listing,registry}
+                        should be one of listing or registry (default)
   -w WORKER_ID, --worker_id WORKER_ID
                         worker id (hex string) to use to submit a work order
   -l WORKLOAD_ID, --workload_id WORKLOAD_ID
                         workload id (hex string) for a given worker
-  -i IN_DATA, --in_data IN_DATA
-                        One or more input strings
-  -o, --decrypted-output
-                        If present, display JSON output items
-  -r, --receipt
-                        If present, retrieve and display work order receipt 
+  -i IN_DATA [IN_DATA ...], --in_data IN_DATA [IN_DATA ...]
+                        Input data
+  -r, --receipt         If present, retrieve and display work order receipt
+  -o, --decrypted_output
+                        If present, display decrypted output as JSON
   -rs, --requester_signature
-                        If present, enable requester signature for work order requests
+                        Enable requester signature for work order requests
 ```
 
 The `--mode` option is used only with an Ethereum smart contract address.
@@ -76,7 +75,7 @@ worker requests on the command line.
 ```
 Or omit the URI if you use the default:
 ```
-./generic_client.py --uri --workload_id "echo-result" --in_data "Hello"
+./generic_client.py --workload_id "echo-result" --in_data "Hello"
 ```
 
 ### Heart disease eval workload using a URI
