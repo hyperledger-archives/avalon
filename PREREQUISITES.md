@@ -196,8 +196,8 @@ wget https://download.01.org/intel-sgx/linux-2.3.1/ubuntu18.04/libsgx-enclave-co
 sudo dpkg -i libsgx-enclave-common_2.3.101.46683-1_amd64.deb
 ```
 
-### Remove Old `/dev/sgx` Intel SGX Driver
-If device file `/dev/sgx` is present, remove the old driver:
+### Remove Old `/dev/sgx` Intel SGX DCAP Driver
+If device file `/dev/sgx` is present, remove the old DCAP driver:
 ```
 sudo /opt/intel/sgxdriver/uninstall.sh
 ```
@@ -216,8 +216,8 @@ fi
 
 After uninstalling, reboot with `sudo shutdown -r 0`
 
-### Install New `/dev/isgx` Intel SGX Driver
-Install the Intel SGX driver:
+### Install New `/dev/isgx` Intel SGX IAS Driver
+Install the Intel SGX IAS driver:
 
 ```
 cd /var/tmp
@@ -294,10 +294,10 @@ For example, to install OpenSSL v1.1.1d on an Ubuntu system:
 
 ```
 cd /var/tmp
-wget 'http://http.us.debian.org/debian/pool/main/o/openssl/libssl1.1_1.1.1d-1_amd64.deb'
-wget 'http://http.us.debian.org/debian/pool/main/o/openssl/libssl-dev_1.1.1d-1_amd64.deb'
-sudo dpkg -i libssl1.1_1.1.1d-1_amd64.deb
-sudo dpkg -i libssl-dev_1.1.1d-1_amd64.deb
+wget 'http://http.us.debian.org/debian/pool/main/o/openssl/libssl1.1_1.1.1d-2_amd64.deb'
+wget 'http://http.us.debian.org/debian/pool/main/o/openssl/libssl-dev_1.1.1d-2_amd64.deb'
+sudo dpkg -i libssl1.1_1.1.1d-2_amd64.deb
+sudo dpkg -i libssl-dev_1.1.1d-2_amd64.deb
 sudo apt-get install -f
 ```
 
