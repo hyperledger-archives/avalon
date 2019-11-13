@@ -60,7 +60,7 @@ Default directory is `/opt/intel/sgxssl`
 Use only with `SGX_MODE=HW`.
 This needs to be set to a valid enclave signing key. You can generate one
 yourself using OpenSSL, then export the path to it:
-  ```
+  ```bash
   openssl genrsa -3 -out $TCF_HOME/enclave.pem 3072
   export TCF_ENCLAVE_CODE_SIGN_PEM=$TCF_HOME/enclave.pem
   ```
@@ -78,7 +78,7 @@ or`TCF_DEBUG_BUILD=1 docker-compose up` for Docker-based builds
 # <a name="packages"></a>Required Packages
 On a minimal Ubuntu system, Hyperledger Avalon requires the following packages.
 Other distributions will require similar packages.
-```
+```bash
 sudo apt-get update
 sudo apt-get install -y cmake swig pkg-config python3-dev python3-venv python \
      software-properties-common virtualenv curl xxd git unzip dh-autoreconf \
@@ -87,7 +87,7 @@ sudo apt-get install -y cmake swig pkg-config python3-dev python3-venv python \
 ```
 
 Also, install the following pip packages
-```
+```bash
 sudo pip3 install --upgrade setuptools json-rpc py-solc web3 wheel
 ```
 
@@ -99,7 +99,7 @@ and Docker Compose if it is not already installed.
 
 To install Docker CE Engine:
 
-```
+```bash
 sudo apt-get install -y apt-transport-https ca-certificates
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
 sudo add-apt-repository \
@@ -111,7 +111,7 @@ sudo apt-get install -y docker-ce
 To verify a correct installation, run `sudo docker run hello-world`
 
 To install Docker Compose:
-```
+```bash
 sudo curl -L \
    https://github.com/docker/compose/releases/download/1.24.1/docker-compose-`uname -s`-`uname -m` \
    -o /usr/local/bin/docker-compose
@@ -140,7 +140,7 @@ Intel SGX simulator mode.
 The following instructions download the Intel SGX SDK 2.3 and installs it in
 `/opt/intel/sgxsdk/` :
 
-```
+```bash
 sudo mkdir -p /opt/intel
 cd /opt/intel
 sudo wget https://download.01.org/intel-sgx/linux-2.3.1/ubuntu18.04/sgx_linux_x64_sdk_2.3.101.46683.bin
@@ -154,7 +154,7 @@ The Intel SGX OpenSSL library expects the SDK to be here by default.
 After installing, source the Intel SGX SDK activation script to set
 `$SGX_SDK`, `$PATH`, `$PKG_CONFIG_PATH`, and `$LD_LIBRARY_PATH`.
 Append this line to your login shell script (`~/.bashrc` or similar):
-```
+```bash
 source /opt/intel/sgxsdk/environment
 echo "source /opt/intel/sgxsdk/environment" >>~/.bashrc
 ```
@@ -168,14 +168,14 @@ Downloads are listed at
 
 ## Intel SGX in Hardware Mode
 
-If you plan to run this on Intel SGX-enabled hardware, you will need
-to install packages `libsgx-enclave-common` and `libelf-dev` and
-install the Intel SGX driver for both standalone and docker builds.
+If you plan to run this on Intel SGX-enabled hardware, you will need to
+install the Intel SGX driver and install additional packages
+for both standalone and docker builds.
 You need to install the Intel SGX driver whether you build Avalon standalone
 or using Docker.
 
-Before installing Intel SGX software, install this package:
-```
+Before installing Intel SGX software, install these packages:
+```bash
 sudo apt-get install -y libelf-dev cpuid
 ````
 
@@ -191,19 +191,19 @@ If disabled, enter BIOS and find the Intel SGX feature
 enable Intel SGX, save your BIOS settings, and exit BIOS.
 
 Download and install libsgx-enclave-common version 2.3.101:
-```
+```bash
 wget https://download.01.org/intel-sgx/linux-2.3.1/ubuntu18.04/libsgx-enclave-common_2.3.101.46683-1_amd64.deb
 sudo dpkg -i libsgx-enclave-common_2.3.101.46683-1_amd64.deb
 ```
 
 ### Remove Old `/dev/sgx` Intel SGX DCAP Driver
 If device file `/dev/sgx` is present, remove the old DCAP driver:
-```
+```bash
 sudo /opt/intel/sgxdriver/uninstall.sh
 ```
 
 If the `uninstall.sh` script is missing or fails, uninstall as follows:
-```
+```bash
 if [ -c /dev/sgx ] ; then
     sudo service aesmd stop
     sudo rm -f $(find /lib/modules -name intel_sgx.ko)
@@ -219,7 +219,7 @@ After uninstalling, reboot with `sudo shutdown -r 0`
 ### Install New `/dev/isgx` Intel SGX IAS Driver
 Install the Intel SGX IAS driver:
 
-```
+```bash
 cd /var/tmp
 wget https://download.01.org/intel-sgx/linux-2.6/ubuntu18.04-server/sgx_linux_x64_driver_2.5.0_2605efa.bin
 sudo bash ./sgx_linux_x64_driver_2.5.0_2605efa.bin
@@ -237,7 +237,7 @@ Replace the SPID and IAS Subscription key values in file
 `$TCF_HOME/config/tcs_config.toml` with the actual hexadecimal values
 (the IAS key may be either your Primary key or Secondary key):
 
-```
+```bash
 spid = '<spid obtained from portal>'
 ias_api_key = '<ias subscription key obtained from portal>'
 ```
@@ -245,7 +245,7 @@ ias_api_key = '<ias subscription key obtained from portal>'
 In the same file, if you are behind a corporate proxy,
 uncomment and update the https_proxy line:
 
-```
+```bash
 #https_proxy = "http://your-proxy:your-port/"
 ```
 If you are not behind a corporate proxy (the usual case),
@@ -261,7 +261,7 @@ They are normally set by sourcing the Intel SGX SDK activation script
 Set `SGX_MODE` as follows.
 Append this line to your login shell script (`~/.bashrc` or similar):
 
-```
+```bash
 export SGX_MODE=HW
 echo "export SGX_MODE=HW" >>~/.bashrc
 ```
@@ -292,7 +292,7 @@ Check for available versions
 [here](http://http.us.debian.org/debian/pool/main/o/openssl/).
 For example, to install OpenSSL v1.1.1d on an Ubuntu system:
 
-```
+```bash
 cd /var/tmp
 wget 'http://http.us.debian.org/debian/pool/main/o/openssl/libssl1.1_1.1.1d-2_amd64.deb'
 wget 'http://http.us.debian.org/debian/pool/main/o/openssl/libssl-dev_1.1.1d-2_amd64.deb'
@@ -309,7 +309,7 @@ you can build OpenSSL from source using the following commands. If you
 installed the package directly as described above you do *not* need to do this.
 These steps detail installing OpenSSL to the `~/openssl/install` directory.
 
-```
+```bash
 mkdir -p ~/openssl/install
 cd ~/openssl
 wget https://www.openssl.org/source/openssl-1.1.1d.tar.gz
@@ -325,13 +325,13 @@ cd ../..
 
 If the above succeeds, define/extend the `PKG_CONFIG_PATH` environment variable
 accordingly, e.g.,
-```
+```bash
 export PKG_CONFIG_PATH="$PWD/install/lib/pkgconfig${PKG_CONFIG_PATH:+:$PKG_CONFIG_PATH}"
 ```
 If you installed in a standard location (e.g., default `/usr/local/lib`),
 run `ldconfig` .
 If you installed in a non-standard location, extend `LD_LIBRARY_PATH`, e.g.,
-```
+```bash
 export LD_LIBRARY_PATH="$PWD/install/lib/${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
 ```
 
@@ -352,26 +352,26 @@ specifically for Intel SGX OpenSSL with fixes for commonly encountered
 problems.
 - Ensure you have the Intel SGX SDK environment variables activated for the
   current shell session
-  ```
+  ```bash
   source /opt/intel/sgxsdk/environment
   ```
 
 - Create a new directory to build the sgxssl components
-  ```
+  ```bash
   mkdir ~/sgxssl
   cd ~/sgxssl
   ```
 
 - Download the latest SGX SSL git repository for your version of OpenSSL:
 
-  ```
+  ```bash
   git clone 'https://github.com/intel/intel-sgx-ssl.git'
   ```
 
 - Download the OpenSSL source package for your version of OpenSSL.
   This will form the base of this Intel SGX SSL install:
 
-  ```
+  ```bash
   cd intel-sgx-ssl/openssl_source
   wget 'https://www.openssl.org/source/openssl-1.1.1d.tar.gz'
   cd ..
@@ -379,7 +379,7 @@ problems.
 
 - Compile and install the sgxssl project.
   Environment variable `SGX_MODE` must be set to `SIM` or `HW` .
-  ```
+  ```bash
   cd Linux
   make DESTDIR=/opt/intel/sgxssl all test
   sudo make install
@@ -391,7 +391,7 @@ problems.
   find and link this library.
   Append this line to your login shell script (`~/.bashrc` or similar)
   after changing the directory name:
-  ```
+  ```bash
   export SGX_SSL=/opt/intel/sgxssl
   echo "export SGX_SSL=/opt/intel/sgxssl" >>~/.bashrc
   ```
@@ -404,14 +404,14 @@ problems.
   `./test_app/TestApp: error while loading shared libraries: libprotobuf.so.9:
    cannot open shared object file: No such file or directory`
   you may not have libprotobuf installed. You can install it via:
-  ```
+  ```bash
   sudo apt-get update
   sudo apt-get install -y libprotobuf-dev
   ```
 - If you still get the above error about libprotobuf.so.9, your distribution
   may not include the .so.9 version of libprotobuf. You can work around this
   by simply creating a symbolic link to the current version like:
-  ```
+  ```bash
   cd /usr/lib/x86_64-linux-gnu/
   sudo ln -s libprotobuf.so.10 libprotobuf.so.9
   ```
