@@ -69,24 +69,24 @@ worker requests on the command line.
 ## Examples
 
 ### Echo workload using a URI
-```
+```bash
 ./generic_client.py --uri "http://localhost:1947" \
     --workload_id "echo-result" --in_data "Hello"
 ```
 Or omit the URI if you use the default:
-```
+```bash
 ./generic_client.py --workload_id "echo-result" --in_data "Hello"
 ```
 
 ### Heart disease eval workload using a URI
-```
+```bash
 ./generic_client.py --uri "http://localhost:1947" \
     --workload_id "heart-disease-eval" \
     --in_data "Data: 25 10 1 67  102 125 1 95 5 10 1 11 36 1"
 ```
 
 ### Echo workload using registry listing smart contract address
-```
+```bash
 ./generic_client.py \
     --address "0x9Be28B132aeE1b2c5A1C50529a636cEd807842cd" --mode "listing" \
     --workload_id "echo-result" --in_data "Hello"

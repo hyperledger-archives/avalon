@@ -72,9 +72,9 @@ The Avalon Enclave Manager and Avalon Listener run in a Docker container.
     ```bash
     mkdir -p $HOME/.py-solc/solc-v0.4.25/bin \
     && curl -LsS https://github.com/ethereum/solidity/releases/download/v0.4.25/solc-static-linux \
-            -o /root/.py-solc/solc-v0.4.25/bin/solc \
-    && chmod 0755 /root/.py-solc/solc-v0.4.25/bin/solc &&
-    export SOLC_BINARY=/root/.py-solc/solc-v0.4.25/bin/solc
+            -o $HOME/.py-solc/solc-v0.4.25/bin/solc \
+    && chmod 0755 $HOME/.py-solc/solc-v0.4.25/bin/solc &&
+    export SOLC_BINARY=$HOME/.py-solc/solc-v0.4.25/bin/solc
     ```
 8.  In Terminal 2, set environment variable `WALLET_PRIVATE_KEY` if not set.
     This should match the value in file `docker/Dockerfile.tcf-dev`

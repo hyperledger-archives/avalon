@@ -71,7 +71,7 @@ The steps below will set up a Python virtual environment to run Avalon.
    [PREREQUISITES document](PREREQUISITES.md)
 
 2. Download the Avalon source repository if you have not already done this:
-   ```
+   ```bash
    git clone https://github.com/hyperledger-labs/trusted-compute-framework
    cd trusted-compute-framework
    ```
@@ -82,7 +82,7 @@ The steps below will set up a Python virtual environment to run Avalon.
    where you interact with Avalon.
    Append this line (with `pwd` expanded) to your login shell script
    (`~/.bashrc` or similar):
-   ```
+   ```bash
    export TCF_HOME=`pwd`
    echo "export TCF_HOME=$TCF_HOME" >> ~/.bashrc
    ```
@@ -97,7 +97,7 @@ The steps below will set up a Python virtual environment to run Avalon.
 
 5. Create Python virtual environment, Build and Install Avalon
    components into it:
-   ```
+   ```bash
    cd $TCF_HOME/tools/build
    # Create virtual environment directory with name _dev
    python3 -m venv _dev
@@ -108,7 +108,7 @@ The steps below will set up a Python virtual environment to run Avalon.
 6. Activate the new Python virtual environment for the current shell session.
    You will need to do this in each new shell session (in addition to
    exporting environment variables).
-   ```
+   ```bash
    source _dev/bin/activate
    ```
    If the virtual environment for the current shell session is activated,
@@ -142,7 +142,7 @@ Follow these steps to run the `Demo.py` testcase:
       "tcf" Docker container shell from the previous build steps
 3. In Terminal 2, run `cd $TCF_HOME/tests`
 4. In Terminal 2, use this command to run the `Demo.py` test:
-   ```
+   ```bash
    python3 Demo.py --input_dir ./json_requests/ \
            --connect_uri "http://localhost:1947" work_orders/output.json
    ```
@@ -153,7 +153,7 @@ Follow these steps to run the `Demo.py` testcase:
    for standalone builds.
    For Docker-based builds, press `Ctrl-c`
 8. For standalone mode, delete virtual environment
-   ```
+   ```bash
    rm -rf $TCF_HOME/tools/build/_dev/
    ```
 

@@ -15,12 +15,12 @@ The EEA Worker is a light Java worker client compliant with the
 
 * for dev purposes:
 
-```
+```bash
 cd eea-worker
 gradle bootRun --refresh-dependencies
 ```
 * or on a remote instance:
-```
+```bash
 cd eea-worker
 ./gradlew bootRun --refresh-dependencies
 ```
