@@ -3,6 +3,7 @@
 
 # build files
 common/sgx_workload/build/
+common/sgx_iohandler/build/
 config/Kv_Shared_tmp
 config/Kv_Shared_tmp-lock
 enclave.pem

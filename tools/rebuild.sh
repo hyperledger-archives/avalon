@@ -145,6 +145,15 @@ NUM_CORES=1
 # -----------------------------------------------------------------
 # BUILD
 # -----------------------------------------------------------------
+
+yell --------------- COMMON SGX IOHANDLER ---------------
+cd $TCF_HOME/common/sgx_iohandler
+
+mkdir -p build
+cd build
+try cmake ..
+try make "-j$NUM_CORES"
+
 yell --------------- COMMON SGX WORKLOAD ---------------
 cd $TCF_HOME/common/sgx_workload
 

@@ -16,16 +16,20 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.2 FATAL_ERROR)
 
 INCLUDE(CMakeVariables.txt)
 
-# Common components for both trusted and untrusted common libraries
+# Common library for all example workloads
 ################################################################################
 
 FILE(GLOB PROJECT_HEADERS *.h)
 FILE(GLOB PROJECT_SOURCES *.cpp)
 
+SOURCE_GROUP("Source" FILES ${PROJECT_HEADERS} ${PROJECT_SOURCES})
+
 SET(GENERIC_PRIVATE_INCLUDE_DIRS "." "${TCF_TOP_DIR}/tc/sgx/common" 
 	"${TCF_TOP_DIR}/tc/sgx/common/work_order_interface" "${TCF_TOP_DIR}/examples/apps"
 	"${TCF_TOP_DIR}/tc/sgx/trusted_worker_manager/enclave")
 SET(GENERIC_CXX_FLAGS ${DEBUG_FLAGS} "-Wall" "-fPIC" "-Wno-write-strings" "-std=c++11")
+
+INCLUDE_DIRECTORIES(${TCF_TOP_DIR}/tcs/core/tcs_trusted_worker_manager/enclave)
 
 SET(WORKLOAD_STATIC_NAME sgx_workload)
 PROJECT(${WORKLOAD_STATIC_NAME} CXX)
@@ -37,6 +41,7 @@ TARGET_INCLUDE_DIRECTORIES(${WORKLOAD_STATIC_NAME} PRIVATE "..")
 TARGET_INCLUDE_DIRECTORIES(${WORKLOAD_STATIC_NAME} PUBLIC ${GENERIC_PUBLIC_INCLUDE_DIRS})
 TARGET_INCLUDE_DIRECTORIES(${WORKLOAD_STATIC_NAME} PUBLIC "${SGX_SDK}/include/tlibc")
 TARGET_INCLUDE_DIRECTORIES(${WORKLOAD_STATIC_NAME} PUBLIC "${SGX_SDK}/include/libcxx")
+TARGET_INCLUDE_DIRECTORIES(${WORKLOAD_STATIC_NAME} PUBLIC "${SGX_SSL}/include")
 
 TARGET_COMPILE_OPTIONS(${WORKLOAD_STATIC_NAME} PRIVATE "${GENERIC_CXX_FLAGS}")
 TARGET_COMPILE_OPTIONS(${WORKLOAD_STATIC_NAME} PRIVATE "-nostdinc")
