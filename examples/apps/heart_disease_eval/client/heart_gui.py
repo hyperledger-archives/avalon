@@ -14,7 +14,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Heart Evaluation GUI Client for use in submitting data to worker.
+"""
+Heart Evaluation GUI Client for use in submitting data to worker.
+"""
 
 import os
 import sys
@@ -28,6 +30,7 @@ import secrets
 import tkinter as tk
 import tkinter.messagebox as messagebox
 import tkinter.font as font
+from PIL import ImageTk,Image
 
 # Avalon imports
 from service_client.generic import GenericServiceClient
@@ -414,6 +417,16 @@ def gui_main():
 	root = tk.Tk()
 	root.title("Heart Disease Evaluation")
 	root.config(background=BACKGROUND)
+
+	# Display image
+	imageFile = TCFHOME + \
+		"/examples/apps/heart_disease_eval/images/ecg.jpg"
+	img = ImageTk.PhotoImage(Image.open(imageFile))
+	canvas = tk.Canvas(root, width=290, height=220, background=BACKGROUND)
+	canvas.pack()
+	canvas.create_image(20, 20, anchor=tk.NW, image=img) 
+
+	# Setup left and right frames for data entry
 	var_root = tk.Frame(root, background=BACKGROUND)
 	var_root.pack(pady=(10,0))
 	v_frame1 = tk.Frame(var_root, background=BACKGROUND)
