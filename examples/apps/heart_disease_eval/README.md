@@ -1,7 +1,8 @@
 # Running the Heart Disease Evaluation Demo
 
 This demo performs a heart disease evaluation based on input parameters.
-Three clients are available: batch command line client, interactive command line client, and GUI client.
+Three clients are available: batch command line client,
+interactive command line client, and GUI client.
 
 
 ## Using the Heart Disease Evaluation Batch Command Line Client
@@ -66,7 +67,7 @@ The Avalon Enclave Manager and Avalon Listener run in a Docker container.
 5.  In Terminal 2 run `cd $TCF_HOME/examples/apps/heart_disease_eval/client`
 6.  In Terminal 2 install Python3's TKInter GUI library with
     ```bash
-    export DEBIAN_FRONTEND=noninteractive; apt update; apt -y install python3-tk
+    apt update; apt -y install python3-tk python3-pil.imagetk
     ```
 7.  In Terminal 2 install the Solidity compiler as follows:
     ```bash
@@ -103,5 +104,6 @@ The Avalon Enclave Manager and Avalon Listener run in a Docker container.
     `xhost -` in Terminal 3
 16. In Terminal 1, press Ctrl-c to stop the Avalon Enclave Manager and Listener
 
-![Screenshot of heart_gui.py]( heart_gui_screenshot.jpg "Screenshot of heart_gui.py")
+![Screenshot of heart_gui.py]( images/heart_gui_screenshot.jpg
+  "Screenshot of heart_gui.py")
 <br /> *Screenshot of heart_gui.py*
