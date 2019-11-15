@@ -51,9 +51,9 @@ private:
     std::string participatingCountries;
     int alreadyLoaded;
     bool clientInit = false;
-    bool checkValidSize1(std::vector<std::string> cliData);
-    bool checkValidSize2(std::vector<std::string> cliData);
-    bool checkValidSize5(std::vector<std::string> cliData);
+    bool checkValidCountriesDeclaration(std::vector<std::string> cliData);
+    bool checkUserBelongsToValidCountry(std::vector<std::string> cliData);
+    bool checkTransactionBelongsToValidCountries(std::vector<std::string> cliData);
 
     std::string getNameFromId(std::string id);
     std::string findSuspects();

@@ -37,10 +37,6 @@ void AmlResult::ProcessWorkOrder(
     std::string result_str;
     int out_wo_data_size = out_work_order_data.size();
 
-    //if(!aml_result_logic){
-    //    aml_result_logic();
-    //}
-
     for (auto wo_data : in_work_order_data) {
         std::string inputData =
               ByteArrayToString(wo_data.decrypted_data);

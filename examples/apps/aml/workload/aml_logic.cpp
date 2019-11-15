@@ -67,6 +67,12 @@ std::string AmlResultLogic::getNameFromId(std::string id) {
     return "unknown id " + id;
 }
 
+/* This function iterates all transaction lists looking for cycles
+* and returns a string containing differents sets of suspects
+* A cycle is composed of transactions with the same amount of money
+* that go through at least three different countries and ends in the
+* origin  account.
+*/
 std::string AmlResultLogic::findSuspects() {
     std::string wholeSuspectList = "Do not trust these people:";
     int traveledCountriesSize = 0;
@@ -180,7 +186,7 @@ bool AmlResultLogic::findNextSuspect(int *traveledCountriesSize, std::vector<std
     return found;
 }
 
-bool AmlResultLogic::checkValidSize1(std::vector<std::string> cliData){
+bool AmlResultLogic::checkValidCountriesDeclaration(std::vector<std::string> cliData){
     int len = cliData[0].length();
     if(cliData[0] == "resetServer"){
         return true;
@@ -196,7 +202,7 @@ bool AmlResultLogic::checkValidSize1(std::vector<std::string> cliData){
     return false;
 }
 
-bool AmlResultLogic::checkValidSize2(std::vector<std::string> cliData){
+bool AmlResultLogic::checkUserBelongsToValidCountry(std::vector<std::string> cliData){
     std::string country = cliData[0].substr(0,2);
     for(int i = 0; i < numberTotalCountries; i++){
         if(allCountries[i] == country){
@@ -206,7 +212,7 @@ bool AmlResultLogic::checkValidSize2(std::vector<std::string> cliData){
     return false;
 }
 
-bool AmlResultLogic::checkValidSize5(std::vector<std::string> cliData){
+bool AmlResultLogic::checkTransactionBelongsToValidCountries(std::vector<std::string> cliData){
     std::string country = cliData[0].substr(0,2);
 
     bool valid1 = false;
@@ -236,7 +242,7 @@ std::string AmlResultLogic::executeWorkOrder(std::string str_in)
         std::vector<std::string> cliData = splot(s, ',');
 
         if(cliData.size() == 1) {
-            if (checkValidSize1(cliData)){
+            if (checkValidCountriesDeclaration(cliData)){
                 if(cliData[0] == "resetServer" && clientInit){
                     allCountries = splot(participatingCountries, '_');
                     numberTotalCountries = allCountries.size();
@@ -272,7 +278,7 @@ std::string AmlResultLogic::executeWorkOrder(std::string str_in)
             }
         }
         else if(cliData.size() == 2) {
-            if(checkValidSize2(cliData)){
+            if(checkUserBelongsToValidCountry(cliData)){
                 std::string country = cliData[0].substr(0,2);
                 int i;
                 for(i = 0; i < numberTotalCountries; i++){
@@ -291,7 +297,7 @@ std::string AmlResultLogic::executeWorkOrder(std::string str_in)
             }
         }
         else if(cliData.size() == 5) {
-            if(checkValidSize5(cliData)){
+            if(checkTransactionBelongsToValidCountries(cliData)){
                 std::vector<std::string> money =  splot(cliData[2], '.');
                 std::string country = cliData[0].substr(0,2);
                 int i;

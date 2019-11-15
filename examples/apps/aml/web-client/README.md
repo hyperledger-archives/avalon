@@ -22,7 +22,7 @@ npm run serve
 docker-compose -f docker-compose-aml-web-client.yaml up
 ```
 
-3. Go back to to this folder (web-client)
+3. Go back to this folder (web-client)
 
 4. Change variable "SERVER_URL" in file "src/config.js"
 
