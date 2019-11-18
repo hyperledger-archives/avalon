@@ -14,8 +14,9 @@ spec:
         app: tcs
     spec:
       containers:
-      - image: sammyne/hyperledger-tcf
+      - image: tcf-dev:latest
         name: tcs
+        imagePullPolicy: Never
         envFrom:
         - prefix: TCF_
           configMapRef:
