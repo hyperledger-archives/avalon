@@ -11,7 +11,8 @@ spec:
       restartPolicy: OnFailure
       containers:
       - name: request-proposer
-        image: sammyne/hyperledger-tcf
+        image: tcf-dev:latest
+        imagePullPolicy: Never
         envFrom:
         - prefix: TCF_
           configMapRef:

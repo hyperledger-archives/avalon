@@ -14,8 +14,9 @@ spec:
         app: lmdb
     spec:
       containers:
-      - image: sammyne/hyperledger-tcf
+      - image: tcf-dev:latest
         name: lmdb-server
+        imagePullPolicy: Never
         envFrom:
         - prefix: TCF_
           configMapRef:

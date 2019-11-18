@@ -14,8 +14,9 @@ spec:
         app: tee
     spec:
       containers:
-      - image: sammyne/hyperledger-tcf
+      - image: tcf-dev:latest
         name: tee
+        imagePullPolicy: Never
         envFrom:
         - prefix: TCF_
           configMapRef:
