@@ -14,12 +14,16 @@ in SGX-SIM mode.
     ```bash
     kubectl create -f tcf-config-map.yaml
     ```
-2. Start the LMDB server
+2. Enable `remote_url` in [tcs_config.toml](../../config/tcs_config.toml)
+   set `remote_url` to lmdb service defined in lmdb.yaml.
+   eg: `remote_url="http://lmdb:9090"`
+
+3. Start the LMDB server.
     ```bash
     # bootstrap the deployment and service
     kubectl create -f lmdb.yaml
     ```
-3. Start the `EnclaveManager` (to manage SGX enclaves) and `TCSServer` (to 
+4. Start the `EnclaveManager` (to manage SGX enclaves) and `TCS Listener` (to
    accept and handle requests from clients)  
     ```bash
     kubectl create -f enclave-manager-deployment.yaml
