@@ -16,9 +16,7 @@
 Provide rest api helper functions for communicating with IAS.
 """
 
-from urllib.parse import urljoin
 import requests
-import sys
 import urllib
 import json
 
@@ -107,7 +105,6 @@ class IasClient(object):
             'ias_signature': result.headers.get('x-iasreport-signature'),
             'ias_certificate': urllib.parse.unquote(result.headers.get('x-iasreport-signing-certificate'))
         }
-        logger.debug("received ias certificate: %s", returnblob['ias_certificate'])
         return returnblob
 
     def verify_report_fields(self, original_quote, received_report):

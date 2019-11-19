@@ -74,7 +74,7 @@ RUN apt-get update \
 
 # Install setuptools, py-solc and web3 packages using pip because
 # these are not available in apt repository.
-RUN pip3 install --upgrade setuptools json-rpc py-solc web3
+RUN pip3 install --upgrade setuptools json-rpc py-solc web3 nose2
 
 # Make Python3 default
 RUN ln -s /usr/bin/python3 /usr/bin/python
@@ -131,11 +131,17 @@ RUN OPENSSL_VER=1.1.1d \
  && rm -rf /tmp/intel-sgx-ssl \
  && echo "SGX_SSL=/opt/intel/sgxssl" >> /etc/environment
 
-# Environment setup
-WORKDIR /project/TrustedComputeFramework
+COPY . /project/TrustedComputeFramework
 
-RUN \
- echo "SOLC_BINARY=/root/.py-solc/solc-v0.4.25/bin/solc" >> /etc/environment \
+ARG SGX_MODE
+ARG MAKECLEAN
+ARG TCF_DEBUG_BUILD
+ARG DISPLAY
+ARG XAUTHORITY
+
+# Environment setup
+
+RUN echo "SOLC_BINARY=/root/.py-solc/solc-v0.4.25/bin/solc" >> /etc/environment \
  && echo "WALLET_PRIVATE_KEY=B413189C95B48737AE2D9AF4CAE97EB03F4DE40599DF8E6C89DCE4C2E2CBA8DE" >> /etc/environment \
  && echo "TCF_HOME=/project/TrustedComputeFramework/" >> /etc/environment \
  && if [ ! -z "$http_proxy"  ]; then \
@@ -173,3 +179,6 @@ ENV DISPLAY=:0
 
 WORKDIR /project/TrustedComputeFramework/tools/build
 
+RUN if [ $MAKECLEAN != 0 ]; then echo "Clean build" && make clean; fi \
+ && make \
+ && echo "BUILD SUCCESS"

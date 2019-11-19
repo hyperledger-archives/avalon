@@ -17,11 +17,11 @@ import binascii
 def pretty_ids(ids):
     pretty_list = []
     for id in ids:
-        pretty_list.append(hex_to_utf(id))
+        pretty_list.append(hex_to_utf8(id))
     return pretty_list
 
 # Return binary hex as UTF string
-def hex_to_utf(binary):
+def hex_to_utf8(binary):
     return binascii.hexlify(binary).decode("UTF-8")
 
 def is_valid_hex_str(hex_str):

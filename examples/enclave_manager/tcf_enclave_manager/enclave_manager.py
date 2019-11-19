@@ -274,7 +274,7 @@ def validate_request(wo_request):
     Validate JSON workorder request
     """
     try:
-        j_req = json.loads(wo_request)
+        json.loads(wo_request)
     except ValueError as e:
         logger.error("Invalid JSON format found for workorder - %s", e)
         return False

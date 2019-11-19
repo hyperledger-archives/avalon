@@ -135,7 +135,7 @@ class TCSWorkerRegistryHandler:
         try:
             worker_status = params["status"]
             status = int(worker_status)
-            wo_status = WorkerStatus(status)
+            WorkerStatus(status)
             return True
         except:
             logger.error("Invalid worker status code")

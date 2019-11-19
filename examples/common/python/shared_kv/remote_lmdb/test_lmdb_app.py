@@ -172,7 +172,7 @@ def main(args=None):
 
     try:
         config = pconfig.parse_configuration_files(conffiles, confpaths)
-        config_json_str = json.dumps(config, indent=4)
+        json.dumps(config, indent=4)
     except pconfig.ConfigurationException as e:
         logger.error(str(e))
         sys.exit(-1)

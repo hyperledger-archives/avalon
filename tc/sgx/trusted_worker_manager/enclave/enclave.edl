@@ -20,5 +20,6 @@ enclave {
     from "signup.edl" import *;
     from "workload.edl" import *;
     from "db_store.edl" import *;
+    from "iohandler.edl" import *;
 };
 

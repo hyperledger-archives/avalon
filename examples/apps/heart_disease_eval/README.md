@@ -1,7 +1,8 @@
 # Running the Heart Disease Evaluation Demo
 
 This demo performs a heart disease evaluation based on input parameters.
-Three clients are available: batch command line client, interactive command line client, and GUI client.
+Three clients are available: batch command line client,
+interactive command line client, and GUI client.
 
 
 ## Using the Heart Disease Evaluation Batch Command Line Client
@@ -66,15 +67,15 @@ The Avalon Enclave Manager and Avalon Listener run in a Docker container.
 5.  In Terminal 2 run `cd $TCF_HOME/examples/apps/heart_disease_eval/client`
 6.  In Terminal 2 install Python3's TKInter GUI library with
     ```bash
-    export DEBIAN_FRONTEND=noninteractive; apt update; apt -y install python3-tk
+    apt update; apt -y install python3-tk python3-pil.imagetk
     ```
 7.  In Terminal 2 install the Solidity compiler as follows:
     ```bash
     mkdir -p $HOME/.py-solc/solc-v0.4.25/bin \
     && curl -LsS https://github.com/ethereum/solidity/releases/download/v0.4.25/solc-static-linux \
-            -o /root/.py-solc/solc-v0.4.25/bin/solc \
-    && chmod 0755 /root/.py-solc/solc-v0.4.25/bin/solc &&
-    export SOLC_BINARY=/root/.py-solc/solc-v0.4.25/bin/solc
+            -o $HOME/.py-solc/solc-v0.4.25/bin/solc \
+    && chmod 0755 $HOME/.py-solc/solc-v0.4.25/bin/solc &&
+    export SOLC_BINARY=$HOME/.py-solc/solc-v0.4.25/bin/solc
     ```
 8.  In Terminal 2, set environment variable `WALLET_PRIVATE_KEY` if not set.
     This should match the value in file `docker/Dockerfile.tcf-dev`
@@ -103,5 +104,6 @@ The Avalon Enclave Manager and Avalon Listener run in a Docker container.
     `xhost -` in Terminal 3
 16. In Terminal 1, press Ctrl-c to stop the Avalon Enclave Manager and Listener
 
-![Screenshot of heart_gui.py]( heart_gui_screenshot.jpg "Screenshot of heart_gui.py")
+![Screenshot of heart_gui.py]( images/heart_gui_screenshot.jpg
+  "Screenshot of heart_gui.py")
 <br /> *Screenshot of heart_gui.py*

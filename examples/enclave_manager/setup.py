@@ -17,7 +17,6 @@
 import os
 import sys
 import subprocess
-import re
 
 # This should only be run with python3
 import sys
@@ -109,7 +108,10 @@ module_files = [
     os.path.join(module_src_path, 'enclave.cpp'),
     os.path.join(module_src_path, 'enclave_info.cpp'),
     os.path.join(module_src_path, 'signup_info.cpp'),
-    os.path.join(module_src_path, 'db_store.cpp')
+    os.path.join(module_src_path, 'db_store.cpp'),
+    os.path.join(module_src_path, 'file_io_handler.cpp'),
+    os.path.join(module_src_path, 'file_io_processor.cpp'),
+    os.path.join(module_src_path, 'io_handler.cpp')
 ]
 
 enclave_module = Extension(

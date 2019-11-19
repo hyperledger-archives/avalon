@@ -13,8 +13,6 @@
 # limitations under the License.
 
 import logging
-import os,sys
-from os.path import exists, realpath
 import json
 from utility.hex_utils import is_valid_hex_str
 

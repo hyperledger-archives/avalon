@@ -17,7 +17,7 @@
 import toml
 import errno
 import logging
-import os,time
+import os
 from os.path import exists, realpath
 
 from connectors.ethereum.ethereum_wrapper import EthereumWrapper as ethereum_wrapper

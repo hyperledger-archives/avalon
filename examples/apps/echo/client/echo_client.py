@@ -16,7 +16,6 @@
 
 import os
 import sys
-import random
 import json
 import argparse
 import logging
@@ -25,7 +24,6 @@ import secrets
 
 import config.config as pconfig
 import utility.logger as plogger
-from service_client.generic import GenericServiceClient
 import utility.utility as utility
 from utility.tcf_types import WorkerType
 import worker.worker_details as worker
@@ -91,7 +89,7 @@ def ParseCommandLine(args) :
 	confpaths = [ "." ]
 	try :
 		config = pconfig.parse_configuration_files(conf_files, confpaths)
-		config_json_str = json.dumps(config)
+		json.dumps(config)
 	except pconfig.ConfigurationException as e :
 		logger.error(str(e))
 		sys.exit(-1)
@@ -117,7 +115,7 @@ def ParseCommandLine(args) :
 	input_data_hash = options.data_hash
 	worker_id = options.worker_id
 	message = options.message
-	if options.message == None or options.message == "":
+	if options.message is None or options.message == "":
 		message = "Test Message"
 
 	# Initializing Worker Object

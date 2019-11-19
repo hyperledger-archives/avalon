@@ -25,22 +25,18 @@ services:
         - http_proxy
         - https_proxy
         - no_proxy
-    environment:
+        - SGX_MODE=HW
         - TCF_DEBUG_BUILD=${TCF_DEBUG_BUILD:-}
         - DISPLAY=${DISPLAY:-}
+        - MAKECLEAN=${MAKECLEAN:-1}
     volumes:
-      - ./:/project/TrustedComputeFramework
+      # Below volume mappings are required for DISPLAY settings by heart disease GUI client
       - /tmp/.X11-unix:/tmp/.X11-unix
+      - ~/.Xauthority:/root/.Xauthority
     devices:
       - "/dev/isgx:/dev/isgx"
-    working_dir: "/project/TrustedComputeFramework/tools/build"
-    environment:
-      - SGX_MODE=HW
+    working_dir: "/project/TrustedComputeFramework"
     entrypoint: "bash -c \"\
-        if [ ${MAKECLEAN:-1} != 0 ]; then echo \\\"Clean build\\\" && make clean; fi \
-        && make \
-        && echo \\\"BUILD SUCCESS\\\" \
-        && cd ../../scripts \
-        && source tcs_startup.sh -y \
+        source scripts/tcs_startup.sh -y \
         && tail -f /dev/null \""
     stop_signal: SIGKILL

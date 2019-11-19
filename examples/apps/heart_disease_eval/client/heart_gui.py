@@ -14,7 +14,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Heart Evaluation GUI Client for use in submitting data to worker.
+"""
+Heart Evaluation GUI Client for use in submitting data to worker.
+"""
 
 import os
 import sys
@@ -23,14 +25,14 @@ import json
 import argparse
 import logging
 import secrets
-import time
 
 # Tkinter imports
 import tkinter as tk
 import tkinter.messagebox as messagebox
 import tkinter.font as font
+from PIL import ImageTk,Image
 
-# TCF imports
+# Avalon imports
 from service_client.generic import GenericServiceClient
 import utility.utility as utility
 import worker.worker_details as worker
@@ -285,8 +287,6 @@ class resultWindow(tk.Toplevel):
 		workload_id = workload_id.encode("UTF-8").hex()
 		session_iv = utility.generate_iv()
 		session_key = utility.generate_key()
-		encrypted_session_key = utility.generate_encrypted_key(
-			session_key, worker_obj.encryption_key)
 		requester_nonce = secrets.token_hex(16)
 		work_order_id = secrets.token_hex(32)
 		requester_id = secrets.token_hex(32)
@@ -417,6 +417,16 @@ def gui_main():
 	root = tk.Tk()
 	root.title("Heart Disease Evaluation")
 	root.config(background=BACKGROUND)
+
+	# Display image
+	imageFile = TCFHOME + \
+		"/examples/apps/heart_disease_eval/images/ecg.jpg"
+	img = ImageTk.PhotoImage(Image.open(imageFile))
+	canvas = tk.Canvas(root, width=290, height=220, background=BACKGROUND)
+	canvas.pack()
+	canvas.create_image(20, 20, anchor=tk.NW, image=img) 
+
+	# Setup left and right frames for data entry
 	var_root = tk.Frame(root, background=BACKGROUND)
 	var_root.pack(pady=(10,0))
 	v_frame1 = tk.Frame(var_root, background=BACKGROUND)
@@ -507,7 +517,7 @@ def gui_main():
 		"""
 
 		message = "Heart disease evaluation data: "
-		if string_use.get() == 1:
+		if string_use.get() == 1: # input is space-separated numbers
 			input_data = string_entry.get()
 			if input_data is None or len(input_data) == 0:
 				messagebox.showwarning("Error",
@@ -524,11 +534,19 @@ def gui_main():
 			message = message + input_data
 		else:
 			for var in var_list:
-				if var.get()==None:
+				if var.get() is None:
 					messagebox.showwarning("Error",
 						"Must input all variables")
 					return
 				message = message + str(var.get()) + " "
+		root.wait_window(resultWindow(root, message))
+
+	def aggregate():
+		"""Open window that will submit work order to retrieve
+		   an aggregate result.
+		"""
+
+		message = "Heart disease aggregate data: "
 		root.wait_window(resultWindow(root, message))
 
 	# "Evaluate" button
@@ -538,7 +556,17 @@ def gui_main():
 	eval_label.pack()
 	eval_button = tk.Button(root, text="Evaluate", command=evaluate,
 		background=BUTTON_COLOR)
-	eval_button.pack(pady=(0,10))
+	eval_button.pack()
+
+	# "Aggregate" button
+	aggr_text = tk.StringVar()
+	aggr_label = tk.Label(root, textvariable=aggr_text,
+		background=BACKGROUND)
+	aggr_label.pack()
+	aggr_button = tk.Button(root, text="Aggregate all data",
+		command=aggregate,
+		background=BUTTON_COLOR)
+	aggr_button.pack(pady=(0,10))
 
 	root.mainloop()
 
@@ -589,7 +617,7 @@ def parse_command_line(args):
 	try :
 		config = pconfig.parse_configuration_files(conf_files,
 			conf_paths)
-		config_json_str = json.dumps(config, indent=4)
+		json.dumps(config, indent=4)
 	except pconfig.ConfigurationException as e :
 		logger.error(str(e))
 		sys.exit(-1)
@@ -607,16 +635,13 @@ def parse_command_line(args):
 	if options.service_uri:
 		service_uri = options.service_uri
 		off_chain = True
-		uri_client = GenericServiceClient(service_uri)
 
 	if options.off_chain:
 		service_uri = config["tcf"].get("json_rpc_uri")
 		off_chain = True
-		uri_client = GenericServiceClient(service_uri)
 
 	requester_signature = options.requester_signature
 
-	service_uri = options.service_uri
 	verbose = options.verbose
 	worker_id = options.worker_id
 
@@ -643,10 +668,9 @@ def initialize_logging(config):
 		logging.getLogger("STDERR"), logging.WARN)
 
 def initialize_tcf(config):
-	"""Initialize TCF: get TCF worker instance."""
+	"""Initialize Avalon: get Avalon worker instance."""
 
-	logger.info("***************** TRUSTED COMPUTE FRAMEWORK (TCF)" + \
-		" *****************")
+	logger.info("***************** Avalon *****************")
 
 	# Retrieve Worker Registry
 	if not off_chain:

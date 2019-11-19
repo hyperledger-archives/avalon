@@ -136,7 +136,6 @@ double HeartDiseaseEvalLogic::score_restecg(int type) {
 double HeartDiseaseEvalLogic::score_thalach(double data) {
     // Maximum heart rate achieved
     return model_B(198, 61, data);
-
 }
 
 double HeartDiseaseEvalLogic::score_exang(int type) {
@@ -223,17 +222,11 @@ double HeartDiseaseEvalLogic::score_num(int num) {
 // Process work order input for heart disease risk factors
 std::string HeartDiseaseEvalLogic::executeWorkOrder(
         std::string decrypted_user_input_str) {
+    std::string resultString;
     // Variables to accumulate multiple results
     static int totalRisk = 0;
     static int count = 0;
 
-    // Clear accumulation data if input is empty
-    if (decrypted_user_input_str.empty()) {
-        totalRisk = count = 0;
-        return "";
-    }
-
-    std::string resultString;
     try {
         std::string dataString;
         std::vector<std::string> inputString =
@@ -242,31 +235,44 @@ std::string HeartDiseaseEvalLogic::executeWorkOrder(
             dataString = inputString[1];
 
         std::vector<std::string> medData = split(dataString, ' ');
-        if (medData.size() != 14)
+        switch (medData.size()) {
+        case 0: // return accumulated calculations
+            if (count == 0) // do not divide by 0
+                resultString = "No accumulated heart disease history";
+            else
+                resultString = "Heart disease risk is " +
+                    std::to_string(totalRisk/count) + "% for " +
+                    std::to_string(count) + " people";
+            break;
+        case 14: { // return individual calculation
+            int risk = 100 -
+                int(score_age(std::stoi(medData[0])) * 0.03
+                + score_sex(std::stoi(medData[1])) * 0.01
+                + score_cp(std::stoi(medData[2])) * 0.21
+                + score_trestbps(std::stoi(medData[3])) * 0.05
+                + score_chol(std::stoi(medData[4])) * 0.05
+                + score_fbs(std::stoi(medData[5])) * 0.04
+                + score_restecg(std::stoi(medData[6])) * 0.19
+                + score_thalach(std::stoi(medData[7])) * 0.06
+                + score_exang(std::stoi(medData[8])) * 0.18
+                + score_oldpeak(std::stoi(medData[9])) * 0.05
+                + score_slop(std::stoi(medData[10])) * 0.03
+                + score_ca(std::stoi(medData[11])) * 0.04
+                + score_thaldur(std::stoi(medData[12])) * 0.02
+                + score_num(std::stoi(medData[13])) * 0.04);
+
+            // Update accumulation
+            totalRisk += risk;
+            count++;
+
+            // Format the result
+            resultString = "You have a " + std::to_string(risk) +
+                "% risk of heart disease";
+            break;
+            }
+        default: // error
             return "Error with missing or incorrect input format";
-
-        int risk = 100 -
-            int( score_age(std::stoi(medData[0])) * 0.03
-            + score_sex(std::stoi(medData[1])) * 0.01
-            + score_cp(std::stoi(medData[2])) * 0.21
-            + score_trestbps(std::stoi(medData[3])) * 0.05
-            + score_chol(std::stoi(medData[4])) * 0.05
-            + score_fbs(std::stoi(medData[5])) * 0.04
-            + score_restecg(std::stoi(medData[6])) * 0.19
-            + score_thalach(std::stoi(medData[7])) * 0.06
-            + score_exang(std::stoi(medData[8])) * 0.18
-            + score_oldpeak(std::stoi(medData[9])) * 0.05
-            + score_slop(std::stoi(medData[10])) * 0.03
-            + score_ca(std::stoi(medData[11])) * 0.04
-            + score_thaldur(std::stoi(medData[12])) * 0.02
-            + score_num(std::stoi(medData[13])) * 0.04 );
-
-        // Update accumulation
-        totalRisk += risk;
-        count++;
-        // Use accumulated data to calculate the result
-        resultString = "You have a " +
-            std::to_string(totalRisk/count) + "% risk of heart disease";
+        }
     } catch (...) {
         resultString = "Caught exception while processing workload data";
     }

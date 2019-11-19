@@ -15,7 +15,6 @@
 import time
 import json
 import logging
-import crypto.crypto as crypto
 from error_code.error_status import WorkOrderStatus
 from error_code.enclave_error import EnclaveError
 import utility.utility as utility

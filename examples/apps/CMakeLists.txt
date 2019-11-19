@@ -23,6 +23,7 @@ SET(GENERIC_PRIVATE_INCLUDE_DIRS "." "${TCF_TOP_DIR}/tc/sgx/common"
 ADD_SUBDIRECTORY(echo/workload)
 ADD_SUBDIRECTORY(heart_disease_eval/workload)
 ADD_SUBDIRECTORY(aml/workload)
+ADD_SUBDIRECTORY(inside_out_demo/workload)
 
 # To add a new workload, uncomment the following line and change
 # $WORKLOAD_STATIC_NAME$ to the appropriate name (such as hello_world):

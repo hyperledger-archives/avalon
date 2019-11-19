@@ -27,14 +27,10 @@
 import os
 import sys
 import argparse
-import random
 import json
 
-import urllib.request
-import urllib.error
 from twisted.web import server, resource, http
 from twisted.internet import reactor
-from twisted.web.error import Error
 from tcs_work_order_handler import TCSWorkOrderHandler
 from tcs_worker_registry_handler import TCSWorkerRegistryHandler
 from tcs_workorder_receipt_handler import TCSWorkOrderReceiptHandler
