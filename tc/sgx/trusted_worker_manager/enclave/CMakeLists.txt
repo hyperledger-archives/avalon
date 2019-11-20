@@ -141,7 +141,6 @@ INCLUDE_DIRECTORIES(/opt/intel/sgxsdk/include /opt/intel/sgxssl/include)
 INCLUDE_DIRECTORIES(${TCF_CORE_DIR}/common)
 INCLUDE_DIRECTORIES(${TCF_CORE_DIR}/common/crypto)
 INCLUDE_DIRECTORIES(${TCF_CORE_DIR}/common/verify_ias_report)
-INCLUDE_DIRECTORIES(${TCF_CORE_DIR}/common/work_order_interface)
 INCLUDE_DIRECTORIES(${TCF_CORE_DIR}/common/packages/db_store)
 INCLUDE_DIRECTORIES(${TCF_CORE_DIR}/common/packages/base64)
 INCLUDE_DIRECTORIES(${TCF_CORE_DIR}/common/packages/parson)
@@ -226,7 +225,7 @@ SGX_SIGN_ENCLAVE(${PROJECT_NAME} ${TCF_ENCLAVE_CODE_SIGN_PEM} ${PROJECT_CONFIG})
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} -Wl,--whole-archive -lsgx_tsgxssl -Wl,--no-whole-archive)
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} -Wl,--whole-archive -l${TRTS_LIBRARY_NAME} -Wl,--no-whole-archive)
 
-TARGET_LINK_LIBRARIES(${PROJECT_NAME} -Wl,--whole-archive -lsgx_workload -lsgx_iohandler -ltcf_work_order_interface -Wl,--no-whole-archive)
+TARGET_LINK_LIBRARIES(${PROJECT_NAME} -Wl,--whole-archive -lsgx_workload -lsgx_iohandler -Wl,--no-whole-archive)
 
 # Add echo workload
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} -Wl,--whole-archive -lecho_wo -Wl,--no-whole-archive)
