@@ -33,8 +33,6 @@ Dir                     Content
 
 `packages/parson/`      \*.cpp,\*.h of Parson JSON  encoding/decoding
 
-`work_order_interface/` work order interface between enclave and workloads
-
 `tests/`                unit tests for crypto library
 
 `tests/untrusted`       test untrusted Crypto library
