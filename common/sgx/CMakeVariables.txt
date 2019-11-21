@@ -17,7 +17,7 @@
 # Configure Environment
 ################################################################################
 
-SET(TCF_TOP_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../")
+SET(TCF_TOP_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../../")
 
 if("$ENV{DEBUG} " STREQUAL " ")
     SET(DEBUG_FLAGS "-O2")

@@ -20,10 +20,10 @@ Source Directories
 
 Dir                     Content
 ---------------------   ------------------------------------------------------
-`sgx_iohandler/`         \*.cpp,\*.h files are custom iohandlers which help workloads to
+`sgx/iohandler/`         \*.cpp,\*.h files are custom iohandlers which help workloads to
                         execute IO operations from SGX enclave
 
-`sgx_workload/`         work_order_data.cpp,work_order_data.h files are wrapper files
+`sgx/workload/`         work_order_data.cpp,work_order_data.h files are wrapper files
                         for work order data   
                         workload_processor.cpp, workload_processor.h are workload processor
                         which overrides function exposed by work order interface and also fecilitates
