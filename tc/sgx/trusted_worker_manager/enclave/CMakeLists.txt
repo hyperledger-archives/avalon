@@ -144,7 +144,7 @@ INCLUDE_DIRECTORIES(${TCF_CORE_DIR}/common/verify_ias_report)
 INCLUDE_DIRECTORIES(${TCF_CORE_DIR}/common/packages/db_store)
 INCLUDE_DIRECTORIES(${TCF_CORE_DIR}/common/packages/base64)
 INCLUDE_DIRECTORIES(${TCF_CORE_DIR}/common/packages/parson)
-INCLUDE_DIRECTORIES(${TCF_TOP_DIR}/common/sgx_workload)
+INCLUDE_DIRECTORIES(${TCF_TOP_DIR}/common/sgx/workload)
 LINK_DIRECTORIES()
 
 SGX_EDGE_TRUSTED(${PROJECT_EDL} PROJECT_EDGE_SOURCES)
@@ -198,8 +198,8 @@ SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,-L,$ENV{SGX_SDK}
 SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,-L,$ENV{SGX_SSL}/lib64")
 SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,-L,$ENV{SGX_SSL}/lib64/release")
 SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,-L,${TCF_CORE_DIR}/common/build")
-SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,-L,${TCF_TOP_DIR}/common/sgx_workload/build")
-SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,-L,${TCF_TOP_DIR}/common/sgx_iohandler/build")
+SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,-L,${TCF_TOP_DIR}/common/sgx/build/workload")
+SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,-L,${TCF_TOP_DIR}/common/sgx/build/iohandler")
 SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,-L,${TCF_TOP_DIR}/examples/apps/build/echo/workload")
 SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,-L,${TCF_TOP_DIR}/examples/apps/build/heart_disease_eval/workload")
 SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,-L,${TCF_TOP_DIR}/examples/apps/build/inside_out_demo/workload")
@@ -225,7 +225,7 @@ SGX_SIGN_ENCLAVE(${PROJECT_NAME} ${TCF_ENCLAVE_CODE_SIGN_PEM} ${PROJECT_CONFIG})
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} -Wl,--whole-archive -lsgx_tsgxssl -Wl,--no-whole-archive)
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} -Wl,--whole-archive -l${TRTS_LIBRARY_NAME} -Wl,--no-whole-archive)
 
-TARGET_LINK_LIBRARIES(${PROJECT_NAME} -Wl,--whole-archive -lsgx_workload -lsgx_iohandler -Wl,--no-whole-archive)
+TARGET_LINK_LIBRARIES(${PROJECT_NAME} -Wl,--whole-archive -lcommon_sgx_workload -lcommon_sgx_iohandler -Wl,--no-whole-archive)
 
 # Add echo workload
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} -Wl,--whole-archive -lecho_wo -Wl,--no-whole-archive)

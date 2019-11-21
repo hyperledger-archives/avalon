@@ -14,7 +14,7 @@
 
 CMAKE_MINIMUM_REQUIRED(VERSION 3.2 FATAL_ERROR)
 
-INCLUDE(CMakeVariables.txt)
+INCLUDE(../CMakeVariables.txt)
 
 # Common library for all example workloads
 ################################################################################
@@ -30,7 +30,7 @@ SET(GENERIC_CXX_FLAGS ${DEBUG_FLAGS} "-Wall" "-fPIC" "-Wno-write-strings" "-std=
 
 INCLUDE_DIRECTORIES(${TCF_TOP_DIR}/tcs/core/tcs_trusted_worker_manager/enclave)
 
-SET(WORKLOAD_STATIC_NAME sgx_workload)
+SET(WORKLOAD_STATIC_NAME common_sgx_workload)
 PROJECT(${WORKLOAD_STATIC_NAME} CXX)
 
 ADD_LIBRARY(${WORKLOAD_STATIC_NAME} STATIC ${PROJECT_HEADERS} ${PROJECT_SOURCES})
