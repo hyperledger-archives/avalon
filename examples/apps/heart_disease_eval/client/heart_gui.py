@@ -30,7 +30,7 @@ import secrets
 import tkinter as tk
 import tkinter.messagebox as messagebox
 import tkinter.font as font
-from PIL import ImageTk,Image
+from PIL import ImageTk, Image
 
 # Avalon imports
 from service_client.generic import GenericServiceClient
@@ -61,6 +61,7 @@ ENTRY_COLOR = "light grey"
 BUTTON_COLOR = "deep sky blue"
 RESULT_BACKGROUND = "pale goldenrod"
 
+
 # -----------------------------------------------------------------
 def _generate_random_or_normal_number(normal, percent_normal, low, high):
     """Generate number "normal" for "percent_normal" % of the time.
@@ -69,6 +70,7 @@ def _generate_random_or_normal_number(normal, percent_normal, low, high):
     if percent_normal >= random.randint(0, 100):
         return normal
     return random.randint(low, high)
+
 
 def _generate_random_data():
     """Generate a random data string for input as evaluation data.
@@ -94,6 +96,7 @@ def _generate_random_data():
         age, sex, cp, trestbps, chol, fbs, restecg, thalach,
         exang, oldpeak, slop, ca, thaldur, num)
 
+
 def _int_validate(text):
     """Validates that input is a non-negative integer."""
 
@@ -101,6 +104,7 @@ def _int_validate(text):
         return True
     else:
         return False
+
 
 def _float_validate(text):
     """Validates that input is a non-negative, non-special float."""
@@ -110,12 +114,13 @@ def _float_validate(text):
     try:
         float(text)
         if float(text) < 0.0 or float(text) == float("NaN") \
-            or float(text) == float("INF") \
-            or float(text) == float("-INF"):
+                or float(text) == float("INF") \
+                or float(text) == float("-INF"):
             return False
         return True
     except ValueError:
         return False
+
 
 class intEntry:
     """User entry for non-negative integer."""
@@ -123,12 +128,12 @@ class intEntry:
     def __init__(self, master, name):
         global cur_row
         label = tk.Label(master, text=name, background=BACKGROUND)
-        label.grid(row=cur_row, column=0, sticky="e", pady=(5,0))
+        label.grid(row=cur_row, column=0, sticky="e", pady=(5, 0))
         validate = (master.register(_int_validate))
         self.entry = tk.Entry(master, validate="all",
             validatecommand=(validate, "%P"), width=5,
             background=ENTRY_COLOR)
-        self.entry.grid(row=cur_row, column=1, padx=(10,0), pady=(5,0),
+        self.entry.grid(row=cur_row, column=1, padx=(10, 0), pady=(5, 0),
             sticky="w")
         cur_row += 1
 
@@ -145,6 +150,7 @@ class intEntry:
     def disable(self):
         self.entry.config(state=tk.DISABLED)
 
+
 class floatEntry:
     """User entry for non-negative, non-special floating point number."""
 
@@ -156,7 +162,7 @@ class floatEntry:
         self.entry = tk.Entry(master, validate="all",
             validatecommand=(validate, "%P"), width=10,
             background=ENTRY_COLOR)
-        self.entry.grid(row=cur_row, column=1, padx=(10,0), pady=(5,),
+        self.entry.grid(row=cur_row, column=1, padx=(10, 0), pady=(5,),
             sticky="w")
         cur_row += 1
 
@@ -172,20 +178,21 @@ class floatEntry:
     def disable(self):
         self.entry.config(state=tk.DISABLED)
 
+
 class radio:
     """User entry for a radio button."""
 
     # Options is a list of text-value pairs
     def __init__(self, master, name, options):
         global cur_row
-        if not all(len(tup)==2 for tup in options):
+        if not all(len(tup) == 2 for tup in options):
             print("ERROR: Mismatched text-value pairs")
             exit(1)
 
         self.var = tk.IntVar()
         self.var.set(None)
         label = tk.Label(master, text=name, background=BACKGROUND)
-        label.grid(row=cur_row, column=0, pady=(5,0), sticky="e")
+        label.grid(row=cur_row, column=0, pady=(5, 0), sticky="e")
 
         self.button_list = []
         for i in range(len(options)):
@@ -193,8 +200,8 @@ class radio:
                 variable=self.var, value=options[i][1],
                 background=BACKGROUND)
             self.button_list.append(button)
-            if i==0:
-                button.grid(row=cur_row, column=1, pady=(5,0),
+            if i == 0:
+                button.grid(row=cur_row, column=1, pady=(5, 0),
                     sticky="w")
             else:
                 button.grid(row=cur_row, column=1, sticky="w")
@@ -213,6 +220,7 @@ class radio:
     def disable(self):
         for button in self.button_list:
             button.config(state=tk.DISABLED)
+
 
 class resultWindow(tk.Toplevel):
     """Create result window that appears after clicking "Evaluate"."""
@@ -257,22 +265,22 @@ class resultWindow(tk.Toplevel):
         self.request_button = tk.Button(
             self.frame2, text="View Request", command=self.request,
             background=BUTTON_COLOR)
-        self.request_button.pack(fill=tk.X, padx=(0,10), pady=(10,0))
+        self.request_button.pack(fill=tk.X, padx=(0, 10), pady=(10, 0))
 
         self.result_button = tk.Button(
             self.frame2, text="View Result", command=self.result,
             background=BUTTON_COLOR)
-        self.result_button.pack(fill=tk.X, padx=(0,10),pady=(10,0))
+        self.result_button.pack(fill=tk.X, padx=(0, 10), pady=(10, 0))
 
         self.receipt_button = tk.Button(
             self.frame2, text="View Receipt",
             command=self.receipt, background=BUTTON_COLOR)
-        self.receipt_button.pack(fill=tk.X, padx=(0,10),pady=(10,0))
+        self.receipt_button.pack(fill=tk.X, padx=(0, 10), pady=(10, 0))
 
         # Close button
         self.close_button = tk.Button(self, text="Close",
             command=self.close, background=BUTTON_COLOR)
-        self.close_button.pack(pady=(0,5))
+        self.close_button.pack(pady=(0, 5))
 
         self.evaluate(message)
 
@@ -305,8 +313,7 @@ class resultWindow(tk.Toplevel):
         private_key = utility.generate_signing_keys()
         if requester_signature:
             # Add requester signature and requester verifying_key
-            if wo_params.add_requester_signature(private_key) == \
-                False:
+            if wo_params.add_requester_signature(private_key) is False:
                 logger.info("Work order request signing failed")
                 exit(1)
 
@@ -327,7 +334,7 @@ class resultWindow(tk.Toplevel):
             json.dumps(response, indent=4)
         ))
         if "error" in response and response["error"]["code"] != \
-            WorkOrderStatus.PENDING:
+                WorkOrderStatus.PENDING:
             sys.exit(1)
         # Create work order receipt
         req_id += 1
@@ -375,23 +382,20 @@ class resultWindow(tk.Toplevel):
                 worker_obj.verification_key)
             try:
                 if status == SignatureStatus.PASSED:
-                    logger.info("Signature verification" + \
-                        " Successful")
+                    logger.info("Signature verification Successful")
                     decrypted_res = utility. \
-                        decrypted_response(
-                        res, session_key, session_iv)
-                    logger.info("\n" + \
+                        decrypted_response(res, session_key, session_iv)
+                    logger.info("\n" +
                         "Decrypted response:\n {}".
                         format(decrypted_res))
                 else:
-                    logger.info("Signature verification" + \
-                        " Failed")
+                    logger.info("Signature verification Failed")
                     sys.exit(1)
             except:
                 logger.info("ERROR: Failed to decrypt response")
                 sys.exit(1)
         else:
-            logger.info("\n Work order get result failed {}\n". \
+            logger.info("\n Work order get result failed {}\n".
                 format(res))
             sys.exit(1)
 
@@ -423,6 +427,7 @@ class resultWindow(tk.Toplevel):
         self.parent.focus_set()
         self.destroy()
 
+
 class jsonWindow(tk.Toplevel):
     """Template for JSON display
        (from clicking View Request/Result/Receipt buttons).
@@ -441,6 +446,7 @@ class jsonWindow(tk.Toplevel):
 
         self.scrollbar.config(command=self.text.yview)
 
+
 def gui_main():
     """Create main Tkinter window and "Evaluate" event handler."""
 
@@ -458,11 +464,11 @@ def gui_main():
 
     # Setup left and right frames for data entry
     var_root = tk.Frame(root, background=BACKGROUND)
-    var_root.pack(pady=(10,0))
+    var_root.pack(pady=(10, 0))
     v_frame1 = tk.Frame(var_root, background=BACKGROUND)
-    v_frame1.pack(fill=tk.Y, side=tk.LEFT, padx=(10,0))
+    v_frame1.pack(fill=tk.Y, side=tk.LEFT, padx=(10, 0))
     v_frame2 = tk.Frame(var_root, background=BACKGROUND)
-    v_frame2.pack(fill=tk.Y, side=tk.LEFT, padx=(0,10))
+    v_frame2.pack(fill=tk.Y, side=tk.LEFT, padx=(0, 10))
     # Organizes parameter grid
     global cur_row
     cur_row = 0
@@ -490,7 +496,7 @@ def gui_main():
         [("0", 0), ("1", 1), ("2", 2), ("3", 3)])
     thal = radio(v_frame2, "Thallium stress test",
         [("Normal", 3), ("Fixed defect", 6), ("Reversible defect", 7)])
-    num = radio (v_frame2, "Heart disease diagnosis",
+    num = radio(v_frame2, "Heart disease diagnosis",
         [("<50% diameter narrowing", 0),
          (">50% diameter narrowing", 1)])
     var_list = [age, sex, cp, trestbps, chol, fbs, restecg, thalach,
@@ -547,7 +553,7 @@ def gui_main():
         """
 
         message = "Heart disease evaluation data: "
-        if string_use.get() == 1: # input is space-separated numbers
+        if string_use.get() == 1:  # input is space-separated numbers
             input_data = string_entry.get()
             if input_data is None or len(input_data) == 0:
                 messagebox.showwarning("Error",
@@ -596,9 +602,10 @@ def gui_main():
     aggr_button = tk.Button(root, text="Aggregate all data",
         command=aggregate,
         background=BUTTON_COLOR)
-    aggr_button.pack(pady=(0,10))
+    aggr_button.pack(pady=(0, 10))
 
     root.mainloop()
+
 
 def parse_command_line(args):
     """Setup and parse command line arguments and help information."""
@@ -613,7 +620,7 @@ def parse_command_line(args):
     parser = argparse.ArgumentParser()
     use_service = parser.add_mutually_exclusive_group()
     parser.add_argument("-c", "--config",
-        help="the config file containing the" + \
+        help="the config file containing the" +
         " Ethereum contract information", type=str)
     use_service.add_argument("-r", "--registry-list",
         help="the Ethereum address of the registry list",
@@ -639,16 +646,15 @@ def parse_command_line(args):
     if options.config:
         conf_files = [options.config]
     else:
-        conf_files = [ TCFHOME + \
-            "/examples/common/python/connectors/tcf_connector.toml"
-            ]
-    conf_paths = [ "." ]
+        conf_files = [TCFHOME +
+            "/examples/common/python/connectors/tcf_connector.toml"]
+    conf_paths = ["."]
 
-    try :
+    try:
         config = pconfig.parse_configuration_files(conf_files,
             conf_paths)
         json.dumps(config, indent=4)
-    except pconfig.ConfigurationException as e :
+    except pconfig.ConfigurationException as e:
         logger.error(str(e))
         sys.exit(-1)
 
@@ -678,24 +684,26 @@ def parse_command_line(args):
     # Initializing Worker Object
     worker_obj = worker.SGXWorkerDetails()
 
+
 def initialize_logging(config):
     """Initialize logging."""
 
     if verbose:
         config["Logging"] = {
-            "LogFile" : "__screen__",
-            "LogLevel" : "INFO"
+            "LogFile": "__screen__",
+            "LogLevel": "INFO"
         }
     else:
         config["Logging"] = {
-            "LogFile" : "__screen__",
-            "LogLevel" : "WARN"
+            "LogFile": "__screen__",
+            "LogLevel": "WARN"
         }
     plogger.setup_loggers(config.get("Logging", {}))
     sys.stdout = plogger.stream_to_logger(
         logging.getLogger("STDOUT"), logging.DEBUG)
     sys.stderr = plogger.stream_to_logger(
         logging.getLogger("STDERR"), logging.WARN)
+
 
 def initialize_tcf(config):
     """Initialize Avalon: get Avalon worker instance."""
@@ -717,8 +725,7 @@ def initialize_tcf(config):
             sys.exit(1)
         registry_retrieve_result = \
             registry_list_instance.registry_retrieve(
-                registry_list[0]
-        )
+                registry_list[0])
         logger.info("\n Registry retrieve response : {}\n".format(
             registry_retrieve_result
         ))
@@ -740,7 +747,7 @@ def initialize_tcf(config):
             json.dumps(worker_lookup_result, indent=4)
         ))
         if "result" in worker_lookup_result and \
-            "ids" in worker_lookup_result["result"].keys():
+                "ids" in worker_lookup_result["result"].keys():
             if worker_lookup_result["result"]["totalCount"] != 0:
                 worker_id = \
                     worker_lookup_result["result"]["ids"][0]
@@ -761,7 +768,7 @@ def initialize_tcf(config):
     worker_obj.load_worker(
         worker
     )
-    logger.info("**********Worker details Updated with Worker ID" + \
+    logger.info("**********Worker details Updated with Worker ID" +
         "*********\n%s\n", worker_id)
 
 
@@ -777,5 +784,6 @@ def main(args=None):
     # Open GUI
     gui_main()
 
-#------------------------------------------------------------------------------
+
+# -----------------------------------------------------------------------------
 main()

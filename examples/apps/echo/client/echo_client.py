@@ -43,6 +43,7 @@ for handler in logging.root.handlers[:]:
 logger = logging.getLogger(__name__)
 TCFHOME = os.environ.get("TCF_HOME", "../../../../")
 
+
 def ParseCommandLine(args):
     global worker_obj
     global worker_id
@@ -117,7 +118,7 @@ def ParseCommandLine(args):
     input_data_hash = options.data_hash
     worker_id = options.worker_id
     message = options.message
-    if options.message == None or options.message == "":
+    if options.message is None or options.message == "":
         message = "Test Message"
 
     # Initializing Worker Object
@@ -230,7 +231,7 @@ def Main(args=None):
     private_key = utility.generate_signing_keys()
     if requester_signature:
         # Add requester signature and requester verifying_key
-        if wo_params.add_requester_signature(private_key) == False:
+        if wo_params.add_requester_signature(private_key) is False:
             logger.info("Work order request signing failed")
             exit(1)
 
@@ -310,7 +311,7 @@ def Main(args=None):
                     decrypted_data = decrypted_res[0]["data"]
                     data_hash_in_resp = (decrypted_res[0]["dataHash"]).upper()
                     # Verify data hash in response
-                    if utility.verify_data_hash(decrypted_data, data_hash_in_resp) == False:
+                    if utility.verify_data_hash(decrypted_data, data_hash_in_resp) is False:
                         sys.exit(1)
             else:
                 logger.info("Signature verification Failed")
