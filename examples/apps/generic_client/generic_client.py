@@ -40,7 +40,8 @@ for handler in logging.root.handlers[:]:
 logger = logging.getLogger(__name__)
 TCFHOME = os.environ.get("TCF_HOME", "../../")
 
-def ParseCommandLine(args) :
+
+def ParseCommandLine(args):
 
     global worker_obj
     global worker_id
@@ -95,13 +96,13 @@ def ParseCommandLine(args) :
     if options.config:
         conf_files = [options.config]
     else:
-        conf_files = [TCFHOME + \
+        conf_files = [TCFHOME +
             "/examples/common/python/connectors/tcf_connector.toml"]
-    confpaths = [ "." ]
-    try :
+    confpaths = ["."]
+    try:
         config = pconfig.parse_configuration_files(conf_files, confpaths)
         json.dumps(config)
-    except pconfig.ConfigurationException as e :
+    except pconfig.ConfigurationException as e:
         logger.error(str(e))
         sys.exit(-1)
 
@@ -117,15 +118,16 @@ def ParseCommandLine(args) :
             config["ethereum"]["direct_registry_contract_address"] = \
                 address
         elif mode == "registry":
-            logger.error("\n Only Worker registry listing address is supported." +
-                                "Worker registry address is unsupported \n");
+            logger.error(
+                "\n Only Worker registry listing address is supported." +
+                "Worker registry address is unsupported \n")
             sys.exit(-1)
 
     worker_id = options.worker_id
 
     workload_id = options.workload_id
     if not workload_id:
-        logger.error("\nWorkload id is mandatory\n");
+        logger.error("\nWorkload id is mandatory\n")
         sys.exit(-1)
 
     in_data = options.in_data
@@ -138,8 +140,8 @@ def Main(args=None):
     ParseCommandLine(args)
 
     config["Logging"] = {
-        "LogFile" : "__screen__",
-        "LogLevel" : "INFO"
+        "LogFile": "__screen__",
+        "LogLevel": "INFO"
     }
 
     plogger.setup_loggers(config.get("Logging", {}))
@@ -152,11 +154,11 @@ def Main(args=None):
         " *****************")
 
     global direct_jrpc
-    direct_jrpc = DirectJsonRpcApiConnector(config_file=None,config=config)
+    direct_jrpc = DirectJsonRpcApiConnector(config_file=None, config=config)
 
     global address
     if mode == "registry" and address:
-        logger.error("\n Worker registry contract address is unsupported \n");
+        logger.error("\n Worker registry contract address is unsupported \n")
         sys.exit(-1)
 
     # Connect to registry list and retrieve registry
@@ -195,7 +197,7 @@ def Main(args=None):
             json.dumps(worker_lookup_result, indent=4)
         ))
         if "result" in worker_lookup_result and \
-            "ids" in worker_lookup_result["result"].keys():
+                "ids" in worker_lookup_result["result"].keys():
             if worker_lookup_result["result"]["totalCount"] != 0:
                 worker_id = worker_lookup_result["result"]["ids"][0]
             else:
@@ -207,7 +209,7 @@ def Main(args=None):
 
     req_id += 1
     worker_retrieve_result = worker_registry_instance.worker_retrieve(
-        worker_id,req_id
+        worker_id, req_id
     )
     logger.info("\n Worker retrieve response: {}\n".format(
         json.dumps(worker_retrieve_result, indent=4)
@@ -221,7 +223,7 @@ def Main(args=None):
     worker_obj = worker_details.SGXWorkerDetails()
     worker_obj.load_worker(worker_retrieve_result)
 
-    logger.info("**********Worker details Updated with Worker ID" + \
+    logger.info("**********Worker details Updated with Worker ID" +
         "*********\n%s\n", worker_id)
 
     # Convert workloadId to hex
@@ -252,7 +254,7 @@ def Main(args=None):
     private_key = utility.generate_signing_keys()
     if requester_signature:
         # Add requester signature and requester verifying_key
-        if wo_params.add_requester_signature(private_key) == False:
+        if wo_params.add_requester_signature(private_key) is False:
             logger.info("Work order request signing failed")
             exit(1)
     # Submit work order
@@ -351,7 +353,7 @@ def Main(args=None):
             id=req_id
         )
         logger.info("\n Retrieve receipt response:\n {}".format(
-            json.dumps(receipt_res, indent= 4)
+            json.dumps(receipt_res, indent=4)
         ))
         # Retrieve last update to receipt by passing 0xFFFFFFFF
         req_id += 1
@@ -362,7 +364,7 @@ def Main(args=None):
             id=req_id
         )
         logger.info("\n Last update to receipt receipt is:\n {}".format(
-            json.dumps(receipt_update_retrieve, indent= 4)
+            json.dumps(receipt_update_retrieve, indent=4)
         ))
         status = sig_obj.verify_update_receipt_signature(receipt_update_retrieve)
         if status == SignatureStatus.PASSED:
@@ -371,5 +373,6 @@ def Main(args=None):
             logger.info("Work order receipt retrieve signature verification failed!!")
             sys.exit(1)
 
-#------------------------------------------------------------------------------
+
+# -----------------------------------------------------------------------------
 Main()

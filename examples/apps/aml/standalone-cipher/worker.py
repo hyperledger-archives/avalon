@@ -39,8 +39,6 @@ class WorkerDetails():
         self.work_order_payload_formats = []
 
 
-
-
 class SGXWorkerDetails(WorkerDetails):
     """
     TEE SGX worker type data
@@ -57,12 +55,12 @@ class SGXWorkerDetails(WorkerDetails):
         self.enclave_certificate = ""
         self.worker_id = ""
 
-#-----------------------------------------------------------------------------------------------
-    def load_worker(self,input_str):
+# -----------------------------------------------------------------------------
+    def load_worker(self, input_str):
         """
         Function to load the member variables of this class based on worker retrieved details
         """
-        worker_data = input_str ['result']['details']
+        worker_data = input_str['result']['details']
         logger.info("*********Updating Worker Details*********")
         self.hashing_algorithm = worker_data['hashingAlgorithm']
         self.signing_algorithm = worker_data['signingAlgorithm']
@@ -81,6 +79,5 @@ class SGXWorkerDetails(WorkerDetails):
         logger.info("Hashing Algorithm : %s", self.hashing_algorithm)
         logger.info("Signing Algorithm : %s", self.signing_algorithm)
 
-
-    def strip_begin_end_key(self,key):
+    def strip_begin_end_key(self, key):
         return key.replace("\n", "").replace("-----BEGIN PUBLIC KEY-----", "").replace("-----END PUBLIC KEY-----", "")

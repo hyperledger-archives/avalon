@@ -35,6 +35,7 @@ country = ""
 numberUsers = 0
 numberTransactions = 0
 
+
 class App():
     def __init__(self):
         global root
@@ -51,68 +52,78 @@ class App():
 
         root = Tk()
         root.geometry('700x520')
-        root.configure(bg = 'white')
+        root.configure(bg='white')
         root.title('AML client')
 
-        ##SETTING THE COUNTRIES WE ARE USING
-        ttk.Label(root, text="Countries participating").grid(row=0,padx=(100, 10),pady=(30, 7))
+        # Setting the countries we are using
+        ttk.Label(root, text="Countries participating").grid(row=0,
+            padx=(100, 10), pady=(30, 7))
         e0 = ttk.Entry(root)
-        b0 = ttk.Button(root,text='Initialize', command=self.loadCountries)
+        b0 = ttk.Button(root, text='Initialize', command=self.loadCountries)
 
-        e0.grid(row=0, column=1,pady=(30, 7))
-        b0.grid(row=0, column=2,pady=(30, 7))
+        e0.grid(row=0, column=1, pady=(30, 7))
+        b0.grid(row=0, column=2, pady=(30, 7))
 
-        ##CREATING THE JSONS FROM CSVS
+        # Creating the jsons from CSVs
 
-        ttk.Label(root, text="Users CSV").grid(row=1,padx=(100, 10),pady=(30, 4))
-        ttk.Label(root, text="Transactions CSV").grid(row=2,padx=(100, 10),pady=(0, 7))
+        ttk.Label(root, text="Users CSV").grid(row=1, padx=(100, 10),
+            pady=(30, 4))
+        ttk.Label(root, text="Transactions CSV").grid(row=2, padx=(100, 10),
+            pady=(0, 7))
 
         e1 = ttk.Entry(root)
         e2 = ttk.Entry(root)
 
-        b1 = ttk.Button(root,text='Select', command=self.selectUsers)
-        b2 = ttk.Button(root,text='Select', command=self.selectTransactions)
-        b3 = ttk.Button(root, text = 'Create Json from CSVs', command=self.createJsonFile)
+        b1 = ttk.Button(root, text='Select', command=self.selectUsers)
+        b2 = ttk.Button(root, text='Select', command=self.selectTransactions)
+        b3 = ttk.Button(root, text='Create Json from CSVs',
+            command=self.createJsonFile)
 
-        e1.grid(row=1, column=1,pady=(30, 4))
-        e2.grid(row=2, column=1,pady=(0, 7))
-        b1.grid(row=1, column=2,pady=(30, 4))
-        b2.grid(row=2, column=2,pady=(0, 7))
+        e1.grid(row=1, column=1, pady=(30, 4))
+        e2.grid(row=2, column=1, pady=(0, 7))
+        b1.grid(row=1, column=2, pady=(30, 4))
+        b2.grid(row=2, column=2, pady=(0, 7))
         b3.grid(row=3, column=1)
 
-        ##CONT
+        # Cont
 
-        ##INITIALIZING ENCRYPTION INFORMATION
-        ttk.Label(root, text="Worker info").grid(row=4,padx=(100, 10),pady=(30, 4))
-        ttk.Label(root, text="EC private key").grid(row=5,padx=(100, 10),pady=(0, 7))
+        # Initializing encryption information
+        ttk.Label(root, text="Worker info").grid(row=4, padx=(100, 10),
+            pady=(30, 4))
+        ttk.Label(root, text="EC private key").grid(row=5, padx=(100, 10),
+            pady=(0, 7))
 
         e4 = ttk.Entry(root)
         e5 = ttk.Entry(root)
 
-        b4 = ttk.Button(root,text='Select', command=self.selectWorkerObj)
-        b5 = ttk.Button(root,text='Select', command=self.selecECPrivK)
-        b6 = ttk.Button(root,text='Init cipher info', command=self.initCipherInfo)
+        b4 = ttk.Button(root, text='Select', command=self.selectWorkerObj)
+        b5 = ttk.Button(root, text='Select', command=self.selecECPrivK)
+        b6 = ttk.Button(root, text='Init cipher info',
+            command=self.initCipherInfo)
 
-        e4.grid(row=4, column=1,pady=(30, 4))
-        e5.grid(row=5, column=1,pady=(0, 7))
-        b4.grid(row=4, column=2,pady=(30, 4))
-        b5.grid(row=5, column=2,pady=(0, 7))
+        e4.grid(row=4, column=1, pady=(30, 4))
+        e5.grid(row=5, column=1, pady=(0, 7))
+        b4.grid(row=4, column=2, pady=(30, 4))
+        b5.grid(row=5, column=2, pady=(0, 7))
         b6.grid(row=6, column=1)
 
-        ##Encrypt JSON
-        ttk.Label(root, text="Workload's JSON").grid(row=7,padx=(100, 10),pady=(30, 4))
+        # Encrypt JSON
+        ttk.Label(root, text="Workload's JSON").grid(row=7, padx=(100, 10),
+            pady=(30, 4))
         e7 = ttk.Entry(root)
-        b7 = ttk.Button(root,text='Select', command=self.selectWorkloadJson)
-        b8 = ttk.Button(root,text="Encrypt Workload's JSON", command=self.encryptJsonInData)
+        b7 = ttk.Button(root, text='Select', command=self.selectWorkloadJson)
+        b8 = ttk.Button(root, text="Encrypt Workload's JSON",
+            command=self.encryptJsonInData)
 
-        e7.grid(row=7, column=1,pady=(30, 4))
-        b7.grid(row=7, column=2,pady=(30, 4))
+        e7.grid(row=7, column=1, pady=(30, 4))
+        b7.grid(row=7, column=2, pady=(30, 4))
         b8.grid(row=8, column=1)
 
-        ##LOGO
-        img_logo = ImageTk.PhotoImage(Image.open("./images/santander_logo.png"))
-        panel_logo = Label(root, image = img_logo)
-        panel_logo.grid(row=10, column=1, sticky=S,pady=(40, 0))
+        # Logo
+        img_logo = ImageTk.PhotoImage(Image.open(
+            "./images/santander_logo.png"))
+        panel_logo = Label(root, image=img_logo)
+        panel_logo.grid(row=10, column=1, sticky=S, pady=(40, 0))
 
         root.mainloop()
 
@@ -122,15 +133,14 @@ class App():
         countries = e0.get()
         preprocess = countries.replace(",", "_")
 
-
     def selectUsers(self):
         global users_filename
         global e1
 
         users_filename = askopenfilename()
 
-        e1.delete(0,END)
-        e1.insert(0,users_filename.rsplit('/', 1)[-1])
+        e1.delete(0, END)
+        e1.insert(0, users_filename.rsplit('/', 1)[-1])
 
     def selectTransactions(self):
         global transactions_filename
@@ -138,14 +148,13 @@ class App():
 
         transactions_filename = askopenfilename()
 
-        e2.delete(0,END)
-        e2.insert(0,transactions_filename.rsplit('/', 1)[-1])
+        e2.delete(0, END)
+        e2.insert(0, transactions_filename.rsplit('/', 1)[-1])
 
     def createJsonFile(self):
         global preprocess
         global users_filename, transactions_filename
         global save_json_filename
-
 
         save_json_filename = asksaveasfilename()
 
@@ -158,9 +167,9 @@ class App():
 
         index = 0
 
-        base_json_file = open("./json_building_blocks/base.json","r")
-        inData_json_file = open("./json_building_blocks/inData.json","r")
-        output_json_file = open(save_json_filename,"w")
+        base_json_file = open("./json_building_blocks/base.json", "r")
+        inData_json_file = open("./json_building_blocks/inData.json", "r")
+        output_json_file = open(save_json_filename, "w")
 
         base_json_str = base_json_file.read()
         inData_json_str = inData_json_file.read()
@@ -173,16 +182,16 @@ class App():
         if preprocess != "":
             inData_json_aux = inData_json
             inData_json_aux["index"] = index
-            index+=1
+            index += 1
 
-            inData_aux = (preprocess + "|" 
+            inData_aux = (preprocess + "|"
                 + (country + "," + str(numberUsers) + "," + str(numberTransactions)))
-        for i in range(0,numberUsers):
-            inData_aux = (inData_aux + "|" + users['userId'][i] 
+        for i in range(0, numberUsers):
+            inData_aux = (inData_aux + "|" + users['userId'][i]
                 + "," + users['name'][i])
-        for j in range(0,numberTransactions):
-            inData_aux = (inData_aux + "|" + transactions['from'][j] 
-                + "," + transactions['to'][j] + "," + str(transactions['amount'][j]) 
+        for j in range(0, numberTransactions):
+            inData_aux = (inData_aux + "|" + transactions['from'][j]
+                + "," + transactions['to'][j] + "," + str(transactions['amount'][j])
                 + "," + transactions['currency'][j] + "," + transactions['date'][j])
 
         inData_json_aux["data"] = inData_aux
@@ -212,33 +221,30 @@ class App():
         global e4
 
         workerObj_filename = askopenfilename()
-        e4.delete(0,END)
-        e4.insert(0,workerObj_filename.rsplit('/', 1)[-1])
+        e4.delete(0, END)
+        e4.insert(0, workerObj_filename.rsplit('/', 1)[-1])
 
     def selecECPrivK(self):
         global ECPrivk_filename
         global e5
 
         ECPrivk_filename = askopenfilename()
-        e5.delete(0,END)
-        e5.insert(0,ECPrivk_filename.rsplit('/', 1)[-1])
+        e5.delete(0, END)
+        e5.insert(0, ECPrivk_filename.rsplit('/', 1)[-1])
 
     def initCipherInfo(self):
         global workerObj_filename, ECPrivk_filename
         global EC_key
         global worker_obj
 
-
         ec_file = open(ECPrivk_filename, "r")
         EC_key = ec_file.read()
 
-        worker_file = open(workerObj_filename,"r")
+        worker_file = open(workerObj_filename, "r")
         worker_str = worker_file.read().rstrip('\n')
         worker_json = json.loads(worker_str)
         worker_obj = worker.SGXWorkerDetails()
         worker_obj.load_worker(worker_json)
-
-
 
         worker_file.close()
         ec_file.close()
@@ -249,8 +255,8 @@ class App():
         global save_json_filename
 
         WorkloadJson_filename = askopenfilename(initialdir="/".join(save_json_filename.split("/")[:-1]))
-        e7.delete(0,END)
-        e7.insert(0,WorkloadJson_filename.rsplit('/', 1)[-1])
+        e7.delete(0, END)
+        e7.insert(0, WorkloadJson_filename.rsplit('/', 1)[-1])
 
     def encryptJsonInData(self):
         global EC_key
@@ -260,7 +266,7 @@ class App():
         enc_json_file = asksaveasfilename()
         save_key_file = asksaveasfilename()
 
-        json_file = open(WorkloadJson_filename,"r")
+        json_file = open(WorkloadJson_filename, "r")
         workload_str = json_file.read()
         workload_json = json.loads(workload_str)
         workload_json["params"]["workerId"] = worker_obj.worker_id
@@ -276,11 +282,12 @@ class App():
 
         enc_obj = encryptionAlg.encAlgorithm()
         session_key = enc_obj.generateKey()
-        
-        enc_session_key = sig_obj.generate_encrypted_key(session_key,worker_obj.encryption_key)
 
-        request_json = sig_obj.generate_client_signature(workload_str,worker_obj,
-            signing_key, session_key, session_iv, enc_session_key)
+        enc_session_key = sig_obj.generate_encrypted_key(session_key,
+            worker_obj.encryption_key)
+
+        request_json = sig_obj.generate_client_signature(workload_str,
+            worker_obj, signing_key, session_key, session_iv, enc_session_key)
 
         enc_json_file = open(enc_json_file, "w")
         enc_json_file.write(request_json)
@@ -299,6 +306,7 @@ def main():
     App()
 
     return 0
+
 
 if __name__ == '__main__':
     main()

@@ -23,19 +23,20 @@ from Crypto.Hash import SHA256
 from Crypto.PublicKey import RSA
 
 logger = logging.getLogger(__name__)
-#No of bytes of encrypted session key to encrypt data
+# Number of bytes of encrypted session key to encrypt data
 NO_OF_BYTES = 16
 
-#############################
-#############################
-class ClientSignature(object) :
-    
+
+# -----------------------------------------------------------------------------
+class ClientSignature(object):
+
     def __init__(self):
         self.private_key = None
         self.public_key = None
-        self.param_pool = ["requesterNonce", "workOrderId", "workerId", "requesterId","inData"]
+        self.param_pool = ["requesterNonce", "workOrderId", "workerId",
+            "requesterId", "inData"]
 
-#---------------------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
     def __payload_json_check(self, json_data):
         """
         Function to check if mandatory parameters are available as per param_pool
@@ -49,23 +50,23 @@ class ClientSignature(object) :
             return False
 
         data_params = data['params']
-        param_valid = True;
+        param_valid = True
         for param in self.param_pool:
-            if ( param not in data_params ):
-                #List down all the missing Parameters
+            if (param not in data_params):
+                # List down all the missing Parameters
                 logger.error("ERROR: Worker Order Submit Json does not have the required parameter: %s", param)
-                param_valid  = False
+                param_valid = False
 
         if param_valid:
             i_obj = data_params['inData']
-            for obj in i_obj :
+            for obj in i_obj:
                 if 'data' not in obj or not obj["data"] or 'index' not in obj:
                     logger.error("ERROR: Worker Order Submit Json does not have the required parameter in InData")
-                    param_valid  = False
+                    param_valid = False
 
         return param_valid
 
-#---------------------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
     def __encrypt_workorder_indata(self, input_json_params,
             session_key, session_iv, worker_encryption_key, data_key=None, data_iv=None):
         """
@@ -86,13 +87,13 @@ class ClientSignature(object) :
         indata_objects = input_json_params['inData']
         indata_objects.sort(key=lambda x: x['index'])
         input_json_params['inData'] = indata_objects
-        logger.info("Encrypting Workorder Data");
+        logger.info("Encrypting Workorder Data")
 
         i = 0
         for item in indata_objects:
             data = item['data'].encode('UTF-8')
             e_key = item['encryptedDataEncryptionKey'].encode('UTF-8')
-            if (not e_key ) or (e_key == "null".encode('UTF-8')):
+            if (not e_key) or (e_key == "null".encode('UTF-8')):
                 enc_data = self.encrypt_data(data, session_key, session_iv)
                 input_json_params['inData'][i]['data'] = self.byte_array_to_base64(enc_data)
                 logger.debug("encrypted indata - %s", self.byte_array_to_base64(enc_data))
@@ -107,13 +108,13 @@ class ClientSignature(object) :
 
         logger.debug("Workorder InData after encryption: %s", indata_objects)
 
-# ----------------------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
     def encrypt_data(self, data, encryption_key, iv):
         encrypt = encryptionAlg.encAlgorithm()
         return encrypt.encrypt_data(data, encryption_key, iv)
 
 
-#---------------------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
     def __calculate_hash_on_concatenated_string(self, input_json_params, nonce_hash):
         """
         Function to calculate a hash value of the string concatenating the following values:
@@ -126,26 +127,28 @@ class ClientSignature(object) :
         workorder_id = (input_json_params['workOrderId']).encode('UTF-8')
         worker_id = (input_json_params['workerId']).encode('UTF-8')
         workload_id = "".encode('UTF-8')
-        if 'workloadId' in input_json_params :
+        if 'workloadId' in input_json_params:
             workload_id = (input_json_params['workloadId']).encode('UTF-8')
         requester_id = (input_json_params['requesterId']).encode('UTF-8')
 
         concat_string = nonce_hash + workorder_id + worker_id + workload_id + requester_id
-        concat_hash =  bytes(concat_string)
-        #SHA-256 hashing is used
+        concat_hash = bytes(concat_string)
+        # SHA-256 hashing is used
         hash_1 = self.compute_message_hash(concat_hash)
         result_hash = self.byte_array_to_base64(hash_1)
 
         return result_hash
 
 
-#---------------------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
     def __calculate_datahash(self, data_objects):
         """
-        Function to calculate a hash value of the array concatenating dataHash, data,
-        encryptedDataEncryptionKey, iv for each item in the inData/outData array
+        Function to calculate a hash value of the array concatenating
+        dataHash, data, encryptedDataEncryptionKey, iv for each item in the
+        inData/outData array
         Parameters:
-            - data_objects is each item in inData or outData part of workorder request as per TCF API 6.1.7 Work Order Data Formats
+            - data_objects is each item in inData or outData part of
+              workorder request as per TCF API 6.1.7 Work Order Data Formats
         """
 
         hash_str = ""
@@ -160,13 +163,14 @@ class ClientSignature(object) :
                 e_key = item['encryptedDataEncryptionKey'].encode('UTF-8')
             if 'iv' in item:
                 iv = item['iv'].encode('UTF-8')
-            concat_string =  datahash + data + e_key + iv
+            concat_string = datahash + data + e_key + iv
             concat_hash = bytes(concat_string)
             hash = self.compute_message_hash(concat_hash)
             hash_str = hash_str + self.byte_array_to_base64(hash)
 
         return hash_str
-#---------------------------------------------------------------------------------------------
+
+# -----------------------------------------------------------------------------
     def __generate_signature(self, hash, private_key):
         """
         Function to generate signature object
@@ -176,11 +180,11 @@ class ClientSignature(object) :
         """
 
         self.private_key = private_key
-        self.public_key =  self.private_key.getPublicKeySerialized()
-        signature_base64  =  self.private_key.sign_message(hash).toBase64()
-        return  signature_base64
+        self.public_key = self.private_key.getPublicKeySerialized()
+        signature_base64 = self.private_key.sign_message(hash).toBase64()
+        return signature_base64
 
-#---------------------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
     def generate_client_signature(self, input_json_str,
             worker, private_key, session_key, session_iv, encrypted_session_key,
             data_key=None, data_iv=None):
@@ -216,7 +220,7 @@ class ClientSignature(object) :
                 session_iv, worker.encryption_key, data_key, data_iv)
         # [NO_OF_BYTES] 16 BYTES for nonce, is the recommendation by NIST to
         # avoid collisions by the "Birthday Paradox".
-        nonce =  self.random_bit_string(NO_OF_BYTES)
+        nonce = self.random_bit_string(NO_OF_BYTES)
 
         request_nonce_hash = self.compute_message_hash(nonce)
         nonce_hash = (self.byte_array_to_base64(request_nonce_hash)).encode('UTF-8')
@@ -227,7 +231,7 @@ class ClientSignature(object) :
         hash_string_3 = ""
         if 'outData' in input_json_params:
             data_objects = input_json_params['outData']
-            data_objects.sort(key = lambda x:x['index'])
+            data_objects.sort(key=lambda x: x['index'])
             hash_string_3 = self.__calculate_datahash(data_objects)
 
         concat_string = hash_string_1 + hash_string_2 + hash_string_3
@@ -238,12 +242,13 @@ class ClientSignature(object) :
         encrypted_request_hash_str = ''.join(format(i, '02x') for i in encrypted_request_hash)
         logger.debug("encrypted request hash: \n%s", encrypted_request_hash_str)
 
-        #Update the input json params
+        # Update the input json params
         input_json_params["encryptedRequestHash"] = encrypted_request_hash_str
-        #input_json_params['requesterSignature'] = self.__generate_signature(final_hash, private_key)
+        # input_json_params['requesterSignature'] = \
+        #     self.__generate_signature(final_hash, private_key)
         input_json_params["encryptedSessionKey"] = encrypted_session_key_str
         # Temporary mechanism to share client's public key. Not a part of Spec
-        input_json_params['verifyingKey'] =  self.public_key
+        input_json_params['verifyingKey'] = self.public_key
         input_json_params['requesterNonce'] = self.byte_array_to_base64(request_nonce_hash)
         input_json['params'] = input_json_params
         input_json_str = json.dumps(input_json)
@@ -251,7 +256,7 @@ class ClientSignature(object) :
 
         return input_json_str
 
-#---------------------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
     def byte_array_to_base64(self, byte_array):
         hash_b_arr = bytearray(list(byte_array))
@@ -260,7 +265,7 @@ class ClientSignature(object) :
 
         return hash_b64_str
 
-#---------------------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
     def base64_to_byte_array(self, b64_str):
         hash_b64 = bytearray(b64_str, 'utf-8')
@@ -269,25 +274,25 @@ class ClientSignature(object) :
 
         return hash_tuple
 
-#---------------------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
     def random_bit_string(self, length):
         list = []
-        for x in range (0,length):
-            list.append(random.randrange(256)) 
+        for x in range(0, length):
+            list.append(random.randrange(256))
         return tuple(list)
 
-# ----------------------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
     def generate_sessioniv(self):
         return self.random_bit_string(12)
 
-# ----------------------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
     def generate_encrypted_session_key(self, session_key, worker_encryption_key):
         session_key = encryptionAlg.encAlgorithm()
-        return self.encrypt_data(worker_encryption_key.encode(), session_key.generateKey(), session_iv )
+        return self.encrypt_data(worker_encryption_key.encode(), session_key.generateKey(), session_iv)
 
-#---------------------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
-    def compute_message_hash(self,message):
+    def compute_message_hash(self, message):
         byte_arr = bytes(message)
 
         hash_obj = SHA256.new()
@@ -296,12 +301,10 @@ class ClientSignature(object) :
 
         return hash_tuple
 
-
     def generate_key(self):
         return self.random_bit_string(16)
 
-    
-    def generate_encrypted_key(self, session_key,encryption_key):
+    def generate_encrypted_key(self, session_key, encryption_key):
 
         key = RSA.importKey(encryption_key)
         cipher = PKCS1_OAEP.new(key, label='')

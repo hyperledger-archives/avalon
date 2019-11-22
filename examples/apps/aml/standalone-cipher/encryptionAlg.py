@@ -15,6 +15,7 @@
 from Cryptodome.Cipher import AES
 from Cryptodome.Random import get_random_bytes
 
+
 class encAlgorithm(object):
 
 	def encrypt_data(self, data, encryption_key, iv):
@@ -40,7 +41,7 @@ class encAlgorithm(object):
 
 		key_list = []
 
-		for i in range(0,len(self.key)):
+		for i in range(0, len(self.key)):
 			key_list.append(self.key[i])
 
 		return tuple(key_list)
