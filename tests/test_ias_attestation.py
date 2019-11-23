@@ -41,7 +41,8 @@ for handler in logging.root.handlers[:]:
 logger = logging.getLogger(__name__)
 TCFHOME = os.environ.get("TCF_HOME", "../../")
 
-def ParseCommandLine(args) :
+
+def ParseCommandLine(args):
 
         global worker_obj
         global worker_id
@@ -75,13 +76,13 @@ def ParseCommandLine(args) :
         if options.config:
                 conf_files = [options.config]
         else:
-                conf_files = [ TCFHOME + \
-                        "/examples/common/python/connectors/tcf_connector.toml" ]
-        confpaths = [ "." ]
-        try :
+                conf_files = [TCFHOME +
+                        "/examples/common/python/connectors/tcf_connector.toml"]
+        confpaths = ["."]
+        try:
                 config = pconfig.parse_configuration_files(conf_files, confpaths)
                 json.dumps(config)
-        except pconfig.ConfigurationException as e :
+        except pconfig.ConfigurationException as e:
                 logger.error(str(e))
                 sys.exit(-1)
 
@@ -104,20 +105,21 @@ def ParseCommandLine(args) :
 
         worker_id = options.worker_id
         message = options.message
-        if options.message == None or options.message == "":
+        if options.message is None or options.message == "":
                 message = "Test Message"
 
         # Initializing Worker Object
         worker_obj = worker.SGXWorkerDetails()
 
+
 def Main(args=None):
         ParseCommandLine(args)
 
         config["Logging"] = {
-                "LogFile" : "__screen__",
-                "LogLevel" : "INFO"
+                "LogFile": "__screen__",
+                "LogLevel": "INFO"
         }
- 
+
         plogger.setup_loggers(config.get("Logging", {}))
         sys.stdout = plogger.stream_to_logger(
                 logging.getLogger("STDOUT"), logging.DEBUG)
@@ -173,14 +175,14 @@ def Main(args=None):
                         sys.exit(1)
         req_id += 1
         worker_retrieve_result = worker_registry_instance.worker_retrieve(
-                worker_id,req_id
+                worker_id, req_id
         )
         logger.info("\n Worker retrieve response: {}\n".format(
                 json.dumps(worker_retrieve_result, indent=4)
         ))
         worker_obj.load_worker(worker_retrieve_result)
 
-        logger.info("**********Worker details Updated with Worker ID" + \
+        logger.info("**********Worker details Updated with Worker ID" +
                 "*********\n%s\n", worker_id)
 
         if not worker_obj.proof_data:
@@ -197,10 +199,11 @@ def Main(args=None):
 
         logger.info("Perform verification of attestation report")
         verify_report_status = attestation_util.verify_attestation_report(enclave_info)
-        if verify_report_status == False:
+        if verify_report_status is False:
             logger.error("Verification of enclave signup info failed")
         else:
             logger.info("Verification of enclave signup info passed")
 
-#------------------------------------------------------------------------------
+
+# -----------------------------------------------------------------------------
 Main()

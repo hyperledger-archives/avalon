@@ -18,6 +18,7 @@ import utility.utility as utility
 
 logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s', level=logging.INFO)
 
+
 def test_encrypt_session_key(iv):
     worker_enc_key = "MIIBCgKCAQEAwocGo"
     enc_sess_key = utility.generate_encrypted_session_key(iv, worker_enc_key)
@@ -26,6 +27,7 @@ def test_encrypt_session_key(iv):
     else:
         logging.info("Test case: test_encrypt_session_key FAIL...")
     return enc_sess_key
+
 
 def test_encrypt_data(iv, enc_sess_key, data):
     data_bytes = bytes(data, 'ascii')
@@ -36,12 +38,14 @@ def test_encrypt_data(iv, enc_sess_key, data):
         logging.info("Test case: test_encrypt_data FAIL...")
     return enc_req_hash
 
+
 def test_decrypt_data(iv, enc_sess_key, plain_data, enc_data):
     dec_data = utility.decrypt_data(enc_sess_key, iv, enc_data)
     if dec_data == plain_data:
         logging.info("Test case: test_decrypt_data PASS..")
     else:
         logging.info("Test case: test_decrypt_data FAIL..")
+
 
 def main():
     logging.info("Executing Unit test cases for encryption at client")
@@ -56,6 +60,6 @@ def main():
             test_decrypt_data(iv_hex, enc_sess_key[:16], msg, b64_enc_data)
     logging.info("Unit test case execution for encryption/decryption complete.")
 
+
 if __name__ == "__main__":
     main()
-

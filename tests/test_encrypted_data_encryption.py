@@ -35,7 +35,8 @@ for handler in logging.root.handlers[:]:
 logger = logging.getLogger(__name__)
 TCFHOME = os.environ.get("TCF_HOME", "../../")
 
-def ParseCommandLine(args) :
+
+def ParseCommandLine(args):
 
         global worker_obj
         global worker_id
@@ -45,23 +46,23 @@ def ParseCommandLine(args) :
 
         parser = argparse.ArgumentParser()
         use_service = parser.add_mutually_exclusive_group()
-        parser.add_argument("-c", "--config", 
-                help="the config file containing the Ethereum contract information", 
+        parser.add_argument("-c", "--config",
+                help="the config file containing the Ethereum contract information",
                 type=str)
-        use_service.add_argument("-r", "--registry-list", 
-                help="the Ethereum address of the registry list", 
+        use_service.add_argument("-r", "--registry-list",
+                help="the Ethereum address of the registry list",
                 type=str)
-        use_service.add_argument("-s", "--service-uri", 
-                help="skip URI lookup and send to specified URI", 
+        use_service.add_argument("-s", "--service-uri",
+                help="skip URI lookup and send to specified URI",
                 type=str)
-        use_service.add_argument("-o", "--off-chain", 
-                help="skip URI lookup and use the registry in the config file", 
+        use_service.add_argument("-o", "--off-chain",
+                help="skip URI lookup and use the registry in the config file",
                 action="store_true")
-        parser.add_argument("-w", "--worker-id", 
-                help="skip worker lookup and retrieve specified worker", 
+        parser.add_argument("-w", "--worker-id",
+                help="skip worker lookup and retrieve specified worker",
                 type=str)
-        parser.add_argument("-m", "--message", 
-                help='text message to be included in the JSON request payload', 
+        parser.add_argument("-m", "--message",
+                help='text message to be included in the JSON request payload',
                 type=str)
 
         options = parser.parse_args(args)
@@ -69,13 +70,13 @@ def ParseCommandLine(args) :
         if options.config:
                 conffiles = [options.config]
         else:
-                conffiles = [ TCFHOME + \
-                        "/examples/common/python/connectors/tcf_connector.toml" ]
-        confpaths = [ "." ]
-        try :
+                conffiles = [TCFHOME +
+                       "/examples/common/python/connectors/tcf_connector.toml"]
+        confpaths = ["."]
+        try:
                 config = pconfig.parse_configuration_files(conffiles, confpaths)
                 json.dumps(config)
-        except pconfig.ConfigurationException as e :
+        except pconfig.ConfigurationException as e:
                 logger.error(str(e))
                 sys.exit(-1)
 
@@ -98,28 +99,29 @@ def ParseCommandLine(args) :
 
         worker_id = options.worker_id
         message = options.message
-        if options.message == None or options.message == "":
+        if options.message is None or options.message == "":
                 message = "Hello world"
 
         # Initializing Worker Object
         worker_obj = worker.WorkerDetails()
 
+
 def Main(args=None):
         ParseCommandLine(args)
 
         config["Logging"] = {
-                "LogFile" : "__screen__",
-                "LogLevel" : "INFO"
+                "LogFile": "__screen__",
+                "LogLevel": "INFO"
         }
-        
+
         plogger.setup_loggers(config.get("Logging", {}))
         sys.stdout = plogger.stream_to_logger(
                 logging.getLogger("STDOUT"), logging.DEBUG)
         sys.stderr = plogger.stream_to_logger(
                 logging.getLogger("STDERR"), logging.WARN)
 
-        logger.info("***************** INTEL TRUSTED COMPUTE FRAMEWORK (TCF)" + \
-                " *****************") 
+        logger.info("***************** INTEL TRUSTED COMPUTE FRAMEWORK (TCF)" +
+                " *****************")
 
         # Connect to registry list and retrieve registry
         if not off_chain:
@@ -154,7 +156,7 @@ def Main(args=None):
         worker_obj.load_worker(
                 direct_wrapper.worker_retrieve(worker_retrieve_json))
 
-        logger.info("**********Worker details Updated with Worker ID" + \
+        logger.info("**********Worker details Updated with Worker ID" +
                 "*********\n%s\n", worker_id)
 
         # Convert workloadId to hex
@@ -162,12 +164,12 @@ def Main(args=None):
         workload_id = workload_id.encode("UTF-8").hex()
         # Create work order
         wo_submit_json = jrpc_request.WorkOrderSubmitJson(3, 6000, "pformat",
-                worker_id, workload_id, "0x2345", 
+                worker_id, workload_id, "0x2345",
                 worker_encryption_key=base64.b64decode(
-                        worker_obj.worker_encryption_key).hex(), 
+                        worker_obj.worker_encryption_key).hex(),
                 data_encryption_algorithm="AES-GCM-256")
         wo_id = wo_submit_json.get_work_order_id()
-    
+
         # Sign work order
         private_key = utility.generate_signing_keys()
         session_key = utility.generate_key()
@@ -189,7 +191,7 @@ def Main(args=None):
         wo_submit_json.add_in_data(message, None, encrypted_data_encryption_key_str, data_iv_str)
         # Submit work order
         direct_wrapper.init_work_order(config)
-        direct_wrapper.work_order_submit(wo_submit_json, encrypted_session_key, 
+        direct_wrapper.work_order_submit(wo_submit_json, encrypted_session_key,
                 worker_obj, private_key, session_key, session_iv, data_key, data_iv)
 
         # Retrieve result
@@ -197,5 +199,6 @@ def Main(args=None):
         direct_wrapper.work_order_get_result(
                 wo_get_result_json, session_key, session_iv, data_key, data_iv)
 
-#------------------------------------------------------------------------------
+
+# -----------------------------------------------------------------------------
 Main()
