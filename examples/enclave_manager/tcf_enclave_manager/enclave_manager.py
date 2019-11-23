@@ -131,7 +131,7 @@ class EnclaveManager:
             else:
                 logger.info("No response found for the workorder %s,"
                             "hence placing the workorder request back in wo-scheduled", wo)
-                kv_helper.set("wo-scheduled", wo,  WorkOrderStatus.SCHEDULED.name)
+                kv_helper.set("wo-scheduled", wo, WorkOrderStatus.SCHEDULED.name)
 
             logger.info("Finally deleting workorder %s from wo-processing table", wo)
             kv_helper.remove("wo-processing", wo)
@@ -175,7 +175,7 @@ class EnclaveManager:
                 return
 
             logger.info("Create workorder entry %s in wo-processing table", wo_id)
-            kv_helper.set("wo-processing", wo_id,  WorkOrderStatus.PROCESSING.name)
+            kv_helper.set("wo-processing", wo_id, WorkOrderStatus.PROCESSING.name)
 
             logger.info("Delete workorder entry %s from wo-scheduled table", wo_id)
             kv_helper.remove("wo-scheduled", wo_id)
@@ -189,7 +189,7 @@ class EnclaveManager:
                 wo_response["Response"]["Status"] = WorkOrderStatus.FAILED
                 wo_response["Response"]["Message"] = "Workorder JSON request is invalid"
                 kv_helper.set("wo-responses", wo_id, json.dumps(wo_response))
-                kv_helper.set("wo-processed", wo_id,  WorkOrderStatus.FAILED.name)
+                kv_helper.set("wo-processed", wo_id, WorkOrderStatus.FAILED.name)
                 kv_helper.remove("wo-processing", wo_id)
                 return
 
@@ -210,7 +210,7 @@ class EnclaveManager:
                 return
 
             logger.info("Mark workorder status for workorder id %s to Completed in wo-processed", wo_id)
-            kv_helper.set("wo-processed", wo_id,  WorkOrderStatus.SUCCESS.name)
+            kv_helper.set("wo-processed", wo_id, WorkOrderStatus.SUCCESS.name)
 
             logger.info("Create entry in wo-responses table for workorder %s", wo_id)
             kv_helper.set("wo-responses", wo_id, wo_json_resp)

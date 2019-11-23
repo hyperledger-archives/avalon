@@ -30,32 +30,32 @@ TCFHOME = os.environ.get("TCF_HOME", "../../../")
 send_to_sgx_worker = enclave.HandleWorkOrderRequest
 get_enclave_public_info = enclave.UnsealEnclaveData
 
-# -----------------------------------------------------------------
+
 # -----------------------------------------------------------------
 _tcf_enclave_info = None
 _ias = None
 
 _sig_rl_update_time = None
-_sig_rl_update_period = 8*60*60 # in seconds every 8 hours
+_sig_rl_update_period = 8 * 60 * 60  # in seconds every 8 hours
 
 _epid_group = None
 
-#-----------------------------------------------------------------
+
 # ----------------------------------------------------------------
-def __find_enclave_library(config) :
+def __find_enclave_library(config):
     """
     Find enclave library file from the parsed config
     """
-    enclave_file_name = config.get('enclave_library');
+    enclave_file_name = config.get('enclave_library')
     enclave_file_path = TCFHOME + "/" + config.get('enclave_library_path')
     logger.info("Enclave Lib: %s", enclave_file_name)
 
-    if enclave_file_path :
-        enclave_file = os.path.join(enclave_file_path, enclave_file_name);
-        if os.path.exists(enclave_file) :
+    if enclave_file_path:
+        enclave_file = os.path.join(enclave_file_path, enclave_file_name)
+        if os.path.exists(enclave_file):
             logger.info("Enclave Lib Exists")
             return enclave_file
-    else :
+    else:
         script_directory = os.path.abspath(os.path.dirname(os.path.realpath(__file__)))
         logger.info("Script directory - %s", script_directory)
         search_path = [
@@ -63,15 +63,15 @@ def __find_enclave_library(config) :
             os.path.abspath(os.path.join(script_directory, '..', 'lib')),
         ]
 
-        for path in search_path :
+        for path in search_path:
             enclave_file = os.path.join(path, enclave_file_name)
-            if os.path.exists(enclave_file) :
+            if os.path.exists(enclave_file):
                 logger.info("Enclave Lib Exits")
                 return enclave_file
 
     raise IOError("Could not find enclave shared object")
 
-# -----------------------------------------------------------------
+
 # -----------------------------------------------------------------
 def __update_sig_rl():
     """
@@ -86,7 +86,7 @@ def __update_sig_rl():
     logger.info("EPID: " + _epid_group)
 
     if not _sig_rl_update_time \
-        or (time.time() - _sig_rl_update_time) > _sig_rl_update_period:
+            or (time.time() - _sig_rl_update_time) > _sig_rl_update_period:
         sig_rl = ""
         if (not enclave.is_sgx_simulator()):
             sig_rl = _ias.get_signature_revocation_lists(_epid_group)
@@ -97,8 +97,7 @@ def __update_sig_rl():
 
 
 # -----------------------------------------------------------------
-# -----------------------------------------------------------------
-def initialize_with_configuration(config) :
+def initialize_with_configuration(config):
     """
     Create and Initialize a SGX enclave with passed config
     """
@@ -123,10 +122,10 @@ def initialize_with_configuration(config) :
     if not _ias and not enclave.is_sgx_simulator():
         _ias = \
             ias_client.IasClient(
-                IasServer = config['ias_url'],
-                ApiKey = config['ias_api_key'],
-                Spid = config['spid'],
-                HttpsProxy = config.get('https_proxy',""))
+                IasServer=config['ias_url'],
+                ApiKey=config['ias_api_key'],
+                Spid=config['spid'],
+                HttpsProxy=config.get('https_proxy', ""))
 
     if not _tcf_enclave_info:
         signed_enclave = __find_enclave_library(config)
@@ -146,7 +145,8 @@ def initialize_with_configuration(config) :
             time.sleep(60)
 
     return get_enclave_basename(), get_enclave_measurement()
-# -----------------------------------------------------------------
+
+
 # -----------------------------------------------------------------
 def shutdown():
     global _tcf_enclave_info
@@ -159,19 +159,19 @@ def shutdown():
     _sig_rl_update_time = None
     _epid_group = None
 
-# -----------------------------------------------------------------
+
 # -----------------------------------------------------------------
 def get_enclave_measurement():
     global _tcf_enclave_info
     return _tcf_enclave_info.mr_enclave if _tcf_enclave_info is not None else None
 
-# -----------------------------------------------------------------
+
 # -----------------------------------------------------------------
 def get_enclave_basename():
     global _tcf_enclave_info
     return _tcf_enclave_info.basename if _tcf_enclave_info is not None else None
 
-# -----------------------------------------------------------------
+
 # -----------------------------------------------------------------
 def verify_enclave_info(enclave_info, mr_enclave, originator_public_key_hash):
     """
@@ -182,7 +182,7 @@ def verify_enclave_info(enclave_info, mr_enclave, originator_public_key_hash):
     """
     return enclave.VerifyEnclaveInfo(enclave_info, mr_enclave, originator_public_key_hash)
 
-# -----------------------------------------------------------------
+
 # -----------------------------------------------------------------
 def create_signup_info(originator_public_key_hash, nonce):
     """
@@ -215,7 +215,7 @@ def create_signup_info(originator_public_key_hash, nonce):
         response = _ias.post_verify_attestation(quote=signup_data['enclave_quote'], nonce=nonce)
         logger.debug("posted verification to IAS")
 
-        #check verification report
+        # check verification report
         if not _ias.verify_report_fields(signup_data['enclave_quote'], response['verification_report']):
             logger.debug("last error: " + _ias.last_verification_error())
             if _ias.last_verification_error() == "GROUP_OUT_OF_DATE":
@@ -223,7 +223,7 @@ def create_signup_info(originator_public_key_hash, nonce):
             else:
                 logger.error("invalid report fields")
                 return None
-        #ALL checks have passed
+        # ALL checks have passed
         logger.info("report fields verified")
 
         # Now put the proof data into the dictionary
