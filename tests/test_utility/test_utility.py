@@ -25,59 +25,71 @@ from utility.utility import (
     human_read_to_byte,
 )
 
+
 class UtilityTest(unittest.TestCase):
     def test_create_error_response(self):
         """Tests to verify create_error_response(code, jrpc_id, message) function
         """
-        expected_response = {"jsonrpc":"2.0","id":"id1","error":{"code":404,"message":"Page not found"},}
+        expected_response = {"jsonrpc": "2.0", "id": "id1",
+            "error": {"code": 404, "message": "Page not found"}, }
         self.assertEquals(expected_response, create_error_response(404, "id1", "Page not found"))
 
-        expected_response = {"jsonrpc":"2.0","id":"id2","error":{"code":"2","message":"General error"},}
-        self.assertEquals(expected_response, create_error_response("2", "id2","General error"))
+        expected_response = {"jsonrpc": "2.0", "id": "id2",
+             "error": {"code": "2", "message": "General error"}, }
+        self.assertEquals(expected_response, create_error_response("2", "id2",
+             "General error"))
 
     def test_strip_begin_end_key(self):
         """Tests to verify strip_begin_end_key(key) function
         """
         expected = "123456aghdfgasdasdkommkf"       # Positive case
-        self.assertEquals(expected, strip_begin_end_key("-----BEGIN PUBLIC KEY-----123456aghdfgas\ndasdkommkf-----END PUBLIC KEY-----"))
+        self.assertEquals(expected, strip_begin_end_key(
+            "-----BEGIN PUBLIC KEY-----123456aghdfgas\n"
+            "dasdkommkf-----END PUBLIC KEY-----"))
 
         expected = "123456aghdfgasdasdkommkf"       # Interspersed with '\n'
-        self.assertEquals(expected, strip_begin_end_key("\n-----BEGIN PUBLIC KEY\n-----123456aghdfgas\ndasdkommkf\n-----END PUBLIC KEY-----\n"))
+        self.assertEquals(expected, strip_begin_end_key(
+            "\n-----BEGIN PUBLIC KEY\n"
+            "-----123456aghdfgas\n"
+            "dasdkommkf\n"
+            "-----END PUBLIC KEY-----\n"))
 
         expected = "123456+/aghdfgasdasdkommkf==="  # Other base64 characters
-        self.assertEquals(expected, strip_begin_end_key("-----BEGIN PUBLIC KEY-----123456+/aghdfgasdasdkommkf===-----END PUBLIC KEY-----"))
+        self.assertEquals(expected, strip_begin_end_key(
+            "-----BEGIN PUBLIC KEY-----123456+/aghdfgasdasdkommkf==="
+            "-----END PUBLIC KEY-----"))
 
     def test_list_difference(self):
         """Tests to verify list_difference(list_1, list_2) function
         """
-        expected = [1,3,5,7,9]
-        list1 = [1,2,3,4,5,6,7,8,9]
-        list2 = [2,4,6,8]
-        self.assertEquals(expected, list_difference(list1,list2))
+        expected = [1, 3, 5, 7, 9]
+        list1 = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+        list2 = [2, 4, 6, 8]
+        self.assertEquals(expected, list_difference(list1, list2))
 
-        list1 = [1,3,5,7,9]
-        list2 = [2,4,6,8]
-        self.assertEquals(expected, list_difference(list1,list2))
+        list1 = [1, 3, 5, 7, 9]
+        list2 = [2, 4, 6, 8]
+        self.assertEquals(expected, list_difference(list1, list2))
 
         expected = []
-        list1 = [1,3,5,7,9]
-        list2 = [1,3,5,7,9]
-        self.assertEquals(expected, list_difference(list1,list2))
+        list1 = [1, 3, 5, 7, 9]
+        list2 = [1, 3, 5, 7, 9]
+        self.assertEquals(expected, list_difference(list1, list2))
 
         expected = []
         list1 = []
-        list2 = [1,3,5,7,9]
-        self.assertEquals(expected, list_difference(list1,list2))
+        list2 = [1, 3, 5, 7, 9]
+        self.assertEquals(expected, list_difference(list1, list2))
 
         expected = []
         list1 = []
         list2 = []
-        self.assertEquals(expected, list_difference(list1,list2))
+        self.assertEquals(expected, list_difference(list1, list2))
 
     def test_human_read_to_byte(self):
         """Tests to verify human_read_to_byte(size) function
         """
-        self.assertRaises(Exception, human_read_to_byte,"1KB")
+        self.assertRaises(Exception, human_read_to_byte, "1KB")
 
         expected = 1024
         self.assertEquals(expected, human_read_to_byte("1 KB"))
@@ -91,6 +103,4 @@ class UtilityTest(unittest.TestCase):
         expected = 10240
         self.assertEquals(expected, human_read_to_byte("10 kb"))
 
-        self.assertRaises(Exception, human_read_to_byte,"1 MD")
-
-
+        self.assertRaises(Exception, human_read_to_byte, "1 MD")
