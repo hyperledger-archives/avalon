@@ -18,20 +18,20 @@ import crypto.crypto as crypto
 import logging
 logger = logging.getLogger(__name__)
 
+
 # -----------------------------------------------------------------
-# -----------------------------------------------------------------
-class TransactionKeys(object) :
+class TransactionKeys(object):
     """
     Wrapper for managing TCF transaction keys
     """
 
-    def __init__(self) :
+    def __init__(self):
         private_key_obj = crypto.SIG_PrivateKey()
         self.private_key = private_key_obj.Generate()
         self.public_key = private_key_obj.GetPublicKey()
 
     @property
-    def hashed_identity(self) :
+    def hashed_identity(self):
         key_byte_array = crypto.string_to_byte_array(self.txn_public)
         hashed_txn_key = crypto.compute_message_hash(key_byte_array)
         encoded_hashed_key = crypto.byte_array_to_hex(hashed_txn_key)
@@ -39,17 +39,17 @@ class TransactionKeys(object) :
         return encoded_hashed_key
 
     @property
-    def txn_private(self) :
+    def txn_private(self):
         return self.private_key.Serialize()
 
     @property
-    def txn_public(self) :
+    def txn_public(self):
         return self.public_key.Serialize()
 
 
 # -----------------------------------------------------------------
 # -----------------------------------------------------------------
-class EnclaveKeys(object) :
+class EnclaveKeys(object):
     """
     Wrapper for managing the enclave's keys, the verifying_key is an
     ECDSA public key used to verify enclave signatures, the
@@ -58,7 +58,7 @@ class EnclaveKeys(object) :
     """
 
     # -------------------------------------------------------
-    def __init__(self, verifying_key, encryption_key) :
+    def __init__(self, verifying_key, encryption_key):
         """
         Initialize the object
 
@@ -70,10 +70,10 @@ class EnclaveKeys(object) :
 
     # -------------------------------------------------------
     @property
-    def identity(self) :
+    def identity(self):
         return self._verifying_key.Serialize()
 
     # -------------------------------------------------------
     @property
-    def hashed_identity(self) :
+    def hashed_identity(self):
         return hashlib.sha256(self.identity.encode('utf8')).hexdigest()[:16]

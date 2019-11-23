@@ -28,10 +28,11 @@ from error_code.error_status import SignatureStatus
 import config.config as pconfig
 
 logger = logging.getLogger(__name__)
-#No of bytes of encrypted session key to encrypt data
+# Number of bytes of encrypted session key to encrypt data
 NO_OF_BYTES = 16
 
-class ClientSignature(object) :
+
+class ClientSignature(object):
     """
     Class to perform hash calculation, signature generation and verification
     """
@@ -39,10 +40,12 @@ class ClientSignature(object) :
     def __init__(self):
         self.private_key = None
         self.public_key = None
-        self.param_pool = ["requesterNonce", "workOrderId", "workerId", "requesterId","inData"]
-        self.tcs_worker = pconfig.read_config_from_toml("tcs_config.toml","WorkerConfig")
+        self.param_pool = ["requesterNonce", "workOrderId", "workerId",
+            "requesterId", "inData"]
+        self.tcs_worker = pconfig.read_config_from_toml("tcs_config.toml",
+            "WorkerConfig")
 
-#---------------------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
     def __payload_json_check(self, json_data):
         """
         Function to check if mandatory parameters are available as per param_pool
@@ -56,23 +59,23 @@ class ClientSignature(object) :
             return False
 
         data_params = data['params']
-        param_valid = True;
+        param_valid = True
         for param in self.param_pool:
-            if ( param not in data_params ):
-                #List down all the missing Parameters
+            if (param not in data_params):
+                # List down all the missing Parameters
                 logger.error("ERROR: Worker Order Submit Json does not have the required parameter: %s", param)
-                param_valid  = False
+                param_valid = False
 
         if param_valid:
             i_obj = data_params['inData']
-            for obj in i_obj :
+            for obj in i_obj:
                 if 'data' not in obj or not obj["data"] or 'index' not in obj:
                     logger.error("ERROR: Worker Order Submit Json does not have the required parameter in InData")
-                    param_valid  = False
+                    param_valid = False
 
         return param_valid
 
-#---------------------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
     def __encrypt_workorder_indata(self, input_json_params,
             session_key, session_iv, worker_encryption_key, data_key=None, data_iv=None):
         """
@@ -93,14 +96,14 @@ class ClientSignature(object) :
         indata_objects = input_json_params['inData']
         indata_objects.sort(key=lambda x: x['index'])
         input_json_params['inData'] = indata_objects
-        logger.info("Encrypting Workorder Data");
+        logger.info("Encrypting Workorder Data")
 
         i = 0
         for item in indata_objects:
             data = item['data'].encode('UTF-8')
             e_key = item['encryptedDataEncryptionKey'].encode('UTF-8')
 
-            if (not e_key ) or (e_key == "null".encode('UTF-8')):
+            if (not e_key) or (e_key == "null".encode('UTF-8')):
                 enc_data = utility.encrypt_data(data, session_key, session_iv)
                 input_json_params['inData'][i]['data'] = crypto.byte_array_to_base64(enc_data)
                 logger.debug("encrypted indata - %s", crypto.byte_array_to_base64(enc_data))
@@ -115,7 +118,7 @@ class ClientSignature(object) :
 
         logger.debug("Workorder InData after encryption: %s", indata_objects)
 
-#---------------------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
     def __calculate_hash_on_concatenated_string(self, input_json_params, nonce_hash):
         """
         Function to calculate a hash value of the string concatenating the following values:
@@ -128,25 +131,27 @@ class ClientSignature(object) :
         workorder_id = (input_json_params['workOrderId']).encode('UTF-8')
         worker_id = (input_json_params['workerId']).encode('UTF-8')
         workload_id = "".encode('UTF-8')
-        if 'workloadId' in input_json_params :
+        if 'workloadId' in input_json_params:
             workload_id = (input_json_params['workloadId']).encode('UTF-8')
         requester_id = (input_json_params['requesterId']).encode('UTF-8')
 
         concat_string = nonce_hash + workorder_id + worker_id + workload_id + requester_id
-        concat_hash =  bytes(concat_string)
-        #SHA-256 hashing is used
+        concat_hash = bytes(concat_string)
+        # SHA-256 hashing is used
         hash_1 = crypto.compute_message_hash(concat_hash)
         result_hash = crypto.byte_array_to_base64(hash_1)
 
         return result_hash
 
-#---------------------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
     def calculate_datahash(self, data_objects):
         """
-        Function to calculate a hash value of the array concatenating dataHash, data,
-        encryptedDataEncryptionKey, iv for each item in the inData/outData array
+        Function to calculate a hash value of the array concatenating dataHash,
+        data, encryptedDataEncryptionKey, iv for each item in the
+        inData/outData array
         Parameters:
-            - data_objects is each item in inData or outData part of workorder request as per TCF API 6.1.7 Work Order Data Formats
+            - data_objects is each item in inData or outData part of workorder
+              request as per TCF API 6.1.7 Work Order Data Formats
         """
 
         hash_str = ""
@@ -161,13 +166,14 @@ class ClientSignature(object) :
                 e_key = item['encryptedDataEncryptionKey'].encode('UTF-8')
             if 'iv' in item:
                 iv = item['iv'].encode('UTF-8')
-            concat_string =  datahash + data + e_key + iv
+            concat_string = datahash + data + e_key + iv
             concat_hash = bytes(concat_string)
             hash = crypto.compute_message_hash(concat_hash)
             hash_str = hash_str + crypto.byte_array_to_base64(hash)
 
         return hash_str
-#---------------------------------------------------------------------------------------------
+
+# -----------------------------------------------------------------------------
     def generate_signature(self, hash, private_key):
         """
         Function to generate signature object
@@ -178,15 +184,15 @@ class ClientSignature(object) :
         """
         try:
             self.private_key = private_key
-            self.public_key =  self.private_key.GetPublicKey().Serialize()
-            signature_result =  self.private_key.SignMessage(hash)
-            signature_base64  =  crypto.byte_array_to_base64(signature_result)
+            self.public_key = self.private_key.GetPublicKey().Serialize()
+            signature_result = self.private_key.SignMessage(hash)
+            signature_base64 = crypto.byte_array_to_base64(signature_result)
         except:
             logger.error("Exception occurred during signature generation")
             return False, None
-        return  True, signature_base64
+        return True, signature_base64
 
-#---------------------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
     def generate_client_signature(self, input_json_str,
             worker, private_key, session_key, session_iv, encrypted_session_key,
             data_key=None, data_iv=None):
@@ -214,12 +220,14 @@ class ClientSignature(object) :
             logger.error("ERROR: Signing the request failed")
             return None
 
-        if (self.tcs_worker['HashingAlgorithm'] !=  worker.hashing_algorithm ):
-            logger.error("ERROR: Signing the request failed. Hashing algorithm is not supported for %s", worker.hashing_algorithm )
+        if (self.tcs_worker['HashingAlgorithm'] != worker.hashing_algorithm):
+            logger.error("ERROR: Signing the request failed. Hashing "
+                "algorithm is not supported for %s", worker.hashing_algorithm)
             return None
 
-        if (self.tcs_worker['SigningAlgorithm'] !=  worker.signing_algorithm):
-            logger.error("ERROR: Signing the request failed. Signing algorithm is not supported for %s", worker.signing_algorithm )
+        if (self.tcs_worker['SigningAlgorithm'] != worker.signing_algorithm):
+            logger.error("ERROR: Signing the request failed. Signing "
+                "algorithm is not supported for %s", worker.signing_algorithm)
             return None
 
         input_json = json.loads(input_json_str)
@@ -231,12 +239,12 @@ class ClientSignature(object) :
                 session_iv, worker.encryption_key, data_key, data_iv)
 
         if input_json_params["requesterNonce"] and \
-            is_valid_hex_str(input_json_params["requesterNonce"]):
+                is_valid_hex_str(input_json_params["requesterNonce"]):
             nonce = crypto.string_to_byte_array(input_json_params["requesterNonce"])
         else:
             # [NO_OF_BYTES] 16 BYTES for nonce, is the recommendation by NIST to
             # avoid collisions by the "Birthday Paradox".
-            nonce =  crypto.random_bit_string(NO_OF_BYTES)
+            nonce = crypto.random_bit_string(NO_OF_BYTES)
 
         request_nonce_hash = crypto.compute_message_hash(nonce)
         nonce_hash = (crypto.byte_array_to_base64(request_nonce_hash)).encode('UTF-8')
@@ -247,7 +255,7 @@ class ClientSignature(object) :
         hash_string_3 = ""
         if 'outData' in input_json_params:
             data_objects = input_json_params['outData']
-            data_objects.sort(key = lambda x:x['index'])
+            data_objects.sort(key=lambda x: x['index'])
             hash_string_3 = self.calculate_datahash(data_objects)
 
         concat_string = hash_string_1 + hash_string_2 + hash_string_3
@@ -258,15 +266,15 @@ class ClientSignature(object) :
         encrypted_request_hash_str = byte_array_to_hex_str(encrypted_request_hash)
         logger.debug("encrypted request hash: \n%s", encrypted_request_hash_str)
 
-        #Update the input json params
+        # Update the input json params
         input_json_params["encryptedRequestHash"] = encrypted_request_hash_str
         status, signature = self.generate_signature(final_hash, private_key)
-        if status == False:
+        if status is False:
             return SignatureStatus.FAILED
         input_json_params['requesterSignature'] = signature
         input_json_params["encryptedSessionKey"] = encrypted_session_key_str
         # Temporary mechanism to share client's public key. Not a part of Spec
-        input_json_params['verifyingKey'] =  self.public_key
+        input_json_params['verifyingKey'] = self.public_key
         input_json_params['requesterNonce'] = crypto.byte_array_to_base64(request_nonce_hash)
         input_json['params'] = input_json_params
         input_json_str = json.dumps(input_json)
@@ -274,7 +282,7 @@ class ClientSignature(object) :
 
         return input_json_str, SignatureStatus.PASSED
 
-#---------------------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
     def verify_signature(self, input_json, verification_key):
         """
         Function to verify the signature received from the enclave
@@ -294,9 +302,9 @@ class ClientSignature(object) :
 
         hash_string_1 = self.__calculate_hash_on_concatenated_string(input_json_params, nonce)
         data_objects = input_json_params['outData']
-        data_objects.sort(key = lambda x:x['index'])
+        data_objects.sort(key=lambda x: x['index'])
         hash_string_2 = self.calculate_datahash(data_objects)
-        concat_string =  hash_string_1+ hash_string_2
+        concat_string = hash_string_1 + hash_string_2
         concat_hash = bytes(concat_string, 'UTF-8')
         final_hash = crypto.compute_message_hash(concat_hash)
 
@@ -307,7 +315,8 @@ class ClientSignature(object) :
             return SignatureStatus.INVALID_VERIFICATION_KEY
 
         decoded_signature = crypto.base64_to_byte_array(signature)
-        sig_result =_verifying_key.VerifySignature(final_hash, decoded_signature)
+        sig_result = _verifying_key.VerifySignature(final_hash,
+            decoded_signature)
 
         if sig_result == 1:
             return SignatureStatus.PASSED
@@ -316,7 +325,7 @@ class ClientSignature(object) :
         else:
             return SignatureStatus.INVALID_SIGNATURE_FORMAT
 
-#---------------------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
     def verify_update_receipt_signature(self, input_json):
         """
         Function to verify the signature of work order receipt update

@@ -21,6 +21,7 @@ import utility.signature as signature
 
 logger = logging.getLogger(__name__)
 
+
 class WorkOrderParams():
 	def __init__(self,
 		work_order_id, worker_id, workload_id,
@@ -42,8 +43,7 @@ class WorkOrderParams():
 		self.set_requester_id(requester_id)
 		if worker_encryption_key:
 			self.set_worker_encryption_key(
-				worker_encryption_key.encode("UTF-8").hex()
-			)
+				worker_encryption_key.encode("UTF-8").hex())
 		if data_encryption_algorithm:
 			self.set_data_encryption_algorithm(data_encryption_algorithm)
 
@@ -62,7 +62,6 @@ class WorkOrderParams():
 		self.params_obj["requesterSignature"] = ""
 		self.params_obj["inData"] = []
 		self.session_key = session_key
-
 
 	def set_response_timeout_msecs(self, response_timeout_msecs):
 		self.params_obj["responseTimeoutMSecs"] = \
@@ -117,7 +116,7 @@ class WorkOrderParams():
 			self.get_workload_id() + \
 			self.get_requester_id()
 		concat_bytes = bytes(concat_string, "UTF-8")
-		#SHA-256 hashing is used
+		# SHA-256 hashing is used
 		hash_1 = crypto.byte_array_to_base64(
 			crypto.compute_message_hash(concat_bytes)
 		)
@@ -144,7 +143,7 @@ class WorkOrderParams():
 			self.final_hash,
 			private_key
 		)
-		if status == True:
+		if status is True:
 			self.params_obj["requesterSignature"] = sign
 			# public signing key is shared to enclave manager to verify the signature.
 			# It is temporary approach to share the key with the worker.
@@ -161,21 +160,19 @@ class WorkOrderParams():
 		encrypted_data_encryption_key=None, data_iv=None):
 		in_data_copy = self.params_obj["inData"]
 		new_data_list = self.__add_data_params(in_data_copy,
-            data, data_hash,
-            encrypted_data_encryption_key,data_iv
-        )
+			data, data_hash, encrypted_data_encryption_key,
+			data_iv)
 
 		self.params_obj["inData"] = new_data_list
 
 	def add_out_data(self, data, data_hash=None,
 		encrypted_data_encryption_key=None, data_iv=None):
-		if not "outData" in self.params_obj:
+		if "outData" not in self.params_obj:
 			self.params_obj["outData"] = []
 		out_data_copy = self.params_obj["outData"]
 		new_data_list = self.__add_data_params(out_data_copy,
-            data, data_hash,
-            encrypted_data_encryption_key,data_iv
-        )
+			data, data_hash, encrypted_data_encryption_key,
+			data_iv)
 		self.params_obj["outData"] = new_data_list
 
 	def __add_data_params(self, data_items, data, data_hash=None,
@@ -196,6 +193,7 @@ class WorkOrderParams():
 		if data_iv:
 			data_items[index]["iv"] = data_iv
 		return data_items
+
 	# Use these if you want to pass json to WorkOrderJRPCImpl
 	def get_params(self):
 		params_copy = self.params_obj.copy()

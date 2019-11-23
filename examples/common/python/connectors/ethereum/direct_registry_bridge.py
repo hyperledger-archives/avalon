@@ -22,9 +22,9 @@ from os.path import dirname, join, abspath
 
 from shared_kv.shared_kv_interface import KvStorage
 
-sys.path.insert(0, abspath(join(dirname(__file__), '..')) + '/tcf_connector/')
-
 import EthereumDirectRegistry as registry
+
+sys.path.insert(0, abspath(join(dirname(__file__), '..')) + '/tcf_connector/')
 
 logger = logging.getLogger(__name__)
 
@@ -135,8 +135,9 @@ def main(args=None):
     # Smart contract address is the address where smart contract is deployed.
     # TODO: Add mechanism to read the address from config file.
 
-    eth_direct_registry = registry.EthereumDirectRegistry("0x8c99670a15047248403a3E5A38eb8FBE7a12533e", \
-                                        '../connectors/contracts/WorkerRegistryList.sol')
+    eth_direct_registry = registry.EthereumDirectRegistry(
+        "0x8c99670a15047248403a3E5A38eb8FBE7a12533e",
+        '../connectors/contracts/WorkerRegistryList.sol')
     kv_storage = KvStorage()
     kv_storage.open("kv_storage")
 

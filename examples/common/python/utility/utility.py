@@ -29,6 +29,7 @@ TCFHOME = os.environ.get("TCF_HOME", "../../")
 # No of bytes of encrypted session key to encrypt data
 NO_OF_BYTES = 16
 
+
 def create_error_response(code, jrpc_id, message):
     """
     Function to create error response
@@ -45,15 +46,18 @@ def create_error_response(code, jrpc_id, message):
     error_response["error"]["message"] = message
     return error_response
 
-#---------------------------------------------------------------------------------------------
-def strip_begin_end_key(key) :
+
+# -----------------------------------------------------------------------------
+def strip_begin_end_key(key):
     """
     Strips off newline chars, BEGIN PUBLIC KEY and END PUBLIC KEY.
     """
     return key.replace("\n", "")\
-            .replace("-----BEGIN PUBLIC KEY-----", "").replace("-----END PUBLIC KEY-----", "")
+        .replace("-----BEGIN PUBLIC KEY-----", "").replace(
+        "-----END PUBLIC KEY-----", "")
 
-#---------------------------------------------------------------------------------------------
+
+# -----------------------------------------------------------------------------
 def generate_signing_keys():
     """
     Function to generate private key object
@@ -63,7 +67,8 @@ def generate_signing_keys():
     signing_key.Generate()
     return signing_key
 
-#---------------------------------------------------------------------------------------------
+
+# -----------------------------------------------------------------
 def generate_iv():
     """
     Function to generate random initialization vector
@@ -71,7 +76,8 @@ def generate_iv():
 
     return crypto.SKENC_GenerateIV()
 
-#---------------------------------------------------------------------------------------------
+
+# -----------------------------------------------------------------
 def generate_encrypted_key(key, encryption_key):
     """
     Function to generate session key for the client
@@ -83,12 +89,14 @@ def generate_encrypted_key(key, encryption_key):
     pub_enc_key = crypto.PKENC_PublicKey(encryption_key)
     return pub_enc_key.EncryptMessage(key)
 
-#-----------------------------------------------------------------
+
+# -----------------------------------------------------------------
 def generate_key():
     """
     Function to generate symmetric key
     """
     return crypto.SKENC_GenerateKey()
+
 
 # -----------------------------------------------------------------
 def list_difference(list_1, list_2):
@@ -100,6 +108,7 @@ def list_difference(list_1, list_2):
     list_dif = [i for i in list_1 + list_2 if i not in list_2]
     return list_dif
 
+
 # -----------------------------------------------------------------
 def compute_data_hash(data):
     '''
@@ -107,6 +116,7 @@ def compute_data_hash(data):
     '''
     data_hash = crypto.compute_message_hash(data.encode("UTF-8"))
     return data_hash
+
 
 # -----------------------------------------------------------------
 def encrypt_data(data, encryption_key, iv=None):
@@ -126,6 +136,7 @@ def encrypt_data(data, encryption_key, iv=None):
     else:
         encrypted_data = crypto.SKENC_EncryptMessage(encryption_key, data)
     return encrypted_data
+
 
 # -----------------------------------------------------------------
 def decrypt_data(encryption_key, data, iv=None):
@@ -153,8 +164,8 @@ def decrypt_data(encryption_key, data, iv=None):
     logger.info("Decryption result at client - %s", result)
     return result
 
-#---------------------------------------------------------------------------------------------
 
+# -----------------------------------------------------------------------------
 def decrypted_response(input_json, session_key, session_iv, data_key=None, data_iv=None):
     """
     Function iterate through the out data items and decrypt the data using
@@ -199,7 +210,8 @@ def decrypted_response(input_json, session_key, session_iv, data_key=None, data_
         i = i + 1
     return input_json_params['outData']
 
-#---------------------------------------------------------------------------------------------
+
+# -----------------------------------------------------------------------------
 def verify_data_hash(msg, data_hash):
     '''
     Function to verify data hash
@@ -218,11 +230,12 @@ def verify_data_hash(msg, data_hash):
         verify_success = False
     return verify_success
 
-#---------------------------------------------------------------------------------------------
+
+# -----------------------------------------------------------------------------
 def human_read_to_byte(size):
     size_name = ("B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB")
-    size = size.split() # divide '1 GB' into ['1', 'GB']
-    if len(size) !=2 or int(size[0]) <= 0:
+    size = size.split()  # divide '1 GB' into ['1', 'GB']
+    if len(size) != 2 or int(size[0]) <= 0:
         raise ValueError("Invalid size")
     num, unit = int(size[0]), size[1].upper()
     try:

@@ -22,6 +22,7 @@ from web3 import HTTPProvider, Web3
 
 logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s', level=logging.INFO)
 
+
 class EthereumWrapper():
     """
     Ethereum wrapper class to interact with ethereum blockchain
@@ -69,7 +70,7 @@ class EthereumWrapper():
             logging.error("Missing parameter gas price")
             return False
         return True
-    
+
     def compile_source_file(self, file_path):
         """
         Compile solidity contract file and returns contract instance object

@@ -16,10 +16,11 @@
 
 """
 Error code defined for handlers
-
 """
 
 from enum import IntEnum, unique
+
+
 @unique
 class WorkOrderStatus(IntEnum):
     SUCCESS = 0
@@ -33,13 +34,15 @@ class WorkOrderStatus(IntEnum):
     BUSY = 8
     UNKNOWN_ERROR = 9
 
+
 @unique
 class WorkerStatus(IntEnum):
     ACTIVE = 0
     OFF_LINE = 1
     DECOMMISSIONED = 2
     COMPROMISED = 3
-    
+
+
 @unique
 class WorkerError(IntEnum):
     SUCCESS = 0
@@ -50,6 +53,7 @@ class WorkerError(IntEnum):
     NO_MORE_LOOKUP_RESULTS = 5
     UNSUPPORTED_MODE = 6
 
+
 @unique
 class ReceiptCreateStatus(IntEnum):
     PENDING = 0
@@ -57,6 +61,7 @@ class ReceiptCreateStatus(IntEnum):
     PROCESSED = 2
     FAILED = 3
     REJECTED = 4
+
 
 @unique
 class SignatureStatus(IntEnum):
@@ -66,6 +71,7 @@ class SignatureStatus(IntEnum):
     INVALID_SIGNATURE_FORMAT = -1
     ERROR_RESPONSE = -2
     INVALID_VERIFICATION_KEY = -3
+
 
 @unique
 class QuoteStatus(IntEnum):

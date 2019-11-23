@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-Worker.py -- functions to perform worker related functions based on Spec 1.0 compatibility  
+Worker.py -- functions to perform worker related functions based on Spec 1.0 compatibility
 
 """
 
@@ -31,9 +31,11 @@ class WorkerDetails():
     """
     def __init__(self):
         """
-        Function to set the member variables of this class with default value as per TCf Spec
+        Function to set the member variables of this class with default
+        value as per TCf Spec.
         """
-        tcs_worker = pconfig.read_config_from_toml("tcs_config.toml","WorkerConfig")
+        tcs_worker = pconfig.read_config_from_toml("tcs_config.toml",
+            "WorkerConfig")
         self.work_order_sync_uri = ""
         self.work_order_async_uri = ""
         self.work_order_pull_uri = ""
@@ -47,8 +49,6 @@ class WorkerDetails():
         self.key_encryption_algorithm = tcs_worker['KeyEncryptionAlgorithm']
         self.data_encryption_algorithm = tcs_worker['DataEncryptionAlgorithm']
         self.work_order_payload_formats = []
-
-
 
 
 class SGXWorkerDetails(WorkerDetails):
@@ -67,12 +67,12 @@ class SGXWorkerDetails(WorkerDetails):
         self.enclave_certificate = ""
         self.worker_id = ""
 
-#-----------------------------------------------------------------------------------------------
-    def load_worker(self,input_str):
+# -----------------------------------------------------------------------------
+    def load_worker(self, input_str):
         """
         Function to load the member variables of this class based on worker retrieved details
         """
-        worker_data = input_str ['result']['details']
+        worker_data = input_str['result']['details']
         logger.info("*********Updating Worker Details*********")
         self.hashing_algorithm = worker_data['hashingAlgorithm']
         self.signing_algorithm = worker_data['signingAlgorithm']
@@ -92,4 +92,4 @@ class SGXWorkerDetails(WorkerDetails):
         logger.info("Hashing Algorithm : %s", self.hashing_algorithm)
         logger.info("Signing Algorithm : %s", self.signing_algorithm)
 
-#-----------------------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------

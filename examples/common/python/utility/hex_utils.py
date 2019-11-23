@@ -13,6 +13,8 @@
 # limitations under the License.
 
 import binascii
+
+
 # Return list of binary hex ids as list of UTF strings
 def pretty_ids(ids):
     pretty_list = []
@@ -20,9 +22,11 @@ def pretty_ids(ids):
         pretty_list.append(hex_to_utf8(id))
     return pretty_list
 
+
 # Return binary hex as UTF string
 def hex_to_utf8(binary):
     return binascii.hexlify(binary).decode("UTF-8")
+
 
 def is_valid_hex_str(hex_str):
     """
@@ -36,6 +40,7 @@ def is_valid_hex_str(hex_str):
         return True
     except ValueError:
         return False
+
 
 def byte_array_to_hex_str(in_byte_array):
     '''

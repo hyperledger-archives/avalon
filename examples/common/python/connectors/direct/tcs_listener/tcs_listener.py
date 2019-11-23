@@ -51,8 +51,9 @@ logger = logging.getLogger(__name__)
 
 class TCSListener(resource.Resource):
     """
-    TCSListener Class  is comprised of HTTP interface which listens for the end user requests,
-    Worker Registry Handler, Work Order Handler and Work Order Receipts Handler .
+    TCSListener Class is comprised of HTTP interface which listens for the
+    end user requests, Worker Registry Handler, Work Order Handler and
+    Work Order Receipts Handler .
     """
     # The isLeaf instance variable describes whether or not a resource will have children and only leaf resources get rendered.
     # TCSListener is the most derived class hence isLeaf is required.

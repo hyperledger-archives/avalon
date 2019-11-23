@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 
 class LMDBHelperProxy:
     """
-    LMDBHelperProxy passes commands serialized as strings 
+    LMDBHelperProxy passes commands serialized as strings
     to the LMDB remote listener.
     """
 
@@ -38,9 +38,9 @@ class LMDBHelperProxy:
 
     def set(self, table, key, value):
         """
-        Function to set a key-value pair in a lmdb table 
+        Function to set a key-value pair in a lmdb table
         Parameters:
-           - table is the name of lmdb table in which 
+           - table is the name of lmdb table in which
              the key-value pair needs to be inserted.
            - key is the primary key of the table.
            - value is the value that needs to be inserted in the table.
@@ -68,7 +68,7 @@ class LMDBHelperProxy:
 # ------------------------------------------------------------------------------
     def get(self, table, key):
         """
-        Function to get the value for a key in a lmdb table 
+        Function to get the value for a key in a lmdb table
         Parameters:
            - table is the name of lmdb table from which
              the key-value pair needs to be retrieved.
@@ -96,16 +96,16 @@ class LMDBHelperProxy:
 # ------------------------------------------------------------------------------
     def remove(self, table, key, value=None):
         """
-        Function to remove the value for a key in a lmdb table 
+        Function to remove the value for a key in a lmdb table
         Parameters:
-           - table is the name of lmdb table in which 
+           - table is the name of lmdb table in which
              the key-value pair need to be removed.
            - key is the primary key of the table.
-           - value is data to be removed, If the database does not support 
-             sorted duplicate data items (MDB_DUPSORT) the data parameter 
-             is ignored. If the database supports sorted duplicates and 
+           - value is data to be removed, If the database does not support
+             sorted duplicate data items (MDB_DUPSORT) the data parameter
+             is ignored. If the database supports sorted duplicates and
              the data parameter is NULL, all of the duplicate data items
-             for the key will be deleted. Otherwise, if the data parameter is 
+             for the key will be deleted. Otherwise, if the data parameter is
              non-NULL only the matching data item will be deleted.
         """
         # Remove, table, key
@@ -132,7 +132,7 @@ class LMDBHelperProxy:
 # ------------------------------------------------------------------------------
     def lookup(self, table):
         """
-        Function to get all the keys in a lmdb table 
+        Function to get all the keys in a lmdb table
         Parameters:
            - table is the name of the lmdb table.
         """

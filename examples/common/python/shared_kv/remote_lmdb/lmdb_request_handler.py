@@ -17,24 +17,26 @@ from twisted.web import resource, http
 from string_escape import escape, unescape
 from shared_kv.shared_kv_interface import KvStorage
 
+
 import logging
 logger = logging.getLogger(__name__)
 
 TCFHOME = os.environ.get("TCF_HOME", "../../../../")
 lookup_flag = False
 
+
 class LMDBRequestHandler(resource.Resource):
     """
-    LMDBRequestHandler is comprised of HTTP interface which 
+    LMDBRequestHandler is comprised of HTTP interface which
     listens for calls to LMDB
     """
-    # The isLeaf instance variable describes whether or not 
+    # The isLeaf instance variable describes whether or not
     # a resource will have children and only leaf resources get rendered.
     # LMDBRequestHandler is the most derived class hence isLeaf is required.
 
     isLeaf = True
 
-    ## -----------------------------------------------------------------
+    # -----------------------------------------------------------------
     def __init__(self, config):
 
         if config.get('KvStorage') is None:
@@ -50,7 +52,7 @@ class LMDBRequestHandler(resource.Resource):
             sys.exit(-1)
 
     def __del__(self):
-       self.kv_helper.close()
+        self.kv_helper.close()
 
     def _process_request(self, request):
         response = ""
@@ -62,7 +64,7 @@ class LMDBRequestHandler(resource.Resource):
         cmd = args[0]
 
         # Lookup
-        if (cmd=="L"):
+        if (cmd == "L"):
             if len(args) == 2:
                 result_list = self.kv_helper.lookup(args[1])
                 result = ""
@@ -83,7 +85,7 @@ class LMDBRequestHandler(resource.Resource):
                 response = "e\nInvalid args for cmd Lookup"
 
         # Get
-        elif (cmd=="G"):
+        elif (cmd == "G"):
             if len(args) == 3:
                 result = self.kv_helper.get(args[1], args[2])
                 # Value found
@@ -95,10 +97,10 @@ class LMDBRequestHandler(resource.Resource):
             # Error
             else:
                 logger.error("Invalid args for cmd Get")
-                response = "e\nInvalid args for cmd Get"   
+                response = "e\nInvalid args for cmd Get"
 
         # Set
-        elif (cmd=="S"):
+        elif (cmd == "S"):
             if len(args) == 4:
                 result = self.kv_helper.set(args[1], args[2], args[3])
                 # Set successful (returned True)
@@ -106,14 +108,14 @@ class LMDBRequestHandler(resource.Resource):
                     response = "t"
                 # Set unsuccessful (returned False)
                 else:
-                    response = "f" 
+                    response = "f"
             # Error
             else:
                 logger.error("Invalid args for cmd Set")
-                response = "e\nInvalid args for cmd Set"  
+                response = "e\nInvalid args for cmd Set"
 
         # Remove
-        elif (cmd=="R"):
+        elif (cmd == "R"):
             if len(args) == 3 or len(args) == 4:
                 if len(args) == 3:
                     result = self.kv_helper.remove(args[1], args[2])
@@ -128,7 +130,7 @@ class LMDBRequestHandler(resource.Resource):
             # Error
             else:
                 logger.error("Invalid args for cmd Remove")
-                response = "e\nInvalid args for cmd Remove"  
+                response = "e\nInvalid args for cmd Remove"
         # Error
         else:
             logger.error("Unknown cmd")
@@ -137,42 +139,42 @@ class LMDBRequestHandler(resource.Resource):
 
     def render_GET(self, request):
         response = 'Only POST request is supported'
-        logger.error("GET request is not supported." + \
+        logger.error("GET request is not supported." +
             " Only POST request is supported")
-        
+
         return response
 
     def render_POST(self, request):
         response = ""
-       
+
         logger.info('Received a new request from the client')
 
-        try :
+        try:
             # Process the message encoding
             encoding = request.getHeader('Content-Type')
             data = request.content.read().decode('utf-8')
 
-            if encoding == 'text/plain; charset=utf-8' :
+            if encoding == 'text/plain; charset=utf-8':
                 response = self._process_request(data)
-            else :
+            else:
                 response = 'UNKNOWN_ERROR: unknown message encoding'
                 return response
 
-        except :
-            logger.exception('exception while decoding http request %s', 
+        except:
+            logger.exception('exception while decoding http request %s',
                 request.path)
             response = 'UNKNOWN_ERROR: unable to decode incoming request '
             return response
 
         # Send back the results
-        try :
+        try:
             logger.info('response[%s]: %s', encoding, response.encode('utf-8'))
             request.setHeader('content-type', encoding)
             request.setResponseCode(http.OK)
             return response.encode('utf-8')
 
-        except :
-            logger.exception('unknown exception while processing request %s', 
+        except:
+            logger.exception('unknown exception while processing request %s',
                 request.path)
             response = 'UNKNOWN_ERROR: unknown exception processing ' + \
                 'http request {0}'.format(request.path)
