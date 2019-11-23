@@ -64,7 +64,7 @@ class KvStorage:
 # ---------------------------------------------------------------------------------------------------
     def set(self, table, key, value):
         """
-        Function to set a key-value pair in a lmdb table 
+        Function to set a key-value pair in a lmdb table
         Parameters:
            - table is the name of lmdb table in which key-value pair need to be inserted.
            - key is the primary key of the table.
@@ -79,13 +79,13 @@ class KvStorage:
 # ---------------------------------------------------------------------------------------------------
     def get(self, table, key):
         """
-        Function to get the value for a key in a lmdb table 
+        Function to get the value for a key in a lmdb table
         Parameters:
            - table is the name of lmdb table in which key-value pair need to be retrieved.
            - key is the primary key of the table.
         """
         try:
-            if key != "" or lookup_flag == True:
+            if key != "" or lookup_flag is True:
                 value = db_store.db_store_get(table, key)
             else:
                 value = None
@@ -122,7 +122,7 @@ class KvStorage:
 # ---------------------------------------------------------------------------------------------------
     def lookup(self, table):
         """
-        Function to get all the keys in a lmdb table 
+        Function to get all the keys in a lmdb table
         Parameters:
            - table is the name of lmdb table.
         """

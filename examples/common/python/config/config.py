@@ -29,10 +29,10 @@ import toml
 from string import Template
 from utility.file_utils import find_file_in_paths
 
-__all__ = [ "ConfigurationException", 
+__all__ = ["ConfigurationException",
     "parse_configuration_files",
     "parse_configuration_file",
-    "read_config_from_toml" ]
+    "read_config_from_toml"]
 
 logger = logging.getLogger(__name__)
 
@@ -41,19 +41,19 @@ try:
 except KeyError:
     raise KeyError("'TCF_HOME' environment variable not set.")
 
+
 # -----------------------------------------------------------------
-# -----------------------------------------------------------------
-class ConfigurationException(Exception) :
+class ConfigurationException(Exception):
     """
     A class to capture configuration exceptions.
     """
 
-    def __init__(self, filename, message) :
+    def __init__(self, filename, message):
         super().__init__(self, "Error in configuration file {0}: {1}".format(filename, message))
 
+
 # -----------------------------------------------------------------
-# -----------------------------------------------------------------
-def parse_configuration_files(cfiles, search_path, variable_map = None) :
+def parse_configuration_files(cfiles, search_path, variable_map=None):
     """
     Locate and parse a collection of configuration files stored in a
     TOML format.
@@ -66,24 +66,24 @@ def parse_configuration_files(cfiles, search_path, variable_map = None) :
     config = {}
     files_found = []
 
-    try :
-        for cfile in cfiles :
+    try:
+        for cfile in cfiles:
             files_found.append(find_file_in_paths(cfile, search_path))
-    except FileNotFoundError as e :
+    except FileNotFoundError as e:
         raise ConfigurationException(e.filename, e.strerror)
 
-    for filename in files_found :
-        try :
+    for filename in files_found:
+        try:
             config.update(parse_configuration_file(filename, variable_map))
-        except IOError as detail :
+        except IOError as detail:
             raise ConfigurationException(filename, "IO error; {0}".format(str(detail)))
-        except ValueError as detail :
+        except ValueError as detail:
             raise ConfigurationException(filename, "Value error; {0}".format(str(detail)))
-        except NameError as detail :
+        except NameError as detail:
             raise ConfigurationException(filename, "Name error; {0}".format(str(detail)))
-        except KeyError as detail :
+        except KeyError as detail:
             raise ConfigurationException(filename, "Key error; {0}".format(str(detail)))
-        except :
+        except:
             raise ConfigurationException(filename, "Unknown error")
 
     return config
@@ -91,7 +91,8 @@ def parse_configuration_files(cfiles, search_path, variable_map = None) :
 # -----------------------------------------------------------------
 # -----------------------------------------------------------------
 
-def parse_configuration_file(filename, variable_map) :
+
+def parse_configuration_file(filename, variable_map):
     """
     Parse a configuration file expanding variable references
     using the Python Template library (variables are $var format)
@@ -103,22 +104,22 @@ def parse_configuration_file(filename, variable_map) :
 
     cpattern = re.compile('##.*$')
 
-    with open(filename) as fp :
+    with open(filename) as fp:
         lines = fp.readlines()
 
     text = ""
-    for line in lines :
+    for line in lines:
         text += re.sub(cpattern, '', line) + ' '
 
-    if variable_map :
+    if variable_map:
         text = Template(text).substitute(variable_map)
 
     return toml.loads(text)
 
-# -----------------------------------------------------------------
-# -----------------------------------------------------------------
 
-def read_config_from_toml(input_file, config_name = None, confpaths=[".", TCFHOME + "/" + "config"]):
+# -----------------------------------------------------------------
+def read_config_from_toml(input_file, config_name=None,
+        confpaths=[".", TCFHOME + "/" + "config"]):
     """
     Function to read toml file and returns the toml content as a list
     Parameters:
@@ -130,9 +131,8 @@ def read_config_from_toml(input_file, config_name = None, confpaths=[".", TCFHOM
     config = parse_configuration_files(conf_files, confpaths)
     if config_name is None:
         return config
-    else :
+    else:
         result = config.get(config_name)
         if result is None:
-            logger.error("%s is missing in toml file %s", config_name, input_file )
+            logger.error("%s is missing in toml file %s", config_name, input_file)
         return result
-

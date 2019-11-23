@@ -24,6 +24,7 @@ from error_code.error_status import WorkOrderStatus
 
 logging.basicConfig(format="%(asctime)s - %(levelname)s - %(message)s", level=logging.INFO)
 
+
 class WorkOrderJRPCImpl(WorkOrderInterface):
     def __init__(self, config):
         self.__uri_client = GenericServiceClient(config["tcf"]["json_rpc_uri"])
@@ -76,7 +77,7 @@ class WorkOrderJRPCImpl(WorkOrderInterface):
                 return response
             else:
                 while "error" in response and \
-                    response["error"]["code"] == WorkOrderStatus.PENDING:
+                        response["error"]["code"] == WorkOrderStatus.PENDING:
                     response = self.work_order_get_result_nonblocking(work_order_id, id)
                     # TODO: currently pooling after every 2 sec interval forever.
                     # We should implement feature to timeout after responseTimeoutMsecs in the request

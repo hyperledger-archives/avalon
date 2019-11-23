@@ -204,7 +204,7 @@ class TCSWorkerRegistryHandler:
                         break
 
             if matched:
-                total_count = total_count+1
+                total_count = total_count + 1
                 ids.append(worker_id)
                 lookupTag = worker_id
 

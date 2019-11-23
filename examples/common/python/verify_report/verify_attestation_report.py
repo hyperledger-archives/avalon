@@ -19,6 +19,7 @@ from error_code.error_status import QuoteStatus
 
 logger = logging.getLogger(__name__)
 
+
 def verify_attestation_report(enclave_info):
     '''
     Function to verify quote status, signature of IAS attestation report
@@ -30,7 +31,7 @@ def verify_attestation_report(enclave_info):
 
     quote_status = verify_report_util.verify_quote(verification_report,
                        QuoteStatus.GROUP_OUT_OF_DATE_OK.value)
-    if quote_status == False:
+    if quote_status is False:
         logger.error("Enclave quote verification failed")
         return quote_status
     logger.info("Enclave quote verification passed")
@@ -38,7 +39,7 @@ def verify_attestation_report(enclave_info):
     report_sig_status = verify_report_util.verify_ias_report_signature(ias_report_cert,
                                     verification_report,
                                     proof_signature)
-    if report_sig_status == False:
+    if report_sig_status is False:
         logger.error("Enclave IAS report signature verification failed")
         return report_sig_status
     logger.info("Enclave IAS report signature verification passed")

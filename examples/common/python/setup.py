@@ -58,7 +58,7 @@ compile_args = [
 # by default the extension class adds '-O2' to the compile
 # flags, this lets us override since these are appended to
 # the compilation switches
-if debug_flag :
+if debug_flag:
     compile_args += ['-g']
 
 crypto_include_dirs = [

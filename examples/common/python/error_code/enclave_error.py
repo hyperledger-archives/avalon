@@ -13,6 +13,8 @@
 # limitations under the License.
 
 from enum import IntEnum, unique
+
+
 @unique
 class EnclaveError(IntEnum):
     ENCLAVE_SUCCESS = 0,
@@ -27,4 +29,3 @@ class EnclaveError(IntEnum):
     ENCLAVE_ERR_SYSTEM = -9,
     ENCLAVE_ERR_CRYPTO = -11,
     ENCLAVE_ERR_SYSTEM_BUSY = -10
-

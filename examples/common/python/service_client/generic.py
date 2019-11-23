@@ -19,20 +19,22 @@ import urllib.error
 import logging
 logger = logging.getLogger(__name__)
 
-class MessageException(Exception) :
+
+class MessageException(Exception):
     """
-    A class to capture communication exceptions when communicating with 
+    A class to capture communication exceptions when communicating with
     services
     """
     pass
 
-class GenericServiceClient(object) :
 
-    def __init__(self, url) :
+class GenericServiceClient(object):
+
+    def __init__(self, url):
         self.ServiceURL = url
         self.ProxyHandler = urllib.request.ProxyHandler({})
 
-    def _postmsg(self, request) :
+    def _postmsg(self, request):
         """
         Post a request JSON string and return the response.
         """
@@ -42,25 +44,25 @@ class GenericServiceClient(object) :
 
         url = self.ServiceURL
 
-        logger.debug('post request to %s with DATALEN=%d, DATA=<%s>', 
+        logger.debug('post request to %s with DATALEN=%d, DATA=<%s>',
             url, datalen, data)
 
-        try :
-            request = urllib.request.Request(url, data, 
+        try:
+            request = urllib.request.Request(url, data,
                 {'Content-Type': 'application/json', 'Content-Length': datalen})
             opener = urllib.request.build_opener(self.ProxyHandler)
             response = opener.open(request, timeout=10)
 
-        except urllib.error.HTTPError as err :
+        except urllib.error.HTTPError as err:
             logger.warn('operation failed with response: %s', err.code)
             raise MessageException(
                 'operation failed with response: {0}'.format(err.code))
 
-        except urllib.error.URLError as err :
+        except urllib.error.URLError as err:
             logger.warn('operation failed: %s', err.reason)
             raise MessageException('operation failed: {0}'.format(err.reason))
 
-        except :
+        except:
             logger.exception('no response from server')
             raise MessageException('no response from server')
 
@@ -69,8 +71,8 @@ class GenericServiceClient(object) :
         response.close()
 
         encoding = headers.get('Content-Type')
-        if encoding != 'application/json' :
-            logger.info('server responds with message %s of type %s', 
+        if encoding != 'application/json':
+            logger.info('server responds with message %s of type %s',
                 content, encoding)
             return None
 
@@ -82,17 +84,18 @@ class GenericServiceClient(object) :
         value = json.loads(content)
         return value
 
-"""
-Class similar to GenericServiceClient that handles UTF8 text instead
-of JSONs
-"""
-class TextServiceClient(object):
 
-    def __init__(self, url) :
+class TextServiceClient(object):
+    """
+    Class similar to GenericServiceClient that handles UTF8 text instead
+    of JSONs
+    """
+
+    def __init__(self, url):
         self.ServiceURL = url
         self.ProxyHandler = urllib.request.ProxyHandler({})
 
-    def _postmsg(self, request) :
+    def _postmsg(self, request):
         """
         Post a request UTF8 text listener and return the response.
         """
@@ -102,26 +105,26 @@ class TextServiceClient(object):
 
         url = self.ServiceURL
 
-        logger.debug('post request to %s with DATALEN=%d, DATA=<%s>', 
+        logger.debug('post request to %s with DATALEN=%d, DATA=<%s>',
             url, datalen, data)
 
-        try :
-            request = urllib.request.Request(url, data, 
-                {'Content-Type': 'text/plain; charset=utf-8', 
+        try:
+            request = urllib.request.Request(url, data,
+                {'Content-Type': 'text/plain; charset=utf-8',
                 'Content-Length': datalen})
             opener = urllib.request.build_opener(self.ProxyHandler)
             response = opener.open(request, timeout=10)
 
-        except urllib.error.HTTPError as err :
+        except urllib.error.HTTPError as err:
             logger.warn('operation failed with response: %s', err.code)
             raise MessageException(
                 'operation failed with response: {0}'.format(err.code))
 
-        except urllib.error.URLError as err :
+        except urllib.error.URLError as err:
             logger.warn('operation failed: %s', err.reason)
             raise MessageException('operation failed: {0}'.format(err.reason))
 
-        except :
+        except:
             logger.exception('no response from server')
             raise MessageException('no response from server')
 
@@ -130,8 +133,8 @@ class TextServiceClient(object):
         response.close()
 
         encoding = headers.get('Content-Type')
-        if encoding != 'text/plain; charset=utf-8' :
-            logger.info('server responds with message %s of type %s', 
+        if encoding != 'text/plain; charset=utf-8':
+            logger.info('server responds with message %s of type %s',
                 content, encoding)
             return None
 

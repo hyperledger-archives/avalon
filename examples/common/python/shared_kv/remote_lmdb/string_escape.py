@@ -12,9 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
 # Return unicode string with special characters escaped
 def escape(string):
     return string.encode("unicode_escape").decode("utf-8")
+
 
 # Return unicode string with escaped characters unescaped
 def unescape(string):

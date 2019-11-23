@@ -14,11 +14,13 @@
 
 from enum import Enum, unique
 
+
 @unique
 class RegistryStatus(Enum):
     ACTIVE = 1
     OFF_LINE = 2
     DECOMMISSIONED = 3
+
 
 @unique
 class WorkerType(Enum):
@@ -26,12 +28,14 @@ class WorkerType(Enum):
     MPC = 2
     ZK = 3
 
+
 @unique
 class WorkerStatus(Enum):
     ACTIVE = 1
     OFF_LINE = 2
     DECOMMISSIONED = 3
     COMPROMISED = 4
+
 
 @unique
 class JsonRpcErrorCode(Enum):
@@ -44,6 +48,7 @@ class JsonRpcErrorCode(Enum):
     UNSUPPORTED_MODE = 6
     KEY_EXISTS = 9
 
+
 @unique
 class ReceiptCreateStatus(Enum):
     PENDING = 0
@@ -51,4 +56,3 @@ class ReceiptCreateStatus(Enum):
     PROCESSED = 2
     FAILED = 3
     REJECTED = 4
-

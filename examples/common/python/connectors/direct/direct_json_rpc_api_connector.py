@@ -27,6 +27,7 @@ from connectors.direct.work_order_receipt_jrpc_impl import WorkOrderReceiptJRPCI
 
 logger = logging.getLogger(__name__)
 
+
 class DirectJsonRpcApiConnector(ConnectorInterface):
     """
     Connector for the direct JSON RPC API.
@@ -36,7 +37,7 @@ class DirectJsonRpcApiConnector(ConnectorInterface):
     3. Work order interacts with json rpc listener.
     4. Work order receipt interacts with json rpc listener.
     """
-    def __init__(self, config_file=None,config=None):
+    def __init__(self, config_file=None, config=None):
         """
         "config_file" is config file path as a string.
         "config" is a dictionary loaded from config_file.
@@ -85,4 +86,3 @@ class DirectJsonRpcApiConnector(ConnectorInterface):
         if self.__work_order_receipts is None:
             self.__work_order_receipts = WorkOrderReceiptJRPCImpl(config)
         return self.__work_order_receipts
-

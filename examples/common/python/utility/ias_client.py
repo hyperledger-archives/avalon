@@ -23,6 +23,7 @@ import json
 import logging
 logger = logging.getLogger(__name__)
 
+
 class IasClient(object):
     """
     Provide rest api helper functions for communicating with IAS.
@@ -49,7 +50,7 @@ class IasClient(object):
             logger.info("IAS ApiKey: %s", self._ias_api_key)
         else:
             raise KeyError('Missing SpidCert setting')
-        self._timeout=300
+        self._timeout = 300
 
     def get_signature_revocation_lists(self,
                                        gid='',
@@ -61,11 +62,11 @@ class IasClient(object):
                 group identified by {gid} parameter.
         """
 
-        url = self._ias_url+path+gid[0:8]
+        url = self._ias_url + path + gid[0:8]
         logger.debug("Fetching SigRL from: %s", url)
 
         req_header = {"Ocp-Apim-Subscription-Key": self._ias_api_key}
-        result = requests.get(url, proxies= self._proxies,
+        result = requests.get(url, proxies=self._proxies,
                               headers=req_header, verify=False)
         if result.status_code != requests.codes.ok:
             logger.error("get_signature_revocation_lists HTTP Error code : %d",
@@ -87,7 +88,7 @@ class IasClient(object):
         if nonce is not None:
             json['nonce'] = nonce
 
-        logger.debug("Posting attestation verification request to: %s",url)
+        logger.debug("Posting attestation verification request to: %s", url)
         req_header = {"Ocp-Apim-Subscription-Key": self._ias_api_key}
         result = requests.post(url,
                                json=json,
@@ -112,7 +113,7 @@ class IasClient(object):
         self._spurious = self._ias_url
         verification_report_dict = json.loads(received_report)
 
-        if not 'id' in verification_report_dict:
+        if 'id' not in verification_report_dict:
             logger.error('AVR does not contain id field')
             return False
 
@@ -125,19 +126,20 @@ class IasClient(object):
             logger.error('AVR does not include an enclave quote status')
             return False
 
-        if not 'isvEnclaveQuoteBody' in verification_report_dict:
+        if 'isvEnclaveQuoteBody' not in verification_report_dict:
             logger.error('AVR does not contain quote body')
             return False
 
-        if not verification_report_dict['isvEnclaveQuoteBody'] in original_quote:
+        if verification_report_dict['isvEnclaveQuoteBody'] not in \
+                original_quote:
             logger.error('isvEnclaveQuoteBody field not in original quote')
             return False
 
-        if not 'epidPseudonym' in verification_report_dict:
+        if 'epidPseudonym' not in verification_report_dict:
             logger.error('AVR does not contain an EPID pseudonym')
             return False
 
-        if not 'nonce' in verification_report_dict:
+        if 'nonce' not in verification_report_dict:
             logger.error('AVR does not contain a nonce')
             return False
 
@@ -156,4 +158,3 @@ class IasClient(object):
         Mostly used for GROUP_OUT_OF_DATE verification report failure.
         """
         return self._last_verification_error
-

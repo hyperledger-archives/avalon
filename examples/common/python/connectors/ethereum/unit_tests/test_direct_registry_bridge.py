@@ -22,9 +22,10 @@ import logging
 from shared_kv.shared_kv_interface import KvStorage
 import connectors.ethereum.direct_registry_bridge as registry_helper
 
-sys.path.insert(0, abspath(join(dirname(__file__), '../..')) + '/connectors/')
 from connectors.ethereum.ethereum_worker_registry_list_impl \
     import EthereumWorkerRegistryListImpl as dir_registry
+
+sys.path.insert(0, abspath(join(dirname(__file__), '../..')) + '/connectors/')
 
 logger = logging.getLogger(__name__)
 

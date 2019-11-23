@@ -18,15 +18,17 @@ from utility.hex_utils import is_valid_hex_str
 from service_client.generic import GenericServiceClient
 from connectors.interfaces.worker_registry_interface import WorkerRegistryInterface
 from utility.tcf_types import WorkerType, JsonRpcErrorCode
-from connectors.utils import create_jrpc_response,validate_details
+from connectors.utils import create_jrpc_response, validate_details
 
 logging.basicConfig(format="%(asctime)s - %(levelname)s - %(message)s", level=logging.INFO)
+
+
 class WorkerRegistryJRPCImpl(WorkerRegistryInterface):
     def __init__(self, config):
         self.__uri_client = GenericServiceClient(config["tcf"]["json_rpc_uri"])
 
     def worker_register(self, worker_id, worker_type, org_id, application_type_ids,
-        details, id=None):
+            details, id=None):
         """ Adds worker details to registry """
         if worker_id is None or not is_valid_hex_str(worker_id):
             logging.error("Worker id is empty or Invalid")
@@ -67,7 +69,7 @@ class WorkerRegistryJRPCImpl(WorkerRegistryInterface):
         }
         response = self.__uri_client._postmsg(json.dumps(json_rpc_request))
         return response
-    
+
     def worker_update(self, worker_id, details, id=None):
         """ Update worker with new information """
         if worker_id is None or not is_valid_hex_str(worker_id):
@@ -86,10 +88,9 @@ class WorkerRegistryJRPCImpl(WorkerRegistryInterface):
         response = self.__uri_client._postmsg(json.dumps(json_rpc_request))
         return response
 
-
     def worker_set_status(self, worker_id, status, id=None):
-        """ Set the worker status to active, offline, decommissioned 
-        or compromised state 
+        """ Set the worker status to active, offline, decommissioned
+        or compromised state
         """
         if worker_id is None or not is_valid_hex_str(worker_id):
             logging.error("Worker id is empty or Invalid")
@@ -107,7 +108,6 @@ class WorkerRegistryJRPCImpl(WorkerRegistryInterface):
         }
         response = self.__uri_client._postmsg(json.dumps(json_rpc_request))
         return response
-    
 
     def worker_retrieve(self, worker_id, id=None):
         """ Retrieve the worker identified by worker id """
@@ -127,11 +127,10 @@ class WorkerRegistryJRPCImpl(WorkerRegistryInterface):
         response = self.__uri_client._postmsg(json.dumps(json_rpc_request))
         return response
 
-    
     def worker_lookup(self, worker_type=None, organization_id=None,
-        application_type_id=None,
-        id=None):
-        """ Worker lookup based on worker type, organization id 
+            application_type_id=None,
+            id=None):
+        """ Worker lookup based on worker type, organization id
         and application id"""
         json_rpc_request = {
             "jsonrpc": "2.0",
@@ -165,15 +164,14 @@ class WorkerRegistryJRPCImpl(WorkerRegistryInterface):
                         id, JsonRpcErrorCode.INVALID_PARAMETER,
                         "Invalid application type id")
             json_rpc_request["params"]["applicationTypeId"] = application_type_id
-        
+
         response = self.__uri_client._postmsg(json.dumps(json_rpc_request))
         return response
 
-    
-    def worker_lookup_next(self, lookup_tag, worker_type=None, 
-        organization_id=None, application_type_id=None, id=None):
+    def worker_lookup_next(self, lookup_tag, worker_type=None,
+            organization_id=None, application_type_id=None, id=None):
         """ Similar to workerLookUp with additional parameter lookup_tag """
-        
+
         json_rpc_request = {
             "jsonrpc": "2.0",
             "method": "WorkerLookUpNext",
@@ -207,6 +205,6 @@ class WorkerRegistryJRPCImpl(WorkerRegistryInterface):
                         id, JsonRpcErrorCode.INVALID_PARAMETER,
                         "Invalid application type id")
             json_rpc_request["params"]["applicationTypeId"] = application_type_id
-        
+
         response = self.__uri_client._postmsg(json.dumps(json_rpc_request))
         return response

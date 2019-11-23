@@ -24,12 +24,13 @@ from utility.tcf_types import JsonRpcErrorCode
 
 logging.basicConfig(format="%(asctime)s - %(levelname)s - %(message)s", level=logging.INFO)
 
+
 class WorkOrderEncryptionKeyJrpcImpl(WorkOrderEncryptionKeyInterface):
     def __init__(self, config):
         self.__uri_client = GenericServiceClient(config["tcf"]["json_rpc_uri"])
 
     def encryption_key_get(self, worker_id, last_used_key_nonce, tag, requester_id,
-        signature_nonce, signature, id=None):
+            signature_nonce, signature, id=None):
         if not is_valid_hex_str(worker_id):
             logging.error("Invalid Worker id")
             return create_jrpc_response(id, JsonRpcErrorCode.INVALID_PARAMETER,
@@ -75,7 +76,7 @@ class WorkOrderEncryptionKeyJrpcImpl(WorkOrderEncryptionKeyInterface):
         return response
 
     def encryption_key_set(self, worker_id, encryption_key, encryption_key_nonce, tag,
-        signature_nonce, signature, id=None):
+            signature_nonce, signature, id=None):
         if not is_valid_hex_str(worker_id):
             logging.error("Invalid Worker id")
             return create_jrpc_response(id, JsonRpcErrorCode.INVALID_PARAMETER,

@@ -27,7 +27,11 @@ logger = logging.getLogger(__name__)
 
 class TCSWorkOrderReceiptHandler:
     """
-    TCSWorkOrderReceiptHandler processes Work Order Receipt Direct API requests. It reads appropriate work order information from the KV storage to create the response. Work order receipts are created and placed in the KV storage by the SGX Enclave Manager after the work order (successfully) completed.
+    TCSWorkOrderReceiptHandler processes Work Order Receipt Direct API
+    requests. It reads appropriate work order information from the
+    KV storage to create the response.
+    Work order receipts are created and placed in the KV storage by the
+    SGX Enclave Manager after the work order (successfully) completed.
     """
 # ------------------------------------------------------------------------------------------------
 
@@ -303,7 +307,7 @@ class TCSWorkOrderReceiptHandler:
                     break
 
             if matched:
-                total_count = total_count+1
+                total_count = total_count + 1
                 ids.append(wo_id)
                 lookupTag = wo_id
 

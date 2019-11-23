@@ -12,7 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from abc import ABC,abstractmethod
+from abc import ABC, abstractmethod
+
 
 class ConnectorInterface(ABC):
     """
@@ -21,10 +22,11 @@ class ConnectorInterface(ABC):
     2. Create worker registry.
     3. Create work order.
     4. Create work order receipt.
-    Parameter “config” is a dictionary containing configuration in TOML format. 
+    Parameter “config” is a dictionary containing configuration in TOML format.
     The type of the adaptor(direct/proxy) is chosen based on the configuration.
-    The configuration also contains information required to construct 
-    and initialize the adaptor, e.g.  URI, user key/log-in info, smart contract address, etc.
+    The configuration also contains information required to construct
+    and initialize the adaptor, e.g.  URI, user key/log-in info,
+    smart contract address, etc.
     Return value is “None” on error or an instantiated object on success.
 
     """
@@ -34,12 +36,15 @@ class ConnectorInterface(ABC):
     @abstractmethod
     def create_worker_registry_list(self, config):
         pass
+
     @abstractmethod
     def create_worker_registry(self, config):
         pass
+
     @abstractmethod
     def create_work_order(self, config):
         pass
+
     @abstractmethod
     def create_work_order_receipt(self, config):
         pass
