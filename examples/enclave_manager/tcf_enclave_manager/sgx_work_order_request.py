@@ -19,31 +19,31 @@ import crypto.crypto as crypto
 
 logger = logging.getLogger(__name__)
 
-# -----------------------------------------------------------------
-# -----------------------------------------------------------------
-class SgxWorkOrderRequest(object) :
 
-    def __init__(self, enclave_service, work_order) :
+# -----------------------------------------------------------------
+class SgxWorkOrderRequest(object):
+
+    def __init__(self, enclave_service, work_order):
         self.enclave_service = enclave_service
         self.work_order = work_order
 
-    # Execute work order in SGX worker enclave 
-    def execute(self) :
+    # Execute work order in SGX worker enclave
+    def execute(self):
         serialized_byte_array = crypto.string_to_byte_array(self.work_order)
         encrypted_request = crypto.byte_array_to_base64(serialized_byte_array)
 
-        try :
+        try:
             encoded_encrypted_response = self.enclave_service.send_to_sgx_worker(encrypted_request)
             assert encoded_encrypted_response
-        except :
+        except:
             logger.exception('workorder request invocation failed')
             raise
 
-        try :
+        try:
             decrypted_response = crypto.base64_to_byte_array(encoded_encrypted_response)
             response_string = crypto.byte_array_to_string(decrypted_response)
             response_parsed = json.loads(response_string[0:-1])
-        except :
+        except:
             logger.exception('workorder response is invalid')
             raise
 
