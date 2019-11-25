@@ -196,6 +196,19 @@ wget https://download.01.org/intel-sgx/linux-2.3.1/ubuntu18.04/libsgx-enclave-co
 sudo dpkg -i libsgx-enclave-common_2.3.101.46683-1_amd64.deb
 ```
 
+### Run aesm service on host machine
+If you are behind a corporate proxy,
+uncomment and update the proxy type and aesm proxy lines in /etc/aesmd.conf:  
+```
+proxy type = manual
+aesm proxy = http://your-proxy:your-port
+```
+
+Start aesm service on host machine  
+```
+sudo source /opt/intel/libsgx-enclave-common/aesm/aesm_service
+```
+
 ### Remove Old `/dev/sgx` Intel SGX DCAP Driver
 If device file `/dev/sgx` is present, remove the old DCAP driver:
 ```bash
