@@ -33,6 +33,8 @@ services:
       # Below volume mappings are required for DISPLAY settings by heart disease GUI client
       - /tmp/.X11-unix:/tmp/.X11-unix
       - ~/.Xauthority:/root/.Xauthority
+      # Map aesm service on host to docker, required only in HW mode.
+      - /var/run/aesmd/aesm.socket:/var/run/aesmd/aesm.socket
     devices:
       - "/dev/isgx:/dev/isgx"
     working_dir: "/project/TrustedComputeFramework"

@@ -75,26 +75,10 @@ fi
 : "${SGX_SDK?Missing environment variable SGX_SDK}"
 : "${PKG_CONFIG_PATH?Missing environment variable PKG_CONFIG_PATH}"
 
-# Set proxy for Intel Architectural Enclave Service Manager (AESM) and start
 if [[ ${SGX_MODE} &&  "${SGX_MODE}" == "HW" ]]; then
-
-    # Add proxy settings, if proxy is present and not set
-    grep -qs "^proxy type" /etc/aesmd.conf
-    if [ $? -ne 0 -a -n "$http_proxy" ] ; then
-       echo "Setting AESMD proxy type"
-       echo "proxy type = manual" >> /etc/aesmd.conf
-    fi
-    grep -qs "^aesm proxy" /etc/aesmd.conf
-    if [ $? -ne 0 -a -n "$http_proxy" ] ; then
-       echo "Setting AESMD proxy"
-       echo "aesm proxy = $http_proxy" >> /etc/aesmd.conf
-    fi
-
-    # Starting aesm service
-    echo "Starting aesm service"
-    /opt/intel/libsgx-enclave-common/aesm/aesm_service &
+    echo "SGX mode is set to HW"
 else
-    echo "Setting default SGX mode=SIM"
+    echo "Setting default SGX mode to SIM"
     export SGX_MODE=SIM
 fi
 
