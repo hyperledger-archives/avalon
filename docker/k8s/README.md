@@ -7,6 +7,10 @@ in SGX-SIM mode.
 ## Prerequisites
 - kubectl-v1.15.2
 - a kubernetes cluster
+- To enable SGX HW, follow the instructions in
+  [PREREQUISITES.md](../../PREREQUISITES.md#intel-sgx-in-hardware-mode)
+- To use SGX HW, build docker image using below command  
+  `docker-compose -f docker-compose-sgx.yaml build`
 
 ## Running 
 
@@ -14,7 +18,7 @@ in SGX-SIM mode.
     ```bash
     kubectl create -f tcf-config-map.yaml
     ```
-2. Enable `remote_url` in [tcs_config.toml](../../config/tcs_config.toml)
+2. Enable `remote_url` in [tcs_config.toml](../../config/tcs_config.toml)  
    set `remote_url` to lmdb service defined in lmdb.yaml.
    eg: `remote_url="http://lmdb:9090"`
 
@@ -23,11 +27,17 @@ in SGX-SIM mode.
     # bootstrap the deployment and service
     kubectl create -f lmdb.yaml
     ```
-4. Start the `EnclaveManager` (to manage SGX enclaves) and `TCS Listener` (to
-   accept and handle requests from clients)  
+4. Start the `EnclaveManager` (to manage SGX enclaves)  
+   For SGX simulator mode, use the below command
     ```bash
     kubectl create -f enclave-manager-deployment.yaml
-
+    ```
+   For SGX hardware mode, use the below command
+    ```bash
+    kubectl create -f sgx-enclave-manager-deployment.yaml
+    ```
+5.  Start `TCS Listener` (to accept and handle requests from clients)
+    ```bash
     kubectl create -f tcs.yaml
     ```
 
@@ -55,5 +65,4 @@ in SGX-SIM mode.
 - The size of LMDB specified as 1TB in 
   [lmdb_store.cpp](../../tc/sgx/common/packages/db_store/lmdb_store.cpp) should 
   be decreased to something like accordingly for local development
-- All the resources specified in yaml are using the images built by sammyne with
-  name sammyne/hyperledger-tcf in docker hub
+- All the resources specified in yaml are using the images built locally.
