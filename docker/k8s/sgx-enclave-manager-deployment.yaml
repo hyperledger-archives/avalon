@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: enclave-manager-pool
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tee
+  template:
+    metadata:
+      name: tee
+      labels:
+        app: tee
+    spec:
+      containers:
+      - image: tcf-dev:latest
+        name: tee
+        imagePullPolicy: Never
+        volumeMounts:
+        - mountPath: /dev/isgx
+          name: isgx
+        - mountPath: /var/run/aesmd/aesm.socket
+          name: aesmsocket
+        securityContext:
+          privileged: true
+        envFrom:
+        - prefix: TCF_
+          configMapRef:
+            name: tcf-config
+        command: ["/bin/bash"]
+        args: ["$(TCF_HOME)/scripts/enclave_manager.sh"]
+      volumes:
+      - name: isgx
+        hostPath:
+          path: /dev/isgx
+          type: CharDevice
+      - name: aesmsocket
+        hostPath:
+          path: /var/run/aesmd/aesm.socket
+          type: Socket
