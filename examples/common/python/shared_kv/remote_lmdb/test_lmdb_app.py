@@ -120,9 +120,10 @@ def parse_command_line(config, args):
 
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('--logfile',
-                        help='Name of the log file, __screen__ for standard output',
-                        type=str)
+    parser.add_argument(
+        '--logfile',
+        help='Name of the log file, __screen__ for standard output',
+        type=str)
     parser.add_argument('--loglevel',
                         help='Logging level',
                         type=str)

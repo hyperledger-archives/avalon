@@ -40,7 +40,7 @@ def local_main(config):
         reactor.run()
     except ReactorNotRunning:
         logger.warn('shutdown')
-    except:
+    except Exception:
         logger.warn('shutdown')
 
     exit(0)
@@ -52,7 +52,8 @@ def parse_command_line(config, args):
 
     global bind_port
 
-    if config.get("KvStorage") is None or config["KvStorage"].get("remote_url") is None:
+    if config.get("KvStorage") is None or \
+            config["KvStorage"].get("remote_url") is None:
         logger.warn("quit due to no suitable config for remote KvStorage")
         sys.exit(-1)
 
@@ -63,9 +64,10 @@ def parse_command_line(config, args):
 
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('--logfile',
-                        help='Name of the log file, __screen__ for standard output',
-                        type=str)
+    parser.add_argument(
+        '--logfile',
+        help='Name of the log file, __screen__ for standard output',
+        type=str)
     parser.add_argument('--loglevel',
                         help='Logging level',
                         type=str)
@@ -121,8 +123,10 @@ def main(args=None):
         sys.exit(-1)
 
     plogger.setup_loggers(config.get('Logging', {}))
-    sys.stdout = plogger.stream_to_logger(logging.getLogger('STDOUT'), logging.DEBUG)
-    sys.stderr = plogger.stream_to_logger(logging.getLogger('STDERR'), logging.WARN)
+    sys.stdout = plogger.stream_to_logger(
+        logging.getLogger('STDOUT'), logging.DEBUG)
+    sys.stderr = plogger.stream_to_logger(
+        logging.getLogger('STDERR'), logging.WARN)
 
     parse_command_line(config, remainder)
     local_main(config)

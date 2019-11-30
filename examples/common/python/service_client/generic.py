@@ -45,11 +45,13 @@ class GenericServiceClient(object):
         url = self.ServiceURL
 
         logger.debug('post request to %s with DATALEN=%d, DATA=<%s>',
-            url, datalen, data)
+                     url, datalen, data)
 
         try:
-            request = urllib.request.Request(url, data,
-                {'Content-Type': 'application/json', 'Content-Length': datalen})
+            request = urllib.request.Request(
+                url, data,
+                {'Content-Type': 'application/json',
+                 'Content-Length': datalen})
             opener = urllib.request.build_opener(self.ProxyHandler)
             response = opener.open(request, timeout=10)
 
@@ -62,9 +64,9 @@ class GenericServiceClient(object):
             logger.warn('operation failed: %s', err.reason)
             raise MessageException('operation failed: {0}'.format(err.reason))
 
-        except:
-            logger.exception('no response from server')
-            raise MessageException('no response from server')
+        except Exception as err:
+            logger.exception('no response from server: %s', str(err))
+            raise MessageException('no response from server: {0}'.format(err))
 
         content = response.read()
         headers = response.info()
@@ -73,7 +75,7 @@ class GenericServiceClient(object):
         encoding = headers.get('Content-Type')
         if encoding != 'application/json':
             logger.info('server responds with message %s of type %s',
-                content, encoding)
+                        content, encoding)
             return None
 
         # Attempt to decode the content if it is not already a string
@@ -106,12 +108,13 @@ class TextServiceClient(object):
         url = self.ServiceURL
 
         logger.debug('post request to %s with DATALEN=%d, DATA=<%s>',
-            url, datalen, data)
+                     url, datalen, data)
 
         try:
-            request = urllib.request.Request(url, data,
+            request = urllib.request.Request(
+                url, data,
                 {'Content-Type': 'text/plain; charset=utf-8',
-                'Content-Length': datalen})
+                 'Content-Length': datalen})
             opener = urllib.request.build_opener(self.ProxyHandler)
             response = opener.open(request, timeout=10)
 
@@ -124,9 +127,9 @@ class TextServiceClient(object):
             logger.warn('operation failed: %s', err.reason)
             raise MessageException('operation failed: {0}'.format(err.reason))
 
-        except:
-            logger.exception('no response from server')
-            raise MessageException('no response from server')
+        except Exception as err:
+            logger.exception('no response from server: %s', str(err))
+            raise MessageException('no response from server: {0}'.format(err))
 
         content = response.read()
         headers = response.info()
@@ -135,7 +138,7 @@ class TextServiceClient(object):
         encoding = headers.get('Content-Type')
         if encoding != 'text/plain; charset=utf-8':
             logger.info('server responds with message %s of type %s',
-                content, encoding)
+                        content, encoding)
             return None
 
         return content

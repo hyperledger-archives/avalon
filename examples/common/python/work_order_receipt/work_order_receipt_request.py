@@ -20,6 +20,8 @@ import utility.signature as signature
 import utility.utility as utility
 from error_code.error_status import ReceiptCreateStatus as ReceiptCreateStatus
 from error_code.error_status import WorkOrderStatus
+
+
 class WorkOrderReceiptRequest():
     """
     Class to create work order receipt APIs like
@@ -31,7 +33,7 @@ class WorkOrderReceiptRequest():
         self.HASHING_ALGORITHM = "SHA-256"
 
     def create_receipt(self, wo_request,
-        receipt_create_status, signing_key, nonce=None):
+                       receipt_create_status, signing_key, nonce=None):
         """
         Create work order receipt corresponding to workorder id
         Parameters:
@@ -48,7 +50,7 @@ class WorkOrderReceiptRequest():
         requester_nonce = nonce
         if nonce is None:
             requester_nonce = str(random.randint(1, 10**10))
-        public_key =  signing_key.GetPublicKey().Serialize()
+        public_key = signing_key.GetPublicKey().Serialize()
         wo_receipt_request = {
             "workOrderId": wo_request_params["workOrderId"],
             # TODO: workerServiceId is same as worker id,
@@ -59,7 +61,8 @@ class WorkOrderReceiptRequest():
             "receiptCreateStatus": receipt_create_status,
             "workOrderRequestHash": final_hash_str,
             "requesterGeneratedNonce": requester_nonce,
-            "signatureRules": self.HASHING_ALGORITHM + "/" + self.SIGNING_ALGORITHM,
+            "signatureRules":
+            self.HASHING_ALGORITHM + "/" + self.SIGNING_ALGORITHM,
             "receiptVerificationKey": public_key
         }
         wo_receipt_str = wo_receipt_request["workOrderId"] + \
@@ -75,7 +78,7 @@ class WorkOrderReceiptRequest():
             wo_receipt_hash,
             signing_key
         )
-        if status == False:
+        if status is False:
             # if generate signature is failed.
             wo_receipt_request["requesterSignature"] = ""
             raise Exception("Generate signature is failed")
@@ -98,8 +101,8 @@ class WorkOrderReceiptRequest():
         Returns jrpc work order update receipt request of type dictionary
         """
         data = update_data
-        if update_type in [ReceiptCreateStatus.PROCESSED.value,\
-            ReceiptCreateStatus.COMPLETED.value]:
+        if update_type in [ReceiptCreateStatus.PROCESSED.value,
+                           ReceiptCreateStatus.COMPLETED.value]:
             # Work Order Receipt status is set to be completed or processed,
             # then update_data should be work order response.
             wo_resp_str = json.dumps(update_data)
@@ -116,7 +119,8 @@ class WorkOrderReceiptRequest():
             "updaterId": updater_id,
             "updateType": update_type,
             "updateData": data,
-            "signatureRules": self.HASHING_ALGORITHM + "/" + self.SIGNING_ALGORITHM,
+            "signatureRules":
+            self.HASHING_ALGORITHM + "/" + self.SIGNING_ALGORITHM,
             "receiptVerificationKey": public_key
         }
         wo_receipt_str = wo_receipt_update["workOrderId"] + \
@@ -128,11 +132,10 @@ class WorkOrderReceiptRequest():
             wo_receipt_hash,
             signing_key
         )
-        if status == False:
+        if status is False:
             # if generating signature failed.
             wo_receipt_update["updateSignature"] = ""
             raise Exception("Generate signature is failed")
         else:
             wo_receipt_update["updateSignature"] = wo_receipt_sign
         return wo_receipt_update
-

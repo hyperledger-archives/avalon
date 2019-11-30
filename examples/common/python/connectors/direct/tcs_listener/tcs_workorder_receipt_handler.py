@@ -17,7 +17,7 @@ import logging
 import base64
 from utility.hex_utils import is_valid_hex_str
 import crypto.crypto as crypto
-from error_code.error_status import ReceiptCreateStatus,SignatureStatus,\
+from error_code.error_status import ReceiptCreateStatus, SignatureStatus,\
     JRPCErrorCodes
 import utility.signature as signature
 from jsonrpc.exceptions import JSONRPCDispatchException
@@ -33,7 +33,7 @@ class TCSWorkOrderReceiptHandler:
     Work order receipts are created and placed in the KV storage by the
     SGX Enclave Manager after the work order (successfully) completed.
     """
-# ------------------------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
     def __init__(self, kv_helper):
         """
@@ -50,7 +50,7 @@ class TCSWorkOrderReceiptHandler:
         self.SIGNING_ALGORITHM = "SECP256K1"
         self.HASHING_ALGORITHM = "SHA-256"
 
-# ------------------------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
     def __workorder_receipt_on_boot(self):
         """
@@ -58,7 +58,8 @@ class TCSWorkOrderReceiptHandler:
         """
         # TODO: Boot time flow need to be implemented.
         pass
-# ------------------------------------------------------------------------------------------------
+
+# -----------------------------------------------------------------------------
 
     def WorkOrderReceiptCreate(self, **params):
         """
@@ -82,10 +83,10 @@ class TCSWorkOrderReceiptHandler:
         else:
             wo_receipt = self.kv_helper.get("wo-receipts", wo_id)
             if wo_receipt is None:
-                status, err_msg = self.__validate_work_order_receipt_create_req(
-                    input_value, wo_request
-                )
-                if status == True:
+                status, err_msg = \
+                    self.__validate_work_order_receipt_create_req(
+                        input_value, wo_request)
+                if status is True:
                     self.kv_helper.set("wo-receipts", wo_id, input_json_str)
                     raise JSONRPCDispatchException(
                         JRPCErrorCodes.SUCCESS,
@@ -99,23 +100,28 @@ class TCSWorkOrderReceiptHandler:
             else:
                 raise JSONRPCDispatchException(
                     JRPCErrorCodes.INVALID_PARAMETER_FORMAT_OR_VALUE,
-                    "Work order receipt already exists. Hence invalid parameter"
+                    "Work order receipt already exists. " +
+                    "Hence invalid parameter"
                 )
 
-# ------------------------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
-    def __validate_work_order_receipt_create_req(self, wo_receipt_req, wo_request):
+    def __validate_work_order_receipt_create_req(self, wo_receipt_req,
+                                                 wo_request):
         """
         Function to validate the work order receipt create request parameters
         Parameters:
             - wo_receipt_req is work order receipt request as dictionary
             - wo_request is string containing jrpc work order request
-        Returns - tuple containing validation status(Boolean) and error message(string)
+        Returns - tuple containing validation status(Boolean) and
+                  error message(string)
         """
         # Valid parameters list
-        valid_params = ["workOrderId", "workerServiceId", "workerId", "requesterId",
-                        "receiptCreateStatus", "workOrderRequestHash", "requesterGeneratedNonce",
-                        "requesterSignature", "signatureRules","receiptVerificationKey"]
+        valid_params = [
+            "workOrderId", "workerServiceId", "workerId",
+            "requesterId", "receiptCreateStatus", "workOrderRequestHash",
+            "requesterGeneratedNonce", "requesterSignature", "signatureRules",
+            "receiptVerificationKey"]
         for key in wo_receipt_req["params"]:
             if key not in valid_params:
                 return False, "Missing parameter " + key + " in the request"
@@ -133,19 +139,21 @@ class TCSWorkOrderReceiptHandler:
         receipt_type = wo_receipt_req["params"]["receiptCreateStatus"]
         try:
             receipt_enum_type = ReceiptCreateStatus(receipt_type)
-        except:
-            return False, "Invalid receipt status type {}".format(receipt_enum_type)
+        except Exception as err:
+            return False, "Invalid receipt status type {}: {}".format(
+                receipt_enum_type, str(err))
 
         # Validate signing rules
         signing_rules = wo_receipt_req["params"]["signatureRules"]
         rules = signing_rules.split("/")
-        if len(rules) == 2 and (rules[0] != self.HASHING_ALGORITHM or \
-            rules[1] != self.SIGNING_ALGORITHM):
+        if len(rules) == 2 and (rules[0] != self.HASHING_ALGORITHM or
+                                rules[1] != self.SIGNING_ALGORITHM):
             return False, "Unsupported the signing rules"
 
         signature_obj = signature.ClientSignature()
         # Verify work order request is calculated properly or not.
-        wo_req_hash = signature_obj.calculate_request_hash(json.loads(wo_request))
+        wo_req_hash = \
+            signature_obj.calculate_request_hash(json.loads(wo_request))
         if wo_req_hash != wo_receipt_req["params"]["workOrderRequestHash"]:
             return False, "Work order request hash does not match"
         # Verify requester signature with signing key in the request
@@ -155,7 +163,7 @@ class TCSWorkOrderReceiptHandler:
         # If all parameters are verified in the request
         return True, ""
 
-# ------------------------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
     def WorkOrderReceiptUpdate(self, **params):
         """
@@ -176,19 +184,20 @@ class TCSWorkOrderReceiptHandler:
         if value:
             # Receipt is created, validate update receipt request
             status, err_msg = self.__validate_work_order_receipt_update_req(
-                    input_value
-                )
-            if status == True:
+                input_value)
+            if status is True:
                 # Load previous updates to receipt
-                updates_to_receipt = self.kv_helper.get("wo-receipt-updates", wo_id)
+                updates_to_receipt = \
+                    self.kv_helper.get("wo-receipt-updates", wo_id)
                 # If it is first update to receipt
                 if updates_to_receipt is None:
                     updated_receipt = []
                 else:
                     updated_receipt = json.loads(updates_to_receipt)
                 # Get last update to receipt
-                last_update = updated_receipt[len(updated_receipt)-1]
-                if last_update["updateType"] == ReceiptCreateStatus.COMPLETED.value:
+                last_update = updated_receipt[len(updated_receipt) - 1]
+                if last_update["updateType"] == \
+                        ReceiptCreateStatus.COMPLETED.value:
                     raise JSONRPCDispatchException(
                         JRPCErrorCodes.INVALID_PARAMETER_FORMAT_OR_VALUE,
                         "Receipt update status is set to completed, "
@@ -196,7 +205,8 @@ class TCSWorkOrderReceiptHandler:
                     )
                 # If last update to receipt is processed then below status
                 # are invalid
-                if last_update["updateType"] == ReceiptCreateStatus.PROCESSED.value:
+                if last_update["updateType"] == \
+                        ReceiptCreateStatus.PROCESSED.value:
                     if input_value["params"]["updateType"] in [
                         ReceiptCreateStatus.PENDING.value,
                         ReceiptCreateStatus.FAILED.value,
@@ -205,11 +215,13 @@ class TCSWorkOrderReceiptHandler:
                         raise JSONRPCDispatchException(
                             JRPCErrorCodes.INVALID_PARAMETER_FORMAT_OR_VALUE,
                             "Current receipt status is set to processed, "
-                            "setting it to status " + str(input_value["params"]["updateType"]) +
+                            "setting it to status " +
+                            str(input_value["params"]["updateType"]) +
                             " is not allowed"
                         )
                 updated_receipt.append(input_value)
-                self.kv_helper.set("wo-receipt-updates", wo_id, json.dumps(updated_receipt))
+                self.kv_helper.set("wo-receipt-updates", wo_id,
+                                   json.dumps(updated_receipt))
                 raise JSONRPCDispatchException(
                     JRPCErrorCodes.SUCCESS,
                     "Receipt updated successfully"
@@ -231,17 +243,19 @@ class TCSWorkOrderReceiptHandler:
                 )
             )
 
-# ------------------------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
     def __validate_work_order_receipt_update_req(self, wo_receipt_req):
         """
         Function to validate the work order receipt create request parameters
         Parameters:
-            - wo_receipt_req is work order receipt request as dictionary
-        Returns - tuple containing validation status(Boolean) and error message(string)
+                - wo_receipt_req is work order receipt request as dictionary
+        Returns - tuple containing validation status(Boolean) and error
+                  message(string)
         """
         valid_params = ["workOrderId", "updaterId", "updateType", "updateData",
-                        "updateSignature", "signatureRules", "receiptVerificationKey"]
+                        "updateSignature", "signatureRules",
+                        "receiptVerificationKey"]
         for key in wo_receipt_req["params"]:
             if key not in valid_params:
                 return False, "Missing parameter " + key + " in the request"
@@ -257,8 +271,10 @@ class TCSWorkOrderReceiptHandler:
         update_type = wo_receipt_req["params"]["updateType"]
         try:
             update_enum_value = ReceiptCreateStatus(update_type)
-        except:
-            return False, "Invalid receipt update type {}".format(update_enum_value)
+        except Exception as err:
+            return False, "Invalid receipt update type {}: {}".format(
+                update_enum_value, str(err))
+
         # If update type is completed or processed,
         # it is a hash value of the Work Order Response
         if wo_receipt_req["params"]["updateType"] in [
@@ -275,7 +291,8 @@ class TCSWorkOrderReceiptHandler:
                 return False, "Invalid Update data in the request"
         # If all validation is pass
         return True, ""
-# ------------------------------------------------------------------------------------------------
+
+# -----------------------------------------------------------------------------
 
     def __lookup_basics(self, is_lookup_next, params):
         receipt_pool = self.kv_helper.lookup("wo-receipts")
@@ -318,7 +335,8 @@ class TCSWorkOrderReceiptHandler:
         }
 
         return result
-# ------------------------------------------------------------------------------------------------
+
+# -----------------------------------------------------------------------------
 
     def WorkOrderReceiptLookUp(self, **params):
         """
@@ -331,7 +349,7 @@ class TCSWorkOrderReceiptHandler:
 
         return self.__lookup_basics(False, params)
 
-# ------------------------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
     def WorkOrderReceiptLookUpNext(self, **params):
         """
@@ -344,14 +362,14 @@ class TCSWorkOrderReceiptHandler:
 
         return self.__lookup_basics(True, params)
 
-# ------------------------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
     def WorkOrderReceiptRetrieve(self, **params):
         """
         Function to retrieve the details of worker
         Parameters:
-            - params is variable-length arugment list containing work order receipt
-            request request as defined in EEA spec 7.2.4
+            - params is variable-length arugment list containing work order
+            receipt request request as defined in EEA spec 7.2.4
         Returns jrpc response as defined in 7.2.5
         """
         wo_id = params["workOrderId"]
@@ -361,29 +379,32 @@ class TCSWorkOrderReceiptHandler:
             receipt = json.loads(value)
             receipt_updates = self.kv_helper.get("wo-receipt-updates", wo_id)
             if receipt_updates is None:
-                receipt["params"]["receiptCurrentStatus"] = receipt["params"]["receiptCreateStatus"]
+                receipt["params"]["receiptCurrentStatus"] = \
+                    receipt["params"]["receiptCreateStatus"]
             else:
                 receipt_updates_json = json.loads(receipt_updates)
                 # Get the recent update to receipt
-                last_receipt = receipt_updates_json[len(receipt_updates_json)-1]
-                receipt["params"]["receiptCurrentStatus"] = last_receipt["updateType"]
+                last_receipt = receipt_updates_json[len(receipt_updates_json)
+                                                    - 1]
+                receipt["params"]["receiptCurrentStatus"] = \
+                    last_receipt["updateType"]
             return receipt["params"]
         else:
             raise JSONRPCDispatchException(
                 JRPCErrorCodes.INVALID_PARAMETER_FORMAT_OR_VALUE,
-                "Work order receipt for work order id {} not found in the database."
-                " Hence invalid parameter".format(
+                "Work order receipt for work order id {} not found in the "
+                "database. Hence invalid parameter".format(
                     wo_id
                 ))
 
-# ------------------------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
     def WorkOrderReceiptUpdateRetrieve(self, **params):
         """
         Function to retrieve the update to work order receipt
         Parameters:
-            - params is variable-length arugment list containing work order update
-            retrieve request as defined in EEA spec 7.2.6
+            - params is variable-length arugment list containing work order
+            update retrieve request as defined in EEA spec 7.2.6
         Returns:
             Jrpc response as defined in EEA spec 7.2.7
         """
@@ -406,9 +427,9 @@ class TCSWorkOrderReceiptHandler:
             total_updates = len(receipt_updates_json)
             if update_index <= 0:
                 raise JSONRPCDispatchException(
-                JRPCErrorCodes.INVALID_PARAMETER_FORMAT_OR_VALUE,
-                "Update index should be positive non-zero number."
-                " Hence invalid parameter")
+                    JRPCErrorCodes.INVALID_PARAMETER_FORMAT_OR_VALUE,
+                    "Update index should be positive non-zero number."
+                    " Hence invalid parameter")
             elif update_index > total_updates:
                 if update_index == self.LAST_RECEIPT_INDEX:
                     # set to the index of last update to receipt
@@ -437,4 +458,3 @@ class TCSWorkOrderReceiptHandler:
                 JRPCErrorCodes.INVALID_PARAMETER_FORMAT_OR_VALUE,
                 "There is no updates available to this receipt"
                 " Hence invalid parameter")
-

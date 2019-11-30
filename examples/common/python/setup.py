@@ -18,13 +18,14 @@ import sys
 import subprocess
 import re
 
+from setuptools import setup, find_packages, Extension
+
 # this should only be run with python3
 import sys
 if sys.version_info[0] < 3:
     print('ERROR: must run with python3')
     sys.exit(1)
 
-from setuptools import setup, find_packages, Extension
 
 tcf_root_dir = os.environ.get('TCF_HOME', '../../..')
 
@@ -35,18 +36,27 @@ sgx_sdk_env = os.environ.get('SGX_SDK', '/opt/intel/sgxsdk')
 sgx_ssl_env = os.environ.get('SGX_SSL', '/opt/intel/sgxssl')
 sgx_mode_env = os.environ.get('SGX_MODE', 'SIM')
 if not sgx_mode_env or (sgx_mode_env != "SIM" and sgx_mode_env != "HW"):
-    print("error: SGX_MODE value must be HW or SIM, current value is: ", sgx_mode_env)
+    print("error: SGX_MODE value must be HW or SIM, current value is: ",
+          sgx_mode_env)
     sys.exit(2)
 
-openssl_cflags = subprocess.check_output(['pkg-config', 'openssl', '--cflags']).decode('ascii').strip().split()
+openssl_cflags = subprocess.check_output(
+    ['pkg-config', 'openssl', '--cflags']).decode('ascii').strip().split()
 openssl_include_dirs = list(
-    filter(None, re.split('\s*-I', subprocess.check_output(['pkg-config', 'openssl', '--cflags-only-I']).decode('ascii').strip())))
+    filter(None, re.split('\s*-I',
+           subprocess.check_output(
+               ['pkg-config', 'openssl', '--cflags-only-I'])
+               .decode('ascii').strip())))
 openssl_libs = list(
-    filter(None, re.split('\s*-l', subprocess.check_output(['pkg-config', 'openssl', '--libs-only-l']).decode('ascii').strip())))
+    filter(None, re.split('\s*-l',
+           subprocess.check_output(['pkg-config', 'openssl', '--libs-only-l'])
+           .decode('ascii').strip())))
 openssl_lib_dirs = list(
-    filter(None, re.split('\s*-L', subprocess.check_output(['pkg-config', 'openssl', '--libs-only-L']).decode('ascii').strip())))
+    filter(None, re.split('\s*-L',
+           subprocess.check_output(['pkg-config', 'openssl', '--libs-only-L'])
+           .decode('ascii').strip())))
 
-debug_flag = os.environ.get('TCF_DEBUG_BUILD',0)
+debug_flag = os.environ.get('TCF_DEBUG_BUILD', 0)
 
 compile_args = [
     '-std=c++11',
@@ -101,7 +111,8 @@ crypto_modulefiles = [
 crypto_module = Extension(
     'crypto._crypto',
     crypto_modulefiles,
-    swig_opts=['-c++'] + openssl_cflags + ['-I%s' % i for i in crypto_include_dirs],
+    swig_opts=['-c++'] + openssl_cflags +
+    ['-I%s' % i for i in crypto_include_dirs],
     extra_compile_args=compile_args,
     include_dirs=crypto_include_dirs,
     library_dirs=library_dirs,
@@ -120,16 +131,15 @@ verify_report_module = Extension(
     library_dirs=library_dirs,
     libraries=libraries)
 
-## -----------------------------------------------------------------
+# -----------------------------------------------------------------
 setup(
-    name = 'tcf_examples_common',
-    version = version,
-    description = 'Common library',
-    author = 'Intel',
-    url = 'http://www.intel.com',
-    packages = find_packages(),
-    install_requires = [],
+    name='tcf_examples_common',
+    version=version,
+    description='Common library',
+    author='Intel',
+    url='http://www.intel.com',
+    packages=find_packages(),
+    install_requires=[],
     ext_modules=[crypto_module, verify_report_module],
     data_files=[],
-    entry_points = {})
-
+    entry_points={})

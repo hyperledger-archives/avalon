@@ -23,7 +23,8 @@ from connectors.ethereum.ethereum_worker_registry_list_impl import \
     EthereumWorkerRegistryListImpl
 from connectors.direct.worker_registry_jrpc_impl import WorkerRegistryJRPCImpl
 from connectors.direct.work_order_jrpc_impl import WorkOrderJRPCImpl
-from connectors.direct.work_order_receipt_jrpc_impl import WorkOrderReceiptJRPCImpl
+from connectors.direct.work_order_receipt_jrpc_impl \
+     import WorkOrderReceiptJRPCImpl
 
 logger = logging.getLogger(__name__)
 
@@ -48,14 +49,15 @@ class DirectJsonRpcApiConnector(ConnectorInterface):
             self.__config = config
         else:
             if not isfile(config_file):
-                raise FileNotFoundError("File not found at path: {0}".format(realpath(config_file)))
+                raise FileNotFoundError("File not found at path: {0}"
+                                        .format(realpath(config_file)))
             try:
                 with open(config_file) as fd:
                     self.__config = toml.load(fd)
             except IOError as e:
                 """
-                Catch the exception related to toml file format except File not exists
-                exception
+                Catch the exception related to toml file format except for
+                the File does not exist exception.
                 """
                 if e.errno != errno.ENOENT:
                     raise Exception('Could not open config file: %s' % e)
@@ -69,7 +71,8 @@ class DirectJsonRpcApiConnector(ConnectorInterface):
     def create_worker_registry_list(self, config):
         if self.__blockchain_type == "Ethereum":
             if self.__worker_registry_list is None:
-                self.__worker_registry_list = EthereumWorkerRegistryListImpl(config)
+                self.__worker_registry_list = EthereumWorkerRegistryListImpl(
+                    config)
             return self.__worker_registry_list
 
     def create_worker_registry(self, config):

@@ -20,15 +20,18 @@ import logging
 import os
 from os.path import exists, realpath
 
-from connectors.ethereum.ethereum_wrapper import EthereumWrapper as ethereum_wrapper
+from connectors.ethereum.ethereum_wrapper \
+    import EthereumWrapper as ethereum_wrapper
 
-logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s', level=logging.INFO)
+logging.basicConfig(
+    format='%(asctime)s - %(levelname)s - %(message)s', level=logging.INFO)
 
 
 class eth_cli:
     def __init__(self, config_file):
         if not os.path.isfile(config_file):
-            raise FileNotFoundError("File not found at path: {0}".format(realpath(config_file)))
+            raise FileNotFoundError(
+                "File not found at path: {0}".format(realpath(config_file)))
         try:
             with open(config_file) as fd:
                 self.__config = toml.load(fd)
@@ -44,14 +47,17 @@ class eth_cli:
 
     def deploy_contracts(self):
         tcf_home = os.environ.get("TCF_HOME", "../../")
-        self.deploy_solidity_contract(tcf_home + "/" +
+        self.deploy_solidity_contract(
+            tcf_home + "/" +
             self.__config['ethereum']['direct_registry_contract_file'])
-        self.deploy_solidity_contract(tcf_home + "/" +
+        self.deploy_solidity_contract(
+            tcf_home + "/" +
             self.__config['ethereum']['worker_registry_contract_file'])
 
     def deploy_solidity_contract(self, contract_file):
         if not exists(contract_file):
-            raise FileNotFoundError("File not found at path: {0}".format(realpath(contract_file)))
+            raise FileNotFoundError("File not found at path: {0}".format(
+                realpath(contract_file)))
         compiled_sol = self.__eth_client.compile_source_file(contract_file)
         contract_id, contract_interface = compiled_sol.popitem()
         address = self.__eth_client.deploy_contract(contract_interface)
@@ -61,7 +67,8 @@ class eth_cli:
 
 def main():
     tcf_home = os.environ.get("TCF_HOME", "../../")
-    eth = eth_cli(tcf_home + "/examples/common/python/connectors/" + "tcf_connector.toml")
+    eth = eth_cli(tcf_home +
+                  "/examples/common/python/connectors/" + "tcf_connector.toml")
     eth.deploy_contracts()
 
 

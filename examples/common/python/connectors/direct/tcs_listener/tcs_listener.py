@@ -55,7 +55,8 @@ class TCSListener(resource.Resource):
     end user requests, Worker Registry Handler, Work Order Handler and
     Work Order Receipts Handler .
     """
-    # The isLeaf instance variable describes whether or not a resource will have children and only leaf resources get rendered.
+    # The isLeaf instance variable describes whether or not a resource will
+    # have children and only leaf resources get rendered.
     # TCSListener is the most derived class hence isLeaf is required.
 
     isLeaf = True
@@ -101,11 +102,13 @@ class TCSListener(resource.Resource):
     def _process_request(self, input_json_str):
         response = {}
         response['error'] = {}
-        response['error']['code'] = WorkOrderStatus.INVALID_PARAMETER_FORMAT_OR_VALUE
+        response['error']['code'] = \
+            WorkOrderStatus.INVALID_PARAMETER_FORMAT_OR_VALUE
 
         try:
             input_json = json.loads(input_json_str)
-        except:
+        except Exception as err:
+            logger.exception("exception loading Json: %s", str(err))
             response = {
                 "error": {
                     "code": WorkOrderStatus.INVALID_PARAMETER_FORMAT_OR_VALUE,
@@ -154,21 +157,22 @@ class TCSListener(resource.Resource):
                     response = utility.create_error_response(
                         WorkOrderStatus.UNKNOWN_ERROR,
                         jrpc_id,
-                        "UNKNOWN_ERROR: Error while loading the input JSON file")
+                        "UNKNOWN_ERROR: Error while loading input JSON file")
                     return response
 
             else:
-                # JRPC response with 0 as id is returned because id can't be fecthed
-                # from a request with unknown encoding
+                # JRPC response with 0 as id is returned because id can't be
+                # fetched from a request with unknown encoding.
                 response = utility.create_error_response(
                     WorkOrderStatus.UNKNOWN_ERROR,
                     0,
                     "UNKNOWN_ERROR: unknown message encoding")
                 return response
 
-        except:
+        except Exception as err:
             logger.exception(
-                'exception while decoding http request %s', request.path)
+                'exception while decoding http request %s: %s',
+                request.path, str(err))
             # JRPC response with 0 as id is returned because id can't be
             # fetched from improper request
             response = utility.create_error_response(
@@ -186,14 +190,15 @@ class TCSListener(resource.Resource):
             request.setResponseCode(http.OK)
             return response.encode('utf8')
 
-        except:
+        except Exception as err:
             logger.exception(
-                'unknown exception while processing request %s', request.path)
+                'unknown exception while processing request %s: %s',
+                request.path, str(err))
             response = utility.create_error_response(
                 WorkOrderStatus.UNKNOWN_ERROR,
                 jrpc_id,
-                "UNKNOWN_ERROR: unknown exception processing http \
-                    request {0}".format(request.path))
+                "UNKNOWN_ERROR: unknown exception processing http " +
+                "request {0}: {1}".format(request.path, str(err)))
             return response
 
 # -----------------------------------------------------------------
@@ -212,8 +217,8 @@ def local_main(config):
         reactor.run()
     except ReactorNotRunning:
         logger.warn('shutdown')
-    except:
-        logger.warn('shutdown')
+    except Exception as err:
+        logger.warn('shutdown: %s', str(e))
 
     exit(0)
 
@@ -233,7 +238,8 @@ def parse_command_line(config, args):
     parser = argparse.ArgumentParser()
 
     parser.add_argument(
-        '--logfile', help='Name of the log file, __screen__ for standard output', type=str)
+        '--logfile',
+        help='Name of the log file, __screen__ for standard output', type=str)
     parser.add_argument('--loglevel', help='Logging level', type=str)
     parser.add_argument(
         '--bind_uri', help='URI to listen for requests ', type=str)

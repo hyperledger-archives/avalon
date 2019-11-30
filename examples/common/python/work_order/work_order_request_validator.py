@@ -24,7 +24,8 @@ class WorkOrderRequestValidator():
     def __init__(self):
         """
         key value pair with field name and boolean indicator that tells
-        whether field is mandatory or not. True is mandatory and False is optional
+        whether field is mandatory or not.
+        True is mandatory and False is optional.
         """
         self.__param_key_map = {
             "responseTimeoutMSecs": True,
@@ -80,11 +81,14 @@ class WorkOrderRequestValidator():
         if "workerEncryptionKey" in params and \
                 not is_valid_hex_str(params["workerEncryptionKey"]):
             return False, "Invalid data format for worker encryption key"
-        if "encryptedSessionKey" in params and not is_valid_hex_str(params["encryptedSessionKey"]):
+        if "encryptedSessionKey" in params and \
+                not is_valid_hex_str(params["encryptedSessionKey"]):
             return False, "Invalid data format for encrypted session key"
-        if "sessionKeyIv" in params and not is_valid_hex_str(params["sessionKeyIv"]):
+        if "sessionKeyIv" in params and \
+                not is_valid_hex_str(params["sessionKeyIv"]):
             return False, "Invalid data format for session key iv"
-        if "encryptedRequestHash" in params and not is_valid_hex_str(params["encryptedRequestHash"]):
+        if "encryptedRequestHash" in params and \
+                not is_valid_hex_str(params["encryptedRequestHash"]):
             return False, "Invalid data format for encrypted request hash"
         return True, ""
 
@@ -108,7 +112,8 @@ class WorkOrderRequestValidator():
             if "dataHash" in data_item:
                 data_hash = data_item["dataHash"]
                 if not is_valid_hex_str(data_hash):
-                    return False, "Invalid data format for data hash of in data"
+                    return False, \
+                        "Invalid data format for data hash of in data"
             if "encryptedDataEncryptionKey" in data_item:
                 enc_key = data_item["encryptedDataEncryptionKey"]
                 if enc_key != "-" and \

@@ -137,8 +137,8 @@ class TCSWorkerRegistryHandler:
             status = int(worker_status)
             WorkerStatus(status)
             return True
-        except:
-            logger.error("Invalid worker status code")
+        except Exception as err:
+            logger.error("Invalid worker status code: %s", str(err))
             return False
 
 # ------------------------------------------------------------------------------------------------
@@ -193,7 +193,8 @@ class TCSWorkerRegistryHandler:
             value = self.kv_helper.get("workers", worker_id)
             if value:
                 worker = json.loads(value)
-                criteria = ["workerType", "organizationId", "applicationTypeId"]
+                criteria = ["workerType", "organizationId",
+                            "applicationTypeId"]
 
                 for c in criteria:
                     if params.get(c) is None:

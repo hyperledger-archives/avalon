@@ -37,8 +37,10 @@ logger = logging.getLogger(__name__)
 def find_file_in_paths(filename, search_paths):
     """General utility to search for a file name in a path
 
-    :param str filename: name of the file to locate, absolute path ignores search_path
-    :param list(str) search_path: list of directories where the files may be located
+    :param str filename: name of the file to locate.
+    Absolute path ignores search_path
+    :param list(str) search_path: list of directories where the files may be
+    located
     """
 
     # os.path.abspath only works for full paths, not relative paths
@@ -53,7 +55,8 @@ def find_file_in_paths(filename, search_paths):
         if os.path.isfile(full_filename):
             return full_filename
 
-    raise FileNotFoundError(errno.ENOENT, "unable to locate file in search path", filename)
+    raise FileNotFoundError(
+        errno.ENOENT, "unable to locate file in search path", filename)
 
 
 # -----------------------------------------------------------------
@@ -73,16 +76,17 @@ def write_result_data_to_json_file(file_name, input_data, data_dir='./'):
     Function to store result data as json file
     Parameters:
         - file_name is the name in which the file should be stored
-        - input_data is a JSON data which needs to be stored in a file( should have attribute 'result')
+        - input_data is a JSON data which needs to be stored in a file
+          (it should have attribute 'result')
         - data_dir is the directory path to store the file
     """
     result_info = dict()
     try:
         result_info['Result'] = json.loads(input_data)['result']
-    except:
+    except Exception:
         raise ValueError("Input data must have attribute 'result'")
     logger.debug('Data file is stored at %s with name %s.json', data_dir,
-        file_name)
+                 file_name)
     extension = "" if file_name.lower().endswith(".json") else ".json"
     filename = os.path.realpath(os.path.join(data_dir, file_name + extension))
     logger.debug('Save result data to %s', filename)

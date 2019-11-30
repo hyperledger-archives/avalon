@@ -85,7 +85,7 @@ class WorkerEncryptionKeyHandler:
         encryptionKey = worker_type_data["encryptionKey"]
         try:
             encryptionKeyNonce = worker_type_data["encryptionKeyNonce"]
-        except:
+        except Exception:
             encryptionKeyNonce = crypto.random_bit_string(NO_OF_BYTES)
 
         tag = ""

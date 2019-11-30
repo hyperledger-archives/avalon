@@ -52,7 +52,8 @@ def test_sync_to_lmdb(eth_direct_registry, kv_storage):
 
     # Add dummy registry to smart contract
     logger.info("Adding sample registry to Smart Contract")
-    result = eth_direct_registry.RegistryAdd(org_id, uri, sc_address, app_type_ids)
+    result = eth_direct_registry.RegistryAdd(
+        org_id, uri, sc_address, app_type_ids)
     logger.info("Registry add status - %s", result)
 
     registry_helper.sync_contract_and_lmdb(eth_direct_registry, kv_storage)
@@ -64,11 +65,14 @@ def test_sync_to_lmdb(eth_direct_registry, kv_storage):
     if reg_info is not None:
         json_reg_info = json.loads(reg_info)
         if json_reg_info["status"] == 0:
-            logger.info("Syncing Registry from smart contract to KvStorage SUCCESS..")
+            logger.info(
+                "Syncing Registry from smart contract to KvStorage SUCCESS..")
         else:
-            logger.info("Syncing Registry from smart contract to KvStorage FAILED..")
+            logger.info(
+                "Syncing Registry from smart contract to KvStorage FAILED..")
     else:
-        logger.info("Syncing Registry from smart contract to KvStorage FAILED...")
+        logger.info(
+            "Syncing Registry from smart contract to KvStorage FAILED...")
 
 
 def test_sync_to_smart_contract(eth_direct_registry, kv_storage):
@@ -77,32 +81,37 @@ def test_sync_to_smart_contract(eth_direct_registry, kv_storage):
     sc_address = "0x5678AB"
     app_type_ids = ["0xAB12", "0x34FF"]
 
-    json_registry = create_json_object(org_id, uri, sc_address, app_type_ids, 1)
+    json_registry = create_json_object(
+        org_id, uri, sc_address, app_type_ids, 1)
     logger.info("Adding sample registry to KvStorage")
     kv_storage.set("registries", org_id, json_registry)
 
     registry_helper.sync_contract_and_lmdb(eth_direct_registry, kv_storage)
 
     # Verify Registry is added to Smart contract and status is set to ACTIVE
-    logger.info("Check if Registry is added to Contract and status set to ACTIVE")
+    logger.info(
+        "Check if Registry is added to Contract and status set to ACTIVE")
     retrieve_result = eth_direct_registry.RegistryRetrieve(org_id.encode())
     if retrieve_result[0] == 1 and retrieve_result[4] == 1:
-        logger.info("Syncing Registry from KvStorage to smart contract SUCCESS..")
+        logger.info(
+            "Syncing Registry from KvStorage to smart contract SUCCESS..")
     else:
-        logger.info("Syncing Registry from KvStorage to smart contract FAILED..")
+        logger.info(
+            "Syncing Registry from KvStorage to smart contract FAILED..")
 
 
 def main():
     logger.info("Testing Direct registry bridge functionality.")
 
-    eth_direct_registry = dir_registry.EthereumDirectRegistry("0x8c99670a15047248403a3E5A38eb8FBE7a12533e",
-                                                 '../contracts/WorkerRegistryList.sol')
+    eth_direct_registry = dir_registry.EthereumDirectRegistry(
+        "0x8c99670a15047248403a3E5A38eb8FBE7a12533e",
+        '../contracts/WorkerRegistryList.sol')
     kv_storage = KvStorage()
     kv_storage.open("kv_storage")
 
-    logger.info("------------------- test_sync_to_lmdb  ---------------------- \n")
+    logger.info("----------------- test_sync_to_lmdb  -------------------- \n")
     test_sync_to_lmdb(eth_direct_registry, kv_storage)
-    logger.info("\n------------------- test_sync_to_smart_contract  ---------------------- \n")
+    logger.info("\n--------------- test_sync_to_smart_contract  ---------- \n")
     test_sync_to_smart_contract(eth_direct_registry, kv_storage)
 
 
