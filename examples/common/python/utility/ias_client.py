@@ -98,13 +98,16 @@ class IasClient(object):
         logger.debug("result headers: %s", result.headers)
         logger.info("received attestation result code: %d", result.status_code)
         if result.status_code != requests.codes.ok:
-            logger.debug("post_verify_attestation HTTP Error code : %d", result.status_code)
+            logger.debug(
+                "post_verify_attestation HTTP Error code : %d",
+                result.status_code)
             result.raise_for_status()
 
         returnblob = {
             'verification_report': result.text,
             'ias_signature': result.headers.get('x-iasreport-signature'),
-            'ias_certificate': urllib.parse.unquote(result.headers.get('x-iasreport-signing-certificate'))
+            'ias_certificate': urllib.parse.unquote(
+                result.headers.get('x-iasreport-signing-certificate'))
         }
         return returnblob
 
@@ -121,7 +124,8 @@ class IasClient(object):
             logger.error('AVR indicates the EPID group has been revoked')
             return False
 
-        isv_enclave_quote_status = verification_report_dict.get('isvEnclaveQuoteStatus')
+        isv_enclave_quote_status = \
+            verification_report_dict.get('isvEnclaveQuoteStatus')
         if isv_enclave_quote_status is None:
             logger.error('AVR does not include an enclave quote status')
             return False
@@ -146,7 +150,8 @@ class IasClient(object):
         # Leave the status check for last
         if isv_enclave_quote_status.upper() != 'OK':
             self._last_verification_error = isv_enclave_quote_status.upper()
-            logger.debug("enclave quote status error: " + self._last_verification_error)
+            logger.debug(
+                "enclave quote status error: " + self._last_verification_error)
             return False
 
         # All checks passed
@@ -154,7 +159,7 @@ class IasClient(object):
 
     def last_verification_error(self):
         """
-        Errno-like procedure to provide details about where the verification failed.
-        Mostly used for GROUP_OUT_OF_DATE verification report failure.
+        Errno-like procedure to provide details about where the verification
+        failed. Mostly used for GROUP_OUT_OF_DATE verification report failure.
         """
         return self._last_verification_error

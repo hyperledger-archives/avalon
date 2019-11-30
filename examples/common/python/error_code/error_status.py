@@ -78,6 +78,7 @@ class QuoteStatus(IntEnum):
     GROUP_OUT_OF_DATE_OK = 1
     GROUP_OUT_OF_DATE_NOT_OK = 2
 
+
 # Generic jrpc error codes
 @unique
 class JRPCErrorCodes(IntEnum):
@@ -88,4 +89,3 @@ class JRPCErrorCodes(IntEnum):
     INVALID_SIGNATURE = 4
     NO_MORE_LOOKUP_RESULTS = 5
     UNSUPPORTED_MODE = 6
-

@@ -120,7 +120,8 @@ class LMDBRequestHandler(resource.Resource):
                 if len(args) == 3:
                     result = self.kv_helper.remove(args[1], args[2])
                 else:
-                    result = self.kv_helper.remove(args[1], args[2], value=args[3])
+                    result = self.kv_helper.remove(
+                        args[1], args[2], value=args[3])
                 # Remove successful (returned True)
                 if result:
                     response = "t"
@@ -140,7 +141,7 @@ class LMDBRequestHandler(resource.Resource):
     def render_GET(self, request):
         response = 'Only POST request is supported'
         logger.error("GET request is not supported." +
-            " Only POST request is supported")
+                     " Only POST request is supported")
 
         return response
 
@@ -160,10 +161,12 @@ class LMDBRequestHandler(resource.Resource):
                 response = 'UNKNOWN_ERROR: unknown message encoding'
                 return response
 
-        except:
-            logger.exception('exception while decoding http request %s',
-                request.path)
-            response = 'UNKNOWN_ERROR: unable to decode incoming request '
+        except Exception as err:
+            logger.exception(
+                'unknown exception while decoding http request %s: %s',
+                request.path, str(err))
+            response = 'UNKNOWN_ERROR: unable to decode incoming ' + \
+                'http request {0}: {1}'.format(request.path, str(err))
             return response
 
         # Send back the results
@@ -173,9 +176,10 @@ class LMDBRequestHandler(resource.Resource):
             request.setResponseCode(http.OK)
             return response.encode('utf-8')
 
-        except:
-            logger.exception('unknown exception while processing request %s',
-                request.path)
+        except Exception as err:
+            logger.exception(
+                'unknown exception while processing request %s: %s',
+                request.path, str(err))
             response = 'UNKNOWN_ERROR: unknown exception processing ' + \
-                'http request {0}'.format(request.path)
+                'http request {0}: {1}'.format(request.path, str(err))
             return response

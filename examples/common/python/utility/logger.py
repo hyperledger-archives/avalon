@@ -58,17 +58,23 @@ def setup_loggers(config):
     logfile = config.get('LogFile', '__screen__')
     if logfile != '__screen__':
         if not os.path.isdir(os.path.dirname(logfile)):
-            warnings.warn("Logging directory {0} does not exist".format(os.path.abspath(os.path.dirname(logfile))))
+            warnings.warn(
+                "Logging directory {0} does not exist".format(
+                    os.path.abspath(os.path.dirname(logfile))))
             sys.exit(-1)
 
-        flog = logging.handlers.RotatingFileHandler(logfile,
-            maxBytes=2 * 1024 * 1024, backupCount=1000, mode='a')
-        flog.setFormatter(logging.Formatter('[%(asctime)s, %(levelno)d, %(name)s] %(message)s', "%H:%M:%S"))
+        flog = logging.handlers.RotatingFileHandler(
+            logfile, maxBytes=2 * 1024 * 1024, backupCount=1000, mode='a')
+        flog.setFormatter(
+            logging.Formatter(
+                '[%(asctime)s, %(levelno)d, %(name)s] %(message)s',
+                "%H:%M:%S"))
         logger.addHandler(flog)
     else:
         clog = logging.StreamHandler()
         formatter = ColoredFormatter(
-            "%(log_color)s[%(asctime)s %(levelname)-8s%(name)s]%(reset)s %(white)s%(message)s",
+            "%(log_color)s[%(asctime)s " +
+            "%(levelname)-8s%(name)s]%(reset)s %(white)s%(message)s",
             datefmt="%H:%M:%S",
             reset=True,
             log_colors={

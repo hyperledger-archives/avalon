@@ -30,9 +30,9 @@ from string import Template
 from utility.file_utils import find_file_in_paths
 
 __all__ = ["ConfigurationException",
-    "parse_configuration_files",
-    "parse_configuration_file",
-    "read_config_from_toml"]
+           "parse_configuration_files",
+           "parse_configuration_file",
+           "read_config_from_toml"]
 
 logger = logging.getLogger(__name__)
 
@@ -49,7 +49,9 @@ class ConfigurationException(Exception):
     """
 
     def __init__(self, filename, message):
-        super().__init__(self, "Error in configuration file {0}: {1}".format(filename, message))
+        super().__init__(
+            self, "Error in configuration file {0}: {1}".format(
+                filename, message))
 
 
 # -----------------------------------------------------------------
@@ -59,7 +61,8 @@ def parse_configuration_files(cfiles, search_path, variable_map=None):
     TOML format.
 
     :param list(str) cfiles: list of configuration files to load
-    :param list(str) search_path: list of directories where the files may be located
+    :param list(str) search_path: list of directories where the files may
+           be located
     :param dict variable_map: a set of substitutions for variables in the files
     :return dict:an aggregated dictionary of configuration information
     """
@@ -76,15 +79,20 @@ def parse_configuration_files(cfiles, search_path, variable_map=None):
         try:
             config.update(parse_configuration_file(filename, variable_map))
         except IOError as detail:
-            raise ConfigurationException(filename, "IO error; {0}".format(str(detail)))
+            raise ConfigurationException(
+                filename, "IO error; {0}".format(str(detail)))
         except ValueError as detail:
-            raise ConfigurationException(filename, "Value error; {0}".format(str(detail)))
+            raise ConfigurationException(
+                filename, "Value error; {0}".format(str(detail)))
         except NameError as detail:
-            raise ConfigurationException(filename, "Name error; {0}".format(str(detail)))
+            raise ConfigurationException(
+                filename, "Name error; {0}".format(str(detail)))
         except KeyError as detail:
-            raise ConfigurationException(filename, "Key error; {0}".format(str(detail)))
-        except:
-            raise ConfigurationException(filename, "Unknown error")
+            raise ConfigurationException(
+                filename, "Key error; {0}".format(str(detail)))
+        except Exception as detail:
+            raise ConfigurationException(
+                filename, "Unknown error; {0}".format(str(detail)))
 
     return config
 
@@ -119,7 +127,7 @@ def parse_configuration_file(filename, variable_map):
 
 # -----------------------------------------------------------------
 def read_config_from_toml(input_file, config_name=None,
-        confpaths=[".", TCFHOME + "/" + "config"]):
+                          confpaths=[".", TCFHOME + "/" + "config"]):
     """
     Function to read toml file and returns the toml content as a list
     Parameters:
@@ -134,5 +142,6 @@ def read_config_from_toml(input_file, config_name=None,
     else:
         result = config.get(config_name)
         if result is None:
-            logger.error("%s is missing in toml file %s", config_name, input_file)
+            logger.error(
+                "%s is missing in toml file %s", config_name, input_file)
         return result

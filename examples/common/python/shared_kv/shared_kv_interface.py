@@ -13,7 +13,8 @@
 # limitations under the License.
 
 '''
-This file implements a simple TCF LMDB wrapper for using multiple tables in a lmdb database.
+This file implements a simple TCF LMDB wrapper for using multiple tables in a
+lmdb database.
 The method put stores key and value to the table.
 The method get will retrieve the value of the key.
 Lookup method will retrieve all the keys of the provided table name.
@@ -32,7 +33,8 @@ lookup_flag = False
 
 class KvStorage:
     """
-    KvStorage interface maintains information about registries supported by the TCS in direct model.
+    KvStorage interface maintains information about registries supported by
+    the TCS in direct model.
     """
 
     def open(self, lmdb_file, map_size="1 TB"):
@@ -40,18 +42,21 @@ class KvStorage:
         Function to open the database file
         Parameters:
            - lmdb_file is the name and location of lmdb database file
-           - map_size is the maximum size of the database, it must be a multiple of the page size (4096)
-             and default to an insanely large max size (1 TB)
+           - map_size is the maximum size of the database.
+             It must be a multiple of the page size (4096).
+             The default is 1 TB.
         """
         try:
             map_size = utility.human_read_to_byte(map_size)
             if map_size % 4096 != 0:
                 logger.error(
-                    "Invalid KV Storage Size, it must be a multiple of the page size (4096)")
+                    "Invalid KV Storage Size. " +
+                    "It must be a multiple of the page size (4096)")
                 raise Exception("Invalid Map Storage Size")
             db_store.db_store_init(lmdb_file, map_size)
             return True
-        except:
+        except Exception as err:
+            logger.error("Exception reading KV Storage Size: %s", str(err))
             return False
 
 # ---------------------------------------------------------------------------------------------------
@@ -66,14 +71,15 @@ class KvStorage:
         """
         Function to set a key-value pair in a lmdb table
         Parameters:
-           - table is the name of lmdb table in which key-value pair need to be inserted.
+           - table is the name of lmdb table in which key-value pair needs
+             to be inserted.
            - key is the primary key of the table.
            - value is the value that needs to be inserted in the table.
         """
         try:
             db_store.db_store_put(table, key, value)
             return True
-        except:
+        except Exception:
             return False
 
 # ---------------------------------------------------------------------------------------------------
@@ -81,7 +87,8 @@ class KvStorage:
         """
         Function to get the value for a key in a lmdb table
         Parameters:
-           - table is the name of lmdb table in which key-value pair need to be retrieved.
+           - table is the name of lmdb table in which key-value pair needs
+             to be retrieved.
            - key is the primary key of the table.
         """
         try:
@@ -89,7 +96,7 @@ class KvStorage:
                 value = db_store.db_store_get(table, key)
             else:
                 value = None
-        except:
+        except Exception:
             value = None
 
         if not value:
@@ -102,13 +109,15 @@ class KvStorage:
         """
         Function to remove the key/value from a lmdb table
         Parameters:
-           - table is the name of lmdb table in which key-value pair need to be removed.
+           - table is the name of lmdb table in which key-value pair need to
+             be removed.
            - key is the primary key of the table.
-           - value is data to be removed, If the database does not support sorted duplicate
-             data items (MDB_DUPSORT) the data parameter is ignored. If the database supports
-             sorted duplicates and the data parameter is NULL, all of the duplicate data items
-             for the key will be deleted. Otherwise, if the data parameter is non-NULL only the
-             matching data item will be deleted
+           - value is data to be removed. If the database does not support
+             sorted duplicate data items (MDB_DUPSORT) the data parameter is
+             ignored. If the database supports sorted duplicates and the data
+             parameter is NULL, all of the duplicate data items for the key
+             will be deleted. Otherwise, if the data parameter is non-NULL
+             only the matching data item will be deleted
         """
         try:
             if value is None:
@@ -116,7 +125,7 @@ class KvStorage:
             else:
                 db_store.db_store_del(table, key, value)
             return True
-        except:
+        except Exception:
             return False
 
 # ---------------------------------------------------------------------------------------------------
@@ -134,7 +143,7 @@ class KvStorage:
             table_keys = table_keys.split(",")
             for i in table_keys:
                 result.append(i)
-        except:
+        except Exception:
             result = []
 
         return result

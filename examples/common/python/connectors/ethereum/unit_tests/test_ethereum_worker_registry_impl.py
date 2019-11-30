@@ -21,12 +21,14 @@ import json
 import unittest
 from web3 import Web3
 
-from connectors.ethereum.ethereum_worker_registry_impl import EthereumWorkerRegistryImpl
+from connectors.ethereum.ethereum_worker_registry_impl \
+     import EthereumWorkerRegistryImpl
 from utility.tcf_types import WorkerType, WorkerStatus
 from utility.hex_utils import hex_to_utf, pretty_ids
 
 
-logging.basicConfig(format="%(asctime)s - %(levelname)s - %(message)s", level=logging.INFO)
+logging.basicConfig(
+    format="%(asctime)s - %(levelname)s - %(message)s", level=logging.INFO)
 
 
 class TestEthereumWorkerRegistryImpl(unittest.TestCase):
@@ -46,31 +48,45 @@ class TestEthereumWorkerRegistryImpl(unittest.TestCase):
     def test_worker_register(self):
         self.__worker_id = urandom(32)
         self.__worker_type = WorkerType.TEE_SGX
-        self.__details = json.dumps({"workOrderSyncUri":
-            "http://worker-order:8008".encode("utf-8").hex()})
+        self.__details = json.dumps(
+            {"workOrderSyncUri":
+             "http://worker-order:8008".encode("utf-8").hex()})
         self.__org_id = urandom(32)
         self.__application_ids = [urandom(32), urandom(32)]
-        logging.info("Calling worker_register contract..\n worker_id: %s\n worker_type: %d\n \
-orgId: %s\n applicationIds %s\n details %s",
+        logging.info(
+            "Calling worker_register contract..\n worker_id: %s\n " +
+            "worker_type: %d\n " +
+            "orgId: %s\n applicationIds %s\n details %s",
             hex_to_utf(self.__worker_id), self.__worker_type.value,
-            hex_to_utf(self.__org_id), pretty_ids(self.__application_ids), self.__details)
-        result = self.__eth_conn.worker_register(self.__worker_id, self.__worker_type,
+            hex_to_utf(self.__org_id), pretty_ids(self.__application_ids),
+            self.__details)
+        result = self.__eth_conn.worker_register(
+            self.__worker_id, self.__worker_type,
             self.__org_id, self.__application_ids, self.__details)
-        self.assertIsNotNone(result["txn_receipt"], "transaction execution failed")
-        logging.info("worker_register status \n{'status': %s', \n'txn_receipt': %s}",
+        self.assertIsNotNone(
+            result["txn_receipt"], "transaction execution failed")
+        logging.info(
+            "worker_register status \n{'status': %s', \n'txn_receipt': %s}",
             result["status"],
-            json.dumps(json.loads(Web3.toJSON(result["txn_receipt"])), indent=4))
-        self.assertEqual(result["status"], "added", "worker register response not matched")
+            json.dumps(json.loads(Web3.toJSON(result["txn_receipt"])),
+                       indent=4))
+        self.assertEqual(
+            result["status"], "added", "worker register response not matched")
 
     def test_worker_set_status(self):
         self.__status = WorkerStatus.DECOMMISSIONED
-        logging.info("Calling worker_set_status..\n worker_id: %s\n status: %d",
+        logging.info(
+            "Calling worker_set_status..\n worker_id: %s\n status: %d",
             hex_to_utf(self.__worker_id), self.__status.value)
-        result = self.__eth_conn.worker_set_status(self.__worker_id, self.__status)
-        logging.info("worker_set_status status \n{'status': %s', \n'txn_receipt': %s}",
+        result = self.__eth_conn.worker_set_status(
+            self.__worker_id, self.__status)
+        logging.info(
+            "worker_set_status status \n{'status': %s', \n'txn_receipt': %s}",
             result["status"],
-            json.dumps(json.loads(Web3.toJSON(result["txn_receipt"])), indent=4))
-        self.assertEqual(result["status"], "added", "worker set status response not matched")
+            json.dumps(json.loads(Web3.toJSON(result["txn_receipt"])),
+                       indent=4))
+        self.assertEqual(result["status"], "added",
+                         "worker set status response not matched")
 
     def test_worker_update(self):
         self.__new_details = json.dumps({
@@ -79,63 +95,87 @@ orgId: %s\n applicationIds %s\n details %s",
             "workOrderNotifyUri":
             "http://worker-order-notify:9909".encode("utf-8").hex()
         })
-        logging.info("Calling worker_update..\n worker_id: %s\n details: %s",
+        logging.info(
+            "Calling worker_update..\n worker_id: %s\n details: %s",
             hex_to_utf(self.__worker_id), self.__new_details)
-        result = self.__eth_conn.worker_update(self.__worker_id, self.__new_details)
-        logging.info("worker_update status \n{'status': %s', \n'txn_receipt': %s}",
+        result = self.__eth_conn.worker_update(
+            self.__worker_id, self.__new_details)
+        logging.info(
+            "worker_update status \n{'status': %s', \n'txn_receipt': %s}",
             result["status"],
-            json.dumps(json.loads(Web3.toJSON(result["txn_receipt"])), indent=4))
-        self.assertEqual(result["status"], "added", "worker update response not matched")
+            json.dumps(
+                json.loads(Web3.toJSON(result["txn_receipt"])), indent=4))
+        self.assertEqual(
+            result["status"], "added", "worker update response not matched")
 
     def test_worker_lookup(self):
-        logging.info("Calling worker_lookup..\n worker_type: %d\n orgId: %s\n applicationId: %s",
+        logging.info(
+            "Calling worker_lookup..\n worker_type: %d\n orgId: %s\n " +
+            "applicationId: %s",
             self.__worker_type.value,
             hex_to_utf(self.__org_id),
             hex_to_utf(self.__application_ids[0]))
-        result = self.__eth_conn.worker_lookup(self.__worker_type, self.__org_id,
+        result = self.__eth_conn.worker_lookup(
+            self.__worker_type, self.__org_id,
             self.__application_ids[0])
-        logging.info("worker_lookup status [%d, %s, %s]",
+        logging.info(
+            "worker_lookup status [%d, %s, %s]",
             result[0], result[1], pretty_ids(result[2]))
         match = self.__worker_id in result[2]
-        self.assertEqual(result[0], 1, "Worker lookup response count doesn't match")
-        self.assertTrue(match, "Worker lookup response worker id doesn't match")
+        self.assertEqual(
+            result[0], 1, "Worker lookup response count doesn't match")
+        self.assertTrue(
+            match, "Worker lookup response worker id doesn't match")
 
     def test_worker_retrieve(self):
-        logging.info("Calling worker_retrieve..\n worker_id: %s",
+        logging.info(
+            "Calling worker_retrieve..\n worker_id: %s",
             hex_to_utf(self.__worker_id))
         result = self.__eth_conn.worker_retrieve(self.__worker_id)
-        logging.info("worker_retrieve status [%d, %s, %s, %s, %d]", result[0],
+        logging.info(
+            "worker_retrieve status [%d, %s, %s, %s, %d]", result[0],
             hex_to_utf(result[1]), pretty_ids(result[2]), result[3], result[4])
-        self.assertEqual(result[0], self.__worker_type.value,
+        self.assertEqual(
+            result[0], self.__worker_type.value,
             "Worker retrieve response worker type doesn't match")
-        self.assertEqual(result[1], self.__org_id,
+        self.assertEqual(
+            result[1], self.__org_id,
             "Worker retrieve response organization id doesn't match")
-        self.assertEqual(result[2][0], self.__application_ids[0],
+        self.assertEqual(
+            result[2][0], self.__application_ids[0],
             "Worker retrieve response application id[0] doesn't match")
-        self.assertEqual(result[2][1], self.__application_ids[1],
+        self.assertEqual(
+            result[2][1], self.__application_ids[1],
             "Worker retrieve response application id[1] doesn't match")
-        self.assertEqual(result[3], self.__new_details,
+        self.assertEqual(
+            result[3], self.__new_details,
             "Worker retrieve response worker details doesn't match")
-        self.assertEqual(result[4], self.__status.value,
+        self.assertEqual(
+            result[4], self.__status.value,
             "Worker retrieve response worker status doesn't match")
 
     def test_worker_lookup_next(self):
         lookUpTag = ""
-        logging.info("Calling worker_lookup_next..\n worker_type: %d\n \
-orgId: %s\n applicationId:%s\n lookUpTag: %s",
+        logging.info(
+            "Calling worker_lookup_next..\n worker_type: %d\n" +
+            "orgId: %s\n applicationId:%s\n lookUpTag: %s",
             self.__worker_type.value, hex_to_utf(self.__org_id),
             hex_to_utf(self.__application_ids[0]), lookUpTag)
-        result = self.__eth_conn.worker_lookup_next(self.__worker_type,
-            self.__org_id, self.__application_ids[0], lookUpTag)
+        result = self.__eth_conn.worker_lookup_next(
+            self.__worker_type, self.__org_id, self.__application_ids[0],
+            lookUpTag)
         logging.info("worker_lookup_next status [%d, %s, %s]",
-            result[0], result[1], pretty_ids(result[2]))
-        self.assertEqual(result[0], 0, "worker_lookup_next response count doesn't match")
+                     result[0], result[1], pretty_ids(result[2]))
+        self.assertEqual(
+            result[0], 0, "worker_lookup_next response count doesn't match")
 
 
 def main():
     logging.info("Running test cases...")
     tcf_home = environ.get("TCF_HOME", "../../")
-    test = TestEthereumWorkerRegistryImpl(tcf_home + "/examples/common/python/connectors/" + "tcf_connector.toml")
+    test = TestEthereumWorkerRegistryImpl(
+        tcf_home +
+        "/examples/common/python/connectors/" + "tcf_connector.toml")
     test.test_worker_register()
     test.test_worker_update()
     test.test_worker_set_status()

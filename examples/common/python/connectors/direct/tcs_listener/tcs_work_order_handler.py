@@ -150,7 +150,8 @@ class TCSWorkOrderHandler:
         input_value_json = json.loads(input_json_str)
 
         req_validator = WorkOrderRequestValidator()
-        valid, err_msg = req_validator.validate_parameters(input_value_json["params"])
+        valid, err_msg = req_validator.validate_parameters(
+            input_value_json["params"])
         if not valid:
             raise JSONRPCDispatchException(
                 JsonRpcErrorCode.INVALID_PARAMETER,
@@ -204,8 +205,10 @@ class TCSWorkOrderHandler:
 
         if(self.kv_helper.get("wo-timestamps", wo_id) is None):
 
-            # Create a new work order entry. Don't change the order of table updation.
-            # The order is important for clean up if the TCS is restarted in middle
+            # Create a new work order entry.
+            # Don't change the order of table updation.
+            # The order is important for clean up if the TCS is restarted in
+            # the middle.
             epoch_time = str(time.time())
 
             # Update the tables

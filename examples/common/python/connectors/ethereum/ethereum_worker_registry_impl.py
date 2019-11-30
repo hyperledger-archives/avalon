@@ -20,10 +20,12 @@ from utility.hex_utils import is_valid_hex_str
 
 from utility.tcf_types import WorkerStatus, WorkerType
 from connectors.ethereum.ethereum_wrapper import EthereumWrapper
-from connectors.interfaces.worker_registry_interface import WorkerRegistryInterface
+from connectors.interfaces.worker_registry_interface \
+    import WorkerRegistryInterface
 from connectors.utils import construct_message, validate_details
 
-logging.basicConfig(format="%(asctime)s - %(levelname)s - %(message)s", level=logging.INFO)
+logging.basicConfig(
+    format="%(asctime)s - %(levelname)s - %(message)s", level=logging.INFO)
 
 
 class EthereumWorkerRegistryImpl(WorkerRegistryInterface):
@@ -38,24 +40,30 @@ class EthereumWorkerRegistryImpl(WorkerRegistryInterface):
         else:
             raise Exception("Invalid configuration parameter")
 
-    def worker_register(self, worker_id, worker_type, org_id, application_ids, details):
+    def worker_register(
+            self, worker_id, worker_type, org_id, application_ids, details):
         """
-        Registry new worker with details of worker
+        Register new worker with details of worker
         """
         if (self.__contract_instance is not None):
-            if not is_valid_hex_str(binascii.hexlify(worker_id).decode("utf8")):
+            if not is_valid_hex_str(
+                    binascii.hexlify(worker_id).decode("utf8")):
                 logging.info("Invalid worker id {}".format(worker_id))
-                return construct_message("failed", "Invalid worker id {}".format(worker_id))
+                return construct_message(
+                    "failed", "Invalid worker id {}".format(worker_id))
             if not isinstance(worker_type, WorkerType):
                 logging.info("Invalid workerType {}".format(worker_type))
-                return construct_message("failed", "Invalid workerType {}".format(worker_type))
+                return construct_message(
+                    "failed", "Invalid workerType {}".format(worker_type))
             if not is_valid_hex_str(binascii.hexlify(org_id).decode("utf8")):
                 logging.info("Invalid organization id {}".format(org_id))
-                return construct_message("failed", "Invalid organization id {}".format(org_id))
+                return construct_message(
+                    "failed", "Invalid organization id {}".format(org_id))
             for aid in application_ids:
                 if not is_valid_hex_str(binascii.hexlify(aid).decode("utf8")):
                     logging.info("Invalid application id {}".format(aid))
-                    return construct_message("failed", "Invalid application id {}".format(aid))
+                    return construct_message(
+                        "failed", "Invalid application id {}".format(aid))
             if details is not None:
                 is_valid = validate_details(details)
                 if is_valid is not None:
@@ -65,14 +73,17 @@ class EthereumWorkerRegistryImpl(WorkerRegistryInterface):
                 worker_id, worker_type.value, org_id, application_ids,
                 details).buildTransaction(
                 {"chainId": self.__eth_client.get_channel_id(),
-                "gas": self.__eth_client.get_gas_limit(),
-                "gasPrice": self.__eth_client.get_gas_price(),
-                "nonce": self.__eth_client.get_txn_nonce()})
+                 "gas": self.__eth_client.get_gas_limit(),
+                 "gasPrice": self.__eth_client.get_gas_price(),
+                 "nonce": self.__eth_client.get_txn_nonce()})
             tx = self.__eth_client.execute_transaction(txn_hash)
             return tx
         else:
-            logging.error("worker registry contract instance is not initialized")
-            return construct_message("failed", "worker registry contract instance is not initialized")
+            logging.error(
+                "worker registry contract instance is not initialized")
+            return construct_message(
+                "failed",
+                "worker registry contract instance is not initialized")
 
     def worker_set_status(self, worker_id, status):
         """
@@ -80,13 +91,17 @@ class EthereumWorkerRegistryImpl(WorkerRegistryInterface):
         status is worker type enum type
         """
         if (self.__contract_instance is not None):
-            if not is_valid_hex_str(binascii.hexlify(worker_id).decode("utf8")):
+            if not is_valid_hex_str(binascii.hexlify(
+                    worker_id).decode("utf8")):
                 logging.info("Invalid worker id {}".format(worker_id))
-                return construct_message("failed", "Invalid worker id {}".format(worker_id))
+                return construct_message(
+                    "failed", "Invalid worker id {}".format(worker_id))
             if not isinstance(status, WorkerStatus):
                 logging.info("Invalid worker status {}".format(status))
-                return construct_message("failed", "Invalid worker status {}".format(status))
-            txn_hash = self.__contract_instance.functions.workerSetStatus(worker_id,
+                return construct_message(
+                    "failed", "Invalid worker status {}".format(status))
+            txn_hash = self.__contract_instance.functions.workerSetStatus(
+                worker_id,
                 status.value).buildTransaction(
                 {
                     "chainId": self.__eth_client.get_channel_id(),
@@ -97,23 +112,29 @@ class EthereumWorkerRegistryImpl(WorkerRegistryInterface):
             tx = self.__eth_client.execute_transaction(txn_hash)
             return tx
         else:
-            logging.error("worker registry contract instance is not initialized")
-            return construct_message("failed", "worker registry contract instance is not initialized")
+            logging.error(
+                "worker registry contract instance is not initialized")
+            return construct_message(
+                "failed",
+                "worker registry contract instance is not initialized")
 
     def worker_update(self, worker_id, details):
         """
         Update the worker with details data which is json string
         """
         if (self.__contract_instance is not None):
-            if not is_valid_hex_str(binascii.hexlify(worker_id).decode("utf8")):
+            if not is_valid_hex_str(binascii.hexlify(
+                    worker_id).decode("utf8")):
                 logging.error("Invalid worker id {}".format(worker_id))
-                return construct_message("failed", "Invalid worker id {}".format(worker_id))
+                return construct_message(
+                    "failed", "Invalid worker id {}".format(worker_id))
             if details is not None:
                 is_valid = validate_details(details)
                 if is_valid is not None:
                     logging.error(is_valid)
                     return construct_message("failed", is_valid)
-            txn_hash = self.__contract_instance.functions.workerUpdate(worker_id,
+            txn_hash = self.__contract_instance.functions.workerUpdate(
+                worker_id,
                 details).buildTransaction(
                 {
                     "chainId": self.__eth_client.get_channel_id(),
@@ -124,8 +145,11 @@ class EthereumWorkerRegistryImpl(WorkerRegistryInterface):
             tx = self.__eth_client.execute_transaction(txn_hash)
             return tx
         else:
-            logging.error("worker registry contract instance is not initialized")
-            return construct_message("failed", "worker registry contract instance is not initialized")
+            logging.error(
+                "worker registry contract instance is not initialized")
+            return construct_message(
+                "failed",
+                "worker registry contract instance is not initialized")
 
     def worker_lookup(self, worker_type, org_id, application_id):
         """
@@ -136,51 +160,73 @@ class EthereumWorkerRegistryImpl(WorkerRegistryInterface):
         if (self.__contract_instance is not None):
             if not isinstance(worker_type, WorkerType):
                 logging.info("Invalid workerType {}".format(worker_type))
-                return construct_message("failed", "Invalid workerType {}".format(worker_type))
+                return construct_message(
+                    "failed", "Invalid workerType {}".format(worker_type))
             if not is_valid_hex_str(binascii.hexlify(org_id).decode("utf8")):
                 logging.info("Invalid organization id {}".format(org_id))
-                return construct_message("failed", "Invalid organization id {}".format(org_id))
-            if not is_valid_hex_str(binascii.hexlify(application_id).decode("utf8")):
-                logging.info("Invalid application id {}".format(application_id))
-                return construct_message("failed", "Invalid application id {}".format(application_id))
-            lookupResult = self.__contract_instance.functions.workerLookUp(worker_type.value,
-                org_id, application_id).call()
+                return construct_message(
+                    "failed", "Invalid organization id {}".format(org_id))
+            if not is_valid_hex_str(
+                    binascii.hexlify(application_id).decode("utf8")):
+                logging.info(
+                    "Invalid application id {}".format(application_id))
+                return construct_message(
+                    "failed",
+                    "Invalid application id {}".format(application_id))
+            lookupResult = self.__contract_instance.functions.workerLookUp(
+                worker_type.value, org_id, application_id).call()
             return lookupResult
         else:
-            logging.error("worker registry contract instance is not initialized")
-            return construct_message("failed", "worker registry contract instance is not initialized")
+            logging.error(
+                "worker registry contract instance is not initialized")
+            return construct_message(
+                "failed",
+                "worker registry contract instance is not initialized")
 
     def worker_retrieve(self, worker_id):
         """
         Retrieve the worker identified by worker id
         """
         if (self.__contract_instance is not None):
-            if not is_valid_hex_str(binascii.hexlify(worker_id).decode("utf8")):
+            if not is_valid_hex_str(binascii.hexlify(
+                    worker_id).decode("utf8")):
                 logging.info("Invalid worker id {}".format(worker_id))
-                return construct_message("failed", "Invalid worker id {}".format(worker_id))
+                return construct_message(
+                    "failed", "Invalid worker id {}".format(worker_id))
 
-            workerDetails = self.__contract_instance.functions.workerRetrieve(worker_id).call()
+            workerDetails = self.__contract_instance.functions.workerRetrieve(
+                worker_id).call()
             return workerDetails
         else:
-            logging.error("worker registry contract instance is not initialized")
-            return construct_message("failed", "worker registry contract instance is not initialized")
+            logging.error(
+                "worker registry contract instance is not initialized")
+            return construct_message(
+                "failed",
+                "worker registry contract instance is not initialized")
 
-    def worker_lookup_next(self, worker_type, org_id, application_id, lookup_tag):
+    def worker_lookup_next(self, worker_type, org_id, application_id,
+                           lookup_tag):
         if (self.__contract_instance is not None):
             if not isinstance(worker_type, WorkerType):
                 logging.info("Invalid workerType {}".format(worker_type))
-                return construct_message("failed", "Invalid workerType {}".format(worker_type))
+                return construct_message(
+                    "failed", "Invalid workerType {}".format(worker_type))
             if not is_valid_hex_str(binascii.hexlify(org_id).decode("utf")):
                 logging.info("Invalid organization id {}".format(org_id))
-                return construct_message("failed", "Invalid organization id {}".format(org_id))
-            if not is_valid_hex_str(binascii.hexlify(application_id).decode("utf8")):
+                return construct_message(
+                    "failed", "Invalid organization id {}".format(org_id))
+            if not is_valid_hex_str(
+                    binascii.hexlify(application_id).decode("utf8")):
                 logging.info("Invalid application id {}".format(org_id))
-                return construct_message("failed", "Invalid application id {}".format(org_id))
-            lookupResult = self.__contract_instance.functions.workerLookUpNext(worker_type.value,
+                return construct_message(
+                    "failed", "Invalid application id {}".format(org_id))
+            lookupResult = self.__contract_instance.functions.workerLookUpNext(
+                worker_type.value,
                 org_id, application_id, lookup_tag).call()
             return lookupResult
         else:
-            logging.error("worker registry contract instance is not initialized")
+            logging.error(
+                "worker registry contract instance is not initialized")
             return construct_message("failed", "worker registry contract instance \
                 is not initialized")
 
@@ -205,7 +251,8 @@ class EthereumWorkerRegistryImpl(WorkerRegistryInterface):
         tcf_home = environ.get("TCF_HOME", "../../../")
         contract_file_name = tcf_home + "/" + \
             config["ethereum"]["worker_registry_contract_file"]
-        contract_address = config["ethereum"]["worker_registry_contract_address"]
+        contract_address = \
+            config["ethereum"]["worker_registry_contract_address"]
         self.__contract_instance = self.__eth_client.get_contract_instance(
             contract_file_name, contract_address
         )

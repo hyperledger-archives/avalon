@@ -18,11 +18,13 @@ from utility.hex_utils import is_valid_hex_str
 import binascii
 from os import environ
 
-from connectors.interfaces.worker_registry_list_interface import WorkerRegistryListInterface
+from connectors.interfaces.worker_registry_list_interface \
+    import WorkerRegistryListInterface
 from connectors.ethereum.ethereum_wrapper import EthereumWrapper
 from utility.tcf_types import RegistryStatus
 
-logging.basicConfig(format="%(asctime)s - %(levelname)s - %(message)s", level=logging.INFO)
+logging.basicConfig(
+    format="%(asctime)s - %(levelname)s - %(message)s", level=logging.INFO)
 
 
 class EthereumWorkerRegistryListImpl(WorkerRegistryListInterface):
@@ -44,7 +46,8 @@ class EthereumWorkerRegistryListImpl(WorkerRegistryListInterface):
             if (sc_addr is not None and is_valid_hex_str(
                     binascii.hexlify(sc_addr).decode("utf8")) is False):
                 logging.info("Invalid smart contract address {}")
-                return construct_message("failed", "Invalid smart contract address")
+                return construct_message(
+                    "failed", "Invalid smart contract address")
             if (not uri):
                 logging.info("Empty uri {}".format(uri))
                 return construct_message("failed", "Empty uri")
@@ -52,22 +55,25 @@ class EthereumWorkerRegistryListImpl(WorkerRegistryListInterface):
                 if (is_valid_hex_str(binascii.hexlify(aid).decode("utf8"))
                         is False):
                     logging.info("Invalid application id {}".format(aid))
-                    return construct_message("failed", "Invalid application id")
+                    return construct_message(
+                        "failed", "Invalid application id")
 
-            txn_hash = self.__contract_instance.functions.registryAdd(org_id, uri, org_id,
-            app_type_ids).buildTransaction(
-                {
-                    "chainId": self.__eth_client.get_channel_id(),
-                    "gas": self.__eth_client.get_gas_limit(),
-                    "gasPrice": self.__eth_client.get_gas_price(),
-                    "nonce": self.__eth_client.get_txn_nonce()
-                })
+            txn_hash = self.__contract_instance.functions.registryAdd(
+                org_id, uri, org_id, app_type_ids).buildTransaction(
+                    {
+                        "chainId": self.__eth_client.get_channel_id(),
+                        "gas": self.__eth_client.get_gas_limit(),
+                        "gasPrice": self.__eth_client.get_gas_price(),
+                        "nonce": self.__eth_client.get_txn_nonce()
+                    })
             tx = self.__eth_client.execute_transaction(txn_hash)
             return tx
         else:
-            logging.error("direct registry contract instance is not initialized")
-            return construct_message("failed", "direct registry contract instance is \
-                not initialized")
+            logging.error(
+                "direct registry contract instance is not initialized")
+            return construct_message(
+                "failed",
+                "direct registry contract instance is not initialized")
 
     def registry_update(self, org_id, uri, sc_addr, app_type_ids):
         if (self.__contract_instance is not None):
@@ -77,8 +83,10 @@ class EthereumWorkerRegistryListImpl(WorkerRegistryListInterface):
                 return construct_message("failed", "Invalid Org id")
             if (sc_addr is not None and is_valid_hex_str(
                     binascii.hexlify(sc_addr).decode("utf8")) is False):
-                logging.error("Invalid smart contract address {}".format(sc_addr))
-                return construct_message("failed", "Invalid smart contract address")
+                logging.error(
+                    "Invalid smart contract address {}".format(sc_addr))
+                return construct_message(
+                    "failed", "Invalid smart contract address")
             if (not uri):
                 logging.error("Empty uri {}".format(uri))
                 return construct_message("failed", "Empty uri")
@@ -86,9 +94,11 @@ class EthereumWorkerRegistryListImpl(WorkerRegistryListInterface):
                 if (is_valid_hex_str(binascii.hexlify(aid).decode("utf8"))
                         is False):
                     logging.error("Invalid application id {}".format(aid))
-                    return construct_message("failed", "Invalid application id")
+                    return construct_message(
+                        "failed", "Invalid application id")
 
-            txn_hash = self.__contract_instance.functions.registryUpdate(org_id, uri, sc_addr,
+            txn_hash = self.__contract_instance.functions.registryUpdate(
+                org_id, uri, sc_addr,
                 app_type_ids).buildTransaction(
                 {
                     "chainId": self.__eth_client.get_channel_id(),
@@ -99,9 +109,11 @@ class EthereumWorkerRegistryListImpl(WorkerRegistryListInterface):
             tx = self.__eth_client.execute_transaction(txn_hash)
             return tx
         else:
-            logging.error("direct registry contract instance is not initialized")
-            return construct_message("failed", "direct registry contract instance is \
-                not initialized")
+            logging.error(
+                "direct registry contract instance is not initialized")
+            return construct_message(
+                "failed",
+                "direct registry contract instance is not initialized")
 
     def registry_set_status(self, org_id, status):
         if (self.__contract_instance is not None):
@@ -111,37 +123,48 @@ class EthereumWorkerRegistryListImpl(WorkerRegistryListInterface):
                 return construct_message("failed", "Invalid argument")
             if not isinstance(status, RegistryStatus):
                 logging.info("Invalid registry status {}".format(status))
-                return construct_message("failed", "Invalid worker status {}".format(status))
+                return construct_message(
+                    "failed", "Invalid worker status {}".format(status))
             txn_hash = self.__contract_instance.functions.registrySetStatus(
                 org_id,
                 status.value).buildTransaction(
                 {"chainId": self.__eth_client.get_channel_id(),
-                "gas": self.__eth_client.get_gas_limit(),
-                "gasPrice": self.__eth_client.get_gas_price(),
-                "nonce": self.__eth_client.get_txn_nonce()})
+                 "gas": self.__eth_client.get_gas_limit(),
+                 "gasPrice": self.__eth_client.get_gas_price(),
+                 "nonce": self.__eth_client.get_txn_nonce()})
             tx = self.__eth_client.execute_transaction(txn_hash)
             return tx
         else:
             logging.error(
                 "direct registry contract instance is not initialized")
-            return construct_message("failed",
+            return construct_message(
+                "failed",
                 "direct registry contract instance is not initialized")
 
     def registry_lookup(self, app_type_id=None):
         if (self.__contract_instance is not None):
             if app_type_id is not None:
-                if is_valid_hex_str(binascii.hexlify(app_type_id).decode("utf8")):
-                    lookupResult = self.__contract_instance.functions.registryLookUp(
-                        app_type_id).call()
+                if is_valid_hex_str(binascii.hexlify(app_type_id).decode(
+                        "utf8")):
+                    lookupResult = \
+                        self.__contract_instance.functions.registryLookUp(
+                            app_type_id).call()
                 else:
-                    logging.info("Invalid application type id {}".format(app_type_id))
-                    return construct_message("failed", "Invalid application type id")
+                    logging.info(
+                        "Invalid application type id {}".format(app_type_id))
+                    return construct_message(
+                        "failed", "Invalid application type id")
             else:
-                lookupResult = self.__contract_instance.functions.registryLookUp(b"").call()
+                lookupResult = \
+                    self.__contract_instance.functions.registryLookUp(b"") \
+                    .call()
             return lookupResult
         else:
-            logging.error("direct registry contract instance is not initialized")
-            return construct_message("failed", "direct registry contract instance is not initialized")
+            logging.error(
+                "direct registry contract instance is not initialized")
+            return construct_message(
+                "failed",
+                "direct registry contract instance is not initialized")
 
     def registry_retrieve(self, org_id):
         if (self.__contract_instance is not None):
@@ -150,25 +173,35 @@ class EthereumWorkerRegistryListImpl(WorkerRegistryListInterface):
                 logging.info("Invalid Org id {}".format(org_id))
                 return construct_message("failed", "Invalid Org id")
             else:
-                registryDetails = self.__contract_instance.functions.registryRetrieve(org_id).call()
+                registryDetails = \
+                    self.__contract_instance.functions.registryRetrieve(
+                        org_id).call()
                 return registryDetails
         else:
-            logging.error("direct registry contract instance is not initialized")
-            return construct_message("failed", "direct registry contract instance is \
-                not initialized")
+            logging.error(
+                "direct registry contract instance is not initialized")
+            return construct_message(
+                "failed",
+                "direct registry contract instance is not initialized")
 
     def registry_lookup_next(self, app_type_id, lookup_tag):
         if (self.__contract_instance is not None):
             if is_valid_hex_str(binascii.hexlify(app_type_id).decode("utf8")):
-                lookupResult = self.__contract_instance.functions.registryLookUpNext(app_type_id, lookup_tag).call()
+                lookupResult = \
+                    self.__contract_instance.functions.registryLookUpNext(
+                        app_type_id, lookup_tag).call()
                 return lookupResult
             else:
-                logging.info("Invalid application type id {}".format(app_type_id))
-                return construct_message("failed", "Invalid application type id")
+                logging.info(
+                    "Invalid application type id {}".format(app_type_id))
+                return construct_message(
+                    "failed", "Invalid application type id")
         else:
-            logging.error("direct registry contract instance is not initialized")
-            return construct_message("failed", "direct registry contract instance \
-                is not initialized")
+            logging.error(
+                "direct registry contract instance is not initialized")
+            return construct_message(
+                "failed",
+                "direct registry contract instance is not initialized")
 
     def __validate(self, config):
         """
@@ -191,7 +224,8 @@ class EthereumWorkerRegistryListImpl(WorkerRegistryListInterface):
         tcf_home = environ.get("TCF_HOME", "../../../")
         contract_file_name = tcf_home + "/" + \
             config["ethereum"]["direct_registry_contract_file"]
-        contract_address = config["ethereum"]["direct_registry_contract_address"]
+        contract_address = \
+            config["ethereum"]["direct_registry_contract_address"]
         self.__contract_instance = self.__eth_client.get_contract_instance(
             contract_file_name, contract_address
         )

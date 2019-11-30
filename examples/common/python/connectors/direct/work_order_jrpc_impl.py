@@ -22,7 +22,8 @@ from connectors.utils import create_jrpc_response
 from utility.tcf_types import JsonRpcErrorCode
 from error_code.error_status import WorkOrderStatus
 
-logging.basicConfig(format="%(asctime)s - %(levelname)s - %(message)s", level=logging.INFO)
+logging.basicConfig(
+    format="%(asctime)s - %(levelname)s - %(message)s", level=logging.INFO)
 
 
 class WorkOrderJRPCImpl(WorkOrderInterface):
@@ -52,7 +53,8 @@ class WorkOrderJRPCImpl(WorkOrderInterface):
         """
         if not is_valid_hex_str(work_order_id):
             logging.error("Invalid work order Id")
-            return create_jrpc_response(id, JsonRpcErrorCode.INVALID_PARAMETER,
+            return create_jrpc_response(
+                id, JsonRpcErrorCode.INVALID_PARAMETER,
                 "Invalid work order Id")
 
         json_rpc_request = {
@@ -78,8 +80,11 @@ class WorkOrderJRPCImpl(WorkOrderInterface):
             else:
                 while "error" in response and \
                         response["error"]["code"] == WorkOrderStatus.PENDING:
-                    response = self.work_order_get_result_nonblocking(work_order_id, id)
-                    # TODO: currently pooling after every 2 sec interval forever.
-                    # We should implement feature to timeout after responseTimeoutMsecs in the request
+                    response = self.work_order_get_result_nonblocking(
+                        work_order_id, id)
+                    # TODO: currently pooling after every 2 sec interval
+                    # forever.
+                    # We should implement feature to timeout after
+                    # responseTimeoutMsecs in the request.
                     time.sleep(2)
                 return response

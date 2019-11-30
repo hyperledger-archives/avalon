@@ -18,7 +18,8 @@ from utility.hex_utils import is_valid_hex_str
 
 from utility.tcf_types import JsonRpcErrorCode
 
-logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s', level=logging.INFO)
+logging.basicConfig(
+    format='%(asctime)s - %(levelname)s - %(message)s', level=logging.INFO)
 
 
 def create_jrpc_response(id, code, message, data=None):

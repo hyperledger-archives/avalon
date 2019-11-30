@@ -12,7 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-''' this Component acts as bridge between smart contract deployed in blockchain and KV storage'''
+'''
+This Component acts as bridge between smart contract deployed in blockchain and
+KV storage.
+'''
 
 import sys
 import time
@@ -45,8 +48,11 @@ def bytes_list_to_str_list(bytes_list):
 
 def create_json_object(registry_id, registry, status):
     registry_info = dict()
-    # registry[0] contains registryType which symbolizes if registry present ( value equals to 1).
-    registry_info["orgId"] = (registry_id.decode()).rstrip(' \t\r\n\0')  # Strip off null bytes added by decode
+    # registry[0] contains registryType which symbolizes if registry present
+    # ( value equals to 1).
+
+    # Strip off null bytes added by decode
+    registry_info["orgId"] = (registry_id.decode()).rstrip(' \t\r\n\0')
     registry_info["uri"] = registry[1]
     registry_info["scAddress"] = (registry[2].decode()).rstrip(' \t\r\n\0')
     app_ids_bytes = registry[3]  # list of application ids
@@ -72,9 +78,11 @@ def deserialize_json_object(json_reg_info):
 
 
 def sync_contract_and_lmdb(eth_direct_registry, kv_storage):
-    # Check if all registries in smart contract are available in KvStorage, if not add them
+    # Check if all registries in smart contract are available in KvStorage.
+    # If not add them.
     eth_lookup_result = eth_direct_registry.RegistryLookUp()
-    eth_registry_list = eth_lookup_result[-1]  # last value of lookup will be list of registry id's/org id's
+    # Last value of lookup will be list of registry id's/org id's
+    eth_registry_list = eth_lookup_result[-1]
 
     logger.info("Syncing registries from Contract to KvStorage")
     if not eth_registry_list:
@@ -82,26 +90,38 @@ def sync_contract_and_lmdb(eth_direct_registry, kv_storage):
 
     else:
         for eth_registry_id in eth_registry_list:
-            eth_reg_info = eth_direct_registry.RegistryRetrieve(eth_registry_id)
+            eth_reg_info = eth_direct_registry.RegistryRetrieve(
+                eth_registry_id)
 
             # Check if registry entry present in KvStorage
-            logger.info("Check if registry with id %s present in KvStorage", eth_registry_id.decode())
-            kv_reg_info = kv_storage.get("registries", eth_registry_id.decode().rstrip(' \t\r\n\0'))
+            logger.info("Check if registry with id %s present in KvStorage",
+                        eth_registry_id.decode())
+            kv_reg_info = kv_storage.get(
+                "registries", eth_registry_id.decode().rstrip(' \t\r\n\0'))
             if not kv_reg_info:
-                logger.info("No matching registry found in KvStorage, ADDING it to KvStorage")
-                # Create JSON registry object with status 0 equivalent to SUSPENDED
-                json_registry = create_json_object(eth_registry_id, eth_reg_info, 0)
-                kv_storage.set("registries", eth_registry_id.decode().rstrip(' \t\r\n\0'), json_registry)
+                logger.info("No matching registry found in KvStorage; " +
+                            "ADDING it to KvStorage")
+                # Create JSON registry object with status 0 equivalent to
+                # SUSPENDED
+                json_registry = create_json_object(
+                    eth_registry_id, eth_reg_info, 0)
+                kv_storage.set("registries",
+                               eth_registry_id.decode().rstrip(' \t\r\n\0'),
+                               json_registry)
 
             else:
-                logger.info("Matching registry found in KvStorage, hence ADDING")
+                logger.info(
+                    "Matching registry found in KvStorage, hence ADDING")
                 # Set the status of registry to ACTIVE
                 kv_registry = json.loads(kv_reg_info)
                 kv_registry["status"] = 1      # status = 1 implies ACTIVE
-                kv_storage.set("registries", eth_registry_id.decode().rstrip(' \t\r\n\0'), json.dumps(kv_registry))
+                kv_storage.set("registries",
+                               eth_registry_id.decode().rstrip(' \t\r\n\0'),
+                               json.dumps(kv_registry))
 
     logger.info("Syncing registries from KvStorage to Contract")
-    # Check if all registries present in KvStorage are available in Smart contract, if not add them
+    # Check if all registries present in KvStorage are available in a
+    # smart contract. If not, add them.
     kv_registry_list = kv_storage.lookup("registries")
 
     if not kv_registry_list:
@@ -111,26 +131,35 @@ def sync_contract_and_lmdb(eth_direct_registry, kv_storage):
         for kv_registry_id in kv_registry_list:
             kv_reg_info = kv_storage.get("registries", kv_registry_id)
             # Check if registry entry present in smart contract
-            retrieve_result = eth_direct_registry.RegistryRetrieve(kv_registry_id.encode())
+            retrieve_result = eth_direct_registry.RegistryRetrieve(
+                kv_registry_id.encode())
 
             if retrieve_result[0] == 0:
-                logger.info("Matching registry with id %s not found in Smart contract, hence ADDING", kv_registry_id)
+                logger.info("Matching registry with id %s not found in " +
+                            "Smart contract, hence ADDING", kv_registry_id)
                 reg_info = deserialize_json_object(kv_reg_info)
                 # Add registry to smart contract and set status to ACTIVE
-                eth_direct_registry.RegistryAdd(kv_registry_id.encode(), reg_info[0], reg_info[1], reg_info[2])
-                eth_direct_registry.RegistrySetStatus(kv_registry_id.encode(), json.loads(kv_reg_info)["status"])
+                eth_direct_registry.RegistryAdd(
+                    kv_registry_id.encode(), reg_info[0], reg_info[1],
+                    reg_info[2])
+                eth_direct_registry.RegistrySetStatus(
+                    kv_registry_id.encode(), json.loads(kv_reg_info)["status"])
 
             else:
                 # Set status of registry to registry status in KvStorage
-                logger.info("Matching registry %s found in Smart contract, CHANGING status", kv_registry_id)
-                eth_direct_registry.RegistrySetStatus(kv_registry_id.encode(), json.loads(kv_reg_info)["status"])
+                logger.info("Matching registry %s found in Smart contract, " +
+                            "CHANGING status", kv_registry_id)
+                eth_direct_registry.RegistrySetStatus(
+                    kv_registry_id.encode(), json.loads(kv_reg_info)["status"])
 
-        logger.info("-------------- Direct Registry bridge flow complete ------------------- ")
+        logger.info(
+            "--------- Direct Registry bridge flow complete ---------------- ")
     return
 
 
 def main(args=None):
-    logger.info("Starting synchronization between Smart contract and KvStorage.")
+    logger.info(
+        "Starting synchronization between Smart contract and KvStorage.")
 
     # Smart contract address is the address where smart contract is deployed.
     # TODO: Add mechanism to read the address from config file.

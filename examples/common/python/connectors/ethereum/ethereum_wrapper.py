@@ -20,7 +20,8 @@ from connectors.utils import construct_message
 from solc import compile_source
 from web3 import HTTPProvider, Web3
 
-logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s', level=logging.INFO)
+logging.basicConfig(
+    format='%(asctime)s - %(levelname)s - %(message)s', level=logging.INFO)
 
 
 class EthereumWrapper():
@@ -37,9 +38,11 @@ class EthereumWrapper():
             http_provider = config["ethereum"]["eth_http_provider"]
             # Ethereum http provider is endpoint to submit the transaction
             self.__w3 = Web3(HTTPProvider(http_provider))
-            # Chain id signifies the which ethereum network to use test net/main ethereum network
+            # Chain id signifies the which ethereum network to use:
+            # test net/main ethereum network
             self.__channel_id = config["ethereum"]["chain_id"]
-            # Maximum amount of gas you’re willing to spend on a particular transaction
+            # Maximum amount of gas you’re willing to spend on
+            # a particular transaction
             self.__gas_limit = config["ethereum"]["gas_limit"]
             # Amount of Ether you’re willing to pay for every unit of gas
             self.__gas_price = config["ethereum"]["gas_price"]
@@ -76,7 +79,8 @@ class EthereumWrapper():
         Compile solidity contract file and returns contract instance object
         """
         if not exists(file_path):
-            raise FileNotFoundError("File not found at path: {0}".format(realpath(file_path)))
+            raise FileNotFoundError(
+                "File not found at path: {0}".format(realpath(file_path)))
         with open(file_path, 'r') as f:
             source = f.read()
         return compile_source(source)
@@ -85,10 +89,13 @@ class EthereumWrapper():
         """
         Deploys solidity contract to ethereum network identified by chain_id
         """
-        acct = self.__w3.eth.account.privateKeyToAccount(self.__eth_private_key)
-        contract_object = self.__w3.eth.contract(abi=contract_interface['abi'],
+        acct = self.__w3.eth.account.privateKeyToAccount(
+            self.__eth_private_key)
+        contract_object = self.__w3.eth.contract(
+            abi=contract_interface['abi'],
             bytecode=contract_interface['bin'])
-        nonce = self.__w3.eth.getTransactionCount(self.__eth_account_address, 'pending')
+        nonce = self.__w3.eth.getTransactionCount(self.__eth_account_address,
+                                                  'pending')
         tx_hash = contract_object.constructor().buildTransaction({
                 'from': acct.address,
                 'chainId': self.__channel_id,
@@ -96,7 +103,8 @@ class EthereumWrapper():
                 'gasPrice': self.get_gas_price(),
                 'nonce': nonce
         })
-        address = self.execute_transaction(tx_hash)['txn_receipt']['contractAddress']
+        address = \
+            self.execute_transaction(tx_hash)['txn_receipt']['contractAddress']
         return address
 
     def execute_transaction(self, tx_dict):
@@ -104,10 +112,13 @@ class EthereumWrapper():
         Sign the raw transaction with private key, send it
         and wait for receipts
         """
-        signed_txn = self.__w3.eth.account.signTransaction(tx_dict, private_key=self.__eth_private_key)
+        signed_txn = self.__w3.eth.account.signTransaction(
+            tx_dict, private_key=self.__eth_private_key)
         tx_hash = self.__w3.eth.sendRawTransaction(signed_txn.rawTransaction)
-        tx_receipt = self.__w3.eth.waitForTransactionReceipt(tx_hash.hex(), 120)
-        logging.info("executed transaction hash: %s, receipt: %s", format(tx_hash.hex()), format(tx_receipt))
+        tx_receipt = self.__w3.eth.waitForTransactionReceipt(
+            tx_hash.hex(), 120)
+        logging.info("executed transaction hash: %s, receipt: %s",
+                     format(tx_hash.hex()), format(tx_receipt))
         if tx_receipt is None:
             return construct_message("failed", "timeout")
         if tx_receipt.status == 0:
@@ -127,7 +138,7 @@ class EthereumWrapper():
         compiled_sol = self.compile_source_file(contract_file_name)
         contract_id, contract_interface = compiled_sol.popitem()
         return self.__w3.eth.contract(address=contract_address,
-            abi=contract_interface["abi"],)
+                                      abi=contract_interface["abi"],)
 
     def get_txn_nonce(self):
         return self.__w3.eth.getTransactionCount(self.__eth_account_address)

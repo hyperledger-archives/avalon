@@ -17,10 +17,13 @@ import logging
 from utility.hex_utils import is_valid_hex_str
 
 from service_client.generic import GenericServiceClient
-from connectors.interfaces.work_order_receipt_interface import WorkOrderReceiptInterface
+from connectors.interfaces.work_order_receipt_interface \
+    import WorkOrderReceiptInterface
 from utility.tcf_types import ReceiptCreateStatus
 from connectors.utils import create_jrpc_response, validate_details
-logging.basicConfig(format="%(asctime)s - %(levelname)s - %(message)s", level=logging.INFO)
+
+logging.basicConfig(
+    format="%(asctime)s - %(levelname)s - %(message)s", level=logging.INFO)
 
 
 class WorkOrderReceiptJRPCImpl(WorkOrderReceiptInterface):
@@ -30,8 +33,8 @@ class WorkOrderReceiptJRPCImpl(WorkOrderReceiptInterface):
     def __init__(self, config):
         self.__uri_client = GenericServiceClient(config["tcf"]["json_rpc_uri"])
 
-
-    def work_order_receipt_create(self, work_order_id,
+    def work_order_receipt_create(
+            self, work_order_id,
             worker_service_id,
             worker_id,
             requester_id,
@@ -65,7 +68,8 @@ class WorkOrderReceiptJRPCImpl(WorkOrderReceiptInterface):
         response = self.__uri_client._postmsg(json.dumps(json_rpc_request))
         return response
 
-    def work_order_receipt_update(self, work_order_id,
+    def work_order_receipt_update(
+            self, work_order_id,
             updater_id,
             update_type,
             update_data,
@@ -105,7 +109,8 @@ class WorkOrderReceiptJRPCImpl(WorkOrderReceiptInterface):
         response = self.__uri_client._postmsg(json.dumps(json_rpc_request))
         return response
 
-    def work_order_receipt_update_retrieve(self, work_order_id,
+    def work_order_receipt_update_retrieve(
+            self, work_order_id,
             updater_id,
             update_index, id=None):
         """
@@ -124,7 +129,8 @@ class WorkOrderReceiptJRPCImpl(WorkOrderReceiptInterface):
         response = self.__uri_client._postmsg(json.dumps(json_rpc_request))
         return response
 
-    def work_order_receipt_lookup(self, worker_service_id=None,
+    def work_order_receipt_lookup(
+            self, worker_service_id=None,
             worker_id=None, requester_id=None, receipt_status=None, id=None):
         """
         Work Order Receipt Lookup
@@ -152,7 +158,8 @@ class WorkOrderReceiptJRPCImpl(WorkOrderReceiptInterface):
         response = self.__uri_client._postmsg(json.dumps(json_rpc_request))
         return response
 
-    def work_order_receipt_lookup_next(self, last_lookup_tag,
+    def work_order_receipt_lookup_next(
+            self, last_lookup_tag,
             worker_service_id=None, worker_id=None, requester_id=None,
             receipt_status=None, id=None):
         """

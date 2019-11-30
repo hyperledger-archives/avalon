@@ -25,20 +25,24 @@ def verify_attestation_report(enclave_info):
     Function to verify quote status, signature of IAS attestation report
     '''
 
-    verification_report = json.dumps(enclave_info["proof_data"]["verification_report"])
-    ias_report_cert = enclave_info["proof_data"]["ias_report_signing_certificate"]
+    verification_report = \
+        json.dumps(enclave_info["proof_data"]["verification_report"])
+    ias_report_cert = \
+        enclave_info["proof_data"]["ias_report_signing_certificate"]
     proof_signature = enclave_info["proof_data"]["ias_report_signature"]
 
-    quote_status = verify_report_util.verify_quote(verification_report,
+    quote_status = verify_report_util.verify_quote(
+                       verification_report,
                        QuoteStatus.GROUP_OUT_OF_DATE_OK.value)
     if quote_status is False:
         logger.error("Enclave quote verification failed")
         return quote_status
     logger.info("Enclave quote verification passed")
 
-    report_sig_status = verify_report_util.verify_ias_report_signature(ias_report_cert,
-                                    verification_report,
-                                    proof_signature)
+    report_sig_status = verify_report_util.verify_ias_report_signature(
+        ias_report_cert,
+        verification_report,
+        proof_signature)
     if report_sig_status is False:
         logger.error("Enclave IAS report signature verification failed")
         return report_sig_status
