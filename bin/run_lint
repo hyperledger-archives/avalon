@@ -191,7 +191,7 @@ retval=0
 export PYTHONPATH=$PYTHONPATH:$top_dir/examples/common/python
 lint_module tests                    "$SINCE" 1 0 || retval=1
 #lint_module examples/enclave_manager "$SINCE" 1 0 || retval=1
-#lint_module examples/common          "$SINCE" 1 0 || retval=1
+lint_module examples/common          "$SINCE" 1 0 || retval=1
 #lint_module examples/apps            "$SINCE" 1 0 || retval=1
 
 exit $retval

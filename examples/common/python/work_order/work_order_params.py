@@ -263,4 +263,3 @@ class WorkOrderParams():
 			"params": self.params_obj
 		}
 		return json.dumps(json_request, indent=4)
-

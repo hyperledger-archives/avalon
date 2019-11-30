@@ -30,7 +30,6 @@ class WorkOrderReceiptJRPCImpl(WorkOrderReceiptInterface):
     def __init__(self, config):
         self.__uri_client = GenericServiceClient(config["tcf"]["json_rpc_uri"])
 
-
     def work_order_receipt_create(self, work_order_id,
             worker_service_id,
             worker_id,

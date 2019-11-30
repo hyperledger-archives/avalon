@@ -17,7 +17,7 @@ import logging
 import base64
 from utility.hex_utils import is_valid_hex_str
 import crypto.crypto as crypto
-from error_code.error_status import ReceiptCreateStatus,SignatureStatus,\
+from error_code.error_status import ReceiptCreateStatus, SignatureStatus,\
     JRPCErrorCodes
 import utility.signature as signature
 from jsonrpc.exceptions import JSONRPCDispatchException
@@ -85,7 +85,7 @@ class TCSWorkOrderReceiptHandler:
                 status, err_msg = self.__validate_work_order_receipt_create_req(
                     input_value, wo_request
                 )
-                if status == True:
+                if status is True:
                     self.kv_helper.set("wo-receipts", wo_id, input_json_str)
                     raise JSONRPCDispatchException(
                         JRPCErrorCodes.SUCCESS,
@@ -113,9 +113,10 @@ class TCSWorkOrderReceiptHandler:
         Returns - tuple containing validation status(Boolean) and error message(string)
         """
         # Valid parameters list
-        valid_params = ["workOrderId", "workerServiceId", "workerId", "requesterId",
-                        "receiptCreateStatus", "workOrderRequestHash", "requesterGeneratedNonce",
-                        "requesterSignature", "signatureRules","receiptVerificationKey"]
+        valid_params = ["workOrderId", "workerServiceId", "workerId",
+            "requesterId", "receiptCreateStatus", "workOrderRequestHash",
+            "requesterGeneratedNonce", "requesterSignature", "signatureRules",
+            "receiptVerificationKey"]
         for key in wo_receipt_req["params"]:
             if key not in valid_params:
                 return False, "Missing parameter " + key + " in the request"
@@ -139,8 +140,8 @@ class TCSWorkOrderReceiptHandler:
         # Validate signing rules
         signing_rules = wo_receipt_req["params"]["signatureRules"]
         rules = signing_rules.split("/")
-        if len(rules) == 2 and (rules[0] != self.HASHING_ALGORITHM or \
-            rules[1] != self.SIGNING_ALGORITHM):
+        if len(rules) == 2 and (rules[0] != self.HASHING_ALGORITHM or
+                rules[1] != self.SIGNING_ALGORITHM):
             return False, "Unsupported the signing rules"
 
         signature_obj = signature.ClientSignature()
@@ -176,9 +177,8 @@ class TCSWorkOrderReceiptHandler:
         if value:
             # Receipt is created, validate update receipt request
             status, err_msg = self.__validate_work_order_receipt_update_req(
-                    input_value
-                )
-            if status == True:
+                input_value)
+            if status is True:
                 # Load previous updates to receipt
                 updates_to_receipt = self.kv_helper.get("wo-receipt-updates", wo_id)
                 # If it is first update to receipt
@@ -187,7 +187,7 @@ class TCSWorkOrderReceiptHandler:
                 else:
                     updated_receipt = json.loads(updates_to_receipt)
                 # Get last update to receipt
-                last_update = updated_receipt[len(updated_receipt)-1]
+                last_update = updated_receipt[len(updated_receipt) - 1]
                 if last_update["updateType"] == ReceiptCreateStatus.COMPLETED.value:
                     raise JSONRPCDispatchException(
                         JRPCErrorCodes.INVALID_PARAMETER_FORMAT_OR_VALUE,
@@ -365,7 +365,8 @@ class TCSWorkOrderReceiptHandler:
             else:
                 receipt_updates_json = json.loads(receipt_updates)
                 # Get the recent update to receipt
-                last_receipt = receipt_updates_json[len(receipt_updates_json)-1]
+                last_receipt = receipt_updates_json[len(receipt_updates_json)
+                    - 1]
                 receipt["params"]["receiptCurrentStatus"] = last_receipt["updateType"]
             return receipt["params"]
         else:
@@ -406,9 +407,9 @@ class TCSWorkOrderReceiptHandler:
             total_updates = len(receipt_updates_json)
             if update_index <= 0:
                 raise JSONRPCDispatchException(
-                JRPCErrorCodes.INVALID_PARAMETER_FORMAT_OR_VALUE,
-                "Update index should be positive non-zero number."
-                " Hence invalid parameter")
+                    JRPCErrorCodes.INVALID_PARAMETER_FORMAT_OR_VALUE,
+                    "Update index should be positive non-zero number."
+                    " Hence invalid parameter")
             elif update_index > total_updates:
                 if update_index == self.LAST_RECEIPT_INDEX:
                     # set to the index of last update to receipt
@@ -437,4 +438,3 @@ class TCSWorkOrderReceiptHandler:
                 JRPCErrorCodes.INVALID_PARAMETER_FORMAT_OR_VALUE,
                 "There is no updates available to this receipt"
                 " Hence invalid parameter")
-

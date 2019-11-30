@@ -360,7 +360,7 @@ class ClientSignature(object):
         else:
             return SignatureStatus.INVALID_SIGNATURE_FORMAT
 
-#---------------------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
     def verify_create_receipt_signature(self, input_json):
         """
         Function to verify the signature of work order receipt create
@@ -398,7 +398,7 @@ class ClientSignature(object):
         else:
             return SignatureStatus.INVALID_SIGNATURE_FORMAT
 
-#---------------------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
     def calculate_request_hash(self, input_json):
         """
         Function to create the work order reuest hash
@@ -415,7 +415,7 @@ class ClientSignature(object):
             wo_request_params["workloadId"] + \
             wo_request_params["requesterId"]
         concat_bytes = bytes(concat_string, "UTF-8")
-        #SHA-256 hashing is used
+        # SHA-256 hashing is used
         hash_1 = crypto.byte_array_to_base64(
             crypto.compute_message_hash(concat_bytes)
         )
@@ -428,4 +428,3 @@ class ClientSignature(object):
         final_hash = crypto.compute_message_hash(concat_hash)
         final_hash_str = crypto.byte_array_to_hex(final_hash)
         return final_hash_str
-
