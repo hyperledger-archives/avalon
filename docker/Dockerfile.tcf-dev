@@ -68,6 +68,9 @@ RUN apt-get update \
     liblmdb-dev \
     ocamlbuild \
     python3-tk \
+    python3-pycodestyle \
+    pycodestyle \
+    pylint3 \
  && apt-get -y -q upgrade \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
@@ -178,6 +181,8 @@ ENV WALLET_PRIVATE_KEY="B413189C95B48737AE2D9AF4CAE97EB03F4DE40599DF8E6C89DCE4C2
 ENV DISPLAY=:0
 
 WORKDIR /project/TrustedComputeFramework/tools/build
+
+RUN make lint && echo "LINT SUCCESS"
 
 RUN if [ $MAKECLEAN != 0 ]; then echo "Clean build" && make clean; fi \
  && make \
