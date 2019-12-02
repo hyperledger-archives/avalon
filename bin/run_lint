@@ -1,0 +1,197 @@
+#! /bin/bash
+
+# Copyright 2019 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ------------------------------------------------------------------------------
+
+set -e
+
+# Find Python packages in subdirectory $1, optionally since date $2
+find_packages() {
+    topdir=$1
+    since=$2
+
+    (
+    if [ "$since" != "" ]; then
+        git ls-files -mo "$topdir/*.py" -x build
+        git diff --name-only $since "$topdir/*.py"
+    else
+        find $topdir -name \*.py
+    fi
+    ) \
+        | sort --unique \
+        | git check-ignore --stdin --non-matching --verbose \
+        | grep ^:: \
+        | sed -e 's/^::\s//' \
+        | grep -v /setup.py$ \
+        | grep -v /setup_tests.py$ \
+        | grep -v _pb2\.py$
+}
+
+# Run lint on subdirectory $1, optionally since date $2.
+# Run pycodestyle if $3 is non-zero. Run pylint3 if $3 is non-zero.
+lint_module() {
+    subdir=$1
+    since=$2
+    enable_pycodestyle=$3
+    enable_pylint=$4
+
+    top_dir=$(cd $(dirname $(dirname $0)) && pwd)
+
+    cd $top_dir
+
+    pylintrc=$top_dir/.pylintrc
+
+    error=0
+
+    packages=$(find_packages "$subdir" "$since")
+
+    if [ "$packages" != "" ]; then
+        [ $VERBOSE = 0 ] && echo "-- $subdir"
+
+        if [ $enable_pycodestyle != 0 ] ; then
+            [ $VERBOSE = 0 ] && echo "---- pycodestyle in $subdir"
+            [ $VERBOSE = 1 ] && (
+                echo "--------------------------------------------------------"
+                echo "---- Running pycodestyle in $subdir..."
+            )
+
+            pycodestyle --config=$top_dir/.pycodestyle $packages || error=1
+
+        else
+            [ $VERBOSE = 1 ] && (
+                echo "--------------------------------------------------------"
+                echo "---- Skipping pycodestyle in $subdir. " \
+                     "(Nothing to do.)"
+            )
+        fi
+
+        if [ $enable_pylint != 0 ] ; then
+            [ $VERBOSE = 0 ] && echo "---- pylint in $subdir"
+            [ $VERBOSE = 1 ] && (
+                echo "--------------------------------------------------------"
+                echo "---- Running pylint3 $pylintrc in $subdir..."
+                echo "---- PYTHONPATH ${PYTHONPATH:-not set}"
+            )
+
+            pylint3 \
+                --rcfile=$pylintrc \
+                --reports=no \
+                --score=no \
+                --persistent=no \
+                $packages || error=1
+
+        else
+            [ $VERBOSE = 1 ] && (
+                echo "--------------------------------------------------------"
+                echo "---- Skipping pylint $pylintrc in $subdir. " \
+                     "(Nothing to do.)"
+            )
+        fi
+
+
+        [ $VERBOSE = 1 ] && (
+            echo "--------------------------------------------------------"
+            echo "---- Checking for CRLF in $subdir..."
+        )
+
+        file $packages | grep CRLF && error=1
+
+    else
+        [ $VERBOSE = 1 ] && (
+            echo "--------------------------------------------------------"
+            echo "---- Skipping pycodestyle and pylint $pylintrc in $subdir. " \
+                 "(Nothing to do.)"
+        )
+    fi
+
+    return $error
+}
+
+usage() {
+    echo "Run pycodestyle and pylint3 for this repository"
+    echo "Usage:"
+    echo "  $0 [-s BRANCH] [-n] [-h]"
+    echo
+    echo "Options:"
+    echo "  -h          print usage and exit"
+    echo "  -n          dry-run, only prints files that would be linted"
+    echo "  -s BRANCH   only lint files changed since BRANCH"
+    echo "  -v          increase verbosity"
+}
+
+
+#
+# Parse command line parameters
+#
+DRY_RUN=0
+VERBOSE=0
+SINCE=""
+while getopts :s:nhv opt
+do
+    case $opt in
+      h)
+        usage
+        exit 0
+        ;;
+      n)
+        DRY_RUN=1
+        ;;
+      s)
+        SINCE=$OPTARG
+        ;;
+      v)
+        if [ "$VERBOSE" = "1" ]; then
+            set -x
+        fi
+        VERBOSE=1
+        ;;
+      \?)
+        echo "Invalid option: -$OPTARG" >&2
+        usage
+        exit 2
+        ;;
+    esac
+done
+
+# Print version information
+pwd
+echo "pycodestyle $(pycodestyle --version)"
+echo "$(pylint3 --version | head -1)"
+echo "PYTHONPATH ${PYTHONPATH:-not imported}"
+
+if [ "$DRY_RUN" = "1" ]; then
+    for dir in validator
+    do
+        for package in $(find_packages "$dir" "$SINCE")
+        do
+            echo $package
+        done
+    done
+    exit 0
+fi
+
+top_dir=$(cd $(dirname $(dirname $0)) && pwd)
+retval=0
+
+# Run pycodestyle or pylint or both for each module.
+# Modules should be ranked in decreasing likelihood of having lint errors.
+
+export PYTHONPATH=$PYTHONPATH:$top_dir/examples/common/python
+lint_module tests                    "$SINCE" 1 0 || retval=1
+#lint_module examples/enclave_manager "$SINCE" 1 0 || retval=1
+#lint_module examples/common          "$SINCE" 1 0 || retval=1
+#lint_module examples/apps            "$SINCE" 1 0 || retval=1
+
+exit $retval

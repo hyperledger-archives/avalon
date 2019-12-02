@@ -37,4 +37,7 @@ enclavekey :
 template :
 	mkdir -p $(DSTDIR)/opt/tcf/logs
 
+lint:
+	cd ../..; ./bin/run_lint
+
 .PHONY : packages template
