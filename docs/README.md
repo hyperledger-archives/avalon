@@ -9,6 +9,7 @@
 * [Project Wiki](https://wiki.hyperledger.org/display/avalon/Hyperledger+Avalon)
 * [RocketChat](https://chat.hyperledger.org/channel/avalon)
 * [Email list](https://lists.hyperledger.org/g/avalon)
+* [JIRA feature & bug tracking](https://jira.hyperledger.org/secure/RapidBoard.jspa?rapidView=241&view=planning.nodetail)
 
 ## Tutorial
 * [Workload Application Tutorial](workload-tutorial/)
