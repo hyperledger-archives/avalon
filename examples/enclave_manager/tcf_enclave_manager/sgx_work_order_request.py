@@ -33,18 +33,22 @@ class SgxWorkOrderRequest(object):
         encrypted_request = crypto.byte_array_to_base64(serialized_byte_array)
 
         try:
-            encoded_encrypted_response = self.enclave_service.send_to_sgx_worker(encrypted_request)
+            encoded_encrypted_response = \
+                self.enclave_service.send_to_sgx_worker(encrypted_request)
             assert encoded_encrypted_response
-        except:
-            logger.exception('workorder request invocation failed')
+        except Exception as err:
+            logger.exception('workorder request invocation failed: %s',
+                             str(err))
             raise
 
         try:
-            decrypted_response = crypto.base64_to_byte_array(encoded_encrypted_response)
+            decrypted_response = crypto.base64_to_byte_array(
+                encoded_encrypted_response)
             response_string = crypto.byte_array_to_string(decrypted_response)
             response_parsed = json.loads(response_string[0:-1])
-        except:
-            logger.exception('workorder response is invalid')
+        except Exception as err:
+            logger.exception('workorder response is invalid: %s',
+                             str(err))
             raise
 
         return response_parsed

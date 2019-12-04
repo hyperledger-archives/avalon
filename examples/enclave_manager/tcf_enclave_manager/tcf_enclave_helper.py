@@ -12,11 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""enclave_helper.py
-
+"""
 This file defines the Enclave class to simplify integration of the SGX
 enclave module into the rest of the tcf flow. Typically, an application
-will call the initialize_enclave function first, then will call create_enclave_signup_data.
+will call the initialize_enclave function first,
+then will call create_enclave_signup_data.
 """
 
 import random
@@ -57,9 +57,11 @@ class EnclaveHelper(object):
         hashed_identity = tcf_instance_keys.hashed_identity
         logger.debug("tx hashed identity: %s", hashed_identity)
         try:
-            enclave_data = tcf_enclave.create_signup_info(hashed_identity, nonce)
-        except:
-            raise Exception('failed to create enclave signup data')
+            enclave_data = tcf_enclave.create_signup_info(
+                hashed_identity, nonce)
+        except Exception as err:
+            raise Exception('failed to create enclave signup data; {}'
+                            .format(str(err)))
 
         enclave_info = dict()
         enclave_info['nonce'] = nonce
@@ -88,9 +90,11 @@ class EnclaveHelper(object):
             self.proof_data = enclave_info['proof_data']
             self.enclave_id = enclave_info['enclave_id']
         except KeyError as ke:
-            raise Exception("missing enclave initialization parameter; {}".format(str(ke)))
+            raise Exception("missing enclave initialization parameter; {}"
+                            .format(str(ke)))
 
-        self.enclave_keys = keys.EnclaveKeys(self.verifying_key, self.encryption_key)
+        self.enclave_keys = \
+            keys.EnclaveKeys(self.verifying_key, self.encryption_key)
 
     # -------------------------------------------------------
     def send_to_sgx_worker(self, encrypted_request):

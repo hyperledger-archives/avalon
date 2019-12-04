@@ -56,7 +56,8 @@ def __find_enclave_library(config):
             logger.info("Enclave Lib Exists")
             return enclave_file
     else:
-        script_directory = os.path.abspath(os.path.dirname(os.path.realpath(__file__)))
+        script_directory = os.path.abspath(
+            os.path.dirname(os.path.realpath(__file__)))
         logger.info("Script directory - %s", script_directory)
         search_path = [
             script_directory,
@@ -130,7 +131,8 @@ def initialize_with_configuration(config):
     if not _tcf_enclave_info:
         signed_enclave = __find_enclave_library(config)
         logger.debug("Attempting to load enclave at: %s", signed_enclave)
-        _tcf_enclave_info = enclave.tcf_enclave_info(signed_enclave, config['spid'], int(config['num_of_enclaves']))
+        _tcf_enclave_info = enclave.tcf_enclave_info(
+            signed_enclave, config['spid'], int(config['num_of_enclaves']))
         logger.info("Basename: %s", get_enclave_basename())
         logger.info("MRENCLAVE: %s", get_enclave_measurement())
 
@@ -140,7 +142,8 @@ def initialize_with_configuration(config):
             __update_sig_rl()
             sig_rl_updated = True
         except (SSLError, Timeout, HTTPError) as e:
-            logger.warning("Failed to retrieve initial sig rl from IAS: %s", str(e))
+            logger.warning(
+                "Failed to retrieve initial sig rl from IAS: %s", str(e))
             logger.warning("Retrying in 60 sec")
             time.sleep(60)
 
@@ -163,13 +166,15 @@ def shutdown():
 # -----------------------------------------------------------------
 def get_enclave_measurement():
     global _tcf_enclave_info
-    return _tcf_enclave_info.mr_enclave if _tcf_enclave_info is not None else None
+    return _tcf_enclave_info.mr_enclave \
+        if _tcf_enclave_info is not None else None
 
 
 # -----------------------------------------------------------------
 def get_enclave_basename():
     global _tcf_enclave_info
-    return _tcf_enclave_info.basename if _tcf_enclave_info is not None else None
+    return _tcf_enclave_info.basename \
+        if _tcf_enclave_info is not None else None
 
 
 # -----------------------------------------------------------------
@@ -180,7 +185,8 @@ def verify_enclave_info(enclave_info, mr_enclave, originator_public_key_hash):
       along with IAS attestation report
     - mr_enclave is enclave measurement value
     """
-    return enclave.VerifyEnclaveInfo(enclave_info, mr_enclave, originator_public_key_hash)
+    return enclave.VerifyEnclaveInfo(
+        enclave_info, mr_enclave, originator_public_key_hash)
 
 
 # -----------------------------------------------------------------
@@ -212,14 +218,17 @@ def create_signup_info(originator_public_key_hash, nonce):
     # an attestation verification report for our signup data.
     if not enclave.is_sgx_simulator():
         logger.debug("posting verification to IAS")
-        response = _ias.post_verify_attestation(quote=signup_data['enclave_quote'], nonce=nonce)
+        response = _ias.post_verify_attestation(
+            quote=signup_data['enclave_quote'], nonce=nonce)
         logger.debug("posted verification to IAS")
 
         # check verification report
-        if not _ias.verify_report_fields(signup_data['enclave_quote'], response['verification_report']):
+        if not _ias.verify_report_fields(
+                signup_data['enclave_quote'], response['verification_report']):
             logger.debug("last error: " + _ias.last_verification_error())
             if _ias.last_verification_error() == "GROUP_OUT_OF_DATE":
-                logger.warning("failure GROUP_OUT_OF_DATE (update your BIOS/microcode!!!) keep going")
+                logger.warning("failure GROUP_OUT_OF_DATE " +
+                               "(update your BIOS/microcode!!!) keep going")
             else:
                 logger.error("invalid report fields")
                 return None
@@ -233,13 +242,15 @@ def create_signup_info(originator_public_key_hash, nonce):
                 'ias_report_signature': response['ias_signature'],
                 'ias_report_signing_certificate': response['ias_certificate']
             })
-        # Grab the EPID pseudonym and put it in the enclave-persistent ID for the
-        # signup info
+        # Grab the EPID pseudonym and put it in the enclave-persistent ID for
+        # the signup info
         verification_report_dict = json.loads(response['verification_report'])
-        signup_info['enclave_persistent_id'] = verification_report_dict.get('epidPseudonym')
+        signup_info['enclave_persistent_id'] = \
+            verification_report_dict.get('epidPseudonym')
 
         mr_enclave = get_enclave_measurement()
-        status = verify_enclave_info(json.dumps(signup_info), mr_enclave, originator_public_key_hash)
+        status = verify_enclave_info(
+            json.dumps(signup_info), mr_enclave, originator_public_key_hash)
         if status != 0:
             logger.error("Verification of enclave signup info failed")
         else:
