@@ -46,7 +46,8 @@ import crypto.crypto as crypto
 from error_code.error_status import WorkOrderStatus, ReceiptCreateStatus
 import utility.signature as signature
 from error_code.error_status import SignatureStatus
-from work_order_receipt.work_order_receipt_request import WorkOrderReceiptRequest
+from work_order_receipt.work_order_receipt_request \
+     import WorkOrderReceiptRequest
 
 # Remove duplicate loggers
 for handler in logging.root.handlers[:]:
@@ -130,11 +131,12 @@ class intEntry:
         label = tk.Label(master, text=name, background=BACKGROUND)
         label.grid(row=cur_row, column=0, sticky="e", pady=(5, 0))
         validate = (master.register(_int_validate))
-        self.entry = tk.Entry(master, validate="all",
+        self.entry = tk.Entry(
+            master, validate="all",
             validatecommand=(validate, "%P"), width=5,
             background=ENTRY_COLOR)
-        self.entry.grid(row=cur_row, column=1, padx=(10, 0), pady=(5, 0),
-            sticky="w")
+        self.entry.grid(
+            row=cur_row, column=1, padx=(10, 0), pady=(5, 0), sticky="w")
         cur_row += 1
 
     def get(self):
@@ -159,11 +161,12 @@ class floatEntry:
         label = tk.Label(master, text=name, background=BACKGROUND)
         label.grid(row=cur_row, column=0, sticky="e", pady=(5,))
         validate = (master.register(_float_validate))
-        self.entry = tk.Entry(master, validate="all",
+        self.entry = tk.Entry(
+            master, validate="all",
             validatecommand=(validate, "%P"), width=10,
             background=ENTRY_COLOR)
         self.entry.grid(row=cur_row, column=1, padx=(10, 0), pady=(5,),
-            sticky="w")
+                        sticky="w")
         cur_row += 1
 
     def get(self):
@@ -196,13 +199,14 @@ class radio:
 
         self.button_list = []
         for i in range(len(options)):
-            button = tk.Radiobutton(master, text=options[i][0],
+            button = tk.Radiobutton(
+                master, text=options[i][0],
                 variable=self.var, value=options[i][1],
                 background=BACKGROUND)
             self.button_list.append(button)
             if i == 0:
                 button.grid(row=cur_row, column=1, pady=(5, 0),
-                    sticky="w")
+                            sticky="w")
             else:
                 button.grid(row=cur_row, column=1, sticky="w")
             cur_row += 1
@@ -244,8 +248,8 @@ class resultWindow(tk.Toplevel):
         self.frame1 = tk.Frame(self.main_frame)
         self.frame1.pack(side=tk.LEFT)
         self.result_text = tk.StringVar()
-        self.label = tk.Label(self.frame1,
-            textvariable=self.result_text, width=45,
+        self.label = tk.Label(
+            self.frame1, textvariable=self.result_text, width=45,
             background=RESULT_BACKGROUND)
         default_font = font.Font(font="TkDefaultFont")
         new_font = default_font
@@ -254,12 +258,11 @@ class resultWindow(tk.Toplevel):
         self.label.pack()
 
         # JSON window display sidebar buttons
-        self.frame2 = tk.Frame(self.main_frame,
-            background=RESULT_BACKGROUND)
+        self.frame2 = tk.Frame(self.main_frame, background=RESULT_BACKGROUND)
         self.frame2.pack(side=tk.LEFT)
 
-        self.frame2 = tk.Frame(self.frame2,
-            background=RESULT_BACKGROUND)
+        self.frame2 = tk.Frame(
+            self.frame2, background=RESULT_BACKGROUND)
         self.frame2.pack(side=tk.LEFT)
 
         self.request_button = tk.Button(
@@ -278,7 +281,8 @@ class resultWindow(tk.Toplevel):
         self.receipt_button.pack(fill=tk.X, padx=(0, 10), pady=(10, 0))
 
         # Close button
-        self.close_button = tk.Button(self, text="Close",
+        self.close_button = tk.Button(
+            self, text="Close",
             command=self.close, background=BUTTON_COLOR)
         self.close_button.pack(pady=(0, 5))
 
@@ -378,25 +382,24 @@ class resultWindow(tk.Toplevel):
         self.result_json = json.dumps(res, indent=4)
         if "result" in res:
             sig_obj = signature.ClientSignature()
-            status = sig_obj.verify_signature(res,
-                worker_obj.verification_key)
+            status = sig_obj.verify_signature(
+                res, worker_obj.verification_key)
             try:
                 if status == SignatureStatus.PASSED:
                     logger.info("Signature verification Successful")
                     decrypted_res = utility. \
                         decrypted_response(res, session_key, session_iv)
                     logger.info("\n" +
-                        "Decrypted response:\n {}".
-                        format(decrypted_res))
+                                "Decrypted response:\n {}".
+                                format(decrypted_res))
                 else:
                     logger.info("Signature verification Failed")
                     sys.exit(1)
-            except:
-                logger.info("ERROR: Failed to decrypt response")
+            except Exception as err:
+                logger.info("ERROR: Failed to decrypt response: %s", str(err))
                 sys.exit(1)
         else:
-            logger.info("\n Work order get result failed {}\n".
-                format(res))
+            logger.info("\n Work order get result failed {}\n".format(res))
             sys.exit(1)
 
         # Set text for JSON sidebar
@@ -477,30 +480,32 @@ def gui_main():
     age = intEntry(v_frame1, "Age")
     sex = radio(v_frame1, "Sex", [("Male", 1), ("Female", 0)])
     cp = radio(v_frame1, "Chest pain type", [("Typical angina", 1),
-        ("Atypical angina", 2), ("Non-anginal pain", 3),
-        ("Asymptomatic", 4)])
+               ("Atypical angina", 2), ("Non-anginal pain", 3),
+               ("Asymptomatic", 4)])
     trestbps = intEntry(v_frame1, "Resting blood pressure\n (mm Hg)")
     chol = intEntry(v_frame1, "Serum cholesterol (mg/dl)")
     fbs = intEntry(v_frame1, "Fasting blood sugar (mg/dl)")
     restecg = radio(v_frame1, "Electrocardiographic\n resting results",
-        [("Normal", 0), ("ST-T wave abnormality", 1),
-        ("Showing hypertrophy", 2)])
+                    [("Normal", 0), ("ST-T wave abnormality", 1),
+                     ("Showing hypertrophy", 2)])
     thalach = intEntry(v_frame1, "Maximum heart rate")
     exang = radio(v_frame2, "Exercise induced angina",
-        [("Yes", 1), ("No", 0)])
-    oldpeak = floatEntry(v_frame2,
-        "ST depression induced by\n exercise relative to rest")
+                  [("Yes", 1), ("No", 0)])
+    oldpeak = floatEntry(
+        v_frame2, "ST depression induced by\n exercise relative to rest")
     slope = radio(v_frame2, "Slope of the peak\n exercise ST segment",
-        [("Upsloping", 0), ("Flat", 1), ("Downsloping", 2)])
+                  [("Upsloping", 0), ("Flat", 1), ("Downsloping", 2)])
     ca = radio(v_frame2, "Major vessels colored\n by flouroscopy",
-        [("0", 0), ("1", 1), ("2", 2), ("3", 3)])
-    thal = radio(v_frame2, "Thallium stress test",
+               [("0", 0), ("1", 1), ("2", 2), ("3", 3)])
+    thal = radio(
+        v_frame2,
+        "Thallium stress test",
         [("Normal", 3), ("Fixed defect", 6), ("Reversible defect", 7)])
     num = radio(v_frame2, "Heart disease diagnosis",
-        [("<50% diameter narrowing", 0),
-         (">50% diameter narrowing", 1)])
+                [("<50% diameter narrowing", 0),
+                 (">50% diameter narrowing", 1)])
     var_list = [age, sex, cp, trestbps, chol, fbs, restecg, thalach,
-        exang, oldpeak, slope, ca, thal, num]
+                exang, oldpeak, slope, ca, thal, num]
 
     def string_toggle():
         """Disable/enable other variable entries/buttons based on
@@ -526,7 +531,8 @@ def gui_main():
         random_frame, command=string_toggle, variable=random_use,
         background=BACKGROUND)
     random_check.pack(side=tk.LEFT)
-    random_label = tk.Label(random_frame,
+    random_label = tk.Label(
+        random_frame,
         text="Generate random data ",
         background=BACKGROUND)
     random_label.pack(side=tk.LEFT)
@@ -539,11 +545,13 @@ def gui_main():
         string_frame, command=string_toggle, variable=string_use,
         background=BACKGROUND)
     string_check.pack(side=tk.LEFT)
-    string_label = tk.Label(string_frame,
+    string_label = tk.Label(
+        string_frame,
         text="Input variables as a string",
         background=BACKGROUND)
     string_label.pack(side=tk.LEFT)
-    string_entry = tk.Entry(string_frame, state=tk.DISABLED, width=50,
+    string_entry = tk.Entry(
+        string_frame, state=tk.DISABLED, width=50,
         background=ENTRY_COLOR)
     string_entry.pack(side=tk.LEFT)
 
@@ -556,23 +564,22 @@ def gui_main():
         if string_use.get() == 1:  # input is space-separated numbers
             input_data = string_entry.get()
             if input_data is None or len(input_data) == 0:
-                messagebox.showwarning("Error",
-                    "Must input space-separated variables")
+                messagebox.showwarning(
+                    "Error", "Must input space-separated variables")
                 return
             message = message + input_data
 
         elif random_use.get() == 1:
             input_data = _generate_random_data()
             if input_data is None or len(input_data) == 0:
-                messagebox.showwarning("Error",
-                    "Random variable generation error")
+                messagebox.showwarning(
+                    "Error", "Random variable generation error")
                 return
             message = message + input_data
         else:
             for var in var_list:
                 if var.get() is None:
-                    messagebox.showwarning("Error",
-                        "Must input all variables")
+                    messagebox.showwarning("Error", "Must input all variables")
                     return
                 message = message + str(var.get()) + " "
         root.wait_window(resultWindow(root, message))
@@ -588,20 +595,18 @@ def gui_main():
     # "Evaluate" button
     eval_text = tk.StringVar()
     eval_label = tk.Label(root, textvariable=eval_text,
-        background=BACKGROUND)
+                          background=BACKGROUND)
     eval_label.pack()
     eval_button = tk.Button(root, text="Evaluate", command=evaluate,
-        background=BUTTON_COLOR)
+                            background=BUTTON_COLOR)
     eval_button.pack()
 
     # "Aggregate" button
     aggr_text = tk.StringVar()
-    aggr_label = tk.Label(root, textvariable=aggr_text,
-        background=BACKGROUND)
+    aggr_label = tk.Label(root, textvariable=aggr_text, background=BACKGROUND)
     aggr_label.pack()
     aggr_button = tk.Button(root, text="Aggregate all data",
-        command=aggregate,
-        background=BUTTON_COLOR)
+                            command=aggregate, background=BUTTON_COLOR)
     aggr_button.pack(pady=(0, 10))
 
     root.mainloop()
@@ -619,25 +624,32 @@ def parse_command_line(args):
 
     parser = argparse.ArgumentParser()
     use_service = parser.add_mutually_exclusive_group()
-    parser.add_argument("-c", "--config",
+    parser.add_argument(
+        "-c", "--config",
         help="the config file containing the" +
         " Ethereum contract information", type=str)
-    use_service.add_argument("-r", "--registry-list",
+    use_service.add_argument(
+        "-r", "--registry-list",
         help="the Ethereum address of the registry list",
         type=str)
-    use_service.add_argument("-s", "--service-uri",
+    use_service.add_argument(
+        "-s", "--service-uri",
         help="skip URI lookup and send to specified URI",
         type=str)
-    use_service.add_argument("-o", "--off-chain",
+    use_service.add_argument(
+        "-o", "--off-chain",
         help="skip URI lookup and use the registry in the config file",
         action="store_true")
-    parser.add_argument("-w", "--worker-id",
+    parser.add_argument(
+        "-w", "--worker-id",
         help="skip worker lookup and retrieve specified worker",
         type=str)
-    parser.add_argument("-v", "--verbose",
+    parser.add_argument(
+        "-v", "--verbose",
         help="increase output verbosity",
         action="store_true")
-    parser.add_argument("-rs", "--requester_signature",
+    parser.add_argument(
+        "-rs", "--requester_signature",
         help="Enable requester signature for work order requests",
         action="store_true")
 
@@ -647,12 +659,11 @@ def parse_command_line(args):
         conf_files = [options.config]
     else:
         conf_files = [TCFHOME +
-            "/examples/common/python/connectors/tcf_connector.toml"]
+                      "/examples/common/python/connectors/tcf_connector.toml"]
     conf_paths = ["."]
 
     try:
-        config = pconfig.parse_configuration_files(conf_files,
-            conf_paths)
+        config = pconfig.parse_configuration_files(conf_files, conf_paths)
         json.dumps(config, indent=4)
     except pconfig.ConfigurationException as e:
         logger.error(str(e))
@@ -769,7 +780,7 @@ def initialize_tcf(config):
         worker
     )
     logger.info("**********Worker details Updated with Worker ID" +
-        "*********\n%s\n", worker_id)
+                "*********\n%s\n", worker_id)
 
 
 def main(args=None):

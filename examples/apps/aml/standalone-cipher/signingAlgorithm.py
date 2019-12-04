@@ -20,26 +20,26 @@ import base64
 
 class signAlgorithm(object):
 
-	def loadKey(self, key_str):
-		self.privateKey = PrivateKey.fromPem(key_str)
+    def loadKey(self, key_str):
+        self.privateKey = PrivateKey.fromPem(key_str)
 
-	def getPublicKey(self):
-		return self.privateKey.publicKey()
+    def getPublicKey(self):
+        return self.privateKey.publicKey()
 
-	def getPublicKeySerialized(self):
-		return self.privateKey.publicKey().toPem()
+    def getPublicKeySerialized(self):
+        return self.privateKey.publicKey().toPem()
 
-	def sign_message(self, hash_t):
+    def sign_message(self, hash_t):
 
-		# Bytearray to base64
-		hash_b_arr = bytearray(list(hash_t))
-		hash_b64 = base64.b64encode(hash_b_arr)
-		hash_b64_str = str(hash_b64, 'utf-8')
+        # Bytearray to base64
+        hash_b_arr = bytearray(list(hash_t))
+        hash_b64 = base64.b64encode(hash_b_arr)
+        hash_b64_str = str(hash_b64, 'utf-8')
 
-		signed = Ecdsa.sign(hash_b64_str, self.privateKey)
+        signed = Ecdsa.sign(hash_b64_str, self.privateKey)
 
-		return signed
+        return signed
 
-	def verify_signature(self, hash_b64_str, decoded_signature,
-			verify_key):
-		return Ecdsa.verify(hash_b64_str, decoded_signature, verify_key)
+    def verify_signature(self, hash_b64_str, decoded_signature, verify_key):
+        return Ecdsa.verify(
+            hash_b64_str, decoded_signature, verify_key)

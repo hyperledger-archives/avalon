@@ -22,7 +22,8 @@ class WorkerDetails():
     """
     def __init__(self):
         """
-        Function to set the member variables of this class with default value as per TCf Spec
+        Function to set the member variables of this class with
+        default value as per TCf Spec
         """
         self.work_order_sync_uri = ""
         self.work_order_async_uri = ""
@@ -58,7 +59,8 @@ class SGXWorkerDetails(WorkerDetails):
 # -----------------------------------------------------------------------------
     def load_worker(self, input_str):
         """
-        Function to load the member variables of this class based on worker retrieved details
+        Function to load the member variables of this class based on
+        worker retrieved details.
         """
         worker_data = input_str['result']['details']
         logger.info("*********Updating Worker Details*********")
@@ -66,18 +68,25 @@ class SGXWorkerDetails(WorkerDetails):
         self.signing_algorithm = worker_data['signingAlgorithm']
         self.key_encryption_algorithm = worker_data['keyEncryptionAlgorithm']
         self.data_encryption_algorithm = worker_data['dataEncryptionAlgorithm']
-        self.verification_key = worker_data['workerTypeData']['verificationKey']
+        self.verification_key = \
+            worker_data['workerTypeData']['verificationKey']
         self.encryption_key = worker_data['workerTypeData']['encryptionKey']
         if worker_data['workerTypeData']['proofData']:
-            # proofData will be initialized only in HW mode by tcf_enclave_bridge
-            # module when signup info is obtained from worker.
-            self.proof_data = json.loads(worker_data['workerTypeData']['proofData'])
+            # proofData will be initialized only in HW mode by
+            # tcf_enclave_bridge module when signup info is obtained from
+            # the worker.
+            self.proof_data = json.loads(
+                worker_data['workerTypeData']['proofData'])
 
-        self.worker_id = self.strip_begin_end_key(worker_data['workerTypeData']['verificationKey']).encode("UTF-8").hex()
+        self.worker_id = self.strip_begin_end_key(
+            worker_data['workerTypeData']['verificationKey']) \
+            .encode("UTF-8").hex()
         ''' worker_id - newline, BEGIN PUB KEY and END PUB KEY are removed
                         from worker's verification key and converted to hex '''
         logger.info("Hashing Algorithm : %s", self.hashing_algorithm)
         logger.info("Signing Algorithm : %s", self.signing_algorithm)
 
     def strip_begin_end_key(self, key):
-        return key.replace("\n", "").replace("-----BEGIN PUBLIC KEY-----", "").replace("-----END PUBLIC KEY-----", "")
+        return key.replace("\n", "") \
+            .replace("-----BEGIN PUBLIC KEY-----", "") \
+            .replace("-----END PUBLIC KEY-----", "")
