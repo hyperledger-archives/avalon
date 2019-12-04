@@ -30,14 +30,17 @@ class UtilityTest(unittest.TestCase):
     def test_create_error_response(self):
         """Tests to verify create_error_response(code, jrpc_id, message) function
         """
-        expected_response = {"jsonrpc": "2.0", "id": "id1",
+        expected_response = {
+            "jsonrpc": "2.0", "id": "id1",
             "error": {"code": 404, "message": "Page not found"}, }
-        self.assertEquals(expected_response, create_error_response(404, "id1", "Page not found"))
+        self.assertEquals(expected_response, create_error_response(
+            404, "id1", "Page not found"))
 
         expected_response = {"jsonrpc": "2.0", "id": "id2",
-             "error": {"code": "2", "message": "General error"}, }
+                             "error":
+                             {"code": "2", "message": "General error"}, }
         self.assertEquals(expected_response, create_error_response("2", "id2",
-             "General error"))
+                          "General error"))
 
     def test_strip_begin_end_key(self):
         """Tests to verify strip_begin_end_key(key) function

@@ -29,18 +29,19 @@ class FileUtilsTest(unittest.TestCase):
         """Tests to verify file_in_path(filename, search_paths) function
         """
         self.assertEqual(FILE_PATH + "/path_test_file",
-            find_file_in_paths("path_test_file", [FILE_PATH]))
+                         find_file_in_paths("path_test_file", [FILE_PATH]))
         self.assertEqual(FILE_PATH + "/path_test_file",
-            find_file_in_paths("path_test_file", ["./", FILE_PATH]))
+                         find_file_in_paths("path_test_file",
+                                            ["./", FILE_PATH]))
         pwd = os.getcwd()
         os.chdir(FILE_PATH)
         self.assertEqual("./path_test_file",
-            find_file_in_paths("./path_test_file", ["./"]))
+                         find_file_in_paths("./path_test_file", ["./"]))
         self.assertEqual("./path_test_file",
-            find_file_in_paths("path_test_file", ["./"]))
+                         find_file_in_paths("path_test_file", ["./"]))
         os.chdir(pwd)
         self.assertRaises(FileNotFoundError, find_file_in_paths,
-            "path_test_file", ["./"])
+                          "path_test_file", ["./"])
 
     def test_read_json_file(self):
         """Tests to verify read_json_file(input_file,data_dir) function
@@ -55,10 +56,12 @@ class FileUtilsTest(unittest.TestCase):
 
         input_json = read_json_file(
             "sample3.json", [FILE_PATH])  # positive case
-        self.assertEqual(input_json, '{1:"one",2:"two",3:["one","two","three"]}')
+        self.assertEqual(input_json,
+                         '{1:"one",2:"two",3:["one","two","three"]}')
 
     def test_write_result_data_to_json_file(self):
-        """Tests to verify write_result_data_to_json_file(file_name,input_data, data_dir ='./') function
+        """Tests to verify function
+           write_result_data_to_json_file(file_name,input_data, data_dir ='./')
         """
         input_data = '{"result":1,"field2":2}'
         file_name = "write_sample.json"
@@ -83,4 +86,5 @@ class FileUtilsTest(unittest.TestCase):
 
         input_data = '{"field1":1,"field2":2}'  # No attribute 'result'
         file_name = "write_sample.json"
-        self.assertRaises(ValueError, write_result_data_to_json_file, file_name, input_data)
+        self.assertRaises(ValueError, write_result_data_to_json_file,
+                          file_name, input_data)

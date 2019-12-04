@@ -16,7 +16,8 @@ import logging
 import crypto.crypto as crypto
 import utility.utility as utility
 
-logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s', level=logging.INFO)
+logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
+                    level=logging.INFO)
 
 
 def test_encrypt_session_key(iv):
@@ -58,7 +59,8 @@ def main():
             b64_enc_data = crypto.byte_array_to_base64(enc_data)
             iv_hex = crypto.byte_array_to_hex(iv)
             test_decrypt_data(iv_hex, enc_sess_key[:16], msg, b64_enc_data)
-    logging.info("Unit test case execution for encryption/decryption complete.")
+    logging.info(
+        "Unit test case execution for encryption/decryption complete.")
 
 
 if __name__ == "__main__":
