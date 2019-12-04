@@ -30,7 +30,8 @@ import crypto.crypto as crypto
 from database import connector
 from error_code.error_status import ReceiptCreateStatus, WorkOrderStatus
 from utility.tcf_types import WorkerStatus, WorkerType
-from work_order_receipt.work_order_receipt_request import WorkOrderReceiptRequest
+from work_order_receipt.work_order_receipt_request \
+    import WorkOrderReceiptRequest
 
 logger = logging.getLogger(__name__)
 
@@ -53,8 +54,10 @@ class EnclaveManager:
         self.verifying_key = signup_data.verifying_key
         self.encryption_key = signup_data.encryption_key
 
-        # TODO: EncryptionKeyNonce and EncryptionKeySignature are hardcoded to dummy values.
-        # Need to come up with a scheme to generate both for every unique encryption key.
+        # TODO: EncryptionKeyNonce and EncryptionKeySignature are hardcoded
+        # to dummy values.
+        # Need to come up with a scheme to generate both for every unique
+        # encryption key.
         self.encryption_key_nonce = ""
         self.encryption_key_signature = ""
         self.enclave_id = signup_data.enclave_id
@@ -68,7 +71,7 @@ class EnclaveManager:
         # Key pair for work order receipt signing
         # This is temporary approach
         self.private_key = utils.generate_signing_keys()
-        self.public_key =  self.private_key.GetPublicKey().Serialize()
+        self.public_key = self.private_key.GetPublicKey().Serialize()
 
     def manager_on_boot(self, kv_helper):
         """
@@ -80,7 +83,8 @@ class EnclaveManager:
         workers_list = kv_helper.lookup("workers")
 
         if len(workers_list) == 0:
-            logger.info("No worker entries available in workers table, skipping Cleanup")
+            logger.info("No worker entries available in workers table; " +
+                        "skipping cleanup")
         else:
             logger.info("Clearing entries in workers table")
             for worker in workers_list:
@@ -88,13 +92,15 @@ class EnclaveManager:
 
         worker_info = create_json_worker(self, self.config)
         logger.info("Adding enclave workers to workers table")
-        worker_id = utils.strip_begin_end_key(self.enclave_id).encode("UTF-8").hex()
+        worker_id = utils.strip_begin_end_key(self.enclave_id) \
+            .encode("UTF-8").hex()
         kv_helper.set("workers", worker_id, worker_info)
 
         # Cleanup wo-processing" table
         processing_list = kv_helper.lookup("wo-processing")
         if len(processing_list) == 0:
-            logger.info("No workorder entries found in wo-processing table, skipping Cleanup")
+            logger.info("No workorder entries found in " +
+                        "wo-processing table, skipping Cleanup")
             return
         for wo in processing_list:
             logger.info("Validating workorders in wo-processing table")
@@ -106,16 +112,22 @@ class EnclaveManager:
                     wo_resp = json.loads(wo_json_resp)
                 except ValueError as e:
                     logger.error(
-                        "Invalid JSON format found for the response for workorder %s - %s", wo, e)
+                        "Invalid JSON format found for the response for " +
+                        "workorder %s - %s", wo, e)
                     if wo_processed is None:
-                        kv_helper.set("wo-processed", wo, WorkOrderStatus.FAILED.name)
+                        kv_helper.set("wo-processed", wo,
+                                      WorkOrderStatus.FAILED.name)
                     kv_helper.remove("wo-processing", wo)
                     continue
 
-                if "Response" in wo_resp and wo_resp["Response"]["Status"] == WorkOrderStatus.FAILED:
+                if "Response" in wo_resp and \
+                        wo_resp["Response"]["Status"] == \
+                        WorkOrderStatus.FAILED:
                     if wo_processed is None:
-                        kv_helper.set("wo-processed", wo, WorkOrderStatus.FAILED.name)
-                    logger.error("Work order processing failed, removing it from wo-processing table")
+                        kv_helper.set("wo-processed", wo,
+                                      WorkOrderStatus.FAILED.name)
+                    logger.error("Work order processing failed; " +
+                                 "removing it from wo-processing table")
                     kv_helper.remove("wo-processing", wo)
                     continue
 
@@ -124,16 +136,21 @@ class EnclaveManager:
                     # update receipt
                     logger.info("Updating receipt in boot flow")
                     self.__update_receipt(kv_helper, wo, wo_json_resp)
-                    logger.info("Receipt updated for workorder %s during boot", wo)
+                    logger.info("Receipt updated for workorder %s during boot",
+                                wo)
 
                 if wo_processed is None:
-                    kv_helper.set("wo-processed", wo, WorkOrderStatus.SUCCESS.name)
+                    kv_helper.set("wo-processed", wo,
+                                  WorkOrderStatus.SUCCESS.name)
             else:
-                logger.info("No response found for the workorder %s,"
-                            "hence placing the workorder request back in wo-scheduled", wo)
-                kv_helper.set("wo-scheduled", wo, WorkOrderStatus.SCHEDULED.name)
+                logger.info("No response found for the workorder %s; " +
+                            "hence placing the workorder request " +
+                            "back in wo-scheduled", wo)
+                kv_helper.set("wo-scheduled", wo,
+                              WorkOrderStatus.SCHEDULED.name)
 
-            logger.info("Finally deleting workorder %s from wo-processing table", wo)
+            logger.info(
+                "Finally deleting workorder %s from wo-processing table", wo)
             kv_helper.remove("wo-processing", wo)
 
         # End of for-loop
@@ -149,7 +166,8 @@ class EnclaveManager:
             list_of_workorders = kv_helper.lookup("wo-scheduled")
 
             if not list_of_workorders:
-                logger.info("Received empty list of work orders from wo-scheduled table")
+                logger.info("Received empty list of work orders from " +
+                            "wo-scheduled table")
                 return
 
         except Exception as e:
@@ -158,13 +176,14 @@ class EnclaveManager:
 
         for wo_id in list_of_workorders:
             try:
-                kv_helper.set("wo-processing", wo_id, WorkOrderStatus.PROCESSING.name)
+                kv_helper.set("wo-processing", wo_id,
+                              WorkOrderStatus.PROCESSING.name)
 
                 # Get JSON workorder request corresponding to wo_id
                 wo_json_req = kv_helper.get("wo-requests", wo_id)
                 if wo_json_req is None:
-                    logger.error("Received empty work order corresponding to id %s"
-                                 "from wo-requests table", wo_id)
+                    logger.error("Received empty work order corresponding " +
+                                 "to id %s from wo-requests table", wo_id)
                     kv_helper.remove("wo-processing", wo_id)
                     return
 
@@ -174,10 +193,13 @@ class EnclaveManager:
                 kv_helper.remove("wo-processing", wo_id)
                 return
 
-            logger.info("Create workorder entry %s in wo-processing table", wo_id)
-            kv_helper.set("wo-processing", wo_id, WorkOrderStatus.PROCESSING.name)
+            logger.info("Create workorder entry %s in wo-processing table",
+                        wo_id)
+            kv_helper.set("wo-processing", wo_id,
+                          WorkOrderStatus.PROCESSING.name)
 
-            logger.info("Delete workorder entry %s from wo-scheduled table", wo_id)
+            logger.info("Delete workorder entry %s from wo-scheduled table",
+                        wo_id)
             kv_helper.remove("wo-scheduled", wo_id)
 
             logger.info("Validating JSON workorder request %s", wo_id)
@@ -185,11 +207,14 @@ class EnclaveManager:
 
             if not validation_status:
                 logger.error(
-                    "JSON validation for Workorder %s failed. Handling Failure scenarios", wo_id)
+                    "JSON validation for Workorder %s failed; " +
+                    "handling Failure scenarios", wo_id)
                 wo_response["Response"]["Status"] = WorkOrderStatus.FAILED
-                wo_response["Response"]["Message"] = "Workorder JSON request is invalid"
+                wo_response["Response"]["Message"] = \
+                    "Workorder JSON request is invalid"
                 kv_helper.set("wo-responses", wo_id, json.dumps(wo_response))
-                kv_helper.set("wo-processed", wo_id, WorkOrderStatus.FAILED.name)
+                kv_helper.set("wo-processed", wo_id,
+                              WorkOrderStatus.FAILED.name)
                 kv_helper.remove("wo-processing", wo_id)
                 return
 
@@ -202,20 +227,25 @@ class EnclaveManager:
             logger.info("Update workorder receipt for workorder %s", wo_id)
             receipt = self.__update_receipt(kv_helper, wo_id, wo_resp)
 
-            if "Response" in wo_resp and wo_resp["Response"]["Status"] == WorkOrderStatus.FAILED:
+            if "Response" in wo_resp and \
+                    wo_resp["Response"]["Status"] == WorkOrderStatus.FAILED:
                 logger.error("error in Response")
-                kv_helper.set("wo-processed", wo_id, WorkOrderStatus.FAILED.name)
+                kv_helper.set("wo-processed", wo_id,
+                              WorkOrderStatus.FAILED.name)
                 kv_helper.set("wo-responses", wo_id, wo_json_resp)
                 kv_helper.remove("wo-processing", wo_id)
                 return
 
-            logger.info("Mark workorder status for workorder id %s to Completed in wo-processed", wo_id)
+            logger.info("Mark workorder status for workorder id %s " +
+                        "as Completed in wo-processed", wo_id)
             kv_helper.set("wo-processed", wo_id, WorkOrderStatus.SUCCESS.name)
 
-            logger.info("Create entry in wo-responses table for workorder %s", wo_id)
+            logger.info("Create entry in wo-responses table for workorder %s",
+                        wo_id)
             kv_helper.set("wo-responses", wo_id, wo_json_resp)
 
-            logger.info("Delete workorder entry %s from wo-processing table", wo_id)
+            logger.info("Delete workorder entry %s from wo-processing table",
+                        wo_id)
             kv_helper.remove("wo-processing", wo_id)
 
         # end of for loop
@@ -227,7 +257,8 @@ class EnclaveManager:
         Update the existing work order receipt with the status as in wo_json_
         Parameters:
             - kv_helper is lmdb instance to access database
-            - wo_id is work order id of request for which receipt is to be created.
+            - wo_id is work order id of request for which receipt is to be
+              created.
             - wo_json_resp is json rpc response of the work order execution.
             status of the work order receipt and updater signature update in
             the receipt.
@@ -236,7 +267,8 @@ class EnclaveManager:
         if receipt_entry:
             update_type = None
             if "error" in wo_json_resp and \
-            wo_json_resp["error"]["code"] != WorkOrderStatus.PENDING.value:
+                    wo_json_resp["error"]["code"] != \
+                    WorkOrderStatus.PENDING.value:
                 update_type = ReceiptCreateStatus.FAILED.value
             else:
                 update_type = ReceiptCreateStatus.PROCESSED.value
@@ -256,18 +288,27 @@ class EnclaveManager:
             else:
                 updated_receipt = json.loads(updates_to_receipt)
                 # Get the last update to receipt
-                last_receipt = updated_receipt[len(updated_receipt)-1]
-                # If receipt updateType is completed then no further update allowed
-                if last_receipt["updateType"] == ReceiptCreateStatus.COMPLETED.value:
-                    logger.info("Receipt for the workorder id %s is completed and no further updates are allowed",
+                last_receipt = updated_receipt[len(updated_receipt) - 1]
+
+                # If receipt updateType is completed,
+                # then no further update allowed
+                if last_receipt["updateType"] == \
+                        ReceiptCreateStatus.COMPLETED.value:
+                    logger.info(
+                        "Receipt for the workorder id %s is completed " +
+                        "and no further updates are allowed",
                         wo_id)
                     return
             updated_receipt.append(wo_receipt)
+
             # Since receipts_json is jrpc request updating only params object.
-            kv_helper.set("wo-receipt-updates", wo_id, json.dumps(updated_receipt))
-            logger.info("Receipt for the workorder id %s is updated to %s", wo_id, wo_receipt)
+            kv_helper.set("wo-receipt-updates", wo_id, json.dumps(
+                updated_receipt))
+            logger.info("Receipt for the workorder id %s is updated to %s",
+                        wo_id, wo_receipt)
         else:
-            logger.info("Work order receipt is not created, so skipping the update")
+            logger.info("Work order receipt is not created, " +
+                        "so skipping the update")
 
 
 # -----------------------------------------------------------------
@@ -276,15 +317,16 @@ def create_enclave_signup_data():
     Create enclave signup data
     """
     try:
-        enclave_signup_data = enclave_helper.EnclaveHelper.create_enclave_signup_data()
+        enclave_signup_data = \
+            enclave_helper.EnclaveHelper.create_enclave_signup_data()
     except Exception as e:
         logger.error("failed to create enclave signup data; %s", str(e))
         sys.exit(-1)
 
     return enclave_signup_data
 
-# -----------------------------------------------------------------
 
+# -----------------------------------------------------------------
 def execute_work_order(enclave_data, input_json_str, indent=4):
     """
     Submits workorder request to Worker enclave and retrieves the response
@@ -297,8 +339,8 @@ def execute_work_order(enclave_data, input_json_str, indent=4):
 
         try:
             json_response = json.dumps(wo_response, indent=indent)
-        except:
-            logger.error("ERROR: Failed to serialize JSON")
+        except Exception as err:
+            logger.error("ERROR: Failed to serialize JSON; %s", str(err))
             wo_response["Response"]["Status"] = WorkOrderStatus.FAILED
             wo_response["Response"]["Message"] = "Failed to serialize JSON"
             json_response = json.dumps(wo_response)
@@ -311,8 +353,8 @@ def execute_work_order(enclave_data, input_json_str, indent=4):
 
     return json_response
 
-# -----------------------------------------------------------------
 
+# -----------------------------------------------------------------
 def validate_request(wo_request):
     """
     Validate JSON workorder request
@@ -332,33 +374,47 @@ def create_json_worker(enclave_data, config):
     """
     worker_type_data = dict()
     worker_type_data["verificationKey"] = enclave_data.verifying_key
-    worker_type_data["extendedMeasurements"] = enclave_data.extended_measurements
+    worker_type_data["extendedMeasurements"] = \
+        enclave_data.extended_measurements
     worker_type_data["proofDataType"] = enclave_data.proof_data_type
     worker_type_data["proofData"] = enclave_data.proof_data
     worker_type_data["encryptionKey"] = enclave_data.encryption_key
-    worker_type_data["encryptionKeySignature"] = enclave_data.encryption_key_signature
+    worker_type_data["encryptionKeySignature"] = \
+        enclave_data.encryption_key_signature
 
     worker_info = dict()
     worker_info["workerType"] = WorkerType.TEE_SGX.value
-    worker_info["organizationId"] = config.get("WorkerConfig")["OrganizationId"]
-    worker_info["applicationTypeId"] = config.get("WorkerConfig")["ApplicationTypeId"]
+    worker_info["organizationId"] = \
+        config.get("WorkerConfig")["OrganizationId"]
+    worker_info["applicationTypeId"] = \
+        config.get("WorkerConfig")["ApplicationTypeId"]
 
     details_info = dict()
-    details_info["workOrderSyncUri"] = config.get("WorkerConfig")["WorkOrderSyncUri"]
-    details_info["workOrderAsyncUri"] = config.get("WorkerConfig")["WorkOrderAsyncUri"]
-    details_info["workOrderPullUri"] = config.get("WorkerConfig")["WorkOrderPullUri"]
-    details_info["workOrderNotifyUri"] = config.get("WorkerConfig")["WorkOrderNotifyUri"]
-    details_info["receiptInvocationUri"] = config.get("WorkerConfig")["ReceiptInvocationUri"]
+    details_info["workOrderSyncUri"] = \
+        config.get("WorkerConfig")["WorkOrderSyncUri"]
+    details_info["workOrderAsyncUri"] = \
+        config.get("WorkerConfig")["WorkOrderAsyncUri"]
+    details_info["workOrderPullUri"] = \
+        config.get("WorkerConfig")["WorkOrderPullUri"]
+    details_info["workOrderNotifyUri"] = \
+        config.get("WorkerConfig")["WorkOrderNotifyUri"]
+    details_info["receiptInvocationUri"] = \
+        config.get("WorkerConfig")["ReceiptInvocationUri"]
     details_info["workOrderInvocationAddress"] = config.get(
         "WorkerConfig")["WorkOrderInvocationAddress"]
     details_info["receiptInvocationAddress"] = config.get(
         "WorkerConfig")["ReceiptInvocationAddress"]
     details_info["fromAddress"] = config.get("WorkerConfig")["FromAddress"]
-    details_info["hashingAlgorithm"] = config.get("WorkerConfig")["HashingAlgorithm"]
-    details_info["signingAlgorithm"] = config.get("WorkerConfig")["SigningAlgorithm"]
-    details_info["keyEncryptionAlgorithm"] = config.get("WorkerConfig")["KeyEncryptionAlgorithm"]
-    details_info["dataEncryptionAlgorithm"] = config.get("WorkerConfig")["DataEncryptionAlgorithm"]
-    details_info["workOrderPayloadFormats"] = config.get("WorkerConfig")["workOrderPayloadFormats"]
+    details_info["hashingAlgorithm"] = \
+        config.get("WorkerConfig")["HashingAlgorithm"]
+    details_info["signingAlgorithm"] = \
+        config.get("WorkerConfig")["SigningAlgorithm"]
+    details_info["keyEncryptionAlgorithm"] = \
+        config.get("WorkerConfig")["KeyEncryptionAlgorithm"]
+    details_info["dataEncryptionAlgorithm"] = \
+        config.get("WorkerConfig")["DataEncryptionAlgorithm"]
+    details_info["workOrderPayloadFormats"] = \
+        config.get("WorkerConfig")["workOrderPayloadFormats"]
     details_info["workerTypeData"] = worker_type_data
 
     worker_info["details"] = details_info
@@ -381,8 +437,10 @@ def start_enclave_manager(config):
         sys.exit(-1)
     try:
         logger.debug("initialize the enclave")
-        # Extended measurements is a list of enclave basename and enclave measurement
-        extended_measurements = enclave_helper.initialize_enclave(config.get("EnclaveModule"))
+        # Extended measurements is a list of enclave basename and
+        # enclave measurement
+        extended_measurements = \
+            enclave_helper.initialize_enclave(config.get("EnclaveModule"))
     except Exception as e:
         logger.exception("failed to initialize enclave; %s", str(e))
         sys.exit(-1)
@@ -391,27 +449,31 @@ def start_enclave_manager(config):
     enclave_signup_data = create_enclave_signup_data()
 
     logger.info("initialize enclave_manager")
-    enclave_manager = EnclaveManager(config, enclave_signup_data, extended_measurements)
+    enclave_manager = EnclaveManager(
+        config, enclave_signup_data, extended_measurements)
     logger.info("Enclave manager started")
 
     try:
         (kv_helper, _) = connector.open(config)
     except Exception as err:
-        logger.error(f"Failed to open KV storage interface, Exiting SGX Enclave manager: {err}")
+        logger.error("Failed to open KV storage interface; " +
+                     "exiting SGX Enclave manager: {err}")
         sys.exit(-1)
 
     try:
-        logger.info("----------------------- Starting Boot time flow -----------------------")
+        logger.info("--------------- Starting Boot time flow ----------------")
         enclave_manager.manager_on_boot(kv_helper)
-        logger.info("----------------------- Boot time flow Complete -----------------------")
-    except:
-        logger.error("Failed to execute boot time flow, Exiting SGX Enclave manager...")
+        logger.info("--------------- Boot time flow Complete ----------------")
+    except Exception as err:
+        logger.error("Failed to execute boot time flow; " +
+                     "exiting SGX Enclave manager: {err}")
         exit(1)
 
     try:
         sleep_interval = int(config["EnclaveManager"]["sleep_interval"])
-    except:
-        logger.error("Failed to get sleep interval from config file. setting sleep interval to 10 secs")
+    except Exception as err:
+        logger.error("Failed to get sleep interval from config file. " +
+                     "Setting sleep interval to 10 seconds: %s", str(err))
         sleep_interval = 10
 
     try:
@@ -421,8 +483,10 @@ def start_enclave_manager(config):
             logger.info("Enclave manager sleeping for %d secs", sleep_interval)
             time.sleep(sleep_interval)
     except Exception as inst:
-        logger.error("Error while processing work-order. Shutting down enclave manager")
-        logger.error("Exception: {} args {} details {}".format(type(inst), inst.args, inst))
+        logger.error("Error while processing work-order; " +
+                     "shutting down enclave manager")
+        logger.error("Exception: {} args {} details {}".format(type(inst),
+                     inst.args, inst))
         exit(1)
 
 
@@ -441,7 +505,8 @@ def parse_command_line(config, args):
     parser = argparse.ArgumentParser()
 
     parser.add_argument(
-        "--logfile", help="Name of the log file, __screen__ for standard output", type=str)
+        "--logfile",
+        help="Name of the log file, __screen__ for standard output", type=str)
     parser.add_argument("--loglevel", help="Logging leve", type=str)
 
     options = parser.parse_args(args)
@@ -485,8 +550,10 @@ def main(args=None):
         sys.exit(-1)
 
     plogger.setup_loggers(config.get("Logging", {}))
-    sys.stdout = plogger.stream_to_logger(logging.getLogger("STDOUT"), logging.DEBUG)
-    sys.stderr = plogger.stream_to_logger(logging.getLogger("STDERR"), logging.WARN)
+    sys.stdout = plogger.stream_to_logger(
+        logging.getLogger("STDOUT"), logging.DEBUG)
+    sys.stderr = plogger.stream_to_logger(
+        logging.getLogger("STDERR"), logging.WARN)
 
     parse_command_line(config, remainder)
     logger.info("Starting Enclave manager")
