@@ -32,7 +32,8 @@ from connectors.direct.direct_json_rpc_api_connector \
 from error_code.error_status import WorkOrderStatus, ReceiptCreateStatus
 import utility.signature as signature
 from error_code.error_status import SignatureStatus
-from work_order_receipt.work_order_receipt_request import WorkOrderReceiptRequest
+from work_order_receipt.work_order_receipt_request \
+    import WorkOrderReceiptRequest
 
 # Remove duplicate loggers
 for handler in logging.root.handlers[:]:
@@ -57,38 +58,49 @@ def ParseCommandLine(args):
 
     parser = argparse.ArgumentParser()
     mutually_excl_group = parser.add_mutually_exclusive_group()
-    parser.add_argument("-c", "--config",
+    parser.add_argument(
+        "-c", "--config",
         help="The config file containing the Ethereum contract information",
         type=str)
-    mutually_excl_group.add_argument("-u", "--uri",
+    mutually_excl_group.add_argument(
+        "-u", "--uri",
         help="Direct API listener endpoint, default is http://localhost:1947",
         default="http://localhost:1947",
         type=str)
-    mutually_excl_group.add_argument("-a", "--address",
-        help="an address (hex string) of the smart contract (e.g. Worker registry listing)",
+    mutually_excl_group.add_argument(
+        "-a", "--address",
+        help="an address (hex string) of the smart contract " +
+        "(e.g. Worker registry listing)",
         type=str)
-    parser.add_argument("-m", "--mode",
+    parser.add_argument(
+        "-m", "--mode",
         help="should be one of listing or registry (default)",
         default="registry",
         choices={"registry", "listing"},
         type=str)
-    parser.add_argument("-w", "--worker_id",
+    parser.add_argument(
+        "-w", "--worker_id",
         help="worker id (hex string) to use to submit a work order",
         type=str)
-    parser.add_argument("-l", "--workload_id",
+    parser.add_argument(
+        "-l", "--workload_id",
         help='workload id (hex string) for a given worker',
         type=str)
-    parser.add_argument("-i", "--in_data",
+    parser.add_argument(
+        "-i", "--in_data",
         help='Input data',
         nargs="+",
         type=str)
-    parser.add_argument("-r", "--receipt",
+    parser.add_argument(
+        "-r", "--receipt",
         help="If present, retrieve and display work order receipt",
         action='store_true')
-    parser.add_argument("-o", "--decrypted_output",
+    parser.add_argument(
+        "-o", "--decrypted_output",
         help="If present, display decrypted output as JSON",
         action='store_true')
-    parser.add_argument("-rs", "--requester_signature",
+    parser.add_argument(
+        "-rs", "--requester_signature",
         help="Enable requester signature for work order requests",
         action="store_true")
     options = parser.parse_args(args)
@@ -97,7 +109,7 @@ def ParseCommandLine(args):
         conf_files = [options.config]
     else:
         conf_files = [TCFHOME +
-            "/examples/common/python/connectors/tcf_connector.toml"]
+                      "/examples/common/python/connectors/tcf_connector.toml"]
     confpaths = ["."]
     try:
         config = pconfig.parse_configuration_files(conf_files, confpaths)
@@ -151,7 +163,7 @@ def Main(args=None):
         logging.getLogger("STDERR"), logging.WARN)
 
     logger.info("***************** TRUSTED COMPUTE FRAMEWORK (TCF)" +
-        " *****************")
+                " *****************")
 
     global direct_jrpc
     direct_jrpc = DirectJsonRpcApiConnector(config_file=None, config=config)
@@ -168,16 +180,19 @@ def Main(args=None):
             config
         )
         # Lookup returns tuple, first element is number of registries and
-        # second is element is lookup tag and third is list of organization ids.
-        registry_count, lookup_tag, registry_list = registry_list_instance.registry_lookup()
-        logger.info("\n Registry lookup response: registry count: {} lookup tag: {} registry list: {}\n".format(
-            registry_count, lookup_tag, registry_list
-        ))
+        # second is element is lookup tag and
+        # third is list of organization ids.
+        registry_count, lookup_tag, registry_list = \
+            registry_list_instance.registry_lookup()
+        logger.info("\n Registry lookup response: registry count: {} " +
+                    "lookup tag: {} registry list: {}\n".format(
+                        registry_count, lookup_tag, registry_list))
         if (registry_count == 0):
             logger.error("No registries found")
             sys.exit(1)
         # Retrieve the fist registry details.
-        registry_retrieve_result = registry_list_instance.registry_retrieve(registry_list[0])
+        registry_retrieve_result = registry_list_instance.registry_retrieve(
+            registry_list[0])
         logger.info("\n Registry retrieve response: {}\n".format(
             registry_retrieve_result
         ))
@@ -224,7 +239,7 @@ def Main(args=None):
     worker_obj.load_worker(worker_retrieve_result)
 
     logger.info("**********Worker details Updated with Worker ID" +
-        "*********\n%s\n", worker_id)
+                "*********\n%s\n", worker_id)
 
     # Convert workloadId to hex
     global workload_id
@@ -259,7 +274,7 @@ def Main(args=None):
             exit(1)
     # Submit work order
     logger.info("Work order submit request : %s, \n \n ",
-        wo_params.to_string(req_id))
+                wo_params.to_string(req_id))
     work_order_instance = direct_jrpc.create_work_order(
         config
     )
@@ -274,7 +289,8 @@ def Main(args=None):
         json.dumps(response, indent=4)
     ))
 
-    if "error" in response and response["error"]["code"] != WorkOrderStatus.PENDING:
+    if "error" in response and response["error"]["code"] != \
+            WorkOrderStatus.PENDING:
         sys.exit(1)
 
     wo_receipt_instance = direct_jrpc.create_work_order_receipt(
@@ -332,12 +348,12 @@ def Main(args=None):
                     res, session_key, session_iv)
                 if show_decrypted_output:
                     logger.info("\nDecrypted response:\n {}"
-                        .format(decrypted_res))
+                                .format(decrypted_res))
             else:
                 logger.error("Signature verification Failed")
                 sys.exit(1)
-        except:
-            logger.error("ERROR: Failed to decrypt response")
+        except Exception as err:
+            logger.error("ERROR: Failed to decrypt response: %s", str(err))
             sys.exit(1)
     else:
         logger.error("\n Work order get result failed {}\n".format(
@@ -357,20 +373,24 @@ def Main(args=None):
         ))
         # Retrieve last update to receipt by passing 0xFFFFFFFF
         req_id += 1
-        receipt_update_retrieve = wo_receipt_instance.work_order_receipt_update_retrieve(
-            work_order_id,
-            None,
-            1 << 32,
-            id=req_id
-        )
+        receipt_update_retrieve = \
+            wo_receipt_instance.work_order_receipt_update_retrieve(
+                work_order_id,
+                None,
+                1 << 32,
+                id=req_id)
         logger.info("\n Last update to receipt receipt is:\n {}".format(
             json.dumps(receipt_update_retrieve, indent=4)
         ))
-        status = sig_obj.verify_update_receipt_signature(receipt_update_retrieve)
+        status = sig_obj.verify_update_receipt_signature(
+            receipt_update_retrieve)
         if status == SignatureStatus.PASSED:
-            logger.info("Work order receipt retrieve signature verification Successful")
+            logger.info(
+                "Work order receipt retrieve signature verification " +
+                "successful")
         else:
-            logger.info("Work order receipt retrieve signature verification failed!!")
+            logger.info(
+                "Work order receipt retrieve signature verification failed!!")
             sys.exit(1)
 
 

@@ -35,7 +35,8 @@ from error_code.error_status import WorkOrderStatus, ReceiptCreateStatus
 import utility.signature as signature
 import utility.hex_utils as hex_utils
 from error_code.error_status import SignatureStatus
-from work_order_receipt.work_order_receipt_request import WorkOrderReceiptRequest
+from work_order_receipt.work_order_receipt_request \
+    import WorkOrderReceiptRequest
 
 # Remove duplicate loggers
 for handler in logging.root.handlers[:]:
@@ -55,33 +56,41 @@ def ParseCommandLine(args):
 
     parser = argparse.ArgumentParser()
     use_service = parser.add_mutually_exclusive_group()
-    parser.add_argument("-c", "--config",
-                        help="the config file containing the Ethereum contract information",
-                        type=str)
-    use_service.add_argument("-r", "--registry-list",
-                             help="the Ethereum address of the registry list",
-                             type=str)
+    parser.add_argument(
+        "-c", "--config",
+        help="the config file containing the Ethereum contract information",
+        type=str)
+    use_service.add_argument(
+        "-r", "--registry-list",
+        help="the Ethereum address of the registry list",
+        type=str)
 
-    use_service.add_argument("-s", "--service-uri",
-                             help="skip URI lookup and send to specified URI",
-                             type=str)
+    use_service.add_argument(
+        "-s", "--service-uri",
+        help="skip URI lookup and send to specified URI",
+        type=str)
 
-    use_service.add_argument("-o", "--off-chain",
-                             help="skip URI lookup and use the registry in the config file",
-                             action="store_true")
+    use_service.add_argument(
+        "-o", "--off-chain",
+        help="skip URI lookup and use the registry in the config file",
+        action="store_true")
 
-    parser.add_argument("-w", "--worker-id",
-                        help="skip worker lookup and retrieve specified worker",
-                        type=str)
-    parser.add_argument("-m", "--message",
-                        help='text message to be included in the JSON request payload',
-                        type=str)
-    parser.add_argument("-rs", "--requester-signature",
-                        help="Enable requester signature for work order requests",
-                        action="store_true")
-    parser.add_argument("-dh", "--data-hash",
-                        help="Enable input data hash for work order requests",
-                        action="store_true")
+    parser.add_argument(
+        "-w", "--worker-id",
+        help="skip worker lookup and retrieve specified worker",
+        type=str)
+    parser.add_argument(
+        "-m", "--message",
+        help='text message to be included in the JSON request payload',
+        type=str)
+    parser.add_argument(
+        "-rs", "--requester-signature",
+        help="Enable requester signature for work order requests",
+        action="store_true")
+    parser.add_argument(
+        "-dh", "--data-hash",
+        help="Enable input data hash for work order requests",
+        action="store_true")
 
     options = parser.parse_args(args)
     if options.config:
@@ -147,16 +156,20 @@ def Main(args=None):
         registry_list_instance = direct_jrpc.create_worker_registry_list(
             config
         )
+
         # Lookup returns tuple, first element is number of registries and
-        # second is element is lookup tag and third is list of organization ids.
-        registry_count, lookup_tag, registry_list = registry_list_instance.registry_lookup()
-        logger.info("\n Registry lookup response: registry count: {} lookup tag: {} registry list: {}\n".format(
-            registry_count, lookup_tag, registry_list
-        ))
+        # second is element is lookup tag and
+        # third is list of organization ids.
+        registry_count, lookup_tag, registry_list = \
+            registry_list_instance.registry_lookup()
+        logger.info("\n Registry lookup response: registry count: {} " +
+                    "lookup tag: {} registry list: {}\n".format(
+                        registry_count, lookup_tag, registry_list))
         if (registry_count == 0):
             logger.warn("No registries found")
             sys.exit(1)
-        # Retrieve the fist registry details.
+
+        # Retrieve the first registry details.
         registry_retrieve_result = registry_list_instance.registry_retrieve(
             registry_list[0])
         logger.info("\n Registry retrieve response: {}\n".format(
@@ -252,7 +265,8 @@ def Main(args=None):
         json.dumps(response, indent=4)
     ))
 
-    if "error" in response and response["error"]["code"] != WorkOrderStatus.PENDING:
+    if "error" in response and response["error"]["code"] != \
+            WorkOrderStatus.PENDING:
         sys.exit(1)
 
     # Create receipt
@@ -311,13 +325,14 @@ def Main(args=None):
                     decrypted_data = decrypted_res[0]["data"]
                     data_hash_in_resp = (decrypted_res[0]["dataHash"]).upper()
                     # Verify data hash in response
-                    if utility.verify_data_hash(decrypted_data, data_hash_in_resp) is False:
+                    if utility.verify_data_hash(
+                            decrypted_data, data_hash_in_resp) is False:
                         sys.exit(1)
             else:
                 logger.info("Signature verification Failed")
                 sys.exit(1)
-        except:
-            logger.error("ERROR: Failed to decrypt response")
+        except Exception as err:
+            logger.error("ERROR: Failed to decrypt response: %s", str(err))
             sys.exit(1)
     else:
         logger.info("\n Work order get result failed {}\n".format(
@@ -334,14 +349,15 @@ def Main(args=None):
     logger.info("\n Retrieve receipt response:\n {}".format(
         json.dumps(receipt_res, indent=4)
     ))
+
     # Retrieve last update to receipt by passing 0xFFFFFFFF
     req_id += 1
-    receipt_update_retrieve = wo_receipt_instance.work_order_receipt_update_retrieve(
-        work_order_id,
-        None,
-        1 << 32,
-        id=req_id
-    )
+    receipt_update_retrieve = \
+        wo_receipt_instance.work_order_receipt_update_retrieve(
+            work_order_id,
+            None,
+            1 << 32,
+            id=req_id)
     logger.info("\n Last update to receipt receipt is:\n {}".format(
         json.dumps(receipt_update_retrieve, indent=4)
     ))
