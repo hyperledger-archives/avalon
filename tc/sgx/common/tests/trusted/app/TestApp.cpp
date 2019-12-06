@@ -117,11 +117,6 @@ int initialize_enclave(void)
     }
 
     FILE* fp = fopen(token_path, "rb");
-    if (fp == NULL && (fp = fopen(token_path, "wb")) == NULL)
-    {
-        fprintf(stderr, "Warning: Failed to create/open the launch token file \"%s\".\n", token_path);
-    }
-
     if (fp != NULL)
     {
         /* read the token from saved file */
@@ -130,9 +125,20 @@ int initialize_enclave(void)
         {
             /* if token is invalid, clear the buffer */
             memset(&token, 0x0, sizeof(sgx_launch_token_t));
-            fprintf(stderr, "Warning: Invalid launch token read from \"%s\".\n", token_path);
+            fprintf(stderr, "Warning: Invalid launch token read from "
+                "\"%s\".\n", token_path);
         }
     }
+    else
+    {
+        /* create file since it does not exist */
+        if ((fp = fopen(token_path, "wb")) == NULL)
+        {
+            fprintf(stderr, "Warning: Failed to create/open the launch token "
+                " file \"%s\".\n", token_path);
+        }
+    }
+
     /* Step 2: call sgx_create_enclave to initialize an enclave instance */
     /* Debug Support: set 2nd parameter to 1 */
     ret = sgx_create_enclave(ENCLAVE_FILENAME, SGX_DEBUG_FLAG, &token, &updated, &global_eid, NULL);
