@@ -80,7 +80,7 @@ RUN apt-get update \
 RUN pip3 install --upgrade setuptools json-rpc py-solc web3 nose2
 
 # Make Python3 default
-RUN ln -s /usr/bin/python3 /usr/bin/python
+RUN ln -sf /usr/bin/python3 /usr/bin/python
 
 # SGX common library and SDK are installed in /opt/intel directory.
 # Installation of SGX libsgx-common packages requires /etc/init directory. In docker image this directory doesn't exist.
