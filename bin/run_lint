@@ -120,7 +120,7 @@ lint_module() {
 }
 
 usage() {
-    echo "Run pycodestyle and pylint3 for this repository"
+    echo "Run pycodestyle, pylint3, and cppcheck for this repository"
     echo "Usage:"
     echo "  $0 [-s BRANCH] [-n] [-h]"
     echo
