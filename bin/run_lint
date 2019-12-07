@@ -17,8 +17,8 @@
 
 set -e
 
-# Find Python packages in subdirectory $1, optionally since date $2
-find_packages() {
+# Find Python files in subdirectory $1, optionally since date $2
+find_python_packages() {
     topdir=$1
     since=$2
 
@@ -39,13 +39,37 @@ find_packages() {
         | grep -v _pb2\.py$
 }
 
+# Find C++ source files in subdirectory $1, optionally since date $2
+find_cpp_packages() {
+    topdir=$1
+    since=$2
+
+    (
+    if [ "$since" != "" ]; then
+        git ls-files -mo "$topdir/*.cpp" -x build
+        git diff --name-only $since "$topdir/*.cpp"
+    else
+        find $topdir -name \*.cpp
+    fi
+    ) \
+        | sort --unique \
+        | git check-ignore --stdin --non-matching --verbose \
+        | grep ^:: \
+        | sed -e 's/^::\s//'
+}
+
 # Run lint on subdirectory $1, optionally since date $2.
-# Run pycodestyle if $3 is non-zero. Run pylint3 if $3 is non-zero.
+# Run pycodestyle on Python source if $3 is non-zero.
+# Run pylint3 if $4 is non-zero.
+# Run pycodestyle on C++ source if $5 is non-zero.
+# Run cppcheck if $6 is non-zero
 lint_module() {
     subdir=$1
     since=$2
-    enable_pycodestyle=$3
+    enable_pycodestyle_py=$3
     enable_pylint=$4
+    enable_pycodestyle_cpp=$5
+    enable_cppcheck=$6
 
     top_dir=$(cd $(dirname $(dirname $0)) && pwd)
 
@@ -55,29 +79,33 @@ lint_module() {
 
     error=0
 
-    packages=$(find_packages "$subdir" "$since")
+    python_packages=$(find_python_packages "$subdir" "$since")
+    cpp_packages=$(find_cpp_packages "$subdir" "$since")
 
-    if [ "$packages" != "" ]; then
+    if [ "$python_packages" != "" -o "$cpp_packages" != "" ]; then
         [ $VERBOSE = 0 ] && echo "-- $subdir"
 
-        if [ $enable_pycodestyle != 0 ] ; then
+        # Check Python with pycodestyle
+        if [ "$enable_pycodestyle_py" != 0 -a "$python_packages" != "" ] ; then
             [ $VERBOSE = 0 ] && echo "---- pycodestyle in $subdir"
             [ $VERBOSE = 1 ] && (
                 echo "--------------------------------------------------------"
-                echo "---- Running pycodestyle in $subdir..."
+                echo "---- Running pycodestyle Python in $subdir..."
             )
 
-            pycodestyle --config=$top_dir/.pycodestyle $packages || error=1
+            pycodestyle --config=$top_dir/.pycodestyle $python_packages \
+                || error=1
 
         else
             [ $VERBOSE = 1 ] && (
                 echo "--------------------------------------------------------"
-                echo "---- Skipping pycodestyle in $subdir. " \
+                echo "---- Skipping pycodestyle Python in $subdir. " \
                      "(Nothing to do.)"
             )
         fi
 
-        if [ $enable_pylint != 0 ] ; then
+        # Check Python with pylint3
+        if [ "$enable_pylint" != 0 -a "$python_packages" != "" ] ; then
             [ $VERBOSE = 0 ] && echo "---- pylint in $subdir"
             [ $VERBOSE = 1 ] && (
                 echo "--------------------------------------------------------"
@@ -90,7 +118,7 @@ lint_module() {
                 --reports=no \
                 --score=no \
                 --persistent=no \
-                $packages || error=1
+                $python_packages || error=1
 
         else
             [ $VERBOSE = 1 ] && (
@@ -100,13 +128,57 @@ lint_module() {
             )
         fi
 
+        # Check C++ with pycodestyle
+        if [ "$enable_pycodestyle_cpp" != 0 -a "$cpp_packages" != "" ] ; then
+            [ $VERBOSE = 0 ] && echo "---- pycodestyle C++ in $subdir"
+            [ $VERBOSE = 1 ] && (
+                echo "--------------------------------------------------------"
+                echo "---- Running pycodestyle C++ in $subdir..."
+            )
 
+            pycodestyle --config=$top_dir/.pycodestyle $cpp_packages \
+                || error=1
+
+        else
+            [ $VERBOSE = 1 ] && (
+                echo "--------------------------------------------------------"
+                echo "---- Skipping pycodestyle C++ in $subdir. " \
+                     "(Nothing to do.)"
+            )
+        fi
+
+        # Check C++ with cppcheck
+        if [ "$enable_cppcheck" != 0 -a "$cpp_packages" != "" ] ; then
+            [ $VERBOSE = 0 ] && echo "---- cppcheck in $subdir"
+            [ $VERBOSE = 1 ] && (
+                echo "--------------------------------------------------------"
+                echo "---- Running cppcheck in $subdir..."
+            )
+
+            cppcheck \
+                --std=c++11 \
+                --quiet \
+                --error-exitcode=1 \
+                $cpp_packages || error=1
+
+        else
+            [ $VERBOSE = 1 ] && (
+                echo "--------------------------------------------------------"
+                echo "---- Skipping cppcheck in $subdir. " \
+                     "(Nothing to do.)"
+            )
+        fi
+
+
+        # Check for unwanted MS-DOS CR/LF-style line endings
         [ $VERBOSE = 1 ] && (
             echo "--------------------------------------------------------"
             echo "---- Checking for CRLF in $subdir..."
         )
 
-        file $packages | grep CRLF && error=1
+        if [ "$python_packages" != "" -a "$cpp_packages" != "" ] ; then
+            file $python_packages $cpp_packages | grep CRLF && error=1
+        fi
 
     else
         [ $VERBOSE = 1 ] && (
@@ -170,6 +242,7 @@ pwd
 echo "pycodestyle $(pycodestyle --version)"
 echo "$(pylint3 --version | head -1)"
 echo "PYTHONPATH ${PYTHONPATH:-not imported}"
+cppcheck --version
 
 if [ "$DRY_RUN" = "1" ]; then
     for dir in validator
@@ -183,15 +256,21 @@ if [ "$DRY_RUN" = "1" ]; then
 fi
 
 top_dir=$(cd $(dirname $(dirname $0)) && pwd)
-retval=0
+rv=0
 
 # Run pycodestyle or pylint or both for each module.
 # Modules should be ranked in decreasing likelihood of having lint errors.
 
+# Language:                                Python  | C
+# Checks:                           pycodestyle    | pycodestyle
+#                                           pylint |    cppcheck
 export PYTHONPATH=$PYTHONPATH:$top_dir/examples/common/python
-lint_module tests                    "$SINCE" 1 0 || retval=1
-lint_module examples/enclave_manager "$SINCE" 1 0 || retval=1
-lint_module examples/common          "$SINCE" 1 0 || retval=1
-lint_module examples/apps            "$SINCE" 1 0 || retval=1
+lint_module tests                    "$SINCE" 1  0   0  0 || rv=1
+lint_module examples/enclave_manager "$SINCE" 1  0   0  0 || rv=1
+lint_module examples/common          "$SINCE" 1  0   0  0 || rv=1
+lint_module examples/apps            "$SINCE" 1  0   0  1 || rv=1
+lint_module tc                       "$SINCE" 1  0   0  1 || rv=1
+lint_module common                   "$SINCE" 0  0   0  1 || rv=1
+lint_module docs/workload-tutorial   "$SINCE" 0  0   0  1 || rv=1
 
-exit $retval
+exit $rv
