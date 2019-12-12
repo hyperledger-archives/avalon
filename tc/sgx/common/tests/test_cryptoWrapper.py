@@ -170,7 +170,7 @@ except Exception as exc:
                      "test successful!")
     else:
         logger.error("error: Asymmetric encryption invalid public key " +
-                     ""deserialize test failed: ", exc)
+                     "deserialize test failed: ", exc)
         sys.exit(-1)
 
 
