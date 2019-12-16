@@ -1,4 +1,4 @@
-/* Copyright 2018 Intel Corporation
+/* Copyright 2019 Intel Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-%module tcf_enclave
+%module db_store
 
 %include <std_vector.i>
 %include <std_map.i>
@@ -31,43 +31,23 @@ namespace std {
     {
         $function
     }
-    catch (tcf::error::MemoryError& e)
+    catch (db_error::MemoryError& e)
     {
         SWIG_exception(SWIG_MemoryError, e.what());
     }
-    catch (tcf::error::IOError& e)
+    catch (db_error::IOError& e)
     {
         SWIG_exception(SWIG_IOError, e.what());
     }
-    catch (tcf::error::RuntimeError& e)
+    catch (db_error::RuntimeError& e)
     {
         SWIG_exception(SWIG_ValueError, e.what());
     }
-    catch (tcf::error::IndexError& e)
-    {
-        SWIG_exception(SWIG_ValueError, e.what());
-    }
-    catch (tcf::error::DivisionByZero& e)
+    catch (db_error::DivisionByZero& e)
     {
         SWIG_exception(SWIG_DivisionByZero, e.what());
     }
-    catch (tcf::error::OverflowError& e)
-    {
-        SWIG_exception(SWIG_OverflowError, e.what());
-    }
-    catch (tcf::error::ValueError& e)
-    {
-        SWIG_exception(SWIG_ValueError, e.what());
-    }
-    catch (tcf::error::SystemError& e)
-    {
-        SWIG_exception(SWIG_SystemError, e.what());
-    }
-    catch (tcf::error::SystemBusyError& e)
-    {
-        SWIG_exception(SWIG_SystemError, e.what());
-    }
-    catch (tcf::error::UnknownError& e) {
+    catch (db_error::UnknownError& e) {
         SWIG_exception(SWIG_UnknownError, e.what());
     }
     catch (...)
@@ -76,22 +56,12 @@ namespace std {
     }
 }
 
-
-%thread;
 %{
 #include "swig_utils.h"
+#include "db_store.h"
+#include "db_store_error.h"
 %}
 
-%{
-#include "tcf_enclave.h"
-%}
 
-%include "signup_info.h"
-%include "enclave_info.h"
-%include "work_order_wrap.h"
-%include "tcf_enclave.h"
-%nothread;
+%include "db_store.h"
 
-%init %{
-    InitializeTCFEnclaveModule();
-%}

@@ -11,26 +11,3 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-version: '3.5'
-
-services:
-  tcf:
-    image: tcf-ci-build:${ISOLATION_ID}
-    build:
-      context: ..
-      dockerfile: docker/Dockerfile.tcf-dev
-      args:
-        - http_proxy
-        - https_proxy
-        - no_proxy
-
-  avalon-lmdb:
-    image: avalon-lmdb:${ISOLATION_ID}
-    build:
-      context: ..
-      dockerfile: examples/shared_kv_storage/Dockerfile
-      args:
-        - http_proxy
-        - https_proxy
-        - no_proxy

@@ -454,7 +454,7 @@ def start_enclave_manager(config):
     logger.info("Enclave manager started")
 
     try:
-        (kv_helper, _) = connector.open(config)
+        kv_helper = connector.open(config['KvStorage']['remote_url'])
     except Exception as err:
         logger.error("Failed to open KV storage interface; " +
                      "exiting SGX Enclave manager: {err}")
@@ -508,6 +508,9 @@ def parse_command_line(config, args):
         "--logfile",
         help="Name of the log file, __screen__ for standard output", type=str)
     parser.add_argument("--loglevel", help="Logging leve", type=str)
+    parser.add_argument(
+            "--lmdb_url",
+            help="DB url to connect to lmdb", type=str)
 
     options = parser.parse_args(args)
 
@@ -520,9 +523,12 @@ def parse_command_line(config, args):
         config["Logging"]["LogFile"] = options.logfile
     if options.loglevel:
         config["Logging"]["LogLevel"] = options.loglevel.upper()
-
+    if options.lmdb_url:
+        config["KvStorage"]["remote_url"] = options.lmdb_url
 
 # -----------------------------------------------------------------
+
+
 def main(args=None):
     import config.config as pconfig
     import utility.logger as plogger

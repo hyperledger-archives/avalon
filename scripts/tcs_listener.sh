@@ -22,4 +22,4 @@ listener_port=`grep listener_port ${TCF_HOME}/config/tcs_config.toml | awk {'pri
 port=${TCF_TCS_LISTENER_PORT:-${listener_port}}
 
 echo "starting TCS listener ..."
-python3 $listener --bind_uri ${port}
+python3 $listener --bind_uri ${port} --lmdb_url http://avalon-lmdb:9090

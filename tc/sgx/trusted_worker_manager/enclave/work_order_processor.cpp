@@ -34,7 +34,6 @@
 
 #include "work_order_data.h"
 #include "work_order_processor.h"
-#include "db_store.h"
 #include "workload_processor.h"
 
 namespace tcf {

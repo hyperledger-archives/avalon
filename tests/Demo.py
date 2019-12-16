@@ -24,7 +24,6 @@ from service_client.generic import GenericServiceClient
 import crypto.crypto as crypto
 import utility.signature as signature
 import worker.worker_details as worker
-from shared_kv.shared_kv_interface import KvStorage
 import utility.utility as enclave_helper
 import utility.file_utils as futils
 from error_code.error_status import SignatureStatus, WorkOrderStatus

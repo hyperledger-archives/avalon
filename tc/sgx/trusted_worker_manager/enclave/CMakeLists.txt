@@ -141,7 +141,6 @@ INCLUDE_DIRECTORIES(/opt/intel/sgxsdk/include /opt/intel/sgxssl/include)
 INCLUDE_DIRECTORIES(${TCF_CORE_DIR}/common)
 INCLUDE_DIRECTORIES(${TCF_CORE_DIR}/common/crypto)
 INCLUDE_DIRECTORIES(${TCF_CORE_DIR}/common/verify_ias_report)
-INCLUDE_DIRECTORIES(${TCF_CORE_DIR}/common/packages/db_store)
 INCLUDE_DIRECTORIES(${TCF_CORE_DIR}/common/packages/base64)
 INCLUDE_DIRECTORIES(${TCF_CORE_DIR}/common/packages/parson)
 INCLUDE_DIRECTORIES(${TCF_TOP_DIR}/common/sgx/workload)
@@ -237,7 +236,7 @@ TARGET_LINK_LIBRARIES(${PROJECT_NAME} -Wl,--whole-archive -linside_out_eval -Wl,
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} -Wl,--start-group  -lttcf-common -lsgx_tsgxssl_crypto -lsgx_tstdc -lsgx_tcxx -lsgx_tcrypto  -l${SERVICE_LIBRARY_NAME} -Wl,--end-group)
 
 TARGET_INCLUDE_DIRECTORIES( ${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR} ${SGX_ENCLAVE_INCLUDE} ${SGX_INCLUDE})
-TARGET_INCLUDE_DIRECTORIES(${PROJECT_NAME} PRIVATE ${TCF_CORE_DIR}/common/packages/db_store ${TCF_TOP_DIR}/examples/apps)
+TARGET_INCLUDE_DIRECTORIES(${PROJECT_NAME} PRIVATE ${TCF_TOP_DIR}/examples/apps)
 
 ADD_CUSTOM_COMMAND(
     TARGET ${PROJECT_NAME}

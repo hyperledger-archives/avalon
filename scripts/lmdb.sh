@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-lmdb_server="${TCF_HOME}/examples/common/python/shared_kv/remote_lmdb/lmdb_listener.py"
+lmdb_server="${TCF_HOME}/examples/shared_kv_storage/kv_storage/remote_lmdb/lmdb_listener.py"
 
 echo "start the lmdb server ..."
 

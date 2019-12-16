@@ -17,4 +17,4 @@
 enclave_manager="${TCF_HOME}/examples/enclave_manager/tcf_enclave_manager/enclave_manager.py"
 
 echo "starting enclave manager ..."
-python3 $enclave_manager
+python3 $enclave_manager --lmdb_url http://avalon-lmdb:9090

@@ -64,7 +64,7 @@ class TCSListener(resource.Resource):
     # -----------------------------------------------------------------
     def __init__(self, config):
         try:
-            (self.kv_helper, _) = connector.open(config)
+            self.kv_helper = connector.open(config['KvStorage']['remote_url'])
         except Exception as err:
             logger.error(f"failed to open db: {err}")
             sys.exit(-1)
@@ -205,7 +205,7 @@ class TCSListener(resource.Resource):
 # -----------------------------------------------------------------
 
 
-def local_main(config):
+def local_main(config, bind_uri):
 
     root = TCSListener(config)
     site = server.Site(root)
@@ -233,7 +233,7 @@ TCFHOME = os.environ.get("TCF_HOME", "../../../../")
 
 def parse_command_line(config, args):
 
-    global bind_uri
+    bind_uri = None
 
     parser = argparse.ArgumentParser()
 
@@ -243,6 +243,8 @@ def parse_command_line(config, args):
     parser.add_argument('--loglevel', help='Logging level', type=str)
     parser.add_argument(
         '--bind_uri', help='URI to listen for requests ', type=str)
+    parser.add_argument(
+        '--lmdb_url', help='DB url to connect to LMDB ', type=str)
 
     options = parser.parse_args(args)
 
@@ -257,10 +259,15 @@ def parse_command_line(config, args):
         config['Logging']['LogLevel'] = options.loglevel.upper()
     if options.bind_uri:
         bind_uri = options.bind_uri
+    if options.lmdb_url:
+        config["KvStorage"]["remote_url"] = options.lmdb_url
 
+    return bind_uri
 
 # -----------------------------------------------------------------
 # -----------------------------------------------------------------
+
+
 def main(args=None):
     import config.config as pconfig
     import utility.logger as plogger
@@ -292,8 +299,8 @@ def main(args=None):
     sys.stderr = plogger.stream_to_logger(
         logging.getLogger('STDERR'), logging.WARN)
 
-    parse_command_line(config, remainder)
-    local_main(config)
+    bind_uri = parse_command_line(config, remainder)
+    local_main(config, bind_uri)
 
 
 main()
