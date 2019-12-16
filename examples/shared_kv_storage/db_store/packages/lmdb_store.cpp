@@ -14,21 +14,21 @@
  */
 
 #include <bits/stdc++.h>
+#include <stdexcept>
 #include <pthread.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
 #include "lmdb.h"
 #include "c11_support.h"
-#include "error.h"
 #include "hex_string.h"
+#include "db_store_error.h"
 #include "tcf_error.h"
 #include "types.h"
-//#include "log.h"
 #define MAX_DBS 20
 
 /* Common API for all database stores */
-#include "db_store.h"
+#include "db_store_wrapper.h"
 /* API for this specific LMDB-backed database store */
 #include "lmdb_store.h"
 
@@ -83,15 +83,15 @@ public:
 };
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-tcf_err_t tcf::lmdb_store::db_store_init(const std::string& db_path, const size_t map_size) {
+tcf_err_t lmdb_store::db_store_init(const std::string& db_path, const size_t map_size) {
     int ret;
 
     ret = mdb_env_create(&lmdb_store_env);
-    tcf::error::ThrowIf<tcf::error::SystemError>(ret != 0, "Failed to create LMDB environment");
+    db_error::ThrowIf<db_error::RuntimeError>(ret != 0, "Failed to create LMDB environment");
     ret=mdb_env_set_maxdbs(lmdb_store_env, MAX_DBS);
-    tcf::error::ThrowIf<tcf::error::SystemError>(ret != 0, "Failed to set maximum database");
+    db_error::ThrowIf<db_error::RuntimeError>(ret != 0, "Failed to set maximum database");
     ret = mdb_env_set_mapsize(lmdb_store_env, map_size);
-    tcf::error::ThrowIf<tcf::error::SystemError>(ret != 0, "Failed to set LMDB default size");
+    db_error::ThrowIf<db_error::RuntimeError>(ret != 0, "Failed to set LMDB default size");
 
     /*
      * MDB_NOSUBDIR avoids creating an additional directory for the database
@@ -108,13 +108,13 @@ tcf_err_t tcf::lmdb_store::db_store_init(const std::string& db_path, const size_
     return TCF_SUCCESS;
 }
 
-void tcf::lmdb_store::db_store_close() {
+void lmdb_store::db_store_close() {
     if (lmdb_store_env != NULL)
         mdb_env_close(lmdb_store_env);
 }
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-tcf_err_t tcf::db_store::db_store_get_value_size(
+tcf_err_t db_store::db_store_get_value_size(
     const std::string& table,
     const uint8_t* inId,
     const size_t inIdSize,
@@ -148,7 +148,7 @@ tcf_err_t tcf::db_store::db_store_get_value_size(
 
     lmdb_id.mv_size = inIdSize;
     lmdb_id.mv_data = (void*)inId;
-    
+
     ret = mdb_get(stxn.txn, dbi, &lmdb_id, &lmdb_data);
     if (ret == MDB_NOTFOUND) {
         *outIsPresent = false;
@@ -169,13 +169,13 @@ tcf_err_t tcf::db_store::db_store_get_value_size(
         // SAFE_LOG(TCF_LOG_DEBUG, "db store found id: '%s' -> '%s'", idStr.c_str(), valueStr.c_str());
     }
 #endif
- 
+
     return TCF_SUCCESS;
 }
 
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-tcf_err_t tcf::db_store::db_store_get(
+tcf_err_t db_store::db_store_get(
     const std::string& table,
     const uint8_t* inId,
     const size_t inIdSize,
@@ -236,7 +236,7 @@ tcf_err_t tcf::db_store::db_store_get(
 }
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-tcf_err_t tcf::db_store::db_store_put(
+tcf_err_t db_store::db_store_put(
     const std::string& table,
     const uint8_t* inId,
     const size_t inIdSize,
@@ -283,7 +283,7 @@ tcf_err_t tcf::db_store::db_store_put(
 }
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-tcf_err_t tcf::db_store::db_store_del(
+tcf_err_t db_store::db_store_del(
     const std::string& table,
     const uint8_t* inId,
     const size_t inIdSize,
@@ -329,7 +329,7 @@ tcf_err_t tcf::db_store::db_store_del(
 }
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-tcf_err_t tcf::db_store::db_store_get_value_size(
+tcf_err_t db_store::db_store_get_value_size(
     const std::string& table,
     const ByteArray& inId,
     bool* outIsPresent,
@@ -339,7 +339,7 @@ tcf_err_t tcf::db_store::db_store_get_value_size(
 
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-tcf_err_t tcf::db_store::db_store_get(
+tcf_err_t db_store::db_store_get(
     const std::string& table,
     const ByteArray& inId,
     ByteArray& outValue) {
@@ -382,7 +382,7 @@ tcf_err_t tcf::db_store::db_store_get(
 }
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-tcf_err_t tcf::db_store::db_store_put(
+tcf_err_t db_store::db_store_put(
     const std::string& table,
     const ByteArray& inId,
     const ByteArray& inValue) {
@@ -390,7 +390,7 @@ tcf_err_t tcf::db_store::db_store_put(
 }
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-tcf_err_t tcf::db_store::db_store_del(
+tcf_err_t db_store::db_store_del(
     const std::string& table,
     const ByteArray& inId,
     const ByteArray& inValue) {
@@ -398,7 +398,7 @@ tcf_err_t tcf::db_store::db_store_del(
 }
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-std::string tcf::db_store::db_store_get_all(
+std::string db_store::db_store_get_all(
     const std::string& table,
     const uint8_t* inId,
     const size_t inIdSize) {
@@ -461,3 +461,4 @@ std::string tcf::db_store::db_store_get_all(
 
     return table_keys;
 }
+

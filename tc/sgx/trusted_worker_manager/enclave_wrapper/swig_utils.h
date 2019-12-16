@@ -18,7 +18,6 @@
 #include <vector>
 #include <stdexcept>
 
-#include "error.h"
 #include "tcf_error.h"
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX

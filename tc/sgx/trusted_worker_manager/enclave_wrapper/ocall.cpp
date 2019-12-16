@@ -19,7 +19,6 @@
 #include <chrono>
 
 #include "log.h"
-#include "packages/db_store/db_store.h"
 #include "timer.h"
 
 std::string g_enclaveError;
@@ -55,35 +54,6 @@ extern "C" {
         }
     }  // ocall_SetErrorMessage
 
-// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-    tcf_err_t ocall_db_store_get_value_size(
-        const std::string& table,
-        const uint8_t* inKey,
-        const size_t inKeySize,
-        bool* outIsPresent,
-        size_t* outValueSize) {
-        return tcf::db_store::db_store_get_value_size(table, inKey, inKeySize, outIsPresent, outValueSize);
-    }  // ocall_db_store_get_value_size
-
-// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-    tcf_err_t ocall_db_store_get(
-	const std::string& table,
-        const uint8_t* inKey,
-        const size_t inKeySize,
-        uint8_t *outValue,
-        const size_t inValueSize) {
-        return tcf::db_store::db_store_get(table, inKey, inKeySize, outValue, inValueSize);
-    }  // ocall_db_store_Get
-
-// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-    tcf_err_t ocall_db_store_put(
-        std::string& table,
-        const uint8_t* inKey,
-        const size_t inKeySize,
-        const uint8_t* inValue,
-        const size_t inValueSize) {
-        return tcf::db_store::db_store_put(table, inKey, inKeySize, inValue, inValueSize);
-    }  // ocall_db_store_Put
 }  // extern "C"
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 

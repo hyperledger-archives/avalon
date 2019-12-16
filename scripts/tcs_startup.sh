@@ -16,7 +16,6 @@
 
 enclave_manager="${TCF_HOME}/examples/enclave_manager/tcf_enclave_manager/enclave_manager.py"
 listener="${TCF_HOME}/examples/common/python/connectors/direct/tcs_listener/tcs_listener.py"
-lmdb_server="${TCF_HOME}/examples/common/python/shared_kv/remote_lmdb/lmdb_listener.py"
 version="$(cat ${TCF_HOME}/VERSION)"
 
 # Trap handler
@@ -31,23 +30,14 @@ start_tcs_components()
         listener_port=1947
     fi
 
-    # if remote_url is set, bootstrap the LMDB server
-    lmdb_remote_url=$(grep ^remote_url ${TCF_HOME}/config/tcs_config.toml)
-    if [ -n "${lmdb_remote_url}" ]; then
-        echo "Starting LMDB server ..."
-        python3 ${lmdb_server} &
-        sleep 3s
-        echo "LMDB server started"
-    fi
-
     echo "Starting Avalon Enclave Manager $version ..."
-    python3 $enclave_manager &
+    python3 $enclave_manager --lmdb_url http://avalon-lmdb:9090 &
     echo "Avalon Enclave Manager started"
 
     sleep 5s
 
     echo "Starting Avalon Listener $version ..."
-    python3 $listener --bind_uri $listener_port &
+    python3 $listener --bind_uri $listener_port --lmdb_url http://avalon-lmdb:9090 &
     echo "Avalon Listener started"
 
     if [ "$YES" != "1" ] ; then
@@ -67,7 +57,6 @@ stop_tcs_components()
     echo "TCS successfully ended."
     pkill -f "$listener"
     pkill -f "$enclave_manager"
-    pkill -f "$lmdb_server"
     exit
 }
 

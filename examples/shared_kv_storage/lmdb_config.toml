@@ -12,25 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-version: '3.5'
 
-services:
-  tcf:
-    image: tcf-ci-build:${ISOLATION_ID}
-    build:
-      context: ..
-      dockerfile: docker/Dockerfile.tcf-dev
-      args:
-        - http_proxy
-        - https_proxy
-        - no_proxy
+[KvStorage]
+StoragePath = "config/Kv_Shared_tmp"
+StorageSize = "1 TB"
+# the remote version is of higher priority if enabled
+bind = "http://localhost:9090"
 
-  avalon-lmdb:
-    image: avalon-lmdb:${ISOLATION_ID}
-    build:
-      context: ..
-      dockerfile: examples/shared_kv_storage/Dockerfile
-      args:
-        - http_proxy
-        - https_proxy
-        - no_proxy
+[Logging]
+LogLevel = "INFO"
+LogFile  = "__screen__"
+

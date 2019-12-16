@@ -14,14 +14,13 @@
 
 from service_client.generic import TextServiceClient
 # add the dot prefix to address the ModuleNotFoundError error
-from .string_escape import escape, unescape
 import logging
 
 logger = logging.getLogger(__name__)
 # ------------------------------------------------------------------------------
 
 
-class LMDBHelperProxy:
+class LMDBHelperProxy():
     """
     LMDBHelperProxy passes commands serialized as strings
     to the LMDB remote listener.
@@ -46,8 +45,8 @@ class LMDBHelperProxy:
            - value is the value that needs to be inserted in the table.
         """
         # Set, table, key, value
-        request = "S\n" + escape(table) + "\n" + escape(key) + \
-            "\n" + escape(value)
+        request = "S\n" + self.__escape(table) + "\n" + self.__escape(key) + \
+            "\n" + self.__escape(value)
         response = self.__uri_client._postmsg(request).decode("utf-8")
         args = response.split("\n")
         # Set successful (returned True)
@@ -75,12 +74,12 @@ class LMDBHelperProxy:
            - key is the primary key of the table.
         """
         # Get, table, key
-        request = "G\n" + escape(table) + "\n" + escape(key)
+        request = "G\n" + self.__escape(table) + "\n" + self.__escape(key)
         response = self.__uri_client._postmsg(request).decode("utf-8")
         args = response.split("\n")
         # Value found
         if args[0] == "v" and len(args) == 2:
-            return unescape(args[1])
+            return self.__unescape(args[1])
         # Value not found
         elif args[0] == "n" and len(args) == 1:
             return None
@@ -109,7 +108,7 @@ class LMDBHelperProxy:
              non-NULL only the matching data item will be deleted.
         """
         # Remove, table, key
-        request = "R\n" + escape(table) + "\n" + escape(key)
+        request = "R\n" + self.__escape(table) + "\n" + self.__escape(key)
         if value is not None:
             request = "\n" + request + value.replace("\n", "\\n")
         response = self.__uri_client._postmsg(request).decode("utf-8")
@@ -138,14 +137,14 @@ class LMDBHelperProxy:
         """
         result = []
         # Lookup, table
-        request = "L\n" + escape(table)
+        request = "L\n" + self.__escape(table)
         response = self.__uri_client._postmsg(request).decode("utf-8")
         args = response.split("\n")
         # Lookup result found
         if args[0] == "l":
             if len(args) == 2:
                 # Result is a list of keys separated by commas
-                result = unescape(args[1]).split(",")
+                result = self.__unescape(args[1]).split(",")
             else:
                 logger.error("Unknown response format")
         # Lookup result not found
@@ -160,3 +159,11 @@ class LMDBHelperProxy:
         else:
             logger.error("Unknown response format")
         return result
+
+# ------------------------------------------------------------------------------
+    def __escape(self, string):
+        return string.encode("unicode_escape").decode("utf-8")
+
+# ------------------------------------------------------------------------------
+    def __unescape(self, string):
+        return string.encode("utf-8").decode("unicode_escape")

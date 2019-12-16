@@ -13,10 +13,8 @@
 # limitations under the License.
 
 [KvStorage]
-StoragePath = "config/Kv_Shared_tmp"
-StorageSize = "1 TB"
 # the remote version is of higher priority if enabled
-#remote_url = "http://localhost:9090"
+remote_url = "http://localhost:9090"
 
 # --------------------------------------------------
 # Logging -- configuration of service logging

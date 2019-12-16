@@ -65,7 +65,6 @@ include_dirs = [
     os.path.join(tcf_root_dir, 'tc/sgx/common/crypto'),
     os.path.join(module_src_path, 'build'),
     os.path.join(sgx_sdk_env,  'include'),
-    os.path.join(tcf_root_dir, 'tc/sgx/common/packages/db_store'),
     os.path.join(tcf_root_dir, 'tc/sgx/common/packages/base64')
 ]
 
@@ -78,8 +77,6 @@ library_dirs = [
 
 libraries = [
     'utcf-common',
-    'utcf-lmdb-store',
-    'lmdb'
 ]
 
 if sgx_mode_env == "HW":
@@ -108,7 +105,6 @@ module_files = [
     os.path.join(module_src_path, 'enclave.cpp'),
     os.path.join(module_src_path, 'enclave_info.cpp'),
     os.path.join(module_src_path, 'signup_info.cpp'),
-    os.path.join(module_src_path, 'db_store.cpp'),
     os.path.join(module_src_path, 'file_io_handler.cpp'),
     os.path.join(module_src_path, 'file_io_processor.cpp'),
     os.path.join(module_src_path, 'io_handler.cpp')

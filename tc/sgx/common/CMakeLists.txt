@@ -59,25 +59,6 @@ TARGET_COMPILE_OPTIONS(${UNTRUSTED_LIB_NAME} PRIVATE ${COMMON_CXX_FLAGS} ${OPENS
 TARGET_COMPILE_DEFINITIONS(${UNTRUSTED_LIB_NAME} PRIVATE "-D_UNTRUSTED_=1")
 
 # DEBUG:
-################################################################################
-# Database Store Library
-################################################################################
-
-SET(DB_STORE_LIB_NAME utcf-lmdb-store)
-PROJECT(${DB_STORE_LIB_NAME} CXX)
-
-ADD_LIBRARY(${DB_STORE_LIB_NAME} STATIC packages/db_store/lmdb_store.cpp)
-
-TARGET_INCLUDE_DIRECTORIES(${DB_STORE_LIB_NAME} PRIVATE ${COMMON_PRIVATE_INCLUDE_DIRS})
-TARGET_INCLUDE_DIRECTORIES(${DB_STORE_LIB_NAME} PUBLIC ${SGX_SDK}/include)
-
-TARGET_COMPILE_OPTIONS(${DB_STORE_LIB_NAME} PRIVATE ${COMMON_CXX_FLAGS} ${OPENSSL_CFLAGS})
-TARGET_COMPILE_DEFINITIONS(${DB_STORE_LIB_NAME} PRIVATE "-D_UNTRUSTED_=1")
-
-option(DB_STORE_DEBUG "Debug logging for database store operations" OFF)
-if (DB_STORE_DEBUG)
-    TARGET_COMPILE_DEFINITIONS(${UNTRUSTED_LIB_NAME} PRIVATE "-DDB_STORE_DEBUG=1")
-endif()
 
 ################################################################################
 # Trusted Common Library

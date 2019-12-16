@@ -28,3 +28,22 @@ services:
         source scripts/tcs_startup.sh -y \
         && sleep 5 \
         && source tools/run_tests.sh \""
+    depends_on:
+      - avalon-lmdb
+
+  avalon-lmdb:
+    container_name: avalon-lmdb
+    image: avalon-lmdb:${ISOLATION_ID}
+    build:
+      context: .
+      args:
+        - http_proxy
+        - https_proxy
+        - no_proxy
+    expose:
+      - 9090
+    command: |
+      bash -c "
+        kv_storage --bind http://avalon-lmdb:9090
+        tail -f /dev/null
+      "
