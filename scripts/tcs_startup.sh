@@ -36,10 +36,6 @@ start_tcs_components()
 
     sleep 5s
 
-    echo "Starting Avalon Listener $version ..."
-    python3 $listener --bind_uri $listener_port --lmdb_url http://avalon-lmdb:9090 &
-    echo "Avalon Listener started"
-
     if [ "$YES" != "1" ] ; then
         while true; do
         echo "If you wish to exit the program, press y and enter"

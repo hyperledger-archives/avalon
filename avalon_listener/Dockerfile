@@ -1,0 +1,193 @@
+# Copyright 2019 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ------------------------------------------------------------------------------
+
+# Description:
+#   Builds the environment needed to build Avalon.
+#
+#  Configuration (build) parameters
+#  - proxy configuration: https_proxy http_proxy ftp_proxy
+#  - sgx mode:
+#
+# Build:
+#   $ docker build docker -f docker/Dockerfile.tcf-dev -t tcf-dev
+#   if behind a proxy, you might want to add also below options
+#   --build-arg https_proxy=$https_proxy --build-arg http_proxy=$http_proxy --build-arg ftp_proxy=$ftp_proxy
+#
+# Run:
+#   $ cd avalon
+#   $ docker run -v $(pwd):/project/avalon -it avalon-listener /bin/bash
+#   (to run with SGX HW, add options '--device=/dev/isgx -v /var/run/aesmd:/var/run/aesmd ')
+#   make clean && make
+
+# -------------=== listener build ===-------------
+
+FROM ubuntu:bionic
+
+# Ignore timezone prompt in apt
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Add necessary packages
+RUN apt-get update \
+ && apt-get install -y -q \
+    build-essential \
+    ca-certificates \
+    cmake \
+    git \
+    make \
+    pkg-config \
+    cmake \
+    libprotobuf-dev \
+    python3-dev \
+    python3-pip \
+    python3-toml \
+    python3-requests \
+    python3-colorlog \
+    python3-twisted \
+    swig \
+    software-properties-common \
+    curl \
+    dh-autoreconf \
+    ocaml \
+    wget \
+    xxd \
+    unzip \
+    tar \
+    ocamlbuild \
+    python3-tk \
+    python3-pycodestyle \
+    pycodestyle \
+    pylint3 \
+    cppcheck \
+ && apt-get -y -q upgrade \
+ && apt-get clean \
+ && rm -rf /var/lib/apt/lists/*
+
+# Install setuptools packages using pip because
+# these are not available in apt repository.
+RUN pip3 install --upgrade setuptools json-rpc nose2
+
+# Make Python3 default
+RUN ln -sf /usr/bin/python3 /usr/bin/python
+
+# SGX common library and SDK are installed in /opt/intel directory.
+# Installation of SGX libsgx-common packages requires /etc/init directory. In docker image this directory doesn't exist.
+# Hence creating /etc/init directory.
+RUN mkdir -p /opt/intel \
+ && mkdir -p /etc/init
+WORKDIR /opt/intel
+
+# Install SGX common library
+RUN wget https://download.01.org/intel-sgx/linux-2.3.1/ubuntu18.04/libsgx-enclave-common_2.3.101.46683-1_amd64.deb \
+ && dpkg -i libsgx-enclave-common_2.3.101.46683-1_amd64.deb
+
+# Install SGX SDK
+RUN wget https://download.01.org/intel-sgx/linux-2.3.1/ubuntu18.04/sgx_linux_x64_sdk_2.3.101.46683.bin \
+ && chmod +x sgx_linux_x64_sdk_2.3.101.46683.bin \
+ && echo "yes" | ./sgx_linux_x64_sdk_2.3.101.46683.bin \
+ && rm sgx_linux_x64_sdk_2.3.101.46683.bin \
+ && echo ". /opt/intel/sgxsdk/environment" >> /etc/environment
+
+WORKDIR /tmp
+
+# Build ("Untrusted") OpenSSL, then build ("trusted") SGX OpenSSL
+# Note: The latter will compile in HW or SIM mode depending on the
+# availability of /dev/isgx and /var/run/aesmd/aesm.socket
+RUN OPENSSL_VER=1.1.1d \
+ && wget https://www.openssl.org/source/openssl-$OPENSSL_VER.tar.gz \
+ && tar -zxf openssl-$OPENSSL_VER.tar.gz \
+ && cd openssl-$OPENSSL_VER/ \
+ && ./config \
+ && THREADS=8 \
+ && make -j$THREADS \
+ && make test \
+ && make install -j$THREADS \
+ && ldconfig \
+ && ln -s /etc/ssl/certs/* /usr/local/ssl/certs/ \
+ && cd .. \
+ && rm -rf openssl-$OPENSSL_VER \
+ && git clone https://github.com/intel/intel-sgx-ssl.git  \
+ && . /opt/intel/sgxsdk/environment \
+ && (cd intel-sgx-ssl/openssl_source; mv /tmp/openssl-$OPENSSL_VER.tar.gz . ) \
+ && (cd intel-sgx-ssl/Linux; \
+    if ([ -c /dev/isgx ] && [ -S /var/run/aesmd/aesm.socket ]); then SGX_MODE=HW; \
+    else SGX_MODE=SIM; \
+    fi; \
+    make SGX_MODE=${SGX_MODE} DESTDIR=/opt/intel/sgxssl all test ) \
+ && (cd intel-sgx-ssl/Linux; make install ) \
+ && rm -rf /tmp/intel-sgx-ssl \
+ && echo "SGX_SSL=/opt/intel/sgxssl" >> /etc/environment
+
+COPY . /project/avalon
+
+ARG SGX_MODE
+ARG MAKECLEAN
+ARG TCF_DEBUG_BUILD
+ARG DISPLAY
+ARG XAUTHORITY
+
+# Environment setup
+
+RUN echo "TCF_HOME=/project/avalon/" >> /etc/environment \
+ && if [ ! -z "$http_proxy"  ]; then \
+    echo 'Acquire::http::Proxy "'$http_proxy'";' >> /etc/apt/apt.conf.d/00proxy; \
+        echo "http_proxy=$http_proxy" >> /etc/wgetrc; \
+        echo "http_proxy=$http_proxy" >> /etc/environment; \
+        echo "HTTP_PROXY=$(echo $http_proxy | sed 's,[a-zA-Z]*://,,')" >> /etc/environment; \
+    fi \
+ && if [ ! -z "$ftp_proxy"  ];  then \
+    echo 'Acquire::ftp::Proxy "'$ftp_proxy'";' >> /etc/apt/apt.conf.d/00proxy; \
+        echo "ftp_proxy=$ftp_proxy" >> /etc/wgetrc; \
+        echo "ftp_proxy=$ftp_proxy" >> /etc/environment; \
+    fi \
+ && if [ ! -z "$https_proxy" ]; then \
+    echo 'Acquire::https::Proxy "'$https_proxy'";' >> /etc/apt/apt.conf.d/00proxy; \
+        echo "https_proxy=$https_proxy" >> /etc/wgetrc; \
+        echo "https_proxy=$https_proxy" >> /etc/environment; \
+        echo "HTTPS_PROXY=$(echo $https_proxy | sed 's,[a-zA-Z]*://,,')" >> /etc/environment; \
+    fi
+
+ENV http_proxy=$http_proxy
+ENV https_proxy=$https_proxy
+ENV TCF_HOME=/project/avalon
+ENV SGX_SSL=/opt/intel/sgxssl
+ENV SGX_SDK=/opt/intel/sgxsdk
+ENV PATH=$PATH:$SGX_SDK/bin:$SGX_SDK/bin/x64
+ENV PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$SGX_SDK/pkgconfig
+ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$SGX_SDK/sdk_libs
+# Solc compiler path to compile solidity contract code
+ENV TCF_ENCLAVE_CODE_SIGN_PEM="$TCF_HOME/enclave.pem"
+
+RUN openssl genrsa -3 -out $TCF_HOME/enclave.pem 3072
+
+WORKDIR /project/avalon/tc/sgx/common
+
+RUN mkdir -p build \
+  && cd build \
+  && cmake .. \
+  && make
+
+WORKDIR /project/avalon/common/python
+
+RUN make \
+  && make install
+
+# Build lmdb listener module next.
+ENV PATH=$PATH:/project/avalon/avalon_listener/
+
+WORKDIR /project/avalon/avalon_listener/
+
+RUN echo "Building avalon listener\n" \
+  && make \
+  && make install

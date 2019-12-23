@@ -30,9 +30,9 @@ services:
         && source tools/run_tests.sh \""
     depends_on:
       - avalon-lmdb
+      - avalon-listener
 
   avalon-lmdb:
-    container_name: avalon-lmdb
     image: avalon-lmdb:${ISOLATION_ID}
     build:
       context: .
@@ -47,3 +47,20 @@ services:
         kv_storage --bind http://avalon-lmdb:9090
         tail -f /dev/null
       "
+  avalon-listener:
+    image: avalon-listener:${ISOLATION_ID}
+    build:
+      context: .
+      args:
+        - http_proxy
+        - https_proxy
+        - no_proxy
+    expose:
+      - 1947
+    command: |
+      bash -c "
+        avalon_listener --bind http://avalon-listener:1947
+        tail -f /dev/null
+      "
+    depends_on:
+      - avalon-lmdb

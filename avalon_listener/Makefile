@@ -1,4 +1,4 @@
-# Copyright 2019 Intel Corporation
+# Copyright 2018 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,41 +12,37 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# Set SGX_MODE default (which can be overridden with an environment variable):
+
 PY_VERSION=${shell python3 --version | sed 's/Python \(3\.[0-9]\).*/\1/' | tr -d .}
-MOD_VERSION=${shell ../../../bin/get_version}
+MOD_VERSION=${shell ../bin/get_version}
 
-# Format of wheel package is <pkg_name>-{python-tag}-{abi-tag}-{platform}
-WHEEL_FILE=dist/tcf_examples_common-${MOD_VERSION}-cp${PY_VERSION}-cp${PY_VERSION}m-linux_x86_64.whl
-SOURCE_DIR=$(shell pwd)
-
+WHEEL_FILE=dist/avalon_listener-${MOD_VERSION}-cp${PY_VERSION}-cp${PY_VERSION}m-linux_x86_64.whl
 
 all : $(WHEEL_FILE)
 
-$(WHEEL_FILE) : build_ext
+$(WHEEL_FILE) : build_listener
 	@echo Build Distribution
 	python3 setup.py bdist_wheel
-	
-build_ext :
+
+build_listener :
 	@echo Build build_ext
 	python3 setup.py build_ext
 
 build :
 	mkdir $@
-	cd $@ 
 
 install:
 	@echo INSTALLING WHEEL FILE =================
-	pip3 install $(WHEEL_FILE)
+	pip3 install dist/*.whl
 
 clean:
 	pip3 uninstall --yes $(WHEEL_FILE)
 	rm -rf build deps dist *.egg-info
-	rm -f crypto/crypto.py crypto/crypto_wrap.cpp
-	rm -f verify_report/verify_report.py verify_report/verify_report_wrap.cpp
 	find . -iname '*.pyc' -delete
 	find . -iname '__pycache__' -delete
+
 
 .phony : all
 .phony : clean
 .phone : install
-

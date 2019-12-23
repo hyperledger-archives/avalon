@@ -128,12 +128,14 @@ Follow these steps to run the `Demo.py` testcase:
    2. `cd $TCF_HOME/scripts`
    3. Run `source $TCF_HOME/tools/build/_dev/bin/activate` .
       You should see the `(_dev)` prompt
-   4. Run `./tcs_startup.sh`
-   5. Wait for the listener to start. You should see the message
+   4. In config/tcs_config.toml, use "localhost" in remote_url instead of
+      avalon-lmdb.
+   5. Run `./tcs_startup.sh`
+   6. Wait for the listener to start. You should see the message
       `TCS Listener started on port 1947`,
       followed by a repetitive message `Enclave manager sleeping for 10 secs`
-   6. To run the Demo test case, open a new terminal, Terminal 2
-   7. In Terminal 2, run `source $TCF_HOME/tools/build/_dev/bin/activate`.
+   7. To run the Demo test case, open a new terminal, Terminal 2
+   8. In Terminal 2, run `source $TCF_HOME/tools/build/_dev/bin/activate`.
       You should see the `(_dev)` prompt
 2. For Docker-based builds:
    1. Follow the steps above for

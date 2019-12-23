@@ -64,8 +64,9 @@ def ParseCommandLine(args):
         type=str)
     mutually_excl_group.add_argument(
         "-u", "--uri",
-        help="Direct API listener endpoint, default is http://localhost:1947",
-        default="http://localhost:1947",
+        help="Direct API listener endpoint, \
+            default is http://avalon-listener:1947",
+        default="http://avalon-listener:1947",
         type=str)
     mutually_excl_group.add_argument(
         "-a", "--address",

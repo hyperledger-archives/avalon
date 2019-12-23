@@ -14,7 +14,8 @@
 
 [KvStorage]
 # the remote version is of higher priority if enabled
-remote_url = "http://localhost:9090"
+# In Standalone build, use localhost instead of avalon-lmdb in remote_url
+remote_url = "http://avalon-lmdb:9090"
 
 # --------------------------------------------------
 # Logging -- configuration of service logging

@@ -18,29 +18,28 @@
 #include "tcf_error.h"
 #include "types.h"
 
-namespace tcf {
-    namespace lmdb_store {
-        /**
-         * Initialize the database store - must be called before performing gets/puts
-         * Primary expected use: python / untrusted side
-         *
-         * @param db_path
-         *   The path to the LMDB (lightning memory mapped database) which provides
-         *   the back-end to this database store implementation
-         *
-         * @param map_size
-         *   The maximum size of the database
-         *
-         * @return
-         *  Success (return TCF_SUCCESS) - database store ready to use
-         *  Failure (return nonzero) - database store is unusable
-         */
-        tcf_err_t db_store_init(const std::string& db_path, const size_t map_size);
+namespace lmdb_store {
+    /**
+     * Initialize the database store - must be called before performing gets/puts
+     * Primary expected use: python / untrusted side
+     *
+     * @param db_path
+     *   The path to the LMDB (lightning memory mapped database) which provides
+     *   the back-end to this database store implementation
+     *
+     * @param map_size
+     *   The maximum size of the database
+     *
+     * @return
+     *  Success (return TCF_SUCCESS) - database store ready to use
+     *  Failure (return nonzero) - database store is unusable
+     */
+    tcf_err_t db_store_init(const std::string& db_path, const size_t map_size);
 
-        /**
-         * Close the database store and flush the data to disk
-         */
-        void db_store_close();
-    }  /* namespace lmdb_store */
-}  /* namespace tcf */
+    /**
+     * Close the database store and flush the data to disk
+     */
+    void db_store_close();
+}  /* namespace lmdb_store */
+
 

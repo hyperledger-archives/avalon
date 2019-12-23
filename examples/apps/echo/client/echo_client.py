@@ -97,7 +97,7 @@ def ParseCommandLine(args):
         conf_files = [options.config]
     else:
         conf_files = [TCFHOME +
-                      "/examples/common/python/connectors/tcf_connector.toml"]
+                      "/common/python/connectors/tcf_connector.toml"]
     confpaths = ["."]
     try:
         config = pconfig.parse_configuration_files(conf_files, confpaths)
@@ -175,7 +175,13 @@ def Main(args=None):
         logger.info("\n Registry retrieve response: {}\n".format(
             registry_retrieve_result
         ))
-        config["tcf"]["json_rpc_uri"] = registry_retrieve_result[0]
+
+        # TO-DO: json_rpc_uri is overridden by tcs_config.toml because
+        # this parameter is hardcoded in ropsten test network contract. This
+        # check will be removed once we deployed the contract on Ropsten
+        # test network with updated value.
+        if config["tcf"]["json_rpc_uri"] is None:
+            config["tcf"]["json_rpc_uri"] = registry_retrieve_result[0]
 
     # Prepare worker
     req_id = 31

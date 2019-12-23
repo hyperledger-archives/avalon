@@ -67,7 +67,7 @@ do
     try python3 ${TCF_HOME}/tests/Demo.py \
         --logfile __screen__ --loglevel warn \
         --input_dir ${TCF_HOME}/tests/$folder/ \
-        --connect_uri "http://localhost:$listener_port" work_orders/output.json > /dev/null
+        --connect_uri "http://avalon-listener:$listener_port" work_orders/output.json > /dev/null
 
     yell "#------------------------------------------------------------------------------------------------"
     yell "#------------------------------------------------------------------------------------------------"
