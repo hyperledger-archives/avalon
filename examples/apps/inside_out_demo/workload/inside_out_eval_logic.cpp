@@ -20,48 +20,38 @@
 #include <vector>
 
 #include "inside_out_eval_logic.h"
-#include "trusted_iohandler.h"
 #include "enclave_utils.h"
 
-// Maximum size of buffer that is used for file io
-size_t GetMaxFileSize() {
-    return 1024;
-}
-
-// Maximum size of result buffer that is used to store status of io
-size_t GetMaxIoResultSize() {
-    return 128;
-}
-
-std::string ReadFile(uint32_t handlerId, std::string fileName) {
-    std::string outBuf;
+std::string InsideOutEvalLogic::ReadFile(FileIoExecutor &file_io) {
+    std::string out_buf;
     std::string result;
-    size_t resultSize = GetMaxIoResultSize();
-    size_t outBufSize = GetMaxFileSize();
-    outBuf.reserve(outBufSize);
-    result.reserve(resultSize);
-    uint32_t status = FileRead(handlerId, fileName, (uint8_t *)result.c_str(),
-        resultSize, (uint8_t *)outBuf.c_str(), outBufSize);
+
+    size_t result_size = file_io.GetMaxIoResultSize();
+    size_t out_buf_size = file_io.GetMaxFileSize();
+    out_buf.reserve(out_buf_size);
+    result.reserve(result_size);
+    uint32_t status = file_io.FileRead((uint8_t *)result.c_str(), result_size,
+        (uint8_t *)out_buf.c_str(), out_buf_size);
 
     if (status == 0) {
         Log(TCF_LOG_INFO, "File Read operation success. File content: %s",
-            outBuf.c_str());
+            out_buf.c_str());
     }
     else {
 	return result;
     }
 
-    return outBuf;
+    return out_buf;
 }
 
-std::string WriteFile(uint32_t handlerId, std::string fileName, std::string content) {
-    std::string inBuf = content;
-
+std::string InsideOutEvalLogic::WriteFile(FileIoExecutor &file_io, std::string content) {
+    std::string in_buf = content;
     std::string result;
-    size_t resultSize = GetMaxIoResultSize();
-    result.reserve(resultSize);
-    uint32_t status = FileWrite(handlerId, fileName, (uint8_t *)result.c_str(),
-        resultSize, (const uint8_t *)inBuf.c_str(), inBuf.length());
+
+    size_t result_size = file_io.GetMaxIoResultSize();
+    result.reserve(result_size);
+    uint32_t status = file_io.FileWrite((uint8_t *)result.c_str(), result_size,
+        (const uint8_t *)in_buf.c_str(), in_buf.length());
 
     if (status == 0) {
         Log(TCF_LOG_INFO, "File Write operation success");
@@ -72,38 +62,42 @@ std::string WriteFile(uint32_t handlerId, std::string fileName, std::string cont
     return result;
 }
 
-std::string ProcessRequest(std::string strIn) {
+std::string InsideOutEvalLogic::ProcessRequest(std::string str_in) {
     std::vector<std::string> args;
-    char *savedPtr;
+    char *saved_ptr;
 
     // tokenize input data
-    char *token = strtok_r((char *)strIn.c_str(), " ", &savedPtr);
+    char *token = strtok_r((char *)str_in.c_str(), " ", &saved_ptr);
     while(token) {
          args.push_back(token);
-         token = strtok_r(NULL, " ", &savedPtr);
+         token = strtok_r(NULL, " ", &saved_ptr);
     }
 
-    uint32_t fileHandlerId = GetIoHandlerId("tcf-base-file-io");
-    std::string ioResult;
+    FileIoExecutor file_io;
+    uint32_t file_handler_id = file_io.GetIoHandlerId("tcf-base-file-io");
+    file_io.SetIoHandlerId(file_handler_id);
+    std::string io_result;
 
     if (args.size() > 0) {
         if (args.at(0) == "read") {
             if (args.size() == 2) {
-                ioResult = ReadFile(fileHandlerId, args.at(1));
+                file_io.SetFileName(args.at(1));
+                io_result = ReadFile(file_io);
             } else {
-                ioResult = "Insuffient arguments passed for i/o operation";
+                io_result = "Insuffient arguments passed for i/o operation";
             }
         } else if (args.at(0) == "write") {
             if (args.size() == 3) {
-                ioResult = WriteFile(fileHandlerId, args.at(1), args.at(2));
+                file_io.SetFileName(args.at(1));
+                io_result = WriteFile(file_io, args.at(2));
             } else {
-                ioResult = "Insuffient arguments passed for i/o operation";
+                io_result = "Insuffient arguments passed for i/o operation";
             }
         }
     } else {
-        ioResult = "Insuffient arguments passed for i/o operation";
+        io_result = "Insuffient arguments passed for i/o operation";
     }
 
-    return "RESULT: " + std::string(ioResult.c_str()); 
+    return "RESULT: " + std::string(io_result.c_str());
 }
 

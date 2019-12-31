@@ -35,7 +35,8 @@ void InsideOutEval::ProcessWorkOrder(
 
     for (auto wo_data : in_work_order_data) {
         // Process the input data
-        result_str = ProcessRequest(
+        InsideOutEvalLogic in_out_logic;
+        result_str = in_out_logic.ProcessRequest(
             ByteArrayToString(wo_data.decrypted_data));
 
         // If the out_work_order_data has entry to hold the data

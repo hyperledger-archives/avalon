@@ -202,6 +202,7 @@ SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,-L,${TCF_TOP_DIR
 SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,-L,${TCF_TOP_DIR}/examples/apps/build/echo/workload")
 SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,-L,${TCF_TOP_DIR}/examples/apps/build/heart_disease_eval/workload")
 SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,-L,${TCF_TOP_DIR}/examples/apps/build/inside_out_demo/workload")
+SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,-L,${TCF_TOP_DIR}/examples/apps/build/simple_wallet/workload")
 SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,-L,$ENV{SGX_SSL}/lib64")
 # Remove all the default windows libraries (kernel32, etc)
 SET(CMAKE_C_STANDARD_LIBRARIES_INIT "")
@@ -232,6 +233,8 @@ TARGET_LINK_LIBRARIES(${PROJECT_NAME} -Wl,--whole-archive -lecho_wo -Wl,--no-who
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} -Wl,--whole-archive -lheart_disease_eval -Wl,--no-whole-archive)
 # Add example inside out workload
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} -Wl,--whole-archive -linside_out_eval -Wl,--no-whole-archive)
+# Add simple wallet workload
+TARGET_LINK_LIBRARIES(${PROJECT_NAME} -Wl,--whole-archive -lsimple_wallet -Wl,--no-whole-archive)
 
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} -Wl,--start-group  -lttcf-common -lsgx_tsgxssl_crypto -lsgx_tstdc -lsgx_tcxx -lsgx_tcrypto  -l${SERVICE_LIBRARY_NAME} -Wl,--end-group)
 
