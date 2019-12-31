@@ -24,7 +24,8 @@ FILE(GLOB PROJECT_SOURCES *.cpp)
 
 SOURCE_GROUP("Source" FILES ${PROJECT_HEADERS} ${PROJECT_SOURCES})
 
-SET(GENERIC_PRIVATE_INCLUDE_DIRS "." "${TCF_TOP_DIR}/tc/sgx/common" 
+SET(GENERIC_PRIVATE_INCLUDE_DIRS "." "${TCF_TOP_DIR}/tc/sgx/common"
+    "${TCF_TOP_DIR}/tc/sgx/common/crypto" 
     "${TCF_TOP_DIR}/examples/apps" "${TCF_TOP_DIR}/tc/sgx/trusted_worker_manager/enclave")
 SET(GENERIC_CXX_FLAGS ${DEBUG_FLAGS} "-Wall" "-fPIC" "-Wno-write-strings" "-std=c++11")
 

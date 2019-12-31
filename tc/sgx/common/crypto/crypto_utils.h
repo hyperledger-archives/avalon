@@ -37,5 +37,14 @@ namespace crypto {
     // Decodes specified number of blocks of base64 encoded data
     int decode_base64_block(unsigned char *decoded_data,
         const unsigned char *base64_data, int num_of_blocks);
+
+    // Create symmetric encryption key and return hex encoded key string
+    std::string CreateHexEncodedEncryptionKey();
+
+    // Decrypt cipher using given encryption key and return message
+    std::string DecryptData(std::string cipher, std::string key);
+
+    // Encrypt the message using given encryption key and return cipher
+    std::string EncryptData(std::string msg, std::string key);
 }  // namespace crypto
 }  // namespace tcf

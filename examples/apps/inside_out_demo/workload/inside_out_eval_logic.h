@@ -16,15 +16,15 @@
 #include <stdint.h>
 #include <string>
 #include "workload_processor.h"
+#include "file_io.h"
 
-size_t GetMaxFileSize();
+class InsideOutEvalLogic {
+private:
+    std::string ReadFile(FileIoExecutor &file_io);
 
-size_t GetMaxIoResultSize();
+    std::string WriteFile(FileIoExecutor &file_io, std::string content);
 
-std::string ReadFile(uint32_t handlerId, std::string fileName);
-
-std::string WriteFile(uint32_t handlerId, std::string fileName,
-    std::string content);
-
-extern std::string ProcessRequest(std::string strIn);
+public:
+    std::string ProcessRequest(std::string str_in);
+};
 
