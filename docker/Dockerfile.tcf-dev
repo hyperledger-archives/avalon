@@ -91,14 +91,14 @@ RUN mkdir -p /opt/intel \
 WORKDIR /opt/intel
 
 # Install SGX common library
-RUN wget https://download.01.org/intel-sgx/linux-2.3.1/ubuntu18.04/libsgx-enclave-common_2.3.101.46683-1_amd64.deb \
- && dpkg -i libsgx-enclave-common_2.3.101.46683-1_amd64.deb
+RUN wget https://download.01.org/intel-sgx/sgx-linux/2.7.1/distro/ubuntu18.04-server/libsgx-enclave-common_2.7.101.3-bionic1_amd64.deb \
+ && dpkg -i libsgx-enclave-common_2.7.101.3-bionic1_amd64.deb
 
 # Install SGX SDK
-RUN wget https://download.01.org/intel-sgx/linux-2.3.1/ubuntu18.04/sgx_linux_x64_sdk_2.3.101.46683.bin \
- && chmod +x sgx_linux_x64_sdk_2.3.101.46683.bin \
- && echo "yes" | ./sgx_linux_x64_sdk_2.3.101.46683.bin \
- && rm sgx_linux_x64_sdk_2.3.101.46683.bin \
+RUN SGX_SDK_FILE=sgx_linux_x64_sdk_2.7.101.3.bin \
+ && wget https://download.01.org/intel-sgx/sgx-linux/2.7.1/distro/ubuntu18.04-server/$SGX_SDK_FILE \
+ && echo "yes" | bash ./$SGX_SDK_FILE \
+ && rm $SGX_SDK_FILE \
  && echo ". /opt/intel/sgxsdk/environment" >> /etc/environment
 
 WORKDIR /tmp

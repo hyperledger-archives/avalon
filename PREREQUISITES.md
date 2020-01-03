@@ -143,8 +143,8 @@ The following instructions download the Intel SGX SDK 2.3 and installs it in
 ```bash
 sudo mkdir -p /opt/intel
 cd /opt/intel
-sudo wget https://download.01.org/intel-sgx/linux-2.3.1/ubuntu18.04/sgx_linux_x64_sdk_2.3.101.46683.bin
-echo "yes" | sudo bash ./sgx_linux_x64_sdk_2.3.101.46683.bin
+sudo wget https://download.01.org/intel-sgx/sgx-linux/2.7.1/distro/ubuntu18.04-server/sgx_linux_x64_sdk_2.7.101.3.bin
+echo "yes" | sudo bash ./sgx_linux_x64_sdk_2.7.101.3.bin
 ```
 
 This installs the Intel SGX SDK in the recommended location,
@@ -190,10 +190,10 @@ If disabled, enter BIOS and find the Intel SGX feature
 (it is usually under the "Advanced" or "Security" menu),
 enable Intel SGX, save your BIOS settings, and exit BIOS.
 
-Download and install libsgx-enclave-common version 2.3.101:
+Download and install libsgx-enclave-common version 2.7.101:
 ```bash
-wget https://download.01.org/intel-sgx/linux-2.3.1/ubuntu18.04/libsgx-enclave-common_2.3.101.46683-1_amd64.deb
-sudo dpkg -i libsgx-enclave-common_2.3.101.46683-1_amd64.deb
+wget https://download.01.org/intel-sgx/sgx-linux/2.7.1/distro/ubuntu18.04-server/libsgx-enclave-common_2.7.101.3-bionic1_amd64.deb
+sudo dpkg -i libsgx-enclave-common_2.7.101.3-bionic1_amd64.deb
 ```
 
 ### Run aesm service on host machine
@@ -234,8 +234,8 @@ Install the Intel SGX IAS driver:
 
 ```bash
 cd /var/tmp
-wget https://download.01.org/intel-sgx/linux-2.6/ubuntu18.04-server/sgx_linux_x64_driver_2.5.0_2605efa.bin
-sudo bash ./sgx_linux_x64_driver_2.5.0_2605efa.bin
+wget https://download.01.org/intel-sgx/sgx-linux/2.7.1/distro/ubuntu18.04-server/sgx_linux_x64_driver_2.6.0_4f5bb63.bin
+sudo bash ./sgx_linux_x64_driver_2.6.0_4f5bb63.bin
 ```
 
 If installation of the Intel SGX driver fails due to syntax errors,
