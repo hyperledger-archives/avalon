@@ -143,6 +143,12 @@ ARG TCF_DEBUG_BUILD
 ARG DISPLAY
 ARG XAUTHORITY
 
+#TODO need to be removed latter
+#install avalon-client python package.
+RUN cd /project/TrustedComputeFramework/client_sdk \
+   && python setup.py bdist_wheel \
+   && pip3 install dist/*.whl
+
 # Environment setup
 
 RUN echo "SOLC_BINARY=/root/.py-solc/solc-v0.4.25/bin/solc" >> /etc/environment \

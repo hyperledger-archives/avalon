@@ -25,7 +25,6 @@ import secrets
 
 import config.config as pconfig
 import utility.logger as plogger
-from service_client.generic import GenericServiceClient
 import utility.utility as utility
 from utility.tcf_types import WorkerType
 import worker.worker_details as worker

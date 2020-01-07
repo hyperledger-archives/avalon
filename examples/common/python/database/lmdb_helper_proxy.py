@@ -12,12 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from service_client.generic import TextServiceClient
-# add the dot prefix to address the ModuleNotFoundError error
 import logging
+import urllib.request
+import urllib.error
 
 logger = logging.getLogger(__name__)
 # ------------------------------------------------------------------------------
+
+
+class MessageException(Exception):
+    """
+    A class to capture communication exceptions when communicating with
+    services
+    """
+    pass
 
 
 class LMDBHelperProxy():
@@ -167,3 +175,60 @@ class LMDBHelperProxy():
 # ------------------------------------------------------------------------------
     def __unescape(self, string):
         return string.encode("utf-8").decode("unicode_escape")
+
+
+class TextServiceClient(object):
+    """
+    Class similar to HTTP client that handles UTF8 text instead
+    of JSONs
+    """
+
+    def __init__(self, url):
+        self.ServiceURL = url
+        self.ProxyHandler = urllib.request.ProxyHandler({})
+
+    def _postmsg(self, request):
+        """
+        Post a request UTF8 text listener and return the response.
+        """
+
+        data = request.encode('utf-8')
+        datalen = len(data)
+
+        url = self.ServiceURL
+
+        logger.debug('post request to %s with DATALEN=%d, DATA=<%s>',
+                     url, datalen, data)
+
+        try:
+            request = urllib.request.Request(
+                url, data,
+                {'Content-Type': 'text/plain; charset=utf-8',
+                 'Content-Length': datalen})
+            opener = urllib.request.build_opener(self.ProxyHandler)
+            response = opener.open(request, timeout=10)
+
+        except urllib.error.HTTPError as err:
+            logger.warn('operation failed with response: %s', err.code)
+            raise MessageException(
+                'operation failed with response: {0}'.format(err.code))
+
+        except urllib.error.URLError as err:
+            logger.warn('operation failed: %s', err.reason)
+            raise MessageException('operation failed: {0}'.format(err.reason))
+
+        except Exception as err:
+            logger.exception('no response from server: %s', str(err))
+            raise MessageException('no response from server: {0}'.format(err))
+
+        content = response.read()
+        headers = response.info()
+        response.close()
+
+        encoding = headers.get('Content-Type')
+        if encoding != 'text/plain; charset=utf-8':
+            logger.info('server responds with message %s of type %s',
+                        content, encoding)
+            return None
+
+        return content

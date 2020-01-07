@@ -24,6 +24,7 @@ fi
 SCRIPTDIR="$(dirname $(readlink --canonicalize ${BASH_SOURCE}))"
 SRCDIR="$(realpath ${SCRIPTDIR}/..)"
 echo_client_path="${TCF_HOME}/examples/apps/echo/client"
+generic_client_path="${TCF_HOME}/examples/apps/generic_client"
 # Read Listener port from config file
 listener_port=`grep listener_port ${TCF_HOME}/config/tcs_config.toml | awk {'print $3'}`
 
@@ -77,6 +78,17 @@ yell "Start testing echo client ................"
 yell "#------------------------------------------------------------------------------------------------"
 # Testing echo client with enabling requester signature and input data hash
 try $echo_client_path/echo_client.py -m "Hello world" -rs -dh
+
+yell "Start testing generic client for echo workload ................"
+yell "#------------------------------------------------------------------------------------------------"
+try $generic_client_path/generic_client.py --uri "http://localhost:1947" \
+    --workload_id "echo-result" --in_data "Hello"
+
+yell "Start testing generic client for heart disease eval workload ................"
+yell "#------------------------------------------------------------------------------------------------"
+try $generic_client_path/generic_client.py --uri "http://localhost:1947" \
+    --workload_id "heart-disease-eval" \
+    --in_data "Data: 25 10 1 67  102 125 1 95 5 10 1 11 36 1"
 
 yell "#------------------------------------------------------------------------------------------------"
 yell "#------------------------------------------------------------------------------------------------"

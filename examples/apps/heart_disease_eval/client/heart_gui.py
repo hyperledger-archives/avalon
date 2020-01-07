@@ -33,20 +33,19 @@ import tkinter.font as font
 from PIL import ImageTk, Image
 
 # Avalon imports
-from service_client.generic import GenericServiceClient
 import utility.utility as utility
-import worker.worker_details as worker
-from utility.tcf_types import WorkerType
-from work_order.work_order_params import WorkOrderParams
-from connectors.direct.direct_json_rpc_api_connector \
-    import DirectJsonRpcApiConnector
+import avalon_client_sdk.worker.worker_details as worker
+from avalon_client_sdk.utility.tcf_types import WorkerType
+from avalon_client_sdk.work_order.work_order_params import WorkOrderParams
+from avalon_client_sdk.avalon_direct_client \
+    import AvalonDirectClient
 import config.config as pconfig
 import utility.logger as plogger
 import crypto.crypto as crypto
 from error_code.error_status import WorkOrderStatus, ReceiptCreateStatus
 import utility.signature as signature
 from error_code.error_status import SignatureStatus
-from work_order_receipt.work_order_receipt_request \
+from avalon_client_sdk.work_order_receipt.work_order_receipt_request \
      import WorkOrderReceiptRequest
 
 # Remove duplicate loggers
@@ -323,15 +322,16 @@ class resultWindow(tk.Toplevel):
 
         # Set text for JSON sidebar
         req_id = 51
-        self.request_json = wo_params.to_string(req_id)
+        self.request_json = wo_params.to_jrpc_string(req_id)
 
-        work_order_instance = direct_jrpc.create_work_order(
+        work_order_instance = direct_jrpc.get_work_order_instance(
             config
         )
         response = work_order_instance.work_order_submit(
-            wo_params.get_params(),
-            wo_params.get_in_data(),
-            wo_params.get_out_data(),
+            wo_params.get_work_order_id(),
+            wo_params.get_worker_id(),
+            wo_params.get_requester_id(),
+            wo_params.to_string(),
             id=req_id
         )
         logger.info("Work order submit response : {}\n ".format(
@@ -342,7 +342,7 @@ class resultWindow(tk.Toplevel):
             sys.exit(1)
         # Create work order receipt
         req_id += 1
-        wo_receipt_instance = direct_jrpc.create_work_order_receipt(
+        wo_receipt_instance = direct_jrpc.get_work_order_receipt_instance(
             config
         )
         wo_request = json.loads(self.request_json)
@@ -659,7 +659,7 @@ def parse_command_line(args):
         conf_files = [options.config]
     else:
         conf_files = [TCFHOME +
-                      "/examples/common/python/connectors/tcf_connector.toml"]
+                      "/client_sdk/avalon_client_sdk/tcf_connector.toml"]
     conf_paths = ["."]
 
     try:
@@ -670,7 +670,7 @@ def parse_command_line(args):
         sys.exit(-1)
 
     global direct_jrpc
-    direct_jrpc = DirectJsonRpcApiConnector(conf_files[0])
+    direct_jrpc = AvalonDirectClient(conf_files[0])
 
     # Whether or not to connect to the registry list on the blockchain
     off_chain = False
@@ -724,7 +724,7 @@ def initialize_tcf(config):
     # Retrieve Worker Registry
     if not off_chain:
         registry_list_instance = direct_jrpc. \
-            create_worker_registry_list(config)
+            get_worker_registry_list_instance(config)
         registry_count, lookup_tag, registry_list = \
             registry_list_instance.registry_lookup()
         logger.info("\n Registry lookup response : registry count {}\
@@ -746,7 +746,7 @@ def initialize_tcf(config):
 
     global worker_id
     if not worker_id:
-        worker_registry_instance = direct_jrpc.create_worker_registry(
+        worker_registry_instance = direct_jrpc.get_worker_registry_instance(
             config
         )
         req_id = 31
