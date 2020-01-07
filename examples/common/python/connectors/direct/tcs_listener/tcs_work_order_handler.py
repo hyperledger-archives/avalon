@@ -18,8 +18,9 @@ import logging
 from error_code.error_status import WorkOrderStatus
 from error_code.enclave_error import EnclaveError
 import utility.utility as utility
-from utility.tcf_types import JsonRpcErrorCode
-from work_order.work_order_request_validator import WorkOrderRequestValidator
+from avalon_client_sdk.utility.tcf_types import JsonRpcErrorCode
+from avalon_client_sdk.work_order.work_order_request_validator \
+    import WorkOrderRequestValidator
 from utility.hex_utils import is_valid_hex_str
 
 from jsonrpc.exceptions import JSONRPCDispatchException

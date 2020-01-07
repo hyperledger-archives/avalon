@@ -28,8 +28,8 @@ import utility.signature as signature
 import utility.utility as utils
 from database import connector
 from error_code.error_status import ReceiptCreateStatus, WorkOrderStatus
-from utility.tcf_types import WorkerStatus, WorkerType
-from work_order_receipt.work_order_receipt_request \
+from avalon_client_sdk.utility.tcf_types import WorkerStatus, WorkerType
+from avalon_client_sdk.work_order_receipt.work_order_receipt_request \
     import WorkOrderReceiptRequest
 
 logger = logging.getLogger(__name__)

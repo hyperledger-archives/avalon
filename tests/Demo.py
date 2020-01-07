@@ -20,10 +20,10 @@ import random
 import json
 import logging
 
-from service_client.generic import GenericServiceClient
+from avalon_client_sdk.http_client.http_jrpc_client import HttpJrpcClient
 import crypto.crypto as crypto
 import utility.signature as signature
-import worker.worker_details as worker
+import avalon_client_sdk.worker.worker_details as worker
 import utility.utility as enclave_helper
 import utility.file_utils as futils
 from error_code.error_status import SignatureStatus, WorkOrderStatus
@@ -49,7 +49,7 @@ def local_main(config):
         exit(1)
 
     LOGGER.info("Execute work order")
-    uri_client = GenericServiceClient(server_uri)
+    uri_client = HttpJrpcClient(server_uri)
     response = None
     wo_id = None
     if input_json_dir:

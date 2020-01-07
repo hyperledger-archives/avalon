@@ -25,17 +25,17 @@ import secrets
 import config.config as pconfig
 import utility.logger as plogger
 import utility.utility as utility
-from utility.tcf_types import WorkerType
-import worker.worker_details as worker
-from work_order.work_order_params import WorkOrderParams
-from connectors.direct.direct_json_rpc_api_connector \
-    import DirectJsonRpcApiConnector
+from avalon_client_sdk.utility.tcf_types import WorkerType
+import avalon_client_sdk.worker.worker_details as worker
+from avalon_client_sdk.work_order.work_order_params import WorkOrderParams
+from avalon_client_sdk.direct.avalon_direct_client \
+    import AvalonDirectClient
 import crypto.crypto as crypto
 from error_code.error_status import WorkOrderStatus, ReceiptCreateStatus
 import utility.signature as signature
 import utility.hex_utils as hex_utils
 from error_code.error_status import SignatureStatus
-from work_order_receipt.work_order_receipt_request \
+from avalon_client_sdk.work_order_receipt.work_order_receipt_request \
     import WorkOrderReceiptRequest
 
 # Remove duplicate loggers
@@ -97,7 +97,7 @@ def ParseCommandLine(args):
         conf_files = [options.config]
     else:
         conf_files = [TCFHOME +
-                      "/examples/common/python/connectors/tcf_connector.toml"]
+                      "/client_sdk/avalon_client_sdk/tcf_connector.toml"]
     confpaths = ["."]
     try:
         config = pconfig.parse_configuration_files(conf_files, confpaths)
@@ -107,7 +107,7 @@ def ParseCommandLine(args):
         sys.exit(-1)
 
     global direct_jrpc
-    direct_jrpc = DirectJsonRpcApiConnector(conf_files[0])
+    direct_jrpc = AvalonDirectClient(conf_files[0])
 
     # Whether or not to connect to the registry list on the blockchain
     off_chain = False
@@ -153,8 +153,7 @@ def Main(args=None):
 
     # Connect to registry list and retrieve registry
     if not off_chain:
-        registry_list_instance = direct_jrpc.create_worker_registry_list(
-            config
+        registry_list_instance = direct_jrpc.get_worker_registry_list_instance(
         )
 
         # Lookup returns tuple, first element is number of registries and
@@ -180,9 +179,7 @@ def Main(args=None):
     # Prepare worker
     req_id = 31
     global worker_id
-    worker_registry_instance = direct_jrpc.create_worker_registry(
-        config
-    )
+    worker_registry_instance = direct_jrpc.get_worker_registry_instance()
     if not worker_id:
         worker_lookup_result = worker_registry_instance.worker_lookup(
             worker_type=WorkerType.TEE_SGX, id=req_id
@@ -250,15 +247,14 @@ def Main(args=None):
 
     # Submit work order
     logger.info("Work order submit request : %s, \n \n ",
-                wo_params.to_string(req_id))
-    work_order_instance = direct_jrpc.create_work_order(
-        config
-    )
+                wo_params.to_jrpc_string(req_id))
+    work_order_instance = direct_jrpc.get_work_order_instance()
     req_id += 1
     response = work_order_instance.work_order_submit(
-        wo_params.get_params(),
-        wo_params.get_in_data(),
-        wo_params.get_out_data(),
+        wo_params.get_work_order_id(),
+        wo_params.get_worker_id(),
+        wo_params.get_requester_id(),
+        wo_params.to_string(),
         id=req_id
     )
     logger.info("Work order submit response : {}\n ".format(
@@ -270,11 +266,10 @@ def Main(args=None):
         sys.exit(1)
 
     # Create receipt
-    wo_receipt_instance = direct_jrpc.create_work_order_receipt(
-        config)
+    wo_receipt_instance = direct_jrpc.get_work_order_receipt_instance()
     req_id += 1
     # Create work order receipt object using WorkOrderReceiptRequest class
-    wo_request = json.loads(wo_params.to_string(req_id))
+    wo_request = json.loads(wo_params.to_jrpc_string(req_id))
     wo_receipt_obj = WorkOrderReceiptRequest()
     wo_create_receipt = wo_receipt_obj.create_receipt(
         wo_request,
