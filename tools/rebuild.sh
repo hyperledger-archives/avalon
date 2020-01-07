@@ -169,6 +169,11 @@ cd $TCF_HOME/examples/common/python
 try make "-j$NUM_CORES"
 try make install
 
+yell --------------- CRYPTO UTILS ---------------
+cd $TCF_HOME/common/python/crypto_utils
+try make "-j$NUM_CORES"
+try make install
+
 yell --------------- ENCLAVE MANAGER ---------------
 cd $TCF_HOME/examples/enclave_manager
 try make "-j$NUM_CORES"

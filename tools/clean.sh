@@ -37,6 +37,10 @@ rm -f $SRCDIR/config/Kv_Shared*
 cd $SRCDIR/examples/common/python
 make clean
 
+# --------------- CRYPTO UTILS ---------------
+cd $SRCDIR/common/python/crypto_utils
+make clean
+
 # --------------- EXAMPLES ENCLAVE MANAGER ---------------
 cd $SRCDIR/examples/enclave_manager
 SGX_MODE=${SGX_MODE:-SIM} make clean
