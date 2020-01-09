@@ -23,8 +23,8 @@ INCLUDE(CMakeVariables.txt)
 # Common components for both trusted and untrusted common libraries
 ################################################################################
 
-FILE(GLOB PROJECT_HEADERS *.h crypto/*.h verify_ias_report/*.h packages/base64/*.h packages/parson/*.h)
-FILE(GLOB PROJECT_SOURCES *.cpp crypto/*.cpp verify_ias_report/*.cpp packages/base64/*.cpp packages/parson/*.cpp)
+FILE(GLOB PROJECT_HEADERS *.h crypto/*.h verify_ias_report/*.h)
+FILE(GLOB PROJECT_SOURCES *.cpp crypto/*.cpp verify_ias_report/*.cpp)
 
 SET(COMMON_PRIVATE_INCLUDE_DIRS "." "tests" "crypto" "verify_ias_report" "packages/base64" "packages/parson" "state")
 SET(COMMON_CXX_FLAGS ${DEBUG_FLAGS} "-m64" "-fvisibility=hidden" "-fpie" "-fPIC" "-fstack-protector" "-std=c++11" "-Wall")
@@ -44,7 +44,7 @@ add_custom_command(OUTPUT  ${PROJECT_GENERATED_IAS_SOURCES}
 # Untrusted Common Library
 ################################################################################
 
-SET(UNTRUSTED_LIB_NAME utcf-common)
+SET(UNTRUSTED_LIB_NAME uavalon-common)
 PROJECT(${UNTRUSTED_LIB_NAME} CXX)
 
 pkg_check_modules (OPENSSL REQUIRED openssl>=1.1.1d)
@@ -65,7 +65,7 @@ TARGET_COMPILE_DEFINITIONS(${UNTRUSTED_LIB_NAME} PRIVATE "-D_UNTRUSTED_=1")
 ################################################################################
 
 if(NOT UNTRUSTED_ONLY)
-	SET(TRUSTED_LIB_NAME ttcf-common)
+	SET(TRUSTED_LIB_NAME tavalon-common)
 	PROJECT(${TRUSTED_LIB_NAME} CXX)
 
 	ADD_LIBRARY(${TRUSTED_LIB_NAME} STATIC ${PROJECT_HEADERS} ${PROJECT_GENERATED_IAS_SOURCES} ${PROJECT_SOURCES})
@@ -91,4 +91,7 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 link_directories(${CMAKE_BINARY_DIR})
+
+ADD_SUBDIRECTORY(packages/base64)
+ADD_SUBDIRECTORY(packages/parson)
 

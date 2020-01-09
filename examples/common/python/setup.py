@@ -91,7 +91,8 @@ library_dirs = [
 ] + openssl_lib_dirs
 
 libraries = [
-    'utcf-common'
+    'uavalon-common',
+    'uavalon-base64'
 ] + openssl_libs
 
 if sgx_mode_env == "HW":

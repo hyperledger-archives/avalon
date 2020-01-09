@@ -9,12 +9,11 @@
 
 #pragma once
 
-#include "types.h"
+#include <string>
+#include <vector>
 
-#define BASE64_SIZE(x) (static_cast<size_t>(((((x) - 1) / 3) * 4 + 4) + 1))
+std::string base64_encode(
+    const std::vector<uint8_t>& raw_buffer);
 
-Base64EncodedString base64_encode(
-    const ByteArray& raw_buffer);
-
-ByteArray base64_decode(
-    const Base64EncodedString& encoded_string);
+std::vector<uint8_t> base64_decode(
+    const std::string& encoded_string);
