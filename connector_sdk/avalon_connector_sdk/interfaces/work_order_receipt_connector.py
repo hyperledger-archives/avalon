@@ -24,7 +24,6 @@ class WorkOrderReceiptConnector(ABC):
     def __init__(self):
         super().__init__()
 
-
     @abstractmethod
     def work_order_receipt_update(self, work_order_id,
                                   updater_id,
@@ -73,4 +72,3 @@ class WorkOrderReceiptConnector(ABC):
         error
         """
         pass
-
