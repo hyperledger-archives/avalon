@@ -76,7 +76,9 @@ library_dirs = [
 ]
 
 libraries = [
-    'utcf-common',
+    'uavalon-common',
+    'uavalon-base64',
+    'uavalon-parson'
 ]
 
 if sgx_mode_env == "HW":
