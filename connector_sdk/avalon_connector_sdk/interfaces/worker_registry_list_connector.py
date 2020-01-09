@@ -72,4 +72,3 @@ class WorkerRegistryListConnector(ABC):
             3 - indicates that the registry is decommissioned
         """
         pass
-

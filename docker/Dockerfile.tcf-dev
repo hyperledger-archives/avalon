@@ -76,10 +76,15 @@ RUN apt-get update \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
 
-# Install setuptools, py-solc and web3 packages using pip because
+# Install setuptools,py-solc-x and web3 packages using pip because
 # these are not available in apt repository.
 # Install nose2 for running tests.
-RUN pip3 install --upgrade setuptools json-rpc py-solc web3 nose2
+RUN pip3 install --upgrade setuptools json-rpc web3 py-solc-x nose2
+
+# Installing solidity compiler
+RUN add-apt-repository ppa:ethereum/ethereum \
+   && apt-get update \
+   && apt-get install solc
 
 # Make Python3 default
 RUN ln -sf /usr/bin/python3 /usr/bin/python
@@ -102,12 +107,8 @@ RUN SGX_SDK_FILE=sgx_linux_x64_sdk_2.7.101.3.bin \
  && rm $SGX_SDK_FILE \
  && echo ". /opt/intel/sgxsdk/environment" >> /etc/environment
 
-WORKDIR /tmp
-# py-solc 3.2.0 requires an older version of the solc compiler, 0.4.25
-RUN mkdir -p $HOME/.py-solc/solc-v0.4.25/bin \
-  && curl -LsS https://github.com/ethereum/solidity/releases/download/v0.4.25/solc-static-linux -o /root/.py-solc/solc-v0.4.25/bin/solc \
-  && chmod 0755 /root/.py-solc/solc-v0.4.25/bin/solc
 
+WORKDIR /tmp
 # Build ("Untrusted") OpenSSL, then build ("trusted") SGX OpenSSL
 # Note: The latter will compile in HW or SIM mode depending on the
 # availability of /dev/isgx and /var/run/aesmd/aesm.socket
@@ -144,16 +145,23 @@ ARG TCF_DEBUG_BUILD
 ARG DISPLAY
 ARG XAUTHORITY
 
-#TODO need to be removed later
-#install avalon-client python package.
+#TODO need to be removed latter
+#install avalon-client sdk python package.
 RUN cd /project/TrustedComputeFramework/client_sdk \
    && python setup.py bdist_wheel \
    && pip3 install dist/*.whl
 
+#TODO need to be removed latter
+#install avalon-connect sdk python package
+RUN cd /project/TrustedComputeFramework/connector_sdk \
+    && python setup.py bdist_wheel \
+    && pip3 install dist/*.whl
+
 # Environment setup
 
-RUN echo "SOLC_BINARY=/root/.py-solc/solc-v0.4.25/bin/solc" >> /etc/environment \
- && echo "WALLET_PRIVATE_KEY=B413189C95B48737AE2D9AF4CAE97EB03F4DE40599DF8E6C89DCE4C2E2CBA8DE" >> /etc/environment \
+RUN echo "WEB3_INFURA_PROJECT_ID=9af17e6320414af8a3168cd9fe9d653d" >> /etc/environment \
+    && echo "WALLET_PRIVATE_KEY=4F611197A6E82715F4D2446FE015D1667E9C40A351411F3A7300F71F285D01B4" >> /etc/environment \
+
  && echo "TCF_HOME=/project/TrustedComputeFramework/" >> /etc/environment \
  && if [ ! -z "$http_proxy"  ]; then \
     echo 'Acquire::http::Proxy "'$http_proxy'";' >> /etc/apt/apt.conf.d/00proxy; \
@@ -181,10 +189,8 @@ ENV SGX_SDK=/opt/intel/sgxsdk
 ENV PATH=$PATH:$SGX_SDK/bin:$SGX_SDK/bin/x64
 ENV PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$SGX_SDK/pkgconfig
 ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$SGX_SDK/sdk_libs
-# Solc compiler path to compile solidity contract code
-ENV SOLC_BINARY=/root/.py-solc/solc-v0.4.25/bin/solc
 # Ethereum private key of ethereum account
-ENV WALLET_PRIVATE_KEY="B413189C95B48737AE2D9AF4CAE97EB03F4DE40599DF8E6C89DCE4C2E2CBA8DE"
+ENV WALLET_PRIVATE_KEY="4F611197A6E82715F4D2446FE015D1667E9C40A351411F3A7300F71F285D01B4"
 # Set display, replace value with [IP address of host]:0
 ENV DISPLAY=:0
 

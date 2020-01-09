@@ -17,7 +17,8 @@ import os
 from os.path import exists, realpath
 from avalon_client_sdk.utility.utils import construct_message
 
-from solc import compile_source
+# solcx has solidity compiler with 0.5.x and 0.6.x support
+from solcx import compile_source
 from web3 import HTTPProvider, Web3
 
 logging.basicConfig(
@@ -138,7 +139,19 @@ class EthereumWrapper():
         compiled_sol = self.compile_source_file(contract_file_name)
         contract_id, contract_interface = compiled_sol.popitem()
         return self.__w3.eth.contract(address=contract_address,
-                                      abi=contract_interface["abi"],)
+                                      abi=contract_interface["abi"])
 
     def get_txn_nonce(self):
         return self.__w3.eth.getTransactionCount(self.__eth_account_address)
+
+    def get_transaction_params(self):
+        """
+        Method to construct a dictionary with required parameters
+        to submit the transaction
+        """
+        return {
+            "chainId": self.get_channel_id(),
+            "gas": self.get_gas_limit(),
+            "gasPrice": self.get_gas_price(),
+            "nonce": self.get_txn_nonce()
+        }

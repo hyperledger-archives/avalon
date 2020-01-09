@@ -75,4 +75,3 @@ class WorkerRegistryConnector(ABC):
         3. id is used for json rpc request
         """
         pass
-

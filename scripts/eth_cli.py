@@ -68,7 +68,7 @@ class eth_cli:
 def main():
     tcf_home = os.environ.get("TCF_HOME", "../../")
     eth = eth_cli(tcf_home +
-                  "/avalon_client/avalon_client_sdk/" + "tcf_connector.toml")
+                  "/client_sdk/avalon_client_sdk/" + "tcf_connector.toml")
     eth.deploy_contracts()
 
 if __name__ == '__main__':
