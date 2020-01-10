@@ -28,6 +28,7 @@
 #include "auto_handle_sgx.h"
 
 #include "error.h"
+#include "avalon_sgx_error.h"
 #include "tcf_error.h"
 #include "zero.h"
 

@@ -16,6 +16,7 @@
 #include <stdint.h>
 #include <stdio.h>
 
+#include "avalon_sgx_error.h"
 #include "error.h"
 #include "sgx_support.h"
 #include "c11_support.h"

@@ -19,32 +19,9 @@
 #include <string>
 
 #include "tcf_error.h"
-#include "sgx_error.h"
 
 namespace tcf {
     namespace error {
-
-        // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-        class SgxError : public std::exception {
-        public:
-            explicit SgxError() : errorCode(SGX_SUCCESS) {}
-            explicit SgxError(
-                sgx_status_t inErrorCode
-                ) :
-                errorCode(inErrorCode) {}
-            virtual ~SgxError() {}
-
-            sgx_status_t error() { return errorCode; }
-
-            virtual char const * what() const throw() {
-                return "Sgx Call Failed.";
-            }
-
-        private:
-            sgx_status_t errorCode;
-        }; // class SgxError
-
-        // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
         class Error : public std::runtime_error {
         private:
             tcf_err_t _error_code;
@@ -176,12 +153,6 @@ namespace tcf {
                 throw except(msg);
             }
         } // ThrowIf
-
-        // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-        void ThrowSgxError(
-            sgx_status_t ret,
-            const char* msg = nullptr
-            );
     }
 
 } // namespace tcf
