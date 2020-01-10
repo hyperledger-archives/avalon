@@ -23,6 +23,7 @@
 #include <sgx_uae_service.h>
 
 #include "error.h"
+#include "avalon_sgx_error.h"
 #include "log.h"
 #include "tcf_error.h"
 #include "types.h"

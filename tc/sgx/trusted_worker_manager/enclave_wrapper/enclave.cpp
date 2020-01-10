@@ -29,6 +29,7 @@
 #include "log.h"
 
 #include "error.h"
+#include "avalon_sgx_error.h"
 #include "hex_string.h"
 #include "tcf_error.h"
 #include "types.h"

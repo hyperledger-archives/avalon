@@ -17,6 +17,7 @@
 
 #include "tcf_error.h"
 #include "error.h"
+#include "avalon_sgx_error.h"
 #include "log.h"
 #include "types.h"
 #include "zero.h"

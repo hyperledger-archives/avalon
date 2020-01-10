@@ -30,6 +30,7 @@
 
 #include "crypto.h"
 #include "error.h"
+#include "avalon_sgx_error.h"
 #include "tcf_error.h"
 #include "zero.h"
 #include "jsonvalue.h"
