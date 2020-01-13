@@ -16,13 +16,6 @@
 #ifndef VERIFY_REPORT_H
 #define VERIFY_REPORT_H
 
-#include <sgx_quote.h>
-
-// Extracts enclave quote from report
-void get_quote_from_report(const uint8_t* report,
-                           const int report_len,
-                           sgx_quote_t* quote);
-
 // Verifies enclave quote status
 bool verify_enclave_quote_status(const char* ias_report,
                                  int ias_report_len,

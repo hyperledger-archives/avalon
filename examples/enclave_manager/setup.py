@@ -77,6 +77,8 @@ library_dirs = [
 
 libraries = [
     'uavalon-common',
+    'uavalon-crypto',
+    'uavalon-verify-ias-report',
     'uavalon-base64',
     'uavalon-parson'
 ]

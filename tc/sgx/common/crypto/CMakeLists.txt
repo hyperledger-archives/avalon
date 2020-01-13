@@ -1,4 +1,4 @@
-# Copyright 2018 Intel Corporation
+# Copyright 2020 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,23 +17,21 @@ find_package(PkgConfig REQUIRED)
 
 option(UNTRUSTED_ONLY "Build only untrusted components" OFF)
 
-INCLUDE(CMakeVariables.txt)
-
 ################################################################################
-# Common components for both trusted and untrusted common libraries
+# Common components for both trusted and untrusted crypto library
 ################################################################################
 
 FILE(GLOB PROJECT_HEADERS *.h)
 FILE(GLOB PROJECT_SOURCES *.cpp)
 
-SET(COMMON_PRIVATE_INCLUDE_DIRS "." "tests" "crypto" "packages/base64" "packages/parson")
+SET(COMMON_PRIVATE_INCLUDE_DIRS ".." "../packages/base64")
 SET(COMMON_CXX_FLAGS ${DEBUG_FLAGS} "-m64" "-fvisibility=hidden" "-fpie" "-fPIC" "-fstack-protector" "-std=c++11" "-Wall")
 
 ################################################################################
-# Untrusted Common Library
+# Untrusted Crypto Library
 ################################################################################
 
-SET(UNTRUSTED_LIB_NAME uavalon-common)
+SET(UNTRUSTED_LIB_NAME uavalon-crypto)
 PROJECT(${UNTRUSTED_LIB_NAME} CXX)
 
 pkg_check_modules (OPENSSL REQUIRED openssl>=1.1.1d)
@@ -41,18 +39,17 @@ pkg_check_modules (OPENSSL REQUIRED openssl>=1.1.1d)
 ADD_LIBRARY(${UNTRUSTED_LIB_NAME} STATIC ${PROJECT_HEADERS} ${PROJECT_SOURCES})
 
 TARGET_INCLUDE_DIRECTORIES(${UNTRUSTED_LIB_NAME} PRIVATE ${COMMON_PRIVATE_INCLUDE_DIRS})
-TARGET_INCLUDE_DIRECTORIES(${UNTRUSTED_LIB_NAME} PUBLIC ${SGX_SDK}/include)
 
 TARGET_COMPILE_OPTIONS(${UNTRUSTED_LIB_NAME} PRIVATE ${COMMON_CXX_FLAGS} ${OPENSSL_CFLAGS})
 
 TARGET_COMPILE_DEFINITIONS(${UNTRUSTED_LIB_NAME} PRIVATE "-D_UNTRUSTED_=1")
 
 ################################################################################
-# Trusted Common Library
+# Trusted Crypto Library
 ################################################################################
 
 if(NOT UNTRUSTED_ONLY)
-	SET(TRUSTED_LIB_NAME tavalon-common)
+	SET(TRUSTED_LIB_NAME tavalon-crypto)
 	PROJECT(${TRUSTED_LIB_NAME} CXX)
 
 	ADD_LIBRARY(${TRUSTED_LIB_NAME} STATIC ${PROJECT_HEADERS} ${PROJECT_SOURCES})
@@ -69,17 +66,3 @@ if(NOT UNTRUSTED_ONLY)
 	TARGET_COMPILE_OPTIONS(${TRUSTED_LIB_NAME} PRIVATE -fno-builtin-printf)
 endif()
 
-
-################################################################################
-# Other libraries in common
-################################################################################
-
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
-link_directories(${CMAKE_BINARY_DIR})
-
-ADD_SUBDIRECTORY(packages/base64)
-ADD_SUBDIRECTORY(packages/parson)
-ADD_SUBDIRECTORY(crypto)
-ADD_SUBDIRECTORY(verify_ias_report)

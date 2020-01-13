@@ -15,7 +15,6 @@
 
 #include <string.h>
 #include <assert.h>
-#include "crypto_utils.h"
 #include <openssl/err.h>
 #include <openssl/rand.h>
 #include <openssl/sha.h>
@@ -24,8 +23,10 @@
 #include <algorithm>
 #include <memory>
 #include <vector>
+
 #include "base64.h"  // Simple base64 enc/dec routines
 #include "crypto_shared.h"
+#include "crypto_utils.h"
 #include "error.h"
 #include "tcf_error.h"
 #include "hex_string.h"
@@ -36,6 +37,9 @@
 #if _UNTRUSTED_
 #include <openssl/crypto.h>
 #include <stdio.h>
+
+// memcpy_s definition is not present in std C library, hence mapping to memcpy
+#define memcpy_s(dest, dest_size, src, count) memcpy(dest, src, count)
 #else
 #include "tSgxSSL_api.h"
 #endif
