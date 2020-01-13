@@ -26,7 +26,6 @@ import sgx_work_order_request as work_order_request
 import tcf_enclave_helper as enclave_helper
 import utility.signature as signature
 import utility.utility as utils
-import crypto.crypto as crypto
 from database import connector
 from error_code.error_status import ReceiptCreateStatus, WorkOrderStatus
 from utility.tcf_types import WorkerStatus, WorkerType

@@ -1,4 +1,4 @@
-# Copyright 2018 Intel Corporation
+# Copyright 2020 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,45 +17,54 @@ find_package(PkgConfig REQUIRED)
 
 option(UNTRUSTED_ONLY "Build only untrusted components" OFF)
 
-INCLUDE(CMakeVariables.txt)
-
 ################################################################################
-# Common components for both trusted and untrusted common libraries
+# Common components for both trusted and untrusted verify_ias_report library
 ################################################################################
 
 FILE(GLOB PROJECT_HEADERS *.h)
 FILE(GLOB PROJECT_SOURCES *.cpp)
 
-SET(COMMON_PRIVATE_INCLUDE_DIRS "." "tests" "crypto" "packages/base64" "packages/parson")
+SET(COMMON_PRIVATE_INCLUDE_DIRS ".." "../packages/base64" "../packages/parson" "../crypto")
 SET(COMMON_CXX_FLAGS ${DEBUG_FLAGS} "-m64" "-fvisibility=hidden" "-fpie" "-fPIC" "-fstack-protector" "-std=c++11" "-Wall")
 
 ################################################################################
-# Untrusted Common Library
+# Generated source
 ################################################################################
 
-SET(UNTRUSTED_LIB_NAME uavalon-common)
+MESSAGE( "current bin dir " ${CMAKE_CURRENT_BINARY_DIR})
+SET(PROJECT_GENERATED_IAS_SOURCES ${CMAKE_CURRENT_BINARY_DIR}/../../verify_ias_report/ias-certificates.cpp)
+add_custom_command(OUTPUT  ${PROJECT_GENERATED_IAS_SOURCES}
+                     COMMAND ./build_ias_certificates_cpp.sh
+                     DEPENDS ias-certificates.template build_ias_certificates_cpp.sh
+                     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../verify_ias_report
+)
+
+################################################################################
+# Untrusted Verify-Ias-Report Library
+################################################################################
+
+SET(UNTRUSTED_LIB_NAME uavalon-verify-ias-report)
 PROJECT(${UNTRUSTED_LIB_NAME} CXX)
 
 pkg_check_modules (OPENSSL REQUIRED openssl>=1.1.1d)
 
-ADD_LIBRARY(${UNTRUSTED_LIB_NAME} STATIC ${PROJECT_HEADERS} ${PROJECT_SOURCES})
+ADD_LIBRARY(${UNTRUSTED_LIB_NAME} STATIC ${PROJECT_HEADERS} ${PROJECT_GENERATED_IAS_SOURCES} ${PROJECT_SOURCES})
 
 TARGET_INCLUDE_DIRECTORIES(${UNTRUSTED_LIB_NAME} PRIVATE ${COMMON_PRIVATE_INCLUDE_DIRS})
-TARGET_INCLUDE_DIRECTORIES(${UNTRUSTED_LIB_NAME} PUBLIC ${SGX_SDK}/include)
 
 TARGET_COMPILE_OPTIONS(${UNTRUSTED_LIB_NAME} PRIVATE ${COMMON_CXX_FLAGS} ${OPENSSL_CFLAGS})
 
 TARGET_COMPILE_DEFINITIONS(${UNTRUSTED_LIB_NAME} PRIVATE "-D_UNTRUSTED_=1")
 
 ################################################################################
-# Trusted Common Library
+# Trusted Verify-Ias-Report Library
 ################################################################################
 
 if(NOT UNTRUSTED_ONLY)
-	SET(TRUSTED_LIB_NAME tavalon-common)
+	SET(TRUSTED_LIB_NAME tavalon-verify-ias-report)
 	PROJECT(${TRUSTED_LIB_NAME} CXX)
 
-	ADD_LIBRARY(${TRUSTED_LIB_NAME} STATIC ${PROJECT_HEADERS} ${PROJECT_SOURCES})
+	ADD_LIBRARY(${TRUSTED_LIB_NAME} STATIC ${PROJECT_HEADERS} ${PROJECT_GENERATED_IAS_SOURCES} ${PROJECT_SOURCES})
 
 	TARGET_INCLUDE_DIRECTORIES(${TRUSTED_LIB_NAME} PRIVATE ${COMMON_PRIVATE_INCLUDE_DIRS})
 	TARGET_INCLUDE_DIRECTORIES(${TRUSTED_LIB_NAME} PUBLIC ${SGX_SDK}/include)
@@ -68,18 +77,3 @@ if(NOT UNTRUSTED_ONLY)
 	TARGET_COMPILE_OPTIONS(${TRUSTED_LIB_NAME} PRIVATE -nostdinc++)
 	TARGET_COMPILE_OPTIONS(${TRUSTED_LIB_NAME} PRIVATE -fno-builtin-printf)
 endif()
-
-
-################################################################################
-# Other libraries in common
-################################################################################
-
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
-link_directories(${CMAKE_BINARY_DIR})
-
-ADD_SUBDIRECTORY(packages/base64)
-ADD_SUBDIRECTORY(packages/parson)
-ADD_SUBDIRECTORY(crypto)
-ADD_SUBDIRECTORY(verify_ias_report)

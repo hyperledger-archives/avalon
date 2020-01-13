@@ -18,7 +18,6 @@
 %{
 #include "types.h"
 #include "error.h"
-#include "sgx_quote.h"
 #include "ias_attestation_util.h"
 %}
 

@@ -27,6 +27,7 @@
 #include <sgx_tcrypto.h>
 #include <sgx_trts.h>
 #include <sgx_utils.h>  // sgx_get_key, sgx_create_report
+#include <sgx_quote.h>
 
 #include "crypto.h"
 #include "error.h"

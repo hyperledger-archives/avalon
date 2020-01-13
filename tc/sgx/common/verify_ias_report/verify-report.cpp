@@ -24,39 +24,6 @@
 #include "crypto_utils.h"
 #include "ias-certificates.h"
 
-void get_quote_from_report(const uint8_t* report, const int report_len, sgx_quote_t* quote)
-{
-    // Move report into \0 terminated buffer such that we can work
-    // with str* functions.
-    int buf_len = report_len + 1;
-    char buf[buf_len];
-
-    memcpy_s(buf, buf_len, report, report_len);
-    buf[report_len] = '\0';
-
-    const int json_string_max_len = 64;
-    const char json_string[json_string_max_len] = "\"isvEnclaveQuoteBody\":\"";
-    char* p_begin = strstr(buf, json_string);
-    assert(p_begin != NULL);
-    p_begin += strnlen(json_string, json_string_max_len);
-    const char* p_end = strchr(p_begin, '"');
-    assert(p_end != NULL);
-
-    const int quote_base64_len = p_end - p_begin;
-    uint8_t* quote_bin = (uint8_t*)malloc(quote_base64_len);
-    uint32_t quote_bin_len = quote_base64_len;
-
-    int ret = tcf::crypto::decode_base64_block(quote_bin,
-                  (unsigned char*)p_begin, quote_base64_len);
-    assert(ret != -1);
-    quote_bin_len = ret;
-
-    assert(quote_bin_len <= sizeof(sgx_quote_t));
-    memset(quote, 0, sizeof(sgx_quote_t));
-    memcpy_s(quote, sizeof(sgx_quote_t), quote_bin, quote_bin_len);
-    free(quote_bin);
-}
-
 bool verify_ias_report_signature(
     const char* ias_attestation_signing_cert_pem,
     const char* ias_report,
