@@ -42,3 +42,26 @@ services:
         source scripts/tcs_startup.sh -y \
         && tail -f /dev/null \""
     stop_signal: SIGKILL
+    depends_on:
+      - avalon-lmdb
+
+  avalon-lmdb:
+    container_name: avalon-lmdb
+    image: avalon-lmdb-dev
+    build:
+      context: .
+      dockerfile: ./examples/shared_kv_storage/Dockerfile
+      args:
+        - http_proxy
+        - https_proxy
+        - no_proxy
+    expose:
+      # Port is where lmdb server will listen for http request.
+      # Port should be same as in bind parameter or lmdb_config.toml
+      - 9090
+    command: |
+      bash -c "
+        kv_storage --bind http://avalon-lmdb:9090
+        tail -f /dev/null
+      "
+
