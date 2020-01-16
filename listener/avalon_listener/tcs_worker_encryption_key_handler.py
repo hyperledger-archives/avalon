@@ -18,6 +18,8 @@ import crypto_utils.crypto.crypto as crypto
 from error_code.error_status import WorkerError
 
 from jsonrpc.exceptions import JSONRPCDispatchException
+from connectors.common.db_helper.worker_encryption_key_lmdb_helper \
+    import WorkerEncryptionKeyLmdbHelper
 
 logger = logging.getLogger(__name__)
 # No of bytes of encryptionKeyNonce to encrypt data
@@ -48,7 +50,7 @@ class WorkerEncryptionKeyHandler:
             - kv_helper is a object of lmdb database
         """
 
-        self.kv_helper = kv_helper
+        self.db_helper = WorkerEncryptionKeyLmdbHelper(kv_helper)
 
 # ---------------------------------------------------------------------------------------------
     def EncryptionKeySet(self, **params):
@@ -73,7 +75,7 @@ class WorkerEncryptionKeyHandler:
         """
 
         worker_id = str(params['workerId'])
-        value = self.kv_helper.get("workers", worker_id)
+        value = self.db_helper.get_worker_with_id(worker_id)
 
         if value is None:
             raise JSONRPCDispatchException(
