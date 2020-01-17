@@ -29,7 +29,7 @@ Follow the instructions below to execute a Docker-based build and execution.
 1. Install Docker Engine and Docker Compose, if not already installed.
    See [PREREQUISITES](PREREQUISITES.md#docker) for instructions
 2. Build and run the Docker image from the top-level directory of your
-   `trusted-compute-framework` source repository.
+   `avalon` source repository.
 
    **Intel SGX Simulator mode (for hosts without Intel SGX)**:
    1. Run `sudo docker-compose up --build`
@@ -72,12 +72,12 @@ The steps below will set up a Python virtual environment to run Avalon.
 
 2. Download the Avalon source repository if you have not already done this:
    ```bash
-   git clone https://github.com/hyperledger-labs/trusted-compute-framework
-   cd trusted-compute-framework
+   git clone https://github.com/hyperledger/avalon 
+   cd avalon
    ```
 
 3. Set `TCF_HOME` to the top level directory of your
-   `trusted-compute-framework` source repository.
+   `avalon` source repository.
    You will need these environment variables set in every shell session
    where you interact with Avalon.
    Append this line (with `pwd` expanded) to your login shell script
@@ -90,10 +90,33 @@ The steps below will set up a Python virtual environment to run Avalon.
 4. If you are using Intel SGX hardware, check that `SGX_MODE=HW` before
    building the code.
    By default `SGX_MODE=SIM` indicating use the Intel SGX simulator.
+   if you are not using Intel SGX hardware, go to the next step.
 
-   If `SGX_MODE=HW`, also check that `TCF_ENCLAVE_CODE_SIGN_PEM` is set.
+   Check that `TCF_ENCLAVE_CODE_SIGN_PEM` is set.
    Refer to the [PREREQUISITES document](PREREQUISITES.md)
-   for more details on these variables
+   for more details on these variables.
+
+   You will also need to obtain an Intel IAS subscription key and SPID
+   from the portal
+   https://api.portal.trustedservices.intel.com/
+   Replace the SPID and IAS Subscription key values in file
+   `$TCF_HOME/config/tcs_config.toml` with the actual hexadecimal values
+   (the IAS key may be either your Primary key or Secondary key):
+
+   ```bash
+   spid = '<spid obtained from portal>'
+   ias_api_key = '<ias subscription key obtained from portal>'
+   ```
+
+   In the same file, if you are behind a corporate proxy,
+   uncomment and update the https_proxy line:
+
+   ```bash
+   #https_proxy = "http://your-proxy:your-port/"
+   ```
+   If you are not behind a corporate proxy (the usual case),
+   then leave this line commented out.
+
 
 5. Create Python virtual environment, Build and Install Avalon
    components into it:

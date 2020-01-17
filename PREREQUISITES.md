@@ -80,10 +80,11 @@ On a minimal Ubuntu system, Hyperledger Avalon requires the following packages.
 Other distributions will require similar packages.
 ```bash
 sudo apt-get update
-sudo apt-get install -y cmake swig pkg-config python3-dev python3-venv python \
+sudo apt-get install -y cmake swig pkg-config python3-dev python \
      software-properties-common virtualenv curl xxd git unzip dh-autoreconf \
      ocaml ocamlbuild liblmdb-dev protobuf-compiler python3-pip python3-toml \
      python3-requests python3-colorlog python3-twisted
+sudo apt-get install -y python3-venv
 ```
 
 Also, install the following pip packages
@@ -242,27 +243,6 @@ If installation of the Intel SGX driver fails due to syntax errors,
 you may need to install a newer version of a non-DCAP Intel SGX driver
 for your version of Linux. See
 https://01.org/intel-software-guard-extensions/downloads
-
-You will need to obtain an Intel IAS subscription key and SPID from the portal
-https://api.portal.trustedservices.intel.com/
-
-Replace the SPID and IAS Subscription key values in file
-`$TCF_HOME/config/tcs_config.toml` with the actual hexadecimal values
-(the IAS key may be either your Primary key or Secondary key):
-
-```bash
-spid = '<spid obtained from portal>'
-ias_api_key = '<ias subscription key obtained from portal>'
-```
-
-In the same file, if you are behind a corporate proxy,
-uncomment and update the https_proxy line:
-
-```bash
-#https_proxy = "http://your-proxy:your-port/"
-```
-If you are not behind a corporate proxy (the usual case),
-then leave this line commented out.
 
 **The following steps apply only to standalone builds.**
 
@@ -470,4 +450,7 @@ problems.
 - If you are not running in a corporate proxy environment (and not connected
   directly to Internet), comment out the `https_proxy` line in
   `config/tcs_config.toml`
+
+- If you reinstall the Intel SGX SDK and you modified `/etc/aesmd.conf`
+  then save and restore the file before installing the SDK.
 
