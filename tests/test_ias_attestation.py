@@ -25,7 +25,6 @@ import secrets
 
 import config.config as pconfig
 import utility.logger as plogger
-import utility.utility as utility
 from utility.tcf_types import WorkerType
 import worker.worker_details as worker
 from work_order.work_order_params import WorkOrderParams

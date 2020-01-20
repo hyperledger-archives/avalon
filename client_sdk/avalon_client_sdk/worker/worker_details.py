@@ -19,8 +19,7 @@ Functions to perform worker related functions based on Spec 1.0 compatibility.
 
 import logging
 import json
-import utility.utility as utility
-import utility.file_utils as futils
+import crypto_utils.crypto_utility as crypto_utility
 import config.config as pconfig
 
 logger = logging.getLogger(__name__)
@@ -90,7 +89,7 @@ class SGXWorkerDetails(WorkerDetails):
             self.proof_data = json.loads(
                 worker_data['workerTypeData']['proofData'])
 
-        self.worker_id = utility.strip_begin_end_key(
+        self.worker_id = crypto_utility.strip_begin_end_public_key(
             worker_data['workerTypeData']['verificationKey']) \
             .encode("UTF-8").hex()
         ''' worker_id - newline, BEGIN PUB KEY and END PUB KEY are removed

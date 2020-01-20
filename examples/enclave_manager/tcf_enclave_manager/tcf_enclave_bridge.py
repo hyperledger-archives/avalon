@@ -19,7 +19,7 @@ import time
 from ssl import SSLError
 from requests.exceptions import Timeout
 from requests.exceptions import HTTPError
-import utility.ias_client as ias_client
+import tcf_enclave_manager.ias_client as ias_client
 import tcf_enclave_manager.tcf_enclave as enclave
 
 import logging

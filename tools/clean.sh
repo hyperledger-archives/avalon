@@ -34,7 +34,7 @@ echo "******** DELETE LMDB FILES **************"
 rm -f $SRCDIR/config/Kv_Shared*
 
 # --------------- EXAMPLES COMMON ---------------
-cd $SRCDIR/examples/common/python
+cd $SRCDIR/common/python
 make clean
 
 # --------------- EXAMPLES ENCLAVE MANAGER ---------------

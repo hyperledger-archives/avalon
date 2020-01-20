@@ -15,9 +15,9 @@
 import json
 import logging
 
-import crypto.crypto as crypto
-import utility.utility as utility
-import utility.signature as signature
+import crypto_utils.crypto.crypto as crypto
+import crypto_utils.crypto_utility as crypto_utility
+import crypto_utils.signature as signature
 
 logger = logging.getLogger(__name__)
 
@@ -47,7 +47,7 @@ class WorkOrderParams():
         if data_encryption_algorithm:
             self.set_data_encryption_algorithm(data_encryption_algorithm)
 
-        encrypted_session_key = utility.generate_encrypted_key(
+        encrypted_session_key = crypto_utility.generate_encrypted_key(
             session_key, worker_encryption_key)
         self.set_encrypted_session_key(
             crypto.byte_array_to_hex(encrypted_session_key)
@@ -128,7 +128,7 @@ class WorkOrderParams():
         concat_hash = hash_1 + hash_2 + hash_3
         concat_hash = bytes(concat_hash, "UTF-8")
         self.final_hash = crypto.compute_message_hash(concat_hash)
-        encrypted_request_hash = utility.encrypt_data(
+        encrypted_request_hash = crypto_utility.encrypt_data(
             self.final_hash, self.session_key, self.session_iv)
         self.params_obj["encryptedRequestHash"] = crypto.byte_array_to_hex(
             encrypted_request_hash)
@@ -237,7 +237,7 @@ class WorkOrderParams():
         if encrypted_data_encryption_key is None or \
                 encrypted_data_encryption_key == "" or \
                 encrypted_data_encryption_key == "null":
-            enc_data = utility.encrypt_data(
+            enc_data = crypto_utility.encrypt_data(
                 data, self.session_key, self.session_iv
             )
             return crypto.byte_array_to_base64(enc_data)
@@ -247,7 +247,7 @@ class WorkOrderParams():
             enc_data = crypto.byte_array_to_base64(data)
             return enc_data
         else:
-            enc_data = utility.encrypt_data(
+            enc_data = crypto_utility.encrypt_data(
                             data, encrypted_data_encryption_key, data_iv)
             return crypto.byte_array_to_base64(enc_data)
 

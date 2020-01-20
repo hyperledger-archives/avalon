@@ -23,14 +23,14 @@ import secrets
 
 import config.config as pconfig
 import utility.logger as plogger
-import utility.utility as utility
+import crypto_utils.crypto_utility as utility
 from avalon_client_sdk.utility.tcf_types import WorkerType
 import avalon_client_sdk.worker.worker_details as worker_details
 from avalon_client_sdk.work_order.work_order_params import WorkOrderParams
 from avalon_client_sdk.direct.avalon_direct_client \
     import AvalonDirectClient
 from error_code.error_status import WorkOrderStatus, ReceiptCreateStatus
-import utility.signature as signature
+import crypto_utils.signature as signature
 from error_code.error_status import SignatureStatus
 from avalon_client_sdk.work_order_receipt.work_order_receipt_request \
     import WorkOrderReceiptRequest

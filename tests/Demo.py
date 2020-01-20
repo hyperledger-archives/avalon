@@ -21,10 +21,10 @@ import json
 import logging
 
 from avalon_client_sdk.http_client.http_jrpc_client import HttpJrpcClient
-import crypto.crypto as crypto
-import utility.signature as signature
+import crypto_utils.crypto.crypto as crypto
+import crypto_utils.signature as signature
 import avalon_client_sdk.worker.worker_details as worker
-import utility.utility as enclave_helper
+import crypto_utils.crypto_utility as enclave_helper
 import utility.file_utils as futils
 from error_code.error_status import SignatureStatus, WorkOrderStatus
 

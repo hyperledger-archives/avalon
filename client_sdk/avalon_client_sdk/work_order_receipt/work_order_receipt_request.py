@@ -15,9 +15,9 @@
 import json
 import random
 
-import crypto.crypto as crypto
-import utility.signature as signature
-import utility.utility as utility
+import crypto_utils.crypto.crypto as crypto
+import crypto_utils.signature as signature
+import crypto_utils.crypto_utility as crypto_utility
 from error_code.error_status import ReceiptCreateStatus as ReceiptCreateStatus
 from error_code.error_status import WorkOrderStatus
 
@@ -112,7 +112,7 @@ class WorkOrderReceiptRequest():
             wo_resp_hash_str = crypto.byte_array_to_hex(wo_resp_hash)
             data = wo_resp_hash_str
         public_key = signing_key.GetPublicKey().Serialize()
-        updater_id = utility.strip_begin_end_key(public_key)
+        updater_id = crypto_utility.strip_begin_end_public_key(public_key)
 
         wo_receipt_update = {
             "workOrderId": work_order_id,

@@ -23,7 +23,7 @@ import random
 import logging
 
 import tcf_enclave_bridge as tcf_enclave
-import utility.keys as keys
+import crypto_utils.keys as keys
 
 logger = logging.getLogger(__name__)
 

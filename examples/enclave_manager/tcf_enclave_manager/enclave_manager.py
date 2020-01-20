@@ -24,8 +24,8 @@ import random
 
 import sgx_work_order_request as work_order_request
 import tcf_enclave_helper as enclave_helper
-import utility.signature as signature
-import utility.utility as utils
+import crypto_utils.signature as signature
+import crypto_utils.crypto_utility as crypto_utils
 from database import connector
 from error_code.error_status import ReceiptCreateStatus, WorkOrderStatus
 from avalon_client_sdk.utility.tcf_types import WorkerStatus, WorkerType
@@ -69,7 +69,7 @@ class EnclaveManager:
 
         # Key pair for work order receipt signing
         # This is temporary approach
-        self.private_key = utils.generate_signing_keys()
+        self.private_key = crypto_utils.generate_signing_keys()
         self.public_key = self.private_key.GetPublicKey().Serialize()
 
     def manager_on_boot(self, kv_helper):
@@ -91,7 +91,7 @@ class EnclaveManager:
 
         worker_info = create_json_worker(self, self.config)
         logger.info("Adding enclave workers to workers table")
-        worker_id = utils.strip_begin_end_key(self.enclave_id) \
+        worker_id = crypto_utils.strip_begin_end_public_key(self.enclave_id) \
             .encode("UTF-8").hex()
         kv_helper.set("workers", worker_id, worker_info)
 

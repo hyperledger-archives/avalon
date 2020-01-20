@@ -15,7 +15,7 @@ import os
 import json
 import logging
 
-import crypto.crypto as crypto
+import crypto_utils.crypto.crypto as crypto
 
 logger = logging.getLogger(__name__)
 

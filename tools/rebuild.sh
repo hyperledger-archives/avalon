@@ -165,7 +165,7 @@ try cmake ..
 try make "-j$NUM_CORES"
 
 yell --------------- EXAMPLES COMMON PYTHON ---------------
-cd $TCF_HOME/examples/common/python
+cd $TCF_HOME/common/python
 try make "-j$NUM_CORES"
 try make install
 

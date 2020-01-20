@@ -16,10 +16,10 @@ import json
 import logging
 import base64
 from utility.hex_utils import is_valid_hex_str
-import crypto.crypto as crypto
+import crypto_utils.crypto.crypto as crypto
 from error_code.error_status import ReceiptCreateStatus, SignatureStatus,\
     JRPCErrorCodes
-import utility.signature as signature
+import crypto_utils.signature as signature
 from jsonrpc.exceptions import JSONRPCDispatchException
 
 logger = logging.getLogger(__name__)
