@@ -20,9 +20,8 @@ Functions based on Spec 1.0 compatibility.
 
 import json
 import logging
-import crypto.crypto as crypto
-import utility.file_utils as futils
-import utility.utility as utility
+import crypto_utils.crypto.crypto as crypto
+import crypto_utils.crypto_utility as crypto_utility
 from utility.hex_utils import is_valid_hex_str, byte_array_to_hex_str
 from error_code.error_status import SignatureStatus
 import config.config as pconfig
@@ -112,7 +111,7 @@ class ClientSignature(object):
             e_key = item['encryptedDataEncryptionKey'].encode('UTF-8')
 
             if (not e_key) or (e_key == "null".encode('UTF-8')):
-                enc_data = utility.encrypt_data(data, session_key, session_iv)
+                enc_data = crypto_utility.encrypt_data(data, session_key, session_iv)
                 input_json_params['inData'][i]['data'] = \
                     crypto.byte_array_to_base64(enc_data)
                 logger.debug(
@@ -124,7 +123,7 @@ class ClientSignature(object):
                 input_json_params['inData'][i]['data'] = \
                     crypto.byte_array_to_base64(data)
             else:
-                enc_data = utility.encrypt_data(data, data_key, data_iv)
+                enc_data = crypto_utility.encrypt_data(data, data_key, data_iv)
                 input_json_params['inData'][i]['data'] = \
                     crypto.byte_array_to_base64(enc_data)
                 logger.debug("encrypted indata - %s",
@@ -293,7 +292,7 @@ class ClientSignature(object):
         concat_hash = bytes(concat_string, 'UTF-8')
         final_hash = crypto.compute_message_hash(concat_hash)
 
-        encrypted_request_hash = utility.encrypt_data(
+        encrypted_request_hash = crypto_utility.encrypt_data(
             final_hash, session_key, session_iv)
         encrypted_request_hash_str = \
             byte_array_to_hex_str(encrypted_request_hash)

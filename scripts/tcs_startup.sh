@@ -15,7 +15,7 @@
 # limitations under the License.
 
 enclave_manager="${TCF_HOME}/examples/enclave_manager/tcf_enclave_manager/enclave_manager.py"
-listener="${TCF_HOME}/examples/common/python/connectors/direct/tcs_listener/tcs_listener.py"
+listener="${TCF_HOME}/common/python/connectors/direct/tcs_listener/tcs_listener.py"
 version="$(cat ${TCF_HOME}/VERSION)"
 
 # Trap handler

@@ -14,7 +14,7 @@
 
 import json
 import logging
-import crypto.crypto as crypto
+import crypto_utils.crypto.crypto as crypto
 from error_code.error_status import WorkerError
 
 from jsonrpc.exceptions import JSONRPCDispatchException

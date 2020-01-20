@@ -33,7 +33,7 @@ import tkinter.font as font
 from PIL import ImageTk, Image
 
 # Avalon imports
-import utility.utility as utility
+import crypto_utils.crypto_utility as utility
 import avalon_client_sdk.worker.worker_details as worker
 from avalon_client_sdk.utility.tcf_types import WorkerType
 from avalon_client_sdk.work_order.work_order_params import WorkOrderParams
@@ -41,9 +41,9 @@ from avalon_client_sdk.avalon_direct_client \
     import AvalonDirectClient
 import config.config as pconfig
 import utility.logger as plogger
-import crypto.crypto as crypto
+import crypto_utils.crypto.crypto as crypto
 from error_code.error_status import WorkOrderStatus, ReceiptCreateStatus
-import utility.signature as signature
+import crypto_utils.signature as signature
 from error_code.error_status import SignatureStatus
 from avalon_client_sdk.work_order_receipt.work_order_receipt_request \
      import WorkOrderReceiptRequest

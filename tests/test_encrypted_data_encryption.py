@@ -23,7 +23,7 @@ import base64
 import config.config as pconfig
 import utility.logger as plogger
 from avalon_client_sdk.http_client.http_jrpc_client import HttpJrpcClient
-import utility.utility as utility
+import crypto_utils.crypto_utility as utility
 import worker.worker_details as worker
 import json_rpc_request.json_rpc_request as jrpc_request
 from connectors.direct.direct_adaptor_factory_wrapper \

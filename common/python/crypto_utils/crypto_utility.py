@@ -1,4 +1,4 @@
-# Copyright 2018 Intel Corporation
+# Copyright 2020 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,50 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""
-utility.py -- general helper function
-"""
 import base64
-import os
-import utility.file_utils as putils
 import utility.hex_utils as hex_utils
-import crypto.crypto as crypto
-import config.config as pconfig
+import crypto_utils.crypto.crypto as crypto
 import logging
 
 logger = logging.getLogger(__name__)
-
-TCFHOME = os.environ.get("TCF_HOME", "../../")
-# No of bytes of encrypted session key to encrypt data
-NO_OF_BYTES = 16
-
-
-def create_error_response(code, jrpc_id, message):
-    """
-    Function to create error response
-    Parameters:
-        - code: error code enum which corresponds to error response
-        - jrpc_id: JRPC id of the error response
-        - message: error message which corresponds to error response
-    """
-    error_response = {}
-    error_response["jsonrpc"] = "2.0"
-    error_response["id"] = jrpc_id
-    error_response["error"] = {}
-    error_response["error"]["code"] = code
-    error_response["error"]["message"] = message
-    return error_response
-
-
-# -----------------------------------------------------------------------------
-def strip_begin_end_key(key):
-    """
-    Strips off newline chars, BEGIN PUBLIC KEY and END PUBLIC KEY.
-    """
-    return key.replace("\n", "")\
-        .replace("-----BEGIN PUBLIC KEY-----", "").replace(
-        "-----END PUBLIC KEY-----", "")
-
 
 # -----------------------------------------------------------------------------
 def generate_signing_keys():
@@ -67,7 +29,6 @@ def generate_signing_keys():
     signing_key.Generate()
     return signing_key
 
-
 # -----------------------------------------------------------------
 def generate_iv():
     """
@@ -75,7 +36,6 @@ def generate_iv():
     """
 
     return crypto.SKENC_GenerateIV()
-
 
 # -----------------------------------------------------------------
 def generate_encrypted_key(key, encryption_key):
@@ -89,26 +49,12 @@ def generate_encrypted_key(key, encryption_key):
     pub_enc_key = crypto.PKENC_PublicKey(encryption_key)
     return pub_enc_key.EncryptMessage(key)
 
-
 # -----------------------------------------------------------------
 def generate_key():
     """
     Function to generate symmetric key
     """
     return crypto.SKENC_GenerateKey()
-
-
-# -----------------------------------------------------------------
-def list_difference(list_1, list_2):
-    """
-    Function to find the difference between two lists.
-    The result is list1 - list2.
-    Parameters:
-    - list_1 / list_2 any list of integers.
-    """
-    list_dif = [i for i in list_1 + list_2 if i not in list_2]
-    return list_dif
-
 
 # -----------------------------------------------------------------
 def compute_data_hash(data):
@@ -117,7 +63,6 @@ def compute_data_hash(data):
     '''
     data_hash = crypto.compute_message_hash(data.encode("UTF-8"))
     return data_hash
-
 
 # -----------------------------------------------------------------
 def encrypt_data(data, encryption_key, iv=None):
@@ -138,7 +83,6 @@ def encrypt_data(data, encryption_key, iv=None):
     else:
         encrypted_data = crypto.SKENC_EncryptMessage(encryption_key, data)
     return encrypted_data
-
 
 # -----------------------------------------------------------------
 def decrypt_data(encryption_key, data, iv=None):
@@ -167,7 +111,6 @@ def decrypt_data(encryption_key, data, iv=None):
     result = crypto.byte_array_to_string(decrypt_result)
     logger.info("Decryption result at client - %s", result)
     return result
-
 
 # -----------------------------------------------------------------------------
 def decrypted_response(input_json, session_key, session_iv, data_key=None,
@@ -218,7 +161,6 @@ def decrypted_response(input_json, session_key, session_iv, data_key=None,
         i = i + 1
     return input_json_params['outData']
 
-
 # -----------------------------------------------------------------------------
 def verify_data_hash(msg, data_hash):
     '''
@@ -238,17 +180,11 @@ def verify_data_hash(msg, data_hash):
         verify_success = False
     return verify_success
 
-
 # -----------------------------------------------------------------------------
-def human_read_to_byte(size):
-    size_name = ("B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB")
-    size = size.split()  # divide '1 GB' into ['1', 'GB']
-    if len(size) != 2 or int(size[0]) <= 0:
-        raise ValueError("Invalid size")
-    num, unit = int(size[0]), size[1].upper()
-    try:
-        idx = size_name.index(unit)
-    except ValueError:
-        raise ValueError("Invalid size")
-    factor = 1024 ** idx
-    return num * factor
+def strip_begin_end_public_key(key):
+    """
+    Strips off newline chars, BEGIN PUBLIC KEY and END PUBLIC KEY.
+    """
+    return key.replace("\n", "")\
+        .replace("-----BEGIN PUBLIC KEY-----", "").replace(
+        "-----END PUBLIC KEY-----", "")

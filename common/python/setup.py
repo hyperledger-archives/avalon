@@ -27,7 +27,7 @@ if sys.version_info[0] < 3:
     sys.exit(1)
 
 
-tcf_root_dir = os.environ.get('TCF_HOME', '../../..')
+tcf_root_dir = os.environ.get('TCF_HOME', '../..')
 
 version = subprocess.check_output(
     os.path.join(tcf_root_dir, 'bin/get_version')).decode('ascii').strip()
@@ -81,11 +81,11 @@ libraries = [
 libraries = libraries + openssl_libs
 
 crypto_modulefiles = [
-    "crypto/crypto.i"
+    "crypto_utils/crypto/crypto.i"
 ]
 
 crypto_module = Extension(
-    'crypto._crypto',
+    'crypto_utils.crypto._crypto',
     crypto_modulefiles,
     swig_opts=['-c++'] + openssl_cflags +
     ['-I%s' % i for i in crypto_include_dirs],
@@ -95,11 +95,11 @@ crypto_module = Extension(
     libraries=libraries)
 
 verify_report_modulefiles = [
-    "verify_report/verify_report.i"
+    "crypto_utils/verify_report/verify_report.i"
 ]
 
 verify_report_module = Extension(
-    'verify_report._verify_report',
+    'crypto_utils.verify_report._verify_report',
     verify_report_modulefiles,
     swig_opts=['-c++'] + ['-I%s' % i for i in verify_report_include_dirs],
     extra_compile_args=compile_args,
@@ -109,11 +109,11 @@ verify_report_module = Extension(
 
 # -----------------------------------------------------------------
 setup(
-    name='tcf_examples_common',
+    name='avalon_common',
     version=version,
     description='Common library',
-    author='Intel',
-    url='http://www.intel.com',
+    author='Hyperledger Avalon',
+    url='https://github.com/hyperledger/avalon',
     packages=find_packages(),
     install_requires=[],
     ext_modules=[crypto_module, verify_report_module],

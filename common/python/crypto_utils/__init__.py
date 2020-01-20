@@ -1,6 +1,4 @@
-#! /bin/bash
-
-# Copyright 2019 Intel Corporation
+# Copyright 2020 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,13 +11,3 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-listener="${TCF_HOME}/common/python/connectors/direct/tcs_listener/tcs_listener.py"
-# Read Listener port from config file
-listener_port=`grep listener_port ${TCF_HOME}/config/tcs_config.toml | awk {'print $3'}`
-
-# config in env variables takes higher priority
-port=${TCF_TCS_LISTENER_PORT:-${listener_port}}
-
-echo "starting TCS listener ..."
-python3 $listener --bind_uri ${port} --lmdb_url http://avalon-lmdb:9090
