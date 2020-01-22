@@ -118,7 +118,7 @@ The steps below will set up a Python virtual environment to run Avalon.
    then leave this line commented out.
 
 
-5. Create Python virtual environment, Build and Install Avalon
+5. Create a Python virtual environment, and build and install Avalon
    components into it:
    ```bash
    cd $TCF_HOME/tools/build
@@ -128,7 +128,29 @@ The steps below will set up a Python virtual environment to run Avalon.
    make
    ```
 
-6. Activate the new Python virtual environment for the current shell session.
+6. Build the Client SDK Python module:
+
+   ```bash
+   cd $TCF_HOME/client_sdk
+   python3 setup.py bdist_wheel
+   pip3 install dist/*.whl
+   ```
+
+7. Build the LMDB listener and shared key/value storage modules:
+
+ 
+   ```bash
+   cd $TCF_HOME/examples/shared_kv_storage/db_store/packages
+   mkdir -p build
+   cd build
+   cmake ..
+   make
+   cd $TCF_HOME/examples/shared_kv_storage
+   make
+   make install
+   ```
+
+8. Activate the new Python virtual environment for the current shell session.
    You will need to do this in each new shell session (in addition to
    exporting environment variables).
    ```bash
