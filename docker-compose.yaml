@@ -36,7 +36,7 @@ services:
     working_dir: "/project/TrustedComputeFramework"
     command: |
       bash -c "
-        source scripts/tcs_startup.sh -y
+        source scripts/tcs_startup.sh -y -l http://avalon-lmdb:9090
         tail -f /dev/null
       "
     stop_signal: SIGKILL
