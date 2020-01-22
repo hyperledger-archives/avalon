@@ -25,7 +25,7 @@ services:
         - no_proxy
     working_dir: "/project/TrustedComputeFramework/"
     entrypoint: "bash -c \"\
-        source scripts/tcs_startup.sh -y \
+        source scripts/tcs_startup.sh -y -l http://avalon-lmdb:9090 \
         && sleep 5 \
         && source tools/run_tests.sh \""
     depends_on:
