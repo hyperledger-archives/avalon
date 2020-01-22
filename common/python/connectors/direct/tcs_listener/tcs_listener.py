@@ -69,11 +69,13 @@ class TCSListener(resource.Resource):
             logger.error(f"failed to open db: {err}")
             sys.exit(-1)
 
-        self.worker_registry_handler = TCSWorkerRegistryHandler(self.kv_helper)
+        lookup_page_size = config["Listener"]["lookup_page_size"]
+        self.worker_registry_handler = TCSWorkerRegistryHandler(
+            self.kv_helper, lookup_page_size)
         self.workorder_handler = TCSWorkOrderHandler(
             self.kv_helper, config["Listener"]["max_work_order_count"])
         self.workorder_receipt_handler = TCSWorkOrderReceiptHandler(
-            self.kv_helper)
+            self.kv_helper, lookup_page_size)
         self.worker_encryption_key_handler = WorkerEncryptionKeyHandler(
             self.kv_helper)
 

@@ -44,7 +44,7 @@ class TCSWorkerRegistryHandler:
     """
 # ------------------------------------------------------------------------------------------------
 
-    def __init__(self, kv_helper):
+    def __init__(self, kv_helper, lookup_page_size):
         """
         Function to perform init activity
         Parameters:
@@ -52,6 +52,7 @@ class TCSWorkerRegistryHandler:
         """
 
         self.kv_helper = kv_helper
+        self.lookup_page_size = lookup_page_size
         self.worker_pool = []
         self.__worker_registry_handler_on_boot()
 # ------------------------------------------------------------------------------------------------
@@ -182,12 +183,14 @@ class TCSWorkerRegistryHandler:
         total_count = 0
         ids = []
         lookupTag = ""
+        page_overflow = False
 
         for worker_id in self.worker_pool:
             if is_lookup_next:
                 # loop until found the expected lookUpTag
                 is_lookup_next = (worker_id != params["lookupTag"])
-                continue
+                if is_lookup_next:
+                    continue
 
             matched = True
             value = self.kv_helper.get("workers", worker_id)
@@ -205,10 +208,20 @@ class TCSWorkerRegistryHandler:
                         break
 
             if matched:
+                # If result size overflows page size, stop here
+                if total_count == self.lookup_page_size:
+                    lookupTag = worker_id
+                    page_overflow = True
+                    break
                 total_count = total_count + 1
                 ids.append(worker_id)
                 lookupTag = worker_id
 
+        # If page has not overflowed(entries <= page size),
+        # it means there are no further entries.
+        # So, return a 0 in lookupTag to indicate this.
+        if not page_overflow:
+            lookupTag = 0
         result = {
             "totalCount": total_count,
             "lookupTag": lookupTag,

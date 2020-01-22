@@ -32,6 +32,7 @@ sleep_interval = "10"
 [Listener]
 listener_port = 1947
 max_work_order_count = 10
+lookup_page_size = 20
 
 # -------------------------------------------------------
 # EnclaveModule -- configuration of the Intel SGX Enclave

@@ -35,7 +35,7 @@ class TCSWorkOrderReceiptHandler:
     """
 # -----------------------------------------------------------------------------
 
-    def __init__(self, kv_helper):
+    def __init__(self, kv_helper, lookup_page_size):
         """
         Function to perform init activity
         Parameters:
@@ -43,6 +43,7 @@ class TCSWorkOrderReceiptHandler:
         """
 
         self.kv_helper = kv_helper
+        self.lookup_page_size = lookup_page_size
         self.__workorder_receipt_on_boot()
         # Special index 0xFFFFFFFF value to fetch last update to receipt
         self.LAST_RECEIPT_INDEX = 1 << 32
@@ -300,11 +301,13 @@ class TCSWorkOrderReceiptHandler:
         total_count = 0
         ids = []
         lookupTag = ""
+        page_overflowed = False
 
         for wo_id in receipt_pool:
             if is_lookup_next:
                 is_lookup_next = (wo_id != params["lastLookUpTag"])
-                continue
+                if is_lookup_next:
+                    continue
 
             value = self.kv_helper.get("wo-receipts", wo_id)
             if not value:
@@ -324,10 +327,20 @@ class TCSWorkOrderReceiptHandler:
                     break
 
             if matched:
+                # If result size overflows page size, stop here
+                if total_count == self.lookup_page_size:
+                    lookupTag = wo_id
+                    page_overflowed = True
+                    break
                 total_count = total_count + 1
                 ids.append(wo_id)
                 lookupTag = wo_id
 
+        # If page has not overflowed(entries <= page size),
+        # it means there are no further entries.
+        # So, return a 0 in lookupTag to indicate this.
+        if not page_overflowed:
+            lookupTag = 0
         result = {
             "totalCount": total_count,
             "lookupTag": lookupTag,

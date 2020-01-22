@@ -21,6 +21,8 @@ organization = "Intel"
 [tcf]
 #Uri for the worker registry
 json_rpc_uri = "http://localhost:1947"
+#Paginate results into lookup_page_size items for registry_lookup() and registry_lookup_next() calls
+lookup_page_size = 20
 
 #Block chain type, it identifies which blockchain to use
 [blockchain]

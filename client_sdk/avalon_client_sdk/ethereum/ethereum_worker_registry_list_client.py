@@ -30,9 +30,11 @@ logging.basicConfig(
 
 class EthereumWorkerRegistryListClientImpl(WorkerRegistryListClient):
     """
-    This class is to read worker registries enttries from Ethereum.
+    This class is to read worker registries entries from Ethereum.
     Implements WorkerRegistryListClient interface
     """
+    lookup_page_size = 20 # Assigning a default size if config absent
+
     def __init__(self, config):
         if self.__validate(config):
             self.__initialize(config)
@@ -144,11 +146,24 @@ class EthereumWorkerRegistryListClientImpl(WorkerRegistryListClient):
                 "direct registry contract instance is not initialized")
 
     def registry_lookup(self, app_type_id=None):
+        return self.__registry_lookup(app_type_id, None, False)
+
+    def registry_lookup_next(self, app_type_id, lookup_tag):
+        return self.__registry_lookup(app_type_id, lookup_tag, True)
+
+    def __registry_lookup(self, app_type_id=None, lookup_tag=None, lookup_next=False):
+        """
+        This function handles both the lookup & lookup_next calls. It looks
+        for the flag, lookup_next, which if enabled, it would discard all
+        entries in the result set until the look_up tag. It paginates results
+        post this and returns it as the next page.
+        """
+
         if (self.__contract_instance is not None):
             if app_type_id is not None:
                 if is_valid_hex_str(binascii.hexlify(app_type_id).decode(
                         "utf8")):
-                    lookupResult = \
+                    lookup_result = \
                         self.__contract_instance.functions.registryLookUp(
                             app_type_id).call()
                 else:
@@ -157,10 +172,38 @@ class EthereumWorkerRegistryListClientImpl(WorkerRegistryListClient):
                     return construct_message(
                         "failed", "Invalid application type id")
             else:
-                lookupResult = \
+                lookup_result = \
                     self.__contract_instance.functions.registryLookUp(b"") \
                     .call()
-            return lookupResult
+            w_count, lookup_string, w_list = lookup_result
+            if lookup_next:
+                residue_list = []
+                for reg in w_list:
+                    # Keep iterating to look for ordId(from where next 
+                    # pages commences) matching lookup_tag. Once a match
+                    # is found, rest of the results are candidate for next
+                    # page(including the match) 
+                    if reg.orgId != lookup_tag:
+                        w_count -= 1
+                        continue
+                    residue_list.append(reg)
+                w_list = residue_list
+
+            # Create a result_list of size lookup_page_size
+            # and update lookup_string expected in next call
+            # to registry_lookup_next
+            result_list = []
+            if w_count > self.lookup_page_size:
+                count = 0;
+                for reg in w_list:
+                    if count == self.lookup_page_size:
+                        lookup_string = reg.orgId
+                        break
+                    result_list.append(reg)
+                    count += 1
+            else:
+                lookup_string = 0
+            return (w_count, lookup_string, result_list)
         else:
             logging.error(
                 "direct registry contract instance is not initialized")
@@ -179,25 +222,6 @@ class EthereumWorkerRegistryListClientImpl(WorkerRegistryListClient):
                     self.__contract_instance.functions.registryRetrieve(
                         org_id).call()
                 return registryDetails
-        else:
-            logging.error(
-                "direct registry contract instance is not initialized")
-            return construct_message(
-                "failed",
-                "direct registry contract instance is not initialized")
-
-    def registry_lookup_next(self, app_type_id, lookup_tag):
-        if (self.__contract_instance is not None):
-            if is_valid_hex_str(binascii.hexlify(app_type_id).decode("utf8")):
-                lookupResult = \
-                    self.__contract_instance.functions.registryLookUpNext(
-                        app_type_id, lookup_tag).call()
-                return lookupResult
-            else:
-                logging.info(
-                    "Invalid application type id {}".format(app_type_id))
-                return construct_message(
-                    "failed", "Invalid application type id")
         else:
             logging.error(
                 "direct registry contract instance is not initialized")
@@ -231,3 +255,6 @@ class EthereumWorkerRegistryListClientImpl(WorkerRegistryListClient):
         self.__contract_instance = self.__eth_client.get_contract_instance(
             contract_file_name, contract_address
         )
+        config_lookup_size = config["tcf"]["lookup_page_size"]
+        if config_lookup_size is not None:
+            self.lookup_page_size = config_lookup_size
