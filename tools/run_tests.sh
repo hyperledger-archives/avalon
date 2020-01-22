@@ -74,10 +74,15 @@ do
     yell "#------------------------------------------------------------------------------------------------"
 done
 
-yell "Start testing echo client ................"
+# TODO: Disabled echo client run with blockchain from CI until we fix the infutra http interface issue
+
+#yell "Start testing echo client with reading registry from blockchain................"
+#yell "#------------------------------------------------------------------------------------------------"
+#try $echo_client_path/echo_client.py -m "Hello world" -rs -dh
+
+yell "Start testing echo client with service uri ................"
 yell "#------------------------------------------------------------------------------------------------"
-# Testing echo client with enabling requester signature and input data hash
-try $echo_client_path/echo_client.py -m "Hello world" -rs -dh
+try $echo_client_path/echo_client.py -m "Hello world" -s "http://localhost:1947" -dh
 
 yell "Start testing generic client for echo workload ................"
 yell "#------------------------------------------------------------------------------------------------"
