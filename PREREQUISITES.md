@@ -86,9 +86,9 @@ sudo apt-get install -y cmake swig pkg-config python3-dev python3-venv python \
      python3-requests python3-colorlog python3-twisted
 ```
 
-Also, install the following pip packages
+Also, install the following pip3 packages:
 ```bash
-sudo pip3 install --upgrade setuptools json-rpc py-solc web3 wheel
+pip3 install --upgrade setuptools json-rpc py-solc web3 wheel
 ```
 
 # <a name="docker"></a>Docker
