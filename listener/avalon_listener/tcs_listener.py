@@ -29,12 +29,16 @@ import sys
 import argparse
 import json
 
+from urllib.parse import urlsplit
 from twisted.web import server, resource, http
 from twisted.internet import reactor
-from tcs_work_order_handler import TCSWorkOrderHandler
-from tcs_worker_registry_handler import TCSWorkerRegistryHandler
-from tcs_workorder_receipt_handler import TCSWorkOrderReceiptHandler
-from tcs_worker_encryption_key_handler import WorkerEncryptionKeyHandler
+from avalon_listener.tcs_work_order_handler import TCSWorkOrderHandler
+from avalon_listener.tcs_worker_registry_handler \
+        import TCSWorkerRegistryHandler
+from avalon_listener.tcs_workorder_receipt_handler \
+        import TCSWorkOrderReceiptHandler
+from avalon_listener.tcs_worker_encryption_key_handler \
+        import WorkerEncryptionKeyHandler
 from database import connector
 from error_code.error_status import WorkOrderStatus
 import utility.jrpc_utility as jrpc_utility
@@ -64,7 +68,8 @@ class TCSListener(resource.Resource):
     # -----------------------------------------------------------------
     def __init__(self, config):
         try:
-            self.kv_helper = connector.open(config['KvStorage']['remote_url'])
+            self.kv_helper = \
+                    connector.open(config['KvStorage']['remote_storage_url'])
         except Exception as err:
             logger.error(f"failed to open db: {err}")
             sys.exit(-1)
@@ -205,13 +210,13 @@ class TCSListener(resource.Resource):
 # -----------------------------------------------------------------
 
 
-def local_main(config, bind_uri):
+def local_main(config, host_name, port):
 
     root = TCSListener(config)
     site = server.Site(root)
-    reactor.listenTCP(int(bind_uri), site)
+    reactor.listenTCP(port, site, interface=host_name)
 
-    logger.info('TCS Listener started on port %s', bind_uri)
+    logger.info('TCS Listener started on port %s', port)
 
     try:
         reactor.run()
@@ -231,9 +236,34 @@ TCFHOME = os.environ.get("TCF_HOME", "../../../../")
 # -----------------------------------------------------------------
 
 
-def parse_command_line(config, args):
+def parse_bind_url(url):
+    """
+    Parse the url and validate against supported format
+    params:
+        url is string
+    returns:
+        returns tuple containing hostname and port,
+        both are of type string
+    """
+    try:
+        parsed_str = urlsplit(url)
+        scheme = parsed_str.scheme
+        host_name = parsed_str.hostname
+        port = parsed_str.port
+        if (port is None or scheme is None or host_name is None) \
+                and scheme != 'http':
+                logger.error("Bind url should be format {} {} {} \
+                    http://<hostname>:<port>".format(scheme, host_name, port))
+                sys.exit(-1)
+    except ValueError as e:
+        logger.error("Wrong url format {}".format(e))
+        logger.error("Bind url should be format \
+                http://<hostname>:<port>")
+        sys.exit(-1)
+    return host_name, port
 
-    bind_uri = None
+
+def parse_command_line(config, args):
 
     parser = argparse.ArgumentParser()
 
@@ -242,7 +272,7 @@ def parse_command_line(config, args):
         help='Name of the log file, __screen__ for standard output', type=str)
     parser.add_argument('--loglevel', help='Logging level', type=str)
     parser.add_argument(
-        '--bind_uri', help='URI to listen for requests ', type=str)
+        '--bind', help='URI to listen for requests ', type=str)
     parser.add_argument(
         '--lmdb_url', help='DB url to connect to LMDB ', type=str)
 
@@ -257,15 +287,40 @@ def parse_command_line(config, args):
         config['Logging']['LogFile'] = options.logfile
     if options.loglevel:
         config['Logging']['LogLevel'] = options.loglevel.upper()
-    if options.bind_uri:
-        bind_uri = options.bind_uri
+    if options.bind:
+        host_name, port = parse_bind_url(options.bind)
+    else:
+        if config.get("Listener") is None or \
+                config["Listener"].get("bind") is None:
+                    logger.warn("quit due to no suitable config for Listener")
+                    sys.exit(-1)
+        host_name, port = parse_bind_url(
+            config["Listener"].get("bind"))
     if options.lmdb_url:
-        config["KvStorage"]["remote_url"] = options.lmdb_url
+        config["KvStorage"]["remote_storage_url"] = options.lmdb_url
+    else:
+        if config.get("KvStorage") is None or \
+                config["KvStorage"].get("remote_storage_url") is None:
+                    logger.warn("quit because remote_storage_url is not \
+                            present in config for Listener")
+                    sys.exit(-1)
 
-    return bind_uri
+    return host_name, port
 
 # -----------------------------------------------------------------
 # -----------------------------------------------------------------
+
+
+def get_config_dir():
+    """
+    Returns the avalon configuration directory based on the
+    TCF_HOME environment variable (if set) or OS defaults.
+    """
+    if 'TCF_HOME' in os.environ:
+        return os.path.join(os.environ['TCF_HOME'], 'listener/')
+    else:
+        logger.warn("quit because TCF_HOME is not defined in your environment")
+        sys.exit(-1)
 
 
 def main(args=None):
@@ -273,8 +328,8 @@ def main(args=None):
     import utility.logger as plogger
 
     # parse out the configuration file first
-    conffiles = ['tcs_config.toml']
-    confpaths = [".", TCFHOME + "/config"]
+    conf_file = ['listener_config.toml']
+    conf_path = [get_config_dir()]
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--config', help='configuration file', nargs='+')
@@ -282,13 +337,13 @@ def main(args=None):
     (options, remainder) = parser.parse_known_args(args)
 
     if options.config:
-        conffiles = options.config
+        conf_file = options.config
 
     if options.config_dir:
-        confpaths = options.config_dir
+        conf_path = options.config_dir
 
     try:
-        config = pconfig.parse_configuration_files(conffiles, confpaths)
+        config = pconfig.parse_configuration_files(conf_file, conf_path)
     except pconfig.ConfigurationException as e:
         logger.error(str(e))
         sys.exit(-1)
@@ -299,8 +354,8 @@ def main(args=None):
     sys.stderr = plogger.stream_to_logger(
         logging.getLogger('STDERR'), logging.WARN)
 
-    bind_uri = parse_command_line(config, remainder)
-    local_main(config, bind_uri)
+    host_name, port = parse_command_line(config, remainder)
+    local_main(config, host_name, port)
 
 
 main()

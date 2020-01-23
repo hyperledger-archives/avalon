@@ -16,43 +16,35 @@
 
 KV_STORAGE="kv_storage"
 ENCLAVE_MANAGER="${TCF_HOME}/examples/enclave_manager/tcf_enclave_manager/enclave_manager.py"
-LISTENER="${TCF_HOME}/common/python/connectors/direct/tcs_listener/tcs_listener.py"
+LISTENER="avalon_listener"
 VERSION="$(cat ${TCF_HOME}/VERSION)"
 # Default values
-COMPONENTS="$ENCLAVE_MANAGER $LISTENER" # #KV_STORAGE added if -s passed
-START_STOP_KV_STORAGE=0 # default if -s not passed
+COMPONENTS="$ENCLAVE_MANAGER" # #KV_STORAGE added if -s passed
+START_STOP_AVALON_SERVICES=0 # default if -s not passed
 LMDB_URL="http://localhost:9090" # -l default
-
+LISTENER_URL="http://localhost:1947"
 # Trap handler
 trap 'stop_avalon_components' HUP INT QUIT ABRT ALRM TERM
 
 start_avalon_components()
 {
-    # Read Listener port from config file
-    LISTENER_PORT=`grep listener_port ${TCF_HOME}/config/tcs_config.toml \
-        | awk {'print $3'}`
-    if [ -z "$LISTENER_PORT" ]; then
-        LISTENER_PORT=1947
-    fi
-
-    if [ $START_STOP_KV_STORAGE = 1 ] ; then
+    if [ $START_STOP_AVALON_SERVICES = 1 ] ; then
         echo "Starting Avalon KV Storage $VERSION ..."
         $KV_STORAGE --bind $LMDB_URL & 
         echo "Avalon KV Storage started"
+
+	echo "Starting Avalon Listener $VERSION ..."
+	$LISTENER --bind $LISTENER_URL --lmdb_url $LMDB_URL &
+	echo "Avalon Listener started"
     fi
     
+    # START_STOP_AVALON_SERVICES doesn't control enclave manager. It will be
+    # once enclave manager runs as seperate container.
     echo "Starting Avalon Enclave Manager $VERSION ..."
     python3 $ENCLAVE_MANAGER --lmdb_url $LMDB_URL &
     echo "Avalon Enclave Manager started"
 
     sleep 5s
-
-    echo "Starting Avalon Listener $VERSION ..."
-    python3 $LISTENER --bind_uri $LISTENER_PORT --lmdb_url $LMDB_URL &
-    echo "Avalon Listener started"
-
-    sleep 5s
-    check_avalon_components
 
     if [ "$YES" != "1" ] ; then
         while true; do
@@ -84,14 +76,20 @@ stop_avalon_components()
         pkill -f "$i"
     done
     echo "Hyperledger Avalon successfully ended."
+    pkill -f "$ENCLAVE_MANAGER"
+    if [ $START_STOP_AVALON_SERVICES = 1 ] ; then
+        pkill -f "$KV_STORAGE"
+        pkill -f "$LISTENER"
+    fi
+
     exit
 }
 
 while getopts "l:styh" OPTCHAR ; do
     case $OPTCHAR in
         s )
-            START_STOP_KV_STORAGE=1
-            COMPONENTS="$COMPONENTS $KV_STORAGE"
+            START_STOP_AVALON_SERVICES=1
+            COMPONENTS="$COMPONENTS $KV_STORAGE $LISTENER"
             ;;
         l )
             LMDB_URL=$OPTARG

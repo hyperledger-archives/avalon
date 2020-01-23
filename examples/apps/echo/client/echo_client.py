@@ -106,9 +106,6 @@ def ParseCommandLine(args):
         logger.error(str(e))
         sys.exit(-1)
 
-    global direct_jrpc
-    direct_jrpc = AvalonDirectClient(conf_files[0])
-
     # Whether or not to connect to the registry list on the blockchain
     off_chain = False
 
@@ -122,6 +119,9 @@ def ParseCommandLine(args):
 
     if options.off_chain:
         off_chain = True
+
+    global direct_jrpc
+    direct_jrpc = AvalonDirectClient(config=config)
 
     requester_signature = options.requester_signature
     input_data_hash = options.data_hash

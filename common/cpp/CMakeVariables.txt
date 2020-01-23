@@ -28,12 +28,12 @@ ELSE()
     message(STATUS "Compiling with optimizations (-O2). To use debug flags, set the DEBUG environment variable.")
 ENDIF()
 
-SET(SGX_SDK "$ENV{SGX_SDK}")
-if("${SGX_SDK} " STREQUAL " ")
-    message(FATAL_ERROR "SGX_SDK environment variable not defined!")
-endif()
-
 if(NOT UNTRUSTED_ONLY)
+    SET(SGX_SDK "$ENV{SGX_SDK}")
+    if("${SGX_SDK} " STREQUAL " ")
+        message(FATAL_ERROR "SGX_SDK environment variable not defined!")
+    endif()
+
     SET(TCF_ENCLAVE_CODE_SIGN_PEM "$ENV{TCF_ENCLAVE_CODE_SIGN_PEM}")
     if("${TCF_ENCLAVE_CODE_SIGN_PEM} " STREQUAL " ")
         message(FATAL_ERROR "TCF_ENCLAVE_CODE_SIGN_PEM environment variable not defined!")
