@@ -144,7 +144,7 @@ ARG TCF_DEBUG_BUILD
 ARG DISPLAY
 ARG XAUTHORITY
 
-#TODO need to be removed latter
+#TODO need to be removed later
 #install avalon-client python package.
 RUN cd /project/TrustedComputeFramework/client_sdk \
    && python setup.py bdist_wheel \
@@ -192,6 +192,6 @@ WORKDIR /project/TrustedComputeFramework/tools/build
 
 RUN make lint && echo "LINT SUCCESS"
 
-RUN if [ $MAKECLEAN != 0 ]; then echo "Clean build" && make clean; fi \
+RUN if [ "$MAKECLEAN" != 0 ]; then echo "Clean build" && make clean; fi \
  && make \
  && echo "BUILD SUCCESS"
