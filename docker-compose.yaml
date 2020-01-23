@@ -36,7 +36,7 @@ services:
     working_dir: "/project/TrustedComputeFramework"
     command: |
       bash -c "
-        source scripts/tcs_startup.sh -y
+        source scripts/tcs_startup.sh -y -s
         tail -f /dev/null
       "
     stop_signal: SIGKILL

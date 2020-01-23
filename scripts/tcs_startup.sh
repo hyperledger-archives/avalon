@@ -14,9 +14,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+KV_STORAGE="kv_storage"
 enclave_manager="${TCF_HOME}/examples/enclave_manager/tcf_enclave_manager/enclave_manager.py"
 listener="${TCF_HOME}/common/python/connectors/direct/tcs_listener/tcs_listener.py"
 version="$(cat ${TCF_HOME}/VERSION)"
+# Default values
+START_KV_STORAGE=1 # default if -s not passed
 
 # Trap handler
 trap 'stop_tcs_components' HUP INT QUIT ABRT ALRM TERM
@@ -28,6 +31,12 @@ start_tcs_components()
         | awk {'print $3'}`
     if [ -z "$listener_port" ]; then
         listener_port=1947
+    fi
+
+    if [ $START_KV_STORAGE = 1 ] ; then
+    	echo "Starting Avalon KV Storage $version ..."
+    	python3 $KV_STORAGE --bind http://avalon-lmdb:9090 & 
+    	echo "Avalon KV Storage started"
     fi
 
     echo "Starting Avalon Enclave Manager $version ..."
@@ -57,12 +66,16 @@ stop_tcs_components()
     echo "TCS successfully ended."
     pkill -f "$listener"
     pkill -f "$enclave_manager"
+    pkill -f "$KV_STORAGE"
     exit
 }
 
 
-while getopts "tyh" OPTCHAR ; do
+while getopts "styh" OPTCHAR ; do
     case $OPTCHAR in
+        s )
+            START_KV_STORAGE=0
+            ;;
         y )
             YES=1
             ;;
@@ -72,11 +85,16 @@ while getopts "tyh" OPTCHAR ; do
         \?|h )
             BN=$(basename $0)
             echo "$BN: Start or Stop TCS" 1>&2
-            echo "Usage: $BN [-t|-y|-h|-?]" 1>&2
+            echo "Usage: $BN [-s|-t|-y|-h|-?]" 1>&2
             echo "Where:" 1>&2
             echo "   -t       terminate the program" 1>&2
             echo "   -y       do not prompt to end program" 1>&2
+            echo "   -s       do not start KV storage component" 1>&2
             echo "   -? or -h print usage information" 1>&2
+            echo "Examples:" 1>&2
+            echo "   $BN" 1>&2
+            echo "   $BN -t" 1>&2
+            echo "   $BN -y -s" 1>&2
             exit 2
             ;;
     esac
