@@ -29,7 +29,7 @@ if os.sys.version_info[0] < 3:
 setup(name='avalon_sdk',
       version=subprocess.check_output(
         ['../bin/get_version']).decode('utf-8').strip(),
-      description='Avalon Client SDK',
+      description='Avalon SDK',
       author='Hyperledger Avalon',
       url='https://github.com/hyperledger/avalon',
       packages=find_packages(),

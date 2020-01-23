@@ -34,3 +34,13 @@ services:
         - http_proxy
         - https_proxy
         - no_proxy
+
+  avalon-listener:
+    image: avalon-listener:${ISOLATION_ID}
+    build:
+      context: ..
+      dockerfile: ./listener/Dockerfile
+      args:
+        - http_proxy
+        - https_proxy
+        - no_proxy

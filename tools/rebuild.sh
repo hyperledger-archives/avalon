@@ -207,3 +207,8 @@ cd $TCF_HOME/examples/shared_kv_storage
 try make
 try make install
 
+yell --------------- AVALON LISTENER ----------------
+cd $TCF_HOME/listener
+try make "-j$NUM_CORES"
+try make install
+
