@@ -89,7 +89,7 @@ sudo apt-get install -y python3-venv
 
 Also, install the following pip3 packages:
 ```bash
-pip3 install --upgrade setuptools json-rpc py-solc web3 wheel
+pip3 install --upgrade setuptools jsonrpc json-rpc py-solc web3 wheel
 ```
 
 # <a name="docker"></a>Docker
