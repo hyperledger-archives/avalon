@@ -39,7 +39,7 @@ services:
       - "/dev/isgx:/dev/isgx"
     working_dir: "/project/TrustedComputeFramework"
     entrypoint: "bash -c \"\
-        source scripts/tcs_startup.sh -y -s \
+        source scripts/tcs_startup.sh -y -s -l http://avalon-lmdb:9090 \
         && tail -f /dev/null \""
     stop_signal: SIGKILL
     depends_on:

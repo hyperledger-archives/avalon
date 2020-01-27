@@ -175,7 +175,6 @@ try make "-j$NUM_CORES"
 try make install
 
 yell --------------- CLIENT SDK ---------------
-Please add following instructions to rebuild.sh to build client sdk python module.
 cd $TCF_HOME/client_sdk
 try python3 setup.py bdist_wheel
 try pip3 install dist/*.whl

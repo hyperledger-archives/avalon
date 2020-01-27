@@ -65,7 +65,7 @@
    https://web3py.readthedocs.io/en/stable/quickstart.html
 
     ```bash
-    sudo pip install web3
+    pip install web3
     ```
 
 9.  Run `cd $TCF_HOME/examples/common/python/connectors/ethereum`

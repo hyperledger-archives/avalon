@@ -67,7 +67,7 @@ The Avalon Enclave Manager and Avalon Listener run in a Docker container.
 5.  In Terminal 2 run `cd $TCF_HOME/examples/apps/heart_disease_eval/client`
 6.  In Terminal 2 install Python3's TKInter GUI library with
     ```bash
-    apt update; apt -y install python3-tk python3-pil.imagetk
+    sudo apt update; sudo apt -y install python3-tk python3-pil.imagetk
     ```
 7.  In Terminal 2 install the Solidity compiler as follows:
     ```bash
