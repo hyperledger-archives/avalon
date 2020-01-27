@@ -154,7 +154,7 @@ The steps below will set up a Python virtual environment to run Avalon.
    You will need to do this in each new shell session (in addition to
    exporting environment variables).
    ```bash
-   source _dev/bin/activate
+   source $TCF_HOME/tools/build/_dev/bin/activate
    ```
    If the virtual environment for the current shell session is activated,
    you will the see this prompt: `(_dev)`

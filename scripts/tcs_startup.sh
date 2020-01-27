@@ -14,10 +14,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+KV_STORAGE="kv_storage"
 ENCLAVE_MANAGER="${TCF_HOME}/examples/enclave_manager/tcf_enclave_manager/enclave_manager.py"
 LISTENER="${TCF_HOME}/common/python/connectors/direct/tcs_listener/tcs_listener.py"
 VERSION="$(cat ${TCF_HOME}/VERSION)"
 # Default values
+START_STOP_KV_STORAGE=0 # default if -s not passed
 LMDB_URL="http://localhost:9090" # -l default
 
 # Trap handler
@@ -32,8 +34,12 @@ start_avalon_components()
         LISTENER_PORT=1947
     fi
 
-    echo "Using LMDB URL $LMDB_URL."
-
+    if [ $START_STOP_KV_STORAGE = 1 ] ; then
+        echo "Starting Avalon KV Storage $VERSION ..."
+        python3 $KV_STORAGE --bind $LMDB_URL & 
+        echo "Avalon KV Storage started"
+    fi
+    
     echo "Starting Avalon Enclave Manager $VERSION ..."
     python3 $ENCLAVE_MANAGER --lmdb_url $LMDB_URL &
     echo "Avalon Enclave Manager started"
@@ -61,12 +67,18 @@ stop_avalon_components()
     echo "Hyperledger Avalon successfully ended."
     pkill -f "$LISTENER"
     pkill -f "$ENCLAVE_MANAGER"
+    if [ $START_STOP_KV_STORAGE = 1 ] ; then
+        pkill -f "$KV_STORAGE"
+    fi
+
     exit
 }
 
-
-while getopts "l:hty" OPTCHAR ; do
+while getopts "l:styh" OPTCHAR ; do
     case $OPTCHAR in
+        s )
+            START_STOP_KV_STORAGE=1
+            ;;
         l )
             LMDB_URL=$OPTARG
             ;;
@@ -79,12 +91,17 @@ while getopts "l:hty" OPTCHAR ; do
         \?|h )
             BN=$(basename $0)
             echo "$BN: Start or Stop Hyperledger Avalon" 1>&2
-            echo "Usage: $BN [-l|-t|-y|-h|-?]" 1>&2
+            echo "Usage: $BN [-l|-s|-t|-y|-h|-?]" 1>&2
             echo "Where:" 1>&2
             echo "   -l       LMDB server URL. Default is $LMDB_URL" 1>&2
             echo "   -t       terminate the program" 1>&2
             echo "   -y       do not prompt to end program" 1>&2
+            echo "   -s       also start or stop KV storage component" 1>&2
             echo "   -? or -h print usage information" 1>&2
+            echo "Examples:" 1>&2
+            echo "   $BN -s" 1>&2
+            echo "   $BN -t -s" 1>&2
+            echo "   $BN -y -l http://avalon-lmdb:9090" 1>&2
             exit 2
             ;;
     esac
