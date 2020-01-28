@@ -13,17 +13,16 @@
  * limitations under the License.
  */
 
-#include "enclave_u.h"
-
 #include <linux/limits.h>
+#include <unistd.h>
 
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
-#include <unistd.h>
 #include <pthread.h>
 
 #include <sgx_uae_service.h>
+#include "enclave_u.h"
 #include "sgx_support.h"
 
 #include "log.h"

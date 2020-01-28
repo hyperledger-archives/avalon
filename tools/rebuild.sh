@@ -164,6 +164,14 @@ cd build
 try cmake ..
 try make "-j$NUM_CORES"
 
+yell --------------- ENCLAVE BRIDGE---------------
+cd $TCF_HOME/tc/sgx/trusted_worker_manager/enclave_untrusted/enclave_bridge
+
+mkdir -p build
+cd build
+try cmake ..
+try make "-j$NUM_CORES"
+
 yell --------------- EXAMPLES COMMON PYTHON ---------------
 cd $TCF_HOME/common/python
 try make "-j$NUM_CORES"
