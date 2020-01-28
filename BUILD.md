@@ -173,7 +173,8 @@ Follow these steps to run the `Demo.py` testcase:
    2. `cd $TCF_HOME/scripts`
    3. Run `source $TCF_HOME/tools/build/_dev/bin/activate` .
       You should see the `(_dev)` prompt
-   4. Run `./tcs_startup.sh`
+   4. Run `./tcs_startup.sh -s` The `-s` option starts 	`kv_storage` before
+      other Avalon components.
    5. Wait for the listener to start. You should see the message
       `TCS Listener started on port 1947`,
       followed by a repetitive message `Enclave manager sleeping for 10 secs`
@@ -217,7 +218,7 @@ See [examples/apps/heart_disease_eval](examples/apps/heart_disease_eval)
 - If the Demo test code breaks due to some error, please perform the following
   steps before re-running:
   1. `sudo rm $TCF_HOME/config/Kv*`
-  2. `$TCF_HOME/scripts/tcs_startup.sh -t`
+  2. `$TCF_HOME/scripts/tcs_startup.sh -t -s`
   3. You can re-run the test now
 
 - If you get build errors rerunning `make`, try `sudo make clean` first
