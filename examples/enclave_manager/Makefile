@@ -19,9 +19,6 @@ PY_VERSION=${shell python3 --version | sed 's/Python \(3\.[0-9]\).*/\1/' | tr -d
 MOD_VERSION=${shell ../../bin/get_version}
 
 WHEEL_FILE=dist/tcf_enclave_manager-${MOD_VERSION}-cp${PY_VERSION}-cp${PY_VERSION}m-linux_x86_64.whl
-SOURCE_DIR=$(shell pwd)
-EDL_PATH=$(SOURCE_DIR)/../../tc/sgx/trusted_worker_manager/enclave
-ENCLAVE_WRAPPER=$(SOURCE_DIR)/../../tc/sgx/trusted_worker_manager/enclave_wrapper
 
 all : $(WHEEL_FILE)
 
@@ -30,12 +27,6 @@ $(WHEEL_FILE) : build_ext
 	python3 setup.py bdist_wheel
 
 build_ext :
-	$(SGX_SDK)/bin/x64/sgx_edger8r --untrusted $(EDL_PATH)/enclave.edl --search-path $(SGX_SDK)/include --search-path $(SGX_SSL)/include/ --search-path $(EDL_PATH)
-	
-	@echo Moving generated edge files	
-	mv enclave_u.h $(ENCLAVE_WRAPPER)
-	mv enclave_u.c $(ENCLAVE_WRAPPER)
-	
 	@echo Build build_ext
 	python3 setup.py build_ext
 
@@ -48,7 +39,6 @@ install:
 
 clean:
 	pip3 uninstall --yes $(WHEEL_FILE)
-	rm -f $(addprefix $(ENCLAVE_WRAPPER), /enclave_u.c /enclave_u.h)
 	rm -f tcf_enclave_manager/tcf_enclave.py tcf_enclave_manager/tcf_enclave_wrap.cpp
 	rm -rf build deps dist *.egg-info
 	find . -iname '*.pyc' -delete
