@@ -423,6 +423,13 @@ problems.
   you are using an old version of OpenSSL and need to clone the
   `openssl_1.1.1` branch of `intel-sgx-ssl` in the step above
 
+- If you get the error:
+  `threads.h:57:22: error: conflicting types for ‘pthread_key_t’` or
+  `threads.h:60:13: error: conflicting types for ‘pthread_once_t’`
+  your Intel SGX SDK is too old. Remove or rename `/opt/intel/sgxsdk` and `~/sgxssl`
+  then reinstall the Intel SGX SDK and rebuild the Intel SGX OpenSSL
+  as instructed under [Intel SGX SDK](#sgx) and [Intel SGX OpenSSL](#sgxssl)
+
 - If the message  `intel_sgx: SGX is not enabled` appears in `/var/log/syslog`
   Intel SGX needs to be enabled in BIOS
 
