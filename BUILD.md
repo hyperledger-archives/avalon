@@ -54,7 +54,7 @@ Follow the instructions below to execute a Docker-based build and execution.
 4. Open a Docker container shell using following command
    `sudo docker exec -it tcf bash`
 5. To execute test cases refer to [Testing](#testing) section below
-6. To exit the TCF program, press `Ctrl-c`
+6. To exit the Avalon program, press `Ctrl-c`
 
 
 # <a name="standalonebuild"></a>Standalone Build

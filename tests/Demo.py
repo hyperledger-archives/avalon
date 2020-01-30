@@ -172,7 +172,7 @@ def local_main(config):
 
 # -----------------------------------------------------------------------------
 def parse_command_line(config, args):
-    LOGGER.info('************** TRUSTED COMPUTE FRAMEWORK (TCF) *************')
+    LOGGER.info("***************** AVALON *****************")
     global input_json_str
     global input_json_dir
     global server_uri
