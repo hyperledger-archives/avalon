@@ -61,13 +61,13 @@ pipeline {
             }
         }
 
-        stage('Build TCF') {
+        stage('Build Avalon') {
             steps {
                 sh 'docker-compose -f ci/docker-compose-build.yaml build'
             }
         }
 
-        stage('Run TCF Tests') {
+        stage('Run Avalon Tests') {
             steps {
                 sh 'INSTALL_TYPE="" ./bin/run_tests'
             }
