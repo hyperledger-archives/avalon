@@ -2,6 +2,7 @@
 
 ## Introduction
 * [README](../README.md). Overview of Avalon and its source code
+* [FAQ](FAQ.rst). Frequently-asked questions with answers about Avalon
 * [Proposal](https://wiki.hyperledger.org/pages/viewpage.action?pageId=16324764). Proposal of the project, members, motivation, proposed solutions, and FAQ
 * [Ecosystem Support for EEA Trusted Compute Specification v1.0 Improves Blockchain Privacy and Scalability](https://software.intel.com/en-us/articles/ecosystem-support-for-eea-trusted-compute-specification-v10-improves-blockchain-privacy-and). Introductory Blog, by Michael Reed (2019)
 
