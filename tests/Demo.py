@@ -20,14 +20,23 @@ import random
 import json
 import logging
 
-from avalon_sdk.http_client.http_jrpc_client import HttpJrpcClient
-import crypto_utils.crypto.crypto as crypto
+
 import crypto_utils.signature as signature
 import avalon_sdk.worker.worker_details as worker
 import crypto_utils.crypto_utility as enclave_helper
 import utility.file_utils as futils
-from error_code.error_status import SignatureStatus, WorkOrderStatus
+from error_code.error_status import SignatureStatus
+from avalon_sdk.worker.worker_details import WorkerType
+from avalon_sdk.direct.jrpc.jrpc_worker_registry import \
+    JRPCWorkerRegistryImpl
+from avalon_sdk.direct.jrpc.jrpc_work_order import \
+    JRPCWorkOrderImpl
+from error_code.error_status import WorkOrderStatus
 
+
+# Remove duplicate loggers
+for handler in logging.root.handlers[:]:
+    logging.root.removeHandler(handler)
 LOGGER = logging.getLogger(__name__)
 
 TCFHOME = os.environ.get("TCF_HOME", "../../")
@@ -44,12 +53,11 @@ def local_main(config):
         LOGGER.error("JSON output file is not provided")
         exit(1)
 
-    if not server_uri:
-        LOGGER.error("Server URI is not provided")
+    if not config["tcf"]["json_rpc_uri"]:
+        LOGGER.error("URI is not provided")
         exit(1)
 
     LOGGER.info("Execute work order")
-    uri_client = HttpJrpcClient(server_uri)
     response = None
     wo_id = None
     if input_json_dir:
@@ -91,8 +99,31 @@ def local_main(config):
                     exit(1)
                 if input_json_str1 is None:
                     continue
-            # -----------------------------------------------------------------
 
+                # Submit work order
+                input_json_obj = json.loads(input_json_str1)
+                work_order_params = input_json_obj["params"]
+                work_order_request = json.dumps(work_order_params)
+                work_order = JRPCWorkOrderImpl(config)
+                jrpc_req_id = input_json_obj['id']
+                jrpc_req_id += 1
+                work_order_id = input_json_obj["params"]["workOrderId"]
+                requester_id = input_json_obj["params"]["requesterId"]
+                worker_id = input_json_obj["params"]["workerId"]
+
+                response = work_order.work_order_submit(
+                    work_order_id,
+                    worker_id,
+                    requester_id,
+                    work_order_request,
+                    id=jrpc_req_id
+                )
+
+                LOGGER.info("Work order submit response : {}\n ".format(
+                    json.dumps(response, indent=2)
+                ))
+
+            # -----------------------------------------------------------------
             # Update the worker ID
             if response:
                 if "workerId" in input_json_str1:
@@ -108,24 +139,54 @@ def local_main(config):
                         LOGGER.info("********** Worker details Updated with "
                                     "Worker ID*********\n%s\n",
                                     input_json_str1)
-
-            # -----------------------------------------------------------------
-            if "WorkOrderGetResult" in input_json_str1 or \
-                    "WorkOrderReceiptRetrieve":
-                input_json_obj = json.loads(input_json_str1)
-                input_json_obj["params"]["workOrderId"] = wo_id
-                input_json_str1 = json.dumps(input_json_obj)
-
-            LOGGER.info("*********Request Json********* \n%s\n",
-                        input_json_str1)
-            response = uri_client._postmsg(input_json_str1)
-            LOGGER.info("**********Received Response*********\n%s\n", response)
-
+                        # Retrieve worker details
+                        LOGGER.info("****Request Json**** \n%s\n",
+                                    input_json_str1)
+                        worker_registry = JRPCWorkerRegistryImpl(config)
+                        jrpc_req_id = input_json_final['id']
+                        jrpc_req_id += 1
+                        response = worker_registry.worker_retrieve(
+                            worker_id, jrpc_req_id
+                        )
+                        LOGGER.info("******Received Response******\n%s\n",
+                                    response)
             # -----------------------------------------------------------------
 
             # Worker details are loaded into Worker_Obj
             if "WorkerRetrieve" in input_json_str1 and "result" in response:
                 worker_obj.load_worker(response)
+            # -----------------------------------------------------------------
+            if "WorkOrderGetResult" in input_json_str1 or \
+                    "WorkOrderReceiptRetrieve" in input_json_str1:
+                input_json_obj = json.loads(input_json_str1)
+                input_json_obj["params"]["workOrderId"] = wo_id
+                input_json_str1 = json.dumps(input_json_obj)
+                input_json_obj = json.loads(input_json_str1)
+                jrpc_req_id = input_json_obj['id']
+                jrpc_req_id += 1
+                wo_id = input_json_obj["params"]["workOrderId"]
+                LOGGER.info("*********Request Json********* \n%s\n",
+                            input_json_str1)
+                work_order = JRPCWorkOrderImpl(config)
+                response = work_order.work_order_get_result(wo_id, jrpc_req_id)
+                LOGGER.info("*******Received Response*******: %s, \n \n ",
+                            response)
+            # -----------------------------------------------------------------
+            if "WorkerLookUp" in input_json_str1:
+                input_json_obj = json.loads(input_json_str1)
+                # Prepare worker
+                # Read JRPC ID from JSON
+                LOGGER.info("********Request Json********* \n%s\n",
+                            input_json_str1)
+                jrpc_req_id = input_json_obj['id']
+                worker_registry = JRPCWorkerRegistryImpl(config)
+                # Get first worker from worker registry
+                response = worker_registry.worker_lookup(
+                    worker_type=WorkerType.TEE_SGX, id=jrpc_req_id
+                )
+                LOGGER.info("**********Received Response*********\n%s\n",
+                            response)
+
             # -----------------------------------------------------------------
 
             # Poll for "WorkOrderGetResult" and break when you get the result
@@ -133,7 +194,13 @@ def local_main(config):
                     "result" not in response):
                 if response["error"]["code"] != WorkOrderStatus.PENDING:
                     break
-                response = uri_client._postmsg(input_json_str1)
+
+                input_json_obj = json.loads(input_json_str1)
+                jrpc_req_id = input_json_obj['id']
+                jrpc_req_id += 1
+                wo_id = input_json_obj["params"]["workOrderId"]
+                work_order = JRPCWorkOrderImpl(config)
+                response = work_order.work_order_get_result(wo_id, jrpc_req_id)
                 LOGGER.info("Received Response: %s, \n \n ", response)
                 time.sleep(3)
 
@@ -163,16 +230,14 @@ def local_main(config):
 
             # -----------------------------------------------------------------
     else:
-        LOGGER.info("Input Request %s", input_json_str)
-        response = uri_client._postmsg(input_json_str)
-        LOGGER.info("Received Response: %s , \n \n ", response)
+        LOGGER.info("Input Request cannot be processed %s", input_json_str)
 
     exit(0)
 
 
 # -----------------------------------------------------------------------------
 def parse_command_line(config, args):
-    LOGGER.info("***************** AVALON *****************")
+    LOGGER.info('************** TRUSTED COMPUTE FRAMEWORK (TCF) *************')
     global input_json_str
     global input_json_dir
     global server_uri
@@ -206,21 +271,11 @@ def parse_command_line(config, args):
 
     options = parser.parse_args(args)
 
-    if config.get("Logging") is None:
-        config["Logging"] = {
-            "LogFile": "__screen__",
-            "LogLevel": "INFO"
-        }
-    if options.logfile:
-        config["Logging"]["LogFile"] = options.logfile
-    if options.loglevel:
-        config["Logging"]["LogLevel"] = options.loglevel.upper()
-
     input_json_str = None
     input_json_dir = None
 
     if options.connect_uri:
-        server_uri = options.connect_uri
+        config["tcf"]["json_rpc_uri"] = options.connect_uri
     else:
         LOGGER.error("ERROR: Please enter the server URI")
 
@@ -260,8 +315,8 @@ def Main(args=None):
     import utility.logger as plogger
 
     # parse out the configuration file first
-    conffiles = ["tcs_config.toml"]
-    confpaths = [".", TCFHOME + "/config", "../../etc"]
+    conffiles = [TCFHOME + "/sdk/avalon_sdk/tcf_connector.toml"]
+    confpaths = ["."]
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", help="configuration file", nargs="+")
@@ -281,6 +336,11 @@ def Main(args=None):
         LOGGER.error(str(e))
         sys.exit(-1)
 
+    # setup logging
+    config["Logging"] = {
+        "LogFile": "__screen__",
+        "LogLevel": "INFO"
+    }
     plogger.setup_loggers(config.get("Logging", {}))
     sys.stdout = plogger.stream_to_logger(logging.getLogger("STDOUT"),
                                           logging.DEBUG)

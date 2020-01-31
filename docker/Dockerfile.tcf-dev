@@ -86,6 +86,9 @@ RUN add-apt-repository ppa:ethereum/ethereum \
    && apt-get update \
    && apt-get install solc
 
+RUN echo $http_proxy \
+ && echo $https_proxy
+
 # Make Python3 default
 RUN ln -sf /usr/bin/python3 /usr/bin/python
 
