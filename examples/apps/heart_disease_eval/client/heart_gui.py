@@ -34,10 +34,10 @@ from PIL import ImageTk, Image
 
 # Avalon imports
 import crypto_utils.crypto_utility as utility
-import avalon_client_sdk.worker.worker_details as worker
-from avalon_client_sdk.utility.tcf_types import WorkerType
-from avalon_client_sdk.work_order.work_order_params import WorkOrderParams
-from avalon_client_sdk.avalon_direct_client \
+import avalon_sdk.worker.worker_details as worker
+from avalon_sdk.worker.worker_details import WorkerType
+from avalon_sdk.work_order.work_order_params import WorkOrderParams
+from avalon_sdk.avalon_direct_client \
     import AvalonDirectClient
 import config.config as pconfig
 import utility.logger as plogger
@@ -45,7 +45,7 @@ import crypto_utils.crypto.crypto as crypto
 from error_code.error_status import WorkOrderStatus, ReceiptCreateStatus
 import crypto_utils.signature as signature
 from error_code.error_status import SignatureStatus
-from avalon_client_sdk.work_order_receipt.work_order_receipt_request \
+from avalon_sdk.work_order_receipt.work_order_receipt \
      import WorkOrderReceiptRequest
 
 # Remove duplicate loggers
@@ -659,7 +659,7 @@ def parse_command_line(args):
         conf_files = [options.config]
     else:
         conf_files = [TCFHOME +
-                      "/client_sdk/avalon_client_sdk/tcf_connector.toml"]
+                      "/sdk/avalon_sdk/tcf_connector.toml"]
     conf_paths = ["."]
 
     try:

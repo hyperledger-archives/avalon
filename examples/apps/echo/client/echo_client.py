@@ -25,17 +25,17 @@ import secrets
 import config.config as pconfig
 import utility.logger as plogger
 import crypto_utils.crypto_utility as utility
-from avalon_client_sdk.utility.tcf_types import WorkerType
-import avalon_client_sdk.worker.worker_details as worker
-from avalon_client_sdk.work_order.work_order_params import WorkOrderParams
-from avalon_client_sdk.direct.avalon_direct_client \
+from avalon_sdk.worker.worker_details import WorkerType
+import avalon_sdk.worker.worker_details as worker
+from avalon_sdk.work_order.work_order_params import WorkOrderParams
+from avalon_sdk.direct.avalon_direct_client \
     import AvalonDirectClient
 import crypto_utils.crypto.crypto as crypto
 from error_code.error_status import WorkOrderStatus, ReceiptCreateStatus
 import crypto_utils.signature as signature
 import utility.hex_utils as hex_utils
 from error_code.error_status import SignatureStatus
-from avalon_client_sdk.work_order_receipt.work_order_receipt_request \
+from avalon_sdk.work_order_receipt.work_order_receipt \
     import WorkOrderReceiptRequest
 
 # Remove duplicate loggers
@@ -97,7 +97,7 @@ def ParseCommandLine(args):
         conf_files = [options.config]
     else:
         conf_files = [TCFHOME +
-                      "/client_sdk/avalon_client_sdk/tcf_connector.toml"]
+                      "/sdk/avalon_sdk/tcf_connector.toml"]
     confpaths = ["."]
     try:
         config = pconfig.parse_configuration_files(conf_files, confpaths)

@@ -24,21 +24,21 @@ import secrets
 import config.config as pconfig
 import utility.logger as plogger
 import crypto_utils.crypto_utility as crypto_utility
-from avalon_client_sdk.utility.tcf_types import WorkerType
-import avalon_client_sdk.worker.worker_details as worker_details
-from avalon_client_sdk.work_order.work_order_params import WorkOrderParams
-from avalon_client_sdk.ethereum.ethereum_worker_registry_list_client import \
-    EthereumWorkerRegistryListClientImpl
-from avalon_client_sdk.direct.jrpc.worker_registry_jrpc_client import \
-    WorkerRegistryJRPCClientImpl
-from avalon_client_sdk.direct.jrpc.work_order_jrpc_client import \
-    WorkOrderJRPCClientImpl
-from avalon_client_sdk.direct.jrpc.work_order_receipt_jrpc_client \
-     import WorkOrderReceiptJRPCClientImpl
+from avalon_sdk.worker.worker_details import WorkerType
+import avalon_sdk.worker.worker_details as worker_details
+from avalon_sdk.work_order.work_order_params import WorkOrderParams
+from avalon_sdk.ethereum.ethereum_worker_registry_list import \
+    EthereumWorkerRegistryListImpl
+from avalon_sdk.direct.jrpc.jrpc_worker_registry import \
+    JRPCWorkerRegistryImpl
+from avalon_sdk.direct.jrpc.jrpc_work_order import \
+    JRPCWorkOrderImpl
+from avalon_sdk.direct.jrpc.jrpc_work_order_receipt \
+     import JRPCWorkOrderReceiptImpl
 from error_code.error_status import WorkOrderStatus, ReceiptCreateStatus
 import crypto_utils.signature as signature
 from error_code.error_status import SignatureStatus
-from avalon_client_sdk.work_order_receipt.work_order_receipt_request \
+from avalon_sdk.work_order_receipt.work_order_receipt \
     import WorkOrderReceiptRequest
 
 # Remove duplicate loggers
@@ -108,7 +108,7 @@ def _parse_config_file(config_file):
         conf_files = [config_file]
     else:
         conf_files = [TCFHOME +
-                      "/client_sdk/avalon_client_sdk/tcf_connector.toml"]
+                      "/sdk/avalon_sdk/tcf_connector.toml"]
     confpaths = ["."]
     try:
         config = pconfig.parse_configuration_files(conf_files, confpaths)
@@ -126,7 +126,7 @@ def _retrieve_uri_from_registry_list(config):
     # Get block chain type
     blockchain_type = config['blockchain']['type']
     if blockchain_type == "Ethereum":
-            worker_registry_list = EthereumWorkerRegistryListClientImpl(
+            worker_registry_list = EthereumWorkerRegistryListImpl(
                 config)
     else:
         worker_registry_list = None
@@ -370,7 +370,7 @@ def Main(args=None):
     # Prepare worker
     # JRPC request id. Choose any integer value
     jrpc_req_id = 31
-    worker_registry = WorkerRegistryJRPCClientImpl(config)
+    worker_registry = JRPCWorkerRegistryImpl(config)
     if not worker_id:
         # Get first worker from worker registry
         worker_id = _lookup_first_worker(worker_registry, jrpc_req_id)
@@ -417,7 +417,7 @@ def Main(args=None):
     # Submit work order
     logger.info("Work order submit request : %s, \n \n ",
                 wo_params.to_jrpc_string(jrpc_req_id))
-    work_order = WorkOrderJRPCClientImpl(config)
+    work_order = JRPCWorkOrderImpl(config)
     jrpc_req_id += 1
     response = work_order.work_order_submit(
         wo_params.get_work_order_id(),
@@ -435,7 +435,7 @@ def Main(args=None):
         sys.exit(1)
 
     # Create receipt
-    wo_receipt = WorkOrderReceiptJRPCClientImpl(config)
+    wo_receipt = JRPCWorkOrderReceiptImpl(config)
     if show_receipt:
         jrpc_req_id += 1
         _create_work_order_receipt(wo_receipt, wo_params,

@@ -28,8 +28,8 @@ import crypto_utils.signature as signature
 import crypto_utils.crypto_utility as crypto_utils
 from database import connector
 from error_code.error_status import ReceiptCreateStatus, WorkOrderStatus
-from avalon_client_sdk.utility.tcf_types import WorkerStatus, WorkerType
-from avalon_client_sdk.work_order_receipt.work_order_receipt_request \
+from avalon_sdk.worker.worker_details import WorkerStatus, WorkerType
+from avalon_sdk.work_order_receipt.work_order_receipt \
     import WorkOrderReceiptRequest
 
 logger = logging.getLogger(__name__)

@@ -15,7 +15,7 @@
 import json
 import logging
 from error_code.error_status import WorkerError
-from error_code.error_status import WorkerStatus
+from avalon_sdk.worker.worker_details import WorkerStatus
 
 from jsonrpc.exceptions import JSONRPCDispatchException
 
