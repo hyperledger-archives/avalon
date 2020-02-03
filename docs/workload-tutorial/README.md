@@ -148,9 +148,9 @@ will be created next in [Phase 2](#phase2).
   ```
 
   > **_NOTE:_** If you are running Avalon in a container you can shell into the container like this:
-      ```bash
-      docker exec -it tcf bash
-      ```
+  ```bash
+  docker exec -it tcf bash
+  ```
 
 * The Hello World worker should return the string `Error: under construction`
   as the result (hard-coded placeholder string in `plug-in.cpp`):
