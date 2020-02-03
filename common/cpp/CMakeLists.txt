@@ -26,7 +26,7 @@ INCLUDE(CMakeVariables.txt)
 FILE(GLOB PROJECT_HEADERS *.h)
 FILE(GLOB PROJECT_SOURCES *.cpp)
 
-SET(COMMON_PRIVATE_INCLUDE_DIRS "." "tests" "crypto" "packages/base64" "packages/parson")
+SET(COMMON_PRIVATE_INCLUDE_DIRS "." "crypto" "packages/base64" "packages/parson")
 SET(COMMON_CXX_FLAGS ${DEBUG_FLAGS} "-m64" "-fvisibility=hidden" "-fpie" "-fPIC" "-fstack-protector" "-std=c++11" "-Wall")
 
 ################################################################################
@@ -41,7 +41,6 @@ pkg_check_modules (OPENSSL REQUIRED openssl>=1.1.1d)
 ADD_LIBRARY(${UNTRUSTED_LIB_NAME} STATIC ${PROJECT_HEADERS} ${PROJECT_SOURCES})
 
 TARGET_INCLUDE_DIRECTORIES(${UNTRUSTED_LIB_NAME} PRIVATE ${COMMON_PRIVATE_INCLUDE_DIRS})
-TARGET_INCLUDE_DIRECTORIES(${UNTRUSTED_LIB_NAME} PUBLIC ${SGX_SDK}/include)
 
 TARGET_COMPILE_OPTIONS(${UNTRUSTED_LIB_NAME} PRIVATE ${COMMON_CXX_FLAGS} ${OPENSSL_CFLAGS})
 

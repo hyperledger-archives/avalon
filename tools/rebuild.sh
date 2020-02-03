@@ -133,7 +133,7 @@ NUM_CORES=1
 # -----------------------------------------------------------------
 
 yell --------------- "COMMON SGX (WORKLOAD & IOHANDLER)" ---------------
-cd $TCF_HOME/common/sgx/
+cd $TCF_HOME/common/sgx_workload/
 
 mkdir -p build
 cd build
@@ -148,8 +148,16 @@ cd build
 try cmake ..
 try make "-j$NUM_CORES"
 
-yell --------------- TC SGX COMMON ---------------
-cd $TCF_HOME/tc/sgx/common
+yell --------------- COMMON CPP ---------------
+cd $TCF_HOME/common/cpp
+
+mkdir -p build
+cd build
+try cmake ..
+try make "-j$NUM_CORES"
+
+yell --------------- TRUSTED WORKER MANAGER COMMON ---------------
+cd $TCF_HOME/tc/sgx/trusted_worker_manager/common
 
 mkdir -p build
 cd build

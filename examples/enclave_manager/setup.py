@@ -55,14 +55,14 @@ if debug_flag :
 include_dirs = [
     enclave_bridge_wrapper_path,
     enclave_bridge_path,
-    os.path.join(tcf_root_dir, 'tc/sgx/common'),
-    os.path.join(tcf_root_dir, 'tc/sgx/common/crypto'),
-    os.path.join(tcf_root_dir, 'tc/sgx/common/packages/base64')
+    os.path.join(tcf_root_dir, 'common/cpp'),
+    os.path.join(tcf_root_dir, 'common/cpp/crypto'),
+    os.path.join(tcf_root_dir, 'common/cpp/packages/base64')
 ]
 
 library_dirs = [
     os.path.join(enclave_bridge_path, 'build/lib'),
-    os.path.join(tcf_root_dir, "tc/sgx/common/build"),
+    os.path.join(tcf_root_dir, "common/cpp/build"),
 ]
 
 libraries = [

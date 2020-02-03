@@ -6,7 +6,7 @@ https://creativecommons.org/licenses/by/4.0/
 Common Crypto library documentation
 ===================================
 
-This `common/crypto/` directory contains cryptographic code used by untrusted and
+This `common/cpp/crypto/` directory contains cryptographic code used by untrusted and
 trusted (SGX Enclave) code.
 
 This code is written in C++, but a Python wrapper is also available (see [../README.md](../README.md))

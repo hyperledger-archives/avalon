@@ -31,7 +31,6 @@ SET(COMMON_CXX_FLAGS ${DEBUG_FLAGS} "-m64" "-fvisibility=hidden" "-fpie" "-fPIC"
 # Generated source
 ################################################################################
 
-MESSAGE( "current bin dir " ${CMAKE_CURRENT_BINARY_DIR})
 SET(PROJECT_GENERATED_IAS_SOURCES ${CMAKE_CURRENT_BINARY_DIR}/../../verify_ias_report/ias-certificates.cpp)
 add_custom_command(OUTPUT  ${PROJECT_GENERATED_IAS_SOURCES}
                      COMMAND ./build_ias_certificates_cpp.sh
