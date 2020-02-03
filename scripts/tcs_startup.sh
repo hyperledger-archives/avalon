@@ -19,6 +19,7 @@ ENCLAVE_MANAGER="${TCF_HOME}/examples/enclave_manager/tcf_enclave_manager/enclav
 LISTENER="${TCF_HOME}/common/python/connectors/direct/tcs_listener/tcs_listener.py"
 VERSION="$(cat ${TCF_HOME}/VERSION)"
 # Default values
+COMPONENTS="$ENCLAVE_MANAGER $LISTENER" # #KV_STORAGE added if -s passed
 START_STOP_KV_STORAGE=0 # default if -s not passed
 LMDB_URL="http://localhost:9090" # -l default
 
@@ -50,27 +51,39 @@ start_avalon_components()
     python3 $LISTENER --bind_uri $LISTENER_PORT --lmdb_url $LMDB_URL &
     echo "Avalon Listener started"
 
+    sleep 5s
+    check_avalon_components
+
     if [ "$YES" != "1" ] ; then
         while true; do
-        echo "If you wish to exit the program, press y and enter"
-        read -t 5 yn
-        case $yn in
-            y ) stop_avalon_components;;
-            * ) echo " ";;
-        esac
+            echo "If you wish to exit the program, press y and enter"
+            read -t 5 yn
+            case $yn in
+                y ) stop_avalon_components;;
+                * ) echo " ";;
+            esac
         done
     fi
 }
 
+check_avalon_components()
+{
+    for i in $COMPONENTS ; do
+        pgrep -f "$i"
+        if [ $? != 0 ] ; then
+            echo "Terminating Avalon because component not running:"
+            echo "$i"
+            stop_avalon_components
+        fi
+    done
+}
+
 stop_avalon_components()
 {
+    for i in $COMPONENTS ; do
+        pkill -f "$i"
+    done
     echo "Hyperledger Avalon successfully ended."
-    pkill -f "$LISTENER"
-    pkill -f "$ENCLAVE_MANAGER"
-    if [ $START_STOP_KV_STORAGE = 1 ] ; then
-        pkill -f "$KV_STORAGE"
-    fi
-
     exit
 }
 
@@ -78,6 +91,7 @@ while getopts "l:styh" OPTCHAR ; do
     case $OPTCHAR in
         s )
             START_STOP_KV_STORAGE=1
+            COMPONENTS="$COMPONENTS $KV_STORAGE"
             ;;
         l )
             LMDB_URL=$OPTARG
