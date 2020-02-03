@@ -19,6 +19,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
 # -----------------------------------------------------------------------------
 def generate_signing_keys():
     """
@@ -29,6 +30,7 @@ def generate_signing_keys():
     signing_key.Generate()
     return signing_key
 
+
 # -----------------------------------------------------------------
 def generate_iv():
     """
@@ -36,6 +38,7 @@ def generate_iv():
     """
 
     return crypto.SKENC_GenerateIV()
+
 
 # -----------------------------------------------------------------
 def generate_encrypted_key(key, encryption_key):
@@ -49,12 +52,14 @@ def generate_encrypted_key(key, encryption_key):
     pub_enc_key = crypto.PKENC_PublicKey(encryption_key)
     return pub_enc_key.EncryptMessage(key)
 
+
 # -----------------------------------------------------------------
 def generate_key():
     """
     Function to generate symmetric key
     """
     return crypto.SKENC_GenerateKey()
+
 
 # -----------------------------------------------------------------
 def compute_data_hash(data):
@@ -63,6 +68,7 @@ def compute_data_hash(data):
     '''
     data_hash = crypto.compute_message_hash(data.encode("UTF-8"))
     return data_hash
+
 
 # -----------------------------------------------------------------
 def encrypt_data(data, encryption_key, iv=None):
@@ -83,6 +89,7 @@ def encrypt_data(data, encryption_key, iv=None):
     else:
         encrypted_data = crypto.SKENC_EncryptMessage(encryption_key, data)
     return encrypted_data
+
 
 # -----------------------------------------------------------------
 def decrypt_data(encryption_key, data, iv=None):
@@ -111,6 +118,7 @@ def decrypt_data(encryption_key, data, iv=None):
     result = crypto.byte_array_to_string(decrypt_result)
     logger.info("Decryption result at client - %s", result)
     return result
+
 
 # -----------------------------------------------------------------------------
 def decrypted_response(input_json, session_key, session_iv, data_key=None,
@@ -161,6 +169,7 @@ def decrypted_response(input_json, session_key, session_iv, data_key=None,
         i = i + 1
     return input_json_params['outData']
 
+
 # -----------------------------------------------------------------------------
 def verify_data_hash(msg, data_hash):
     '''
@@ -179,6 +188,7 @@ def verify_data_hash(msg, data_hash):
         logger.error("Computed hash of message does not match with data hash")
         verify_success = False
     return verify_success
+
 
 # -----------------------------------------------------------------------------
 def strip_begin_end_public_key(key):

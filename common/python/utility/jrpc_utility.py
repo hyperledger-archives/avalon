@@ -16,6 +16,7 @@
 jrpc_utility.py -- general jrpc helper function
 """
 
+
 def create_error_response(code, jrpc_id, message):
     """
     Function to create error response
