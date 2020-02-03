@@ -57,17 +57,17 @@ compile_args = [
 
 
 crypto_include_dirs = [
-    os.path.join(tcf_root_dir, 'tc/sgx/common'),
-    os.path.join(tcf_root_dir, 'tc/sgx/common/crypto'),
+    os.path.join(tcf_root_dir, 'common/cpp'),
+    os.path.join(tcf_root_dir, 'common/cpp/crypto'),
 ] + openssl_include_dirs
 
 verify_report_include_dirs = [
-    os.path.join(tcf_root_dir, 'tc/sgx/common'),
-    os.path.join(tcf_root_dir, 'tc/sgx/common/verify_ias_report'),
+    os.path.join(tcf_root_dir, 'common/cpp'),
+    os.path.join(tcf_root_dir, 'common/cpp/verify_ias_report'),
 ]
 
 library_dirs = [
-    os.path.join(tcf_root_dir, "tc/sgx/common/build"),
+    os.path.join(tcf_root_dir, "common/cpp/build"),
 ] + openssl_lib_dirs
 
 libraries = [

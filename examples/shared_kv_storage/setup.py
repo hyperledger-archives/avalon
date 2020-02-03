@@ -56,7 +56,7 @@ if debug_flag :
 
 include_dirs = [
     module_src_path,
-    os.path.join(tcf_root_dir, 'tc/sgx/common'),
+    os.path.join(tcf_root_dir, 'common/cpp'),
     os.path.join(tcf_root_dir, 'tc/sgx/trusted_worker_manager/enclave_untrusted/enclave_bridge_wrapper')
 ]
 

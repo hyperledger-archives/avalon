@@ -33,20 +33,9 @@ Dir                     Content
 
 `packages/parson/`      \*.cpp,\*.h of Parson JSON  encoding/decoding
 
-`tests/`                unit tests for crypto library
-
-`tests/untrusted`       test untrusted Crypto library
-
-`tests/trusted`         test trusted Crypto library
-
-`tests/trusted/app`     trusted Crypto test app
-
-`tests/trusted/enclave` trusted Crypto test enclave
-
-
 Python Wrapper
 --------------
 The Python SWIG wrapper exports the functions and classes defined in crypto.h,
 tcf_error.h and types.h.
 Several classes and functions are renamed.
-Check `examples/common/python/crypto/crypto.i` for details.
+Check `common/python/crypto_utils/crypto/crypto.i` for details.

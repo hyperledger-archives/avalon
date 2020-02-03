@@ -41,17 +41,14 @@ make clean
 cd $SRCDIR/examples/enclave_manager
 SGX_MODE=${SGX_MODE:-SIM} make clean
 
-# --------------- COMMON SGX_IOHANDLER ---------------
-rm -rf $SRCDIR/common/sgx_iohandler/build
-
-# --------------- COMMON SGX_WORKLOAD ---------------
+# --------------- COMMON SGX WORKLOAD ---------------
 rm -rf $SRCDIR/common/sgx_workload/build
 
 # --------------- ENCLAVE ---------------
 cd $SRCDIR/tc/sgx/trusted_worker_manager/enclave
 rm -rf build deps
 
-cd $SRCDIR/tc/sgx/common
+cd $SRCDIR/common/cpp
 rm -rf build
 
 # --------------- WORKLOADS -------------

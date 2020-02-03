@@ -15,7 +15,7 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.2 FATAL_ERROR)
 
 INCLUDE(CMakeVariables.txt)
-SET(GENERIC_PRIVATE_INCLUDE_DIRS "." "${TCF_TOP_DIR}/tc/sgx/common")
+SET(GENERIC_PRIVATE_INCLUDE_DIRS "." "${TCF_TOP_DIR}/common/cpp")
 
 ################################################################################
 ADD_SUBDIRECTORY(workload)
