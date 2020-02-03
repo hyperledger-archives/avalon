@@ -111,7 +111,8 @@ class ClientSignature(object):
             e_key = item['encryptedDataEncryptionKey'].encode('UTF-8')
 
             if (not e_key) or (e_key == "null".encode('UTF-8')):
-                enc_data = crypto_utility.encrypt_data(data, session_key, session_iv)
+                enc_data = crypto_utility.encrypt_data(
+                    data, session_key, session_iv)
                 input_json_params['inData'][i]['data'] = \
                     crypto.byte_array_to_base64(enc_data)
                 logger.debug(
