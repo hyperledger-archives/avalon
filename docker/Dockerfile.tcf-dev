@@ -151,7 +151,7 @@ RUN cd /project/TrustedComputeFramework/client_sdk \
    && python setup.py bdist_wheel \
    && pip3 install dist/*.whl
 
-#TODO need to be removed latter
+#TODO need to be removed later
 #install avalon-connect sdk python package
 RUN cd /project/TrustedComputeFramework/connector_sdk \
     && python setup.py bdist_wheel \
@@ -160,8 +160,8 @@ RUN cd /project/TrustedComputeFramework/connector_sdk \
 # Environment setup
 
 RUN echo "WEB3_INFURA_PROJECT_ID=9af17e6320414af8a3168cd9fe9d653d" >> /etc/environment \
-    && echo "WALLET_PRIVATE_KEY=4F611197A6E82715F4D2446FE015D1667E9C40A351411F3A7300F71F285D01B4" >> /etc/environment \
-
+ && echo "WALLET_PRIVATE_KEY=4F611197A6E82715F4D2446FE015D1667E9C40A351411F3A7300F71F285D01B4" \
+    >> /etc/environment \
  && echo "TCF_HOME=/project/TrustedComputeFramework/" >> /etc/environment \
  && if [ ! -z "$http_proxy"  ]; then \
     echo 'Acquire::http::Proxy "'$http_proxy'";' >> /etc/apt/apt.conf.d/00proxy; \
