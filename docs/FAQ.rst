@@ -31,7 +31,7 @@ and to support attested Oracles.
 
 What is the Off-Chain Trusted Compute Specification?
 ----------------------------------------------------
-The Off-Chain Trusted Compute Specification (TCS) is defines off-chain
+The Off-Chain Trusted Compute Specification (TCS) defines off-chain
 compute transactions that can be computed in private and trusted to be correct.
 These transactions may or may not be associated with a blockchain.
 Avalon implements the TCS.
@@ -89,6 +89,11 @@ How do I add a question and answer to this FAQ?
 File a Pull Request (PR) against this file in the
 Avalon source code. See
 https://github.com/hyperledger/avalon/blob/master/CONTRIBUTING.md
+
+How do I rasie a defect or a new feature request to the hyperledger Avalon community?
+-------------------------------------------------------------------------------------
+You can log any new feature request OR issues/defects you find with the Avalon code, here.
+https://jira.hyperledger.org/secure/RapidBoard.jspa?rapidView=241&projectKey=AV&view=planning.nodetail
 
 Installation and Configuration
 ==============================
