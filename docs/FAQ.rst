@@ -90,7 +90,7 @@ File a Pull Request (PR) against this file in the
 Avalon source code. See
 https://github.com/hyperledger/avalon/blob/master/CONTRIBUTING.md
 
-How do I rasie a defect or a new feature request to the hyperledger Avalon community?
+How do I raise a defect or a new feature request to the hyperledger Avalon community?
 -------------------------------------------------------------------------------------
 You can log any new feature request OR issues/defects you find with the Avalon code, here.
 https://jira.hyperledger.org/secure/RapidBoard.jspa?rapidView=241&projectKey=AV&view=planning.nodetail
