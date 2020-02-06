@@ -30,6 +30,10 @@ tc/sgx/trusted_worker_manager/enclave_wrapper/enclave_u.h
 tc/sgx/common/verify_ias_report/ias-certificates.cpp
 tools/build/_dev/
 
+# test environment runtime files
+docs/dev-environments/besu/besu/node1/database
+docs/dev-environments/besu/besu/node2/database
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 
