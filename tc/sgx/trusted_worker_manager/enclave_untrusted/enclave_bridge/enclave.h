@@ -106,11 +106,7 @@ namespace tcf {
 
             std::string enclaveError;
         };  // class Enclave
-
-        static void* Worker(void* arg);
-
     }  /* namespace enclave_api */
-
 }  // namespace tcf
 
 
