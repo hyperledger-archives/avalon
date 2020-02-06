@@ -147,15 +147,9 @@ ARG XAUTHORITY
 
 #TODO need to be removed latter
 #install avalon-client sdk python package.
-RUN cd /project/TrustedComputeFramework/client_sdk \
+RUN cd /project/TrustedComputeFramework/sdk \
    && python setup.py bdist_wheel \
    && pip3 install dist/*.whl
-
-#TODO need to be removed latter
-#install avalon-connect sdk python package
-RUN cd /project/TrustedComputeFramework/connector_sdk \
-    && python setup.py bdist_wheel \
-    && pip3 install dist/*.whl
 
 # Environment setup
 

@@ -25,9 +25,9 @@ import secrets
 
 import config.config as pconfig
 import utility.logger as plogger
-from utility.tcf_types import WorkerType
-import worker.worker_details as worker
-from work_order.work_order_params import WorkOrderParams
+from avalon_sdk.worker.worker_details import WorkerType
+import avalon_sdk.worker.worker_details as worker
+from avalon_sdk.work_order.work_order_params import WorkOrderParams
 from connectors.direct.direct_json_rpc_api_connector \
     import DirectJsonRpcApiConnector
 import verify_report.verify_attestation_report as attestation_util
@@ -79,7 +79,7 @@ def ParseCommandLine(args):
         if options.config:
                 conf_files = [options.config]
         else:
-                conf_files = [TCFHOME + "/examples/common/python/connectors/" +
+                conf_files = [TCFHOME + "/sdk/avalon_sdk/" +
                               "tcf_connector.toml"]
         confpaths = ["."]
         try:

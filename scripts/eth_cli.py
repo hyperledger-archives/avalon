@@ -20,7 +20,7 @@ import logging
 import os
 from os.path import exists, realpath
 
-from avalon_client_sdk.ethereum.ethereum_wrapper \
+from avalon_sdk.ethereum.ethereum_wrapper \
     import EthereumWrapper as ethereum_wrapper
 
 logging.basicConfig(
@@ -68,7 +68,7 @@ class eth_cli:
 def main():
     tcf_home = os.environ.get("TCF_HOME", "../../")
     eth = eth_cli(tcf_home +
-                  "/client_sdk/avalon_client_sdk/" + "tcf_connector.toml")
+                  "/sdk/avalon_sdk/" + "tcf_connector.toml")
     eth.deploy_contracts()
 
 if __name__ == '__main__':
