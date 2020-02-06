@@ -76,9 +76,25 @@ https://wiki.hyperledger.org/display/avalon/Hyperledger+Avalon
 
 Where are videos about Hyperledger Avalon?
 ------------------------------------------
-- `Hyperledger Avalon Heart Disease Demo (2019, 10:25) <https://youtu.be/6L_UOhi7Rxs>`_
-- `iExec, Microsoft and Intel present the TCF Trusted Compute Framework at
-  Devcon (EEA token & other uses) (2019, 1:38:18) <https://youtu.be/lveTxAQ6rmQ>`_
+- `Hyperledger Avalon
+  (Manoj Gopalakrishnan, 2019, 20 minutes, begins at 55:57)
+  <https://www.youtube.com/watch?v=N02vxA6qFPg&feature=youtu.be&t=3357>`_
+- `Hyperledger Avalon Developer Forum videos
+  <https://wiki.hyperledger.org/display/avalon/Meetings>`_
+  including:
+  - `Introduction to Hyperledger Avalon
+    (Eugene Yarmosh, 2019, 55:54)
+    <https://wiki.hyperledger.org/display/avalon/2019-12-03+Avalon+Introduction>`_
+  - `Hyperledger Avalon Developer Forum Kick-off
+    (Eugene Yarmosh, 2019, 31:56)
+    <https://wiki.hyperledger.org/display/avalon/2019-11-19+Kickoff>`_
+- `Hyperledger Avalon Heart Disease Demo
+  (Dan Anderson, 2019, 10:25)
+  <https://youtu.be/6L_UOhi7Rxs>`_
+- `iExec, Microsoft and Intel present Trusted Compute Framework [Avalon] at
+  Devcon (EEA token & other uses)
+  (Sanjay Bakshi and others, 2019, 1:38:18)
+  <https://youtu.be/lveTxAQ6rmQ>`_
 
 What is Trusted Compute Framework (TCF)?
 ----------------------------------------
@@ -187,11 +203,11 @@ the work order result.
 Docker and Containers
 =====================
 
-What is the purpose of using Docker, and what does it have to do with Intel SGX? I mean, are enclaves running in containers?
-----------------------------------------------------------------------------------------------------------------------------
+What is the purpose of using Docker, and what does it have to do with Intel SGX? I mean, are Intel SGX enclaves running in containers?
+--------------------------------------------------------------------------------------------------------------------------------------
 Docker is used only as a convenience. It has nothing to do with the Avalon
-security model or enclaves. Docker makes it easier to build and setup Avalon,
-but you can also build without Docker
+security model or Intel SGX enclaves. Docker makes it easier to
+build and setup Avalon, but you can also build without Docker
 (although it requires several more steps).
 
 
@@ -249,10 +265,11 @@ Avalon uses sealed data internally for storing private enclave signing and
 encryption keys.
 As result application specific data size is not dependent on the sealed data
 storage.
-It is indirectly limited by the maximum enclave size
+It is indirectly limited by the maximum Enclave Page Cache (EPC) size
 (enclave includes both data and code).
-The maximum enclave size is limited to 128Mbytes.
-Enclaves can be bigger but it results in swapping in and out of the enclave,
+The maximum EPC size is limited to 128 Mbytes on Intel Xeon E3 and
+256 Mbytes on Intel Xeon E Mehlow-R.
+The EPC can be bigger but it results in swapping in and out of the enclave,
 which greatly slows things down.
 
 Is there a SDK for work order submissions?
