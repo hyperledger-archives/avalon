@@ -136,7 +136,8 @@ The steps below will set up a Python virtual environment to run Avalon.
    cd $TCF_HOME/tools/build
    # Create virtual environment directory with name _dev
    python3 -m venv _dev
-   sudo make clean
+   make clean
+   pip3 install wheel
    make
    ```
 
