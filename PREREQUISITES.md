@@ -89,7 +89,7 @@ sudo apt-get install -y python3-venv
 
 Also, install the following pip3 packages:
 ```bash
-pip3 install --upgrade setuptools json-rpc py-solc web3 wheel
+pip3 install --upgrade setuptools json-rpc py-solc web3 colorlog twisted wheel
 ```
 
 # <a name="docker"></a>Docker
@@ -374,6 +374,7 @@ problems.
   Environment variable `SGX_MODE` must be set to `SIM` or `HW` .
   ```bash
   cd Linux
+  export SGX_MODE=${SGX_MODE:-SIM}
   make DESTDIR=/opt/intel/sgxssl all test
   sudo make install
   cd ../../..
