@@ -82,12 +82,14 @@ Where are videos about Hyperledger Avalon?
 - `Hyperledger Avalon Developer Forum videos
   <https://wiki.hyperledger.org/display/avalon/Meetings>`_
   including:
+
   - `Introduction to Hyperledger Avalon
     (Eugene Yarmosh, 2019, 55:54)
     <https://wiki.hyperledger.org/display/avalon/2019-12-03+Avalon+Introduction>`_
   - `Hyperledger Avalon Developer Forum Kick-off
     (Eugene Yarmosh, 2019, 31:56)
     <https://wiki.hyperledger.org/display/avalon/2019-11-19+Kickoff>`_
+
 - `Hyperledger Avalon Heart Disease Demo
   (Dan Anderson, 2019, 10:25)
   <https://youtu.be/6L_UOhi7Rxs>`_
@@ -199,6 +201,12 @@ That's normal operation. Currently only pull model is implemented by Avalon.
 The Client is expected to call ``WorkOrderGetResult`` periodically to poll
 the work order result.
 
+Where are error codes defined?
+------------------------------
+See file
+https://github.com/hyperledger/avalon/blob/master/common/python/error_code/error_status.py
+For example, workorder error 5 is ``PENDING``.
+
 
 Docker and Containers
 =====================
@@ -240,19 +248,22 @@ At high level you design an application so the core business part resides in
 the enclave, ensuring that even if your untrusted part is compromised the
 trusted part cannot be.
 
-Intel SGX guarantees code and data is kept private and that the results are
-correct with confidentiality and integrity mechanisms.
+Intel SGX is a set of instructions that increases the security of application
+code and data, giving them more protection from disclosure or modification.
+Developers can partition sensitive information into Intel SGX enclaves,
+which are areas of execution in memory with more security protection.
 
-The PDF link at this webpage gives a good technical overview of Intel SGX enclaves:
+The PDF link at this webpage gives a good technical overview of Intel SGX
+enclaves:
 https://software.intel.com/en-us/blogs/2016/06/06/overview-of-intel-software-guard-extension-enclave
-
 
 How can I create a TEE with Intel SGX using Avalon?
 ----------------------------------------------------------------------------------
 Start with the examples and tutorial at https://github.com/hyperledger/avalon/tree/master/docs#tutorial
-The technical details of Intel SGX enclaves are encapsulated in the Avalon libraries and Avalon Enclave Manager.
-If you want to learn about low-level details, I would look at the Intel SGX SDK and example programs.
-
+The technical details of Intel SGX enclaves are encapsulated in the
+Avalon libraries and Avalon Enclave Manager.
+If you want to learn about low-level details, I would look at the
+Intel SGX SDK and example programs.
 
 I get the message ``intel_sgx: SGX is not enabled`` in ``/var/log/syslog``
 --------------------------------------------------------------------------
