@@ -29,10 +29,10 @@ class WorkOrder(ABC):
                           work_order_request, id=None):
         """
         Submit work order request
-        work_order_id is unique id to identify the work order request
-        worker_id is identifer for the worker
-        requester_id is unique id to identify the requester
-        work_order_request is json string containing following parameters
+        work_order_id is a unique id to identify the work order request
+        worker_id is the identifier for the worker
+        requester_id is a unique id to identify the requester
+        work_order_request is a json string containing following parameters
         {
             "responseTimeoutMSecs": <integer>,
             "payloadFormat": <string>

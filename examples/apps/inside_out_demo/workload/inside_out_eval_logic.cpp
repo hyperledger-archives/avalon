@@ -84,18 +84,18 @@ std::string InsideOutEvalLogic::ProcessRequest(std::string str_in) {
                 file_io.SetFileName(args.at(1));
                 io_result = ReadFile(file_io);
             } else {
-                io_result = "Insuffient arguments passed for i/o operation";
+                io_result = "Insufficient arguments passed for i/o operation";
             }
         } else if (args.at(0) == "write") {
             if (args.size() == 3) {
                 file_io.SetFileName(args.at(1));
                 io_result = WriteFile(file_io, args.at(2));
             } else {
-                io_result = "Insuffient arguments passed for i/o operation";
+                io_result = "Insufficient arguments passed for i/o operation";
             }
         }
     } else {
-        io_result = "Insuffient arguments passed for i/o operation";
+        io_result = "Insufficient arguments passed for i/o operation";
     }
 
     return "RESULT: " + std::string(io_result.c_str());

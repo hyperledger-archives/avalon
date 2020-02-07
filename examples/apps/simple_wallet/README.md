@@ -8,7 +8,7 @@ on the ledger data.
 
 Generic command line client, `generic_client.py` sends an input request
 with transaction type, account identifier(s), and amount to the worker
-which stores stores wallet details in encypted ledger using inside-out API.
+which stores stores wallet details in encrypted ledger using inside-out API.
 The encrypted ledger data is then decrypted by the workload by making use of crypto functions.
 Once the balance is updated, the result is encrypted and written to ledger using file i/o.  
 Both encryption and decryption of the ledger data is achieved using symmetric encryption key generated 

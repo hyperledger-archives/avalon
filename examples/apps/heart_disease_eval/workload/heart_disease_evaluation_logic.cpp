@@ -199,7 +199,7 @@ double HeartDiseaseEvalLogic::score_ca(int number) {
 double HeartDiseaseEvalLogic::score_thaldur(int durationMin) {
     // Thallium stress test
     double score = 0.0;
-    // 3=normal, 6=fixed defect, 7=reversable defect
+    // 3=normal, 6=fixed defect, 7=reversible defect
     if ((durationMin >= 3) && (durationMin < 6))
         score = 45.0;
     else if ((durationMin >= 6) && (durationMin < 8))

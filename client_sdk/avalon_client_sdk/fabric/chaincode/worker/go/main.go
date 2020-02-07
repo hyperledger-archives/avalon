@@ -248,7 +248,7 @@ func (t *WorkerRegistry) workerLookUpNext(stub shim.ChaincodeStubInterface, args
 
 	if len(args) != 4 {
 		logger.Errorf("Expected parameters are 4, received %d", len(args))
-		return shim.Error("workerLookUpNext must include 4 argements, workerType, organizationID, applicationTypeId and lookupTag")
+		return shim.Error("workerLookUpNext must include 4 arguments, workerType, organizationID, applicationTypeId and lookupTag")
 	}
 
 	attrs, err := processAttributes(args[0:3], []string{UINT64FORMAT, BYTE32FORMAT, BYTE32FORMAT})

@@ -138,7 +138,7 @@ std::string SimpleWalletLogic::ProcessWalletRequest(std::string str_indata) {
                     transaction_result = DepositMoney(sw_io, args.at(1), args.at(2));
                 }
             } else {
-                transaction_result = "Insuffient arguments supplied to "
+                transaction_result = "Insufficient arguments supplied to "
                     "perform wallet operation";
             }
         } else if (args.at(0) == "transfer") {
@@ -149,7 +149,7 @@ std::string SimpleWalletLogic::ProcessWalletRequest(std::string str_indata) {
                     transaction_result = TransferMoney(sw_io, args.at(1), args.at(2), args.at(3));
                 }
             } else {
-                transaction_result = "Insuffient arguments supplied to "
+                transaction_result = "Insufficient arguments supplied to "
                     "perform wallet operation";
             }
         } else if (args.at(0) == "withdraw") {
@@ -160,12 +160,12 @@ std::string SimpleWalletLogic::ProcessWalletRequest(std::string str_indata) {
                     transaction_result = WithdrawMoney(sw_io, args.at(1), args.at(2));
                 }
             } else {
-                transaction_result = "Insuffient arguments supplied to "
+                transaction_result = "Insufficient arguments supplied to "
                     "perform wallet operation";
             }
         }
     } else {
-        transaction_result = "Insuffient arguments supplied to "
+        transaction_result = "Insufficient arguments supplied to "
             "perform wallet operation";
     }
 

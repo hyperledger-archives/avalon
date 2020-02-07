@@ -253,7 +253,7 @@ func (t *Registry) registryLookUpNext(stub shim.ChaincodeStubInterface, args []s
 
 	if len(args) != 2 {
 		logger.Errorf("Expected arguments are 2, received %d", len(args))
-		return shim.Error("registryLookUpNext must include 2 argements, appTypeId and lookUpTag")
+		return shim.Error("registryLookUpNext must include 2 arguments, appTypeId and lookUpTag")
 	}
 
 	attrs, _ := processAttributes(args[0:1], []string{BYTE32FORMAT})
