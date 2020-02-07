@@ -3,11 +3,15 @@ services:
   #
   # node1 is first of the two-node ethereum private network based on Hyperledger Besu
   #
-  node1.eea.org:
+  node1.avalon.org:
     image: hyperledger/besu:1.2.4
-    command: --data-path=/var/lib/besu --genesis-file=/var/lib/besu/genesis.json --rpc-http-enabled --rpc-http-host=0.0.0.0 --rpc-ws-enabled --rpc-ws-host=0.0.0.0 --discovery-enabled=false --p2p-host=0.0.0.0 --rpc-http-api=ETH,NET,WEB3,DEBUG,MINER,ADMIN,TXPOOL,CLIQUE --rpc-ws-api=ETH,NET,WEB3,DEBUG,MINER,ADMIN,TXPOOL,CLIQUE --rpc-http-cors-origins='*' --host-whitelist='*' --min-gas-price=0
+    command: >-
+      --data-path=/var/lib/besu --genesis-file=/var/lib/besu/genesis.json --rpc-http-enabled 
+      --rpc-http-host=0.0.0.0 --rpc-ws-enabled --rpc-ws-host=0.0.0.0 --discovery-enabled=false 
+      --p2p-host=0.0.0.0 --rpc-http-api=ETH,NET,WEB3,DEBUG,MINER,ADMIN,TXPOOL,CLIQUE 
+      --rpc-ws-api=ETH,NET,WEB3,DEBUG,MINER,ADMIN,TXPOOL,CLIQUE --rpc-http-cors-origins='*' 
+      --host-whitelist='*' --min-gas-price=0
     ports:
-      # RPC endpoint
       - 22011:8545
       # websocket endpoint (for subscribing to events)
       - 22002:8546
@@ -19,17 +23,20 @@ services:
 
   #
   # ethsigner1 is the signing wallet associated to node1, and provides an RPC endpoint for web3 APIs
-  # This account is used by the application as the EEA Admin signing account
+  # The signing account is 0x7085d4d4c6efea785edfba5880bb62574e115626
   #
-  rpc.node1.eea.org:
+  rpc.node1.avalon.org:
     image: pegasyseng/ethsigner
-    command: --chain-id=12345 --downstream-http-host=node1.eea.org --downstream-http-port=8545 --http-listen-host=0.0.0.0 --http-listen-port=8555 file-based-signer --password-file=/var/lib/ethsigner/password.txt --key-file=/var/lib/ethsigner/keystore/account.txt
+    command: >-
+      --chain-id=12345 --downstream-http-host=node1.avalon.org --downstream-http-port=8545 
+      --http-listen-host=0.0.0.0 --http-listen-port=8555 file-based-signer 
+      --password-file=/var/lib/ethsigner/password.txt --key-file=/var/lib/ethsigner/keystore/account.txt
     ports:
       - 22001:8555
     volumes:
       - './ethsigner/node1:/var/lib/ethsigner'
     depends_on:
-      - node1.eea.org
+      - node1.avalon.org
     networks:
       local_net:
         ipv4_address: '172.13.0.3'
@@ -37,11 +44,15 @@ services:
   #
   # node2 is the second of the two-node ethereum private network based on Hyperledger Besu
   #
-  node2.eea.org:
+  node2.avalon.org:
     image: hyperledger/besu:1.2.4
-    command: --data-path=/var/lib/besu --genesis-file=/var/lib/besu/genesis.json --rpc-http-enabled --rpc-http-host=0.0.0.0 --rpc-ws-enabled --rpc-ws-host=0.0.0.0 --discovery-enabled=false --p2p-host=0.0.0.0 --rpc-http-api=ETH,NET,WEB3,DEBUG,MINER,ADMIN,TXPOOL,CLIQUE --rpc-ws-api=ETH,NET,WEB3,DEBUG,MINER,ADMIN,TXPOOL,CLIQUE --rpc-http-cors-origins='*' --host-whitelist='*' --min-gas-price=0
+    command: >-
+      --data-path=/var/lib/besu --genesis-file=/var/lib/besu/genesis.json --rpc-http-enabled 
+      --rpc-http-host=0.0.0.0 --rpc-ws-enabled --rpc-ws-host=0.0.0.0 --discovery-enabled=false 
+      --p2p-host=0.0.0.0 --rpc-http-api=ETH,NET,WEB3,DEBUG,MINER,ADMIN,TXPOOL,CLIQUE 
+      --rpc-ws-api=ETH,NET,WEB3,DEBUG,MINER,ADMIN,TXPOOL,CLIQUE --rpc-http-cors-origins='*' 
+      --host-whitelist='*' --min-gas-price=0
     ports:
-      # RPC endpoint
       - 23011:8545
       # websocket endpoint (for subscribing to events)
       - 23002:8546
@@ -52,17 +63,21 @@ services:
         ipv4_address: '172.13.0.4'
 
   #
-  # ethsigner2 is a 2nd signing wallet associated to node1, and represents a signing account for organization 1
+  # ethsigner2 is a 2nd signing wallet associated to node1, and provides an RPC endpoint for web3 APIs
+  # The signing account is 0xb36b1934004385bfa5c51eaecb8ec348ec733ca8
   #
-  rpc.node2.eea.org:
+  rpc.node2.avalon.org:
     image: pegasyseng/ethsigner
-    command: --chain-id=12345 --downstream-http-host=node2.eea.org --downstream-http-port=8545 --http-listen-host=0.0.0.0 --http-listen-port=8555 file-based-signer --password-file=/var/lib/ethsigner/password.txt --key-file=/var/lib/ethsigner/keystore/account.txt
+    command: >-
+      --chain-id=12345 --downstream-http-host=node2.avalon.org --downstream-http-port=8545 
+      --http-listen-host=0.0.0.0 --http-listen-port=8555 file-based-signer 
+      --password-file=/var/lib/ethsigner/password.txt --key-file=/var/lib/ethsigner/keystore/account.txt
     ports:
       - 23001:8555
     volumes:
       - './ethsigner/node2:/var/lib/ethsigner'
     depends_on:
-      - node2.eea.org
+      - node2.avalon.org
     networks:
       local_net:
         ipv4_address: '172.13.0.5'
