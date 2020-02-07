@@ -37,7 +37,7 @@ start_avalon_components()
 
     if [ $START_STOP_KV_STORAGE = 1 ] ; then
         echo "Starting Avalon KV Storage $VERSION ..."
-        python3 $KV_STORAGE --bind $LMDB_URL & 
+        $KV_STORAGE --bind $LMDB_URL & 
         echo "Avalon KV Storage started"
     fi
     
