@@ -214,7 +214,7 @@ class WorkOrderReceipt(ABC):
         3. ids is an array of the Work Order receipt ids that match the input
         criteria from the corresponding call to work_order_receipt_lookup().
         Returns
-            tuple containg total count, look up tag and
+            tuple containing total count, look up tag and
             list of work order ids.
         """
         pass

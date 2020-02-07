@@ -26,5 +26,5 @@ Dir                     Content
 `sgx/workload/`         work_order_data.cpp,work_order_data.h files are wrapper files
                         for work order data   
                         workload_processor.cpp, workload_processor.h are workload processor
-                        which overrides function exposed by work order interface and also fecilitates
+                        which overrides function exposed by work order interface and also facilitates
                         auto registration of workloads

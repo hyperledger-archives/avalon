@@ -25,7 +25,7 @@ public:
     // given account in the ledger.
     std::string ledger_details;
 
-    // Symmetric encyption key to encrypt/decrypt ledger file
+    // Symmetric encryption key to encrypt/decrypt ledger file
     std::string ledger_encryption_key;
 
 };  // class SimpleWalletLedger

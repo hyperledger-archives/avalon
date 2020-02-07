@@ -170,7 +170,7 @@ func (t *WorkOrder) workOrderComplete(stub shim.ChaincodeStubInterface, args []s
 
 	wo, err := t.getOrderByID(stub, args[0])
 	if err != nil {
-		logger.Errorf("Could not find the work orger by the id %s", args[0])
+		logger.Errorf("Could not find the work order by the id %s", args[0])
 		return shim.Error(err.Error())
 	}
 	logger.Infof("The work order ID: %s", wo.WorkOrderId)
@@ -230,7 +230,7 @@ func (t *WorkOrder) workOrderGet(stub shim.ChaincodeStubInterface, args []string
 
 	wo, err := t.getOrderByID(stub, args[0])
 	if err != nil {
-		logger.Errorf("Could not find the work orger by the id %s", args[0])
+		logger.Errorf("Could not find the work order by the id %s", args[0])
 		return shim.Error(err.Error())
 	}
 	logger.Infof("The work order ID: %s", wo.WorkOrderId)

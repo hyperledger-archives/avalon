@@ -27,7 +27,7 @@ SimpleWallet::SimpleWallet() {
 
     // Create encryption key to encrypt or decrypt wallet ledger
     sw_io.CreateLedgerEncryptionKey();
-    Log(TCF_LOG_INFO, "Symmetric ledger encypion key successful");
+    Log(TCF_LOG_INFO, "Symmetric ledger encryption key creation successful");
 }
 
 SimpleWallet::~SimpleWallet() {}
