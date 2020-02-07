@@ -32,7 +32,9 @@ tools/build/_dev/
 
 # test environment runtime files
 docs/dev-environments/besu/besu/node1/database
+docs/dev-environments/besu/besu/node1/DATABASE_METADATA.json
 docs/dev-environments/besu/besu/node2/database
+docs/dev-environments/besu/besu/node2/DATABASE_METADATA.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
