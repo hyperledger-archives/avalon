@@ -60,6 +60,14 @@ function try() {
     "$@" || die "test failed: $*"
 }
 
+check_error()
+{
+    if [ "$?" = "1" ]; then
+        echo "Directory doesn't exist!" 1>&2
+        exit 1
+    fi
+}
+
 # -----------------------------------------------------------------
 # CHECK ENVIRONMENT
 # -----------------------------------------------------------------
@@ -134,6 +142,7 @@ NUM_CORES=1
 
 yell --------------- "COMMON SGX (WORKLOAD & IOHANDLER)" ---------------
 cd $TCF_HOME/common/sgx_workload/
+check_error
 
 mkdir -p build
 cd build
@@ -142,6 +151,7 @@ try make "-j$NUM_CORES"
 
 yell --------------- EXAMPLE WORKLOADS ---------------
 cd $TCF_HOME/examples/apps
+check_error
 
 mkdir -p build
 cd build
@@ -150,6 +160,7 @@ try make "-j$NUM_CORES"
 
 yell --------------- COMMON CPP ---------------
 cd $TCF_HOME/common/cpp
+check_error
 
 mkdir -p build
 cd build
@@ -158,6 +169,7 @@ try make "-j$NUM_CORES"
 
 yell --------------- TRUSTED WORKER MANAGER COMMON ---------------
 cd $TCF_HOME/tc/sgx/trusted_worker_manager/common
+check_error
 
 mkdir -p build
 cd build
@@ -166,6 +178,7 @@ try make "-j$NUM_CORES"
 
 yell --------------- ENCLAVE ---------------
 cd $TCF_HOME/tc/sgx/trusted_worker_manager/enclave
+check_error
 
 mkdir -p build
 cd build
@@ -174,6 +187,7 @@ try make "-j$NUM_CORES"
 
 yell --------------- ENCLAVE BRIDGE---------------
 cd $TCF_HOME/tc/sgx/trusted_worker_manager/enclave_untrusted/enclave_bridge
+check_error
 
 mkdir -p build
 cd build
@@ -182,21 +196,29 @@ try make "-j$NUM_CORES"
 
 yell --------------- EXAMPLES COMMON PYTHON ---------------
 cd $TCF_HOME/common/python
+check_error
+
 try make "-j$NUM_CORES"
 try make install
 
 yell --------------- ENCLAVE MANAGER ---------------
 cd $TCF_HOME/examples/enclave_manager
+check_error
+
 try make "-j$NUM_CORES"
 try make install
 
 yell --------------- AVALON SDK ---------------
 cd $TCF_HOME/sdk
+check_error
+
 try python3 setup.py bdist_wheel
 try pip3 install dist/*.whl
 
 yell --------------- LMDB LISTENER ---------------
 cd $TCF_HOME/shared_kv_storage/db_store/packages
+check_error
+
 mkdir -p build
 cd build
 try cmake ..
@@ -204,6 +226,8 @@ try make
 
 yell --------------- SHARED KV STORAGE ---------------
 cd $TCF_HOME/shared_kv_storage
+check_error
+
 try make
 try make install
 
