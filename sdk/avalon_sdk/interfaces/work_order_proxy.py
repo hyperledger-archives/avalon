@@ -37,7 +37,7 @@ class WorkOrderProxy(ABC, WorkOrder):
             If it is zero, the transaction sender's address
             is used as a tag.
         Returns
-        errorCode is a result of operation.
+            An error code, 0 - success, otherwise an error.
         """
         pass
 
@@ -51,6 +51,6 @@ class WorkOrderProxy(ABC, WorkOrder):
             work_order_id is unique id to identify the work order request
             work_order_response is the Work Order response data in string
         Returns
-        errorCode is a result of operation.
+            An error code, 0 - success, otherwise an error.
         """
         pass

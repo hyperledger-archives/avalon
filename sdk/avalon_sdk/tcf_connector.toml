@@ -31,11 +31,20 @@ type = "Ethereum"
 direct_registry_contract_file = "sdk/avalon_sdk/ethereum/contracts/WorkerRegistryList.sol"
 #Worker registry contract file
 worker_registry_contract_file = "sdk/avalon_sdk/ethereum/contracts/WorkerRegistry.sol"
+#Proxy worker registry contract file
+proxy_worker_registry_contract_file = "sdk/avalon_sdk/ethereum/contracts/proxy-model/WorkerRegistry.sol"
+#Worker registry contract file
+work_order_contract_file = "sdk/avalon_sdk/ethereum/contracts/proxy-model/WorkerOrderRegistry.sol"
+
+#Initially deploy the contracts using eth_cli.py to get the these addresses
 #Deployed contract address of direct registry contract address.
-#Initial deploy the contract using eth_cli.py to get the this address
 direct_registry_contract_address = "0xD5A613945DE851C7c2f83fFDA4de0aE01CE980c0"
 #Deployed contract address of worker registry contract address.
 worker_registry_contract_address = "0x523748D492AfEEC90767403Da7C1e86feBB10435"
+#Deployed contract address of direct registry contract address.
+proxy_worker_registry_contract_address = "0xD5A613945DE851C7c2f83fFDA4de0aE01CE980c0"
+#Deployed contract address of worker registry contract address.
+work_order_contract_address = "0x523748D492AfEEC90767403Da7C1e86feBB10435"
 
 #Ethereum account details
 eth_account = "0xDcB780ea30C1041abfcCCE4233c275B9F313eAf4"
