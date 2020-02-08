@@ -67,10 +67,10 @@ class EthereumWorkerRegistryListImpl(WorkerRegistryList):
                         "Invalid application type id {}".format(app_type_id))
                     return None
             else:
-                lookupResult = \
+                lookup_result = \
                     self.__contract_instance.functions.registryLookUp(b"") \
                     .call()
-            return lookupResult
+            return lookup_result
         else:
             logging.error(
                 "direct registry contract instance is not initialized")
@@ -95,10 +95,10 @@ class EthereumWorkerRegistryListImpl(WorkerRegistryList):
                 logging.info("Invalid Org id {}".format(org_id))
                 return None
             else:
-                registryDetails = \
+                registry_details = \
                     self.__contract_instance.functions.registryRetrieve(
                         org_id).call()
-                return registryDetails
+                return registry_details
         else:
             logging.error(
                 "direct registry contract instance is not initialized")
@@ -128,10 +128,10 @@ class EthereumWorkerRegistryListImpl(WorkerRegistryList):
         """
         if (self.__contract_instance is not None):
             if is_valid_hex_str(binascii.hexlify(app_type_id).decode("utf8")):
-                lookupResult = \
+                lookup_result = \
                     self.__contract_instance.functions.registryLookUpNext(
                         app_type_id, lookup_tag).call()
-                return lookupResult
+                return lookup_result
             else:
                 logging.info(
                     "Invalid application type id {}".format(app_type_id))
@@ -200,13 +200,13 @@ class EthereumWorkerRegistryListImpl(WorkerRegistryList):
                     logging.info("Invalid application id {}".format(aid))
                     return None
 
-            txn_statusn_hash = self.__contract_instance.functions.registryAdd(
+            txn_dict = self.__contract_instance.functions.registryAdd(
                 org_id, uri, org_id, app_type_ids).buildTransaction(
                     self.__eth_client.get_transaction_params()
             )
-            txn_status = self.__eth_client.execute_transaction(
-                txn_statusn_hash)
-            return txn_status
+            txn_receipt = self.__eth_client.execute_transaction(
+                txn_dict)
+            return txn_receipt
         else:
             logging.error(
                 "direct registry contract instance is not initialized")
@@ -245,15 +245,15 @@ class EthereumWorkerRegistryListImpl(WorkerRegistryList):
                     logging.error("Invalid application id {}".format(aid))
                     return None
 
-            txn_statusn_hash = \
+            txn_dict = \
                 self.__contract_instance.functions.registryUpdate(
                     org_id, uri, sc_addr,
                     app_type_ids).buildTransaction(
                         self.__eth_client.get_transaction_params()
                         )
-            txn_status = self.__eth_client.execute_transaction(
-                txn_statusn_hash)
-            return txn_status
+            txn_receipt = self.__eth_client.execute_transaction(
+                txn_dict)
+            return txn_receipt
         else:
             logging.error(
                 "direct registry contract instance is not initialized")
@@ -280,15 +280,15 @@ class EthereumWorkerRegistryListImpl(WorkerRegistryList):
             if not isinstance(status, RegistryStatus):
                 logging.info("Invalid registry status {}".format(status))
                 return None
-            txn_statusn_hash = \
+            txn_dict = \
                 self.__contract_instance.functions.registrySetStatus(
                     org_id,
                     status.value).buildTransaction(
                         self.__eth_client.get_transaction_params()
                         )
-            txn_status = self.__eth_client.execute_transaction(
-                txn_statusn_hash)
-            return txn_status
+            txn_receipt = self.__eth_client.execute_transaction(
+                txn_dict)
+            return txn_receipt
         else:
             logging.error(
                 "direct registry contract instance is not initialized")

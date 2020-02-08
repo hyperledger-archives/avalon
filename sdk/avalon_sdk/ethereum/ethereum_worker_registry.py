@@ -14,6 +14,7 @@
 
 import binascii
 import logging
+import json
 from os import environ
 
 from utility.hex_utils import is_valid_hex_str
@@ -30,9 +31,8 @@ logging.basicConfig(
 
 class EthereumWorkerRegistryImpl(WorkerRegistry):
     """
-    This class provide worker APIs which interact with
-    Ethereum blockchain. Detail method description will be
-    available in interface
+    This class is meant to set/get worker related information to/from Ethereum
+    blockchain. Detailed method description is available in the interface.
     """
 
     def __init__(self, config):
@@ -43,27 +43,54 @@ class EthereumWorkerRegistryImpl(WorkerRegistry):
 
     def worker_lookup(self, worker_type, org_id, application_id):
         """
-        Lookup a worker identified worker_type, org_id and application_id
-        all fields are optional and if present condition should match for all
-        fields. If none passed it should return all workers.
-        Returns tuple containing workers count, lookup tag and list of
-        worker ids or on error returns None.
+        Initiating Worker lookup
+        This function retrieves a list of Worker ids that match the input
+        parameters.
+        The Worker must match all input parameters (AND mode) to be included
+        in the list.
+        If the list is too large to fit into a single response (the maximum
+        number of entries in a single response is implementation specific),
+        the smart contract should return the first batch of the results
+        and provide a lookupTag that can be used by the caller to
+        retrieve the next batch by calling worker_lookup_next.
+
+        All input parameters are optional and can be provided in any
+        combination to select Workers.
+
+        Inputs
+        1. worker_type is a characteristic of Workers for which you may wish
+        to search
+        2. organization_id is an id of an organization that can be used to
+        search for one or more Workers that belong to this organization
+        3. application_type_id is an application type that is supported by
+        the Worker
+
+        Returns
+        1. total_count is a total number of entries matching a specified
+        lookup criteria. If this number is bigger than size of ids array,
+        the caller should use lookupTag to call workerLookUpNext to
+        retrieve the rest of the ids.
+        2. lookup_tag is an optional parameter. If it is returned, it means
+        that there are more matching Worker ids that can be retrieved by
+        calling function workerLookUpNext with this tag as an input parameter.
+        3. ids is an array of the Worker ids that match the input parameters.
         """
+
         if (self.__contract_instance is not None):
             if not isinstance(worker_type, WorkerType):
-                logging.info("Invalid workerType {}".format(worker_type))
+                logging.error("Invalid workerType {}".format(worker_type))
                 return None
             if not is_valid_hex_str(binascii.hexlify(org_id).decode("utf8")):
-                logging.info("Invalid organization id {}".format(org_id))
+                logging.error("Invalid organization id {}".format(org_id))
                 return None
             if not is_valid_hex_str(
                     binascii.hexlify(application_id).decode("utf8")):
-                logging.info(
+                logging.error(
                     "Invalid application id {}".format(application_id))
                 return None
-            lookupResult = self.__contract_instance.functions.workerLookUp(
+            lookup_result = self.__contract_instance.functions.workerLookUp(
                 worker_type.value, org_id, application_id).call()
-            return lookupResult
+            return lookup_result
         else:
             logging.error(
                 "worker registry contract instance is not initialized")
@@ -71,21 +98,24 @@ class EthereumWorkerRegistryImpl(WorkerRegistry):
 
     def worker_retrieve(self, worker_id):
         """
-        Retrieve the worker identified by worker id
-        Returns tuple containing worker status, worker type,
-        organization id, list of application ids and worker
-        details(json string)
-        On error returns None
+        Retrieve worker by worker id
+        Inputs
+        1. worker_id is the id of the registry whose details are requested.
+        Returns:
+        The same as the input parameters to the corresponding call to
+        worker_register()
+        plus status as defined in worker_set_status.
         """
+
         if (self.__contract_instance is not None):
             if not is_valid_hex_str(binascii.hexlify(
                     worker_id).decode("utf8")):
-                logging.info("Invalid worker id {}".format(worker_id))
+                logging.error("Invalid worker id {}".format(worker_id))
                 return None
 
-            workerDetails = self.__contract_instance.functions.workerRetrieve(
+            worker_details = self.__contract_instance.functions.workerRetrieve(
                 worker_id).call()
-            return workerDetails
+            return worker_details
         else:
             logging.error(
                 "worker registry contract instance is not initialized")
@@ -103,9 +133,8 @@ class EthereumWorkerRegistryImpl(WorkerRegistry):
         by the Worker.
         4. lookup_tag is returned by a previous call to either this function
         or to worker_lookup.
-        5. id is used for json rpc request
 
-        Outputs tuple containing following.
+        Returns:
         1. total_count is a total number of entries matching this lookup
         criteria.  If this number is larger than the number of ids returned
         so far, the caller should use lookupTag to call workerLookUpNext to
@@ -114,27 +143,161 @@ class EthereumWorkerRegistryImpl(WorkerRegistry):
         means that there are more matching Worker ids than can be retrieved
         by calling this function again with this tag as an input parameter.
         3. ids is an array of the Worker ids that match the input parameters.
-        On error returns None.
         """
+
         if (self.__contract_instance is not None):
             if not isinstance(worker_type, WorkerType):
-                logging.info("Invalid workerType {}".format(worker_type))
+                logging.error("Invalid workerType {}".format(worker_type))
                 return None
             if not is_valid_hex_str(binascii.hexlify(org_id).decode("utf")):
-                logging.info("Invalid organization id {}".format(org_id))
+                logging.error("Invalid organization id {}".format(org_id))
                 return None
             if not is_valid_hex_str(
                     binascii.hexlify(application_id).decode("utf8")):
-                logging.info("Invalid application id {}".format(org_id))
+                logging.error("Invalid application id {}".format(org_id))
                 return None
-            lookupResult = self.__contract_instance.functions.workerLookUpNext(
+            lookup_result = self.__contract_instance.functions
+            .workerLookUpNext(
                 worker_type.value,
                 org_id, application_id, lookup_tag).call()
-            return lookupResult
+            return lookup_result
         else:
             logging.error(
                 "worker registry contract instance is not initialized")
             return None
+
+    def worker_register(self, worker_id, worker_type, organization_id,
+                        application_type_ids, details):
+        """
+        Registering a New Worker
+        Inputs
+        1. worker_id is a worker id, e.g. an Ethereum address or
+        a value derived from the worker's DID.
+        2. worker_type defines the type of Worker. Currently defined types are:
+            1. indicates "TEE-SGX": an Intel SGX Trusted Execution Environment
+            2. indicates "MPC": Multi-Party Compute
+            3. indicates "ZK": Zero-Knowledge
+        3. organization_id is an optional parameter representing the
+        organization that hosts the Worker, e.g. a bank in the consortium or
+        anonymous entity.
+        4. application_type_ids is an optional parameter that defines
+        application types supported by the Worker.
+        5. details is detailed information about the worker in JSON format as
+        defined in
+        https://entethalliance.github.io/trusted-computing/spec.html
+        #common-data-for-all-worker-types
+        """
+
+        if (self.__contract_instance is not None):
+            if not is_valid_hex_str(binascii
+                                    .hexlify(worker_id).decode("utf8")):
+                logging.error("Invalid worker id {}".format(worker_id))
+                return None
+            if not isinstance(worker_type, WorkerType):
+                logging.error("Invalid workerType {}".format(worker_type))
+                return None
+            if not is_valid_hex_str(binascii
+                                    .hexlify(organization_id).decode("utf8")):
+                logging.error("Invalid organization id {}"
+                              .format(orgnization_id))
+                return None
+            for app_id in app_type_ids:
+                if not is_valid_hex_str(binascii
+                                        .hexlify(app_id).decode("utf8")):
+                    logging.error("Invalid application id {}".format(app_id))
+                    return None
+            if details is not None:
+                worker = WorkerDetails()
+                is_valid = worker.validate_worker_details(details)
+                if is_valid is not None:
+                    logging.error(
+                        "Worker details not valid : {}".format(is_valid))
+                    return None
+
+            txn_dict = self.__contract_instance.functions.workerRegister(
+                worker_type, organization_id, application_type_ids, details)
+            .buildTransaction(self.__eth_client
+                              .get_transaction_params())
+            txn_receipt = self.__eth_client.execute_transaction(
+                txn_dict)
+            return txn_receipt
+        else:
+            logging.error(
+                "worker registry contract instance is not initialized")
+            return None
+
+    def worker_update(self, worker_id, details):
+        """
+        Updating a Worker
+        Inputs
+        1. worker_id is a worker id, e.g. an Ethereum address or
+        a value derived from the worker's DID.
+        2. details is detailed information about the worker in JSON format
+        """
+
+        if (self.__contract_instance is not None):
+            if not is_valid_hex_str(binascii
+                                    .hexlify(worker_id).decode("utf8")):
+                logging.error("Invalid worker id {}".format(worker_id))
+                return None
+            if details is not None:
+                worker = WorkerDetails()
+                is_valid = worker.validate_worker_details(details)
+                if is_valid is not None:
+                    logging.error(
+                        "Worker details not valid : {}".format(is_valid))
+                    return None
+
+            txn_dict = self.__contract_instance.functions.workerUpdate(
+                worker_id, details)
+            .buildTransaction(self.__eth_client.get_transaction_params())
+            txn_receipt = self.__eth_client.execute_transaction(
+                txn_dict)
+            return txn_receipt
+        else:
+            logging.error(
+                "worker registry contract instance is not initialized")
+            return None
+
+    def worker_set_status(self, worker_id, status):
+        """
+        Set the worker status identified by worker id
+        Inputs
+        1. worker_id is a worker id
+        2. status defines Worker status. The currently defined values are:
+            1 - indicates that the worker is active
+            2 - indicates that the worker is "off-line" (temporarily)
+            3 - indicates that the worker is decommissioned
+            4 - indicates that the worker is compromised
+        """
+
+        if (self.__contract_instance is not None):
+            if not is_valid_hex_str(binascii
+                                    .hexlify(worker_id).decode("utf8")):
+                logging.error("Invalid worker id {}".format(worker_id))
+                return None
+            if not isinstance(status, WorkerStatus):
+                logging.error("Invalid workerStatus {}".format(status))
+                return None
+
+            txn_dict = self.__contract_instance.functions.workerSetStatus(
+                worker_id, status)
+            .buildTransaction(self.__eth_client.get_transaction_params())
+            txn_receipt = self.__eth_client.execute_transaction(
+                txn_dict)
+            return txn_receipt
+        else:
+            logging.error(
+                "worker registry contract instance is not initialized")
+            return None
+
+    def _is_valid_json(self, json_string):
+        try:
+            json.loads(json_string)
+        except ValueError as e:
+            logging.error(e)
+            return False
+        return True
 
     def __validate(self, config):
         """
@@ -162,122 +325,3 @@ class EthereumWorkerRegistryImpl(WorkerRegistry):
         self.__contract_instance = self.__eth_client.get_contract_instance(
             contract_file_name, contract_address
         )
-
-    def worker_register(
-            self, worker_id, worker_type, org_id, application_ids, details):
-        """
-        Register new worker with details of worker
-        Inputs
-        1. worker_id is a worker id, e.g. an Ethereum address or
-        a value derived from the worker's DID.
-        2. worker_type defines the type of Worker. Currently defined types are:
-            1. indicates "TEE-SGX": an Intel SGX Trusted Execution Environment
-            2. indicates "MPC": Multi-Party Compute
-            3. indicates "ZK": Zero-Knowledge
-        3. organization_id is an optional parameter representing the
-        organization that hosts the Worker, e.g. a bank in the consortium or
-        anonymous entity.
-        4. application_type_ids is an optional parameter that defines
-        application types supported by the Worker.
-        5. details is detailed information about the worker in JSON format as
-        defined in
-        https://entethalliance.github.io/trusted-computing/spec.html
-        #common-data-for-all-worker-types
-        Returns transaction receipt on success or None on error.
-        """
-        if (self.__contract_instance is not None):
-            if not is_valid_hex_str(
-                    binascii.hexlify(worker_id).decode("utf8")):
-                logging.info("Invalid worker id {}".format(worker_id))
-                return None
-            if not isinstance(worker_type, WorkerType):
-                logging.info("Invalid workerType {}".format(worker_type))
-                return None
-            if not is_valid_hex_str(binascii.hexlify(org_id).decode("utf8")):
-                logging.info("Invalid organization id {}".format(org_id))
-                return None
-            for aid in application_ids:
-                if not is_valid_hex_str(binascii.hexlify(aid).decode("utf8")):
-                    logging.info("Invalid application id {}".format(aid))
-                    return None
-            if details is not None:
-                worker = WorkerDetails()
-                is_valid = worker.validate_worker_details(details)
-                if is_valid is not None:
-                    return None
-
-            txn_statusn_hash = \
-                self.__contract_instance.functions.workerRegister(
-                    worker_id, worker_type.value, org_id, application_ids,
-                    details).buildTransaction(
-                        self.__eth_client.get_transaction_params()
-                        )
-            txn_status = self.__eth_client.execute_transaction(
-                txn_statusn_hash)
-            return txn_status
-        else:
-            logging.error(
-                "worker registry contract instance is not initialized")
-            return None
-
-    def worker_set_status(self, worker_id, status):
-        """
-        Set the registry status identified by worker id
-        status is worker type enum type
-        Returns transaction receipt on success or None on error.
-        """
-        if (self.__contract_instance is not None):
-            if not is_valid_hex_str(binascii.hexlify(
-                    worker_id).decode("utf8")):
-                logging.info("Invalid worker id {}".format(worker_id))
-                return None
-            if not isinstance(status, WorkerStatus):
-                logging.info("Invalid worker status {}".format(status))
-                return None
-            txn_statusn_hash = \
-                self.__contract_instance.functions.workerSetStatus(
-                    worker_id,
-                    status.value).buildTransaction(
-                        self.__eth_client.get_transaction_params()
-                        )
-            txn_status = self.__eth_client.execute_transaction(
-                txn_statusn_hash)
-            return txn_status
-        else:
-            logging.error(
-                "worker registry contract instance is not initialized")
-            return None
-
-    def worker_update(self, worker_id, details):
-        """
-        Update the worker with details data which is json string
-        Updating a Worker
-        Inputs
-        1. worker_id is a worker id, e.g. an Ethereum address or
-        a value derived from the worker's DID.
-        2. details is detailed information about the worker in JSON format
-        Returns transaction receipt on success or None on error.
-        """
-        if (self.__contract_instance is not None):
-            if not is_valid_hex_str(binascii.hexlify(
-                    worker_id).decode("utf8")):
-                logging.error("Invalid worker id {}".format(worker_id))
-                return None
-            if details is not None:
-                worker = WorkerDetails()
-                is_valid = worker.validate_worker_details(details)
-                if is_valid is not None:
-                    logging.error(is_valid)
-                    return None
-            txn_statusn_hash = self.__contract_instance.functions.workerUpdate(
-                worker_id,
-                details).buildTransaction(
-                    self.__eth_client.get_transaction_params()
-            )
-            txn_status = self.__eth_client.execute_transaction(
-                txn_statusn_hash)
-            return txn_status
-        else:
-            logging.error(
-                "worker registry contract instance is not initialized")
-            return None

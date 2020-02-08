@@ -151,6 +151,8 @@ class WorkOrder(ABC):
         17. outData contains information about what and how the work order
         execution results should be delivered. Same as inData
         18. id is used for json rpc request
+        Output(Only in case of proxy-model)
+        errorCode is an error code, 0 - success, otherwise an error.
         """
         pass
 
@@ -234,3 +236,4 @@ class WorkOrder(ABC):
         Returns
             error code is the result of the operation.
         """
+        pass
