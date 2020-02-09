@@ -50,7 +50,7 @@ RUN ln -sf /usr/bin/python3 /usr/bin/python
 COPY . /project/avalon/
 
 # Build lmdb c++ module
-RUN cd /project/avalon/examples/shared_kv_storage/db_store/packages \
+RUN cd /project/avalon/shared_kv_storage/db_store/packages \
    && mkdir -p build \
    && cd build \
    && cmake .. \
@@ -59,7 +59,7 @@ RUN cd /project/avalon/examples/shared_kv_storage/db_store/packages \
 
 # Build lmdb server module next.
 
-WORKDIR /project/avalon/examples/shared_kv_storage/
+WORKDIR /project/avalon/shared_kv_storage/
 
 RUN echo "Building avalon lmdb server\n" \
    && make \

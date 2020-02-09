@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from os import sys,environ
+from os import sys, environ
 from twisted.web import resource, http
 from kv_storage.remote_lmdb.string_escape import escape, unescape
 from kv_storage.remote_lmdb.shared_kv_dbstore import KvDBStore
@@ -20,7 +20,8 @@ from kv_storage.remote_lmdb.shared_kv_dbstore import KvDBStore
 
 import logging
 
-logging.basicConfig(format="%(asctime)s - %(levelname)s - %(message)s", level=logging.INFO)
+logging.basicConfig(
+    format="%(asctime)s - %(levelname)s - %(message)s", level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 TCFHOME = environ.get("TCF_HOME", "../../../../")
@@ -28,10 +29,8 @@ lookup_flag = False
 
 
 class LMDBRequestHandler(resource.Resource):
-    """
-    LMDBRequestHandler is comprised of HTTP interface which
-    listens for calls to LMDB
-    """
+    """LMDBRequestHandler is comprised of HTTP interface which listens for
+    calls to LMDB."""
     # The isLeaf instance variable describes whether or not
     # a resource will have children and only leaf resources get rendered.
     # LMDBRequestHandler is the most derived class hence isLeaf is required.
@@ -122,7 +121,8 @@ class LMDBRequestHandler(resource.Resource):
                 if len(args) == 3:
                     result = self.kv_helper.remove(args[1], args[2])
                 else:
-                    result = self.kv_helper.remove(args[1], args[2], value=args[3])
+                    result = self.kv_helper.remove(
+                        args[1], args[2], value=args[3])
                 # Remove successful (returned True)
                 if result:
                     response = "t"
@@ -142,7 +142,7 @@ class LMDBRequestHandler(resource.Resource):
     def render_GET(self, request):
         response = 'Only POST request is supported'
         logger.error("GET request is not supported." +
-            " Only POST request is supported")
+                     " Only POST request is supported")
 
         return response
 
@@ -162,9 +162,9 @@ class LMDBRequestHandler(resource.Resource):
                 response = 'UNKNOWN_ERROR: unknown message encoding'
                 return response
 
-        except:
+        except Exception:
             logger.exception('exception while decoding http request %s',
-                request.path)
+                             request.path)
             response = 'UNKNOWN_ERROR: unable to decode incoming request '
             return response
 
@@ -175,9 +175,9 @@ class LMDBRequestHandler(resource.Resource):
             request.setResponseCode(http.OK)
             return response.encode('utf-8')
 
-        except:
+        except Exception:
             logger.exception('unknown exception while processing request %s',
-                request.path)
+                             request.path)
             response = 'UNKNOWN_ERROR: unknown exception processing ' + \
                 'http request {0}'.format(request.path)
             return response
