@@ -15,7 +15,7 @@
 # Set SGX_MODE default (which can be overridden with an environment variable):
 
 PY_VERSION=${shell python3 --version | sed 's/Python \(3\.[0-9]\).*/\1/' | tr -d .}
-MOD_VERSION=${shell ../../bin/get_version}
+MOD_VERSION=${shell ../bin/get_version}
 
 WHEEL_FILE=dist/kv_storage-${MOD_VERSION}-cp${PY_VERSION}-cp${PY_VERSION}m-linux_x86_64.whl
 

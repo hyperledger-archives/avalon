@@ -26,7 +26,7 @@ FILE(GLOB PROJECT_SOURCES *.cpp $ENV{TCF_HOME}/common/cpp/c11_support.cpp
 $ENV{TCF_HOME}/common/cpp/packages/base64/*.cpp)
 
 SET(COMMON_PRIVATE_INCLUDE_DIRS "." $ENV{TCF_HOME}/common/cpp
-$ENV{TCF_HOME}/common/cpp/packages/base64 $ENV{TCF_HOME}/examples/shared_kv_storage/db_store)
+$ENV{TCF_HOME}/common/cpp/packages/base64 $ENV{TCF_HOME}/shared_kv_storage/db_store)
 SET(COMMON_CXX_FLAGS ${DEBUG_FLAGS} "-m64" "-fvisibility=hidden" "-fpie" "-fPIC"
 "-fstack-protector" "-std=c++11" "-Wall")
 

@@ -275,5 +275,6 @@ lint_module common                   "$SINCE" 1  0   0  1 || rv=1
 lint_module docs/workload-tutorial   "$SINCE" 0  0   0  1 || rv=1
 lint_module sdk                      "$SINCE" 1  0   0  0 || rv=1
 lint_module listener                 "$SINCE" 1  0   0  0 || rv=1
+lint_module shared_kv_storage        "$SINCE" 1  0   0  1 || rv=1
 
 exit $rv

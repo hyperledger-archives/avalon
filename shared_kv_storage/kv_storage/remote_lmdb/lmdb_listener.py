@@ -41,13 +41,14 @@ def local_main(config, host_name, port):
     except ReactorNotRunning:
         del root
         logger.warn('shutdown')
-    except:
+    except Exception:
         del root
         logger.warn('shutdown')
 
     exit(0)
 
 # -----------------------------------------------------------------
+
 
 def parse_bind_url(url):
     """
@@ -63,12 +64,12 @@ def parse_bind_url(url):
         scheme = parsed_str.scheme
         host_name = parsed_str.hostname
         port = parsed_str.port
-        if (port is None or \
-            scheme is None or \
-            host_name is None) and scheme != 'http':
-                logger.error("Bind url should be format {} {} {} \
-                    http://<hostname>:<port>".format(scheme,host_name,port))
-                sys.exit(-1)
+        if (port is None or
+            scheme is None or
+                host_name is None) and scheme != 'http':
+            logger.error("Bind url should be format {} {} {} \
+                    http://<hostname>:<port>".format(scheme, host_name, port))
+            sys.exit(-1)
     except ValueError as e:
         logger.error("Wrong url format {}".format(e))
         logger.error("Bind url should be format \
@@ -77,20 +78,20 @@ def parse_bind_url(url):
     return host_name, port
 
 
-
-
 def parse_command_line(config, args):
 
     parser = argparse.ArgumentParser()
 
     parser.add_argument('--logfile',
-                        help='Name of the log file, __screen__ for standard output',
+                        help='Name of the log file, \
+                              __screen__ for standard output',
                         type=str)
     parser.add_argument('--loglevel',
                         help='Logging level',
                         type=str)
     parser.add_argument('--bind',
-                        help='identify host and port for lmdb server to run on',
+                        help='identify host and port for \
+                              lmdb server to run on',
                         type=str)
 
     options = parser.parse_args(args)
@@ -108,7 +109,7 @@ def parse_command_line(config, args):
         host_name, port = parse_bind_url(options.bind)
     else:
         if config.get("KvStorage") is None or \
-            config["KvStorage"].get("bind") is None:
+                config["KvStorage"].get("bind") is None:
             logger.warn("quit due to no suitable config for remote KvStorage")
             sys.exit(-1)
         host_name, port = parse_bind_url(
@@ -116,15 +117,15 @@ def parse_command_line(config, args):
     return host_name, port
 # -----------------------------------------------------------------
 
+
 def get_config_dir():
-    """
-    Returns the avalon configuration directory based on the
-    TCF__HOME environment variable (if set) or OS defaults.
-    """
+    """Returns the avalon configuration directory based on the TCF__HOME
+    environment variable (if set) or OS defaults."""
     if 'TCF_HOME' in os.environ:
-        return os.path.join(os.environ['TCF_HOME'], 'examples/shared_kv_storage/')
+        return os.path.join(os.environ['TCF_HOME'], 'shared_kv_storage/')
 
     return '/etc/avalon'
+
 
 def main(args=None):
     # Parse out the configuration file first
