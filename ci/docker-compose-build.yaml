@@ -29,7 +29,7 @@ services:
     image: avalon-lmdb:${ISOLATION_ID}
     build:
       context: ..
-      dockerfile: examples/shared_kv_storage/Dockerfile
+      dockerfile: shared_kv_storage/Dockerfile
       args:
         - http_proxy
         - https_proxy

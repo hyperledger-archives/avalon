@@ -20,8 +20,8 @@ import subprocess
 
 from setuptools import setup, find_packages, Extension
 
-tcf_root_dir = os.environ.get('TCF_HOME', '../../')
-module_src_path= os.path.join(tcf_root_dir, 'examples/shared_kv_storage/db_store')
+tcf_root_dir = os.environ.get('TCF_HOME', '../')
+module_src_path = os.path.join(tcf_root_dir, 'shared_kv_storage/db_store')
 
 
 if os.sys.version_info[0] < 3:
@@ -36,10 +36,10 @@ data_files = [
 
 if os.path.exists("/lib/systemd/system"):
     data_files.append(('/lib/systemd/system',
-        ['packaging/systemd/shared_kv_storage.service']))
+                       ['packaging/systemd/shared_kv_storage.service']))
 
 
-debug_flag = os.environ.get('TCF_DEBUG_BUILD',0)
+debug_flag = os.environ.get('TCF_DEBUG_BUILD', 0)
 
 compile_args = [
     '-std=c++11',
@@ -51,17 +51,20 @@ compile_args = [
 # By default the extension class adds '-O2' to the compile
 # flags, this lets us override since these are appended to
 # the compilation switches.
-if debug_flag :
+if debug_flag:
     compile_args += ['-g']
 
 include_dirs = [
     module_src_path,
     os.path.join(tcf_root_dir, 'common/cpp'),
-    os.path.join(tcf_root_dir, 'tc/sgx/trusted_worker_manager/enclave_untrusted/enclave_bridge_wrapper')
+    os.path.join(
+      tcf_root_dir,
+      'tc/sgx/trusted_worker_manager/enclave_untrusted/enclave_bridge_wrapper'
+    )
 ]
 
 library_dirs = [
-    os.path.join(tcf_root_dir, 'examples/shared_kv_storage/db_store/packages/build'),
+    os.path.join(tcf_root_dir, 'shared_kv_storage/db_store/packages/build'),
 ]
 
 libraries = [
@@ -70,25 +73,26 @@ libraries = [
 ]
 
 module_files = [
-    os.path.join(tcf_root_dir, 'examples/shared_kv_storage/kv_storage/remote_lmdb/db_store.i'),
+    os.path.join(
+        tcf_root_dir, 'shared_kv_storage/kv_storage/remote_lmdb/db_store.i'),
     os.path.join(module_src_path, 'db_store.cpp'),
 ]
 
 dbstore_module = Extension(
     'kv_storage.remote_lmdb._db_store',
     module_files,
-    swig_opts = ['-c++', '-threads'] + ['-I%s' % i for i in include_dirs],
-    extra_compile_args = compile_args,
-    libraries = libraries,
-    include_dirs = include_dirs,
-    library_dirs = library_dirs,
-    define_macros = [],
-    undef_macros = []
-    )
+    swig_opts=['-c++', '-threads'] + ['-I%s' % i for i in include_dirs],
+    extra_compile_args=compile_args,
+    libraries=libraries,
+    include_dirs=include_dirs,
+    library_dirs=library_dirs,
+    define_macros=[],
+    undef_macros=[]
+)
 
 setup(name='kv_storage',
       version=subprocess.check_output(
-        ['../../bin/get_version']).decode('utf-8').strip(),
+          ['../bin/get_version']).decode('utf-8').strip(),
       description='Shared KV Storage',
       author='Hyperledger Avalon',
       url='https://github.com/hyperledger/avalon',
@@ -101,6 +105,6 @@ setup(name='kv_storage',
       ],
       data_files=data_files,
       entry_points={
-        'console_scripts':
-        ['kv_storage = kv_storage.remote_lmdb.lmdb_listener:main']
+          'console_scripts':
+          ['kv_storage = kv_storage.remote_lmdb.lmdb_listener:main']
       })

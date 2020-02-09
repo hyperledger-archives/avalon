@@ -196,14 +196,14 @@ try python3 setup.py bdist_wheel
 try pip3 install dist/*.whl
 
 yell --------------- LMDB LISTENER ---------------
-cd $TCF_HOME/examples/shared_kv_storage/db_store/packages
+cd $TCF_HOME/shared_kv_storage/db_store/packages
 mkdir -p build
 cd build
 try cmake ..
 try make
 
 yell --------------- SHARED KV STORAGE ---------------
-cd $TCF_HOME/examples/shared_kv_storage
+cd $TCF_HOME/shared_kv_storage
 try make
 try make install
 

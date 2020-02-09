@@ -48,7 +48,7 @@ services:
     image: avalon-lmdb-dev
     build:
       context: .
-      dockerfile: ./examples/shared_kv_storage/Dockerfile
+      dockerfile: ./shared_kv_storage/Dockerfile
       args:
         - http_proxy
         - https_proxy
