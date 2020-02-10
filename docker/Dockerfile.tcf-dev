@@ -145,7 +145,7 @@ ARG TCF_DEBUG_BUILD
 ARG DISPLAY
 ARG XAUTHORITY
 
-#TODO need to be removed latter
+#TODO need to be removed later
 #install avalon-client sdk python package.
 RUN cd /project/TrustedComputeFramework/sdk \
    && python setup.py bdist_wheel \
@@ -153,26 +153,32 @@ RUN cd /project/TrustedComputeFramework/sdk \
 
 # Environment setup
 
-RUN echo "WEB3_INFURA_PROJECT_ID=9af17e6320414af8a3168cd9fe9d653d" >> /etc/environment \
-    && echo "WALLET_PRIVATE_KEY=4F611197A6E82715F4D2446FE015D1667E9C40A351411F3A7300F71F285D01B4" >> /etc/environment \
-
+RUN echo "WEB3_INFURA_PROJECT_ID=9af17e6320414af8a3168cd9fe9d653d" \
+          >> /etc/environment \
+ && echo "WALLET_PRIVATE_KEY=4F611197A6E82715F4D2446FE015D1667E9C40A351411F3A7300F71F285D01B4" \
+         >> /etc/environment \
  && echo "TCF_HOME=/project/TrustedComputeFramework/" >> /etc/environment \
  && if [ ! -z "$http_proxy"  ]; then \
-    echo 'Acquire::http::Proxy "'$http_proxy'";' >> /etc/apt/apt.conf.d/00proxy; \
+        echo 'Acquire::http::Proxy "'$http_proxy'";' \
+             >> /etc/apt/apt.conf.d/00proxy; \
         echo "http_proxy=$http_proxy" >> /etc/wgetrc; \
         echo "http_proxy=$http_proxy" >> /etc/environment; \
-        echo "HTTP_PROXY=$(echo $http_proxy | sed 's,[a-zA-Z]*://,,')" >> /etc/environment; \
+        echo "HTTP_PROXY=$(echo $http_proxy | sed 's,[a-zA-Z]*://,,')" \
+                  >> /etc/environment; \
     fi \
  && if [ ! -z "$ftp_proxy"  ];  then \
-    echo 'Acquire::ftp::Proxy "'$ftp_proxy'";' >> /etc/apt/apt.conf.d/00proxy; \
+        echo 'Acquire::ftp::Proxy "'$ftp_proxy'";' \
+             >> /etc/apt/apt.conf.d/00proxy; \
         echo "ftp_proxy=$ftp_proxy" >> /etc/wgetrc; \
         echo "ftp_proxy=$ftp_proxy" >> /etc/environment; \
     fi \
  && if [ ! -z "$https_proxy" ]; then \
-    echo 'Acquire::https::Proxy "'$https_proxy'";' >> /etc/apt/apt.conf.d/00proxy; \
+        echo 'Acquire::https::Proxy "'$https_proxy'";' \
+              >> /etc/apt/apt.conf.d/00proxy; \
         echo "https_proxy=$https_proxy" >> /etc/wgetrc; \
         echo "https_proxy=$https_proxy" >> /etc/environment; \
-        echo "HTTPS_PROXY=$(echo $https_proxy | sed 's,[a-zA-Z]*://,,')" >> /etc/environment; \
+        echo "HTTPS_PROXY=$(echo $https_proxy | sed 's,[a-zA-Z]*://,,')" \
+             >> /etc/environment; \
     fi
 
 ENV http_proxy=$http_proxy
