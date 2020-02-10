@@ -135,7 +135,7 @@ func (t *WorkerRegistry) workerRegister(stub shim.ChaincodeStubInterface, args [
 	return shim.Success(nil)
 }
 
-// workerUpdate - This function set the detail of a Worker
+// workerUpdate - This function sets the detail of a Worker
 // params:
 //   byte32 workerID
 //   string detail
@@ -169,7 +169,7 @@ func (t *WorkerRegistry) workerUpdate(stub shim.ChaincodeStubInterface, args []s
 	return shim.Success(value)
 }
 
-// WorkerSetStatus - This function set the status of a Worker
+// WorkerSetStatus - This function sets the status of a Worker
 // params:
 //   byte32 workerID
 //   uint256 status
@@ -351,7 +351,7 @@ func (t *WorkerRegistry) query(stub shim.ChaincodeStubInterface, args []string) 
 	return shim.Success(Avalbytes)
 }
 
-// Invoke - this function simply satisfy the main requirement of chaincode
+// Invoke - this function simply satisfies the main requirement of chaincode
 func (t *WorkerRegistry) Invoke(stub shim.ChaincodeStubInterface) pb.Response {
 	logger.Info("Invoke")
 	function, args := stub.GetFunctionAndParameters()
@@ -374,7 +374,7 @@ func (t *WorkerRegistry) Invoke(stub shim.ChaincodeStubInterface) pb.Response {
 	return shim.Error("Invalid invoke function name")
 }
 
-// processAttributes - This function formalize the input attributes. It
+// processAttributes - This function formalizes the input attributes. It
 // will transform the variable length of a parameter value into a fixed
 // length string value
 // params:
