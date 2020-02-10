@@ -157,7 +157,7 @@ func (t *Receipt) workOrderReceiptUpdate(stub shim.ChaincodeStubInterface, args 
 //    uint256 receiptStatus
 // returns:
 //   int totalCount
-//   string LookupTag
+//   string lookupTag
 //   bytes32[] ids
 func (t *Receipt) workOrderReceiptLookUp(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	logger.Info("workOrderReceiptLookUp")

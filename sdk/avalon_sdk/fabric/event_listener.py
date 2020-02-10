@@ -79,7 +79,7 @@ class EventListener(base.ClientBase):
             with open(self._config, 'r') as file:
                 data = file.read()
                 if len(data) > 0:
-                    self._last_block = int(data)
+                    self._last_block = int(data) + 1
             logger.info('Loaded block mark: %s', self._last_block)
         except IOError:
             pass
@@ -93,7 +93,7 @@ class EventListener(base.ClientBase):
         """
         Function to start event listener.
         """
-        def event_handler(event, block_num, txnid, status):
+        def _event_handler(event, block_num, txnid, status):
             logger.info(
                 'Event: {0}\nblock_num: {1}\ntxid: {2}\nstatus: {3}'.format(
                     event, block_num, txnid, status))
@@ -105,7 +105,7 @@ class EventListener(base.ClientBase):
 
         self._event_regid = self._channel_event_hub.registerChaincodeEvent(
             self._chaincode, self._event, start=self._last_block,
-            onEvent=eventHandler)
+            onEvent=_event_handler)
         logger.info('Event handler registered!')
         try:
             await self._channel_event_hub.connect(False)

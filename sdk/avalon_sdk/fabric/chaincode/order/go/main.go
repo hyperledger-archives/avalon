@@ -28,7 +28,7 @@ import (
 
 var logger = shim.NewLogger("WorkerOrder")
 
-// getWorkOrderID - This function retrieve the work order with its ID
+// getWorkOrderID - This function retrieves the work order with its ID
 // params:
 //   byte32 workOrderID
 func (t *WorkOrder) getOrderByID(stub shim.ChaincodeStubInterface, workOrderID string) (*WorkOrder, error) {
@@ -98,7 +98,7 @@ func (t *WorkOrder) Init(stub shim.ChaincodeStubInterface) pb.Response {
 	return shim.Success(nil)
 }
 
-// workOrderSubmit - This function submit a work order
+// workOrderSubmit - This function submits a work order
 // params:
 //   bytes32 workOrderId
 //   bytes32 workerId
