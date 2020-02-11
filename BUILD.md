@@ -83,7 +83,7 @@ The steps below will set up a Python virtual environment to run Avalon.
      git clone https://github.com/hyperledger/avalon 
      ```
 
-3. Change to the avalon soure directory
+3. Change to the Avalon source directory
    ```bash
    cd avalon
    ```
@@ -130,47 +130,56 @@ The steps below will set up a Python virtual environment to run Avalon.
    then leave this line commented out.
 
 
-6. Create a Python virtual environment, and build and install Avalon
-   components into it:
+6. Create a Python virtual environment:
+
    ```bash
    cd $TCF_HOME/tools/build
-   # Create virtual environment directory with name _dev
    python3 -m venv _dev
-   make clean
-   pip3 install wheel
-   make
    ```
 
-7. Build the Avalon SDK Python module:
-
-   ```bash
-   cd $TCF_HOME/sdk
-   python3 setup.py bdist_wheel
-   pip3 install dist/*.whl
-   ```
-
-8. Build the LMDB listener and shared key/value storage modules:
-
- 
-   ```bash
-   cd $TCF_HOME/examples/shared_kv_storage/db_store/packages
-   mkdir -p build
-   cd build
-   cmake ..
-   make
-   cd $TCF_HOME/examples/shared_kv_storage
-   make
-   make install
-   ```
-
-9. Activate the new Python virtual environment for the current shell session.
+7. Activate the new Python virtual environment for the current shell session.
    You will need to do this in each new shell session (in addition to
    exporting environment variables).
    ```bash
-   source $TCF_HOME/tools/build/_dev/bin/activate
+   source _dev/bin/activate
    ```
+
    If the virtual environment for the current shell session is activated,
    you will the see this prompt: `(_dev)`
+
+8. Install PIP3 packages into your Python virtual environment:
+
+   ```bash
+   pip3 install --upgrade setuptools json-rpc py-solc web3 colorlog twisted wheel
+   ```
+
+9. Build and install Avalon components:
+
+   ```bash
+   make clean
+   make
+   ```
+
+10. Build the Avalon SDK Python module:
+
+    ```bash
+    cd $TCF_HOME/sdk
+    python3 setup.py bdist_wheel
+    pip3 install dist/*.whl
+    ```
+
+11. Build the LMDB listener and shared key/value storage modules:
+ 
+    ```bash
+    cd $TCF_HOME/examples/shared_kv_storage/db_store/packages
+    mkdir -p build
+    cd build
+    cmake ..
+    make
+    cd $TCF_HOME/examples/shared_kv_storage
+    make
+    make install
+    ```
 
 # <a name="testing"></a>Testing
 
