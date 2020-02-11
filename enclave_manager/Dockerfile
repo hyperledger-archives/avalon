@@ -1,4 +1,4 @@
-# Copyright 2019 Intel Corporation
+# Copyright 2020 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,23 +14,36 @@
 # ------------------------------------------------------------------------------
 
 # Description:
-#   Builds the environment needed to build Trusted Compute Framework.
+#   Builds the environment needed to build Avalon SGX Enclave manager.
 #
 #  Configuration (build) parameters
 #  - proxy configuration: https_proxy http_proxy ftp_proxy
 #  - sgx mode:
 #
-# Build:
-#   $ docker build docker -f docker/Dockerfile.tcf-dev -t tcf-dev
-#   if behind a proxy, you might want to add also below options
-#   --build-arg https_proxy=$https_proxy --build-arg http_proxy=$http_proxy --build-arg ftp_proxy=$ftp_proxy
-#
-# Run:
-#   $ cd TrustedComputeFramework
-#   $ docker run -v $(pwd):/project/TrustedComputeFramework -it tcf-dev /bin/bash
-#   (to run with SGX HW, add options '--device=/dev/isgx -v /var/run/aesmd:/var/run/aesmd ')
-#   make clean && make
 
+# -------------=== build avalon Enclave Manager image ===-------------
+#Build base docker image
+FROM ubuntu:bionic as base_image
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update \
+ && apt-get install -y -q \
+    ca-certificates \
+    python3-toml \
+    python3-pip \
+    python3-requests \
+    python3-colorlog \
+    python3-twisted \
+ && apt-get -y -q upgrade \
+ && apt-get clean \
+ && rm -rf /var/lib/apt/lists/*
+
+# Make Python3 default
+RUN ln -sf /usr/bin/python3 /usr/bin/python
+
+# Install setuptools packages using pip because
+RUN pip3 install --upgrade json-rpc nose2
 
 # -------------=== Build openssl_image ===-------------
 
@@ -61,66 +74,36 @@ RUN OPENSSL_VER=1.1.1d \
  && make test \
  && make install -j$THREADS
 
-# -------------=== build avalon image ===-------------
-#Build docker image
-FROM ubuntu:bionic
+#Build Avalon Listener intermediate docker image
+FROM base_image as build_image
 
-# Ignore timezone prompt in apt
-ENV DEBIAN_FRONTEND=noninteractive
-
-# Add necessary packages
 RUN apt-get update \
  && apt-get install -y -q \
     build-essential \
-    ca-certificates \
-    cmake \
-    git \
-    make \
+    software-properties-common \
     pkg-config \
     cmake \
-    protobuf-compiler \
+    make \
+    git \
     libprotobuf-dev \
     python3-dev \
-    libssl-dev \
-    python3-pip \
-    python3-toml \
-    python3-requests \
-    python3-colorlog \
-    python3-twisted \
     swig \
-    software-properties-common \
+    wget \
+    tar \
+    libprotobuf-dev \
     curl \
     dh-autoreconf \
     ocaml \
     wget \
     xxd \
     unzip \
-    tar \
-    liblmdb-dev \
     ocamlbuild \
-    python3-tk \
-    python3-pycodestyle \
-    pycodestyle \
-    pylint3 \
-    cppcheck \
  && apt-get -y -q upgrade \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
 
-# Install setuptools,py-solc-x and web3 packages using pip because
-# these are not available in apt repository.
-# Install nose2 for running tests.
-RUN pip3 install --upgrade setuptools json-rpc web3 py-solc-x nose2
-# Install specific version of solc to support versions <0.6.0
-RUN python3 -m solcx.install v0.5.15
-
-# Installing solidity compiler
-RUN add-apt-repository ppa:ethereum/ethereum \
-   && apt-get update \
-   && apt-get install solc
-
-# Make Python3 default
-RUN ln -sf /usr/bin/python3 /usr/bin/python
+# Install setuptools packages using pip because
+RUN pip3 install --upgrade setuptools
 
 # SGX common library and SDK are installed in /opt/intel directory.
 # Installation of SGX libsgx-common packages requires /etc/init directory. In docker image this directory doesn't exist.
@@ -150,7 +133,12 @@ COPY --from=openssl_image /tmp/openssl-$OPENSSL_VER.tar.gz /tmp/
 
 # Build ("trusted") SGX OpenSSL
 # Note: This will compile in HW or SIM mode depending on the
+
+# Note: This will compile in HW or SIM mode depending on the
 # availability of /dev/isgx and /var/run/aesmd/aesm.socket
+
+WORKDIR /tmp
+
 RUN ldconfig \
  && ln -s /etc/ssl/certs/* /usr/local/ssl/certs/ \
  && git clone https://github.com/intel/intel-sgx-ssl.git  \
@@ -165,65 +153,112 @@ RUN ldconfig \
  && rm -rf /tmp/intel-sgx-ssl \
  && echo "SGX_SSL=/opt/intel/sgxssl" >> /etc/environment
 
-COPY . /project/TrustedComputeFramework
+COPY . /project/avalon
 
 ARG SGX_MODE
 ARG MAKECLEAN
 ARG TCF_DEBUG_BUILD
-ARG DISPLAY
-ARG XAUTHORITY
-
-#TODO need to be removed later
-#install avalon-client sdk python package.
-RUN cd /project/TrustedComputeFramework/sdk \
-   && python setup.py bdist_wheel \
-   && pip3 install dist/*.whl
-
-# Install fabric python sdk
-RUN pip3 install virtualenv \
-   && pip3 install git+https://github.com/hyperledger/fabric-sdk-py.git
 
 # Environment setup
-
-RUN echo "TCF_HOME=/project/TrustedComputeFramework/" >> /etc/environment \
- && if [ ! -z "$http_proxy"  ]; then \
-        echo 'Acquire::http::Proxy "'$http_proxy'";' \
-             >> /etc/apt/apt.conf.d/00proxy; \
-        echo "http_proxy=$http_proxy" >> /etc/wgetrc; \
-        echo "http_proxy=$http_proxy" >> /etc/environment; \
-        echo "HTTP_PROXY=$(echo $http_proxy | sed 's,[a-zA-Z]*://,,')" \
-                  >> /etc/environment; \
-    fi \
- && if [ ! -z "$ftp_proxy"  ];  then \
-        echo 'Acquire::ftp::Proxy "'$ftp_proxy'";' \
-             >> /etc/apt/apt.conf.d/00proxy; \
-        echo "ftp_proxy=$ftp_proxy" >> /etc/wgetrc; \
-        echo "ftp_proxy=$ftp_proxy" >> /etc/environment; \
-    fi \
- && if [ ! -z "$https_proxy" ]; then \
-        echo 'Acquire::https::Proxy "'$https_proxy'";' \
-              >> /etc/apt/apt.conf.d/00proxy; \
-        echo "https_proxy=$https_proxy" >> /etc/wgetrc; \
-        echo "https_proxy=$https_proxy" >> /etc/environment; \
-        echo "HTTPS_PROXY=$(echo $https_proxy | sed 's,[a-zA-Z]*://,,')" \
-             >> /etc/environment; \
-    fi
-
 ENV http_proxy=$http_proxy
 ENV https_proxy=$https_proxy
-ENV TCF_HOME=/project/TrustedComputeFramework
+ENV TCF_HOME=/project/avalon
 ENV SGX_SSL=/opt/intel/sgxssl
 ENV SGX_SDK=/opt/intel/sgxsdk
 ENV PATH=$PATH:$SGX_SDK/bin:$SGX_SDK/bin/x64
 ENV PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$SGX_SDK/pkgconfig
 ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$SGX_SDK/sdk_libs
-# Set display, replace value with [IP address of host]:0
-ENV DISPLAY=:0
+ENV TCF_ENCLAVE_CODE_SIGN_PEM="$TCF_HOME/enclave.pem"
 
-WORKDIR /project/TrustedComputeFramework/tools/build
+RUN openssl genrsa -3 -out $TCF_HOME/enclave.pem 3072
 
-RUN make lint && echo "LINT SUCCESS"
+WORKDIR /project/avalon/common/sgx_workload
 
-RUN if [ "$MAKECLEAN" != 0 ]; then echo "Clean build" && make clean; fi \
- && make \
- && echo "BUILD SUCCESS"
+RUN mkdir -p build \
+  && cd build \
+  && cmake .. \
+  && make
+
+# apps directory contains SGX workloads which need to be build
+# and linked to SGX enclave
+WORKDIR /project/avalon/examples/apps
+
+RUN mkdir -p build \
+  && cd build \
+  && cmake .. \
+  && make
+
+WORKDIR /project/avalon/common/cpp
+
+RUN mkdir -p build \
+  && cd build \
+  && cmake .. \
+  && make
+
+WORKDIR /project/avalon/tc/sgx/trusted_worker_manager/common
+
+RUN mkdir -p build \
+  && cd build \
+  && cmake .. \
+  && make
+
+WORKDIR /project/avalon/tc/sgx/trusted_worker_manager/enclave
+
+RUN mkdir -p build \
+  && cd build \
+  && cmake .. \
+  && make
+
+WORKDIR /project/avalon/tc/sgx/trusted_worker_manager/enclave_untrusted/enclave_bridge
+
+RUN mkdir -p build \
+  && cd build \
+  && cmake .. \
+  && make
+
+WORKDIR /project/avalon/common/python
+
+RUN make
+
+WORKDIR /project/avalon/sdk
+
+RUN make
+
+WORKDIR /project/avalon/enclave_manager
+
+RUN echo "Building avalon enclave manager" \
+  && make
+
+# Build Final image and install dependent modules
+FROM base_image as final_image
+
+ENV http_proxy=$http_proxy
+ENV https_proxy=$https_proxy
+ENV TCF_HOME=/project/avalon
+
+WORKDIR /project/avalon/
+
+COPY --from=build_image /project/avalon/config/tcs_config.toml /project/avalon/config/
+COPY --from=build_image /project/avalon/tc/sgx/trusted_worker_manager/enclave/build/lib/*.so /project/avalon/tc/sgx/trusted_worker_manager/enclave/build/lib/
+COPY --from=build_image /project/avalon/tc/sgx/trusted_worker_manager/enclave_untrusted/enclave_bridge/build/lib/*.so /project/avalon/tc/sgx/trusted_worker_manager/enclave_untrusted/enclave_bridge/build/lib/
+# Copy sgxsdk, sgxssl to final image.
+COPY --from=build_image /opt/intel/sgxsdk/bin/ /opt/intel/sgxsdk/bin
+COPY --from=build_image /opt/intel/sgxsdk/lib64/ /opt/intel/sgxsdk/lib64
+COPY --from=build_image /opt/intel/sgxssl/lib64/ /opt/intel/sgxssl/lib64
+
+# Copy Python build artifacts
+COPY --from=build_image /project/avalon/common/python/dist/*.whl dist/
+COPY --from=build_image /project/avalon/sdk/dist/*.whl dist/
+COPY --from=build_image /project/avalon/enclave_manager/dist/*.whl dist/
+
+# Installing wheel file requires python3-pip package.
+# But python3-pip package will increase size of final docker image.
+# So remove python3-pip package and dependencies after installing wheel file.
+RUN apt-get update \
+ && apt-get install -y -q python3-pip \
+ && echo "Install Common Python, SDK and Enclave Manager packages\n" \
+ && pip3 install dist/*.whl \
+ && echo "Remove unused packages from image\n" \
+ && apt-get autoremove --purge -y -q python3-pip \
+ && apt-get clean \
+ && rm -rf /var/lib/apt/lists/*

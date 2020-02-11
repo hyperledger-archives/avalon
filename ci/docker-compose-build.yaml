@@ -15,15 +15,28 @@
 version: '3.5'
 
 services:
-  tcf:
-    image: tcf-ci-build:${ISOLATION_ID}
+  avalon-shell:
+    image: avalon-shell:${ISOLATION_ID}
     build:
       context: ..
-      dockerfile: docker/Dockerfile.tcf-dev
+      dockerfile: docker/Dockerfile
       args:
         - http_proxy
         - https_proxy
         - no_proxy
+
+  avalon-enclave-manager:
+    image: avalon-enclave-manager:${ISOLATION_ID}
+    build:
+      context: ..
+      dockerfile: enclave_manager/Dockerfile
+      args:
+        - http_proxy
+        - https_proxy
+        - no_proxy
+        - TCF_DEBUG_BUILD=${TCF_DEBUG_BUILD:-}
+    depends_on:
+      - avalon-lmdb
 
   avalon-lmdb:
     image: avalon-lmdb:${ISOLATION_ID}
