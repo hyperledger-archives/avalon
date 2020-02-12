@@ -11,15 +11,3 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-
-[KvStorage]
-StoragePath = "config/Kv_Shared_tmp"
-StorageSize = "1 TB"
-# the remote version is of higher priority if enabled
-bind = "http://localhost:9090"
-
-[Logging]
-LogLevel = "INFO"
-LogFile  = "__screen__"
-

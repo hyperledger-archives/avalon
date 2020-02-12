@@ -13,17 +13,17 @@
 # limitations under the License.
 from abc import ABC, abstractmethod
 
+
 class KvStorage(ABC):
-    """
-    KvStorage interface provides APIs to access key value store.
-    """
+    """KvStorage interface provides APIs to access key value store."""
     @abstractmethod
     def open(self, lmdb_file, map_size="1 TB"):
         """
         Function to open the database file
         Parameters:
            - lmdb_file is the name and location of lmdb database file
-           - map_size is the maximum size of the database, it must be a multiple of the page size (4096)
+           - map_size is the maximum size of the database, it must be a
+             multiple of the page size (4096)
              and defaults to large max size (1 TB)
         """
         pass
@@ -31,9 +31,7 @@ class KvStorage(ABC):
 # ---------------------------------------------------------------------------------------------------
     @abstractmethod
     def close(self):
-        """
-        Function to close the database file
-        """
+        """Function to close the database file."""
         pass
 
 # ---------------------------------------------------------------------------------------------------
@@ -42,7 +40,8 @@ class KvStorage(ABC):
         """
         Function to set a key-value pair in a lmdb table
         Parameters:
-           - table is the name of lmdb table in which key-value pair need to be inserted.
+           - table is the name of lmdb table in which key-value pair
+             need to be inserted.
            - key is the primary key of the table.
            - value is the value that needs to be inserted in the table.
         """
@@ -54,7 +53,8 @@ class KvStorage(ABC):
         """
         Function to get the value for a key in a lmdb table
         Parameters:
-           - table is the name of lmdb table in which key-value pair need to be retrieved.
+           - table is the name of lmdb table in which key-value pair
+             need to be retrieved.
            - key is the primary key of the table.
         """
         pass
@@ -65,13 +65,15 @@ class KvStorage(ABC):
         """
         Function to remove the key/value from a lmdb table
         Parameters:
-           - table is the name of lmdb table in which key-value pair need to be removed.
+           - table is the name of lmdb table in which key-value pair need
+             to be removed.
            - key is the primary key of the table.
-           - value is data to be removed, If the database does not support sorted duplicate
-             data items (MDB_DUPSORT) the data parameter is ignored. If the database supports
-             sorted duplicates and the data parameter is NULL, all of the duplicate data items
-             for the key will be deleted. Otherwise, if the data parameter is non-NULL only the
-             matching data item will be deleted
+           - value is data to be removed, If the database does not support
+             sorted duplicate data items (MDB_DUPSORT) the data parameter
+             is ignored. If the database supports sorted duplicates and the
+             data parameter is NULL, all of the duplicate data items for the
+             key will be deleted. Otherwise, if the data parameter is
+             non-NULL only the matching data item will be deleted.
         """
         pass
 
@@ -87,9 +89,7 @@ class KvStorage(ABC):
 # ---------------------------------------------------------------------------------------------------
 
     def human_read_to_byte(self, size):
-        """
-        Convert human readable memory size to byte
-        """
+        """Convert human readable memory size to byte."""
         size_name = ("B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB")
         size = size.split()  # divide '1 GB' into ['1', 'GB']
         if len(size) != 2 or int(size[0]) <= 0:
@@ -101,4 +101,3 @@ class KvStorage(ABC):
             raise ValueError("Invalid size")
         factor = 1024 ** idx
         return num * factor
-

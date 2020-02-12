@@ -57,7 +57,6 @@ namespace std {
 }
 
 %{
-#include "swig_utils.h"
 #include "db_store.h"
 #include "db_store_error.h"
 %}
