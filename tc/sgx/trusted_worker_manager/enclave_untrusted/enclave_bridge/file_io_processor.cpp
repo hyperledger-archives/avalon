@@ -426,7 +426,7 @@ uint32_t FileDelete(string fileName, uint8_t *result, size_t resultSize) {
                 "greater than max result size");
             result = (uint8_t *)strncpy((char *)result, resultStr.c_str(), resultStrSize);
         }
-    } catch (std::exception e) {
+    } catch ( std::exception e ) {
         tcf::Log(TCF_LOG_ERROR, "Caught exception while deleting file: %s\n", e.what());
         resultStr = "FAILED TO DELETE: Caught Exception while deleting file";
         resultStrSize = resultStr.length();
