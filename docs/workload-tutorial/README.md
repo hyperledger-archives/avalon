@@ -253,3 +253,139 @@ To see what the updated source files should look like, refer to the files in
 directory
 [$TCF_HOME/docs/workload-tutorial/hello_world/stage_2/](hello_world/stage_2/).
 
+### <a name="phase3"></a>Phase 3: Worker-specific Code to execute IO operations inside the TEE
+This phase of tutorial defines step by step development of the helloworld workload with
+file IO handling capability.  
+For the very first input request from the client, the workload echoes user name
+along with encryption key.  
+For the subsequent requests, client submits input request
+with encryption key received in the previous step. As a response, the client
+receives an echo of username along with the workload hit count or number of workload
+invocations by that user.  
+The counter value is stored in the encrypted format
+while writing to a file and decrypted while reading from the file.
+
+For the first request, the client needs to submit the user name as in_data.  
+As a response, client receives `Hello <username> <encryption_key_in_hex>`.
+For the subsequent requests from the same user, client needs to submit username
+along with encryption key obtained in the previous step. As a response client receives,
+`Hello <username> [workload_hit_count]`.
+
+* Change to the "Hello World" workload directory:
+  ```bash
+  cd $TCF_HOME/examples/apps/hello_world/workload
+  ```
+* Add the `GetCountOrKey()` function declaration to `logic.h`:
+  ```cpp
+  extern std::string GetCountOrKey(std::string name, std::string hex_key);
+  ```
+
+* Add the `GetCountOrKey()` function implementation to `logic.cpp`
+  ```cpp
+  std::string GetCountOrKey(std::string name, std::string hex_key) {
+    std::string file_path = USER_FILES_PATH + name;
+    IoHelper io_helper(file_path);
+    std::string ret_str;
+
+    if (hex_key.empty()) {
+        io_helper.DeleteFile();
+        // Generate symmetric hex key
+        ret_str = io_helper.GenerateKey();
+        io_helper.SetKey(ret_str);
+        io_helper.WriteFile("1");
+    } else {
+        io_helper.SetKey(hex_key);
+        if (!io_helper.ReadFile(ret_str)) {
+            size_t count = std::stoul(ret_str);
+            count++;
+            ret_str = std::to_string(count);
+            io_helper.WriteFile(ret_str);
+        }
+    }
+
+    return ret_str;
+  }  // GetCountOrKey
+  ```
+
+* Modify the `ProcessWorkOrder()` method in `plug-in.cpp`
+  to call `ProcessHelloWorld()` and GetCountOrKey().  That is, change:
+  from
+  ```cpp
+  // Replace the dummy implementation below with invocation of
+  // actual logic defined in logic.h and implemented in logic.cpp.
+  std::string result_str("Error: under construction");
+  ByteArray ba(result_str.begin(), result_str.end());
+  AddOutput(0, out_work_order_data, ba);
+  ```
+  to
+
+  ```cpp
+  std::string name;
+  std::string hex_key;
+  std::string result;
+  int count = 0;
+
+  // Process the input data
+  for (auto wo_data : in_work_order_data) {
+    if (count++ == 0) {
+        name = ByteArrayToString(wo_data.decrypted_data);
+    } else {
+        hex_key = ByteArrayToString(wo_data.decrypted_data);
+    }
+  }
+  result = ProcessHelloWorld(name) + " [" + GetCountOrKey(name, hex_key) + "]";
+  ByteArray ba(result.begin(), result.end());
+  AddOutput(0, out_work_order_data, ba);
+  ```
+
+* Copy the io_helper .h and .cpp files from hello_world_io/stage_2 folder to hello_world/workload.
+  Include the io_helper.h file in logic.cpp.
+
+* Create `/tmp/tutorial` folder to persist all files storing their count value.
+
+* Change to the top-level Avalon source repository directory, `$TCF_HOME`,
+  and rebuild the framework (see [$TCF_HOME/BUILD.md](../../BUILD.md)).
+  It should now include updated hello_world workload
+
+* Load the framework and use the generic command line utility to test the
+  IO operations performed by workload :
+
+**step 1**:
+  * Submit work order input with user name
+
+  ```bash
+  examples/apps/generic_client/generic_client.py
+      --uri "http://localhost:1947" -o --workload_id "hello-world" --in_data "jack"
+  ```
+
+  * The Hello World worker should return a string
+    `Hello name [key]` where `name` is the string sent in the first
+    input parameter and `key` is the file encryption key. A file with
+    filename `name` will be generated in /tmp/tutorial.
+    ```
+    [10:29:35 INFO    crypto_utils.crypto_utility] Decryption result at client - Hello jack [8342EFBE7C379231A4E03C80E5BA1AC9E8ACBC5338976CE6146431D8CBF2318D]
+    [10:29:35 INFO    __main__]
+    Decrypted response:
+      [{'index': 0, 'dataHash': '5493B8B39AFE2F7D4F1490D6E04AD410E394958C6BD85324BC28B540EDF0A462', 'data': 'Hello jack [8342EFBE7C379231A4E03C80E5BA1AC9E8ACBC5338976CE6146431D8CBF2318D]', 'encryptedDataEncryptionKey': '', 'iv': ''}]
+    ```
+
+**step 2**:
+  * Submit work order request with user name and encryption key received in the previous step.
+
+    ```bash
+    examples/apps/generic_client/generic_client.py
+      --uri "http://localhost:1947" -o --workload_id "hello-world" --in_data "jack" "8342EFBE7C379231A4E03C80E5BA1AC9E8ACBC5338976CE6146431D8CBF2318D"
+    ```
+  * The Hello World worker should return a string
+    `Hello name [count]` where `count` is number of times the workload has been invoked
+    by the user `name`.
+    ```
+    [10:36:46 INFO    crypto_utils.crypto_utility] Decryption result at client - Hello jack [2]
+    [10:36:46 INFO    __main__]
+    Decrypted response:
+      [{'index': 0, 'dataHash': 'D040AFA0D78276BAFD1360A6170D7EB53446731F25E0F77343A07EEE3628731A', 'data': 'Hello jack [2]', 'encryptedDataEncryptionKey': '', 'iv': ''}]
+    ```
+
+To see what the updated source files should look like, refer to the files in
+directory
+[$TCF_HOME/docs/workload-tutorial/hello_world_io/stage_2/](hello_world_io/stage_2/).
