@@ -57,8 +57,7 @@ The command line client `generic_client.py` allows you to submit
 worker requests on the command line.
 
 1. If needed, update the Ethereum account and direct registry contract
-   information in `docker/Dockerfile.tcf-dev` and
-   `examples/common/python/connectors/tcf_connector.toml`
+   information in `sdk/avalon_sdk/tcf_connector.toml`
 2. Follow the build instructions in the
    [build document](../../../BUILD.md)
 3. Change to the Generic Client directory

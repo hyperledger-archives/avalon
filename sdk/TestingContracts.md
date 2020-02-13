@@ -15,8 +15,7 @@
       Then continue with step 8, below.
 
 2.  (Standalone builds only) If needed, update the Ethereum account and
-    direct registry contract information in `docker/Dockerfile.tcf-dev` and
-    `examples/common/python/connectors/tcf_connector.toml`
+    direct registry contract information in `sdk/avalon_sdk/tcf_connector.toml`
 
 3. (Standalone builds only) Install Python 3.6.8 if not currently installed.
    Determine your Python version with `python3 --version` .
@@ -70,7 +69,7 @@
 
 9.  Run `cd $TCF_HOME/examples/common/python/connectors/ethereum`
 
-10. Fill in your Ropsten testnet address in `eth_account` in `examples/common/python/connectors/tcf_connector.toml`
+10. Fill in your Ropsten testnet address in `eth_account` in `sdk/avalon_sdk/tcf_connector.toml`
 
 11. Deploy solidity contracts to Ropsten network using `eth_cli.py`
 
@@ -83,7 +82,7 @@
 
 12. Fill in your your contract addresses
       `direct_registry_contract_address` and `worker_registry_contract_address`
-      in `examples/common/python/connectors/tcf_connector.toml`
+      in `sdk/avalon_sdk/tcf_connector.toml`
 
 13. Test the DirectRegistry and WorkerRegistry contracts with:
     ```bash

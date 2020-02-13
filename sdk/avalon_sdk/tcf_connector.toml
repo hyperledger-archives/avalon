@@ -48,9 +48,12 @@ work_order_contract_address = "0x523748D492AfEEC90767403Da7C1e86feBB10435"
 
 #Ethereum account details
 eth_account = "0xDcB780ea30C1041abfcCCE4233c275B9F313eAf4"
-#Ethereum account private key should be set in environment variable WALLET_PRIVATE_KEY
-#Http provider for ropsten test network.
-eth_http_provider = "https://ropsten.infura.io/v3/9af17e6320414af8a3168cd9fe9d653d"
+#Ethereum account private key should be passed as a command line argument when using
+#generic/echo/heart_disease_eval client
+ 
+#Provider for test network. Using Ropsten by default here and Infura as the IAAS.
+#This could be replaced with a url for a Hyperledger Besu client or a Ganache client.
+provider = "https://ropsten.infura.io/v3/9af17e6320414af8a3168cd9fe9d653d"
 #chain_id is 3 for ropsten test network
 #"1": Ethereum Mainnet
 #"2": Morden Testnet (deprecated)
