@@ -143,3 +143,19 @@ uint32_t FileIoExecutor::FileSeek(size_t position, uint8_t *result, size_t resul
         NULL, 0, NULL, 0);
     return status;
 }
+
+/*
+   Deletes the file whose name is stored in the FileIoExecutor instance
+   result - status of file delete operation
+   result_size - Maximum size of the result buffer
+*/
+
+uint32_t FileIoExecutor::FileDelete(uint8_t *result, size_t result_size) {
+    uint32_t status;
+    std::string file_operation = "delete";
+    std::string command = file_operation + " " + this->file_name;
+    status = TcfExecuteIoCommand(this->handler_id,
+        (const uint8_t *)command.c_str(), command.length(), result, result_size,
+        NULL, 0, NULL, 0);
+    return status;
+}
