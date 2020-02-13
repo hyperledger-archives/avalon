@@ -19,19 +19,20 @@ The command line client `generic_client.py` allows you to submit
 requests on the command line.
 
 1.  If needed, update the Ethereum account and direct registry contract
-    information in `docker/Dockerfile.tcf-dev` and
-    `examples/common/python/connectors/tcf_connector.toml`
+    information in `sdk/avalon_sdk/tcf_connector.toml`
 2.  Follow instructions in the "Docker-based Build and Execution" section of
     the [build document](../../../BUILD.md#dockerbuild) through step 5
     (activating a virtual environment)
 3.  Terminal 1 is running the Avalon Enclave Manager and Listener with
     `docker-compose` . Terminal 2 is running the Docker container shell
-4.  In Terminal 2, set environment variable `WALLET_PRIVATE_KEY` if not set.
-    This should match the value in file `docker/Dockerfile.tcf-dev`
-    from step 3 above:
+4.  In Terminal 2, set environment variable `WALLET_PRIVATE_KEY` if you wish 
+    to send raw transactions to Ethereum(usually required for Ropsten).
     ```bash
     export WALLET_PRIVATE_KEY="B413189C95B48737AE2D9AF4CAE97EB03F4DE40599DF8E6C89DCE4C2E2CBA8DE"
     ```
+    The key used here is for the default account used in tcf_connector.toml.
+    You can use the key specific to you account if you have made changes to
+    tcf_connector.toml
 5.  In Terminal 2 run `cd $TCF_HOME/examples/apps/generic_client`
 6.  In Terminal 2, run
     ``` bash
@@ -57,8 +58,7 @@ The Avalon Enclave Manager and Avalon Listener run in a Docker container.
 1.  If needed, in file `docker/Dockerfile.tcf-dev` change `ENV DISPLAY`
     to the X Windows `$DISPLAY` value. By default, it is the console, `:0`
 2.  If needed, also update the Ethereum account and direct registry contract
-    information in `docker/Dockerfile.tcf-dev` and
-    `examples/common/python/connectors/tcf_connector.toml`
+    information in `sdk/avalon_sdk/tcf_connector.toml`
 3.  Follow instructions in the "Docker-based Build and Execution" section of
     the [build document](../../../BUILD.md#dockerbuild) through step 4
     (activating a virtual environment)
@@ -77,12 +77,14 @@ The Avalon Enclave Manager and Avalon Listener run in a Docker container.
     && chmod 0755 $HOME/.py-solc/solc-v0.4.25/bin/solc &&
     export SOLC_BINARY=$HOME/.py-solc/solc-v0.4.25/bin/solc
     ```
-8.  In Terminal 2, set environment variable `WALLET_PRIVATE_KEY` if not set.
-    This should match the value in file `docker/Dockerfile.tcf-dev`
-    from step 3 above:
+8.  In Terminal 2, set environment variable `WALLET_PRIVATE_KEY` if you wish
+    to send raw transactions to Ethereum(usually required for Ropsten). 
     ```bash
     export WALLET_PRIVATE_KEY="B413189C95B48737AE2D9AF4CAE97EB03F4DE40599DF8E6C89DCE4C2E2CBA8DE"
     ```
+    The key used here is for the default account used in tcf_connector.toml.
+    You can use the key specific to you account if you have made changes to
+    tcf_connector.toml
 9.  If your DISPLAY is not the local console, `:0`, you need to give access to
     your display from the GUI.
     Open a new terminal, Terminal 3, and run `xhost +`

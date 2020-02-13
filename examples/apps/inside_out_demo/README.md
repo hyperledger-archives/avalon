@@ -15,8 +15,7 @@ For command line options, type `./generic_client.py -h` from the
 To use:
 
 1.  If needed, update the Ethereum account and direct registry contract
-    information in `docker/Dockerfile.tcf-dev` and
-    `examples/common/python/connectors/tcf_connector.toml`
+    information in `sdk/avalon_sdk/tcf_connector.toml`
 2.  Follow instructions in the "Docker-based Build and Execution" section of
     the [build document](../../../BUILD.md#dockerbuild) through step 4
 3.  Terminal 1 is running the TCF Enclave Manager and Listener with

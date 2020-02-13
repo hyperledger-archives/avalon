@@ -15,13 +15,21 @@
 import logging
 import os
 from os.path import exists, realpath
-
 # solcx has solidity compiler with 0.5.x and 0.6.x support
 from solcx import compile_source
-from web3 import HTTPProvider, Web3
+from urllib.parse import urlparse
+import web3
 
 logging.basicConfig(
     format='%(asctime)s - %(levelname)s - %(message)s', level=logging.INFO)
+
+PROVIDER_DICT = {
+    'http':  web3.HTTPProvider,
+    'https': web3.HTTPProvider,
+    'ws':    web3.WebsocketProvider,
+    'wss':   web3.WebsocketProvider,
+    'ipc':   web3.IPCProvider,
+}
 
 
 class EthereumWrapper():
@@ -36,12 +44,14 @@ class EthereumWrapper():
             self.__eth_private_key = os.environ["WALLET_PRIVATE_KEY"]
             # Ethereum account address to interact with ethereum network
             self.__eth_account_address = config['ethereum']['eth_account']
-            http_provider = config["ethereum"]["eth_http_provider"]
-            # Ethereum http provider is endpoint to submit the transaction
-            self.__w3 = Web3(HTTPProvider(http_provider))
+            provider = config["ethereum"]["provider"]
+            # Ethereum provider is endpoint to submit the transaction
+            self.__w3 = web3.Web3(
+                PROVIDER_DICT[urlparse(provider).scheme](provider))
+            self._is_ropsten_provider = self._is_ropsten(provider)
             # Chain id signifies the which ethereum network to use:
             # test net/main ethereum network
-            self.__channel_id = config["ethereum"]["chain_id"]
+            self._chain_id = config["ethereum"]["chain_id"]
             # Maximum amount of gas you’re willing to spend on
             # a particular transaction
             self.__gas_limit = config["ethereum"]["gas_limit"]
@@ -50,13 +60,24 @@ class EthereumWrapper():
         else:
             raise Exception("Invalid configuration parameter")
 
+    def _is_ropesten(self, url):
+        """
+        This function checks if the url passed is one for ropsten network
+        """
+        loc = urlparse(url).netloc.lower()
+        if "ropsten" in loc:
+            return True
+        else:
+            return False
+
     def __validate(self, config):
         """
         validates parameter from config parameters for existence.
         Returns false if validation fails and true if it success
         """
         if os.environ["WALLET_PRIVATE_KEY"] is None:
-            logging.error("Ethereum account private key is not set!!")
+            logging.error("Ethereum account private key is not set!!\
+                Set environment variable WALLET_PRIVATE_KEY.")
             return False
         if config["ethereum"]["eth_account"] is None:
             logging.error("Missing ethereum account id!!")
@@ -64,8 +85,8 @@ class EthereumWrapper():
         if config["ethereum"]["chain_id"] is None:
             logging.error("Missing chain id in config!!")
             return False
-        if config["ethereum"]["eth_http_provider"] is None:
-            logging.error("Missing ethereum http provider url!!")
+        if config["ethereum"]["provider"] is None:
+            logging.error("Missing ethereum provider url!!")
             return False
         if config["ethereum"]["gas_limit"] is None:
             logging.error("Missing parameter gas limit")
@@ -98,18 +119,19 @@ class EthereumWrapper():
             bytecode=contract_interface['bin'])
         nonce = self.__w3.eth.getTransactionCount(self.__eth_account_address,
                                                   'pending')
-        tx_hash = contract_object.constructor().buildTransaction({
+        tx_dict = contract_object.constructor().buildTransaction({
             'from': acct.address,
-            'chainId': self.__channel_id,
+            'chainId': self._chain_id,
             'gas': self.__gas_limit,
             'gasPrice': self.get_gas_price(),
             'nonce': nonce
         })
         address = \
-            self.execute_transaction(tx_hash)['txn_receipt']['contractAddress']
+            self.sign_execute_raw_transaction(tx_dict)
+        ['txn_receipt']['contractAddress']
         return address
 
-    def execute_transaction(self, tx_dict):
+    def sign_execute_raw_transaction(self, tx_dict):
         """
         Sign the raw transaction with private key, send it
         and wait for receipts
@@ -124,14 +146,39 @@ class EthereumWrapper():
                      format(tx_hash.hex()), format(tx_receipt))
         return tx_receipt
 
-    def get_channel_id(self):
-        return self.__channel_id
+    def execute_unsigned_transaction(self, tx_dict):
+        """
+        Send transaction to be executed only with account address
+        and wait for receipts
+        Returns transaction receipt on success or None on error.
+        """
+        txn_hash = w3.eth.sendTransaction(txn_dict)
+        txn_receipt = w3.eth.waitForTransactionReceipt(txn_hash)
+        logging.info("executed transaction hash: %s, receipt: %s",
+                     format(tx_hash.hex()), format(tx_receipt))
+        return tx_receipt
+
+    def execute_transaction(self, tx_dict):
+        """
+        Wrapper function to choose appropriate function to execute
+        transaction based on provider(ropsten vs other)
+        """
+        if _is_ropsten_provider:
+            return sign_execute_raw_transaction(tx_dict)
+        else:
+            return execute_unsigned_transaction(tx_dict)
+
+    def get_chain_id(self):
+        return self._chain_id
 
     def get_gas_limit(self):
         return self.__gas_limit
 
     def get_gas_price(self):
         return self.__w3.toWei(self.__gas_price, "gwei")
+
+    def get_account_address(self):
+        return self.__eth_account_address
 
     def get_contract_instance(self, contract_file_name, contract_address):
         compiled_sol = self.compile_source_file(contract_file_name)
@@ -148,9 +195,19 @@ class EthereumWrapper():
         to submit the transaction
         Return dict containing chain id, gas, gas limit and nonce.
         """
-        return {
-            "chainId": self.get_channel_id(),
-            "gas": self.get_gas_limit(),
-            "gasPrice": self.get_gas_price(),
-            "nonce": self.get_txn_nonce()
-        }
+        # Ropsten accepts only raw transactions & chain id is fixed
+        if self._is_ropsten_provider:
+            return {
+                "from": self.get_account_address(),
+                "chainId": self.get_chain_id(),
+                "gas": self.get_gas_limit(),
+                "gasPrice": self.get_gas_price(),
+                "nonce": self.get_txn_nonce()
+            }
+        else:
+            return {
+                "from": self.get_account_address(),
+                "gas": self.get_gas_limit(),
+                "gasPrice": self.get_gas_price(),
+                "nonce": self.get_txn_nonce()
+            }
