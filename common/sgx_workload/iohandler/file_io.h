@@ -52,4 +52,6 @@ public:
         size_t out_buf_size);
 
     uint32_t FileSeek(size_t position, uint8_t *result, size_t result_size);
+
+    uint32_t FileDelete(uint8_t *result, size_t result_size);
 };

@@ -17,6 +17,7 @@
 #include <fstream>
 #include <iostream>
 #include <string.h>
+#include <stdio.h>
 
 #include "file_io_processor.h"
 #include "log.h"
@@ -406,3 +407,42 @@ uint32_t FileSeek(std::string fileName, size_t position, uint8_t *result,
     return SUCCESS;
 }
 
+uint32_t FileDelete(string fileName, uint8_t *result, size_t resultSize) {
+    string resultStr;
+    size_t resultStrSize = 0;
+
+    if ( IsFileNameEmpty(fileName, result, resultSize) ) {
+        tcf::Log(TCF_LOG_ERROR, "Filename is empty\n");
+        return FAILED;
+    }
+
+    try {
+        if ( remove(fileName.c_str()) != 0 ) {
+            tcf::Log(TCF_LOG_DEBUG, "File %s delete failed", fileName.c_str());
+            resultStr = "FILE DELETE FAILED";
+            resultStrSize = resultStr.length();
+            tcf::error::ThrowIf<tcf::error::ValueError>(
+                resultStrSize > resultSize, "result string size is "
+                "greater than max result size");
+            result = (uint8_t *)strncpy((char *)result, resultStr.c_str(), resultStrSize);
+        }
+    } catch (std::exception e) {
+        tcf::Log(TCF_LOG_ERROR, "Caught exception while deleting file: %s\n", e.what());
+        resultStr = "FAILED TO DELETE: Caught Exception while deleting file";
+        resultStrSize = resultStr.length();
+        tcf::error::ThrowIf<tcf::error::ValueError>(
+                resultStrSize < resultSize, "result string size is "
+                "greater than max result size");
+        result = (uint8_t *)strncpy((char *)result, resultStr.c_str(), resultStrSize);
+        return FAILED;
+    }
+
+    tcf::Log(TCF_LOG_DEBUG, "File %s delete successful", fileName.c_str());
+    resultStr = "FILE DELETE SUCCESS";
+    resultStrSize = resultStr.length();
+    tcf::error::ThrowIf<tcf::error::ValueError>(
+        resultStrSize > resultSize, "result string size is "
+        "greater than max result size");
+    result = (uint8_t *)strncpy((char *)result, resultStr.c_str(), resultStrSize);
+    return SUCCESS;
+}

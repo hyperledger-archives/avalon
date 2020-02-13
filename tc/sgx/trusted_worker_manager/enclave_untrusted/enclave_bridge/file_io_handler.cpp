@@ -62,6 +62,8 @@ uint32_t FileIoHandler::Process(uint32_t handlerId,
             status = FileSeek(args[1], stoi(args[2]), result, resultSize);
         } else if (args.at(0) == "tell") {
             status = FileTell(args[1], result, resultSize, outBuf, outBufSize);
+        } else if (args.at(0) == "delete") {
+            status = FileDelete(args[1], result, resultSize);
         } else {
             status = -1;
 	}
