@@ -203,24 +203,32 @@ Follow these steps to run the `Demo.py` testcase:
    6. To run the Demo test case, open a new terminal, Terminal 2
    7. In Terminal 2, run `source $TCF_HOME/tools/build/_dev/bin/activate`.
       You should see the `(_dev)` prompt
+   8. In Terminal 2, cd to `$TCF_HOME/tests` and
+      type this command to run the `Demo.py` test:
+      ```bash
+      cd $TCF_HOME/tests
+      python3 Demo.py --input_dir ./json_requests/ \
+         --connect_uri "http://localhost:1947" work_orders/output.json
+      ```
 2. For Docker-based builds:
    1. Follow the steps above for
       ["Docker-based Build and Execution"](#dockerbuild)
    2. Terminal 1 is running `docker-compose` and Terminal 2 is running the
       "tcf" Docker container shell from the previous build steps
-3. In Terminal 2, run `cd $TCF_HOME/tests`
-4. In Terminal 2, use this command to run the `Demo.py` test:
-   ```bash
-   python3 Demo.py --input_dir ./json_requests/ \
-           --connect_uri "http://localhost:1947" work_orders/output.json
-   ```
-5. The response to the Avalon listener and Intel&reg; SGX enclave Manager can be
-   seen at Terminal 1
-6. The response to the test case request can be seen at Terminal 2
-7. If you wish to exit the Avalon program, press `y` and `Enter` at Terminal 1
+   3. In Terminal 2, cd to `$TCF_HOME/tests` and
+      type this command to run the `Demo.py` test:
+      ```bash
+      cd $TCF_HOME/tests
+      python3 Demo.py --input_dir ./json_requests/ \
+         --connect_uri "http://avalon-listener:1947" work_orders/output.json
+      ```
+3. The response to the Avalon listener and Intel&reg; SGX enclave Manager
+   can be seen at Terminal 1
+4. The response to the test case request can be seen at Terminal 2
+5. If you wish to exit the Avalon program, press `y` and `Enter` at Terminal 1
    for standalone builds.
    For Docker-based builds, press `Ctrl-c`
-8. For standalone mode, delete virtual environment
+6. For standalone mode, delete virtual environment
    ```bash
    rm -rf $TCF_HOME/tools/build/_dev/
    ```

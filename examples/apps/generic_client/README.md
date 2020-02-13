@@ -48,6 +48,8 @@ If `--uri` is passed, `--mode` is not used. It will fetch the worker details
 from the LMDB database and submit work order to the first available worker.
 The Avalon Listener uses TCP port 1947, so the default URI is
 `http://localhost:1947` .
+If you are using Docker, add `--uri "http://avalon-listener:1947"`
+to the command line.
 
 ## Using the Generic Client
 
@@ -73,14 +75,29 @@ worker requests on the command line.
 ./generic_client.py --uri "http://localhost:1947" \
     --workload_id "echo-result" --in_data "Hello"
 ```
-Or omit the URI if you use the default:
+
+Add or change the `--uri` parameter if using Docker:
+```bash
+./generic_client.py --uri "http://avalon-listener:1947" \
+    --workload_id "echo-result" --in_data "Hello"
+```
+
+Or omit the URI if you use the default URI (standalone mode) :
 ```bash
 ./generic_client.py --workload_id "echo-result" --in_data "Hello"
 ```
 
 ### Heart disease eval workload using a URI
+Standalone mode (no Docker):
 ```bash
 ./generic_client.py --uri "http://localhost:1947" \
+    --workload_id "heart-disease-eval" \
+    --in_data "Data: 25 10 1 67  102 125 1 95 5 10 1 11 36 1"
+```
+
+With Docker:
+```bash
+./generic_client.py --uri "http://avalon-listener:1947" \
     --workload_id "heart-disease-eval" \
     --in_data "Data: 25 10 1 67  102 125 1 95 5 10 1 11 36 1"
 ```
