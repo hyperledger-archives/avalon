@@ -242,6 +242,11 @@ See [examples/apps/heart_disease_eval](examples/apps/heart_disease_eval)
   `source _dev/bin/activate`
   or you did not successfully build Avalon
 
+- If you see the message `CMake Error: The current CMakeCache.txt
+  . . . is different than the directory . . . where CMakeCache.txt
+   was created.` then the CMakeCache.txt file is out-of-date.
+   Remove the file and rebuild.
+
 ## <a name="troubleshootingstandalone"></a>Troubleshooting: Standalone build
 - Verify your [environment variables](PREREQUISITES.md#environment)
   are set correctly and the paths exist
