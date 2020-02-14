@@ -153,9 +153,7 @@ RUN cd /project/TrustedComputeFramework/sdk \
 
 # Environment setup
 
-RUN echo "WEB3_INFURA_PROJECT_ID=9af17e6320414af8a3168cd9fe9d653d" \
-         >> /etc/environment \
- && echo "TCF_HOME=/project/TrustedComputeFramework/" >> /etc/environment \
+RUN echo "TCF_HOME=/project/TrustedComputeFramework/" >> /etc/environment \
  && if [ ! -z "$http_proxy"  ]; then \
         echo 'Acquire::http::Proxy "'$http_proxy'";' \
              >> /etc/apt/apt.conf.d/00proxy; \
