@@ -40,8 +40,6 @@ class EthereumWrapper():
 
     def __init__(self, config):
         if self.__validate(config):
-            # Private key to sign the transaction
-            self.__eth_private_key = os.environ["WALLET_PRIVATE_KEY"]
             # Ethereum account address to interact with ethereum network
             self.__eth_account_address = config['ethereum']['eth_account']
             provider = config["ethereum"]["provider"]
@@ -49,6 +47,9 @@ class EthereumWrapper():
             self.__w3 = web3.Web3(
                 PROVIDER_DICT[urlparse(provider).scheme](provider))
             self._is_ropsten_provider = self._is_ropsten(provider)
+            # Private key to sign the transaction
+            if self._is_ropsten_provider:
+                self.__eth_private_key = config['ethereum']['acc_pvt_key']
             # Chain id signifies the which ethereum network to use:
             # test net/main ethereum network
             self._chain_id = config["ethereum"]["chain_id"]
@@ -60,7 +61,7 @@ class EthereumWrapper():
         else:
             raise Exception("Invalid configuration parameter")
 
-    def _is_ropesten(self, url):
+    def _is_ropsten(self, url):
         """
         This function checks if the url passed is one for ropsten network
         """
@@ -75,10 +76,7 @@ class EthereumWrapper():
         validates parameter from config parameters for existence.
         Returns false if validation fails and true if it success
         """
-        if os.environ["WALLET_PRIVATE_KEY"] is None:
-            logging.error("Ethereum account private key is not set!!\
-                Set environment variable WALLET_PRIVATE_KEY.")
-            return False
+
         if config["ethereum"]["eth_account"] is None:
             logging.error("Missing ethereum account id!!")
             return False
@@ -94,6 +92,15 @@ class EthereumWrapper():
         if config["ethereum"]["gas_price"] is None:
             logging.error("Missing parameter gas price")
             return False
+        provider = config["ethereum"]["provider"]
+        if self._is_ropsten(provider):
+            try:
+                config['ethereum']['acc_pvt_key']
+            except KeyError:
+                logging.error("Ethereum account private key is not set!!\
+                    Cannot sign transactions.")
+                return False
+
         return True
 
     def compile_source_file(self, file_path):
