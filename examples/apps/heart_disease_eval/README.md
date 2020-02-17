@@ -25,28 +25,20 @@ requests on the command line.
     (activating a virtual environment)
 3.  Terminal 1 is running the Avalon Enclave Manager and Listener with
     `docker-compose` . Terminal 2 is running the Docker container shell
-4.  In Terminal 2, set environment variable `WALLET_PRIVATE_KEY` if you wish 
-    to send raw transactions to Ethereum(usually required for Ropsten).
-    ```bash
-    export WALLET_PRIVATE_KEY="B413189C95B48737AE2D9AF4CAE97EB03F4DE40599DF8E6C89DCE4C2E2CBA8DE"
-    ```
-    The key used here is for the default account used in tcf_connector.toml.
-    You can use the key specific to you account if you have made changes to
-    tcf_connector.toml
-5.  In Terminal 2 run `cd $TCF_HOME/examples/apps/generic_client`
-6.  In Terminal 2, run
+4.  In Terminal 2 run `cd $TCF_HOME/examples/apps/generic_client`
+5.  In Terminal 2, run
     ``` bash
     ./generic_client.py --workload_id "heart-disease-eval" \
         --in_data "Data: 25 10 1 67 102 125 1 95 5 10 1 11 36 1"
     ```
-7.  The data will be submitted to the worker and the results will appear shortly:
+6.  The data will be submitted to the worker and the results will appear shortly:
     ```
     [04:31:55 INFO    utility.utility] Decryption result at client -
     You have a 46% risk of heart disease.
     ```
-8.  Optionally submit another request.
+7.  Optionally submit another request.
     Use the `--help` option to see other available options
-9.  In Terminal 1, press Ctrl-c to stop the Avalon Enclave Manager and Listener
+8.  In Terminal 1, press Ctrl-c to stop the Avalon Enclave Manager and Listener
 
 ## Using the Heart Disease Evaluation GUI Client
 
@@ -77,32 +69,24 @@ The Avalon Enclave Manager and Avalon Listener run in a Docker container.
     && chmod 0755 $HOME/.py-solc/solc-v0.4.25/bin/solc &&
     export SOLC_BINARY=$HOME/.py-solc/solc-v0.4.25/bin/solc
     ```
-8.  In Terminal 2, set environment variable `WALLET_PRIVATE_KEY` if you wish
-    to send raw transactions to Ethereum(usually required for Ropsten). 
-    ```bash
-    export WALLET_PRIVATE_KEY="B413189C95B48737AE2D9AF4CAE97EB03F4DE40599DF8E6C89DCE4C2E2CBA8DE"
-    ```
-    The key used here is for the default account used in tcf_connector.toml.
-    You can use the key specific to you account if you have made changes to
-    tcf_connector.toml
-9.  If your DISPLAY is not the local console, `:0`, you need to give access to
+8.  If your DISPLAY is not the local console, `:0`, you need to give access to
     your display from the GUI.
     Open a new terminal, Terminal 3, and run `xhost +`
-10.  In Terminal 2, run `./heart_gui.py` .
+9.  In Terminal 2, run `./heart_gui.py` .
     Use the `--help` option to see other available options
-11. A new window will pop up with the GUI. See the screenshot below for an
+10. A new window will pop up with the GUI. See the screenshot below for an
     example.
-12. Input all the heart disease evaluation values.
+11. Input all the heart disease evaluation values.
     Alternatively, check the "Input variables as string" box to input the
     values as a string of 14 integers separated by spaces. For example,
     `25 10 1 67 102 125 1 95 5 10 1 11 36 1` or
     `32 1 1 156 132 125 1 95 1 0 1 1 3 1`
-13. Click the "Evaluate" button and a new window will appear with the
+12. Click the "Evaluate" button and a new window will appear with the
     heart disease evaluation result.
     The "View Request", "View Result", and "View Receipt" buttons will pop up
     windows displaying the raw JSON RPC files
-14. Close the GUI windows when done
-15. If you ran `xhost +` above, close access to your display with
+13. Close the GUI windows when done
+14. If you ran `xhost +` above, close access to your display with
     `xhost -` in Terminal 3
 16. In Terminal 1, press Ctrl-c to stop the Avalon Enclave Manager and Listener
 

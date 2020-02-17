@@ -52,14 +52,8 @@
    - https://faucet.metamask.io/
    - https://blog.bankex.org/how-to-buy-ethereum-using-metamask-ccea0703daec
 
-7. (Standalone builds only) Export your ethereum account private key
-   (get the private key from metamask client):
 
-   ```bash
-   export WALLET_PRIVATE_KEY=<private_key>
-   ```
-
-8. Install web3.py, which is an Ethereum Python client that interacts
+7. Install web3.py, which is an Ethereum Python client that interacts
    with the Ethereum network. For more information about web3.py, see
    https://web3py.readthedocs.io/en/stable/quickstart.html
 
@@ -67,11 +61,11 @@
     pip install web3
     ```
 
-9.  Run `cd $TCF_HOME/examples/common/python/connectors/ethereum`
+8.  Run `cd $TCF_HOME/examples/common/python/connectors/ethereum`
 
-10. Fill in your Ropsten testnet address in `eth_account` in `sdk/avalon_sdk/tcf_connector.toml`
+9.  Fill in your Ropsten testnet address in `eth_account` in `sdk/avalon_sdk/tcf_connector.toml`
 
-11. Deploy solidity contracts to Ropsten network using `eth_cli.py`
+10. Deploy solidity contracts to Ropsten network using `eth_cli.py`
 
     ```bash
     ./eth_cli.py
@@ -80,18 +74,18 @@
     The above command will display the contract instance address for
     `direct_registry_contract_address` and `worker_registry_contract_address`
 
-12. Fill in your your contract addresses
+11. Fill in your your contract addresses
       `direct_registry_contract_address` and `worker_registry_contract_address`
       in `sdk/avalon_sdk/tcf_connector.toml`
 
-13. Test the DirectRegistry and WorkerRegistry contracts with:
+12. Test the DirectRegistry and WorkerRegistry contracts with:
     ```bash
     cd $TCF_HOME/examples/common/python/connectors/ethereum/unit_tests
     python3 test_ethereum_worker_registry_impl.py
     python3 test_ethereum_worker_registry_list_impl.py
     ```
 
-14. Test echo client with direct mode using Ropsten test network.
+13. Test echo client with direct mode using Ropsten test network.
     ```bash
     cd $TCF_HOME/examples/apps/echo/client
     ./echo_client.py -m "Hello world"
