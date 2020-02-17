@@ -19,19 +19,10 @@ To use:
     (activating a virtual environment)
 3.  Terminal 1 is running the Avalon Enclave Manager and Listener with
     `docker-compose` . Terminal 2 is running the Docker container shell
-4.  In Terminal 2, set environment variable `WALLET_PRIVATE_KEY` if you wish
-    to send raw transactions to Ethereum(usually required for Ropsten).
-    ```bash
-    export WALLET_PRIVATE_KEY="B413189C95B48737AE2D9AF4CAE97EB03F4DE40599DF8E6C89DCE4C2E2CBA8DE"
-    ```
-    The key used here is for the default account used in tcf_connector.toml.
-    You can use the key specific to you account if you have made changes to
-    tcf_connector.toml
-5.  In Terminal 2 run `cd $TCF_HOME/examples/apps/echo/client`
-6.  In Terminal 2, run `./echo_client.py -m "Hello world"` .
-    Use the `-h` option to see other available options
-
-7.  You will see output showing the following:
+4.  In Terminal 2 run `cd $TCF_HOME/examples/apps/echo/client`
+5.  In Terminal 2, run `./echo_client.py -m "Hello world"` .
+    Use the `-h` option to see other available options.
+6.  You will see output showing the following:
     1. The client searches the registry for an "echo" worker
     2. The client sends a request to the worker
     3. The client waits for and receives a response in JSON format
@@ -43,5 +34,5 @@ To use:
     5. The worker receipt in JSON format
     6. Messages sent and received are encrypted with the key specified
        in the JSON packet, then encoded in Base64.
-8.  In Terminal 1, press Ctrl-c to stop the Avalon Enclave Manager and Listener
+7.  In Terminal 1, press Ctrl-c to stop the Avalon Enclave Manager and Listener
 
