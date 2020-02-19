@@ -168,15 +168,23 @@ The steps below will set up a Python virtual environment to run Avalon.
     pip3 install dist/*.whl
     ```
 
-11. Build the LMDB listener and shared key/value storage modules:
+11. Build the shared key/value storage modules:
  
     ```bash
-    cd $TCF_HOME/examples/shared_kv_storage/db_store/packages
+    cd $TCF_HOME/shared_kv_storage/db_store/packages
     mkdir -p build
     cd build
     cmake ..
     make
-    cd $TCF_HOME/examples/shared_kv_storage
+    cd $TCF_HOME/shared_kv_storage
+    make
+    make install
+    ```
+
+12. Build the Avalon Listener module:
+
+    ```bash
+    cd $TCF_HOME/listener
     make
     make install
     ```
