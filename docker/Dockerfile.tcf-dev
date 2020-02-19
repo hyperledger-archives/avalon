@@ -32,6 +32,37 @@
 #   make clean && make
 
 
+# -------------=== Build openssl_image ===-------------
+
+#Build openssl intermediate docker image
+FROM ubuntu:bionic as openssl_image
+
+RUN apt-get update \
+ && apt-get install -y -q \
+    ca-certificates \
+    pkg-config \
+    make \
+    wget \
+    tar \
+ && apt-get -y -q upgrade \
+ && apt-get clean \
+ && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /tmp
+
+# Build ("Untrusted") OpenSSL
+RUN OPENSSL_VER=1.1.1d \
+ && wget https://www.openssl.org/source/openssl-$OPENSSL_VER.tar.gz \
+ && tar -zxf openssl-$OPENSSL_VER.tar.gz \
+ && cd openssl-$OPENSSL_VER/ \
+ && ./config \
+ && THREADS=8 \
+ && make -j$THREADS \
+ && make test
+
+
+# -------------=== build avalon image ===-------------
+#Build docker image
 FROM ubuntu:bionic
 
 # Ignore timezone prompt in apt
@@ -109,22 +140,19 @@ RUN SGX_SDK_FILE=sgx_linux_x64_sdk_2.7.101.3.bin \
 
 
 WORKDIR /tmp
+ENV OPENSSL_VER=1.1.1d
+COPY --from=openssl_image /tmp/openssl-$OPENSSL_VER /tmp/openssl-$OPENSSL_VER/
+COPY --from=openssl_image /tmp/openssl-$OPENSSL_VER.tar.gz /tmp/
 # Build ("Untrusted") OpenSSL, then build ("trusted") SGX OpenSSL
 # Note: The latter will compile in HW or SIM mode depending on the
 # availability of /dev/isgx and /var/run/aesmd/aesm.socket
-RUN OPENSSL_VER=1.1.1d \
- && wget https://www.openssl.org/source/openssl-$OPENSSL_VER.tar.gz \
- && tar -zxf openssl-$OPENSSL_VER.tar.gz \
- && cd openssl-$OPENSSL_VER/ \
- && ./config \
+RUN cd openssl-$OPENSSL_VER/ \
  && THREADS=8 \
- && make -j$THREADS \
- && make test \
  && make install -j$THREADS \
  && ldconfig \
  && ln -s /etc/ssl/certs/* /usr/local/ssl/certs/ \
  && cd .. \
- && rm -rf openssl-$OPENSSL_VER \
+ && rm -rf openssl/ \
  && git clone https://github.com/intel/intel-sgx-ssl.git  \
  && . /opt/intel/sgxsdk/environment \
  && (cd intel-sgx-ssl/openssl_source; mv /tmp/openssl-$OPENSSL_VER.tar.gz . ) \

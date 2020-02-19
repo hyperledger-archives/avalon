@@ -36,25 +36,22 @@ RUN apt-get update \
 # Make Python3 default
 RUN ln -sf /usr/bin/python3 /usr/bin/python
 
-#Build Avalon Listener intermediate docker image
-FROM base_image as build_image
+
+# -------------=== openssl build ===-------------
+
+#Build openssl intermediate docker image
+FROM ubuntu:bionic as openssl_image
 
 RUN apt-get update \
  && apt-get install -y -q \
-    cmake \
+    ca-certificates \
+    pkg-config \
     make \
-    libprotobuf-dev \
-    python3-dev \
-    python3-pip \
-    swig \
-    software-properties-common \
     wget \
-    tar
-
-
-# Install setuptools packages using pip because
-# these are not available in apt repository.
-RUN pip3 install --upgrade setuptools json-rpc
+    tar \
+ && apt-get -y -q upgrade \
+ && apt-get clean \
+ && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /tmp
 
@@ -66,12 +63,38 @@ RUN OPENSSL_VER=1.1.1d \
  && ./config \
  && THREADS=8 \
  && make -j$THREADS \
- && make test \
+ && make test
+
+
+# -------------=== build_image ===-------------
+#Build Avalon Listener intermediate docker image
+FROM base_image as build_image
+
+RUN apt-get update \
+ && apt-get install -y -q \
+    cmake \
+    make \
+    libprotobuf-dev \
+    python3-dev \
+    python3-pip \
+    swig \
+    software-properties-common
+
+ENV OPENSSL_VER=1.1.1d
+RUN THREADS=8
+COPY --from=openssl_image /tmp/openssl-$OPENSSL_VER /tmp/openssl-$OPENSSL_VER/
+WORKDIR /tmp
+RUN cd openssl-$OPENSSL_VER/ \
  && make install -j$THREADS \
  && ldconfig \
  && ln -s /etc/ssl/certs/* /usr/local/ssl/certs/ \
  && cd .. \
- && rm -rf openssl-$OPENSSL_VER
+ && rm -rf openssl/
+
+
+# Install setuptools packages using pip because
+# these are not available in apt repository.
+RUN pip3 install --upgrade setuptools json-rpc
 
 ENV TCF_HOME=/project/avalon
 
@@ -93,7 +116,7 @@ RUN mkdir -p build \
 WORKDIR /project/avalon/common/python
 
 RUN echo "Building Avalon Common Python\n" \
- && make \ 
+ && make \
  && echo "Installing Avalon Common Python" \
  && make install
 
@@ -109,9 +132,12 @@ RUN echo "Building Avalon SDK\n" \
 WORKDIR /project/avalon/listener/
 
 RUN echo "Building avalon listener\n" \
-  && make \
-  && echo "Installing Avalon Listener" \
-  && make install
+ && make \
+ && echo "Installing Avalon Listener" \
+ && make install
+
+
+# -------------=== final_image ===-------------
 
 # Build final image and install modules
 FROM base_image as final_image
