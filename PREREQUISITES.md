@@ -23,7 +23,8 @@ This document describes how to get and compile these required components.
 
 # Recommended host system
 Hyperledger Avalon services (specifically the enclave manager and
-listener) should be ran on Ubuntu 18.04. Avalon has been tested on Ubuntu 18.04.
+listener) should be ran on Ubuntu 18.04.
+ Avalon has been tested on Ubuntu 18.04.
 
 Avalon may run on other Linux distributions, but the installation
 process is likely to be more complicated, and the use of other distributions is
@@ -427,8 +428,8 @@ problems.
 - If you get the error:
   `threads.h:57:22: error: conflicting types for ‘pthread_key_t’` or
   `threads.h:60:13: error: conflicting types for ‘pthread_once_t’`
-  your Intel SGX SDK is too old. Remove or rename `/opt/intel/sgxsdk` and `~/sgxssl`
-  then reinstall the Intel SGX SDK and rebuild the Intel SGX OpenSSL
+  your Intel SGX SDK is too old. Remove or rename `/opt/intel/sgxsdk` and
+  `~/sgxssl` then reinstall the Intel SGX SDK and rebuild the Intel SGX OpenSSL
   as instructed under [Intel SGX SDK](#sgx) and [Intel SGX OpenSSL](#sgxssl)
 
 - If the message  `intel_sgx: SGX is not enabled` appears in `/var/log/syslog`
