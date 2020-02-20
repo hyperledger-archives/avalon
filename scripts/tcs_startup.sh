@@ -45,6 +45,7 @@ start_avalon_components()
     echo "Avalon Enclave Manager started"
 
     sleep 5s
+    check_avalon_components
 
     if [ "$YES" != "1" ] ; then
         while true; do
