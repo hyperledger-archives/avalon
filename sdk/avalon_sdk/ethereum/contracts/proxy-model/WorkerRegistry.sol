@@ -35,10 +35,10 @@ contract WorkerRegistry
 		string    details;
 	}
 
-	// WorkerID → Worker
+	// WorkerID -> Worker
 	mapping(bytes32 => Worker) private m_workers;
 
-	// workerType → organizationId → appTypeId → WorkerID[]
+	// workerType -> organizationId -> appTypeId -> WorkerID[]
 	mapping(uint256 => mapping(bytes32 => mapping(bytes32 => bytes32[]))) m_workersDB;
 
 	constructor()

@@ -156,10 +156,10 @@ class EthereumWorkerRegistryImpl(WorkerRegistry):
                     binascii.hexlify(application_id).decode("utf8")):
                 logging.error("Invalid application id {}".format(org_id))
                 return None
-            lookup_result = self.__contract_instance.functions
-            .workerLookUpNext(
-                worker_type.value,
-                org_id, application_id, lookup_tag).call()
+            lookup_result = self.__contract_instance.functions\
+                .workerLookUpNext(
+                    worker_type.value,
+                    org_id, application_id, lookup_tag).call()
             return lookup_result
         else:
             logging.error(
@@ -215,9 +215,9 @@ class EthereumWorkerRegistryImpl(WorkerRegistry):
                     return None
 
             txn_dict = self.__contract_instance.functions.workerRegister(
-                worker_type, organization_id, application_type_ids, details)
-            .buildTransaction(self.__eth_client
-                              .get_transaction_params())
+                worker_type, organization_id, application_type_ids, details)\
+                .buildTransaction(
+                self.__eth_client.get_transaction_params())
             txn_receipt = self.__eth_client.execute_transaction(
                 txn_dict)
             return txn_receipt
@@ -249,10 +249,9 @@ class EthereumWorkerRegistryImpl(WorkerRegistry):
                     return None
 
             txn_dict = self.__contract_instance.functions.workerUpdate(
-                worker_id, details)
-            .buildTransaction(self.__eth_client.get_transaction_params())
-            txn_receipt = self.__eth_client.execute_transaction(
-                txn_dict)
+                worker_id, details)\
+                .buildTransaction(self.__eth_client.get_transaction_params())
+            txn_receipt = self.__eth_client.execute_transaction(txn_dict)
             return txn_receipt
         else:
             logging.error(
@@ -281,10 +280,9 @@ class EthereumWorkerRegistryImpl(WorkerRegistry):
                 return None
 
             txn_dict = self.__contract_instance.functions.workerSetStatus(
-                worker_id, status)
-            .buildTransaction(self.__eth_client.get_transaction_params())
-            txn_receipt = self.__eth_client.execute_transaction(
-                txn_dict)
+                worker_id, status)\
+                .buildTransaction(self.__eth_client.get_transaction_params())
+            txn_receipt = self.__eth_client.execute_transaction(txn_dict)
             return txn_receipt
         else:
             logging.error(

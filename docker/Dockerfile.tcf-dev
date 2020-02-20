@@ -80,6 +80,8 @@ RUN apt-get update \
 # these are not available in apt repository.
 # Install nose2 for running tests.
 RUN pip3 install --upgrade setuptools json-rpc web3 py-solc-x nose2
+# Install specific version of solc to support versions <0.6.0
+RUN python3 -m solcx.install v0.5.15
 
 # Installing solidity compiler
 RUN add-apt-repository ppa:ethereum/ethereum \

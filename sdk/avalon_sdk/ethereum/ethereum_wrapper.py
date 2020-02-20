@@ -16,9 +16,10 @@ import logging
 import os
 from os.path import exists, realpath
 # solcx has solidity compiler with 0.5.x and 0.6.x support
-from solcx import compile_source
+from solcx import compile_source, set_solc_version, get_solc_version
 from urllib.parse import urlparse
 import web3
+import json
 
 logging.basicConfig(
     format='%(asctime)s - %(levelname)s - %(message)s', level=logging.INFO)
@@ -58,6 +59,9 @@ class EthereumWrapper():
             self.__gas_limit = config["ethereum"]["gas_limit"]
             # Amount of Ether you’re willing to pay for every unit of gas
             self.__gas_price = config["ethereum"]["gas_price"]
+            set_solc_version(config['ethereum']['solc_version'])
+            logging.info("Solidity compiler version being used : {}"
+                         .format(get_solc_version()))
         else:
             raise Exception("Invalid configuration parameter")
 
@@ -144,9 +148,9 @@ class EthereumWrapper():
         and wait for receipts
         Returns transaction receipt on success or None on error.
         """
-        signed_txn = self.__w3.eth.account.signTransaction(
+        signed_tx = self.__w3.eth.account.signTransaction(
             tx_dict, private_key=self.__eth_private_key)
-        tx_hash = self.__w3.eth.sendRawTransaction(signed_txn.rawTransaction)
+        tx_hash = self.__w3.eth.sendRawTransaction(signed_tx.rawTransaction)
         tx_receipt = self.__w3.eth.waitForTransactionReceipt(
             tx_hash.hex(), 120)
         logging.info("executed transaction hash: %s, receipt: %s",
@@ -159,8 +163,8 @@ class EthereumWrapper():
         and wait for receipts
         Returns transaction receipt on success or None on error.
         """
-        txn_hash = w3.eth.sendTransaction(txn_dict)
-        txn_receipt = w3.eth.waitForTransactionReceipt(txn_hash)
+        tx_hash = self.__w3.eth.sendTransaction(tx_dict)
+        tx_receipt = self.__w3.eth.waitForTransactionReceipt(tx_hash)
         logging.info("executed transaction hash: %s, receipt: %s",
                      format(tx_hash.hex()), format(tx_receipt))
         return tx_receipt
@@ -170,10 +174,10 @@ class EthereumWrapper():
         Wrapper function to choose appropriate function to execute
         transaction based on provider(ropsten vs other)
         """
-        if _is_ropsten_provider:
-            return sign_execute_raw_transaction(tx_dict)
+        if self._is_ropsten_provider:
+            return self.sign_execute_raw_transaction(tx_dict)
         else:
-            return execute_unsigned_transaction(tx_dict)
+            return self.execute_unsigned_transaction(tx_dict)
 
     def get_chain_id(self):
         return self._chain_id
@@ -193,8 +197,19 @@ class EthereumWrapper():
         return self.__w3.eth.contract(address=contract_address,
                                       abi=contract_interface["abi"])
 
+    def get_contract_instance_from_json(self, json_file_name,
+                                        contract_address):
+        """
+        Method to get contract ABI from a JSON file
+        """
+        return self.__w3.eth.contract(
+                  address=contract_address,
+                  abi=json.load(open(json_file_name)).get('abi'),
+                  ContractFactoryClass=web3.contract.Contract)
+
     def get_txn_nonce(self):
-        return self.__w3.eth.getTransactionCount(self.__eth_account_address)
+        return self.__w3.eth.getTransactionCount(web3.Web3.toChecksumAddress(
+            self.__eth_account_address))
 
     def get_transaction_params(self):
         """
@@ -213,7 +228,8 @@ class EthereumWrapper():
             }
         else:
             return {
-                "from": self.get_account_address(),
+                "from": web3.Web3.toChecksumAddress(
+                             self.get_account_address()),
                 "gas": self.get_gas_limit(),
                 "gasPrice": self.get_gas_price(),
                 "nonce": self.get_txn_nonce()

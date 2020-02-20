@@ -34,7 +34,7 @@ worker_registry_contract_file = "sdk/avalon_sdk/ethereum/contracts/WorkerRegistr
 #Proxy worker registry contract file
 proxy_worker_registry_contract_file = "sdk/avalon_sdk/ethereum/contracts/proxy-model/WorkerRegistry.sol"
 #Worker registry contract file
-work_order_contract_file = "sdk/avalon_sdk/ethereum/contracts/proxy-model/WorkerOrderRegistry.sol"
+work_order_contract_file = "sdk/avalon_sdk/ethereum/contracts/proxy-model/WorkOrderRegistry.sol"
 
 #Initially deploy the contracts using eth_cli.py to get the these addresses
 #Deployed contract address of direct registry contract address.
@@ -42,18 +42,20 @@ direct_registry_contract_address = "0xD5A613945DE851C7c2f83fFDA4de0aE01CE980c0"
 #Deployed contract address of worker registry contract address.
 worker_registry_contract_address = "0x523748D492AfEEC90767403Da7C1e86feBB10435"
 #Deployed contract address of direct registry contract address.
-proxy_worker_registry_contract_address = "0xD5A613945DE851C7c2f83fFDA4de0aE01CE980c0"
+proxy_worker_registry_contract_address = "0x76Cf65807D6F2E749fF1f3dAc79e6b44fc21f0f6"
 #Deployed contract address of worker registry contract address.
-work_order_contract_address = "0x523748D492AfEEC90767403Da7C1e86feBB10435"
+work_order_contract_address = "0x2525fef0dE3454e05b37F040d2f4862C3460f2E6"
 
 #Ethereum account details
-eth_account = "0xDcB780ea30C1041abfcCCE4233c275B9F313eAf4"
+eth_account = "0xefb21e451a2f8c9e25e02ffee969b169a067d343"
 #Ethereum account private key 
 acc_pvt_key = "4F611197A6E82715F4D2446FE015D1667E9C40A351411F3A7300F71F285D01B4"
- 
-#Provider for test network. Using Ropsten by default here and Infura as the IAAS.
-#This could be replaced with a url for a Hyperledger Besu client or a Ganache client.
-provider = "https://ropsten.infura.io/v3/9af17e6320414af8a3168cd9fe9d653d"
+
+#Version of solc to be used for compiling Solidity contracts 
+solc_version = "v0.5.15"
+#Provider for test network. The default url is for a Hyperledger Besu client.
+#This could be replaced with a Ropsten(Infura as the IAAS) provider or a Ganache client.
+provider = "http://10.66.245.80:8545"
 #chain_id is 3 for ropsten test network
 #"1": Ethereum Mainnet
 #"2": Morden Testnet (deprecated)
