@@ -22,7 +22,7 @@ from utility.hex_utils import is_valid_hex_str
 from avalon_sdk.worker.worker_details import WorkerStatus, WorkerType
 from avalon_sdk.ethereum.ethereum_wrapper import EthereumWrapper
 from avalon_sdk.interfaces.work_order_proxy \
-    import WorkOrderClient
+    import WorkOrderProxy
 
 logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(message)s", level=logging.INFO)

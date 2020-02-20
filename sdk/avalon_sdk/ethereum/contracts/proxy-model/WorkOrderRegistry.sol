@@ -37,7 +37,7 @@ contract WorkOrderRegistry
 		string  response;
 	}
 
-	// workOrderID → workOrder
+	// workOrderID -> workOrder
 	mapping(bytes32 => WorkOrder) m_workorders;
 
 	event workOrderSubmitted(

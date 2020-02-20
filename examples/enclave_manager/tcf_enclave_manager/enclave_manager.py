@@ -92,7 +92,12 @@ class EnclaveManager:
         worker_info = create_json_worker(self, self.config)
         logger.info("Adding enclave workers to workers table")
         worker_id = crypto_utils.strip_begin_end_public_key(self.enclave_id) \
-            .encode("UTF-8").hex()
+            .encode("UTF-8")
+        # Truncate worker id to 32 bytes since TC spec proxy model
+        # contracts expect byte32
+        worker_id = worker_id[:32]
+        # convert worderid to hex string
+        worker_id = worker_id.hex()
         kv_helper.set("workers", worker_id, worker_info)
 
         # Cleanup wo-processing" table

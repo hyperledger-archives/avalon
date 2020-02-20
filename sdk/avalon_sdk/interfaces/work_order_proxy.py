@@ -13,10 +13,10 @@
 # limitations under the License.
 
 from abc import ABC, abstractmethod
-from sdk.avalon_sdk.interfaces.work_order import WorkOrder
+from avalon_sdk.interfaces.work_order import WorkOrder
 
 
-class WorkOrderProxy(ABC, WorkOrder):
+class WorkOrderProxy(WorkOrder):
     """
     This class is an abstract base class that contains
     abstract APIs to manage work orders.
