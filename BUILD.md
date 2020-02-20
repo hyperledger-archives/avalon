@@ -167,8 +167,8 @@ The steps below will set up a Python virtual environment to run Avalon.
 
     ```bash
     cd $TCF_HOME/sdk
-    python3 setup.py bdist_wheel
-    pip3 install dist/*.whl
+    make
+    make install
     ```
 
 13. Build the shared key/value storage modules:
@@ -236,13 +236,7 @@ Follow these steps to run the `Demo.py` testcase:
 3. The response to the Avalon listener and Intel&reg; SGX enclave Manager
    can be seen at Terminal 1
 4. The response to the test case request can be seen at Terminal 2
-5. If you wish to exit the Avalon program, press `y` and `Enter` at Terminal 1
-   for standalone builds.
-   For Docker-based builds, press `Ctrl-c`
-6. For standalone mode, delete virtual environment
-   ```bash
-   rm -rf $TCF_HOME/tools/build/_dev/
-   ```
+5. If you wish to exit the Avalon program, press `Ctrl-c`
 
 A GUI is also available to run this demo.
 See [examples/apps/heart_disease_eval](examples/apps/heart_disease_eval)
