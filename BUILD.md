@@ -101,9 +101,11 @@ The steps below will set up a Python virtual environment to run Avalon.
 
 5. If you are using Intel SGX hardware, check that `SGX_MODE=HW` before
    building the code.
-   By default `SGX_MODE=SIM` indicating use the Intel SGX simulator.
-   if you are not using Intel SGX hardware, go to the next step.
+   If you are not using Intel SGX hardware, check that `SGX_MODE` is not
+   set or set to `SGX_MODE=SIM` .
+   By default `SGX_MODE=SIM` , indicating use the Intel SGX simulator.
 
+6. If you are not using Intel SGX hardware, go to the next step.
    Check that `TCF_ENCLAVE_CODE_SIGN_PEM` is set.
    Refer to the [PREREQUISITES document](PREREQUISITES.md)
    for more details on these variables.
@@ -120,24 +122,25 @@ The steps below will set up a Python virtual environment to run Avalon.
    ias_api_key = '<ias subscription key obtained from portal>'
    ```
 
-   In the same file, if you are behind a corporate proxy,
-   uncomment and update the https_proxy line:
+7. If you are behind a corporate proxy, then in file
+   `$TCF_HOME/config/tcs_config.toml` uncomment and update the
+   `https_proxy` line:
 
    ```bash
    #https_proxy = "http://your-proxy:your-port/"
    ```
+
    If you are not behind a corporate proxy (the usual case),
    then leave this line commented out.
 
-
-6. Create a Python virtual environment:
+8. Create a Python virtual environment:
 
    ```bash
    cd $TCF_HOME/tools/build
    python3 -m venv _dev
    ```
 
-7. Activate the new Python virtual environment for the current shell session.
+9. Activate the new Python virtual environment for the current shell session.
    You will need to do this in each new shell session (in addition to
    exporting environment variables).
    ```bash
@@ -147,20 +150,20 @@ The steps below will set up a Python virtual environment to run Avalon.
    If the virtual environment for the current shell session is activated,
    you will the see this prompt: `(_dev)`
 
-8. Install PIP3 packages into your Python virtual environment:
+10. Install PIP3 packages into your Python virtual environment:
 
-   ```bash
-   pip3 install --upgrade setuptools json-rpc py-solc web3 colorlog twisted wheel
-   ```
+    ```bash
+    pip3 install --upgrade setuptools json-rpc py-solc web3 colorlog twisted wheel
+    ```
 
-9. Build and install Avalon components:
+11. Build and install Avalon components:
 
-   ```bash
-   make clean
-   make
-   ```
+    ```bash
+    make clean
+    make
+    ```
 
-10. Build the Avalon SDK Python module:
+12. Build the Avalon SDK Python module:
 
     ```bash
     cd $TCF_HOME/sdk
@@ -168,7 +171,7 @@ The steps below will set up a Python virtual environment to run Avalon.
     pip3 install dist/*.whl
     ```
 
-11. Build the shared key/value storage modules:
+13. Build the shared key/value storage modules:
  
     ```bash
     cd $TCF_HOME/shared_kv_storage/db_store/packages
@@ -181,7 +184,7 @@ The steps below will set up a Python virtual environment to run Avalon.
     make install
     ```
 
-12. Build the Avalon Listener module:
+14. Build the Avalon Listener module:
 
     ```bash
     cd $TCF_HOME/listener
