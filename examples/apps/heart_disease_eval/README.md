@@ -21,22 +21,36 @@ requests on the command line.
 1.  If needed, update the Ethereum account and direct registry contract
     information in `sdk/avalon_sdk/tcf_connector.toml`
 2.  Follow instructions in the "Docker-based Build and Execution" section of
-    the [build document](../../../BUILD.md#dockerbuild) through step 5
-    (activating a virtual environment)
-3.  Terminal 1 is running the Avalon Enclave Manager and Listener with
-    `docker-compose` . Terminal 2 is running the Docker container shell
+    the [build document](../../../BUILD.md#dockerbuild).
+
+    As an alternative, you can run this in Standalone mode without Docker.
+    In that case, follow instructions in the "Standalone Build" section of
+    the [build document](../../../BUILD.md#standalonebuild)
+3.  Terminal 1 is running the Avalon Enclave Manager and Listener.
+    Terminal 2 is running either the Docker container shell (recommended) or
+    (for Standalone Builds) the Python virtual environment
 4.  In Terminal 2 run `cd $TCF_HOME/examples/apps/generic_client`
-5.  In Terminal 2, run
+5.  If you are running with Docker, then run this in Terminal 2:
     ``` bash
     ./generic_client.py --workload_id "heart-disease-eval" \
         --in_data "Data: 25 10 1 67 102 125 1 95 5 10 1 11 36 1"
     ```
-6.  The data will be submitted to the worker and the results will appear shortly:
+
+     If you are running standalone, then run this in Terminal 2:
+    ``` bash
+    ./generic_client.py --workload_id "heart-disease-eval" \
+         --uri "http://localhost:1947/" \
+        --in_data "Data: 25 10 1 67 102 125 1 95 5 10 1 11 36 1"
+    ```
+
+6.  The data will be submitted to the worker and the results will appear
+    shortly:
     ```
     [04:31:55 INFO    utility.utility] Decryption result at client -
     You have a 46% risk of heart disease.
     ```
 7.  Optionally submit another request.
+
     Use the `--help` option to see other available options
 8.  In Terminal 1, press Ctrl-c to stop the Avalon Enclave Manager and Listener
 
@@ -45,34 +59,43 @@ requests on the command line.
 The GUI client, `heart_gui.py` opens a X window on your display.
 You must run this on your graphical console or a terminal emulator that
 supports X Windows.
-The Avalon Enclave Manager and Avalon Listener run in a Docker container.
 
 1.  If needed, in file `docker/Dockerfile.tcf-dev` change `ENV DISPLAY`
     to the X Windows `$DISPLAY` value. By default, it is the console, `:0`
 2.  If needed, also update the Ethereum account and direct registry contract
     information in `sdk/avalon_sdk/tcf_connector.toml`
 3.  Follow instructions in the "Docker-based Build and Execution" section of
-    the [build document](../../../BUILD.md#dockerbuild) through step 4
-    (activating a virtual environment)
-4.  Terminal 1 is running the Avalon Enclave Manager and Listener with
-    `docker-compose` . Terminal 2 is running the Docker container shell
+    the [build document](../../../BUILD.md#dockerbuild).
+
+    As an alternative, you can run this in Standalone mode without Docker.
+    In that case, follow instructions in the "Standalone Build" section of
+    the [build document](../../../BUILD.md#standalonebuild)
+4.  Terminal 1 is running the Avalon Enclave Manager and Listener.
+    Terminal 2 is running either the Docker container shell (recommended) or
+    (for Standalone Builds) the Python virtual environment
 5.  In Terminal 2 run `cd $TCF_HOME/examples/apps/heart_disease_eval/client`
-6.  In Terminal 2 install Python3's TKInter GUI library with
+6.  In Terminal 2 install Python3's TKInter GUI library and the
+    Pillow Imaging Library (PIL):
     ```bash
     sudo apt update; sudo apt -y install python3-tk python3-pil.imagetk
+    pip3 install --upgrade pillow
     ```
-7.  In Terminal 2 install the Solidity compiler as follows:
+7.  In Terminal 2 install the Solidity compiler:
     ```bash
-    mkdir -p $HOME/.py-solc/solc-v0.4.25/bin \
-    && curl -LsS https://github.com/ethereum/solidity/releases/download/v0.4.25/solc-static-linux \
-            -o $HOME/.py-solc/solc-v0.4.25/bin/solc \
-    && chmod 0755 $HOME/.py-solc/solc-v0.4.25/bin/solc &&
-    export SOLC_BINARY=$HOME/.py-solc/solc-v0.4.25/bin/solc
+    pip3 install --upgrade py-solc-x
+    python3 -m solc.install v0.4.25
+    python3 -m solcx.install v0.5.15
+    export SOLC_BINARY=~/.py-solc/solc-v0.4.25/bin/solc
     ```
+    The `SOLC_BINARY` environment variable makes `solc` accessible
+    from Python to compile Solidity contracts
 8.  If your DISPLAY is not the local console, `:0`, you need to give access to
     your display from the GUI.
     Open a new terminal, Terminal 3, and run `xhost +`
-9.  In Terminal 2, run `./heart_gui.py` .
+9.  If you are running with Docker, then run in Terminal 2 `./heart_gui.py` .
+
+    If you are running standalone, then run in Terminal 2
+    `./heart_gui.py --service-uri "http://localhost:1947/"` .
     Use the `--help` option to see other available options
 10. A new window will pop up with the GUI. See the screenshot below for an
     example.
@@ -88,7 +111,7 @@ The Avalon Enclave Manager and Avalon Listener run in a Docker container.
 13. Close the GUI windows when done
 14. If you ran `xhost +` above, close access to your display with
     `xhost -` in Terminal 3
-16. In Terminal 1, press Ctrl-c to stop the Avalon Enclave Manager and Listener
+15. In Terminal 1, press Ctrl-c to stop the Avalon Enclave Manager and Listener
 
 ![Screenshot of heart_gui.py]( images/heart_gui_screenshot.jpg
   "Screenshot of heart_gui.py")
