@@ -203,7 +203,7 @@ def Main(args=None):
     logger.info("\n Worker retrieve response: {}\n".format(
         json.dumps(worker_retrieve_result, indent=4)
     ))
-    worker_obj.load_worker(worker_retrieve_result)
+    worker_obj.load_worker(worker_retrieve_result["result"]["details"])
 
     logger.info("**********Worker details Updated with Worker ID" +
                 "*********\n%s\n", worker_id)
@@ -307,13 +307,14 @@ def Main(args=None):
     ))
     sig_obj = signature.ClientSignature()
     if "result" in res:
-        status = sig_obj.verify_signature(res, worker_obj.verification_key)
+        status = sig_obj.verify_signature(
+            res['result'], worker_obj.verification_key)
         try:
             if status == SignatureStatus.PASSED:
                 logger.info(
                     "Work order response signature verification Successful")
                 decrypted_res = utility.decrypted_response(
-                    res, session_key, session_iv)
+                    res['result'], session_key, session_iv)
                 logger.info("\nDecrypted response:\n {}".format(decrypted_res))
                 if input_data_hash:
                     decrypted_data = decrypted_res[0]["data"]
@@ -355,7 +356,8 @@ def Main(args=None):
     logger.info("\n Last update to receipt receipt is:\n {}".format(
         json.dumps(receipt_update_retrieve, indent=4)
     ))
-    status = sig_obj.verify_update_receipt_signature(receipt_update_retrieve)
+    status = sig_obj.verify_update_receipt_signature(
+        receipt_update_retrieve['result'])
     if status == SignatureStatus.PASSED:
         logger.info(
             "Work order receipt retrieve signature verification Successful")

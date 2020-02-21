@@ -18,7 +18,7 @@ import logging
 import grpc
 from hfc.fabric.peer import create_peer
 
-from avalon import base
+from avalon_sdk.fabric import base
 
 logger = logging.getLogger(__name__)
 
@@ -94,7 +94,7 @@ class EventListener(base.ClientBase):
         Function to start event listener.
         """
         def _event_handler(event, block_num, txnid, status):
-            logger.info(
+            logger.debug(
                 'Event: {0}\nblock_num: {1}\ntxid: {2}\nstatus: {3}'.format(
                     event, block_num, txnid, status))
             try:

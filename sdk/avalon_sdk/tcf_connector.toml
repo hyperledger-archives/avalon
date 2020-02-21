@@ -24,7 +24,7 @@ json_rpc_uri = "http://localhost:1947"
 
 #Block chain type, it identifies which blockchain to use
 [blockchain]
-type = "Ethereum"
+type = "ethereum"
 
 [ethereum]
 #Direct registry contract file
@@ -65,3 +65,8 @@ provider = "http://10.66.245.80:8545"
 chain_id = 3
 gas_limit = 3000000
 gas_price = "100"
+
+# Fabric blockchain
+[fabric]
+fabric_network_file = "sdk/avalon_sdk/fabric/network.json"
+channel_name = "mychannel"

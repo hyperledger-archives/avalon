@@ -139,10 +139,9 @@ def decrypted_response(input_json, session_key, session_iv, data_key=None,
           Default is all zeros.
     returns out data json object in response after decrypting output data
     """
-    input_json_params = input_json['result']
     i = 0
     do_decrypt = True
-    data_objects = input_json_params['outData']
+    data_objects = input_json['outData']
     for item in data_objects:
         data = item['data'].encode('UTF-8')
         iv = item['iv'].encode('UTF-8')
@@ -156,7 +155,7 @@ def decrypted_response(input_json, session_key, session_iv, data_key=None,
             data_encryption_key_byte = data_key
             iv = data_iv
         if not do_decrypt:
-            input_json_params['outData'][i]['data'] = data
+            input_json['outData'][i]['data'] = data
             logger.info(
                 "Work order response data not encrypted, data in plain - %s",
                 base64.b64decode(data).decode('UTF-8'))
@@ -165,9 +164,9 @@ def decrypted_response(input_json, session_key, session_iv, data_key=None,
             # Decrypt output data
             data_in_plain = decrypt_data(
                     data_encryption_key_byte, item['data'], iv)
-            input_json_params['outData'][i]['data'] = data_in_plain
+            input_json['outData'][i]['data'] = data_in_plain
         i = i + 1
-    return input_json_params['outData']
+    return input_json['outData']
 
 
 # -----------------------------------------------------------------------------

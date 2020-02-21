@@ -383,12 +383,13 @@ class resultWindow(tk.Toplevel):
         if "result" in res:
             sig_obj = signature.ClientSignature()
             status = sig_obj.verify_signature(
-                res, worker_obj.verification_key)
+                res['result'], worker_obj.verification_key)
             try:
                 if status == SignatureStatus.PASSED:
                     logger.info("Signature verification Successful")
                     decrypted_res = utility. \
-                        decrypted_response(res, session_key, session_iv)
+                        decrypted_response(
+                            res['result'], session_key, session_iv)
                     logger.info("\n" +
                                 "Decrypted response:\n {}".
                                 format(decrypted_res))
@@ -777,7 +778,7 @@ def initialize_tcf(config):
         json.dumps(worker, indent=4)
     ))
     worker_obj.load_worker(
-        worker
+        worker["result"]["details"]
     )
     logger.info("**********Worker details Updated with Worker ID" +
                 "*********\n%s\n", worker_id)
