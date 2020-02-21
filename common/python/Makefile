@@ -32,21 +32,20 @@ build_ext :
 
 build :
 	mkdir $@
-	cd $@ 
 
 install:
 	@echo INSTALLING WHEEL FILE =================
 	pip3 install $(WHEEL_FILE)
 
 clean:
-	pip3 uninstall --yes $(WHEEL_FILE)
+	if [[ -f $(WHEEL_FILE) ]] ; then pip3 uninstall --yes $(WHEEL_FILE); fi
 	rm -rf build deps dist *.egg-info
 	rm -f crypto/crypto.py crypto/crypto_wrap.cpp
 	rm -f verify_report/verify_report.py verify_report/verify_report_wrap.cpp
 	find . -iname '*.pyc' -delete
 	find . -iname '__pycache__' -delete
 
-.phony : all
-.phony : clean
-.phone : install
+.PHONY : all
+.PHONY : clean
+.PHONY : install
 
