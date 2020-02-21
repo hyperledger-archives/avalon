@@ -43,7 +43,6 @@ clean:
 	find . -iname '*.pyc' -delete
 	find . -iname '__pycache__' -delete
 
-
-.phony : all
-.phony : clean
-.phone : install
+.PHONY : all
+.PHONY : clean
+.PHONY : install
