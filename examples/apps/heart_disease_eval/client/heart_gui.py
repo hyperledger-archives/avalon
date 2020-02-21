@@ -37,8 +37,7 @@ import crypto_utils.crypto_utility as utility
 import avalon_sdk.worker.worker_details as worker
 from avalon_sdk.worker.worker_details import WorkerType
 from avalon_sdk.work_order.work_order_params import WorkOrderParams
-from avalon_sdk.avalon_direct_client \
-    import AvalonDirectClient
+from avalon_sdk.direct.avalon_direct_client import AvalonDirectClient
 import config.config as pconfig
 import utility.logger as plogger
 import crypto_utils.crypto.crypto as crypto
@@ -324,9 +323,7 @@ class resultWindow(tk.Toplevel):
         req_id = 51
         self.request_json = wo_params.to_jrpc_string(req_id)
 
-        work_order_instance = direct_jrpc.get_work_order_instance(
-            config
-        )
+        work_order_instance = direct_jrpc.get_work_order_instance()
         response = work_order_instance.work_order_submit(
             wo_params.get_work_order_id(),
             wo_params.get_worker_id(),
@@ -342,9 +339,7 @@ class resultWindow(tk.Toplevel):
             sys.exit(1)
         # Create work order receipt
         req_id += 1
-        wo_receipt_instance = direct_jrpc.get_work_order_receipt_instance(
-            config
-        )
+        wo_receipt_instance = direct_jrpc.get_work_order_receipt_instance()
         wo_request = json.loads(self.request_json)
         wo_receipt_obj = WorkOrderReceiptRequest()
         wo_create_receipt = wo_receipt_obj.create_receipt(
@@ -724,7 +719,7 @@ def initialize_tcf(config):
     # Retrieve Worker Registry
     if not off_chain:
         registry_list_instance = direct_jrpc. \
-            get_worker_registry_list_instance(config)
+            get_worker_registry_list_instance()
         registry_count, lookup_tag, registry_list = \
             registry_list_instance.registry_lookup()
         logger.info("\n Registry lookup response : registry count {}\
@@ -746,9 +741,7 @@ def initialize_tcf(config):
 
     global worker_id
     if not worker_id:
-        worker_registry_instance = direct_jrpc.get_worker_registry_instance(
-            config
-        )
+        worker_registry_instance = direct_jrpc.get_worker_registry_instance()
         req_id = 31
         worker_lookup_result = worker_registry_instance.worker_lookup(
             worker_type=WorkerType.TEE_SGX,
