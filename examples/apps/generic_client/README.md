@@ -60,11 +60,20 @@ worker requests on the command line.
    information in `sdk/avalon_sdk/tcf_connector.toml`
 2. Follow the build instructions in the
    [build document](../../../BUILD.md)
-3. Change to the Generic Client directory
+3. Install the Solidity compiler:
+    ```bash
+    pip3 install --upgrade py-solc-x
+    python3 -m solc.install v0.4.25
+    python3 -m solcx.install v0.5.15
+    export SOLC_BINARY=~/.py-solc/solc-v0.4.25/bin/solc
+    ```
+    The `SOLC_BINARY` environment variable makes `solc` accessible
+    from Python to compile Solidity contracts
+4. Change to the Generic Client directory
    ```bash
    cd $TCF_HOME/examples/apps/generic_client
    ```
-4. Run `./generic_client.py` using the appropriate command line options
+5. Run `./generic_client.py` using the appropriate command line options
    documented here. For a list of options, type `./generic_client.py -h`
 
 ## Examples
