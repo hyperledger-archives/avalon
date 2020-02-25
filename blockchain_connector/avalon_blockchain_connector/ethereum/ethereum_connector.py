@@ -14,7 +14,6 @@
 
 import os
 import json
-import web3
 import random
 import asyncio
 import logging
@@ -31,6 +30,8 @@ from avalon_sdk.ethereum.ethereum_worker_registry \
     import EthereumWorkerRegistryImpl
 from avalon_sdk.ethereum.ethereum_wrapper \
     import EthereumWrapper
+from avalon_sdk.ethereum.ethereum_listener \
+    import BlockchainInterface, EventProcessor
 from avalon_sdk.direct.jrpc.jrpc_worker_registry \
     import JRPCWorkerRegistryImpl
 from avalon_sdk.direct.jrpc.jrpc_work_order \
@@ -63,7 +64,8 @@ class EthereumConnector:
             config["ethereum"]["proxy_worker_registry_contract_file"]
         worker_reg_contract_address = \
             config["ethereum"]["proxy_worker_registry_contract_address"]
-        self._worker_reg_contract_instance = self._eth_client\
+        self._worker_reg_contract_instance,\
+            self._worker_reg_contract_instance_evt = self._eth_client\
             .get_contract_instance(
                 worker_reg_contract_file, worker_reg_contract_address)
 
@@ -71,7 +73,8 @@ class EthereumConnector:
             config["ethereum"]["work_order_contract_file"]
         work_order_contract_address = \
             config["ethereum"]["work_order_contract_address"]
-        self._work_order_contract_instance = self._eth_client\
+        self._work_order_contract_instance,\
+            self._work_order_contract_instance_evt = self._eth_client\
             .get_contract_instance(
                 work_order_contract_file, work_order_contract_address)
 
@@ -121,15 +124,16 @@ class EthereumConnector:
         """
         This function adds a worker to the Ethereum blockchain
         """
-        worker_id = web3.Web3.toBytes(hexstr=worker_id)
+        worker_id = self._eth_client.get_bytes_from_hex(worker_id)
         worker_type = worker_info["workerType"]
-        org_id = web3.Web3.toBytes(hexstr=worker_info["organizationId"])
-        app_type_ids = web3.Web3.toBytes(
-            hexstr=worker_info["applicationTypeId"])
+        org_id = self._eth_client\
+            .get_bytes_from_hex(worker_info["organizationId"])
+        app_type_id = self._eth_client.get_bytes_from_hex(
+            worker_info["applicationTypeId"])
         details = json.dumps(worker_info["details"])
 
         txn_dict = self._worker_reg_contract_instance.functions.workerRegister(
-            worker_id, worker_type, org_id, [app_type_ids], details)\
+            worker_id, worker_type, org_id, [app_type_id], details)\
             .buildTransaction(self._eth_client.get_transaction_params())
         try:
             txn_receipt = self._eth_client.execute_transaction(txn_dict)
@@ -164,7 +168,8 @@ class EthereumConnector:
         """
 
         txn_dict = self._work_order_contract_instance.functions\
-            .workOrderComplete(web3.Web3.toBytes(hexstr=work_order_id),
+            .workOrderComplete(self._eth_client
+                               .get_bytes_from_hex(work_order_id),
                                json.dumps(response))\
             .buildTransaction(self._eth_client.get_transaction_params())
         try:
@@ -172,6 +177,7 @@ class EthereumConnector:
         except Exception as e:
             logging.error("Error adding work order result to ethereum"
                           + " blockchain : "+str(e))
+        return txn_receipt
 
     def handleEvent(self, event, account, contract):
         """
@@ -179,6 +185,7 @@ class EthereumConnector:
         and makes request to listener using Direct API and writes back result
         to the blockchain
         """
+
         work_order_request = json.loads(event["args"]["workOrderRequest"])
 
         work_order_id = work_order_request["workOrderId"]
@@ -189,7 +196,11 @@ class EthereumConnector:
         response = self\
             ._submit_work_order_and_get_result(work_order_id, worker_id,
                                                requester_id, work_order_params)
-        self._add_work_order_result_to_chain(work_order_id, response)
+        txn_receipt = self._add_work_order_result_to_chain(work_order_id,
+                                                           response)
+
+        logging.info("Work Order complete transaction receipt {}"
+                     .format(txn_receipt))
 
     def start(self):
         logging.info("Ethereum Connector service started")
@@ -205,14 +216,14 @@ class EthereumConnector:
         # blockchain, extracts request payload from there and make a request
         # to avalon-listener
 
-        w3 = BlockchainInterface(self._config["ethereum"]["provider"])
+        w3 = BlockchainInterface(self._config)
 
-        contract = self._work_order_contract_instance
+        contract = self._work_order_contract_instance_evt
         # Listening only for workOrderSubmitted event now
         listener = w3.newListener(contract, "workOrderSubmitted")
 
         try:
-            daemon = EventProcessor()
+            daemon = EventProcessor(self._config)
             asyncio.get_event_loop().run_until_complete(daemon.start(
                 listener,
                 self.handleEvent,
@@ -221,47 +232,3 @@ class EthereumConnector:
             ))
         except KeyboardInterrupt:
             asyncio.get_event_loop().run_until_complete(daemon.stop())
-
-
-class BlockchainInterface:
-    def __init__(self, gateway):
-        # TODO: store list of contracts?
-        pass
-
-    def newListener(self, contract, event, fromBlock='latest'):
-        return contract.events[event].createFilter(fromBlock=fromBlock)
-
-
-class EventProcessor:
-    async def listener(self, eventListener):
-        while True:
-            for event in eventListener.get_new_entries():
-                await self.queue.put(event)
-                logging.debug("Event pushed into listener Queue")
-            await asyncio.sleep(LISTENER_SLEEP_DURATION)
-
-    async def handler(self, callback, *kargs, **kwargs):
-        while True:
-            event = await self.queue.get()
-            logging.debug("Popped event from listener Queue")
-            callback(event, *kargs, **kwargs)
-            self.queue.task_done()
-
-    async def start(self, eventListener, callback, *kargs, **kwargs):
-        self.queue = asyncio.Queue()
-        loop = asyncio.get_event_loop()
-        self.listeners = [loop.create_task(
-            self.listener(eventListener)) for _ in range(1)]
-        self.handlers = [loop.create_task(self.handler(
-            callback, *kargs, **kwargs)) for _ in range(8)]
-
-        await asyncio.gather(*self.listeners)  # infinite loop
-        await self.queue.join()  # this code should never run
-        await self.stop()  # this code should never run
-
-    async def stop(self):
-        for process in self.listeners:
-            process.cancel()
-        for process in self.handlers:
-            process.cancel()
-        logging.debug("---exit---")

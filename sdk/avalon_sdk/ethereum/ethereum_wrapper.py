@@ -45,8 +45,10 @@ class EthereumWrapper():
             self.__eth_account_address = config['ethereum']['eth_account']
             provider = config["ethereum"]["provider"]
             # Ethereum provider is endpoint to submit the transaction
-            self.__w3 = web3.Web3(
-                PROVIDER_DICT[urlparse(provider).scheme](provider))
+            self.__w3 = self._get_provider_for_url(provider)
+            event_provider = config["ethereum"]["event_provider"]
+            # Ethereum provider is endpoint to submit the transaction
+            self.__w3_event = self._get_provider_for_url(event_provider)
             self._is_ropsten_provider = self._is_ropsten(provider)
             # Private key to sign the transaction
             if self._is_ropsten_provider:
@@ -64,6 +66,9 @@ class EthereumWrapper():
                          .format(get_solc_version()))
         else:
             raise Exception("Invalid configuration parameter")
+
+    def _get_provider_for_url(self, url):
+        return web3.Web3(PROVIDER_DICT[urlparse(url).scheme](url))
 
     def _is_ropsten(self, url):
         """
@@ -192,10 +197,18 @@ class EthereumWrapper():
         return self.__eth_account_address
 
     def get_contract_instance(self, contract_file_name, contract_address):
+        """
+        This function returns 2 contract instances, first meant for committing
+        transactions or reading from blockchain. The second one is specifically
+        meant for event listening.
+        """
         compiled_sol = self.compile_source_file(contract_file_name)
         contract_id, contract_interface = compiled_sol.popitem()
+
         return self.__w3.eth.contract(address=contract_address,
-                                      abi=contract_interface["abi"])
+                                      abi=contract_interface["abi"]),\
+            self.__w3_event.eth.contract(address=contract_address,
+                                         abi=contract_interface["abi"])
 
     def get_contract_instance_from_json(self, json_file_name,
                                         contract_address):
@@ -203,9 +216,9 @@ class EthereumWrapper():
         Method to get contract ABI from a JSON file
         """
         return self.__w3.eth.contract(
-                  address=contract_address,
-                  abi=json.load(open(json_file_name)).get('abi'),
-                  ContractFactoryClass=web3.contract.Contract)
+            address=contract_address,
+            abi=json.load(open(json_file_name)).get('abi'),
+            ContractFactoryClass=web3.contract.Contract)
 
     def get_txn_nonce(self):
         return self.__w3.eth.getTransactionCount(web3.Web3.toChecksumAddress(
@@ -229,8 +242,22 @@ class EthereumWrapper():
         else:
             return {
                 "from": web3.Web3.toChecksumAddress(
-                             self.get_account_address()),
+                    self.get_account_address()),
                 "gas": self.get_gas_limit(),
                 "gasPrice": self.get_gas_price(),
                 "nonce": self.get_txn_nonce()
             }
+
+    def get_bytes_from_hex(self, hex_str):
+        """
+        Method to convert hex string to bytes
+        """
+        return web3.Web3.toBytes(hexstr=hex_str)
+
+
+def get_keccak_for_text(method_sign):
+    """
+    Method to get the keccak hash of a method signature.
+    The HexBytes is converted to str and returned.
+    """
+    return web3.Web3.keccak(text=method_sign).hex()

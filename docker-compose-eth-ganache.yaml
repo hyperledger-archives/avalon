@@ -1,4 +1,4 @@
-# Copyright 2019 Intel Corporation
+# Copyright 2020 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -32,12 +32,8 @@ services:
     volumes:
       # Below volume mappings are required for DISPLAY settings by heart disease GUI client
       - /tmp/.X11-unix:/tmp/.X11-unix
-      # To store the bookmark file to host machine,
-      # it is required for fabric event listening
-      - ~/mywork/vars/blockmark:/project/TrustedComputeFramework/examples/apps/generic_client/blockmark
       - ~/.Xauthority:/root/.Xauthority
-      - ~/mywork/vars/keyfiles:/keyfiles
-      - ~/mywork/vars/mychannel_network.json:/project/TrustedComputeFramework/sdk/avalon_sdk/fabric/network.json
+      - ./examples:/project/TrustedComputeFramework/examples
     working_dir: "/project/TrustedComputeFramework"
     command: |
       bash -c "
@@ -89,8 +85,8 @@ services:
       - avalon-lmdb
 
   avalon-blockchain-connector:
-    container_name: avalon-blockchain-connector
-    image: avalon-blockchain-connector-dev
+    container_name: avalon-blockchain-connector-eth
+    image: avalon-blockchain-connector-eth-dev
     build:
       context: .
       dockerfile: ./blockchain_connector/Dockerfile
@@ -100,20 +96,12 @@ services:
         - no_proxy
     command: |
       bash -c "
-        avalon_blockchain_connector -b fabric -u http://avalon-listener:1947
+        avalon_blockchain_connector -b ethereum -u http://avalon-listener:1947
         tail -f /dev/null
         "
     volumes:
       - ./:/project/avalon
-      # Fabric crypto materials has to be shared to connector to
-      # interact with fabric blockchain
-      - ~/mywork/vars/keyfiles:/keyfiles
-      - ~/mywork/vars/mychannel_network.json:/project/avalon/sdk/avalon_sdk/fabric/network.json
     depends_on:
       - avalon-listener
       - tcf
 
-networks:
-  default:
-    external:
-      name: minifab

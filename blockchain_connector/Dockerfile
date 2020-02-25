@@ -112,7 +112,7 @@ RUN pip3 install virtualenv \
    && pip3 install git+https://github.com/hyperledger/fabric-sdk-py.git
 
 # Installing web3 for ethereum
-RUN pip3 install --upgrade setuptools json-rpc web3 py-solc-x nose2
+RUN pip3 install --upgrade setuptools json-rpc web3 py-solc-x nose2 eth-abi
 
 # Install specific version of solc to support versions <0.6.0
 RUN python3 -m solcx.install v0.5.15
@@ -132,6 +132,7 @@ ENV TCF_HOME=/project/avalon
 WORKDIR /project/avalon/blockchain_connector
 
 COPY --from=build_image /usr/local/ /usr/local
+COPY --from=build_image /root/.solcx /root/.solcx
 
 # Environment setup
 
@@ -161,5 +162,3 @@ RUN echo "TCF_HOME=/project/avalon/" >> /etc/environment \
 
 ENV http_proxy=$http_proxy
 ENV https_proxy=$https_proxy
-
-
