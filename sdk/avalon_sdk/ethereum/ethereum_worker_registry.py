@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import binascii
 import logging
 import json
 from os import environ
@@ -41,7 +40,7 @@ class EthereumWorkerRegistryImpl(WorkerRegistry):
         else:
             raise Exception("Invalid configuration parameter")
 
-    def worker_lookup(self, worker_type, org_id, application_id):
+    def worker_lookup(self, worker_type, org_id, application_id, id=None):
         """
         Initiating Worker lookup
         This function retrieves a list of Worker ids that match the input
@@ -80,23 +79,25 @@ class EthereumWorkerRegistryImpl(WorkerRegistry):
             if not isinstance(worker_type, WorkerType):
                 logging.error("Invalid workerType {}".format(worker_type))
                 return None
-            if not is_valid_hex_str(binascii.hexlify(org_id).decode("utf8")):
+            if not is_valid_hex_str(org_id):
                 logging.error("Invalid organization id {}".format(org_id))
                 return None
-            if not is_valid_hex_str(
-                    binascii.hexlify(application_id).decode("utf8")):
+            if not is_valid_hex_str(application_id):
                 logging.error(
                     "Invalid application id {}".format(application_id))
                 return None
             lookup_result = self.__contract_instance.functions.workerLookUp(
                 worker_type.value, org_id, application_id).call()
+            # Convert byte32 ids to hex
+            lookup_result[2] = _convert_byte32_arr_to_hex_arr(lookup_result[2])
+
             return lookup_result
         else:
             logging.error(
                 "worker registry contract instance is not initialized")
             return None
 
-    def worker_retrieve(self, worker_id):
+    def worker_retrieve(self, worker_id, id=None):
         """
         Retrieve worker by worker id
         Inputs
@@ -108,14 +109,13 @@ class EthereumWorkerRegistryImpl(WorkerRegistry):
         """
 
         if (self.__contract_instance is not None):
-            if not is_valid_hex_str(binascii.hexlify(
-                    worker_id).decode("utf8")):
+            if not is_valid_hex_str(worker_id):
                 logging.error("Invalid worker id {}".format(worker_id))
                 return None
 
             worker_details = self.__contract_instance.functions.workerRetrieve(
                 worker_id).call()
-            return worker_details
+            return _convert_retrieve_result_to_hex(worker_details)
         else:
             logging.error(
                 "worker registry contract instance is not initialized")
@@ -149,11 +149,10 @@ class EthereumWorkerRegistryImpl(WorkerRegistry):
             if not isinstance(worker_type, WorkerType):
                 logging.error("Invalid workerType {}".format(worker_type))
                 return None
-            if not is_valid_hex_str(binascii.hexlify(org_id).decode("utf")):
+            if not is_valid_hex_str(org_id):
                 logging.error("Invalid organization id {}".format(org_id))
                 return None
-            if not is_valid_hex_str(
-                    binascii.hexlify(application_id).decode("utf8")):
+            if not is_valid_hex_str(application_id):
                 logging.error("Invalid application id {}".format(org_id))
                 return None
             lookup_result = self.__contract_instance.functions\
@@ -189,21 +188,18 @@ class EthereumWorkerRegistryImpl(WorkerRegistry):
         """
 
         if (self.__contract_instance is not None):
-            if not is_valid_hex_str(binascii
-                                    .hexlify(worker_id).decode("utf8")):
+            if not is_valid_hex_str(worker_id):
                 logging.error("Invalid worker id {}".format(worker_id))
                 return None
             if not isinstance(worker_type, WorkerType):
                 logging.error("Invalid workerType {}".format(worker_type))
                 return None
-            if not is_valid_hex_str(binascii
-                                    .hexlify(organization_id).decode("utf8")):
+            if not is_valid_hex_str(organization_id):
                 logging.error("Invalid organization id {}"
-                              .format(orgnization_id))
+                              .format(organization_id))
                 return None
             for app_id in app_type_ids:
-                if not is_valid_hex_str(binascii
-                                        .hexlify(app_id).decode("utf8")):
+                if not is_valid_hex_str(app_id):
                     logging.error("Invalid application id {}".format(app_id))
                     return None
             if details is not None:
@@ -236,8 +232,7 @@ class EthereumWorkerRegistryImpl(WorkerRegistry):
         """
 
         if (self.__contract_instance is not None):
-            if not is_valid_hex_str(binascii
-                                    .hexlify(worker_id).decode("utf8")):
+            if not is_valid_hex_str(worker_id):
                 logging.error("Invalid worker id {}".format(worker_id))
                 return None
             if details is not None:
@@ -271,8 +266,7 @@ class EthereumWorkerRegistryImpl(WorkerRegistry):
         """
 
         if (self.__contract_instance is not None):
-            if not is_valid_hex_str(binascii
-                                    .hexlify(worker_id).decode("utf8")):
+            if not is_valid_hex_str(worker_id):
                 logging.error("Invalid worker id {}".format(worker_id))
                 return None
             if not isinstance(status, WorkerStatus):
@@ -317,9 +311,52 @@ class EthereumWorkerRegistryImpl(WorkerRegistry):
         self.__eth_client = EthereumWrapper(config)
         tcf_home = environ.get("TCF_HOME", "../../../")
         contract_file_name = tcf_home + "/" + \
-            config["ethereum"]["worker_registry_contract_file"]
+            config["ethereum"]["proxy_worker_registry_contract_file"]
         contract_address = \
-            config["ethereum"]["worker_registry_contract_address"]
-        self.__contract_instance = self.__eth_client.get_contract_instance(
-            contract_file_name, contract_address
-        )
+            config["ethereum"]["proxy_worker_registry_contract_address"]
+        self.__contract_instance, self.__contract_instance_evt = \
+            self.__eth_client.get_contract_instance(
+                contract_file_name, contract_address
+            )
+
+
+def _convert_byte32_arr_to_hex_arr(byte32_arr):
+    """
+    This function takes in an array of byte32 strings and
+    returns an array of hex strings
+    """
+    hex_ids = []
+    for byte32_str in byte32_arr:
+        hex_ids = hex_ids + [byte32_str.hex()]
+    return hex_ids
+
+
+def _convert_retrieve_result_to_json(retrieve_result):
+    """
+    This function takes in the result retrieved from blockchain
+    and converts it to json for external entities
+    """
+    result = {}
+    result["status"] = retrieve_result[0]
+    result["workerType"] = retrieve_result[1]
+    result["organizationId"] = retrieve_result[2].hex()
+    result["applicationTypeId"] = _convert_byte32_arr_to_hex_arr(
+        retrieve_result[3])
+    result["details"] = json.loads(retrieve_result[4])
+
+    # Convert to make similar to JRPC response structure
+    return {"result": result}
+
+
+def _convert_retrieve_result_to_hex(retrieve_result):
+    """
+    This function takes in the result retrieved from blockchain
+    and converts byte32 fiels to hex for external entities
+    """
+    result = [retrieve_result[0], retrieve_result[1],
+              None, None, retrieve_result[4]]
+    result[2] = retrieve_result[2].hex()
+    result[3] = _convert_byte32_arr_to_hex_arr(
+        retrieve_result[3])
+
+    return result

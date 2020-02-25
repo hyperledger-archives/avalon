@@ -42,12 +42,15 @@ direct_registry_contract_address = "0xD5A613945DE851C7c2f83fFDA4de0aE01CE980c0"
 #Deployed contract address of worker registry contract address.
 worker_registry_contract_address = "0x523748D492AfEEC90767403Da7C1e86feBB10435"
 #Deployed contract address of direct registry contract address.
-proxy_worker_registry_contract_address = "0x76Cf65807D6F2E749fF1f3dAc79e6b44fc21f0f6"
+#proxy_worker_registry_contract_address = "0x76Cf65807D6F2E749fF1f3dAc79e6b44fc21f0f6"
+proxy_worker_registry_contract_address = "0x75a3Fd17E8c5CceAa9121251c359bFe4b9C343C8"
 #Deployed contract address of worker registry contract address.
-work_order_contract_address = "0x2525fef0dE3454e05b37F040d2f4862C3460f2E6"
+#work_order_contract_address = "0x2525fef0dE3454e05b37F040d2f4862C3460f2E6"
+work_order_contract_address = "0xf873133fae1d1f80642c551a6edd5A14f37129c2"
 
 #Ethereum account details
-eth_account = "0xefb21e451a2f8c9e25e02ffee969b169a067d343"
+#eth_account = "0xefb21e451a2f8c9e25e02ffee969b169a067d343"
+eth_account = "0x7085d4d4c6efea785edfba5880bb62574e115626"
 #Ethereum account private key 
 acc_pvt_key = "4F611197A6E82715F4D2446FE015D1667E9C40A351411F3A7300F71F285D01B4"
 
@@ -55,13 +58,17 @@ acc_pvt_key = "4F611197A6E82715F4D2446FE015D1667E9C40A351411F3A7300F71F285D01B4"
 solc_version = "v0.5.15"
 #Provider for test network. The default url is for a Hyperledger Besu client.
 #This could be replaced with a Ropsten(Infura as the IAAS) provider or a Ganache client.
-provider = "http://10.66.245.80:8545"
+#provider = "http://10.66.245.80:8545"
+provider = "http://10.66.245.80:22001"
+event_provider = "http://10.66.245.80:22011"
+#event_provider = "http://10.66.245.80:8545"
 #chain_id is 3 for ropsten test network
 #"1": Ethereum Mainnet
 #"2": Morden Testnet (deprecated)
 #"3": Ropsten Testnet
 #"4": Rinkeby Testnet
 #"42": Kovan Testnet
+
 chain_id = 3
 gas_limit = 3000000
 gas_price = "100"
