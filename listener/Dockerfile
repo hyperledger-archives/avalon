@@ -36,25 +36,22 @@ RUN apt-get update \
 # Make Python3 default
 RUN ln -sf /usr/bin/python3 /usr/bin/python
 
-#Build Avalon Listener intermediate docker image
-FROM base_image as build_image
+
+# -------------=== openssl build ===-------------
+
+#Build openssl intermediate docker image
+FROM ubuntu:bionic as openssl_image
 
 RUN apt-get update \
  && apt-get install -y -q \
-    cmake \
+    ca-certificates \
+    pkg-config \
     make \
-    libprotobuf-dev \
-    python3-dev \
-    python3-pip \
-    swig \
-    software-properties-common \
     wget \
-    tar
-
-
-# Install setuptools packages using pip because
-# these are not available in apt repository.
-RUN pip3 install --upgrade setuptools json-rpc
+    tar \
+ && apt-get -y -q upgrade \
+ && apt-get clean \
+ && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /tmp
 
@@ -67,11 +64,34 @@ RUN OPENSSL_VER=1.1.1d \
  && THREADS=8 \
  && make -j$THREADS \
  && make test \
- && make install -j$THREADS \
- && ldconfig \
- && ln -s /etc/ssl/certs/* /usr/local/ssl/certs/ \
- && cd .. \
- && rm -rf openssl-$OPENSSL_VER
+ && make install -j$THREADS
+
+#Build Avalon Listener intermediate docker image
+FROM base_image as build_image
+
+RUN apt-get update \
+ && apt-get install -y -q \
+    cmake \
+    make \
+    libprotobuf-dev \
+    python3-dev \
+    python3-pip \
+    swig \
+    software-properties-common
+
+
+# Copy openssl build artifacts from openssl_image
+COPY --from=openssl_image /usr/local/ssl /usr/local/ssl
+COPY --from=openssl_image /usr/local/bin /usr/local/bin
+COPY --from=openssl_image /usr/local/include /usr/local/include
+COPY --from=openssl_image /usr/local/lib /usr/local/lib
+
+RUN ldconfig \
+ && ln -s /etc/ssl/certs/* /usr/local/ssl/certs/
+
+# Install setuptools packages using pip because
+# these are not available in apt repository.
+RUN pip3 install --upgrade setuptools json-rpc
 
 ENV TCF_HOME=/project/avalon
 
