@@ -61,7 +61,7 @@ class AvalonDirectClient():
                     raise Exception('Could not open config file: %s' % e)
 
         self.__blockchain_type = self.__config['blockchain']['type']
-        if self.__blockchain_type == "Ethereum":
+        if self.__blockchain_type.lower() == "ethereum":
                 self.__worker_registry_list = EthereumWorkerRegistryListImpl(
                     self.__config)
         else:

@@ -24,7 +24,7 @@ from hfc.util.utils import build_tx_req, send_transaction
 from hfc.util.crypto.crypto import ecies
 from hfc.fabric.client import Client
 
-from avalon import base
+from avalon_sdk.fabric import base
 
 logger = logging.getLogger(__name__)
 
@@ -90,7 +90,7 @@ class TxCommitter(base.ClientBase):
         responses = loop.run_until_complete(base.get_stream_result(
             send_transaction(self.client.orderers, tran_req, tx_context_tx)))
 
-        logger.info('Tx response: {0}'.format(responses))
+        logger.info('Tx response: {}'.format(responses))
 
         return responses
 

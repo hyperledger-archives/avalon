@@ -330,7 +330,7 @@ class ClientSignature(object):
         Returns enum type SignatureStatus
         """
 
-        input_json_params = input_json['result']
+        input_json_params = input_json
 
         nonce = (input_json_params['workerNonce']).encode('UTF-8')
         signature = input_json_params['workerSignature']
@@ -370,7 +370,7 @@ class ClientSignature(object):
               WorkOrderReceiptUpdateRetrieve API as define EEA spec 7.2.7
         Returns enum type SignatureStatus
         """
-        input_json_params = input_json['result']
+        input_json_params = input_json
 
         concat_string = input_json_params["workOrderId"] + \
             str(input_json_params["updateType"]) + \

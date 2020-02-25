@@ -50,7 +50,7 @@ RUN apt-get update \
     protobuf-compiler \
     libprotobuf-dev \
     python3-dev \
-    virtualenv \
+    libssl-dev \
     python3-pip \
     python3-toml \
     python3-requests \
@@ -152,6 +152,10 @@ ARG XAUTHORITY
 RUN cd /project/TrustedComputeFramework/sdk \
    && python setup.py bdist_wheel \
    && pip3 install dist/*.whl
+
+# Install fabric python sdk
+RUN pip3 install virtualenv \
+   && pip3 install git+https://github.com/hyperledger/fabric-sdk-py.git
 
 # Environment setup
 

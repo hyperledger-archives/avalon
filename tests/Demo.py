@@ -125,7 +125,7 @@ def local_main(config):
 
             # Worker details are loaded into Worker_Obj
             if "WorkerRetrieve" in input_json_str1 and "result" in response:
-                worker_obj.load_worker(response)
+                worker_obj.load_worker(response["result"]["details"])
             # -----------------------------------------------------------------
 
             # Poll for "WorkOrderGetResult" and break when you get the result
@@ -147,12 +147,12 @@ def local_main(config):
                                 "skipping signature verification")
                     continue
                 sig_bool = sig_obj.verify_signature(
-                    response, worker_obj.verification_key)
+                    response['result'], worker_obj.verification_key)
                 try:
                     if sig_bool > 0:
                         LOGGER.info("Signature Verified")
                         enclave_helper.decrypted_response(
-                            response, session_key, session_iv)
+                            response['result'], session_key, session_iv)
                     else:
                         LOGGER.info("Signature verification Failed")
                         exit(1)

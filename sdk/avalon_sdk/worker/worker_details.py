@@ -72,6 +72,8 @@ class WorkerDetails():
         Validate the details field of worker
         params:
             details is json formatted string
+        returns:
+            None on success and error string on failure
         """
         details_dict = json.loads(details)
         worker_details_fields = [
@@ -144,42 +146,23 @@ class WorkerDetails():
             return "Invalid argument fromAddress"
 
         if ("workOrderPayloadFormats" in details_dict.keys() and
-                not is_valid_hex_str(details_dict['workOrderPayloadFormats'])):
+                not is_valid_hex_str(
+                    details_dict['workOrderPayloadFormats'])):
             return "Invalid argument workOrderPayloadFormats"
 
         if ("workerTypeData" in details_dict.keys()):
             if ("verificationKey" in details_dict["workerTypeData"].keys() and
-                    not is_valid_hex_str(
-                    details_dict["workerTypeData"]["verificationKey"])):
+                    details_dict["workerTypeData"]["verificationKey"] is None):
                 return "Invalid argument verificationKey"
 
             if ("proofDataType" in details_dict["workerTypeData"].keys() and
-                    not is_valid_hex_str(
-                    details_dict["workerTypeData"]["proofDataType"])):
+                    details_dict["workerTypeData"]["proofDataType"] is None):
                 return "Invalid argument proofDataType"
 
             if ("encryptionKey" in details_dict["workerTypeData"].keys() and
-                    not is_valid_hex_str(
-                    details_dict["workerTypeData"]["encryptionKey"])):
+                    details_dict["workerTypeData"]["encryptionKey"] is None):
                 return "Invalid argument encryptionKey"
 
-            if ("encryptionKeyNonce" in details_dict["workerTypeData"].keys()
-                and not is_valid_hex_str(
-                    details_dict["workerTypeData"]["encryptionKeyNonce"])):
-                return "Invalid argument encryptionKeyNonce"
-
-            if ("encryptionKeySignature" in
-                details_dict["workerTypeData"].keys() and
-                not is_valid_hex_str(
-                    details_dict["workerTypeData"]["encryptionKeySignature"]
-                    )):
-                return "Invalid argument encryptionKeySignature"
-
-            if ("enclaveCertificate" in
-                details_dict["workerTypeData"].keys() and
-                not is_valid_hex_str(
-                    details_dict["workerTypeData"]["enclaveCertificate"])):
-                return "Invalid argument enclaveCertificate"
         return None
 
 
@@ -201,12 +184,11 @@ class SGXWorkerDetails(WorkerDetails):
         self.worker_id = ""
 
 # -----------------------------------------------------------------------------
-    def load_worker(self, input_str):
+    def load_worker(self, worker_data):
         """
         Function to load the member variables of this class
         based on worker retrieved details.
         """
-        worker_data = input_str['result']['details']
         logger.info("*********Updating Worker Details*********")
         self.hashing_algorithm = worker_data['hashingAlgorithm']
         self.signing_algorithm = worker_data['signingAlgorithm']
@@ -218,7 +200,7 @@ class SGXWorkerDetails(WorkerDetails):
         if 'proofData' in worker_data['workerTypeData'] and \
                 worker_data['workerTypeData']['proofData']:
             # proofData will be initialized only in HW mode by the
-            # tcf_enclave_bridge module when signup info is obtained from
+            # tcf_enclave_bridge module when sign up info is obtained from
             # the worker.
             self.proof_data = json.loads(
                 worker_data['workerTypeData']['proofData'])

@@ -1,0 +1,132 @@
+{
+  "name": "fabric-network",
+  "description": "Generated network configuration file",
+  "version": "0.1",
+  "client": {
+    "organization": "org1.example.com",
+    "credentialStore": {
+      "path": "/tmp/hfc-kvs",
+      "cryptoStore": {
+        "path": "/tmp/hfc-cvs"
+      },
+      "wallet": "wallet-name"
+    }
+  },
+  "organizations": {
+    "example.com": {
+      "mspid": "examplecom",
+      "orderers": [
+        "orderer1.example.com",
+        "orderer2.example.com",
+        "orderer3.example.com"
+      ],
+      "users": {
+        "Admin": {
+          "cert": "/keyfiles/ordererOrganizations/example.com/users/Admin@example.com/msp/signcerts/Admin@example.com-cert.pem",
+          "private_key": "/keyfiles/ordererOrganizations/example.com/users/Admin@example.com/msp/keystore/priv_sk"
+        }
+      }
+    },
+    "org0.example.com": {
+      "mspid": "org0examplecom",
+      "peers": [
+        "peer1.org0.example.com",
+        "peer2.org0.example.com"
+      ],
+      "users": {
+        "Admin": {
+          "cert": "/keyfiles/peerOrganizations/org0.example.com/users/Admin@org0.example.com/msp/signcerts/Admin@org0.example.com-cert.pem",
+          "private_key": "/keyfiles/peerOrganizations/org0.example.com/users/Admin@org0.example.com/msp/keystore/priv_sk"
+        }
+      }
+    },
+    "org1.example.com": {
+      "mspid": "org1examplecom",
+      "peers": [
+        "peer1.org1.example.com",
+        "peer2.org1.example.com"
+      ],
+      "users": {
+        "Admin": {
+          "cert": "/keyfiles/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/signcerts/Admin@org1.example.com-cert.pem",
+          "private_key": "/keyfiles/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/keystore/priv_sk"
+        }
+      }
+    }
+  },
+  "orderers": {
+    "orderer1.example.com": {
+      "url": "orderer1.example.com:7050",
+      "grpcOptions": {
+        "grpc.ssl_target_name_override": "orderer1.example.com",
+        "grpc-max-send-message-length": 15
+      },
+      "tlsCACerts": {
+        "path": "/keyfiles/ordererOrganizations/example.com/tlsca/tlsca.example.com-cert.pem"
+      }
+    },
+    "orderer2.example.com": {
+      "url": "orderer2.example.com:7050",
+      "grpcOptions": {
+        "grpc.ssl_target_name_override": "orderer2.example.com",
+        "grpc-max-send-message-length": 15
+      },
+      "tlsCACerts": {
+        "path": "/keyfiles/ordererOrganizations/example.com/tlsca/tlsca.example.com-cert.pem"
+      }
+    },
+    "orderer3.example.com": {
+      "url": "orderer3.example.com:7050",
+      "grpcOptions": {
+        "grpc.ssl_target_name_override": "orderer3.example.com",
+        "grpc-max-send-message-length": 15
+      },
+      "tlsCACerts": {
+        "path": "/keyfiles/ordererOrganizations/example.com/tlsca/tlsca.example.com-cert.pem"
+      }
+    }
+  },
+  "peers": {
+    "peer2.org0.example.com": {
+      "url": "peer2.org0.example.com:7051",
+      "grpcOptions": {
+        "grpc.ssl_target_name_override": "peer2.org0.example.com",
+        "grpc-max-send-message-length": 15
+      },
+      "tlsCACerts": {
+        "path": "/keyfiles/peerOrganizations/org0.example.com/tlsca/tlsca.org0.example.com-cert.pem"
+      }
+    },
+    "peer2.org1.example.com": {
+      "url": "peer2.org1.example.com:7051",
+      "grpcOptions": {
+        "grpc.ssl_target_name_override": "peer2.org1.example.com",
+        "grpc-max-send-message-length": 15
+      },
+      "tlsCACerts": {
+        "path": "/keyfiles/peerOrganizations/org1.example.com/tlsca/tlsca.org1.example.com-cert.pem"
+      }
+    },
+    "peer1.org0.example.com": {
+      "url": "peer1.org0.example.com:7051",
+      "grpcOptions": {
+        "grpc.ssl_target_name_override": "peer1.org0.example.com",
+        "grpc-max-send-message-length": 15
+      },
+      "tlsCACerts": {
+        "path": "/keyfiles/peerOrganizations/org0.example.com/tlsca/tlsca.org0.example.com-cert.pem"
+      }
+    },
+    "peer1.org1.example.com": {
+      "url": "peer1.org1.example.com:7051",
+      "grpcOptions": {
+        "grpc.ssl_target_name_override": "peer1.org1.example.com",
+        "grpc-max-send-message-length": 15
+      },
+      "tlsCACerts": {
+        "path": "/keyfiles/peerOrganizations/org1.example.com/tlsca/tlsca.org1.example.com-cert.pem"
+      }
+    }
+  },
+  "certificateAuthorities": { }
+}

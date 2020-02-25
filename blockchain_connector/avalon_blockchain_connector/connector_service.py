@@ -18,7 +18,10 @@ import json
 import argparse
 import config.config as pconfig
 
-from ethereum.ethereum_connector import EthereumConnector
+from avalon_blockchain_connector.ethereum.ethereum_connector \
+    import EthereumConnector
+from avalon_blockchain_connector.fabric.fabric_connector \
+    import FabricConnector
 
 import logging
 
@@ -98,6 +101,8 @@ def main(args=None):
             eth_connector_svc.start()
         else:
             logging.info("About to start Fabric connector service")
+            fabric_connector_svc = FabricConnector(uri)
+            fabric_connector_svc.start()
     else:
         logging.error("Could not parse command line arguments")
     sys.exit(-1)

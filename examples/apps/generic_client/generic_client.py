@@ -264,7 +264,7 @@ def _verify_receipt_signature(receipt_update_retrieve):
     # Verify receipt signature
     sig_obj = signature.ClientSignature()
     status = sig_obj.verify_update_receipt_signature(
-        receipt_update_retrieve)
+        receipt_update_retrieve['result'])
     if status == SignatureStatus.PASSED:
         logger.info(
             "Work order receipt retrieve signature verification " +
@@ -397,7 +397,7 @@ def Main(args=None):
 
     # Initializing Worker Object
     worker_obj = worker_details.SGXWorkerDetails()
-    worker_obj.load_worker(worker_retrieve_result)
+    worker_obj.load_worker(worker_retrieve_result['result']['details'])
 
     logger.info("**********Worker details Updated with Worker ID" +
                 "*********\n%s\n", worker_id)
@@ -455,14 +455,14 @@ def Main(args=None):
     # Check if result field is present in work order response
     if "result" in res:
         # Verify work order response signature
-        if _verify_wo_res_signature(res,
+        if _verify_wo_res_signature(res['result'],
                                     worker_obj.verification_key) is False:
             logger.error("Work order response signature verification Failed")
             sys.exit(1)
         # Decrypt work order response
         if show_decrypted_output:
             decrypted_res = crypto_utility.decrypted_response(
-                    res, session_key, session_iv)
+                    res['result'], session_key, session_iv)
             logger.info("\nDecrypted response:\n {}"
                         .format(decrypted_res))
     else:

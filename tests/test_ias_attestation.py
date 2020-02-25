@@ -182,7 +182,7 @@ def Main(args=None):
             worker_id, req_id)
         logger.info("\n Worker retrieve response: {}\n".format(
             json.dumps(worker_retrieve_result, indent=4)))
-        worker_obj.load_worker(worker_retrieve_result)
+        worker_obj.load_worker(worker_retrieve_result["result"]["details"])
 
         logger.info("**********Worker details Updated with Worker ID" +
                     "*********\n%s\n", worker_id)
