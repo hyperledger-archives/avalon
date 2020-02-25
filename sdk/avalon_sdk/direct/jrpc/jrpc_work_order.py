@@ -104,6 +104,8 @@ class JRPCWorkOrderImpl(WorkOrder):
                     # responseTimeoutMsecs in the request.
                     time.sleep(2)
                 return response
+        else:
+            return response
 
     def encryption_key_get(self, worker_id, requester_id,
                            last_used_key_nonce=None, tag=None,

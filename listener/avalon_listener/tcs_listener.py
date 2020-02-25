@@ -33,6 +33,7 @@ from urllib.parse import urlsplit
 from twisted.web import server, resource, http
 from twisted.internet import reactor
 from avalon_listener.tcs_work_order_handler import TCSWorkOrderHandler
+from avalon_listener.tcs_work_order_handler_sync import TCSWorkOrderHandlerSync
 from avalon_listener.tcs_worker_registry_handler \
         import TCSWorkerRegistryHandler
 from avalon_listener.tcs_workorder_receipt_handler \
@@ -75,8 +76,17 @@ class TCSListener(resource.Resource):
             sys.exit(-1)
 
         self.worker_registry_handler = TCSWorkerRegistryHandler(self.kv_helper)
-        self.workorder_handler = TCSWorkOrderHandler(
-            self.kv_helper, config["Listener"]["max_work_order_count"])
+        if int(config["WorkloadExecution"]["sync_workload_execution"]) == 1:
+            self.workorder_handler = TCSWorkOrderHandlerSync(
+                                    self.kv_helper,
+                                    config["Listener"]["max_work_order_count"],
+                                    config["Listener"]["zmq_url"],
+                                    config["Listener"]["zmq_port"])
+        else:
+            self.workorder_handler = TCSWorkOrderHandler(
+                                    self.kv_helper,
+                                    config["Listener"]["max_work_order_count"])
+
         self.workorder_receipt_handler = TCSWorkOrderReceiptHandler(
             self.kv_helper)
         self.worker_encryption_key_handler = WorkerEncryptionKeyHandler(

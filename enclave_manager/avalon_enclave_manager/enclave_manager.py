@@ -22,6 +22,7 @@ import sys
 import time
 import random
 import hashlib
+import zmq
 
 import avalon_enclave_manager.sgx_work_order_request as work_order_request
 import avalon_enclave_manager.avalon_enclave_helper as enclave_helper
@@ -37,8 +38,6 @@ logger = logging.getLogger(__name__)
 
 # representation of the enclave data
 enclave_data = None
-
-# XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 
 class EnclaveManager:
@@ -157,9 +156,35 @@ class EnclaveManager:
                 "Finally deleting workorder %s from wo-processing table", wo)
             kv_helper.remove("wo-processing", wo)
 
-        # End of for-loop
+    def process_work_order_sync(self, kv_helper, process_wo_id):
+        """
+        Process the work-order of the specified work-order id
+        and return the response.
+        Used for synchronous execution.
+        Parameters:
+        - kv_helper is lmdb instance to access database
+        - process_wo_id is id of the work-order that is to be processed
+        """
+        logger.info("Processing work order")
+        try:
+            # Get all workorders requests from KV storage lookup and process
+            list_of_workorders = kv_helper.lookup("wo-scheduled")
+            if not list_of_workorders:
+                logger.info("Received empty list of work orders from " +
+                            "wo-scheduled table")
+                return
+        except Exception as e:
+            logger.error("Problem while getting ids from wo-scheduled table")
+            return
 
-    # -----------------------------------------------------------------
+        for wo_id in list_of_workorders:
+            if wo_id == process_wo_id:
+                resp = self.process_work_order_by_id(kv_helper, wo_id)
+                return resp
+            else:
+                return None
+        # end of for loop
+
     def process_work_orders(self, kv_helper):
         """
         Executes Run time flow of enclave manager
@@ -168,93 +193,99 @@ class EnclaveManager:
         try:
             # Get all workorders requests from KV storage lookup and process
             list_of_workorders = kv_helper.lookup("wo-scheduled")
-
             if not list_of_workorders:
                 logger.info("Received empty list of work orders from " +
                             "wo-scheduled table")
                 return
-
         except Exception as e:
             logger.error("Problem while getting keys from wo-scheduled table")
             return
 
         for wo_id in list_of_workorders:
-            try:
-                kv_helper.set("wo-processing", wo_id,
-                              WorkOrderStatus.PROCESSING.name)
+            self.process_work_order_by_id(kv_helper, wo_id)
+        # end of for loop
 
-                # Get JSON workorder request corresponding to wo_id
-                wo_json_req = kv_helper.get("wo-requests", wo_id)
-                if wo_json_req is None:
-                    logger.error("Received empty work order corresponding " +
-                                 "to id %s from wo-requests table", wo_id)
-                    kv_helper.remove("wo-processing", wo_id)
-                    return
-
-            except Exception as e:
-                logger.error("Problem while reading the work order %s"
-                             "from wo-requests table", wo_id)
-                kv_helper.remove("wo-processing", wo_id)
-                return
-
-            logger.info("Create workorder entry %s in wo-processing table",
-                        wo_id)
+    def process_work_order_by_id(self, kv_helper, wo_id):
+        """
+        Process the work-order of the specified work-order id
+        Parameters:
+        - kv_helper is lmdb instance to access database
+        - wo_id is work-order id of the work-order that is to be processed
+        Execute the work-order and update the tables accordingly
+        """
+        try:
             kv_helper.set("wo-processing", wo_id,
                           WorkOrderStatus.PROCESSING.name)
 
-            logger.info("Delete workorder entry %s from wo-scheduled table",
-                        wo_id)
-            kv_helper.remove("wo-scheduled", wo_id)
-
-            logger.info("Validating JSON workorder request %s", wo_id)
-            validation_status = validate_request(wo_json_req)
-
-            if not validation_status:
-                logger.error(
-                    "JSON validation for Workorder %s failed; " +
-                    "handling Failure scenarios", wo_id)
-                wo_response["Response"]["Status"] = WorkOrderStatus.FAILED
-                wo_response["Response"]["Message"] = \
-                    "Workorder JSON request is invalid"
-                kv_helper.set("wo-responses", wo_id, json.dumps(wo_response))
-                kv_helper.set("wo-processed", wo_id,
-                              WorkOrderStatus.FAILED.name)
+            # Get JSON workorder request corresponding to wo_id
+            wo_json_req = kv_helper.get("wo-requests", wo_id)
+            if wo_json_req is None:
+                logger.error("Received empty work order corresponding " +
+                             "to id %s from wo-requests table", wo_id)
                 kv_helper.remove("wo-processing", wo_id)
                 return
 
-            # Execute work order request
-
-            logger.info("Execute workorder with id %s", wo_id)
-            wo_json_resp = execute_work_order(self.enclave_data, wo_json_req)
-            wo_resp = json.loads(wo_json_resp)
-
-            logger.info("Update workorder receipt for workorder %s", wo_id)
-            receipt = self.__update_receipt(kv_helper, wo_id, wo_resp)
-
-            if "Response" in wo_resp and \
-                    wo_resp["Response"]["Status"] == WorkOrderStatus.FAILED:
-                logger.error("error in Response")
-                kv_helper.set("wo-processed", wo_id,
-                              WorkOrderStatus.FAILED.name)
-                kv_helper.set("wo-responses", wo_id, wo_json_resp)
-                kv_helper.remove("wo-processing", wo_id)
-                return
-
-            logger.info("Mark workorder status for workorder id %s " +
-                        "as Completed in wo-processed", wo_id)
-            kv_helper.set("wo-processed", wo_id, WorkOrderStatus.SUCCESS.name)
-
-            logger.info("Create entry in wo-responses table for workorder %s",
-                        wo_id)
-            kv_helper.set("wo-responses", wo_id, wo_json_resp)
-
-            logger.info("Delete workorder entry %s from wo-processing table",
-                        wo_id)
+        except Exception as e:
+            logger.error("Problem while reading the work order %s"
+                         "from wo-requests table", wo_id)
             kv_helper.remove("wo-processing", wo_id)
+            return
 
-        # end of for loop
+        logger.info("Create workorder entry %s in wo-processing table",
+                    wo_id)
+        kv_helper.set("wo-processing", wo_id,
+                      WorkOrderStatus.PROCESSING.name)
 
-    # -----------------------------------------------------------------
+        logger.info("Delete workorder entry %s from wo-scheduled table",
+                    wo_id)
+        kv_helper.remove("wo-scheduled", wo_id)
+
+        logger.info("Validating JSON workorder request %s", wo_id)
+        validation_status = validate_request(wo_json_req)
+
+        if not validation_status:
+            logger.error(
+                "JSON validation for Workorder %s failed; " +
+                "handling Failure scenarios", wo_id)
+            wo_response["Response"]["Status"] = WorkOrderStatus.FAILED
+            wo_response["Response"]["Message"] = \
+                "Workorder JSON request is invalid"
+            kv_helper.set("wo-responses", wo_id, json.dumps(wo_response))
+            kv_helper.set("wo-processed", wo_id,
+                          WorkOrderStatus.FAILED.name)
+            kv_helper.remove("wo-processing", wo_id)
+            return
+
+        # Execute work order request
+
+        logger.info("Execute workorder with id %s", wo_id)
+        wo_json_resp = execute_work_order(self.enclave_data, wo_json_req)
+        wo_resp = json.loads(wo_json_resp)
+
+        logger.info("Update workorder receipt for workorder %s", wo_id)
+        receipt = self.__update_receipt(kv_helper, wo_id, wo_resp)
+
+        if "Response" in wo_resp and \
+                wo_resp["Response"]["Status"] == WorkOrderStatus.FAILED:
+            logger.error("error in Response")
+            kv_helper.set("wo-processed", wo_id,
+                          WorkOrderStatus.FAILED.name)
+            kv_helper.set("wo-responses", wo_id, wo_json_resp)
+            kv_helper.remove("wo-processing", wo_id)
+            return
+
+        logger.info("Mark workorder status for workorder id %s " +
+                    "as Completed in wo-processed", wo_id)
+        kv_helper.set("wo-processed", wo_id, WorkOrderStatus.SUCCESS.name)
+
+        logger.info("Create entry in wo-responses table for workorder %s",
+                    wo_id)
+        kv_helper.set("wo-responses", wo_id, wo_json_resp)
+
+        logger.info("Delete workorder entry %s from wo-processing table",
+                    wo_id)
+        kv_helper.remove("wo-processing", wo_id)
+        return wo_resp
 
     def __update_receipt(self, kv_helper, wo_id, wo_json_resp):
         """
@@ -315,7 +346,7 @@ class EnclaveManager:
                         "so skipping the update")
 
 
-# -----------------------------------------------------------------
+# ----------------------------------------------------------------
 def create_enclave_signup_data():
     """
     Create enclave signup data
@@ -473,31 +504,71 @@ def start_enclave_manager(config):
                      "exiting Intel SGX Enclave manager: {err}")
         exit(1)
 
-    try:
-        sleep_interval = int(config["EnclaveManager"]["sleep_interval"])
-    except Exception as err:
-        logger.error("Failed to get sleep interval from config file. " +
-                     "Setting sleep interval to 10 seconds: %s", str(err))
-        sleep_interval = 10
+    if int(config["WorkloadExecution"]["sync_workload_execution"]) == 1:
+        # Binding with ZMQ Port
+        try:
+            socket = bind_zmq_socket(config.get("EnclaveManager")["zmq_port"])
+            logger.info("ZMQ Port hosted by Enclave")
+        except Exception as ex:
+            logger.exception("Failed to bind socket" +
+                             "shutting down enclave manager")
+            logger.error("Exception: {} args{} details{}".format(type(ex),
+                         ex.args, ex))
+            exit(1)
+        try:
+            while True:
+                # Wait for the next request
+                logger.info("Enclave Manager waiting for next request")
+                wo_id = socket.recv()
+                wo_id = wo_id.decode()
+                logger.info("Received request at enclave manager: %s" % wo_id)
+                result = enclave_manager.process_work_order_sync(kv_helper,
+                                                                 wo_id)
+                if result is None:
+                    socket.send_string("Error while processing work order: " +
+                                       str(wo_id))
+                else:
+                    socket.send_string("Work order processed: " + str(wo_id))
+        except Exception as inst:
+            logger.error("Error while processing work-order; " +
+                         "shutting down enclave manager")
+            logger.error("Exception: {} args {} details {}".format(type(inst),
+                         inst.args, inst))
+            exit(1)
+    else:
+        try:
+            sleep_interval = int(config["EnclaveManager"]["sleep_interval"])
+        except Exception as err:
+            logger.error("Failed to get sleep interval from config file. " +
+                         "Setting sleep interval to 10 seconds: %s", str(err))
+            sleep_interval = 10
 
-    try:
-        while True:
-            # Poll KV storage for new work-order requests and process
-            enclave_manager.process_work_orders(kv_helper)
-            logger.info("Enclave manager sleeping for %d secs", sleep_interval)
-            time.sleep(sleep_interval)
-    except Exception as inst:
-        logger.error("Error while processing work-order; " +
-                     "shutting down enclave manager")
-        logger.error("Exception: {} args {} details {}".format(type(inst),
-                     inst.args, inst))
-        exit(1)
+        try:
+            while True:
+                # Poll KV storage for new work-order requests and process
+                enclave_manager.process_work_orders(kv_helper)
+                logger.info("Enclave manager sleeping for %d secs",
+                            sleep_interval)
+                time.sleep(sleep_interval)
+        except Exception as inst:
+            logger.error("Error while processing work-order; " +
+                         "shutting down enclave manager")
+            logger.error("Exception: {} args {} details {}".format(type(inst),
+                         inst.args, inst))
+            exit(1)
 
 
 TCFHOME = os.environ.get("TCF_HOME", "../../../../")
 
 # -----------------------------------------------------------------
 # -----------------------------------------------------------------
+
+
+def bind_zmq_socket(zmq_port):
+    context = zmq.Context()
+    socket = context.socket(zmq.REP)
+    socket.bind("tcp://0.0.0.0:"+zmq_port)
+    return socket
 
 
 def parse_command_line(config, args):
