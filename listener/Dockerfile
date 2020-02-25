@@ -223,7 +223,7 @@ COPY --from=build_image /project/avalon/listener/dist/*.whl dist/
 # So remove python3-pip package and dependencies after installing wheel file.
 RUN apt-get update \
  && apt-get install -y -q python3-pip \
- && pip3 install json-rpc \
+ && pip3 install json-rpc pyzmq\
  && echo "Install Common Python, Crypto, Listener and SDK packages\n" \
  && pip3 install dist/*.whl \
  && echo "Remove unused packages from image\n" \

@@ -57,6 +57,9 @@ services:
       - http_proxy
       - https_proxy
       - no_proxy
+    expose:
+      # ZMQ socket port. 
+      - 5555
     command: |
       bash -c "
         enclave_manager --lmdb_url http://avalon-lmdb:9090
@@ -64,6 +67,7 @@ services:
       "
     depends_on:
       - avalon-lmdb
+      - avalon-listener
 
   avalon-lmdb:
     container_name: avalon-lmdb
@@ -105,6 +109,8 @@ services:
       - no_proxy
     expose:
       - 1947
+      # ZMQ socket port.
+      - 5555
     command: |
       bash -c "
         avalon_listener --bind http://avalon-listener:1947 --lmdb_url http://avalon-lmdb:9090
