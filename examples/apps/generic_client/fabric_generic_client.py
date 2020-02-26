@@ -84,7 +84,7 @@ class GenericClient():
             help="Blockchain type to use in proxy model",
             choices={"fabric", "ethereum"},
             type=str,
-            default="ethereum"
+            default="fabric"
         )
         parser.add_argument(
             "-a", "--address",
