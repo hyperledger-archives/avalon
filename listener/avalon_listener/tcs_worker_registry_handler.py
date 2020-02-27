@@ -115,7 +115,7 @@ class TCSWorkerRegistryHandler:
                 " Hence invalid parameter")
 
         # Worker Initial Status is set to Active
-        params["status"] = WorkerStatus.ACTIVE
+        params["status"] = WorkerStatus.ACTIVE.value
 
         input_json_str = json.dumps(params)
         self.kv_helper.set("workers", worker_id, input_json_str)
