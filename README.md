@@ -39,7 +39,7 @@ Hyperledger Avalon uses the
 defined by Enterprise Ethereum Alliance (EEA) Task Force as a starting point to
 apply a consistent and compatible approach to all supported blockchains.
 
-Hyperledger Avalon can be found [_avalon-arch.pdf_](docs/avalon-arch.pdf).
+Hyperledger Avalon architecture can be found [_avalon-arch.pdf_](docs/avalon-arch.pdf).
 
 ## Initial Committers
 * Manjunath A C (manju956)
