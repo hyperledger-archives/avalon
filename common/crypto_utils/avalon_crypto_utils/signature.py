@@ -20,8 +20,8 @@ Functions based on Spec 1.0 compatibility.
 
 import json
 import logging
-import crypto_utils.crypto.crypto as crypto
-import crypto_utils.crypto_utility as crypto_utility
+import avalon_crypto_utils.crypto.crypto as crypto
+import avalon_crypto_utils.crypto_utility as crypto_utility
 from utility.hex_utils import is_valid_hex_str, byte_array_to_hex_str
 from error_code.error_status import SignatureStatus
 import config.config as pconfig

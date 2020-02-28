@@ -19,7 +19,7 @@ Functions to perform worker related functions based on Spec 1.0 compatibility.
 
 import logging
 import json
-import crypto_utils.crypto_utility as crypto_utility
+import avalon_crypto_utils.crypto_utility as crypto_utility
 import config.config as pconfig
 from enum import Enum, unique
 from utility.hex_utils import is_valid_hex_str

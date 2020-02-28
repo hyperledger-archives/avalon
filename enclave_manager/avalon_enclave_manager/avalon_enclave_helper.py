@@ -23,7 +23,7 @@ import random
 import logging
 
 import avalon_enclave_manager.avalon_enclave_bridge as avalon_enclave
-import crypto_utils.keys as keys
+import avalon_crypto_utils.keys as keys
 
 logger = logging.getLogger(__name__)
 

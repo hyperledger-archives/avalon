@@ -15,9 +15,9 @@
 import json
 import logging
 
-import crypto_utils.crypto.crypto as crypto
-import crypto_utils.crypto_utility as crypto_utility
-import crypto_utils.signature as signature
+import avalon_crypto_utils.crypto.crypto as crypto
+import avalon_crypto_utils.crypto_utility as crypto_utility
+import avalon_crypto_utils.signature as signature
 
 logger = logging.getLogger(__name__)
 

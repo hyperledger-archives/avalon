@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import hashlib
-import crypto_utils.crypto.crypto as crypto
+import avalon_crypto_utils.crypto.crypto as crypto
 
 import logging
 logger = logging.getLogger(__name__)

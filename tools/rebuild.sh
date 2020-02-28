@@ -186,8 +186,14 @@ cd build
 try cmake ..
 try make "-j$NUM_CORES"
 
-yell --------------- EXAMPLES COMMON PYTHON ---------------
+yell --------------- COMMON PYTHON ---------------
 cd $TCF_HOME/common/python || error_exit "Failed to change to the directory"
+
+try make "-j$NUM_CORES"
+try make install
+
+yell --------------- COMMON CRYPTO UTILS PYTHON ---------------
+cd $TCF_HOME/common/crypto_utils || error_exit "Failed to change to the directory"
 
 try make "-j$NUM_CORES"
 try make install

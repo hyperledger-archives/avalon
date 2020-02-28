@@ -14,7 +14,7 @@
 
 import base64
 import utility.hex_utils as hex_utils
-import crypto_utils.crypto.crypto as crypto
+import avalon_crypto_utils.crypto.crypto as crypto
 import logging
 
 logger = logging.getLogger(__name__)
