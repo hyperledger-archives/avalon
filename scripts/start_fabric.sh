@@ -14,8 +14,48 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# Since fabric 1.4.4 is takes less time to instantiate the chaincodes
+# default fabric version is set to 1.4.4
+FABRIC_VERSION=1.4.4
+CHAIN_CODE_VERSION=1.0
 MINIFAB=~/mywork/minifab
 WORK_DIR=~/mywork
+
+# Default chaincode path is different for 1.4.4 and 2.0
+DEFAULT_CHAIN_CODE_PATH=""
+if expr $FABRIC_VERSION '=' 1.4.4>/dev/null; then
+    DEFAULT_CHAIN_CODE_PATH=/opt/gopath/src/github.com/chaincode
+elif expr $FABRIC_VERSION '=' 2.0>/dev/null; then
+    DEFAULT_CHAIN_CODE_PATH=/go/src/github.com/chaincode
+fi
+
+check_if_cc_artifacts_exists()
+{
+    chain_codes=("registry", "worker", "order", "receipt")
+    artifact_path="$WORK_DIR/vars/chaincode/"
+    if expr $FABRIC_VERSION '=' 1.4.4>/dev/null; then
+        # In 1.4.4 go chain code build targets will be
+        # in $WORK_DIR/vars/chaincode/<chaincode_name>/go/vendor
+        lang="/go/"
+        artifact_name="vendor"
+    elif expr $FABRIC_VERSION '=' 2.0>/dev/null; then
+        # In 2.0 chain code build targets will be in
+        # $WORK_DIR/vars/chaincode/<chaincode_name>/
+        # <chaincode_name>_go_<chain_code_version>.tar.gz
+        lang=""
+        artifact_name="_go_$CHAIN_CODE_VERSION.tar.gz"
+    fi
+    for i in $chain_codes
+    do
+        chaincode_artifact=$artifact_path$i$lang$artifact_name
+        if [ ! -f $chaincode_artifact ]; then
+            return 0
+        else
+            continue
+        fi
+    done
+    return 1
+}
 if [ -f "$MINIFAB" ]; then
     echo "minifab is already installed in ~/mywork"
 else
@@ -28,13 +68,18 @@ if [[ ! -v TCF_HOME ]]; then
 fi
 cd ~/mywork
 export PATH=~/mywork/:$PATH
-if [ ! -f "$WORK_DIR/vars/chaincode/registry/registry_go_1.0.tar.gz" ] && [ ! -f "$WORK_DIR/vars/chaincode/worker/worker_go_1.0.tar.gz" ] && [ ! -f "$WORK_DIR/vars/chaincode/order/order_go_1.0.tar.gz" ] && [ ! -f "$WORK_DIR/vars/chaincode/receipt/receipt_go_1.0.tar.gz" ]; then
-    minifab cleanup
+# If we copy chaincode files everytime, go build take more time to generate
+# build artifcat.
+if check_if_cc_artifacts_exists; then
+    echo "Chain codes are built and use existing built artifacts"
+else
     mkdir -p ./vars/chaincode
     cp -R $TCF_HOME/sdk/avalon_sdk/fabric/chaincode/* vars/chaincode/
 fi
+
+# If already fabric network up and running skip start again.
 if [[ ! $(docker ps --format '{{.Names}}' |grep "peer*") ]]; then
-    minifab up
+    minifab up -i $FABRIC_VERSION
     # Create blockmark file with block number 0
     # This file will be used by generic client to
     # register event
@@ -44,28 +89,29 @@ if [[ ! $(docker ps --format '{{.Names}}' |grep "peer*") ]]; then
     # to access internet. Passing proxy settings for cli.
     docker rm -f cli
     docker run -dit --name cli --network minifab -v /var/run/docker.sock:/var/run/docker.sock -v $(pwd)/vars:/vars \
--v $(pwd)/vars/chaincode:/go/src/github.com/chaincode \
+-v $(pwd)/vars/chaincode:$DEFAULT_CHAIN_CODE_PATH \
 -e "http_proxy=$http_proxy" -e "https_proxy=$https_proxy" \
--e "no_proxy=$no_proxy,localhost,orderer3.example.com,orderer2.example.com,orderer1.example.com,peer2.org1.example.com,peer1.org1.example.com,peer2.org0.example.com,peer1.org0.example.com" \
+-e "no_proxy=$no_proxy" \
 -e "HTTP_PROXY=$http_proxy" -e "HTTPS_PROXY=$https_proxy" \
--e "NO_PROXY=$no_proxy,localhost,orderer3.example.com,orderer2.example.com,orderer1.example.com,peer2.org1.example.com,peer1.org1.example.com,peer2.org0.example.com,peer1.org0.example.com" \
-hyperledger/fabric-tools:2.0
+-e "NO_PROXY=$no_proxy" \
+hyperledger/fabric-tools:$FABRIC_VERSION
 fi
+# If chaincode already instantiated then don't start it again.
 if [[ ! $(docker ps --format '{{.Names}}' |grep "dev-*" |grep "registry_*") ]]; then
     echo "Installing and instantiating registry chain code.."
-    minifab install,approve,instantiate -n registry -v 1.0
+    minifab install,approve,instantiate -n registry -v $CHAIN_CODE_VERSION
 fi
 if [[ ! $(docker ps --format '{{.Names}}' |grep "dev-*" |grep "worker_*") ]]; then
     echo "Installing and instantiating worker chain code.."
-    minifab install,approve,instantiate -n worker -v 1.0
+    minifab install,approve,instantiate -n worker -v $CHAIN_CODE_VERSION
 fi
 if [[ ! $(docker ps --format '{{.Names}}' |grep "dev-*" |grep "order_*") ]]; then
     echo "Installing and instantiating order chain code.."
-    minifab install,approve,instantiate -n order -v 1.0
+    minifab install,approve,instantiate -n order -v $CHAIN_CODE_VERSION
 fi
 if [[ ! $(docker ps --format '{{.Names}}' |grep "dev-*" |grep "receipt_*") ]]; then
     echo "Installing and instantiating receipt chain code.."
-    minifab install,approve,instantiate -n receipt -v 1.0
+    minifab install,approve,instantiate -n receipt -v $CHAIN_CODE_VERSION
 fi
 echo "Started fabric network..."
 docker ps --format '{{.Names}}'
