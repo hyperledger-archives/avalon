@@ -13,7 +13,6 @@ To set up the local environment in order to run Avalon tests, you need the follo
 Pull down the docker images:
 
 ```
-cd local
 docker-compose pull
 ```
 

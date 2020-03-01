@@ -6,7 +6,9 @@
     ```
     This requires Requires ``NodeJS v8.9.4 or later`` preinstalled.
 
-2.  Set the environment variable ``TCF_HOME`` to the Avalon root directory
+2.  Set the environment variable ``TCF_HOME`` to the Avalon root directory. Update ``no_proxy`` environment variable if you are behind a proxy
+    server. Add these private IP - ``172.13.0.2, 172.13.0.3, 172.13.0.4, 172.13.0.5``. These are the IP addresses used in the default Besu 
+    network defined in the corresponding [docker-compose file](dev-environments/besu/docker-compose.yaml)
 
 3.  Start the Ethereum network with 2 nodes and 2 eth-signers. To bring up the network, do the following
        ```
@@ -26,7 +28,7 @@
         truffle migrate --network avalon
         ```
 5. The ``truffle migrate`` command would deploy contracts to the Ethereum network. If the command is successful, you should see something like 
-
+	```
 	2_deploy_contracts.js
 	=====================
 	
@@ -41,13 +43,12 @@
 	> balance:             1000000000
 	> gas used:            667475
 	> ...
+	```
    Only partial output is seen here. The actual output has more data.
 6. Update configuration fields in ``$TCF_HOME/sdk/avalon_sdk/tcf_connector.toml ``
 	- **proxy_worker_registry_contract_address** - Read the field ``contract address`` from Step 4 under ``Deploying 'WorkerRegistry'``
 	- **work_order_contract_address** - Read the field ``contract address`` from Step 4 under ``Deploying 'WorkerOrderRegistry'``
 	- **eth_account** - Read the field account from Step 4
-	- **provider** - Replace the placeholder IP(only IP and not the port) with the IP address of your host machine
-	- **event_provider** - Replace the placeholder IP with the IP address of your host machine
 
 7. Start the Avalon containers
 
@@ -65,4 +66,5 @@ use these steps
 cd $TCF_HOME/docs/dev-environments/besu
 docker-compose down
 ./cleanup.sh
+rm -f $TCF_HOME/blockchain_connector/bookmark $TCF_HOME/examples/apps/generic_client/bookmark
 ```
