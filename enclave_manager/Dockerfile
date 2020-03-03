@@ -162,8 +162,6 @@ ARG MAKECLEAN
 ARG TCF_DEBUG_BUILD
 
 # Environment setup
-ENV http_proxy=$http_proxy
-ENV https_proxy=$https_proxy
 ENV TCF_HOME=/project/avalon
 ENV SGX_SSL=/opt/intel/sgxssl
 ENV SGX_SDK=/opt/intel/sgxsdk
@@ -238,8 +236,6 @@ RUN echo "Building avalon enclave manager" \
 # Build Final image and install dependent modules
 FROM base_image as final_image
 
-ENV http_proxy=$http_proxy
-ENV https_proxy=$https_proxy
 ENV TCF_HOME=/project/avalon
 
 WORKDIR /project/avalon/
@@ -257,6 +253,7 @@ COPY --from=build_image /project/avalon/common/python/dist/*.whl dist/
 COPY --from=build_image /project/avalon/common/crypto_utils/dist/*.whl dist/
 COPY --from=build_image /project/avalon/sdk/dist/*.whl dist/
 COPY --from=build_image /project/avalon/enclave_manager/dist/*.whl dist/
+
 
 # Installing wheel file requires python3-pip package.
 # But python3-pip package will increase size of final docker image.

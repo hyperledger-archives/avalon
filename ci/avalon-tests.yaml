@@ -19,10 +19,10 @@ services:
     image: avalon-shell:${ISOLATION_ID}
     build:
       context: .
-      args:
-        - http_proxy
-        - https_proxy
-        - no_proxy
+    environment:
+      - http_proxy
+      - https_proxy
+      - no_proxy
     working_dir: "/project/avalon/"
     entrypoint: "bash -c \"\
         ./tools/run_tests.sh -l avalon-listener \""
@@ -36,10 +36,11 @@ services:
       context: .
       dockerfile: ./enclave_manager/Dockerfile
       args:
-        - http_proxy
-        - https_proxy
-        - no_proxy
         - TCF_DEBUG_BUILD=${TCF_DEBUG_BUILD:-}
+    environment:
+      - http_proxy
+      - https_proxy
+      - no_proxy
     command: |
       bash -c "
         enclave_manager --lmdb_url http://avalon-lmdb:9090
@@ -52,10 +53,10 @@ services:
     image: avalon-lmdb:${ISOLATION_ID}
     build:
       context: .
-      args:
-        - http_proxy
-        - https_proxy
-        - no_proxy
+    environment:
+      - http_proxy
+      - https_proxy
+      - no_proxy
     expose:
       - 9090
     command: |
@@ -68,10 +69,10 @@ services:
     image: avalon-listener:${ISOLATION_ID}
     build:
       context: .
-      args:
-        - http_proxy
-        - https_proxy
-        - no_proxy
+    environment:
+      - http_proxy
+      - https_proxy
+      - no_proxy
     expose:
       - 1947
     command: |

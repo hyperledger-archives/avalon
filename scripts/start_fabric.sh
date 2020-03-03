@@ -115,4 +115,3 @@ if [[ ! $(docker ps --format '{{.Names}}' |grep "dev-*" |grep "receipt_*") ]]; t
 fi
 echo "Started fabric network..."
 docker ps --format '{{.Names}}'
-

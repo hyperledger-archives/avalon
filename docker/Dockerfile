@@ -51,7 +51,7 @@ RUN ln -sf /usr/bin/python3 /usr/bin/python
 RUN add-apt-repository ppa:ethereum/ethereum \
    && apt-get update \
    && apt-get install solc
-
+   
 # Install py-solc-x and web3 packages using pip because
 # these are not available in apt repository.
 # Install nose2 for running tests.
@@ -118,18 +118,10 @@ RUN ldconfig \
 
 COPY VERSION /project/avalon/
 COPY ./bin /project/avalon/bin
-COPY ./tools/run_tests.sh /project/avalon/tools/
-COPY ./config/tcs_config.toml /project/avalon/config/
 COPY ./common/cpp /project/avalon/common/cpp
 COPY ./common/python /project/avalon/common/python
 COPY ./common/crypto_utils /project/avalon/common/crypto_utils
 COPY ./sdk /project/avalon/sdk
-COPY ./tests /project/avalon/tests
-COPY ./examples/apps /project/avalon/examples/apps
-
-# Install fabric python sdk
-RUN pip3 install virtualenv \
- && pip3 install git+https://github.com/hyperledger/fabric-sdk-py.git
 
 WORKDIR /project/avalon/common/cpp
 
@@ -161,21 +153,19 @@ ARG DISPLAY
 ARG XAUTHORITY
 
 #Environment setup
-ENV http_proxy=$http_proxy
-ENV https_proxy=$https_proxy
 ENV TCF_HOME=/project/avalon
 # Set display, replace value with [IP address of host]:0
 ENV DISPLAY=:0
 
 WORKDIR /project/avalon/
 
-COPY --from=build_image /project/avalon/config/tcs_config.toml /project/avalon/config/
-COPY --from=build_image /project/avalon/examples/apps/ /project/avalon/examples/apps
-COPY --from=build_image /project/avalon/tests /project/avalon/tests
-COPY --from=build_image /project/avalon/sdk/avalon_sdk/tcf_connector.toml /project/avalon/sdk/avalon_sdk/
-COPY --from=build_image /project/avalon/sdk/avalon_sdk/ethereum/contracts /project/avalon/sdk/avalon_sdk/ethereum/contracts
-COPY --from=build_image /project/avalon/sdk/avalon_sdk/fabric/methods.json /project/avalon/sdk/avalon_sdk/fabric/
-COPY --from=build_image /project/avalon/tools/run_tests.sh /project/avalon/tools/
+COPY ./tools/run_tests.sh /project/avalon/tools/
+COPY ./config/tcs_config.toml /project/avalon/config/
+COPY ./tests /project/avalon/tests
+COPY ./sdk/avalon_sdk/tcf_connector.toml /project/avalon/sdk/avalon_sdk/
+COPY ./examples/apps/ /project/avalon/examples/apps
+COPY ./sdk/avalon_sdk/ethereum/contracts /project/avalon/sdk/avalon_sdk/ethereum/contracts
+COPY ./sdk/avalon_sdk/fabric/methods.json /project/avalon/sdk/avalon_sdk/fabric/
 
 # Copy Python build artifacts
 COPY --from=build_image /project/avalon/common/python/dist/*.whl dist/
