@@ -39,6 +39,7 @@ RUN apt-get update \
     python3-requests \
     python3-colorlog \
     python3-twisted \
+    git \
  && apt-get -y -q upgrade \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
@@ -167,11 +168,16 @@ COPY --from=build_image /project/avalon/examples/apps/ /project/avalon/examples/
 COPY --from=build_image /project/avalon/tests /project/avalon/tests
 COPY --from=build_image /project/avalon/sdk/avalon_sdk/tcf_connector.toml /project/avalon/sdk/avalon_sdk/
 COPY --from=build_image /project/avalon/sdk/avalon_sdk/ethereum/contracts /project/avalon/sdk/avalon_sdk/ethereum/contracts
+COPY --from=build_image /project/avalon/sdk/avalon_sdk/fabric/methods.json /project/avalon/sdk/avalon_sdk/fabric/
 COPY --from=build_image /project/avalon/tools/run_tests.sh /project/avalon/tools/
 
 # Copy Python build artifacts
 COPY --from=build_image /project/avalon/common/python/dist/*.whl dist/
 COPY --from=build_image /project/avalon/sdk/dist/*.whl dist/
+
+# Install fabric python sdk
+RUN pip3 install virtualenv \
+ && pip3 install git+https://github.com/hyperledger/fabric-sdk-py.git
 
 # Installing wheel file requires python3-pip package.
 # But python3-pip package will increase size of final docker image.
