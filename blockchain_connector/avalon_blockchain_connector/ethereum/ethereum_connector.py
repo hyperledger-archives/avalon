@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import os
+import sys
 import json
 import random
 import asyncio
@@ -78,6 +79,8 @@ class EthereumConnector:
             .get_contract_instance(
                 work_order_contract_file, work_order_contract_address)
 
+        self._worker_registry = EthereumWorkerRegistryImpl(config)
+
     def _retrieve_first_worker_details(self):
         """
         This function retrieves the first worker from shared kv using
@@ -120,26 +123,57 @@ class EthereumConnector:
             sys.exit(1)
         return worker_id, worker_info["result"]
 
-    def _add_worker_to_chain(self, worker_id, worker_info):
+    def _add_update_worker_to_chain(self, worker_id_hex, worker_info):
         """
-        This function adds a worker to the Ethereum blockchain
+        This function adds/updates a worker in the Ethereum blockchain
         """
-        worker_id = self._eth_client.get_bytes_from_hex(worker_id)
+        worker_id = self._eth_client.get_bytes_from_hex(worker_id_hex)
         worker_type = worker_info["workerType"]
         org_id = self._eth_client\
             .get_bytes_from_hex(worker_info["organizationId"])
         app_type_id = self._eth_client.get_bytes_from_hex(
             worker_info["applicationTypeId"])
         details = json.dumps(worker_info["details"])
-
-        txn_dict = self._worker_reg_contract_instance.functions.workerRegister(
-            worker_id, worker_type, org_id, [app_type_id], details)\
-            .buildTransaction(self._eth_client.get_transaction_params())
+        workers = self._lookup_workers_on_chain()
+        if worker_id_hex in workers:
+            logging.info("Updating worker {} on ethereum blockchain"\
+                .format(worker_id_hex))
+            txn_dict = self._worker_reg_contract_instance.functions\
+                .workerUpdate(worker_id, details)\
+                .buildTransaction(self._eth_client.get_transaction_params())
+        else:
+            logging.info("Adding new worker {} to ethereum blockchain"\
+                .format(worker_id_hex))
+            txn_dict = self._worker_reg_contract_instance.functions\
+                .workerRegister(worker_id, worker_type, org_id,
+                                [app_type_id], details)\
+                .buildTransaction(self._eth_client.get_transaction_params())
         try:
             txn_receipt = self._eth_client.execute_transaction(txn_dict)
         except Exception as e:
-            logging.error("Error while adding worker to ethereum"
+            logging.error("Error while adding/updating worker to ethereum"
                           + " blockchain : "+str(e))
+
+    def _lookup_workers_on_chain(self):
+        """
+        Lookup all workers on chain to sync up with kv storage
+        """
+        jrpc_req_id = random.randint(0, 100000)
+        # TODO: Remove hardcoding and pass wild characters instead
+        worker_lookup_result = self._worker_registry.worker_lookup(
+            WorkerType.TEE_SGX,
+            'aabbcc1234ddeeff',
+            '11aa22bb33cc44dd',
+            jrpc_req_id
+        )
+        logging.debug("\n Worker lookup response: {}\n".format(
+            json.dumps(worker_lookup_result, indent=4)
+        ))
+        if worker_lookup_result[0] > 0:
+            return worker_lookup_result[2]
+        else:
+            logging.error("No worker found in lookup")
+        return []
 
     def _submit_work_order_and_get_result(self, work_order_id, worker_id,
                                           requester_id, work_order_params):
@@ -210,7 +244,7 @@ class EthereumConnector:
         # TODO: Fetch all workers from shared KV and block chain
         # and do 2-way sync.
         worker_id, worker_info = self._retrieve_first_worker_details()
-        self._add_worker_to_chain(worker_id, worker_info)
+        self._add_update_worker_to_chain(worker_id, worker_info)
 
         # Start an event listener that listens for events from the proxy
         # blockchain, extracts request payload from there and make a request
