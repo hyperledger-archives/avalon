@@ -193,7 +193,7 @@ try make "-j$NUM_CORES"
 try make install
 
 yell --------------- ENCLAVE MANAGER ---------------
-cd $TCF_HOME/examples/enclave_manager || error_exit "Failed to change to the directory"
+cd $TCF_HOME/enclave_manager || error_exit "Failed to change to the directory"
 
 try make "-j$NUM_CORES"
 try make install

@@ -26,7 +26,7 @@ if sys.version_info[0] < 3:
 
 from setuptools import setup, find_packages, Extension
 
-tcf_root_dir = os.environ.get('TCF_HOME', '../../../../')
+tcf_root_dir = os.environ.get('TCF_HOME', '../')
 
 enclave_bridge_wrapper_path = os.path.join(tcf_root_dir,
          'tc/sgx/trusted_worker_manager/enclave_untrusted/enclave_bridge_wrapper')
@@ -72,7 +72,7 @@ libraries = [
 ]
 
 enclave_module_files = [
-    "tcf_enclave_manager/tcf_enclave.i",
+    "avalon_enclave_manager/avalon_enclave.i",
     os.path.join(enclave_bridge_wrapper_path, 'swig_utils.cpp'),
     os.path.join(enclave_bridge_wrapper_path, 'work_order_wrap.cpp'),
     os.path.join(enclave_bridge_wrapper_path, 'enclave_info.cpp'),
@@ -80,7 +80,7 @@ enclave_module_files = [
 ]
 
 enclave_module = Extension(
-    'tcf_enclave_manager._tcf_enclave',
+    'avalon_enclave_manager._avalon_enclave',
     enclave_module_files,
     swig_opts = ['-c++', '-threads'] + ['-I%s' % i for i in include_dirs],
     extra_compile_args = compile_args,
@@ -99,19 +99,21 @@ enclave_module = Extension(
 version = subprocess.check_output(
     os.path.join(tcf_root_dir, 'bin/get_version')).decode('ascii').strip()
 
-setup(name='tcf_enclave_manager',
+setup(name='avalon_enclave_manager',
       version = version,
       description = 'Avalon SGX Enclave Manager',
       author = 'Hyperledger Avalon',
       url = 'https://github.com/hyperledger/avalon',
       packages = find_packages(),
       install_requires = [
-          'requests',
-          'toml',
+          'requests'
           ],
       ext_modules = [
           enclave_module
       ],
       data_files = [],
-      entry_points = {}
+      entry_points = {
+        'console_scripts':
+        ['enclave_manager = avalon_enclave_manager.enclave_manager:main']
+          }
 )

@@ -19,8 +19,8 @@ import time
 from ssl import SSLError
 from requests.exceptions import Timeout
 from requests.exceptions import HTTPError
-import tcf_enclave_manager.ias_client as ias_client
-import tcf_enclave_manager.tcf_enclave as enclave
+import avalon_enclave_manager.ias_client as ias_client
+import avalon_enclave_manager.avalon_enclave as enclave
 
 import logging
 logger = logging.getLogger(__name__)

@@ -15,18 +15,16 @@
 version: '3.5'
 
 services:
-  tcf:
-    container_name: tcf
-    image: tcf-dev
+  avalon-shell:
+    container_name: avalon-shell
+    image: avalon-shell-dev
     build:
       context: .
-      dockerfile: ./docker/Dockerfile.tcf-dev
+      dockerfile: ./docker/Dockerfile
       args:
         - http_proxy
         - https_proxy
         - no_proxy
-        - MAKECLEAN=${MAKECLEAN:-1}
-        - TCF_DEBUG_BUILD=${TCF_DEBUG_BUILD:-}
         - DISPLAY=${DISPLAY:-}
         - XAUTHORITY=~/.Xauthority
     volumes:
@@ -35,18 +33,17 @@ services:
       # To store the bookmark file to host machine,
       # it is required for fabric event listening
       - ~/mywork/vars/blockmark:/project/TrustedComputeFramework/examples/apps/generic_client/blockmark
+      - ./examples/apps/generic_client/:/project/avalon/examples/apps/generic_client/
       - ~/.Xauthority:/root/.Xauthority
       - ~/mywork/vars/keyfiles:/keyfiles
-      - ~/mywork/vars/mychannel_network.json:/project/TrustedComputeFramework/sdk/avalon_sdk/fabric/network.json
-    working_dir: "/project/TrustedComputeFramework"
+      - ~/mywork/vars/mychannel_network.json:/project/avalon/sdk/avalon_sdk/fabric/network.json
+    working_dir: "/project/avalon"
     command: |
-      bash -c "
-        source scripts/tcs_startup.sh -y -l http://avalon-lmdb:9090
-        tail -f /dev/null
-      "
+      bash -c "tail -f /dev/null"
     stop_signal: SIGKILL
     depends_on:
-      - avalon-lmdb
+      - avalon-enclave-manager
+      - avalon-listener
 
   avalon-lmdb:
     container_name: avalon-lmdb
@@ -67,6 +64,25 @@ services:
         kv_storage --bind http://avalon-lmdb:9090
         tail -f /dev/null
       "
+
+  avalon-enclave-manager:
+    container_name: avalon-enclave-manager
+    image: avalon-enclave-manager-dev
+    build:
+      context: .
+      dockerfile: ./enclave_manager/Dockerfile
+      args:
+        - http_proxy
+        - https_proxy
+        - no_proxy
+        - TCF_DEBUG_BUILD=${TCF_DEBUG_BUILD:-}
+    command: |
+      bash -c "
+        enclave_manager --lmdb_url http://avalon-lmdb:9090
+        tail -f /dev/null
+      "
+    depends_on:
+      - avalon-lmdb
 
   avalon-listener:
     container_name: avalon-listener

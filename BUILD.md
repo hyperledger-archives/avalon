@@ -52,7 +52,7 @@ Follow the instructions below to execute a Docker-based build and execution.
 3. On a successful run, you should see the message `BUILD SUCCESS`
    followed by a repetitive message `Enclave manager sleeping for 10 secs`
 4. Open a Docker container shell using following command
-   `sudo docker exec -it tcf bash`
+   `sudo docker exec -it avalon-shell bash`
 5. To execute test cases refer to [Testing](#testing) section below
 6. To exit the Avalon program, press `Ctrl-c`
 
@@ -225,7 +225,7 @@ Follow these steps to run the `Demo.py` testcase:
    1. Follow the steps above for
       ["Docker-based Build and Execution"](#dockerbuild)
    2. Terminal 1 is running `docker-compose` and Terminal 2 is running the
-      "tcf" Docker container shell from the previous build steps
+      "avalon-shell" Docker container shell from the previous build steps
    3. In Terminal 2, cd to `$TCF_HOME/tests` and
       type this command to run the `Demo.py` test:
       ```bash

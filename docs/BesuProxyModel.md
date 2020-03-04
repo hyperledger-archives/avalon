@@ -53,9 +53,9 @@
 
     ``docker-compose -f docker-compose-eth-besu.yaml up --build``
 
-8. Go to the ``tcf`` container to run ``eth_generic_client.py``:
+8. Go to the ``avalon-shell`` container to run ``eth_generic_client.py``:
       ```
-       docker exec -it tcf bash
+       docker exec -it avalon-shell bash
        cd examples/apps/generic_client/
        ./eth_generic_client.py -b ethereum --workload_id "echo-result" -o --in_data "Hello"
 

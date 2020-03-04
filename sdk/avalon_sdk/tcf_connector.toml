@@ -59,8 +59,8 @@ solc_version = "v0.5.15"
 #Provider for test network. The default url is for a Hyperledger Besu client.
 #This could be replaced with a Ropsten(Infura as the IAAS) provider or a Ganache client.
 #provider = "http://10.66.245.80:8545"
-provider = "http://10.66.245.80:22001"
-event_provider = "http://10.66.245.80:22011"
+provider = "http://10.223.155.81:22001"
+event_provider = "http://10.223.155.81:22011"
 #event_provider = "http://10.66.245.80:8545"
 #chain_id is 3 for ropsten test network
 #"1": Ethereum Mainnet

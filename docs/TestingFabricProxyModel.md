@@ -23,9 +23,9 @@
     To save time, omit the ``--build`` parameter after running the first time
     so it will not rebuilt Avalon.
 
-5.  Go to the ``tcf`` container to run ``fabric_generic_client.py``:
+5.  Go to the ``avalon-shell`` container to run ``fabric_generic_client.py``:
     ````
-    docker exec -it tcf bash
+    docker exec -it  avalon-shell bash
 
     cd examples/apps/generic_client/
     ./fabric_generic_client.py -b fabric --workload_id "echo-result" --in_data "Hello"

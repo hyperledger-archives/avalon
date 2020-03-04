@@ -16,9 +16,9 @@
 SGX_MODE?=SIM
 
 PY_VERSION=${shell python3 --version | sed 's/Python \(3\.[0-9]\).*/\1/' | tr -d .}
-MOD_VERSION=${shell ../../bin/get_version}
+MOD_VERSION=${shell ../bin/get_version}
 
-WHEEL_FILE=dist/tcf_enclave_manager-${MOD_VERSION}-cp${PY_VERSION}-cp${PY_VERSION}m-linux_x86_64.whl
+WHEEL_FILE=dist/avalon_enclave_manager-${MOD_VERSION}-cp${PY_VERSION}-cp${PY_VERSION}m-linux_x86_64.whl
 
 all : $(WHEEL_FILE)
 
@@ -39,7 +39,7 @@ install:
 
 clean:
 	if [[ -f $(WHEEL_FILE) ]] ; then pip3 uninstall --yes $(WHEEL_FILE); fi
-	rm -f tcf_enclave_manager/tcf_enclave.py tcf_enclave_manager/tcf_enclave_wrap.cpp
+	rm -f avalon_enclave_manager/avalon_enclave.py avalon_enclave_manager/avalon_enclave_wrap.cpp
 	rm -rf build deps dist *.egg-info
 	find . -iname '*.pyc' -delete
 	find . -iname '__pycache__' -delete

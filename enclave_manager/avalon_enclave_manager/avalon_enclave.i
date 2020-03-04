@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-%module tcf_enclave
+%module avalon_enclave
 
 %include <std_vector.i>
 %include <std_map.i>

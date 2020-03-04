@@ -22,7 +22,7 @@ then will call create_enclave_signup_data.
 import random
 import logging
 
-import tcf_enclave_bridge as tcf_enclave
+import avalon_enclave_manager.avalon_enclave_bridge as avalon_enclave
 import crypto_utils.keys as keys
 
 logger = logging.getLogger(__name__)
@@ -33,7 +33,7 @@ def initialize_enclave(enclave_config):
     """initialize_enclave -- Call the initialization function on the
     enclave module
     """
-    return tcf_enclave.initialize_with_configuration(enclave_config)
+    return avalon_enclave.initialize_with_configuration(enclave_config)
 
 
 # -----------------------------------------------------------------
@@ -57,7 +57,7 @@ class EnclaveHelper(object):
         hashed_identity = tcf_instance_keys.hashed_identity
         logger.debug("tx hashed identity: %s", hashed_identity)
         try:
-            enclave_data = tcf_enclave.create_signup_info(
+            enclave_data = avalon_enclave.create_signup_info(
                 hashed_identity, nonce)
         except Exception as err:
             raise Exception('failed to create enclave signup data; {}'
@@ -70,7 +70,7 @@ class EnclaveHelper(object):
         enclave_info['encryption_key'] = enclave_data.encryption_key
         enclave_info['enclave_id'] = enclave_data.verifying_key
         enclave_info['proof_data'] = ''
-        if not tcf_enclave.enclave.is_sgx_simulator():
+        if not avalon_enclave.enclave.is_sgx_simulator():
             enclave_info['proof_data'] = enclave_data.proof_data
 
         return cls(enclave_info, tcf_instance_keys)
@@ -103,7 +103,7 @@ class EnclaveHelper(object):
 
         :param encrypted_request: base64 encoded encrypted workorder request
         """
-        return tcf_enclave.send_to_sgx_worker(
+        return avalon_enclave.send_to_sgx_worker(
             self.sealed_data,
             encrypted_request)
 
@@ -112,5 +112,5 @@ class EnclaveHelper(object):
         """
         Return information about the enclave
         """
-        return tcf_enclave.get_enclave_public_info(self.sealed_data)
+        return avalon_enclave.get_enclave_public_info(self.sealed_data)
     # -------------------------------------------------------

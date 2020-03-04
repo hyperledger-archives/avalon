@@ -22,8 +22,8 @@ import sys
 import time
 import random
 
-import sgx_work_order_request as work_order_request
-import tcf_enclave_helper as enclave_helper
+import avalon_enclave_manager.sgx_work_order_request as work_order_request
+import avalon_enclave_manager.avalon_enclave_helper as enclave_helper
 import crypto_utils.signature as signature
 import crypto_utils.crypto_utility as crypto_utils
 from database import connector

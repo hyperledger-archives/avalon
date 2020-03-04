@@ -25,7 +25,7 @@ PROJECT_DIR=$(cd $(dirname $(dirname $0)) && pwd)
 PATH=$PROJECT_DIR/bin:$PATH
 
 main() {
-    run_docker_test ./ci/tcf-tests.yaml
+    run_docker_test ./ci/avalon-tests.yaml
 }
 
 main
