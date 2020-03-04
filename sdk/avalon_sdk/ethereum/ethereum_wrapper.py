@@ -62,8 +62,8 @@ class EthereumWrapper():
             # Amount of Ether you’re willing to pay for every unit of gas
             self.__gas_price = config["ethereum"]["gas_price"]
             set_solc_version(config['ethereum']['solc_version'])
-            logging.info("Solidity compiler version being used : {}"
-                         .format(get_solc_version()))
+            logging.debug("Solidity compiler version being used : {}"
+                          .format(get_solc_version()))
         else:
             raise Exception("Invalid configuration parameter")
 
