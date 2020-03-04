@@ -127,7 +127,7 @@ services:
       - ~/mywork/vars/mychannel_network.json:/project/avalon/sdk/avalon_sdk/fabric/network.json
     depends_on:
       - avalon-listener
-      - tcf
+      - avalon-enclave-manager
 
 networks:
   default:
