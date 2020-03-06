@@ -21,6 +21,7 @@ import os
 import sys
 import time
 import random
+import hashlib
 
 import avalon_enclave_manager.sgx_work_order_request as work_order_request
 import avalon_enclave_manager.avalon_enclave_helper as enclave_helper
@@ -93,11 +94,10 @@ class EnclaveManager:
         logger.info("Adding enclave workers to workers table")
         worker_id = crypto_utils.strip_begin_end_public_key(self.enclave_id) \
             .encode("UTF-8")
-        # Truncate worker id to 32 bytes since TC spec proxy model
-        # contracts expect byte32
-        worker_id = worker_id[:32]
-        # convert worderid to hex string
-        worker_id = worker_id.hex()
+        # Calculate sha256 of worker id to get 32 bytes. The TC spec proxy
+        # model contracts expect byte32. Then take a hexdigest for hex str.
+        worker_id = hashlib.sha256(worker_id).hexdigest()
+
         kv_helper.set("workers", worker_id, worker_info)
 
         # Cleanup wo-processing" table

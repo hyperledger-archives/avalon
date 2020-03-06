@@ -88,10 +88,8 @@ class EthereumWorkerRegistryImpl(WorkerRegistry):
                 return None
             lookup_result = self.__contract_instance.functions.workerLookUp(
                 worker_type.value, org_id, application_id).call()
-            # Convert byte32 ids to hex
-            lookup_result[2] = _convert_byte32_arr_to_hex_arr(lookup_result[2])
 
-            return lookup_result
+            return _convert_lookup_result_to_json(lookup_result)
         else:
             logging.error(
                 "worker registry contract instance is not initialized")
@@ -115,7 +113,7 @@ class EthereumWorkerRegistryImpl(WorkerRegistry):
 
             worker_details = self.__contract_instance.functions.workerRetrieve(
                 worker_id).call()
-            return _convert_retrieve_result_to_hex(worker_details)
+            return _convert_retrieve_result_to_json(worker_details)
         else:
             logging.error(
                 "worker registry contract instance is not initialized")
@@ -198,7 +196,7 @@ class EthereumWorkerRegistryImpl(WorkerRegistry):
                 logging.error("Invalid organization id {}"
                               .format(organization_id))
                 return None
-            for app_id in app_type_ids:
+            for app_id in application_type_ids:
                 if not is_valid_hex_str(app_id):
                     logging.error("Invalid application id {}".format(app_id))
                     return None
@@ -232,9 +230,6 @@ class EthereumWorkerRegistryImpl(WorkerRegistry):
         """
 
         if (self.__contract_instance is not None):
-            if not is_valid_hex_str(worker_id):
-                logging.error("Invalid worker id {}".format(worker_id))
-                return None
             if details is not None:
                 worker = WorkerDetails()
                 is_valid = worker.validate_worker_details(details)
@@ -266,15 +261,12 @@ class EthereumWorkerRegistryImpl(WorkerRegistry):
         """
 
         if (self.__contract_instance is not None):
-            if not is_valid_hex_str(worker_id):
-                logging.error("Invalid worker id {}".format(worker_id))
-                return None
             if not isinstance(status, WorkerStatus):
                 logging.error("Invalid workerStatus {}".format(status))
                 return None
 
             txn_dict = self.__contract_instance.functions.workerSetStatus(
-                worker_id, status)\
+                worker_id, status.value)\
                 .buildTransaction(self.__eth_client.get_transaction_params())
             txn_receipt = self.__eth_client.execute_transaction(txn_dict)
             return txn_receipt
@@ -319,6 +311,14 @@ class EthereumWorkerRegistryImpl(WorkerRegistry):
                 contract_file_name, contract_address
             )
 
+def _convert_lookup_result_to_json(worker_lookup_result):
+
+    result = {}
+    result["totalCount"] = worker_lookup_result[0]
+    result["lookupTag"] = worker_lookup_result[1]
+    result["ids"] = _convert_byte32_arr_to_hex_arr(worker_lookup_result[2])
+
+    return {"result": result}
 
 def _convert_byte32_arr_to_hex_arr(byte32_arr):
     """

@@ -21,7 +21,7 @@ import logging
 import argparse
 from urllib.parse import urlparse
 import crypto_utils.crypto_utility as crypto_utility
-from avalon_sdk.worker.worker_details import WorkerType
+from avalon_sdk.worker.worker_details import WorkerType, WorkerStatus
 import avalon_sdk.worker.worker_details as worker_details
 from avalon_sdk.work_order.work_order_params import WorkOrderParams
 
@@ -81,17 +81,14 @@ class EthereumConnector:
 
         self._worker_registry = EthereumWorkerRegistryImpl(config)
 
-    def _retrieve_first_worker_details(self):
+    def _lookup_workers_in_kv_storage(self, worker_registry):
         """
-        This function retrieves the first worker from shared kv using
+        This function retrieves the worker ids from shared kv using
         worker_lookup direct API.
-        Returns details of worker
+        Returns list of worker id
         """
         jrpc_req_id = random.randint(0, 100000)
-        worker_registry = JRPCWorkerRegistryImpl(self._config)
 
-        # Get first worker from worker registry
-        worker_id = None
         worker_lookup_result = worker_registry.worker_lookup(
             worker_type=WorkerType.TEE_SGX, id=jrpc_req_id
         )
@@ -101,60 +98,69 @@ class EthereumConnector:
         if "result" in worker_lookup_result and \
                 "ids" in worker_lookup_result["result"].keys():
             if worker_lookup_result["result"]["totalCount"] != 0:
-                worker_id = worker_lookup_result["result"]["ids"][0]
+                return worker_lookup_result["result"]["ids"]
             else:
                 logging.error("No workers found")
-                worker_id = None
         else:
             logging.error("Failed to lookup worker")
-            worker_id = None
-        if worker_id is None:
-            logging.error("Unable to get a worker")
-            sys.exit(-1)
+        return []
 
+    def _retrieve_worker_details_from_kv_storage(self, worker_registry, worker_id):
         # Retrieve worker details
-        jrpc_req_id += 1
+        jrpc_req_id = random.randint(0, 100000)
         worker_info = worker_registry.worker_retrieve(worker_id, jrpc_req_id)
         logging.info("Worker retrieve response: {}"
                      .format(json.dumps(worker_info)))
 
         if "error" in worker_info:
             logging.error("Unable to retrieve worker details\n")
-            sys.exit(1)
-        return worker_id, worker_info["result"]
+        return worker_info["result"]
 
-    def _add_update_worker_to_chain(self, worker_id_hex, worker_info):
+    def _add_update_worker_to_chain(self, wids_onchain, wids_kv,
+                                    jrpc_worker_registry):
         """
         This function adds/updates a worker in the Ethereum blockchain
         """
-        worker_id = self._eth_client.get_bytes_from_hex(worker_id_hex)
-        worker_type = worker_info["workerType"]
-        org_id = self._eth_client\
-            .get_bytes_from_hex(worker_info["organizationId"])
-        app_type_id = self._eth_client.get_bytes_from_hex(
-            worker_info["applicationTypeId"])
-        details = json.dumps(worker_info["details"])
-        workers = self._lookup_workers_on_chain()
-        if worker_id_hex in workers:
-            logging.info("Updating worker {} on ethereum blockchain"\
-                .format(worker_id_hex))
-            txn_dict = self._worker_reg_contract_instance.functions\
-                .workerUpdate(worker_id, details)\
-                .buildTransaction(self._eth_client.get_transaction_params())
-        else:
-            logging.info("Adding new worker {} to ethereum blockchain"\
-                .format(worker_id_hex))
-            txn_dict = self._worker_reg_contract_instance.functions\
-                .workerRegister(worker_id, worker_type, org_id,
-                                [app_type_id], details)\
-                .buildTransaction(self._eth_client.get_transaction_params())
-        try:
-            txn_receipt = self._eth_client.execute_transaction(txn_dict)
-        except Exception as e:
-            logging.error("Error while adding/updating worker to ethereum"
-                          + " blockchain : "+str(e))
 
-    def _lookup_workers_on_chain(self):
+        for wid in wids_kv:
+            worker_info = self._retrieve_worker_details_from_kv_storage(
+                jrpc_worker_registry, wid)
+            worker_id = self._eth_client.get_bytes_from_hex(wid)
+            worker_type = worker_info["workerType"]
+            org_id = self._eth_client\
+                .get_bytes_from_hex(worker_info["organizationId"])
+            app_type_id = self._eth_client.get_bytes_from_hex(
+                worker_info["applicationTypeId"])
+            details = json.dumps(worker_info["details"])
+
+            if wid in wids_onchain:
+                logging.info("Updating worker {} on ethereum blockchain"\
+                    .format(wid))
+                txn_dict = self._worker_reg_contract_instance.functions\
+                    .workerUpdate(worker_id, details)\
+                    .buildTransaction(self._eth_client.get_transaction_params())
+            else:
+                logging.info("Adding new worker {} to ethereum blockchain"\
+                    .format(wid))
+                txn_dict = self._worker_reg_contract_instance.functions\
+                    .workerRegister(worker_id, worker_type, org_id,
+                                    [app_type_id], details)\
+                    .buildTransaction(self._eth_client.get_transaction_params())
+            try:
+                txn_receipt = self._eth_client.execute_transaction(txn_dict)
+            except Exception as e:
+                logging.error("Error while adding/updating worker to ethereum"
+                              + " blockchain : "+str(e))
+        for wid in wids_onchain:
+            # Mark all stale workers on blockchain as decommissioned
+            if wid not in wids_kv:
+                worker_id = self._eth_client.get_bytes_from_hex(wid)
+                self._worker_registry.worker_set_status(
+                    worker_id, WorkerStatus.DECOMMISSIONED)
+                logging.info("Marked worker "+wid+" as decommissioned on"
+                             + " ethereum blockchain")
+
+    def _lookup_workers_onchain(self):
         """
         Lookup all workers on chain to sync up with kv storage
         """
@@ -166,13 +172,17 @@ class EthereumConnector:
             '11aa22bb33cc44dd',
             jrpc_req_id
         )
-        logging.debug("\n Worker lookup response: {}\n".format(
+        logging.info("\nWorker lookup response from blockchain: {}\n".format(
             json.dumps(worker_lookup_result, indent=4)
         ))
-        if worker_lookup_result[0] > 0:
-            return worker_lookup_result[2]
+        if "result" in worker_lookup_result and \
+                "ids" in worker_lookup_result["result"].keys():
+            if worker_lookup_result["result"]["totalCount"] != 0:
+                return worker_lookup_result["result"]["ids"]
+            else:
+                logging.error("No workers found")
         else:
-            logging.error("No worker found in lookup")
+            logging.error("Failed to lookup worker")
         return []
 
     def _submit_work_order_and_get_result(self, work_order_id, worker_id,
@@ -243,8 +253,12 @@ class EthereumConnector:
         # and add the worker to block chain.
         # TODO: Fetch all workers from shared KV and block chain
         # and do 2-way sync.
-        worker_id, worker_info = self._retrieve_first_worker_details()
-        self._add_update_worker_to_chain(worker_id, worker_info)
+        jrpc_worker_registry = JRPCWorkerRegistryImpl(self._config)
+        worker_ids_onchain = self._lookup_workers_onchain()
+        worker_ids_kv = self._lookup_workers_in_kv_storage(jrpc_worker_registry)
+
+        self._add_update_worker_to_chain(worker_ids_onchain, worker_ids_kv,
+                                        jrpc_worker_registry)
 
         # Start an event listener that listens for events from the proxy
         # blockchain, extracts request payload from there and make a request
