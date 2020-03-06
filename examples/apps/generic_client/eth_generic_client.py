@@ -17,6 +17,7 @@
 import os
 import sys
 import json
+import random
 import argparse
 import logging
 import secrets
@@ -25,7 +26,7 @@ import asyncio
 import config.config as pconfig
 import utility.logger as plogger
 import crypto_utils.crypto_utility as crypto_utility
-from avalon_sdk.worker.worker_details import WorkerType
+from avalon_sdk.worker.worker_details import WorkerType, WorkerStatus
 import avalon_sdk.worker.worker_details as worker_details
 from avalon_sdk.work_order.work_order_params import WorkOrderParams
 from avalon_sdk.ethereum.ethereum_worker_registry_list import \
@@ -172,35 +173,6 @@ def _retrieve_uri_from_registry_list(config):
     ))
 
     return registry_retrieve_result[0]
-
-
-def _lookup_first_worker(blockchain_type, worker_registry, jrpc_req_id):
-    # Get first worker id from worker registry
-    worker_id = None
-    worker_lookup_result = worker_registry.worker_lookup(
-        WorkerType.TEE_SGX,
-        'aabbcc1234ddeeff',
-        '11aa22bb33cc44dd',
-        jrpc_req_id
-    )
-    logger.info("\n Worker lookup response: {}\n".format(
-        json.dumps(worker_lookup_result, indent=4)
-    ))
-    if "result" in worker_lookup_result and \
-            "ids" in worker_lookup_result["result"].keys():
-        if worker_lookup_result["result"]["totalCount"] != 0:
-            worker_id = worker_lookup_result["result"]["ids"][0]
-        else:
-            logger.error("ERROR: No workers found")
-            worker_id = None
-    elif blockchain_type and worker_lookup_result[0] > 0:
-        worker_id = worker_lookup_result[2][0]
-    else:
-        logger.error("ERROR: Failed to lookup worker")
-        worker_id = None
-
-    return worker_id
-
 
 def _create_work_order_params(worker_id, workload_id, in_data,
                               worker_encrypt_key, session_key, session_iv):
@@ -419,34 +391,53 @@ def _handle_ethereum_event(event, *kargs, **kwargs):
                     .format(decrypted_res))
     sys.exit(1)
 
-
-def _get_worker_details(blockchain_type,
-                        worker_registry, worker_id):
-    # get the worker details for direct/proxy model.
-    # Retrieve worker details
-    jrpc_req_id = 342
-    worker_retrieve_result = worker_registry.worker_retrieve(
-        worker_id, jrpc_req_id
-    )
-    logger.info("\n Worker retrieve response: {}\n".format(
-        json.dumps(worker_retrieve_result, indent=4)
-    ))
-
-    if worker_retrieve_result is None or "error" in worker_retrieve_result:
-        logger.error("Unable to retrieve worker details\n")
-        sys.exit(1)
-
-    # Initializing Worker Object
-    worker_obj1 = worker_details.SGXWorkerDetails()
-    if blockchain_type:
-        worker_obj1.load_worker(
-            json.loads(worker_retrieve_result[4]))
+def _get_first_active_worker(worker_registry, worker_id):
+    """
+    This function looks up all the workers registered. It then filters
+    this data to get the first worker that has Active status.
+    """
+    jrpc_req_id = random.randint(0, 100000)
+    worker_retrieve_result = None
+    if not worker_id:
+        # Lookup all worker id present on  blockchain
+        worker_lookup_result = worker_registry.worker_lookup(
+            WorkerType.TEE_SGX,
+            'aabbcc1234ddeeff',
+            '11aa22bb33cc44dd',
+            jrpc_req_id
+        )
+        logger.info(worker_lookup_result)
+        if "result" in worker_lookup_result and \
+                "ids" in worker_lookup_result["result"].keys():
+            if worker_lookup_result["result"]["totalCount"] != 0:
+                worker_ids = worker_lookup_result["result"]["ids"]
+                # Filter workers by status(active) field
+                # Return first worker whose status is active
+                for w_id in worker_ids:
+                    jrpc_req_id += 1
+                    worker = worker_registry\
+                        .worker_retrieve(w_id, jrpc_req_id)
+                    if worker["result"]["status"] == WorkerStatus.ACTIVE.value:
+                        worker_retrieve_result = worker
+                        worker_id = w_id
+                        break
+                logger.error("No active worker found")
+            else:
+                logger.error("No workers found")
+        else:
+            logger.error("Failed to lookup worker")
     else:
-        worker_obj1.load_worker(
-            worker_retrieve_result["result"]["details"])
+        worker_retrieve_result = worker_registry\
+            .worker_retrieve(worker_id, jrpc_req_id)
 
-    return worker_obj1
+    if worker_retrieve_result is None:
+        logger.error("Failed to lookup worker")
+        return None, None
+    # Initializing Worker Object
+    worker_obj = worker_details.SGXWorkerDetails()
+    worker_obj.load_worker(worker_retrieve_result["result"]["details"])
 
+    return worker_obj, worker_id
 
 def _verify_work_order_response(res):
     # Verify work order response signature
@@ -546,17 +537,12 @@ def Main(args=None):
                 sys.exit(-1)
 
     # Prepare worker
-    # JRPC request id. Choose any integer value
-    jrpc_req_id = 31
     worker_registry = _create_worker_registry_instance(blockchain, config)
-    if not worker_id:
-        # Get first worker from worker registry
-        worker_id = _lookup_first_worker(
-            blockchain, worker_registry, jrpc_req_id)
-        if worker_id is None:
-            logger.error("\n Unable to get worker \n")
-            sys.exit(-1)
-
+    worker_obj, worker_id = _get_first_active_worker(worker_registry,
+                                                    worker_id)
+    if worker_obj is None:
+        logger.error("Cannot proceed without a valid worker")
+        sys.exit(-1)
     # Create session key and iv to sign work order request
     session_key = crypto_utility.generate_key()
     session_iv = crypto_utility.generate_iv()
@@ -566,7 +552,6 @@ def Main(args=None):
     logger.info("**********Worker details Updated with Worker ID" +
                 "*********\n%s\n", worker_id)
 
-    worker_obj = _get_worker_details(blockchain, worker_registry, worker_id)
     # Create work order
     verification_key = worker_obj.verification_key
     wo_params = _create_work_order_params(worker_id, workload_id,
@@ -581,6 +566,7 @@ def Main(args=None):
             exit(1)
 
     # Submit work order
+    jrpc_req_id = random.randint(0, 100000)
     logger.info("Work order submit request : %s, \n \n ",
                 wo_params.to_jrpc_string(jrpc_req_id))
     work_order = _create_work_order_instance(blockchain, config)
