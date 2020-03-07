@@ -99,22 +99,11 @@ class EthereumWorkOrderProxyImpl(WorkOrderProxy):
             An error code, 0 - success, otherwise an error.
         """
         if (self.__contract_instance is not None):
-            if not is_valid_hex_str(work_order_id):
-                logging.error("Invalid work order id {}".format(work_order_id))
-                return ERROR
-
-            if not is_valid_hex_str(worker_id):
-                logging.error("Invalid worker id {}".format(worker_id))
-                return ERROR
-
-            if not is_valid_hex_str(requester_id):
-                logging.error("Invalid requester id {}".format(requester_id))
-                return ERROR
 
             if not _is_valid_work_order_json(work_order_id, worker_id,
                                              requester_id, work_order_request):
-                logging.error("Invalid request string {}"
-                              .format(work_order_request))
+                logging.error("Invalid request string {}"\
+                    .format(work_order_request))
                 return ERROR
 
             txn_dict = self.__contract_instance.functions.workOrderSubmit(
@@ -127,12 +116,12 @@ class EthereumWorkOrderProxyImpl(WorkOrderProxy):
                 return SUCCESS
             except Exception as e:
                 logging.error(
-                    "exception occured when trying to execute workOrderSubmit \
-                     transaction on chain"+str(e))
+                    "Exception occured when trying to execute workOrderSubmit "
+                    + "transaction on chain"+str(e))
                 return ERROR
         else:
             logging.error(
-                "work order contract instance is not initialized")
+                "Work order contract instance is not initialized")
             return ERROR
 
     def work_order_complete(self, work_order_id, work_order_response):
@@ -147,9 +136,7 @@ class EthereumWorkOrderProxyImpl(WorkOrderProxy):
             An error code, 0 - success, otherwise an error.
         """
         if (self.__contract_instance is not None):
-            if not is_valid_hex_str(work_order_id):
-                logging.error("Invalid work order id {}".format(work_order_id))
-                return ERROR
+
             txn_dict = self.__contract_instance.functions.workOrderComplete(
                 work_order_id, work_order_response).buildTransaction(
                     self.__eth_client.get_transaction_params()
@@ -157,14 +144,14 @@ class EthereumWorkOrderProxyImpl(WorkOrderProxy):
             try:
                 txn_receipt = self.__eth_client.execute_transaction(txn_dict)
                 return SUCCESS
-            except Execption as e:
+            except Exception as e:
                 logging.error(
-                    "execption occured when trying to execute \
-                     workOrderComplete transaction on chain"+str(e))
+                    "Execption occured when trying to execute "
+                    + "workOrderComplete transaction on chain"+str(e))
                 return ERROR
         else:
             logging.error(
-                "work order contract instance is not initialized")
+                "Work order contract instance is not initialized")
             return ERROR
 
     def start_work_order_completed_event_handler(self, evt_handler,

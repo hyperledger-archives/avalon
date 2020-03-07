@@ -43,6 +43,9 @@ logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(message)s", level=logging.INFO)
 
 LISTENER_SLEEP_DURATION = 5  # seconds
+# Return codes
+SUCCESS = 0
+ERROR = 1
 
 
 class EthereumConnector:
@@ -70,6 +73,8 @@ class EthereumConnector:
             .get_contract_instance(
                 worker_reg_contract_file, worker_reg_contract_address)
 
+        self._worker_registry = EthereumWorkerRegistryImpl(config)
+
         work_order_contract_file = tcf_home + "/" + \
             config["ethereum"]["work_order_contract_file"]
         work_order_contract_address = \
@@ -79,7 +84,7 @@ class EthereumConnector:
             .get_contract_instance(
                 work_order_contract_file, work_order_contract_address)
 
-        self._worker_registry = EthereumWorkerRegistryImpl(config)
+        self._work_order_proxy = EthereumWorkOrderProxyImpl(config)
 
     def _lookup_workers_in_kv_storage(self, worker_registry):
         """
@@ -105,7 +110,8 @@ class EthereumConnector:
             logging.error("Failed to lookup worker")
         return []
 
-    def _retrieve_worker_details_from_kv_storage(self, worker_registry, worker_id):
+    def _retrieve_worker_details_from_kv_storage(self, worker_registry,
+                                                 worker_id):
         # Retrieve worker details
         jrpc_req_id = random.randint(0, 100000)
         worker_info = worker_registry.worker_retrieve(worker_id, jrpc_req_id)
@@ -133,32 +139,36 @@ class EthereumConnector:
                 worker_info["applicationTypeId"])
             details = json.dumps(worker_info["details"])
 
+            result = None
             if wid in wids_onchain:
-                logging.info("Updating worker {} on ethereum blockchain"\
-                    .format(wid))
-                txn_dict = self._worker_reg_contract_instance.functions\
-                    .workerUpdate(worker_id, details)\
-                    .buildTransaction(self._eth_client.get_transaction_params())
+                logging.info("Updating worker {} on ethereum blockchain"
+                             .format(wid))
+                result = self._worker_registry.worker_update(
+                    worker_id, details)
             else:
-                logging.info("Adding new worker {} to ethereum blockchain"\
-                    .format(wid))
-                txn_dict = self._worker_reg_contract_instance.functions\
-                    .workerRegister(worker_id, worker_type, org_id,
-                                    [app_type_id], details)\
-                    .buildTransaction(self._eth_client.get_transaction_params())
-            try:
-                txn_receipt = self._eth_client.execute_transaction(txn_dict)
-            except Exception as e:
+                logging.info("Adding new worker {} to ethereum blockchain"
+                             .format(wid))
+                result = self._worker_registry.worker_register(
+                    worker_id, worker_type, org_id, [app_type_id], details
+                )
+            if result is None:
                 logging.error("Error while adding/updating worker to ethereum"
-                              + " blockchain : "+str(e))
+                              + " blockchain")
+
         for wid in wids_onchain:
             # Mark all stale workers on blockchain as decommissioned
             if wid not in wids_kv:
                 worker_id = self._eth_client.get_bytes_from_hex(wid)
-                self._worker_registry.worker_set_status(
-                    worker_id, WorkerStatus.DECOMMISSIONED)
-                logging.info("Marked worker "+wid+" as decommissioned on"
-                             + " ethereum blockchain")
+                worker = self._worker_registry\
+                    .worker_retrieve(wid, random.randint(0, 100000))
+                worker_status_onchain = worker["result"]["status"]
+                # If worker is not already decommissoined, mark it decommission
+                # as it is no longer available in the kv storage
+                if worker_status_onchain != WorkerStatus.DECOMMISSIONED.value:
+                    self._worker_registry.worker_set_status(
+                        worker_id, WorkerStatus.DECOMMISSIONED)
+                    logging.info("Marked worker "+wid+" as decommissioned on"
+                                 + " ethereum blockchain")
 
     def _lookup_workers_onchain(self):
         """
@@ -210,18 +220,15 @@ class EthereumConnector:
         """
         This function adds a work order result to the Ethereum blockchain
         """
-
-        txn_dict = self._work_order_contract_instance.functions\
-            .workOrderComplete(self._eth_client
-                               .get_bytes_from_hex(work_order_id),
-                               json.dumps(response))\
-            .buildTransaction(self._eth_client.get_transaction_params())
-        try:
-            txn_receipt = self._eth_client.execute_transaction(txn_dict)
-        except Exception as e:
-            logging.error("Error adding work order result to ethereum"
-                          + " blockchain : "+str(e))
-        return txn_receipt
+        work_order_id_bytes = self._eth_client\
+            .get_bytes_from_hex(work_order_id)
+        result = self._work_order_proxy.work_order_complete(
+            work_order_id_bytes, json.dumps(response))
+        if result == SUCCESS:
+            logging.info("Successfully added work order result to blockchain")
+        else:
+            logging.error("Error adding work order result to blockchain")
+        return result
 
     def handleEvent(self, event, account, contract):
         """
@@ -239,12 +246,9 @@ class EthereumConnector:
 
         response = self\
             ._submit_work_order_and_get_result(work_order_id, worker_id,
-                                               requester_id, work_order_params)
-        txn_receipt = self._add_work_order_result_to_chain(work_order_id,
-                                                           response)
-
-        logging.info("Work Order complete transaction receipt {}"
-                     .format(txn_receipt))
+                                               requester_id,
+                                               work_order_params)
+        self._add_work_order_result_to_chain(work_order_id, response)
 
     def start(self):
         logging.info("Ethereum Connector service started")
@@ -255,10 +259,11 @@ class EthereumConnector:
         # and do 2-way sync.
         jrpc_worker_registry = JRPCWorkerRegistryImpl(self._config)
         worker_ids_onchain = self._lookup_workers_onchain()
-        worker_ids_kv = self._lookup_workers_in_kv_storage(jrpc_worker_registry)
+        worker_ids_kv = self._lookup_workers_in_kv_storage(
+            jrpc_worker_registry)
 
         self._add_update_worker_to_chain(worker_ids_onchain, worker_ids_kv,
-                                        jrpc_worker_registry)
+                                         jrpc_worker_registry)
 
         # Start an event listener that listens for events from the proxy
         # blockchain, extracts request payload from there and make a request
