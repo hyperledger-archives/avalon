@@ -207,6 +207,19 @@ See file
 https://github.com/hyperledger/avalon/blob/master/common/python/error_code/error_status.py
 For example, workorder error 5 is ``PENDING``.
 
+How is the JRPC Request ID in work orders used?
+-----------------------------------------------
+The ``jrpc_req_id`` is used to verify the context of a response received after
+posting a JRPC request.
+We recommend using a UUID for the request ID.
+Currently it is not being verified in Avalon's SDK as the communication is over
+HTTP and only a single call is included in each call.
+When there is significant traffic, multi-call JRPC requests might be possible
+in a single HTTP request. This field would play a role there to map requests
+to responses. A shift from HTTP (synchronous request-response) would also require
+proper handling of this field.
+
+
 
 Docker and Containers
 =====================
