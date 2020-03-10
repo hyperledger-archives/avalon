@@ -139,9 +139,11 @@ COPY --from=openssl_image /tmp/openssl-$OPENSSL_VER.tar.gz /tmp/
 
 WORKDIR /tmp
 
+# Using specific SGX SSL tag "lin_2.5_1.1.1d" corresponding to
+# openSSL version 1.1.1d
 RUN ldconfig \
  && ln -s /etc/ssl/certs/* /usr/local/ssl/certs/ \
- && git clone https://github.com/intel/intel-sgx-ssl.git  \
+ && git clone -b lin_2.5_1.1.1d https://github.com/intel/intel-sgx-ssl.git  \
  && . /opt/intel/sgxsdk/environment \
  && (cd intel-sgx-ssl/openssl_source; mv /tmp/openssl-$OPENSSL_VER.tar.gz . ) \
  && (cd intel-sgx-ssl/Linux; \
