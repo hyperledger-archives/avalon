@@ -421,7 +421,6 @@ def _get_first_active_worker(worker_registry, worker_id):
                         worker_retrieve_result = worker
                         worker_id = w_id
                         break
-                logger.error("No active worker found")
             else:
                 logger.error("No workers found")
         else:
