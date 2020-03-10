@@ -27,6 +27,11 @@ namespace tcf {
         class WorkOrderProcessor {
         public:
                 WorkOrderProcessor() {}
+                ~WorkOrderProcessor() {
+                    // Sanitize class members storing secrets
+                    worker_encryption_key.clear();
+                    session_key.clear();
+                }
                 ByteArray CreateErrorResponse(int err_code, const char* err_message);
                 ByteArray Process(EnclaveData& enclaveData, std::string json_str);
 
