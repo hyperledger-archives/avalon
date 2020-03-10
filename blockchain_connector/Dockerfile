@@ -95,6 +95,7 @@ COPY VERSION /project/avalon/
 COPY ./bin /project/avalon/bin
 COPY ./common/cpp /project/avalon/common/cpp
 COPY ./common/python /project/avalon/common/python
+COPY ./common/crypto_utils /project/avalon/common/crypto_utils
 COPY ./sdk /project/avalon/sdk
 COPY ./blockchain_connector /project/avalon/blockchain_connector
 
@@ -118,9 +119,17 @@ RUN mkdir -p build \
 WORKDIR /project/avalon/common/python
 
 RUN echo "Building Avalon Common Python\n" \
- && make \ 
- && echo "Installing Avalon Common Python" \
- && make install
+  && python setup.py bdist_wheel \
+  && echo "Installing Avalon Common Python" \
+  && pip3 install dist/*.whl
+
+#install avalon crypto module
+WORKDIR /project/avalon/common/crypto_utils
+
+RUN echo "Building Avalon Common Crypto Python\n" \
+  && make \
+  && echo "Installing Avalon Common Crypto Python" \
+  && pip3 install dist/*.whl
 
 #install avalon-client sdk python package.
 RUN echo "Building Avalon SDK\n" \

@@ -26,7 +26,7 @@ import asyncio
 import config.config as pconfig
 import utility.logger as plogger
 import avalon_crypto_utils.crypto_utility as crypto_utility
-from avalon_sdk.worker.worker_details import WorkerType
+from avalon_sdk.worker.worker_details import WorkerType, WorkerStatus
 import avalon_sdk.worker.worker_details as worker_details
 from avalon_sdk.work_order.work_order_params import WorkOrderParams
 from avalon_sdk.ethereum.ethereum_worker_registry_list import \
