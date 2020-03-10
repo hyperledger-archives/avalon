@@ -183,12 +183,38 @@ class EthereumWorkerRegistryImpl(WorkerRegistry):
         defined in
         https://entethalliance.github.io/trusted-computing/spec.html
         #common-data-for-all-worker-types
+        Returns
+        None - if registration does not succeed
+        Transaction receipt - if registration succeeds
         """
 
         if (self.__contract_instance is not None):
-
+            if not is_valid_hex_str(worker_id):
+                logging.error("Invalid worker id {}".format(worker_id))
+                return None
+            if not isinstance(worker_type, WorkerType):
+                logging.error("Invalid workerType {}".format(worker_type))
+                return None
+            if not is_valid_hex_str(organization_id):
+                logging.error("Invalid organization id {}"
+                              .format(organization_id))
+                return None
+            for app_id in application_type_ids:
+                if not is_valid_hex_str(app_id):
+                    logging.error("Invalid application id {}".format(app_id))
+                    return None
+            # TODO : Validate worker details. As of now worker details are not
+            # strictly following the spec
+            """if details is not None:
+                worker = WorkerDetails()
+                is_valid = worker.validate_worker_details(details)
+                if is_valid is not None:
+                    logging.error(
+                        "Worker details not valid : {}".format(is_valid))
+                    return None
+            """
             txn_dict = self.__contract_instance.functions.workerRegister(
-                worker_id, worker_type, organization_id,
+                worker_id, worker_type.value, organization_id,
                 application_type_ids, details)\
                 .buildTransaction(
                 self.__eth_client.get_transaction_params())
@@ -210,7 +236,20 @@ class EthereumWorkerRegistryImpl(WorkerRegistry):
         """
 
         if (self.__contract_instance is not None):
+            if not is_valid_hex_str(worker_id):
+                logging.error("Invalid worker id {}".format(worker_id))
+                return None
 
+            # TODO : Validate worker details. As of now worker details are not
+            # strictly following the spec
+            """if details is not None:
+                worker = WorkerDetails()
+                is_valid = worker.validate_worker_details(details)
+                if is_valid is not None:
+                    logging.error(
+                        "Worker details not valid : {}".format(is_valid))
+                    return None
+            """
             txn_dict = self.__contract_instance.functions.workerUpdate(
                 worker_id, details)\
                 .buildTransaction(self.__eth_client.get_transaction_params())
@@ -234,6 +273,9 @@ class EthereumWorkerRegistryImpl(WorkerRegistry):
         """
 
         if (self.__contract_instance is not None):
+            if not is_valid_hex_str(worker_id):
+                logging.error("Invalid worker id {}".format(worker_id))
+                return None
             if not isinstance(status, WorkerStatus):
                 logging.error("Invalid workerStatus {}".format(status))
                 return None

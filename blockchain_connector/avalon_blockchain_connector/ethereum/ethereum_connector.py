@@ -131,12 +131,10 @@ class EthereumConnector:
         for wid in wids_kv:
             worker_info = self._retrieve_worker_details_from_kv_storage(
                 jrpc_worker_registry, wid)
-            worker_id = self._eth_client.get_bytes_from_hex(wid)
-            worker_type = worker_info["workerType"]
-            org_id = self._eth_client\
-                .get_bytes_from_hex(worker_info["organizationId"])
-            app_type_id = self._eth_client.get_bytes_from_hex(
-                worker_info["applicationTypeId"])
+            worker_id = wid
+            worker_type = WorkerType(worker_info["workerType"])
+            org_id = worker_info["organizationId"]
+            app_type_id = worker_info["applicationTypeId"]
             details = json.dumps(worker_info["details"])
 
             result = None
@@ -158,7 +156,7 @@ class EthereumConnector:
         for wid in wids_onchain:
             # Mark all stale workers on blockchain as decommissioned
             if wid not in wids_kv:
-                worker_id = self._eth_client.get_bytes_from_hex(wid)
+                worker_id = wid
                 worker = self._worker_registry\
                     .worker_retrieve(wid, random.randint(0, 100000))
                 worker_status_onchain = worker["result"]["status"]
@@ -220,10 +218,8 @@ class EthereumConnector:
         """
         This function adds a work order result to the Ethereum blockchain
         """
-        work_order_id_bytes = self._eth_client\
-            .get_bytes_from_hex(work_order_id)
         result = self._work_order_proxy.work_order_complete(
-            work_order_id_bytes, json.dumps(response))
+            work_order_id, json.dumps(response))
         if result == SUCCESS:
             logging.info("Successfully added work order result to blockchain")
         else:
