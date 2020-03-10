@@ -347,7 +347,7 @@ namespace tcf {
 
         tcf::crypto::sig::PublicKey public_signing_key_(verifying_key);
 
-        int SIG_result = public_signing_key_.VerifySignature(final_hash, Signature_byte);
+        size_t SIG_result = public_signing_key_.VerifySignature(final_hash, Signature_byte);
         if (SIG_result == 1) {
             Log(TCF_LOG_INFO, "Client Signature Verification Passed");
         } else if (SIG_result == 0) {
@@ -367,8 +367,8 @@ namespace tcf {
 
         std::string hash_1 = base64_encode(tcf::crypto::ComputeMessageHash(StrToByteArray(concat_string)));
 
-        int i = 0;
-        int out_data_size = data_items_out.size();
+        size_t i = 0;
+        size_t out_data_size = data_items_out.size();
 
         for (auto data : wo_data) {
             if (i < out_data_size) {
@@ -400,7 +400,7 @@ namespace tcf {
 
         ByteArray hash_2;
         std::string outhash = "";
-        for (int i = 0; i < data_items_out.size(); i++) {
+        for (size_t i = 0; i < data_items_out.size(); i++) {
             tcf::WorkOrderDataHandler& d = data_items_out.at(i);
             if (!d.concat_string.empty()) {
                 concat_hashes = StrToByteArray(d.concat_string);
@@ -469,8 +469,8 @@ namespace tcf {
                     "Signature verification of client request failed. Request is tampered.");
             }
             std::vector<tcf::WorkOrderData> wo_data = ExecuteWorkOrder();
-            int i = 0;
-            int out_data_size = data_items_out.size();
+            size_t i = 0;
+            size_t out_data_size = data_items_out.size();
             ByteArray hash = ResponseHashCalculate(wo_data);
             ComputeSignature(enclaveData, hash);
             return CreateJsonOutput();

@@ -70,6 +70,8 @@ public:
     EnclaveData(void);
     EnclaveData(const uint8_t* inSealedData);
 
+    ~EnclaveData(void);
+
     ByteArray encrypt_message(const ByteArray& message) const {
         return public_encryption_key_.EncryptMessage(message);
     }
