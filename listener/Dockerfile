@@ -24,7 +24,6 @@ ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update \
  && apt-get install -y -q \
     ca-certificates \
-    pkg-config \
     python3-toml \
     python3-requests \
     python3-colorlog \
@@ -35,7 +34,6 @@ RUN apt-get update \
 
 # Make Python3 default
 RUN ln -sf /usr/bin/python3 /usr/bin/python
-
 
 # -------------=== openssl build ===-------------
 
@@ -71,6 +69,7 @@ FROM base_image as build_image
 
 RUN apt-get update \
  && apt-get install -y -q \
+    pkg-config \
     cmake \
     make \
     libprotobuf-dev \
@@ -91,7 +90,7 @@ RUN ldconfig \
 
 # Install setuptools packages using pip because
 # these are not available in apt repository.
-RUN pip3 install --upgrade setuptools json-rpc
+RUN pip3 install --upgrade setuptools
 
 ENV TCF_HOME=/project/avalon
 
@@ -100,6 +99,7 @@ COPY ./bin /project/avalon/bin
 COPY ./config/tcs_config.toml /project/avalon/config/
 COPY ./common/cpp /project/avalon/common/cpp
 COPY ./common/python /project/avalon/common/python
+COPY ./common/crypto_utils /project/avalon/common/crypto_utils
 COPY ./sdk /project/avalon/sdk
 COPY ./listener /project/avalon/listener
 
@@ -113,25 +113,24 @@ RUN mkdir -p build \
 WORKDIR /project/avalon/common/python
 
 RUN echo "Building Avalon Common Python\n" \
- && make \ 
- && echo "Installing Avalon Common Python" \
- && make install
+ && make 
+
+WORKDIR /project/avalon/common/crypto_utils
+
+RUN echo "Building Avalon Common Crypto Python\n" \
+ && make
 
 WORKDIR /project/avalon/sdk
 #install Avalon SDK  package.
 RUN echo "Building Avalon SDK\n" \
- && make \
- && echo "Installing Avalon SDK\n" \
- && make install
+ && make 
 
 # Build Avalon Listener module next.
 
 WORKDIR /project/avalon/listener/
 
 RUN echo "Building avalon listener\n" \
-  && make \
-  && echo "Installing Avalon Listener" \
-  && make install
+  && make
 
 # Build final image and install modules
 FROM base_image as final_image
@@ -140,6 +139,23 @@ ENV TCF_HOME=/project/avalon
 
 WORKDIR /project/avalon/listener
 
-COPY --from=build_image /usr/local/ /usr/local
 COPY --from=build_image /project/avalon/listener/listener_config.toml /project/avalon/listener/listener_config.toml
 COPY --from=build_image /project/avalon/config/tcs_config.toml /project/avalon/config/
+# Copy Python build artifacts
+COPY --from=build_image /project/avalon/common/python/dist/*.whl dist/
+COPY --from=build_image /project/avalon/common/crypto_utils/dist/*.whl dist/
+COPY --from=build_image /project/avalon/sdk/dist/*.whl dist/
+COPY --from=build_image /project/avalon/listener/dist/*.whl dist/
+
+# Installing wheel file requires python3-pip package.
+# But python3-pip package will increase size of final docker image.
+# So remove python3-pip package and dependencies after installing wheel file.
+RUN apt-get update \
+ && apt-get install -y -q python3-pip \
+ && pip3 install --upgrade json-rpc \
+ && echo "Install Common Python, Crypto, Listener and SDK packages\n" \
+ && pip3 install dist/*.whl \
+ && echo "Remove unused packages from image\n" \
+ && apt-get autoremove --purge -y -q python3-pip \
+ && apt-get clean \
+ && rm -rf /var/lib/apt/lists/*

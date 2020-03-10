@@ -20,8 +20,8 @@ import asyncio
 import logging
 import argparse
 from urllib.parse import urlparse
-import crypto_utils.crypto_utility as crypto_utility
-from avalon_sdk.worker.worker_details import WorkerType, WorkerStatus
+import avalon_crypto_utils.crypto_utility as crypto_utility
+from avalon_sdk.worker.worker_details import WorkerType
 import avalon_sdk.worker.worker_details as worker_details
 from avalon_sdk.work_order.work_order_params import WorkOrderParams
 

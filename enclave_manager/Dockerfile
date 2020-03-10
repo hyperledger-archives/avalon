@@ -220,6 +220,10 @@ WORKDIR /project/avalon/common/python
 
 RUN make
 
+WORKDIR /project/avalon/common/crypto_utils
+
+RUN make
+
 WORKDIR /project/avalon/sdk
 
 RUN make
@@ -248,6 +252,7 @@ COPY --from=build_image /opt/intel/sgxssl/lib64/ /opt/intel/sgxssl/lib64
 
 # Copy Python build artifacts
 COPY --from=build_image /project/avalon/common/python/dist/*.whl dist/
+COPY --from=build_image /project/avalon/common/crypto_utils/dist/*.whl dist/
 COPY --from=build_image /project/avalon/sdk/dist/*.whl dist/
 COPY --from=build_image /project/avalon/enclave_manager/dist/*.whl dist/
 

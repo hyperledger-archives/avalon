@@ -25,8 +25,8 @@ import hashlib
 
 import avalon_enclave_manager.sgx_work_order_request as work_order_request
 import avalon_enclave_manager.avalon_enclave_helper as enclave_helper
-import crypto_utils.signature as signature
-import crypto_utils.crypto_utility as crypto_utils
+import avalon_crypto_utils.signature as signature
+import avalon_crypto_utils.crypto_utility as crypto_utils
 from database import connector
 from error_code.error_status import ReceiptCreateStatus, WorkOrderStatus
 from avalon_sdk.worker.worker_details import WorkerStatus, WorkerType

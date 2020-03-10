@@ -122,6 +122,7 @@ COPY ./tools/run_tests.sh /project/avalon/tools/
 COPY ./config/tcs_config.toml /project/avalon/config/
 COPY ./common/cpp /project/avalon/common/cpp
 COPY ./common/python /project/avalon/common/python
+COPY ./common/crypto_utils /project/avalon/common/crypto_utils
 COPY ./sdk /project/avalon/sdk
 COPY ./tests /project/avalon/tests
 COPY ./examples/apps /project/avalon/examples/apps
@@ -141,6 +142,11 @@ RUN echo "Building Avalon Common CPP\n" \
 WORKDIR /project/avalon/common/python
 
 RUN echo "Building Avalon Common Python\n" \
+  && make
+
+WORKDIR /project/avalon/common/crypto_utils
+
+RUN echo "Building Avalon Common Crypto Python\n" \
   && make
 
 WORKDIR /project/avalon/sdk
@@ -173,6 +179,7 @@ COPY --from=build_image /project/avalon/tools/run_tests.sh /project/avalon/tools
 
 # Copy Python build artifacts
 COPY --from=build_image /project/avalon/common/python/dist/*.whl dist/
+COPY --from=build_image /project/avalon/common/crypto_utils/dist/*.whl dist/
 COPY --from=build_image /project/avalon/sdk/dist/*.whl dist/
 
 # Install fabric python sdk

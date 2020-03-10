@@ -15,9 +15,9 @@
 import json
 import random
 
-import crypto_utils.crypto.crypto as crypto
-import crypto_utils.signature as signature
-import crypto_utils.crypto_utility as crypto_utility
+import avalon_crypto_utils.crypto.crypto as crypto
+import avalon_crypto_utils.signature as signature
+import avalon_crypto_utils.crypto_utility as crypto_utility
 from error_code.error_status import ReceiptCreateStatus as ReceiptCreateStatus
 from error_code.error_status import WorkOrderStatus
 from enum import Enum, unique
