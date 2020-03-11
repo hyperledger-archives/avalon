@@ -76,6 +76,31 @@ https://wiki.hyperledger.org/display/avalon/Hyperledger+Avalon
 
 Where are videos about Hyperledger Avalon?
 ------------------------------------------
+- *Hyperledger Avalon Hands-on Experience* at
+  Hyperledger Global Forum 2020
+
+  - `Entire presentation (parts 1-5)
+    <https://youtu.be/EdYJ-8eTqNc>`_ (1:30:56)
+  - Or view presentations split into five parts by speaker:
+  - `Part 1: Introduction and Architecture (Eugene Yarmosh) 
+    <https://www.youtube.com/watch?v=ex5k5QPSXdU>`_ (19:19)
+  - `Part 2: Cold Chain Supply Chain Case Study (Joshua Satten)
+    <https://youtu.be/hPBRtUhO_w0>`_ (21:31)
+  - `Part 3: Avalon Setup and Development Options (Dan Anderson)
+    <https://youtu.be/DeKixYXddCE>`_ (9:24)
+  - `Part 4: Hyperledger Fabric Development (Tong Li)
+    <https://youtu.be/sA-J-4e--bE>`_ (27:45)
+  - `Part 5: Hyperledger Besu Development (Jim Zhang)
+    <https://youtu.be/WzI6XkJFtF8>`_ (12:50)
+  - Part 6: Tutorial not recorded; see slide link below and
+    `online tutorial
+    <https://github.com/hyperledger/avalon/tree/master/docs/workload-tutorial>`_
+    (Dan Anderson and Manjunath A C)
+  - `Avalon hands-on presentation description and speaker biographies
+    <https://hgf20.sched.com/event/XogI/hands-on-experience-with-avalon-on-how-to-bridge-on-chain-and-off-chain-worlds-yevgeniy-yarmosh-dan-anderson-intel>`_
+  - `PDF slides for Avalon hands-on presentation
+    <https://static.sched.com/hosted_files/hgf20/e3/HLGF-AvalonWorkshop-T.pdf>`_
+
 - `Hyperledger Avalon
   (Manoj Gopalakrishnan, 2019, 20 minutes, begins at 55:57)
   <https://www.youtube.com/watch?v=N02vxA6qFPg&feature=youtu.be&t=3357>`_
