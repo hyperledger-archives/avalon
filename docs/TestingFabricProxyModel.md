@@ -4,7 +4,21 @@
 
 2.  Set the environment variable ``TCF_HOME`` to the Avalon root directory
 
-3.  Start the Fabric network with 2 organizations, 4 peers and 3 orderers
+3.  If the host machine is behind any firewall/proxy, you need to define the
+    following parameters in /etc/environment file:
+    http_proxy=<http-proxy-url>:<port>
+    https_proxy=<https-proxy-url>:<port>
+    
+    By default minifab creates 3 orderers, 2 peers with 2 organisations. The
+    no_proxy for this setup is as follows:
+    no_proxy=localhost,127.0.0.1,orderer3.example.com,orderer2.example.com,
+             orderer1.example.com,peer2.org1.example.com,peer1.org1.example.com,
+             peer2.org0.example.com,peer1.org0.example.com
+    
+    If, you modify the number of orderers, peers or organisations, please update
+    the no_proxy accordingly.
+
+4.  Start the Fabric network with 2 organizations, 4 peers and 3 orderers
     using the ``start_fabric.sh`` script.
     ```
     cd $TCF_HOME

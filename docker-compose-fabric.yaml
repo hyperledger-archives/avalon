@@ -22,11 +22,11 @@ services:
       context: .
       dockerfile: ./docker/Dockerfile
       args:
+        - DISPLAY=${DISPLAY:-}
+        - XAUTHORITY=~/.Xauthority
         - http_proxy
         - https_proxy
         - no_proxy
-        - DISPLAY=${DISPLAY:-}
-        - XAUTHORITY=~/.Xauthority
     volumes:
       # Below volume mappings are required for DISPLAY settings by heart disease GUI client
       - /tmp/.X11-unix:/tmp/.X11-unix
@@ -37,6 +37,11 @@ services:
       - ~/.Xauthority:/root/.Xauthority
       - ~/mywork/vars/keyfiles:/keyfiles
       - ~/mywork/vars/mychannel_network.json:/project/avalon/sdk/avalon_sdk/fabric/network.json
+    environment:
+      - DISPLAY
+      - http_proxy
+      - https_proxy
+      - no_proxy
     working_dir: "/project/avalon"
     command: |
       bash -c "tail -f /dev/null"
@@ -59,6 +64,10 @@ services:
       # Port is where lmdb server will listen for http request.
       # Port should be same as in bind parameter or lmdb_config.toml
       - 9090
+    environment:
+      - http_proxy
+      - https_proxy
+      - no_proxy
     command: |
       bash -c "
         kv_storage --bind http://avalon-lmdb:9090
@@ -72,10 +81,14 @@ services:
       context: .
       dockerfile: ./enclave_manager/Dockerfile
       args:
+        - TCF_DEBUG_BUILD=${TCF_DEBUG_BUILD:-}
         - http_proxy
         - https_proxy
         - no_proxy
-        - TCF_DEBUG_BUILD=${TCF_DEBUG_BUILD:-}
+    environment:
+      - http_proxy
+      - https_proxy
+      - no_proxy
     command: |
       bash -c "
         enclave_manager --lmdb_url http://avalon-lmdb:9090
@@ -96,6 +109,10 @@ services:
         - no_proxy
     expose:
       - 1947
+    environment:
+      - http_proxy
+      - https_proxy
+      - no_proxy
     command: |
       bash -c "
         avalon_listener --bind http://avalon-listener:1947 --lmdb_url http://avalon-lmdb:9090
@@ -114,6 +131,10 @@ services:
         - http_proxy
         - https_proxy
         - no_proxy
+    environment:
+      - http_proxy
+      - https_proxy
+      - no_proxy
     command: |
       bash -c "
         avalon_blockchain_connector -b fabric -u http://avalon-listener:1947

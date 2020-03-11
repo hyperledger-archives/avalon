@@ -22,10 +22,15 @@ services:
       context: .
       dockerfile: ./docker/Dockerfile
       args:
+        - DISPLAY=${DISPLAY:-}
         - http_proxy
         - https_proxy
         - no_proxy
-        - DISPLAY=${DISPLAY:-}
+    environment:
+      - DISPLAY
+      - http_proxy
+      - https_proxy
+      - no_proxy
     volumes:
       # Below volume mappings are required for DISPLAY settings by heart disease GUI client
       - /tmp/.X11-unix:/tmp/.X11-unix
@@ -44,11 +49,15 @@ services:
       context: .
       dockerfile: ./enclave_manager/Dockerfile
       args:
+        - SGX_MODE=HW
+        - TCF_DEBUG_BUILD=${TCF_DEBUG_BUILD:-}
         - http_proxy
         - https_proxy
         - no_proxy
-        - SGX_MODE=HW
-        - TCF_DEBUG_BUILD=${TCF_DEBUG_BUILD:-}
+    environment:
+      - http_proxy
+      - https_proxy
+      - no_proxy
     volumes:
       # Map aesm service on host to docker, required only in HW mode.
       - /var/run/aesmd/aesm.socket:/var/run/aesmd/aesm.socket
@@ -72,6 +81,10 @@ services:
         - http_proxy
         - https_proxy
         - no_proxy
+    environment:
+      - http_proxy
+      - https_proxy
+      - no_proxy
     expose:
       # Port is where lmdb server will listen for http request.
       # Port should be same as in bind parameter or lmdb_config.toml
@@ -91,6 +104,10 @@ services:
         - http_proxy
         - https_proxy
         - no_proxy
+    environment:
+      - http_proxy
+      - https_proxy
+      - no_proxy
     expose:
       - 1947
     command: |
