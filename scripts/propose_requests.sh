@@ -14,7 +14,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-testsDir=${TCF_HOME}/tests
+ClientDir=/project/avalon/examples/apps/generic_client
 
-python3 ${testsDir}/Demo.py --input_dir ${testsDir}/json_requests/ \
-    --connect_uri "http://tcs:8080" ${testsDir}/work_orders/output.json
+python3 ${ClientDir}/generic_client.py --uri "http://avalon-listener:${1:-1947}" \
+ --workload_id "heart-disease-eval" \
+ --in_data "Data: 25 10 1 67  102 125 1 95 5 10 1 11 36 1" -o
+    

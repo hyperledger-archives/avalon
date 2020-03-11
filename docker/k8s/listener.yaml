@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: avalon-http-jrpc-listener
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: avalon-listener
+  template:
+    metadata:
+      name: avalon-listener
+      labels:
+        app: avalon-listener
+    spec:
+      containers:
+      - image: avalon-listener-dev:latest
+        name: avalon-listener
+        imagePullPolicy: Never
+        command: ["/bin/bash"]
+        args: ["-c", "avalon_listener --bind http://0.0.0.0:1947 --lmdb_url http://avalon-lmdb:9090"]
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: avalon-listener
+spec:
+  ports:
+  - port: 1947
+    targetPort: 1947
+  selector:
+    app: avalon-listener
