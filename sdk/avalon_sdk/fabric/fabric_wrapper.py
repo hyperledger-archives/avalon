@@ -18,6 +18,7 @@ from os.path import exists, realpath
 import json
 import random
 
+from avalon_sdk.contract_response.contract_response import ContractResponse
 from avalon_sdk.fabric import base
 from avalon_sdk.fabric import tx_committer
 from avalon_sdk.fabric import event_listener
@@ -94,7 +95,8 @@ class FabricWrapper():
             returns the payload of chain code response
             on success or None on error.
             If the call is invoking chain code then it
-            returns True on success and False on failure.
+            returns ContractResponse.SUCCESS on success
+            and ContractResponse.ERROR on failure.
         """
         cc_methods = self.__valid_calls[chaincode_name]
         if cc_methods is None:
@@ -111,39 +113,33 @@ class FabricWrapper():
                                               method_name, '',
                                               queryonly=the_call['isQuery'])
         logging.info("Response of chain code {} call: {}".format(
-            method_name, resp[0]
+            method_name, resp
         ))
-        if len(resp) > 0:
-            # In case query chain code call
-            # it has response has status 200 and payload on success
-            # status 500 on error
-            if the_call['isQuery'] is True:
-                if hasattr(resp[0], 'response') and \
-                        hasattr(resp[0].response, 'status'):
-                    if resp[0].response.status == 200 and \
-                            hasattr(resp[0].response, 'payload'):
-                        payload = json.loads(resp[0].response.payload)
-                        logging.info(
-                            "\nThe execution payload: %s\n ", payload)
-                        result = []
-                        for v in payload.values():
-                            result.append(v)
-                        logging.info(
-                            "\nThe tuple created: %s\n ", result)
-                        return result
-                    else:
-                        logging.info("\nThe execution result: %s\n",
-                                     resp[0].response.message)
-                        return None
+
+        # In case query chain code call
+        # it has response in dictionary format
+        # convert it to tuple with values.
+        if the_call['isQuery'] is True:
+            if resp:
+                result = []
+                for v in resp.values():
+                    result.append(v)
+                logging.info(
+                    "\nThe tuple created: %s\n ", result)
+                return result
+            else:
+                return None
+        elif len(resp) > 0:
             # If it is invoke chain code call then response
             # has status SUCCESS otherwise it is an error
-            elif hasattr(resp[0], "status") and \
+            if hasattr(resp[0], "status") and \
                     resp[0].status == common.Status.SUCCESS:
-                return True
+                return ContractResponse.SUCCESS
             else:
-                return False
+                return ContractResponse.ERROR
 
-        return False
+        else:
+            return ContractResponse.ERROR
 
     def get_event_handler(self, event_name, chain_code, handler_func):
         """

@@ -43,6 +43,7 @@ from avalon_sdk.work_order_receipt.work_order_receipt \
     import WorkOrderReceiptRequest
 from avalon_sdk.fabric.fabric_worker_registry import FabricWorkerRegistryImpl
 from avalon_sdk.fabric.fabric_work_order import FabricWorkOrderImpl
+from avalon_sdk.contract_response.contract_response import ContractResponse
 
 # Remove duplicate loggers
 for handler in logging.root.handlers[:]:
@@ -57,9 +58,6 @@ class GenericClient():
     Generic client class to test end to end test
     for direct and proxy model.
     """
-
-    def __init__(self):
-        self.WAIT_TIME = 100
 
     def parse_command_line(self, args):
         """
@@ -183,10 +181,8 @@ class GenericClient():
         # Get first worker id from worker registry
         worker_id = None
         worker_lookup_result = worker_registry.worker_lookup(
-            WorkerType.TEE_SGX,
-            'aabbcc1234ddeeff',
-            '11aa22bb33cc44dd',
-            jrpc_req_id
+            worker_type=WorkerType.TEE_SGX,
+            id=jrpc_req_id
         )
         logger.info("\n Worker lookup response: {}\n".format(
             json.dumps(worker_lookup_result, indent=4)
@@ -351,29 +347,12 @@ class GenericClient():
     def get_work_order_result(self, blockchain_type, work_order,
                               work_order_id, jrpc_req_id):
         # Get the work order result for direct/proxy model
-
-        if blockchain_type == 'fabric':
-            event_handler = work_order.get_work_order_completed_event_handler(
-                self.handle_fabric_event
-            )
-            if event_handler:
-                tasks = [
-                    event_handler.start_event_handling(),
-                    event_handler.stop_event_handling(int(self.WAIT_TIME))
-                ]
-                loop = asyncio.get_event_loop()
-                loop.run_until_complete(
-                    asyncio.wait(tasks,
-                                 return_when=asyncio.ALL_COMPLETED))
-                loop.close()
-        elif blockchain_type == 'ethereum':
-            return None
-        else:
-            res = work_order.work_order_get_result(
-                work_order_id,
-                jrpc_req_id
-            )
-            return res
+        res = work_order.work_order_get_result(
+            work_order_id,
+            jrpc_req_id
+        )
+        logger.info("Work order result {}".format(res))
+        return res
 
     def get_worker_details(self, blockchain_type,
                            worker_registry, worker_id):
@@ -564,7 +543,7 @@ def Main(args=None):
         id=jrpc_req_id
     )
     logger.info("Work order submit response : {}\n ".format(
-        json.dumps(response, indent=4)
+        response
     ))
 
     if blockchain is None:
@@ -572,7 +551,7 @@ def Main(args=None):
                 WorkOrderStatus.PENDING:
             sys.exit(1)
     else:
-        if response != 0:
+        if response != ContractResponse.SUCCESS:
             sys.exit(1)
 
     # Create receipt
@@ -589,31 +568,25 @@ def Main(args=None):
         blockchain, work_order,
         wo_params.get_work_order_id(),
         jrpc_req_id+1)
-    if res:
-        logger.info("Work order get result : {}\n ".format(
-            json.dumps(res, indent=4)
-        ))
 
-        # Check if result field is present in work order response
-        if "result" in res:
-            # Verify work order response signature
-            if generic_client.verify_wo_res_signature(
-                    res['result'],
-                    worker_obj.verification_key) is False:
-                logger.error(
-                    "Work order response signature verification Failed")
-                sys.exit(1)
-            # Decrypt work order response
-            if show_decrypted_output:
-                decrypted_res = crypto_utility.decrypted_response(
-                    res['result'], session_key, session_iv)
-                logger.info("\nDecrypted response:\n {}"
-                            .format(decrypted_res))
-        else:
-            logger.error("\n Work order get result failed {}\n".format(
-                res
-            ))
+    # Check if result field is present in work order response
+    if "result" in res:
+        # Verify work order response signature
+        if generic_client.verify_wo_res_signature(
+            res['result'], worker_obj.verification_key) is False:
+            logger.error(
+                "Work order response signature verification Failed")
             sys.exit(1)
+        # Decrypt work order response
+        if show_decrypted_output:
+            decrypted_res = crypto_utility.decrypted_response(
+                res['result'], session_key, session_iv)
+            logger.info("\nDecrypted response:\n {}".format(decrypted_res))
+    else:
+        logger.error("\n Work order get result failed {}\n".format(
+            res
+        ))
+        sys.exit(1)
 
     if show_receipt and wo_receipt:
         # Retrieve receipt

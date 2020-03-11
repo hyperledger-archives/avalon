@@ -268,14 +268,21 @@ func (t *WorkerRegistry) workerLookUpNext(stub shim.ChaincodeStubInterface, args
 	for iter.HasNext() {
 		item, _ := iter.Next()
 		logger.Infof("The value: %v", item)
-		resparam.IDs = append(resparam.IDs, string(item.Value))
-		if len(resparam.IDs) == PAGESIZE {
-			break
+		// Append only active workers
+		worker, err := t.getWorkerByID(stub, string(item.Value))
+		if err != nil {
+			return shim.Error(err.Error())
+		}
+		if worker.Status == WORKERACTIVE {
+			resparam.IDs = append(resparam.IDs, string(item.Value))
+			if len(resparam.IDs) == PAGESIZE {
+				break
+			}
 		}
 	}
 	logger.Info("Result metadata: %v", metadata)
 	resparam.LookupTag = metadata.GetBookmark()
-	resparam.TotalCount = uint64(metadata.GetFetchedRecordsCount())
+	resparam.TotalCount = uint64(len(resparam.IDs))
 
 	//Serialize the response
 	value, err := json.Marshal(resparam)
@@ -390,13 +397,20 @@ func processAttributes(arg1 []string, arg2 []string) ([]string, error) {
 	for i, argType := range arg2 {
 		switch argType {
 		case UINT64FORMAT:
+			// If search argument workerType is 0 then ignore parameter
 			arg, err := strconv.ParseUint(arg1[i], 10, 64)
 			if err != nil {
 				return nil, err
 			}
-			attrs = append(attrs, fmt.Sprintf(UINT64FORMAT, arg))
+			if arg != 0 {
+				attrs = append(attrs, fmt.Sprintf(UINT64FORMAT, arg))
+			}
 		case BYTE32FORMAT:
-			attrs = append(attrs, fmt.Sprintf(BYTE32FORMAT, arg1[i]))
+			// If search arguments orgId and appId are empty then ignore parameter
+			arg := fmt.Sprintf("%v", arg1[i])
+			if len(arg) > 0 {
+				attrs = append(attrs, fmt.Sprintf(BYTE32FORMAT, arg1[i]))
+			}
 		}
 	}
 	return attrs, nil

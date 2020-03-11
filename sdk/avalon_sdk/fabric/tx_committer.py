@@ -61,6 +61,9 @@ class TxCommitter(base.ClientBase):
     # if the invocation does result in ledger change, it should
     # be set to False.
     def cc_invoke(self, args, cc_name, fcn, cc_version, queryonly=False):
+        if queryonly:
+            return self.cc_query(args, cc_name, fcn)
+
         loop = asyncio.get_event_loop()
         crypto = ecies()
 
@@ -78,9 +81,6 @@ class TxCommitter(base.ClientBase):
 
         res = loop.run_until_complete(asyncio.gather(*responses))
 
-        if queryonly:
-            return res
-
         tran_req = build_tx_req((res, proposal, header))
 
         tx_context_tx = create_tx_context(self.user,
@@ -91,21 +91,21 @@ class TxCommitter(base.ClientBase):
             send_transaction(self.client.orderers, tran_req, tx_context_tx)))
 
         logger.info('Tx response: {}'.format(responses))
-
         return responses
 
     # Invoke a chaincode query method. If there is no query method from the
     # chaincode, then this will fail
     # args - the array of the strings used as the parameters to query method
     # cc_name - chaincode name
-    def cc_query(self, args, cc_name):
+    # fcn - chaincode function name
+    def cc_query(self, args, cc_name, fcn):
         loop = asyncio.get_event_loop()
         try:
             responses = loop.run_until_complete(self.client.chaincode_query(
                 requestor=self.user, channel_name=self.channel_name,
-                peers=[self.peer_name], args=args, cc_name=cc_name))
+                peers=[self.peer_name], args=args, cc_name=cc_name, fcn=fcn))
             logger.info('Tx response: {0}'.format(responses))
-            return responses
+            return json.loads(responses)
         except Exception as ex:
             logger.error('Query error: {0}'.format(ex))
             return {}

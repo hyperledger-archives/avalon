@@ -19,6 +19,7 @@ from os import environ
 from utility.hex_utils import is_valid_hex_str
 from utility.hex_utils import byte_array_to_hex_str
 
+from avalon_sdk.contract_response.contract_response import ContractResponse
 from avalon_sdk.worker.worker_details import WorkerStatus, WorkerType
 from avalon_sdk.fabric.fabric_wrapper import FabricWrapper
 from avalon_sdk.interfaces.worker_registry \
@@ -65,12 +66,12 @@ class FabricWorkerRegistryImpl(WorkerRegistry):
                 params.append(str(worker_type.value))
 
             if org_id is None:
-                params.append('')
+                params.append("")
             else:
                 params.append(org_id)
 
             if application_id is None:
-                params.append('')
+                params.append("")
             else:
                 params.append(application_id)
 
@@ -165,7 +166,8 @@ class FabricWorkerRegistryImpl(WorkerRegistry):
         defined in
         https://entethalliance.github.io/trusted-computing/spec.html
         #common-data-for-all-worker-types
-        Returns transaction receipt on success or None on error.
+        Returns ContractResponse.SUCCESS on success
+        or ContractResponse.ERROR on error.
         """
         if (self.__fabric_wrapper is not None):
             params = []
@@ -181,17 +183,19 @@ class FabricWorkerRegistryImpl(WorkerRegistry):
             return txn_status
         else:
             logging.error("Fabric wrapper instance is not initialized")
-            return None
+            return ContractResponse.ERROR
 
     def worker_set_status(self, worker_id, status, id=None):
         """
         Set the registry status identified by worker id
         status is worker type enum type
-        Returns transaction receipt on success or None on error.
+        Returns ContractResponse.SUCCESS on success
+        or ContractResponse.ERROR on error.
         """
         if (self.__fabric_wrapper is not None):
+            params = []
             params.append(worker_id)
-            params.append(str(status))
+            params.append(str(status.value))
             txn_status = self.__fabric_wrapper.invoke_chaincode(
                 self.CHAIN_CODE,
                 'workerSetStatus',
@@ -199,7 +203,7 @@ class FabricWorkerRegistryImpl(WorkerRegistry):
             return txn_status
         else:
             logging.error("Fabric wrapper instance is not initialized")
-            return None
+            return ContractResponse.ERROR
 
     def worker_update(self, worker_id, details, id=None):
         """
@@ -209,7 +213,8 @@ class FabricWorkerRegistryImpl(WorkerRegistry):
         1. worker_id is a worker id, e.g. an Fabric address or
         a value derived from the worker's DID.
         2. details is detailed information about the worker in JSON format
-        Returns transaction receipt on success or None on error.
+        Returns ContractResponse.SUCCESS on success
+        or ContractResponse.ERROR on error.
         """
         if (self.__fabric_wrapper is not None):
             params = []
@@ -222,4 +227,4 @@ class FabricWorkerRegistryImpl(WorkerRegistry):
             return txn_status
         else:
             logging.error("Fabric wrapper instance is not initialized")
-            return None
+            return ContractResponse.ERROR

@@ -13,10 +13,14 @@
 # limitations under the License.
 
 import binascii
+import json
 import logging
 from os import environ
+import time
+import asyncio
 
 from utility.hex_utils import is_valid_hex_str
+from avalon_sdk.contract_response.contract_response import ContractResponse
 from avalon_sdk.fabric.fabric_wrapper import FabricWrapper
 from avalon_sdk.interfaces.work_order_proxy \
     import WorkOrderProxy
@@ -41,6 +45,8 @@ class FabricWorkOrderImpl(WorkOrderProxy):
         self.CHAIN_CODE = 'order'
         self.WORK_ORDER_SUBMITTED_EVENT_NAME = 'workOrderSubmitted'
         self.WORK_ORDER_COMPLETED_EVENT_NAME = 'workOrderCompleted'
+        self.WAIT_TIME = 30
+        self.__wo_resp = ''
         if config is not None:
             self.__fabric_wrapper = FabricWrapper(config)
         else:
@@ -69,13 +75,10 @@ class FabricWorkOrderImpl(WorkOrderProxy):
                 self.CHAIN_CODE,
                 'workOrderSubmit',
                 params)
-            if txn_status is True:
-                return 0
-            else:
-                return -1
+            return txn_status
         else:
             logging.error("Fabric wrapper instance is not initialized")
-            return -1
+            return ContractResponse.ERROR
 
     def work_order_get_result(self, work_order_id, id=None):
         """
@@ -84,23 +87,30 @@ class FabricWorkOrderImpl(WorkOrderProxy):
             work_order_id is a Work Order id that was
             sent in the corresponding work_order_submit request.
         Returns
-        -1 on error, result on Success.
+        None on error, result on Success.
         """
-        if (self.__fabric_wrapper is not None):
-            params = []
-            params.append(work_order_id)
-            work_order_result = self.__fabric_wrapper.invoke_chaincode(
-                self.CHAIN_CODE,
-                'workOrderGetResult',
-                params)
-            if work_order_result is not None:
-                return work_order_result
-            else:
-                return -1
+        # Calling the contract workOrderGet() will result in error
+        # work order id doesn't exist. This is because committing will
+        # take some time to commit to chain.
+        # Instead of calling contract api to get result chosen the
+        # event based approach.
+        event_handler = \
+            self.get_work_order_completed_event_handler(
+                self.handle_fabric_event)
+        if event_handler:
+            tasks = [
+                event_handler.start_event_handling(),
+                event_handler.stop_event_handling(int(self.WAIT_TIME))
+                ]
+            loop = asyncio.get_event_loop()
+            loop.run_until_complete(
+                asyncio.wait(tasks,
+                return_when=asyncio.ALL_COMPLETED))
+            loop.close()
+            return self.__wo_resp
         else:
-            logging.error(
-                "Fabric wrapper instance is not initialized")
-            return -1
+            logging.info("Failed while creating event handler")
+            return None
 
     def work_order_complete(self, work_order_id, work_order_response):
         """
@@ -116,7 +126,7 @@ class FabricWorkOrderImpl(WorkOrderProxy):
         if (self.__fabric_wrapper is not None):
             if work_order_response is None:
                 logging.info("Work order response is empty")
-                return -1
+                return ContractResponse.ERROR
             params = []
             params.append(work_order_id)
             params.append(work_order_response)
@@ -124,14 +134,11 @@ class FabricWorkOrderImpl(WorkOrderProxy):
                 self.CHAIN_CODE,
                 'workOrderComplete',
                 params)
-            if txn_status is True:
-                return 0
-            else:
-                return -1
+            return txn_status
         else:
             logging.error(
                 "Fabric wrapper instance is not initialized")
-            return -1
+            return ContractResponse.ERROR
 
     def encryption_key_start(self, tag):
         """
@@ -198,3 +205,14 @@ class FabricWorkOrderImpl(WorkOrderProxy):
             logging.error(
                 "Fabric wrapper instance is not initialized")
             return None
+
+    def handle_fabric_event(self, event, block_num, txn_id, status):
+        """
+        callback function for fabric event handler
+        """
+        payload = event['payload'].decode("utf-8")
+        resp = json.loads(payload)
+        self.__wo_resp = json.loads(resp["workOrderResponse"])
+        logging.debug("Work order response from event : {}".format(
+            self.__wo_resp
+        ))
