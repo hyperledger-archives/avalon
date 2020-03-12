@@ -154,13 +154,12 @@ class EthereumWorkOrderProxyImpl(WorkOrderProxy):
                 "Work order contract instance is not initialized")
             return ERROR
 
-    def start_work_order_completed_event_handler(self, evt_handler,
-                                                 show_decrypted_output,
-                                                 verification_key,
-                                                 session_key, session_iv):
+    def work_order_get_result(self, work_order_id, id=None):
         """
-        Function to start event handler for handling workOrderCompleted
-        event from Ethereum blockchain
+        Get worker order result.
+        This function starts an event handler for handling workOrderCompleted
+        event from Ethereum blockchain.
+        Returns the reresponse of work order processing.
         """
         logging.info("About to start Ethereum event handler")
 
@@ -176,14 +175,17 @@ class EthereumWorkOrderProxyImpl(WorkOrderProxy):
 
         try:
             daemon = EventProcessor(self._config)
-            asyncio.get_event_loop().run_until_complete(daemon.start(
-                listener,
-                evt_handler,
-                show_decrypted_output, verification_key,
-                session_key, session_iv
-            ))
+            # Wait for the workOrderCompleted event after starting the
+            # listener and handler
+            event = asyncio.get_event_loop()\
+                .run_until_complete(daemon.get_event_synchronously(listener))
+
+            # Get the first element as this is a list of one event
+            # obtained from gather() in ethereum_listener
+            return event[0]["args"]["workOrderResponse"]
         except KeyboardInterrupt:
             asyncio.get_event_loop().run_until_complete(daemon.stop())
+        
 
     def encryption_key_retrieve(self, worker_id, last_used_key_nonce, tag,
                                 requester_id, signature_nonce=None,
@@ -204,12 +206,6 @@ class EthereumWorkOrderProxyImpl(WorkOrderProxy):
                            encryption_nonce, tag, signature, id=None):
         """
         Set Encryption Key Request Payload
-        """
-        pass
-
-    def work_order_get_result(self, work_order_id, id=None):
-        """
-        Get worker order result
         """
         pass
 

@@ -81,23 +81,23 @@ class BlockchainInterface:
 
 
 def get_last_read_block():
+    f = None
     try:
         f = open("bookmark", 'r')
         block_num = f.readline()
         return 0 if block_num == '' else int(block_num)
     except FileNotFoundError as e:
+        logging.error(e)
         return 0
+    finally:
+        if f is not None:
+            f.close()
 
 
 def set_last_read_block(block_num):
-    try:
-        f = open("bookmark", 'w')
+    with open("bookmark", 'w') as f:
         f.seek(0)
         f.write(str(block_num))
-        return True
-    except Exception as e:
-        logging.error(e)
-        return False
 
 
 def get_new_filter_payload(evt_hash, contract_address):
@@ -170,23 +170,26 @@ class EventProcessor:
             "workOrderSubmitted(bytes32,bytes32,bytes32,string,"
             + "uint256,address,bytes4)")
 
-    async def listener(self, eventListener):
-        logging.info("Started listener for events")
+    async def listener(self, event_filter):
+        logging.info("Started listener for events from blockchain")
         while True:
-            for event in eventListener.get_new_entries():
+            # Check for any new event logs since the last poll
+            # on this filter. Though using events, this is not
+            # fully asynchronous.
+            for event in event_filter.get_new_entries():
                 await self.queue.put(event)
                 logging.debug("Event pushed into listener Queue")
             await asyncio.sleep(LISTENER_SLEEP_DURATION)
 
-    async def jrpc_listener(self, eventListener):
-        logging.info("Started jrpc listener for events")
+    async def jrpc_listener(self, event_filter):
+        logging.info("Started jrpc listener for events from blockchain")
         while True:
             json_rpc_request = {
                 "jsonrpc": "2.0",
                 "method": "eth_getFilterLogs",
                 "id": random.randint(0, 100000)
             }
-            json_rpc_request["params"] = [eventListener]
+            json_rpc_request["params"] = [event_filter]
 
             logging.debug("New events request %s",
                           json.dumps(json_rpc_request))
@@ -200,10 +203,15 @@ class EventProcessor:
                 block_num = int(block_num, 16) if is_valid_hex_str(block_num)\
                     else block_num
                 if block_num > last_processed_block:
-                    # Placeholder flag to mark event format
+                    # Placeholder flag to mark event format. Currently
+                    # two types of event mechanism are being supported.
+                    # The event formats for the two vary slightly which
+                    # necessitates the use of a flag to distinguish.
                     event["jsonrpc"] = "2.0"
+                    # These events being put by the listener are meant to be
+                    # used by the handlers consuming from the same queue
                     await self.queue.put(event)
-                    logging.info("Event pushed into listener Queue")
+                    logging.debug("Event pushed into listener queue")
 
             await asyncio.sleep(LISTENER_SLEEP_DURATION)
 
@@ -211,7 +219,7 @@ class EventProcessor:
         logging.info("Started handler to handle events")
         while True:
             event = await self.queue.get()
-            logging.info("Event popped from listener Queue")
+            logging.debug("Event popped from listener queue")
             normalized_event = normalize_event(event, self._wo_submitted_hash,
                                                self._wo_completed_hash)
 
@@ -220,24 +228,52 @@ class EventProcessor:
             callback(normalized_event, *kargs, **kwargs)
             self.queue.task_done()
 
-    async def start(self, eventListener, callback, *kargs, **kwargs):
+    async def sync_handler(self, *kargs, **kwargs):
+        logging.info("Started synchronous handler to handle an event")
+        event = await self.queue.get()
+        logging.debug("Event popped from listener queue")
+        normalized_event = normalize_event(event, self._wo_submitted_hash,
+                                           self._wo_completed_hash)
+        set_last_read_block(normalized_event["blockNumber"])
+        self.queue.task_done()
+        return normalized_event
+
+    async def start(self, event_filter, callback, *kargs, **kwargs):
         self.queue = asyncio.Queue()
         loop = asyncio.get_event_loop()
-        # Check if the eventListener is an id returned from createNewFilter
-        # JRPC call in which case it should be a hex string. Else it is a
-        # filter created using web3 library
-        if isinstance(eventListener, str) and is_valid_hex_str(eventListener):
-            self.listeners = [loop.create_task(
-                self.jrpc_listener(eventListener)) for _ in range(1)]
-        else:
-            self.listeners = [loop.create_task(
-                self.listener(eventListener)) for _ in range(1)]
+        self.listeners = self.get_listeners(loop, event_filter)
         self.handlers = [loop.create_task(self.handler(
             callback, *kargs, **kwargs)) for _ in range(1)]
 
         await asyncio.gather(*self.listeners)  # infinite loop
         await self.queue.join()  # this code should never run
         await self.stop()  # this code should never run
+
+    async def get_event_synchronously(self, event_filter, *kargs, **kwargs):
+        """
+        Get a single event synchronously using the event_filter
+        provided.
+        Returns an event received for the event_filter used.
+        """
+        self.queue = asyncio.Queue()
+        loop = asyncio.get_event_loop()
+        self.listeners = self.get_listeners(loop, event_filter)
+        self.handlers = [loop.create_task(self.sync_handler(*kargs, **kwargs))]
+
+        handler_result = await asyncio.gather(*self.handlers)
+
+        return handler_result
+
+    def get_listeners(self, loop, event_filter):
+        # Check if the event_filter is an id returned from createNewFilter
+        # JRPC call in which case it should be a hex string. Else it is a
+        # filter created using web3 library
+        if isinstance(event_filter, str) and is_valid_hex_str(event_filter):
+            return [loop.create_task(
+                self.jrpc_listener(event_filter)) for _ in range(1)]
+        else:
+            return [loop.create_task(
+                self.listener(event_filter)) for _ in range(1)]
 
     async def stop(self):
         for process in self.listeners:

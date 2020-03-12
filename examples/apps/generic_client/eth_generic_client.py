@@ -318,8 +318,7 @@ def _create_work_order_receipt_instance(blockchain_type, config):
         return JRPCWorkOrderReceiptImpl(config)
 
 
-def _get_work_order_result(blockchain_type, work_order, show_decrypted_output,
-                           verification_key, session_key, session_iv,
+def _get_work_order_result(blockchain_type, work_order,
                            work_order_id, jrpc_req_id):
     # Get the work order result for direct/proxy model
 
@@ -337,12 +336,6 @@ def _get_work_order_result(blockchain_type, work_order, show_decrypted_output,
                 asyncio.wait(tasks,
                              return_when=asyncio.ALL_COMPLETED))
             loop.close()
-    elif blockchain_type == 'ethereum':
-        res = work_order.start_work_order_completed_event_handler(
-            _handle_ethereum_event, show_decrypted_output, verification_key,
-            session_key, session_iv
-        )
-        return res
     else:
         res = work_order.work_order_get_result(
             work_order_id,
@@ -362,34 +355,6 @@ def _handle_fabric_event(event, block_num, txn_id, status):
                          event, block_num, txn_id, status
                      ))
         _verify_work_order_response(res["workOrderResponse"])
-
-
-def _handle_ethereum_event(event, *kargs, **kwargs):
-    """
-    The function retrieves pertinent information from the event received
-    """
-    response = event["args"]
-    if "result" not in response["workOrderResponse"]:
-        logger.error(
-            "Work order execution failed")
-        sys.exit(1)
-    show_decrypted_output = kargs[0]
-    verification_key = kargs[1]
-    session_key = kargs[2]
-    session_iv = kargs[3]
-
-    response_json = response["workOrderResponse"]["result"]
-    if _verify_wo_res_signature(response_json, verification_key) is False:
-        logger.error(
-            "Work order response signature verification Failed")
-        sys.exit(1)
-    # Decrypt work order response
-    if show_decrypted_output:
-        decrypted_res = crypto_utility.decrypted_response(
-            response_json, session_key, session_iv)
-        logger.info("\nDecrypted response:\n {}"
-                    .format(decrypted_res))
-    sys.exit(1)
 
 def _get_first_active_worker(worker_registry, worker_id):
     """
@@ -598,8 +563,7 @@ def Main(args=None):
                                    client_private_key, jrpc_req_id)
 
     # Retrieve work order result
-    res = _get_work_order_result(blockchain, work_order, show_decrypted_output,
-                                 verification_key, session_key, session_iv,
+    res = _get_work_order_result(blockchain, work_order,
                                  wo_params.get_work_order_id(), jrpc_req_id+1)
     if res:
         logger.info("Work order get result : {}\n ".format(
@@ -609,7 +573,7 @@ def Main(args=None):
         # Check if result field is present in work order response
         if "result" in res:
             # Verify work order response signature
-            if _verify_wo_res_signature(res,
+            if _verify_wo_res_signature(res['result'],
                                         worker_obj.verification_key) is False:
                 logger.error(
                     "Work order response signature verification Failed")
@@ -617,7 +581,7 @@ def Main(args=None):
             # Decrypt work order response
             if show_decrypted_output:
                 decrypted_res = crypto_utility.decrypted_response(
-                    res, session_key, session_iv)
+                    res['result'], session_key, session_iv)
                 logger.info("\nDecrypted response:\n {}"
                             .format(decrypted_res))
         else:
