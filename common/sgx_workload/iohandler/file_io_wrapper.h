@@ -21,5 +21,5 @@ std::string Read(std::string file_name);
 // Write given data to given file and return status
 uint32_t Write(std::string file_name, std::string data);
 
-// Delet given file
+// Delete given file
 uint32_t Delete(std::string file_name);

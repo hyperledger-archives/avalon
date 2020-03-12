@@ -1,4 +1,4 @@
-/* Copyright 2019 Intel Corporation
+/* Copyright 2020 Intel Corporation
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -28,10 +28,10 @@ void Workload::ProcessWorkOrder(
         const std::vector<tcf::WorkOrderData>& in_work_order_data,
         std::vector<tcf::WorkOrderData>& out_work_order_data) {
 
+    // For each work order, process the input data
     for (auto wo_data : in_work_order_data) {
-        // Process the input data
         std::string result_str =
-                ProcessHelloWorld(ByteArrayToString(wo_data.decrypted_data));
+            ProcessHelloWorld(ByteArrayToString(wo_data.decrypted_data));
 
         ByteArray ba(result_str.begin(), result_str.end());
         AddOutput(wo_data.index, out_work_order_data, ba);

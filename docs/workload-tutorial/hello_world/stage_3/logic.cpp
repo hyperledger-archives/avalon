@@ -21,7 +21,7 @@
 
 std::string ProcessHelloWorld(std::string in_str) {
     return "Hello " + in_str;
-}  // ProcessHelloWorld 
+}
 
 std::string GetCountOrKey(std::string name, std::string hex_key) {
     std::string file_path = USER_FILES_PATH + name;

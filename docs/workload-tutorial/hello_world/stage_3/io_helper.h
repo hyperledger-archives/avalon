@@ -17,5 +17,16 @@
 
 #include <string>
 
-// Add actual workload declarations here ...
+class IoHelper {
+public:
+    IoHelper(std::string file_name);
 
+    std::string GenerateKey();
+    void SetKey(std::string hex_key);
+    uint32_t WriteFile(std::string data);
+    uint32_t ReadFile(std::string& read_data);
+    uint32_t DeleteFile();
+
+    std::string file_name;
+    std::string hex_key;
+};  // class IoHelper

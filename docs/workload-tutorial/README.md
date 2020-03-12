@@ -32,10 +32,10 @@ The directory structure for this tutorial is as follows:
       framework
     * [plug-in.cpp](hello_world/stage_1/plug-in.cpp)
   * [stage_2/](hello_world/stage_2/) Final results from adding worker code
-    * [logic.h](hello_world/stage_1/logic.h) Modified with worker definitions
+    * [logic.h](hello_world/stage_2/logic.h) Modified with worker definitions
       added
-    * [logic.cpp](hello_world/stage_1/logic.cpp) Modified with worker code added
-    * [plug-in.cpp](hello_world/stage_1/plug-in.cpp) Modified to call worker
+    * [logic.cpp](hello_world/stage_2/logic.cpp) Modified with worker code added
+    * [plug-in.cpp](hello_world/stage_2/plug-in.cpp) Modified to call worker
 
 ## Prerequisites
 
@@ -147,9 +147,10 @@ will be created next in [Phase 2](#phase2).
       --workload_id "hello-world" --in_data "Jane" "Dan"
   ```
 
-  > **_NOTE:_** If you are running Avalon in a container you can shell into the container like this:
+  > **_NOTE:_** If you are running Avalon in a container you can shell into
+  the container like this:
   ```bash
-  docker exec -it  avalon-shell bash
+  docker exec -it avalon-shell bash
   ```
 
 * The Hello World worker should return the string `Error: under construction`
@@ -212,10 +213,10 @@ In this example we name the worker-specific function `ProcessHelloWorld()`.
   to
 
   ```cpp
+  // For each work order, process the input data
   for (auto wo_data : in_work_order_data) {
-     // Process the input data
-     std::string result_str =
-             ProcessHelloWorld(ByteArrayToString(wo_data.decrypted_data));
+      std::string result_str =
+          ProcessHelloWorld(ByteArrayToString(wo_data.decrypted_data));
 
      ByteArray ba(result_str.begin(), result_str.end());
      AddOutput(wo_data.index, out_work_order_data, ba);
@@ -233,8 +234,8 @@ In this example we name the worker-specific function `ProcessHelloWorld()`.
 * Load the framework and use the generic command line utility to test the
   newly-added workload:
   ```bash
-  examples/apps/generic_client/generic_client.py
-      --uri "http://localhost:1947" --workload_id "hello-world" --in_data "Dan"
+  examples/apps/generic_client/generic_client.py \
+     --uri "http://localhost:1947" --workload_id "hello-world" --in_data "Dan"
   ```
 
 * The Hello World worker should return a string
@@ -253,29 +254,69 @@ To see what the updated source files should look like, refer to the files in
 directory
 [$TCF_HOME/docs/workload-tutorial/hello_world/stage_2/](hello_world/stage_2/).
 
-### <a name="phase3"></a>Phase 3: Worker-specific Code to execute IO operations inside the TEE
-This phase of tutorial defines step by step development of the helloworld workload with
-file IO handling capability.  
-For the very first input request from the client, the workload echoes user name
-along with encryption key.  
-For the subsequent requests, client submits input request
-with encryption key received in the previous step. As a response, the client
-receives an echo of username along with the workload hit count or number of workload
-invocations by that user.  
-The counter value is stored in the encrypted format
-while writing to a file and decrypted while reading from the file.
+### <a name="phase3"></a>Phase 3: Worker-specific Code to execute I/O operations inside the TEE
+This phase of tutorial extends the helloworld worker
+with "inside out file I/O" handling capability.
+"Inside out file I/O" refers to reading and writing files outside the
+TEE (Trusted Execution Environment) from within the TEE.
 
-For the first request, the client needs to submit the user name as in_data.  
-As a response, client receives `Hello <username> <encryption_key_in_hex>`.
-For the subsequent requests from the same user, client needs to submit username
-along with encryption key obtained in the previous step. As a response client receives,
-`Hello <username> [workload_hit_count]`.
+For the first input request from the client, the workload echoes the user
+name along with the encryption key.
+For subsequent requests, the client submits a input request
+with an encryption key received in the previous step.
+As a response, the client receives an echo of username along with the
+workload hit count or number of workload invocations by that user.
+The counter value is stored in encrypted format in a file outside the enclave,
+with file writes encrypted, and file reads decrypted.
 
-* Change to the "Hello World" workload directory:
+The protocol is as follows:
+* For the first request, the client needs to submit the user name as `in_data`.
+* As a response, client receives the message
+  `Hello <username> <encryption_key_in_hex>`.
+* For the subsequent requests from the same user, the client needs to submit
+  a username along with the encryption key obtained in the previous step.
+* As a response, the client receives the message
+  `Hello <username> <workload_hit_count>`.
+
+The directory structure for this tutorial is as follows:
+
+* [hello_world/](hello_world/)
+  * [stage_3/](hello_world/stage_3/) Results from adding Inside Out I/O code
+    * [logic.h](hello_world/stage_1/logic.h) Modified with worker definitions
+      added
+    * [CMakeLists.txt](hello_world/stage_3/CMakeLists.txt) CMake file with new
+      include directory added to build this application
+    * [io_helper.h](hello_world/stage_3/io_helper.h) Header file defining
+      Inside Out I/O helper
+    * [io_helper.cpp](hello_world/stage_3/io_helper.cpp) C file for
+      Inside Out I/O helper code, which invokes the inside out I/O functionality
+    * [logic.h](hello_world/stage_3/logic.h) Header file with new
+      `GetCountOrKey()` definition
+    * [logic.cpp](hello_world/stage_3/logic.cpp) C file with new
+      `GetCountOrKey()` function
+    * [plug-in.cpp](hello_world/stage_3/plug-in.cpp) C file with modified
+      `ProcessWorkOrder()` function
+
+For this phase, follow these steps to extend the worker functionality:
+
+* Change to the "Hello World" workload directory
   ```bash
   cd $TCF_HOME/examples/apps/hello_world/workload
   ```
-* Add the `GetCountOrKey()` function declaration to `logic.h`:
+* Add a line to `CMakeLists.txt` to add a new include directory
+  ```bash
+  TARGET_INCLUDE_DIRECTORIES(${WORK_ORDER_STATIC_NAME} PUBLIC $ENV{TCF_HOME}/common/cpp/crypto)
+  ```
+* Copy the Inside Out I/O source files
+  ```bash
+  cp ../../../../docs/workload-tutorial/hello_world/stage_3/io_helper.* .
+  ```
+  Examine file `io_helper.cpp`. Notice that it calls the inside out I/O
+  functions `Read()`, `Write()`, and `Delete()`, which are defined in file
+  [$TCF_HOME/common/sgx_workload/iohandler/file_io_wrapper.h
+  ](../../common/sgx_workload/iohandler/file_io_wrapper.h)
+
+* Add the `GetCountOrKey()` function declaration to `logic.h`
   ```cpp
   extern std::string GetCountOrKey(std::string name, std::string hex_key);
   ```
@@ -308,8 +349,8 @@ along with encryption key obtained in the previous step. As a response client re
   ```
 
 * Modify the `ProcessWorkOrder()` method in `plug-in.cpp`
-  to call `ProcessHelloWorld()` and GetCountOrKey().  That is, change:
-  from
+  to call `ProcessHelloWorld()` and `GetCountOrKey()`. That is, change:
+
   ```cpp
   // Replace the dummy implementation below with invocation of
   // actual logic defined in logic.h and implemented in logic.cpp.
@@ -317,6 +358,7 @@ along with encryption key obtained in the previous step. As a response client re
   ByteArray ba(result_str.begin(), result_str.end());
   AddOutput(0, out_work_order_data, ba);
   ```
+
   to
 
   ```cpp
@@ -325,67 +367,84 @@ along with encryption key obtained in the previous step. As a response client re
   std::string result;
   int count = 0;
 
-  // Process the input data
+  // For each work order, process the input data
   for (auto wo_data : in_work_order_data) {
-    if (count++ == 0) {
-        name = ByteArrayToString(wo_data.decrypted_data);
-    } else {
-        hex_key = ByteArrayToString(wo_data.decrypted_data);
-    }
+      if (count++ == 0) {
+          name = ByteArrayToString(wo_data.decrypted_data);
+      } else {
+          hex_key = ByteArrayToString(wo_data.decrypted_data);
+      }
   }
-  result = ProcessHelloWorld(name) + " [" + GetCountOrKey(name, hex_key) + "]";
+
+  result = ProcessHelloWorld(name) + " [" +
+      GetCountOrKey(name, hex_key) + "]";
   ByteArray ba(result.begin(), result.end());
   AddOutput(0, out_work_order_data, ba);
   ```
 
-* Copy the io_helper .h and .cpp files from hello_world_io/stage_2 folder to hello_world/workload.
-  Include the io_helper.h file in logic.cpp.
+* Add line `#include "io_helper.h"` to the beginning of file `logic.cpp`
 
-* Create `/tmp/tutorial` folder to persist all files storing their count value.
-
-* Change to the top-level Avalon source repository directory, `$TCF_HOME`,
-  and rebuild the framework (see [$TCF_HOME/BUILD.md](../../BUILD.md)).
-  It should now include updated hello_world workload
-
-* Load the framework and use the generic command line utility to test the
-  IO operations performed by workload :
-
-**step 1**:
-  * Submit work order input with user name
-
+* Create a directory to store files for persistent storage of
+  values outside the TEE
   ```bash
-  examples/apps/generic_client/generic_client.py
-      --uri "http://localhost:1947" -o --workload_id "hello-world" --in_data "jack"
+  mkdir /tmp/tutorial
   ```
 
-  * The Hello World worker should return a string
-    `Hello name [key]` where `name` is the string sent in the first
-    input parameter and `key` is the file encryption key. A file with
-    filename `name` will be generated in /tmp/tutorial.
-    ```
-    [10:29:35 INFO    crypto_utils.crypto_utility] Decryption result at client - Hello jack [8342EFBE7C379231A4E03C80E5BA1AC9E8ACBC5338976CE6146431D8CBF2318D]
-    [10:29:35 INFO    __main__]
-    Decrypted response:
-      [{'index': 0, 'dataHash': '5493B8B39AFE2F7D4F1490D6E04AD410E394958C6BD85324BC28B540EDF0A462', 'data': 'Hello jack [8342EFBE7C379231A4E03C80E5BA1AC9E8ACBC5338976CE6146431D8CBF2318D]', 'encryptedDataEncryptionKey': '', 'iv': ''}]
-    ```
+* Change to the top-level Avalon source repository directory,
+  `$TCF_HOME`, and rebuild the framework
+  (see [$TCF_HOME/BUILD.md](../../BUILD.md)).
+  It should now include updated hello_world workload
 
-**step 2**:
-  * Submit work order request with user name and encryption key received in the previous step.
+* Load the framework and use the generic command line utility to
+  test the IO operations performed by workload :
 
-    ```bash
-    examples/apps/generic_client/generic_client.py
-      --uri "http://localhost:1947" -o --workload_id "hello-world" --in_data "jack" "8342EFBE7C379231A4E03C80E5BA1AC9E8ACBC5338976CE6146431D8CBF2318D"
-    ```
-  * The Hello World worker should return a string
-    `Hello name [count]` where `count` is number of times the workload has been invoked
-    by the user `name`.
-    ```
-    [10:36:46 INFO    crypto_utils.crypto_utility] Decryption result at client - Hello jack [2]
-    [10:36:46 INFO    __main__]
-    Decrypted response:
-      [{'index': 0, 'dataHash': 'D040AFA0D78276BAFD1360A6170D7EB53446731F25E0F77343A07EEE3628731A', 'data': 'Hello jack [2]', 'encryptedDataEncryptionKey': '', 'iv': ''}]
-    ```
+* Submit a work order request with user name `jack`
 
-To see what the updated source files should look like, refer to the files in
-directory
-[$TCF_HOME/docs/workload-tutorial/hello_world_io/stage_2/](hello_world_io/stage_2/).
+  ```bash
+  examples/apps/generic_client/generic_client.py --uri "http://localhost:1947" \
+     -o --workload_id "hello-world" --in_data "jack"
+  ```
+
+* The Hello World worker should return the string
+  `Hello <name> <key>` where `<name>` is the string sent in the first
+  input parameter and `<key>` is the file encryption key.
+  This will create an encrypted file named `<name>` in `/tmp/tutorial/`
+  (without the `<>` angle brackets).
+
+  ```
+  [10:29:35 INFO    crypto_utils.crypto_utility] Decryption result at client -
+  Hello jack [8342EFBE7C379231A4E03C80E5BA1AC9E8ACBC5338976CE6146431D8CBF2318D]
+  [10:29:35 INFO    __main__]
+  Decrypted response:
+    [{'index': 0, 'dataHash':
+      '5493B8B39AFE2F7D4F1490D6E04AD410E394958C6BD85324BC28B540EDF0A462',
+      'data': 'Hello jack
+      [8342EFBE7C379231A4E03C80E5BA1AC9E8ACBC5338976CE6146431D8CBF2318D]',
+      'encryptedDataEncryptionKey': '', 'iv': ''}]
+  ```
+
+* Submit a work order request with user name `jack` and the encryption key
+  received in the previous step.
+
+  ```bash
+  examples/apps/generic_client/generic_client.py \
+     --uri "http://localhost:1947" -o --workload_id "hello-world" --in_data \
+     "jack" "8342EFBE7C379231A4E03C80E5BA1AC9E8ACBC5338976CE6146431D8CBF2318D"
+  ```
+* The Hello World worker should return the string
+  `Hello <name> <count>` where `<count>` is the number of times the workload has
+  been invoked by the user `<name>`.
+
+  ```
+  [10:36:46 INFO    crypto_utils.crypto_utility]
+  Decryption result at client - Hello jack [2]
+  [10:36:46 INFO    __main__]
+  Decrypted response:
+    [{'index': 0, 'dataHash':
+      'D040AFA0D78276BAFD1360A6170D7EB53446731F25E0F77343A07EEE3628731A',
+      'data': 'Hello jack [2]', 'encryptedDataEncryptionKey': '', 'iv': ''}]
+  ```
+
+To see what the updated source files should look like,
+refer to the files in directory
+[$TCF_HOME/docs/workload-tutorial/hello_world/stage_3/](hello_world/stage_3/).
