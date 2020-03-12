@@ -25,4 +25,5 @@
 
 ## Reference
 * [ _Off-Chain Trusted Compute Specification_](https://entethalliance.github.io/trusted-computing/spec.html) defined by Enterprise Ethereum Alliance (EEA) Task Force (2019)
-* [Cryptography](../tc/sgx/common/crypto/README.md). Cryptographic primitives used, libraries used, and implementation
+* [Cryptography](../common/cpp/crypto/README.md). Cryptographic primitives
+  used, libraries used, and implementation

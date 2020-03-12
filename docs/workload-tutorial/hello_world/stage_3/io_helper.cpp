@@ -55,4 +55,3 @@ uint32_t IoHelper::DeleteFile() {
     uint32_t status = Delete(this->file_name);
     return status;
 }
-

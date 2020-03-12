@@ -28,9 +28,22 @@ void Workload::ProcessWorkOrder(
         const std::vector<tcf::WorkOrderData>& in_work_order_data,
         std::vector<tcf::WorkOrderData>& out_work_order_data) {
 
-    // Replace the dummy implementation below with invocation of
-    // actual logic defined in logic.h and implemented in logic.cpp.
-    std::string result_str("Error: under construction");
-    ByteArray ba(result_str.begin(), result_str.end());
+    std::string name;
+    std::string hex_key;
+    std::string result;
+    int count = 0;
+
+    // For each work order, process the input data
+    for (auto wo_data : in_work_order_data) {
+        if (count++ == 0) {
+            name = ByteArrayToString(wo_data.decrypted_data);
+        } else {
+            hex_key = ByteArrayToString(wo_data.decrypted_data);
+        }
+    }
+
+    result = ProcessHelloWorld(name) + " [" +
+        GetCountOrKey(name, hex_key) + "]";
+    ByteArray ba(result.begin(), result.end());
     AddOutput(0, out_work_order_data, ba);
 }
