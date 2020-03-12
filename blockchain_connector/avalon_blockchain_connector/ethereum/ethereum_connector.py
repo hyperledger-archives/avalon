@@ -96,7 +96,7 @@ class EthereumConnector:
         worker_lookup_result = worker_registry.worker_lookup(
             worker_type=WorkerType.TEE_SGX, id=jrpc_req_id
         )
-        logging.info("\n Worker lookup response: {}\n".format(
+        logging.info("\nWorker lookup response from kv storage : {}\n".format(
             json.dumps(worker_lookup_result, indent=4)
         ))
         if "result" in worker_lookup_result and \
@@ -104,9 +104,9 @@ class EthereumConnector:
             if worker_lookup_result["result"]["totalCount"] != 0:
                 return worker_lookup_result["result"]["ids"]
             else:
-                logging.error("No workers found")
+                logging.error("No workers found in kv storage")
         else:
-            logging.error("Failed to lookup worker")
+            logging.error("Failed to lookup worker in kv storage")
         return []
 
     def _retrieve_worker_details_from_kv_storage(self, worker_registry,
@@ -114,11 +114,11 @@ class EthereumConnector:
         # Retrieve worker details
         jrpc_req_id = random.randint(0, 100000)
         worker_info = worker_registry.worker_retrieve(worker_id, jrpc_req_id)
-        logging.info("Worker retrieve response: {}"
-                     .format(json.dumps(worker_info)))
+        logging.info("Worker retrieve response from kv storage: {}"
+                     .format(json.dumps(worker_info, indent=4)))
 
         if "error" in worker_info:
-            logging.error("Unable to retrieve worker details\n")
+            logging.error("Unable to retrieve worker details from kv storage")
         return worker_info["result"]
 
     def _add_update_worker_to_chain(self, wids_onchain, wids_kv,
@@ -179,7 +179,7 @@ class EthereumConnector:
             '11aa22bb33cc44dd',
             jrpc_req_id
         )
-        logging.info("\nWorker lookup response from blockchain: {}\n".format(
+        logging.info("Worker lookup response from blockchain: {}\n".format(
             json.dumps(worker_lookup_result, indent=4)
         ))
         if "result" in worker_lookup_result and \
@@ -187,9 +187,9 @@ class EthereumConnector:
             if worker_lookup_result["result"]["totalCount"] != 0:
                 return worker_lookup_result["result"]["ids"]
             else:
-                logging.error("No workers found")
+                logging.error("No workers found on blockchain")
         else:
-            logging.error("Failed to lookup worker")
+            logging.error("Failed to lookup workers on blockchain")
         return []
 
     def _submit_work_order_and_get_result(self, work_order_id, worker_id,
@@ -198,10 +198,11 @@ class EthereumConnector:
         This function submits work order using work_order_submit direct API
         """
         work_order_impl = JRPCWorkOrderImpl(self._config)
+        logging.info("About to submit work order to kv storage")
         response = work_order_impl\
             .work_order_submit(work_order_id, worker_id, requester_id,
                                work_order_params, id=random.randint(0, 100000))
-        logging.info("Work order submit response : {}"
+        logging.info("Work order submit response : {}"\
                      .format(json.dumps(response, indent=4)))
 
         work_order_result = work_order_impl\
@@ -238,7 +239,7 @@ class EthereumConnector:
         worker_id = work_order_request["workerId"]
         requester_id = work_order_request["requesterId"]
         work_order_params = event["args"]["workOrderRequest"]
-
+        logging.info("Received event from blockchain")
         response = self\
             ._submit_work_order_and_get_result(work_order_id, worker_id,
                                                requester_id,
