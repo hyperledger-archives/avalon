@@ -37,8 +37,8 @@ rm -f $SRCDIR/config/Kv_Shared*
 cd $SRCDIR/common/python
 make clean
 
-# --------------- EXAMPLES ENCLAVE MANAGER ---------------
-cd $SRCDIR/examples/enclave_manager
+# --------------- ENCLAVE MANAGER ---------------
+cd $SRCDIR/enclave_manager
 SGX_MODE=${SGX_MODE:-SIM} make clean
 
 # --------------- COMMON SGX WORKLOAD ---------------
