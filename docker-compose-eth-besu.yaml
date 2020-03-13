@@ -67,7 +67,9 @@ services:
         enclave_manager --lmdb_url http://avalon-lmdb:9090
         tail -f /dev/null
       "
-
+    depends_on:
+      - avalon-lmdb
+    
   avalon-lmdb:
     container_name: avalon-lmdb
     image: avalon-lmdb-dev
