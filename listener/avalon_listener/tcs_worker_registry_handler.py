@@ -19,6 +19,9 @@ from avalon_sdk.worker.worker_details import WorkerStatus
 
 from jsonrpc.exceptions import JSONRPCDispatchException
 
+from connectors.common.db_helper.worker_registry_lmdb_helper \
+    import WorkerRegistryLmdbHelper
+
 logger = logging.getLogger(__name__)
 
 
@@ -51,7 +54,7 @@ class TCSWorkerRegistryHandler:
             - kv_helper is a object of lmdb database
         """
 
-        self.kv_helper = kv_helper
+        self.db_helper = WorkerRegistryLmdbHelper(kv_helper)
         self.worker_pool = []
         self.__worker_registry_handler_on_boot()
 # ------------------------------------------------------------------------------------------------
@@ -62,13 +65,11 @@ class TCSWorkerRegistryHandler:
         """
 
         worker_list = []
-        worker_list = self.kv_helper.lookup("workers")
+        worker_list = self.db_helper.get_all_workers()
 
         # Initial Worker details are loaded
         self.worker_pool = worker_list
-        organisation_id = self.kv_helper.lookup("registries")
-        for o_id in organisation_id:
-            self.kv_helper.remove("registries", o_id)
+        self.db_helper.cleanup_registries()
 
         # Adding a new entry that corresponds to this handler, its URI, etc.
         # json with byte32 orgID, string uri, byte32 scAddr,
@@ -83,7 +84,7 @@ class TCSWorkerRegistryHandler:
         response = {}
         response['id'] = "regid"
 
-        set_response = self.kv_helper.set("registries", "regid", value)
+        set_response = self.db_helper.save_registry("regid", value)
         if set_response:
             response['result'] = "WorkerRegistryHandleronBoot Successful"
             response['error'] = {}
@@ -92,12 +93,12 @@ class TCSWorkerRegistryHandler:
             response['error'] = {}
             response['error']['code'] = WorkerError.UNKNOWN_ERROR
             response['error']['message'] = 'Unknown Error occurred during' + \
-                'worker registry handler boot up'
+                                           'worker registry handler boot up'
 
         return response
-# ------------------------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------------------------
+
     def WorkerRegister(self, **params):
         """
         Function to register a new worker to the enclave
@@ -107,8 +108,8 @@ class TCSWorkerRegistryHandler:
         """
 
         worker_id = must_get_worker_id(params)
-
-        if(self.kv_helper.get("workers", worker_id) is not None):
+        worker = self.db_helper.get_worker_with_id(worker_id)
+        if (worker is not None):
             raise JSONRPCDispatchException(
                 WorkerError.INVALID_PARAMETER_FORMAT_OR_VALUE,
                 "Worker Id already exists in the database." +
@@ -118,7 +119,7 @@ class TCSWorkerRegistryHandler:
         params["status"] = WorkerStatus.ACTIVE.value
 
         input_json_str = json.dumps(params)
-        self.kv_helper.set("workers", worker_id, input_json_str)
+        self.db_helper.save_worker(worker_id, input_json_str)
 
         raise JSONRPCDispatchException(
             WorkerError.SUCCESS, "Successfully Registered")
@@ -154,7 +155,7 @@ class TCSWorkerRegistryHandler:
 
         worker_id = must_get_worker_id(params)
 
-        value = self.kv_helper.get("workers", worker_id)
+        value = self.db_helper.get_worker_with_id(worker_id)
         if value:
             json_dict = json.loads(value)
             if not self.__validate_input_worker_status(params):
@@ -164,7 +165,7 @@ class TCSWorkerRegistryHandler:
 
             json_dict['status'] = params['status']
             value = json.dumps(json_dict)
-            self.kv_helper.set("workers", worker_id, value)
+            self.db_helper.save_worker(worker_id, value)
 
             raise JSONRPCDispatchException(
                 WorkerError.SUCCESS,
@@ -177,7 +178,7 @@ class TCSWorkerRegistryHandler:
 # ------------------------------------------------------------------------------------------------
     def __lookup_basic(self, is_lookup_next, params):
         # sync the work pool to that of DB
-        self.worker_pool = self.kv_helper.lookup("workers")
+        self.worker_pool = self.db_helper.get_all_workers()
 
         total_count = 0
         ids = []
@@ -190,7 +191,7 @@ class TCSWorkerRegistryHandler:
                 continue
 
             matched = True
-            value = self.kv_helper.get("workers", worker_id)
+            value = self.db_helper.get_worker_with_id(worker_id)
             if value:
                 worker = json.loads(value)
                 criteria = ["workerType", "organizationId",
@@ -250,7 +251,7 @@ class TCSWorkerRegistryHandler:
         worker_id = must_get_worker_id(params)
         # value retrieved is 'result' field as per Spec 5.3.8 Worker Retrieve
         # Response Payload
-        value = self.kv_helper.get("workers", worker_id)
+        value = self.db_helper.get_worker_with_id(worker_id)
 
         if value is None:
             raise JSONRPCDispatchException(
@@ -282,7 +283,7 @@ class TCSWorkerRegistryHandler:
 
         # value retrieved is 'result' field as per Spec 5.3.8 Worker Retrieve
         # Response Payload
-        value = self.kv_helper.get("workers", worker_id)
+        value = self.db_helper.get_worker_with_id(worker_id)
 
         if value is None:
             raise JSONRPCDispatchException(
@@ -295,7 +296,7 @@ class TCSWorkerRegistryHandler:
             json_dict["details"][item] = worker_details[item]
 
         value = json.dumps(json_dict)
-        self.kv_helper.set("workers", worker_id, value)
+        self.db_helper.save_worker(worker_id, value)
 
         raise JSONRPCDispatchException(
             WorkerError.SUCCESS, "Successfully Updated")

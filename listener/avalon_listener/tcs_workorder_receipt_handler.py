@@ -22,6 +22,9 @@ from error_code.error_status import ReceiptCreateStatus, SignatureStatus,\
 import avalon_crypto_utils.signature as signature
 from jsonrpc.exceptions import JSONRPCDispatchException
 
+from connectors.common.db_helper.workorder_receipt_lmdb_helper \
+    import WorkOrderReceiptLmdbHelper
+
 logger = logging.getLogger(__name__)
 
 
@@ -42,10 +45,8 @@ class TCSWorkOrderReceiptHandler:
             - kv_helper is a object of lmdb database
         """
 
-        self.kv_helper = kv_helper
+        self.db_helper = WorkOrderReceiptLmdbHelper(kv_helper)
         self.__workorder_receipt_on_boot()
-        # Special index 0xFFFFFFFF value to fetch last update to receipt
-        self.LAST_RECEIPT_INDEX = 1 << 32
         # Supported hashing and signing algorithms
         self.SIGNING_ALGORITHM = "SECP256K1"
         self.HASHING_ALGORITHM = "SHA-256"
@@ -73,7 +74,7 @@ class TCSWorkOrderReceiptHandler:
         input_json_str = params["raw"]
         input_value = json.loads(input_json_str)
 
-        wo_request = self.kv_helper.get("wo-requests", wo_id)
+        wo_request = self.db_helper.get_wo_req(wo_id)
         if wo_request is None:
             raise JSONRPCDispatchException(
                 JRPCErrorCodes.INVALID_PARAMETER_FORMAT_OR_VALUE,
@@ -81,13 +82,13 @@ class TCSWorkOrderReceiptHandler:
                 "hence invalid request"
             )
         else:
-            wo_receipt = self.kv_helper.get("wo-receipts", wo_id)
+            wo_receipt = self.db_helper.get_wo_receipt(wo_id)
             if wo_receipt is None:
                 status, err_msg = \
                     self.__validate_work_order_receipt_create_req(
                         input_value, wo_request)
                 if status is True:
-                    self.kv_helper.set("wo-receipts", wo_id, input_json_str)
+                    self.db_helper.save_wo_receipt(wo_id, input_json_str)
                     raise JSONRPCDispatchException(
                         JRPCErrorCodes.SUCCESS,
                         "Receipt created successfully"
@@ -104,7 +105,7 @@ class TCSWorkOrderReceiptHandler:
                     "Hence invalid parameter"
                 )
 
-# -----------------------------------------------------------------------------
+    # -----------------------------------------------------------------------------
 
     def __validate_work_order_receipt_create_req(self, wo_receipt_req,
                                                  wo_request):
@@ -179,7 +180,7 @@ class TCSWorkOrderReceiptHandler:
         input_value = json.loads(input_json_str)
 
         # Check if receipt for work order id is created or not
-        value = self.kv_helper.get("wo-receipts", wo_id)
+        value = self.db_helper.get_wo_receipt(wo_id)
 
         if value:
             # Receipt is created, validate update receipt request
@@ -188,7 +189,7 @@ class TCSWorkOrderReceiptHandler:
             if status is True:
                 # Load previous updates to receipt
                 updates_to_receipt = \
-                    self.kv_helper.get("wo-receipt-updates", wo_id)
+                    self.db_helper.get_wo_receipt_update(wo_id)
                 # If it is first update to receipt
                 if updates_to_receipt is None:
                     updated_receipt = []
@@ -220,8 +221,8 @@ class TCSWorkOrderReceiptHandler:
                             " is not allowed"
                         )
                 updated_receipt.append(input_value)
-                self.kv_helper.set("wo-receipt-updates", wo_id,
-                                   json.dumps(updated_receipt))
+                self.db_helper.save_receipt_update(wo_id,
+                                                   json.dumps(updated_receipt))
                 raise JSONRPCDispatchException(
                     JRPCErrorCodes.SUCCESS,
                     "Receipt updated successfully"
@@ -366,36 +367,17 @@ class TCSWorkOrderReceiptHandler:
 
     def WorkOrderReceiptRetrieve(self, **params):
         """
-        Function to retrieve the details of worker
+        Function to retrieve the details of work-order receipt
         Parameters:
-            - params is variable-length arugment list containing work order
-            receipt request request as defined in EEA spec 7.2.4
+            - params is variable-length argument list containing work order
+            receipt request as defined in EEA spec 7.2.4
         Returns jrpc response as defined in 7.2.5
         """
         wo_id = params["workOrderId"]
-
-        value = self.kv_helper.get("wo-receipts", wo_id)
-        if value:
-            receipt = json.loads(value)
-            receipt_updates = self.kv_helper.get("wo-receipt-updates", wo_id)
-            if receipt_updates is None:
-                receipt["params"]["receiptCurrentStatus"] = \
-                    receipt["params"]["receiptCreateStatus"]
-            else:
-                receipt_updates_json = json.loads(receipt_updates)
-                # Get the recent update to receipt
-                last_receipt = receipt_updates_json[len(receipt_updates_json)
-                                                    - 1]
-                receipt["params"]["receiptCurrentStatus"] = \
-                    last_receipt["updateType"]
-            return receipt["params"]
-        else:
-            raise JSONRPCDispatchException(
-                JRPCErrorCodes.INVALID_PARAMETER_FORMAT_OR_VALUE,
-                "Work order receipt for work order id {} not found in the "
-                "database. Hence invalid parameter".format(
-                    wo_id
-                ))
+        try:
+            return self.db_helper.retrieve_wo_receipt(wo_id)
+        except JSONRPCDispatchException:
+            raise
 
 # -----------------------------------------------------------------------------
 
@@ -403,7 +385,7 @@ class TCSWorkOrderReceiptHandler:
         """
         Function to retrieve the update to work order receipt
         Parameters:
-            - params is variable-length arugment list containing work order
+            - params is variable-length argument list containing work order
             update retrieve request as defined in EEA spec 7.2.6
         Returns:
             Jrpc response as defined in EEA spec 7.2.7
@@ -420,41 +402,9 @@ class TCSWorkOrderReceiptHandler:
         # starts from 1
         update_index = input_params["updateIndex"]
         # Load list of updates to the receipt
-        receipt_updates = self.kv_helper.get("wo-receipt-updates", wo_id)
-
-        if receipt_updates:
-            receipt_updates_json = json.loads(receipt_updates)
-            total_updates = len(receipt_updates_json)
-            if update_index <= 0:
-                raise JSONRPCDispatchException(
-                    JRPCErrorCodes.INVALID_PARAMETER_FORMAT_OR_VALUE,
-                    "Update index should be positive non-zero number."
-                    " Hence invalid parameter")
-            elif update_index > total_updates:
-                if update_index == self.LAST_RECEIPT_INDEX:
-                    # set to the index of last update to receipt
-                    update_index = total_updates - 1
-                else:
-                    raise JSONRPCDispatchException(
-                        JRPCErrorCodes.INVALID_PARAMETER_FORMAT_OR_VALUE,
-                        "Update index is larger than total update count."
-                        " Hence invalid parameter")
-            else:
-                # If the index is less than total updates
-                # then decrement by one since it is zero based array
-                update_index = update_index - 1
-            update_to_receipt = receipt_updates_json[update_index]
-            # If updater id is present then check whether it matches
-            if updater_id:
-                if update_to_receipt["updaterId"] != updater_id:
-                    raise JSONRPCDispatchException(
-                        JRPCErrorCodes.INVALID_PARAMETER_FORMAT_OR_VALUE,
-                        "Update index and updater id doesn't match"
-                        " Hence invalid parameter")
-            update_to_receipt["updateCount"] = total_updates
-            return update_to_receipt
-        else:
-            raise JSONRPCDispatchException(
-                JRPCErrorCodes.INVALID_PARAMETER_FORMAT_OR_VALUE,
-                "There is no updates available to this receipt"
-                " Hence invalid parameter")
+        try:
+            return self.db_helper.retrieve_wo_receipt_update(wo_id,
+                                                             update_index,
+                                                             updater_id)
+        except JSONRPCDispatchException:
+            raise
