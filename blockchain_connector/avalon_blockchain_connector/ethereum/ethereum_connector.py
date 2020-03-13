@@ -41,7 +41,6 @@ from avalon_sdk.direct.jrpc.jrpc_work_order \
 logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(message)s", level=logging.INFO)
 
-LISTENER_SLEEP_DURATION = 5  # seconds
 # Return codes
 SUCCESS = 0
 ERROR = 1
@@ -187,9 +186,9 @@ class EthereumConnector:
             if worker_lookup_result["result"]["totalCount"] != 0:
                 return worker_lookup_result["result"]["ids"]
             else:
-                logging.error("No workers found on blockchain")
+                logging.error("No workers found in ethereum blockchain")
         else:
-            logging.error("Failed to lookup workers on blockchain")
+            logging.error("Failed to lookup worker in ethereum blockchain")
         return []
 
     def _submit_work_order_and_get_result(self, work_order_id, worker_id,
