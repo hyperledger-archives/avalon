@@ -38,7 +38,7 @@ install:
 	pip3 install $(WHEEL_FILE)
 
 clean:
-	if [[ -f $(WHEEL_FILE) ]] ; then pip3 uninstall --yes $(WHEEL_FILE); fi
+	if [ -f $(WHEEL_FILE) ] ; then pip3 uninstall --yes $(WHEEL_FILE); fi
 	rm -rf build deps dist *.egg-info
 	rm -f crypto/crypto.py crypto/crypto_wrap.cpp
 	rm -f verify_report/verify_report.py verify_report/verify_report_wrap.cpp

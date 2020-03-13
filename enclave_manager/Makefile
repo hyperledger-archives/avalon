@@ -38,7 +38,7 @@ install:
 	pip3 install $(WHEEL_FILE)
 
 clean:
-	if [[ -f $(WHEEL_FILE) ]] ; then pip3 uninstall --yes $(WHEEL_FILE); fi
+	if [ -f $(WHEEL_FILE) ] ; then pip3 uninstall --yes $(WHEEL_FILE); fi
 	rm -f avalon_enclave_manager/avalon_enclave.py avalon_enclave_manager/avalon_enclave_wrap.cpp
 	rm -rf build deps dist *.egg-info
 	find . -iname '*.pyc' -delete
