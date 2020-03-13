@@ -174,11 +174,6 @@ The steps below will set up a Python virtual environment to run Avalon.
 13. Build the shared key/value storage modules:
  
     ```bash
-    cd $TCF_HOME/shared_kv_storage/db_store/packages
-    mkdir -p build
-    cd build
-    cmake ..
-    make
     cd $TCF_HOME/shared_kv_storage
     make
     make install

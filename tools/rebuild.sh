@@ -210,13 +210,6 @@ cd $TCF_HOME/sdk || error_exit "Failed to change to the directory"
 try python3 setup.py bdist_wheel
 try pip3 install dist/*.whl
 
-yell --------------- LMDB LISTENER ---------------
-cd $TCF_HOME/shared_kv_storage/db_store/packages || error_exit "Failed to change to the directory"
-mkdir -p build
-cd build
-try cmake ..
-try make
-
 yell --------------- SHARED KV STORAGE ---------------
 cd $TCF_HOME/shared_kv_storage || error_exit "Failed to change to the directory"
 try make
