@@ -22,17 +22,36 @@ ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update \
  && apt-get install -y -q \
     ca-certificates \
-    python3-pip \
     python3-toml \
     python3-requests \
     python3-colorlog \
     python3-twisted \
- && apt-get -y -q upgrade \
- && apt-get clean \
- && rm -rf /var/lib/apt/lists/*
+ && apt-get clean
 
 # Make Python3 default
 RUN ln -sf /usr/bin/python3 /usr/bin/python
+
+
+# -------------=== python build ===-------------
+
+#Build python intermediate docker image
+FROM ubuntu:bionic as python_image
+
+
+# Add necessary packages
+RUN apt-get update \
+ && apt-get install -y -q \
+    ca-certificates \
+    pkg-config \
+    python3-pip \
+    python3-dev \
+    make \
+ && apt-get clean
+
+# Install setuptools packages using pip because
+# these are not available in apt repository.
+RUN pip3 install setuptools
+
 
 # -------------=== Build openssl_image ===-------------
 
@@ -46,7 +65,6 @@ RUN apt-get update \
     make \
     wget \
     tar \
- && apt-get -y -q upgrade \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
 
@@ -64,35 +82,17 @@ RUN OPENSSL_VER=1.1.1d \
  && make install -j$THREADS
 
 
-# Build Avalon blockchain connector intermediate docker image
-FROM base_image as build_image
-# Add necessary packages to build
+# -------------=== common/cpp build ===-------------
+
+#Build common/cpp intermediate docker image
+FROM ubuntu:bionic as common_cpp_image
+
 RUN apt-get update \
  && apt-get install -y -q \
     pkg-config \
-    protobuf-compiler \
-    libprotobuf-dev \
-    software-properties-common \
-    dh-autoreconf \
-    ocaml \
-    xxd \
-    ocamlbuild \
     cmake \
-    make \
-    git \
-    swig \
- && apt-get -y -q upgrade \
- && apt-get clean \
- && rm -rf /var/lib/apt/lists/*
+    make
 
-
-# Installing web3 for ethereum
-RUN pip3 install --upgrade setuptools json-rpc web3 py-solc-x nose2
-
-# Install specific version of solc to support versions <0.6.0
-RUN python3 -m solcx.install v0.5.15
-
-RUN pip3 install nest_asyncio
 
 # Copy openssl build artifacts from openssl_image
 COPY --from=openssl_image /usr/local/ssl /usr/local/ssl
@@ -105,13 +105,7 @@ RUN ldconfig \
 
 ENV TCF_HOME=/project/avalon
 
-COPY VERSION /project/avalon/
-COPY ./bin /project/avalon/bin
 COPY ./common/cpp /project/avalon/common/cpp
-COPY ./common/python /project/avalon/common/python
-COPY ./common/crypto_utils /project/avalon/common/crypto_utils
-COPY ./sdk /project/avalon/sdk
-COPY ./blockchain_connector /project/avalon/blockchain_connector
 
 WORKDIR /project/avalon/common/cpp
 
@@ -120,23 +114,109 @@ RUN mkdir -p build \
   && cmake .. -DUNTRUSTED_ONLY=1 \
   && make
 
-#install avalon common module
+
+# -------------=== common/python build ===-------------
+
+#Build common/python intermediate docker image
+FROM python_image as common_python_image
+
+COPY VERSION /project/avalon/
+COPY ./bin /project/avalon/bin
+
+ENV TCF_HOME=/project/avalon
+
+COPY ./common/python /project/avalon/common/python
+
 WORKDIR /project/avalon/common/python
 
 RUN echo "Building Avalon Common Python\n" \
-  && make
+ && make
 
-#install avalon crypto module
+
+# -------------=== common/crypto_utils build ===-------------
+
+#Build common/crypto_utils intermediate docker image
+FROM python_image as common_crypto_utils_image
+
+RUN apt-get install -y -q \
+    swig
+
+# Copy openssl build artifacts from openssl_image
+COPY --from=openssl_image /usr/local/ssl /usr/local/ssl
+COPY --from=openssl_image /usr/local/bin /usr/local/bin
+COPY --from=openssl_image /usr/local/include /usr/local/include
+COPY --from=openssl_image /usr/local/lib /usr/local/lib
+
+RUN ldconfig \
+ && ln -s /etc/ssl/certs/* /usr/local/ssl/certs/
+
+COPY --from=common_cpp_image /project/avalon/common/cpp/build /project/avalon/common/cpp/build
+COPY VERSION /project/avalon/
+COPY ./bin /project/avalon/bin
+COPY ./common/cpp /project/avalon/common/cpp
+
+ENV TCF_HOME=/project/avalon
+
+COPY ./common/crypto_utils /project/avalon/common/crypto_utils
+
 WORKDIR /project/avalon/common/crypto_utils
 
 RUN echo "Building Avalon Common Crypto Python\n" \
-  && make
+ && make
+
+
+# -------------=== Avalon SDK build ===-------------
+
+#Build Avalon SDK intermediate docker image
+FROM python_image as avalon_sdk_image
+
+COPY VERSION /project/avalon/
+COPY ./bin /project/avalon/bin
+COPY ./sdk /project/avalon/sdk
+
+ENV TCF_HOME=/project/avalon
 
 WORKDIR /project/avalon/sdk
-#install Avalon SDK package.
+
+#install Avalon SDK  package.
 RUN echo "Building Avalon SDK\n" \
  && make
 
+
+# Build Avalon blockchain connector docker image
+FROM python_image as build_image
+# Add necessary packages to build
+RUN apt-get install -y -q \
+    protobuf-compiler \
+    libprotobuf-dev \
+    software-properties-common \
+    dh-autoreconf \
+    ocaml \
+    xxd \
+    ocamlbuild \
+    cmake \
+    git \
+    swig \
+ && apt-get clean \
+ && rm -rf /var/lib/apt/lists/*
+
+# Installing web3 for ethereum
+RUN pip3 install --upgrade setuptools json-rpc web3 py-solc-x nose2
+
+# Install specific version of solc to support versions <0.6.0
+RUN python3 -m solcx.install v0.5.15
+
+RUN pip3 install nest_asyncio
+
+WORKDIR /project/avalon/blockchain_connector
+
+COPY VERSION /project/avalon/
+COPY ./bin /project/avalon/bin
+COPY ./blockchain_connector /project/avalon/blockchain_connector
+
+# Copy Python build artifacts
+COPY --from=common_python_image /project/avalon/common/python/dist/*.whl dist/
+COPY --from=avalon_sdk_image /project/avalon/sdk/dist/*.whl dist/
 
 # Install fabric python sdk
 RUN pip3 install virtualenv \
@@ -145,6 +225,7 @@ RUN pip3 install virtualenv \
 # install blockchain connector module
 RUN cd /project/avalon/blockchain_connector \
    && make
+
 
 # Build final image and install modules
 FROM base_image as final_image
@@ -156,17 +237,16 @@ WORKDIR /project/avalon/blockchain_connector
 COPY --from=build_image /usr/local/ /usr/local
 COPY --from=build_image /root/.solcx /root/.solcx
 # Copy Python build artifacts
-COPY --from=build_image /project/avalon/common/python/dist/*.whl dist/
-COPY --from=build_image /project/avalon/common/crypto_utils/dist/*.whl dist/
-COPY --from=build_image /project/avalon/sdk/dist/*.whl dist/
+COPY --from=common_python_image /project/avalon/common/python/dist/*.whl dist/
+COPY --from=avalon_sdk_image /project/avalon/sdk/dist/*.whl dist/
+COPY --from=common_crypto_utils_image /project/avalon/common/crypto_utils/dist/*.whl dist/
 COPY --from=build_image /project/avalon/blockchain_connector/dist/*.whl dist/
 
 # Installing wheel file requires python3-pip package.
 # python3-pip package will increase size of final docker image.
 # So remove python3-pip package and dependencies.
-RUN apt-get update \
- && apt-get install -y -q python3-pip \
- && echo "Install Common Python, Crypto, SDK & Blockchain_connector packages\n" \
+RUN apt-get install -y -q python3-pip \
+ && echo "Install Common Python, SDK & Blockchain_connector packages\n" \
  && pip3 install dist/*.whl \
  && echo "Remove unused packages from image\n" \
  && apt-get autoremove --purge -y -q python3-pip \
