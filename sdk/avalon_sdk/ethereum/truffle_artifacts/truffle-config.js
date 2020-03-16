@@ -47,17 +47,24 @@ module.exports = {
     //  port: 8545,            // Standard Ethereum port (default: none)
     //  network_id: "*",       // Any network (default: none)
     // },
-       avalon: {
-            host: "localhost",
+       avalon_besu: {
+            host: "localhost",  // Meant for Hyperledger Besu network when contract deployed from host network
             network_id: "*",
             port: 22001,
             gas: 4500000,
             gasPrice: 0
        },
-       develop: {
-            host: "10.66.245.80",     // Localhost (default: none)
-            port: 8545,            // Standard Ethereum port (default: none)
-            network_id: "*",       // Any network (default: none)
+       avalon_besu_docker: {     // Meant for Hyperledger Besu network when contract deployed from same network
+            host: "172.13.0.3",  // Private IP of local Besu node used in https://github.com/hyperledger/avalon/blob/master/docs/BesuProxyModel.md
+            network_id: "*",
+            port: 8555,
+            gas: 4500000,
+            gasPrice: 0
+       },
+       develop: {                   // Meant for Ganache nodes
+            host: "10.66.245.80",   // Localhost (default: none). IP address of host machine
+            port: 8545,             // Standard Ethereum port (default: none)
+            network_id: "*",        // Any network (default: none)
        }
 
 

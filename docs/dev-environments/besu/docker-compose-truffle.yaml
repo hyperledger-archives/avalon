@@ -1,0 +1,42 @@
+# Copyright 2020 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+version: '3.5'
+
+services:
+    truffle-envt-setup:
+      image: truffle-envt:latest
+      build:
+        context: ./
+        dockerfile: ./Dockerfile.truffle-envt
+      volumes:
+        - ./my_project:/my_project
+        - $TCF_HOME/sdk/avalon_sdk/ethereum/contracts/proxy-model:/contracts
+        - $TCF_HOME/sdk/avalon_sdk/ethereum/truffle_artifacts:/truffle_artifacts
+      container_name: truffle-envt-setup
+      command: "bash -c \"\
+          cd my_project && \
+          truffle init && \
+          cp /contracts/*.sol ./contracts/ && \
+          cp /truffle_artifacts/truffle-config.js ./ && \
+          cp /truffle_artifacts/2_deploy_contracts.js ./migrations/ && \
+          sleep 20s && \
+          truffle migrate --network avalon_besu_docker
+          \""
+
+networks:
+  default:
+    external:
+      name: besu_local_net
+  
