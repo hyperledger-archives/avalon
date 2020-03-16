@@ -111,6 +111,8 @@ class EventListener(base.ClientBase):
             await self._channel_event_hub.connect(False)
         except grpc.RpcError as ex:
             # This is expected when event hub gets disconnected
+            logger.info("Event handler disconnected")
+        finally:
             self._save_config()
 
     async def stop_event_handling(self, seconds):

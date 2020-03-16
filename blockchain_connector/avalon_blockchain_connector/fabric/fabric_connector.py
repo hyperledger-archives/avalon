@@ -25,12 +25,13 @@ import nest_asyncio
 from utility.hex_utils import byte_array_to_hex_str
 from avalon_sdk.fabric import base
 from avalon_sdk.fabric import event_listener
-from avalon_sdk.worker.worker_details import WorkerType
+from avalon_sdk.worker.worker_details import WorkerType, WorkerStatus
 from error_code.error_status import WorkOrderStatus
 from avalon_sdk.direct.jrpc.jrpc_worker_registry import JRPCWorkerRegistryImpl
 from avalon_sdk.direct.jrpc.jrpc_work_order import JRPCWorkOrderImpl
 from avalon_sdk.fabric.fabric_worker_registry import FabricWorkerRegistryImpl
 from avalon_sdk.fabric.fabric_work_order import FabricWorkOrderImpl
+from avalon_sdk.contract_response.contract_response import ContractResponse
 
 logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(message)s", level=logging.INFO)
@@ -75,17 +76,43 @@ class FabricConnector():
         """
         Check for existing worker and update worker to fabric blockchain
         """
-        worker_type = WorkerType.TEE_SGX
+        # First get all the workers from the blockchain
         req_id = 15
-        lookup_result = self.__jrpc_worker.worker_lookup(
+        bc_workers = self.__fabric_worker.worker_lookup(
+            worker_type=WorkerType.TEE_SGX,
+        )
+        logging.info("Workers in blockchain {}".format(
+            bc_workers
+        ))
+        # Set worker status to Decommissioned.
+        if bc_workers and bc_workers[0] > 0:
+            for worker in bc_workers[2]:
+                update_status = self.__fabric_worker.worker_set_status(
+                    worker,
+                    WorkerStatus.DECOMMISSIONED
+                )
+                if update_status == ContractResponse.SUCCESS:
+                    logging.info("Set worker {} status to {}".format(
+                        worker,
+                        WorkerStatus.DECOMMISSIONED
+                    ))
+                else:
+                    logging.info("Failed to set worker {} status".format(
+                        worker
+                    ))
+        else:
+            logging.info("No active workers in blockchain")
+        # Get active workers from avalon
+        worker_type = WorkerType.TEE_SGX
+        active_workers = self.__jrpc_worker.worker_lookup(
             worker_type=worker_type, id=req_id)
         logging.info("worker lookup result {}".format(
-            lookup_result
+            active_workers
         ))
-        if lookup_result and 'result' in lookup_result:
+        if active_workers and 'result' in active_workers:
             # Since currently we have only worker, get the first worker
-            if lookup_result['result']['totalCount'] > 0:
-                worker_id = lookup_result['result']['ids'][0]
+            if active_workers['result']['totalCount'] > 0:
+                worker_id = active_workers['result']['ids'][0]
                 worker_result = self.__jrpc_worker.worker_retrieve(
                     worker_id, req_id+1)
                 logging.info("worker retrieve result {}".format(
@@ -101,7 +128,7 @@ class FabricConnector():
                         [worker['applicationTypeId']],
                         json.dumps(worker['details'])
                     )
-                    if status == 0:
+                    if status == ContractResponse.SUCCESS:
                         logging.info(
                             "Added worker to fabric blockchain")
                     else:
@@ -109,11 +136,11 @@ class FabricConnector():
                             "Failed to add worker to fabric \
                                 blockchain")
                 else:
-                    logging.info("Failed to retrieve worker")
+                    logging.info("Failed to retrieve avalon workers")
             else:
-                logging.info("No workers are available!")
+                logging.info("No avalon workers are available!")
         else:
-            logging.info("Failed to lookup workers")
+            logging.info("Failed to lookup avalon workers")
 
     def get_work_order_event_handler_tasks(self):
         """
@@ -145,9 +172,6 @@ class FabricConnector():
         jrpc_req_id = 301
         # Add workorder id to work order list
         payload_string = event['payload'].decode("utf-8")
-        logging.info("work order request {}\n {}".format(
-            payload_string, type(payload_string)
-        ))
         work_order_req = json.loads(payload_string)
         work_order_id = work_order_req['workOrderId']
         # Submit the work order to listener
@@ -163,24 +187,25 @@ class FabricConnector():
             response
         ))
         if response and 'error' in response and \
-                response['error']['code'] == WorkOrderStatus.PENDING.value:
+            response['error']['code'] == WorkOrderStatus.PENDING.value:
             # get the work order result
             jrpc_req_id += 1
-            work_order_result = self.__jrpc_work_order.work_order_get_result(
-                work_order_req['workOrderId'],
-                jrpc_req_id
-            )
+            work_order_result = \
+                self.__jrpc_work_order.work_order_get_result(
+                    work_order_req['workOrderId'],
+                    jrpc_req_id
+                )
             logging.info("Work order get result {}".format(
                 work_order_result
             ))
-            if work_order_result and 'result' in work_order_result:
+            if work_order_result:
                 logging.info("Commit work order result to blockchain")
                 # call to chain code to store result to blockchain
                 status = self.__fabric_work_order.work_order_complete(
                     work_order_id,
-                    json.dumps(work_order_result['result'])
+                    json.dumps(work_order_result)
                 )
-                if status == 0:
+                if status == ContractResponse.SUCCESS:
                     # remove the entry from work order list
                     logging.info(
                         "Chaincode invoke call work_order_complete success"

@@ -32,7 +32,7 @@ services:
       - /tmp/.X11-unix:/tmp/.X11-unix
       # To store the bookmark file to host machine,
       # it is required for fabric event listening
-      - ~/mywork/vars/blockmark:/project/TrustedComputeFramework/examples/apps/generic_client/blockmark
+      - ~/mywork/vars/blockmark:/project/avalon/examples/apps/generic_client/blockmark
       - ./examples/apps/generic_client/:/project/avalon/examples/apps/generic_client/
       - ~/.Xauthority:/root/.Xauthority
       - ~/mywork/vars/keyfiles:/keyfiles
@@ -146,6 +146,7 @@ services:
       # interact with fabric blockchain
       - ~/mywork/vars/keyfiles:/keyfiles
       - ~/mywork/vars/mychannel_network.json:/project/avalon/sdk/avalon_sdk/fabric/network.json
+      - ~/mywork/vars/blockmark:/project/avalon/blockchain_connector/blockmark
     depends_on:
       - avalon-listener
       - avalon-enclave-manager

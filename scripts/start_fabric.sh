@@ -18,8 +18,8 @@
 # default fabric version is set to 1.4.4
 FABRIC_VERSION=1.4.4
 CHAIN_CODE_VERSION=1.0
-MINIFAB=~/mywork/minifab
 WORK_DIR=~/mywork
+MINIFAB=$WORK_DIR/minifab
 
 # Default chaincode path is different for 1.4.4 and 2.0
 DEFAULT_CHAIN_CODE_PATH=""
@@ -31,12 +31,11 @@ fi
 
 check_if_cc_artifacts_exists()
 {
-    chain_codes=("registry", "worker", "order", "receipt")
-    artifact_path="$WORK_DIR/vars/chaincode/"
+    artifact_path="$WORK_DIR/vars/chaincode"
     if expr $FABRIC_VERSION '=' 1.4.4>/dev/null; then
         # In 1.4.4 go chain code build targets will be
         # in $WORK_DIR/vars/chaincode/<chaincode_name>/go/vendor
-        lang="/go/"
+        lang="go"
         artifact_name="vendor"
     elif expr $FABRIC_VERSION '=' 2.0>/dev/null; then
         # In 2.0 chain code build targets will be in
@@ -45,32 +44,37 @@ check_if_cc_artifacts_exists()
         lang=""
         artifact_name="_go_$CHAIN_CODE_VERSION.tar.gz"
     fi
-    for i in $chain_codes
+    exists=1
+    for i in "registry" "worker" "order" "receipt" ;
     do
-        chaincode_artifact=$artifact_path$i$lang$artifact_name
-        if [ ! -f $chaincode_artifact ]; then
-            return 0
-        else
+        chaincode_artifact="$artifact_path/$i/$lang/$artifact_name"
+        if [ -f "$chaincode_artifact" ]; then
             continue
+        else
+            exists=0
+            break
         fi
     done
-    return 1
+    return $exists
 }
+
 if [ -f "$MINIFAB" ]; then
-    echo "minifab is already installed in ~/mywork"
+    echo "minifab is already installed in $MINIFAB"
 else
-    mkdir -p ~/mywork && cd ~/mywork && curl -o minifab -sL https://tinyurl.com/twrt8zv && chmod +x minifab
+    mkdir -p $WORK_DIR && cd $WORK_DIR && curl -o minifab -sL https://tinyurl.com/twrt8zv && chmod +x minifab
 fi
 
 if [[ ! -v TCF_HOME ]]; then
     echo "TCF_HOME is not set"
     exit
 fi
-cd ~/mywork
-export PATH=~/mywork/:$PATH
+cd $WORK_DIR
+export PATH=$WORK_DIR/:$PATH
 # If we copy chaincode files everytime, go build take more time to generate
-# build artifcat.
-if check_if_cc_artifacts_exists; then
+# build artifact.
+check_if_cc_artifacts_exists
+exist=$?
+if [ "$exist" -eq "1" ]; then
     echo "Chain codes are built and use existing built artifacts"
 else
     mkdir -p ./vars/chaincode
@@ -84,6 +88,9 @@ if [[ ! $(docker ps --format '{{.Names}}' |grep "peer*") ]]; then
     # This file will be used by generic client to
     # register event
     echo "0">$WORK_DIR/vars/blockmark
+    # Delete the old blockmark files.
+    rm -rf $TCF_HOME/blockchain_connector/blockmark
+    rm -rf $TCF_HOME/examples/apps/generic_client/blockmark
     # Since cli container is creating go package by downloading
     # go external dependencies and it need proxy configurations
     # to access internet. Passing proxy settings for cli.
