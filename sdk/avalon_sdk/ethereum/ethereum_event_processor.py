@@ -22,11 +22,12 @@ from eth_abi import decode_abi
 from utility.hex_utils import is_valid_hex_str
 from avalon_sdk.ethereum.ethereum_wrapper import get_keccak_for_text
 from avalon_sdk.http_client.http_jrpc_client import HttpJrpcClient
+from avalon_sdk.interfaces.event_processor import EventProcessor
 
 logging.basicConfig(
     format='%(asctime)s - %(levelname)s - %(message)s', level=logging.INFO)
 
-LISTENER_SLEEP_DURATION = 5  # second
+LISTENER_SLEEP_DURATION = 2  # second
 
 
 class BlockchainInterface:
@@ -79,7 +80,6 @@ class BlockchainInterface:
         else:
             return True
 
-
 def get_last_read_block():
     f = None
     try:
@@ -87,7 +87,7 @@ def get_last_read_block():
         block_num = f.readline()
         return 0 if block_num == '' else int(block_num)
     except FileNotFoundError as e:
-        logging.error(e)
+        logging.debug(e)
         return 0
     finally:
         if f is not None:
@@ -159,7 +159,7 @@ def normalize_event(evt, wo_submitted_hash, wo_completed_hash):
     return parse_jrpc_evt(evt, wo_submitted_hash, wo_completed_hash)
 
 
-class EventProcessor:
+class EthereumEventProcessor(EventProcessor):
     def __init__(self, config):
         self._config = config
         self._uri_client = HttpJrpcClient(config["ethereum"]["event_provider"])
@@ -170,16 +170,15 @@ class EventProcessor:
             "workOrderSubmitted(bytes32,bytes32,bytes32,string,"
             + "uint256,address,bytes4)")
 
-    async def listener(self, event_filter):
-        logging.info("Started listener for events from blockchain")
-        while True:
-            # Check for any new event logs since the last poll
-            # on this filter. Though using events, this is not
-            # fully asynchronous.
-            for event in event_filter.get_new_entries():
-                await self.queue.put(event)
-                logging.debug("Event pushed into listener Queue")
-            await asyncio.sleep(LISTENER_SLEEP_DURATION)
+    async def get_events(self, event_filter, *kargs, **kwargs):
+        """
+        This function makes a call to web3 based event_filter to poll
+        for new events.
+        Returns:
+            Events received from the event source as per the filter
+        """
+        await asyncio.sleep(LISTENER_SLEEP_DURATION)
+        return event_filter.get_new_entries()
 
     async def jrpc_listener(self, event_filter):
         logging.info("Started jrpc listener for events from blockchain")
@@ -215,54 +214,27 @@ class EventProcessor:
 
             await asyncio.sleep(LISTENER_SLEEP_DURATION)
 
-    async def handler(self, callback, *kargs, **kwargs):
-        logging.info("Started handler to handle events")
-        while True:
-            event = await self.queue.get()
-            logging.debug("Event popped from listener queue")
-            normalized_event = normalize_event(event, self._wo_submitted_hash,
-                                               self._wo_completed_hash)
-
-            set_last_read_block(normalized_event["blockNumber"])
-
-            callback(normalized_event, *kargs, **kwargs)
-            self.queue.task_done()
-
-    async def sync_handler(self, *kargs, **kwargs):
-        logging.info("Started synchronous handler to handle an event")
-        event = await self.queue.get()
-        logging.debug("Event popped from listener queue")
+    def process_and_delegate(self, event, callback, *kargs, **kwargs):
+        """
+        This function normalizes an event (which could vary in format).It
+        then delegates the normalized event to the callback for further
+        handling.
+        """
         normalized_event = normalize_event(event, self._wo_submitted_hash,
                                            self._wo_completed_hash)
         set_last_read_block(normalized_event["blockNumber"])
-        self.queue.task_done()
+        callback(normalized_event, *kargs, **kwargs)
+
+    def process_and_get(self, event, *kargs, **kwargs):
+        """
+        This function also normalizes an event passed to it.
+        Returns:
+            The normalized event
+        """
+        normalized_event = normalize_event(event, self._wo_submitted_hash,
+                                           self._wo_completed_hash)
+        set_last_read_block(normalized_event["blockNumber"])
         return normalized_event
-
-    async def start(self, event_filter, callback, *kargs, **kwargs):
-        self.queue = asyncio.Queue()
-        loop = asyncio.get_event_loop()
-        self.listeners = self.get_listeners(loop, event_filter)
-        self.handlers = [loop.create_task(self.handler(
-            callback, *kargs, **kwargs)) for _ in range(1)]
-
-        await asyncio.gather(*self.listeners)  # infinite loop
-        await self.queue.join()  # this code should never run
-        await self.stop()  # this code should never run
-
-    async def get_event_synchronously(self, event_filter, *kargs, **kwargs):
-        """
-        Get a single event synchronously using the event_filter
-        provided.
-        Returns an event received for the event_filter used.
-        """
-        self.queue = asyncio.Queue()
-        loop = asyncio.get_event_loop()
-        self.listeners = self.get_listeners(loop, event_filter)
-        self.handlers = [loop.create_task(self.sync_handler(*kargs, **kwargs))]
-
-        handler_result = await asyncio.gather(*self.handlers)
-
-        return handler_result
 
     def get_listeners(self, loop, event_filter):
         # Check if the event_filter is an id returned from createNewFilter
@@ -275,9 +247,19 @@ class EventProcessor:
             return [loop.create_task(
                 self.listener(event_filter)) for _ in range(1)]
 
+    def get_handlers(self, loop, callback, *kargs, **kwargs):
+        """
+        This method is a wrapper to get handler tasks.
+        Returns:
+            A list of handler tasks
+        """
+        return [loop.create_task(self.handler(
+                callback, *kargs, **kwargs)) for _ in range(1)]
+        
     async def stop(self):
         for process in self.listeners:
             process.cancel()
         for process in self.handlers:
             process.cancel()
         logging.debug("---exit---")
+

@@ -21,8 +21,8 @@ from utility.hex_utils import is_valid_hex_str
 
 from avalon_sdk.worker.worker_details import WorkerStatus, WorkerType
 from avalon_sdk.ethereum.ethereum_wrapper import EthereumWrapper
-from avalon_sdk.ethereum.ethereum_listener \
-    import BlockchainInterface, EventProcessor
+from avalon_sdk.ethereum.ethereum_event_processor \
+    import BlockchainInterface, EthereumEventProcessor
 from avalon_sdk.interfaces.work_order_proxy \
     import WorkOrderProxy
 
@@ -174,14 +174,14 @@ class EthereumWorkOrderProxyImpl(WorkOrderProxy):
         listener = w3.newListener(contract, "workOrderCompleted")
 
         try:
-            daemon = EventProcessor(self._config)
+            daemon = EthereumEventProcessor(self._config)
             # Wait for the workOrderCompleted event after starting the
             # listener and handler
             event = asyncio.get_event_loop()\
                 .run_until_complete(daemon.get_event_synchronously(listener))
 
             # Get the first element as this is a list of one event
-            # obtained from gather() in ethereum_listener
+            # obtained from gather() in ethereum_event_processor
             return event[0]["args"]["workOrderResponse"]
         except KeyboardInterrupt:
             asyncio.get_event_loop().run_until_complete(daemon.stop())

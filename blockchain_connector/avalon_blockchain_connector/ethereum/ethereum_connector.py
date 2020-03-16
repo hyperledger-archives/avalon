@@ -30,8 +30,8 @@ from avalon_sdk.ethereum.ethereum_worker_registry \
     import EthereumWorkerRegistryImpl
 from avalon_sdk.ethereum.ethereum_wrapper \
     import EthereumWrapper
-from avalon_sdk.ethereum.ethereum_listener \
-    import BlockchainInterface, EventProcessor
+from avalon_sdk.ethereum.ethereum_event_processor \
+    import BlockchainInterface, EthereumEventProcessor
 from avalon_sdk.direct.jrpc.jrpc_worker_registry \
     import JRPCWorkerRegistryImpl
 from avalon_sdk.direct.jrpc.jrpc_work_order \
@@ -271,7 +271,7 @@ class EthereumConnector:
         listener = w3.newListener(contract, "workOrderSubmitted")
 
         try:
-            daemon = EventProcessor(self._config)
+            daemon = EthereumEventProcessor(self._config)
             asyncio.get_event_loop().run_until_complete(daemon.start(
                 listener,
                 self.handleEvent,
