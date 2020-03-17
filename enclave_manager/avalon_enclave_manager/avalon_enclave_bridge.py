@@ -116,7 +116,7 @@ def initialize_with_configuration(config):
     if missing_keys:
         raise \
             ValueError(
-                'TCF enclave config file missing the following keys: '
+                'Avalon enclave config file missing the following keys: '
                 '{}'.format(
                     ', '.join(sorted(list(missing_keys)))))
     # IAS is not initialized in SGX SIM mode
@@ -203,7 +203,7 @@ def create_signup_info(originator_public_key_hash, nonce):
         return None
 
     # We don't really have any reason to call back down into the enclave
-    # as we have everything we now need.  For other objects such as wait
+    # as we have everything we now need. For other objects such as wait
     # timer and certificate they are serialized into JSON down in C++ code.
     #
     # Start building up the signup info dictionary we will serialize

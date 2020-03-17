@@ -76,7 +76,7 @@ def encrypt_data(data, encryption_key, iv=None):
     Function to encrypt data based on encryption key and iv
     Parameters:
         - data is each item in inData or outData part of workorder request
-          as per TCF API 6.1.7 Work Order Data Formats
+          as per Trusted Compute EEA API 6.1.7 Work Order Data Formats
         - encryption_key is the key used to encrypt the data
         - iv is an initialization vector if required by the data encryption
           algorithm.
@@ -102,7 +102,7 @@ def decrypt_data(encryption_key, data, iv=None):
           algorithm.
           The default is all zeros.
         - data is the parameter data in outData part of workorder request as
-          per TCF API 6.1.7 Work Order Data Formats.
+          per Trusted Compute EEA API 6.1.7 Work Order Data Formats.
     Returns decrypted data as a string
     """
     if not data:
@@ -129,7 +129,7 @@ def decrypted_response(input_json, session_key, session_iv, data_key=None,
     Parameters:
         - input_json is a dictionary object containing the work order response
           payload
-          as per TCF API 6.1.2
+          as per Trusted Compute EEA API 6.1.2
         - session_key is the key used to decrypt the encrypted data of the
           response.
         - session_iv is an initialization vector corresponding to session_key.

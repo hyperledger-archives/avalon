@@ -18,9 +18,9 @@
 * [Example Applications](../examples/apps/)
 
 ## Source Code
-* [TCF source code repository, https://github.com/hyperledger/avalon](https://github.com/hyperledger/avalon)
+* [Avalon source code repository, https://github.com/hyperledger/avalon](https://github.com/hyperledger/avalon)
 * [Building source code](../BUILD.md)
-* [Example TCF applications](../examples/apps/)
+* [Example Avalon applications](../examples/apps/)
 * [Contributing source code](../CONTRIBUTING.md)
 
 ## Reference

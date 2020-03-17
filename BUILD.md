@@ -18,7 +18,7 @@ The Docker-based build is recommended.
 - [Docker-based Build and Execution](#dockerbuild)
 - [Standalone Build](#standalonebuild)
     - [Prerequisites](#prerequisites)
-    - [Installing Avalon Using Scripts](#installtcf)
+    - [Installing Avalon Using Scripts](#install)
 - [Testing](#testing)
     - [Troubleshooting](#troubleshooting)
     - [Troubleshooting: Standalone Build](#troubleshootingstandalone)
@@ -62,7 +62,7 @@ Follow the instructions below to execute a Docker-based build and execution.
 Follow the [PREREQUISITES document](PREREQUISITES.md) to install and configure
 components on which Hyperledger Avalon depends.
 
-## <a name="installtcf"></a>Standalone: Installing Avalon Using Scripts
+## <a name="install"></a>Standalone: Installing Avalon Using Scripts
 This section describes how to get started with Avalon quickly using provided
 scripts to compile and install Avalon.
 The steps below will set up a Python virtual environment to run Avalon.
@@ -80,7 +80,7 @@ The steps below will set up a Python virtual environment to run Avalon.
 
    - Or, to use the latest branch, run this command:
      ```bash
-     git clone https://github.com/hyperledger/avalon 
+     git clone https://github.com/hyperledger/avalon
      ```
 
 3. Change to the Avalon source directory
@@ -172,7 +172,7 @@ The steps below will set up a Python virtual environment to run Avalon.
     ```
 
 13. Build the shared key/value storage modules:
- 
+
     ```bash
     cd $TCF_HOME/shared_kv_storage
     make
@@ -228,7 +228,7 @@ Follow these steps to run the `Demo.py` testcase:
       python3 Demo.py --input_dir ./json_requests/ \
          --connect_uri "http://avalon-listener:1947" work_orders/output.json
       ```
-3. The response to the Avalon listener and Intel&reg; SGX enclave Manager
+3. The response to the Avalon listener and Intel&reg; SGX Enclave Manager
    can be seen at Terminal 1
 4. The response to the test case request can be seen at Terminal 2
 5. If you wish to exit the Avalon program, press `Ctrl-c`
@@ -267,4 +267,3 @@ See [examples/apps/heart_disease_eval](examples/apps/heart_disease_eval)
   then you need to set `LD_LIBRARY_PATH` with:
   `source /opt/intel/sgxsdk/environment` .
   For details, see [PREREQUISITES](PREREQUISITES.md)
-

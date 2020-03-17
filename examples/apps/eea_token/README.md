@@ -5,21 +5,21 @@ EEA execution logic based on token requests.
 See also
 https://github.com/EntEthAlliance/Trusted-Token token_validation.cpp
 
-This application is for execution on SCONE platform execution.
+This application is for execution on the SCONE platform.
 For other Intel SGX frameworks, please directly call the method
 `string token_valid_procedure(string input)` in `execution_logic.cpp`.
 
 ## Input Format
 
-- Issue/burn tokens input
+- Issue/burn tokens input format
 
   `issue_burn_tokens[]: [org_ID, [member_employee_ID, requested_EEA_activity, activity_realized]]`
 
-- Redeem tokens input
+- Redeem tokens input format
 
   `redeem[]:[org_ID, redeem_token_number]`
 
-- Share tokens input
+- Share tokens input format
 
   `share[]: [ord_ID, share_to_amount[share_token_number, share_to]]`
 
@@ -64,12 +64,12 @@ did:ethr:8a5d9...61||100, did:ethr:8a5d9...64||105, did:ethr:111d9...11||100, di
 - Line 3 is the issue/burn token
 - Line 4 is the issue/burn individual reputation
 
-### Redeem Rokens Result 
+### Redeem Rokens Result
 
 ```
 2
 0
-did:ethr:8a5d9...68||100, did:ethr:111d9...01||90 
+did:ethr:8a5d9...68||100, did:ethr:111d9...01||90
 ```
 
 ### Share Tokens Result
@@ -84,4 +84,3 @@ did:ethr:8a5d9...68||100||did:ethr:aaad9...01, did:ethr:8a5d9...68||200||did:eth
 smart contract API
 (i.e., feed to onchain smart contracts).
 Please check https://github.com/EntEthAlliance/Trusted-Token
-

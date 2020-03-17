@@ -91,8 +91,9 @@ class TCSWorkOrderHandler:
 # ---------------------------------------------------------------------------------------------
     def WorkOrderGetResult(self, **params):
         """
-        Function to process work order get result
-        This API corresponds to TCF API 6.1.4 Work Order Pull Request Payload
+        Function to process work order get result.
+        This API corresponds to Trusted Compute EEA API 6.1.4
+        Work Order Pull Request Payload
         Parameters:
             - params is variable-length arugment list containing work request
               as defined in EEA spec 6.1.4

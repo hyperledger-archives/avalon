@@ -34,7 +34,7 @@ def must_get_worker_id(params):
 class TCSWorkerRegistryHandler:
     """
      TCSWorkerRegistryHandler processes worker registry requests defined in the
-     TC API spec at Worker Registry Direct API and Worker Type Data API . It
+     TC API spec at Worker Registry Direct API and Worker Type Data API. It
      reads appropriate worker information from the KV storage to generate the
      response.
      All raised exceptions will be caught and handled by any
@@ -243,8 +243,8 @@ class TCSWorkerRegistryHandler:
         """
         Function to retrieve the details of worker
         Parameters:
-            - param is the 'param' object in the a worker request as per TCF
-                per TCF API 5.3.7 Worker Retrieve JSON Payload
+            - param is the 'param' object in the a worker request as per
+                Trusted Compute EEA API 5.3.7 Worker Retrieve JSON Payload
         """
 
         worker_id = must_get_worker_id(params)
