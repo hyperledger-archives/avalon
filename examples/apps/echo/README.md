@@ -35,4 +35,3 @@ To use:
     6. Messages sent and received are encrypted with the key specified
        in the JSON packet, then encoded in Base64.
 7.  In Terminal 1, press Ctrl-c to stop the Avalon Enclave Manager and Listener
-

@@ -12,8 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""This file implements a simple TCF LMDB wrapper for using multiple tables in
-a lmdb database.
+"""
+This file implements a simple Avalon LMDB wrapper for using multiple tables in
+a LMDB database.
 
 The method put stores key and value to the table. The method get will
 retrieve the value of the key. Lookup method will retrieve all the keys

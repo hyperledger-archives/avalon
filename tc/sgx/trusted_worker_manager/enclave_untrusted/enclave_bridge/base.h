@@ -28,7 +28,8 @@ namespace tcf {
         namespace base {
 
             /*
-              Tests if libtcf is built against the SGX simulator or the SGX runtime
+              Tests if libtcf is built against the Intel SGX simulator or the
+              Intel SGX runtime
             */
             int IsSgxSimulator();
 
@@ -45,7 +46,7 @@ namespace tcf {
                 const std::string& message = "No description given");
 
             /*
-              Returns the string associated with the last TCF error message.
+              Returns the string associated with the last Avalon error message.
             */
             std::string GetLastError(void);
 

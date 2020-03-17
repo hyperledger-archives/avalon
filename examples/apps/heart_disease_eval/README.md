@@ -60,7 +60,7 @@ The GUI client, `heart_gui.py` opens a X window on your display.
 You must run this on your graphical console or a terminal emulator that
 supports X Windows.
 
-1.  If needed, in file `docker/Dockerfile.tcf-dev` change `ENV DISPLAY`
+1.  If needed, in file `docker/Dockerfile` change `ENV DISPLAY`
     to the X Windows `$DISPLAY` value. By default, it is the console, `:0`
 2.  If needed, also update the Ethereum account and direct registry contract
     information in `sdk/avalon_sdk/tcf_connector.toml`

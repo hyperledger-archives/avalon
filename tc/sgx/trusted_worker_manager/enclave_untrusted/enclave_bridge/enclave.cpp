@@ -44,7 +44,7 @@ namespace tcf {
         sgx_status_t ConvertErrorStatus(
             sgx_status_t ret,
             tcf_err_t tcfRet) {
-            // If the SGX code is success and the TCF error code is
+            // If the SGX code is success and the Avalon error code is
             // "busy", then convert to appropriate value.
             if ((SGX_SUCCESS == ret) &&
                 (TCF_ERR_SYSTEM_BUSY == tcfRet)) {
@@ -150,7 +150,7 @@ namespace tcf {
             Zero(outEnclaveBasename, sizeof(*outEnclaveBasename));
 
             // We can get the enclave's measurement (i.e., mr_enclave) and
-            // basename only by getting a quote.  To do that, we need to first
+            // basename only by getting a quote. To do that, we need to first
             // generate a report.
 
             // Initialize a quote
@@ -163,7 +163,7 @@ namespace tcf {
             tcf::error::ThrowSgxError(ret, "Failed to initialize enclave quote");
 
             // Now retrieve a fake enclave report so that we can later
-            // create a quote from it.  We need to the quote so that we can
+            // create a quote from it. We need to the quote so that we can
             // get some of the information (basename and mr_enclave,
             // specifically) being requested.
             sgx_report_t enclaveReport = { 0 };
@@ -417,7 +417,7 @@ namespace tcf {
 
         /* This function is run as the very first step in the attestation
            process to check the device status; query the status of the SGX
-           device.  If not enabled before, enable it. If the device is not
+           device. If not enabled before, enable it. If the device is not
            enabled, SGX device not found error is expected when the enclave is
            created.
         */

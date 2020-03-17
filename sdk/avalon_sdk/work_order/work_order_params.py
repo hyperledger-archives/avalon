@@ -136,7 +136,7 @@ class WorkOrderParams():
     def add_requester_signature(self, private_key):
         """
         Calculate the signature of the request
-        as defined in TCF EEA spec 6.1.8.3
+        as defined in Off-Chain Trusted Compute EEA spec 6.1.8.3
         and set the requesterSignature parameter in the request
         """
         sig_obj = signature.ClientSignature()

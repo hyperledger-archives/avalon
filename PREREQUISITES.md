@@ -23,8 +23,8 @@ This document describes how to get and compile these required components.
 
 # Recommended host system
 Hyperledger Avalon services (specifically the enclave manager and
-listener) should be ran on Ubuntu 18.04.
- Avalon has been tested on Ubuntu 18.04.
+listener) should be ran on Ubuntu 18.04 LTS ("Bionic Beaver").
+Avalon has been tested on Ubuntu 18.04.
 
 Avalon may run on other Linux distributions, but the installation
 process is likely to be more complicated, and the use of other distributions is
@@ -68,7 +68,7 @@ yourself using OpenSSL, then export the path to it:
 
 - `TCF_HOME`
 Used to locate the top level Avalon build directory.
-It is described in the [BUILD document](BUILD.md#buildtcf)
+It is described in the [BUILD document](BUILD.md#install)
 
 - `TCF_DEBUG_BUILD`
 Optional variable for enabling Avalon debug output. Set to `1` enable.
@@ -200,13 +200,13 @@ sudo dpkg -i libsgx-enclave-common_2.7.101.3-bionic1_amd64.deb
 
 ### Run aesm service on host machine
 If you are behind a corporate proxy,
-uncomment and update the proxy type and aesm proxy lines in /etc/aesmd.conf:  
+uncomment and update the proxy type and aesm proxy lines in /etc/aesmd.conf:
 ```
 proxy type = manual
 aesm proxy = http://your-proxy:your-port
 ```
 
-Start aesm service on host machine  
+Start the AESM service on the host machine
 ```
 sudo source /opt/intel/libsgx-enclave-common/aesm/aesm_service
 ```
@@ -462,4 +462,3 @@ problems.
 
 - If you reinstall the Intel SGX SDK and you modified `/etc/aesmd.conf`
   then save and restore the file before installing the SDK.
-

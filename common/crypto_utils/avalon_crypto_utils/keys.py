@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 # -----------------------------------------------------------------
 class TransactionKeys(object):
     """
-    Wrapper for managing TCF transaction keys
+    Wrapper for managing Avalon transaction keys
     """
 
     def __init__(self):
