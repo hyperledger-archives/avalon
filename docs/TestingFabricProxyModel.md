@@ -22,7 +22,7 @@
     using the ``start_fabric.sh`` script.
     ```
     cd $TCF_HOME
-    ./scripts/start_fabric.sh
+    ./scripts/start_fabric.sh start
     ```
     Starting Fabric Docker containers will take some time.
     Once it is up and running check for Fabric containers named
@@ -44,4 +44,8 @@
     cd examples/apps/generic_client/
     ./fabric_generic_client.py -b fabric --workload_id "echo-result" --in_data "Hello"
     ````
+6. To stop fabric network run below command
+    ```
+    ./scripts/start_fabric.sh stop
+    ```
 

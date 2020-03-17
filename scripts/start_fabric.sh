@@ -61,6 +61,7 @@ check_if_cc_artifacts_exists()
 if [ -f "$MINIFAB" ]; then
     echo "minifab is already installed in $MINIFAB"
 else
+    echo "Installing minifab in $MINIFAB"
     mkdir -p $WORK_DIR && cd $WORK_DIR && curl -o minifab -sL https://tinyurl.com/twrt8zv && chmod +x minifab
 fi
 
@@ -68,57 +69,71 @@ if [[ ! -v TCF_HOME ]]; then
     echo "TCF_HOME is not set"
     exit
 fi
+
 cd $WORK_DIR
 export PATH=$WORK_DIR/:$PATH
-# If we copy chaincode files everytime, go build take more time to generate
-# build artifact.
-check_if_cc_artifacts_exists
-exist=$?
-if [ "$exist" -eq "1" ]; then
-    echo "Chain codes are built and use existing built artifacts"
-else
-    mkdir -p ./vars/chaincode
-    cp -R $TCF_HOME/sdk/avalon_sdk/fabric/chaincode/* vars/chaincode/
-fi
 
-# If already fabric network up and running skip start again.
-if [[ ! $(docker ps --format '{{.Names}}' |grep "peer*") ]]; then
-    minifab up -i $FABRIC_VERSION
-    # Create blockmark file with block number 0
-    # This file will be used by generic client to
-    # register event
-    echo "0">$WORK_DIR/vars/blockmark
-    # Delete the old blockmark files.
-    rm -rf $TCF_HOME/blockchain_connector/blockmark
-    rm -rf $TCF_HOME/examples/apps/generic_client/blockmark
-    # Since cli container is creating go package by downloading
-    # go external dependencies and it need proxy configurations
-    # to access internet. Passing proxy settings for cli.
-    docker rm -f cli
-    docker run -dit --name cli --network minifab -v /var/run/docker.sock:/var/run/docker.sock -v $(pwd)/vars:/vars \
--v $(pwd)/vars/chaincode:$DEFAULT_CHAIN_CODE_PATH \
--e "http_proxy=$http_proxy" -e "https_proxy=$https_proxy" \
--e "no_proxy=$no_proxy" \
--e "HTTP_PROXY=$http_proxy" -e "HTTPS_PROXY=$https_proxy" \
--e "NO_PROXY=$no_proxy" \
-hyperledger/fabric-tools:$FABRIC_VERSION
+if [[ $1 != "" && $1 == "stop" ]]; then
+    minifab down
+elif [[ $1 != "" && $1 == "start" ]]; then
+    # If we copy chaincode files everytime, go build take more time to generate
+    # build artifact.
+    check_if_cc_artifacts_exists
+    exist=$?
+    if [ "$exist" -eq "1" ]; then
+        echo "Chain codes are built and use existing built artifacts"
+    else
+        echo "Copying avalon fabric chaincodes to $WORK_DIR/vars/chaincode"
+        mkdir -p ./vars/chaincode
+        cp -R $TCF_HOME/sdk/avalon_sdk/fabric/chaincode/* vars/chaincode/
+    fi
+
+    # If already fabric network up and running skip start again.
+    if [[ ! $(docker ps --format '{{.Names}}' |grep "peer*") ]]; then
+        # Start the fabric containers peers, orderers, cas
+        minifab up -i $FABRIC_VERSION
+        # Create network profile file for avalon to use
+        # profile file is generated in $WORK_DIR/vars/profiles/
+        minifab profilegen
+        # Create blockmark file with block number 0
+        # This file will be used by generic client to
+        # register event
+        echo "0">$WORK_DIR/vars/blockmark
+        # Delete the old blockmark files.
+        rm -rf $TCF_HOME/blockchain_connector/blockmark
+        rm -rf $TCF_HOME/examples/apps/generic_client/blockmark
+        # Since cli container is creating go package by downloading
+        # go external dependencies and it need proxy configurations
+        # to access internet. Passing proxy settings for cli.
+        docker rm -f cli
+        docker run -dit --name cli --network minifab -v /var/run/docker.sock:/var/run/docker.sock -v $(pwd)/vars:/vars \
+        -v $(pwd)/vars/chaincode:$DEFAULT_CHAIN_CODE_PATH \
+        -e "http_proxy=$http_proxy" -e "https_proxy=$https_proxy" \
+        -e "no_proxy=$no_proxy" \
+        -e "HTTP_PROXY=$http_proxy" -e "HTTPS_PROXY=$https_proxy" \
+        -e "NO_PROXY=$no_proxy" \
+        hyperledger/fabric-tools:$FABRIC_VERSION
+    fi
+    # If chaincode already instantiated then don't start it again.
+    if [[ ! $(docker ps --format '{{.Names}}' |grep "dev-*" |grep "registry_*") ]]; then
+        echo "Installing and instantiating registry chain code.."
+        minifab install,approve,instantiate -n registry -v $CHAIN_CODE_VERSION
+    fi
+    if [[ ! $(docker ps --format '{{.Names}}' |grep "dev-*" |grep "worker_*") ]]; then
+        echo "Installing and instantiating worker chain code.."
+        minifab install,approve,instantiate -n worker -v $CHAIN_CODE_VERSION
+    fi
+    if [[ ! $(docker ps --format '{{.Names}}' |grep "dev-*" |grep "order_*") ]]; then
+        echo "Installing and instantiating order chain code.."
+        minifab install,approve,instantiate -n order -v $CHAIN_CODE_VERSION
+    fi
+    if [[ ! $(docker ps --format '{{.Names}}' |grep "dev-*" |grep "receipt_*") ]]; then
+        echo "Installing and instantiating receipt chain code.."
+        minifab install,approve,instantiate -n receipt -v $CHAIN_CODE_VERSION
+    fi
+    echo "Started fabric network..."
+    docker ps --format '{{.Names}}'
+else
+    echo "Invalid input: $1"
+    echo "Valid inputs are 'start' or 'stop'"
 fi
-# If chaincode already instantiated then don't start it again.
-if [[ ! $(docker ps --format '{{.Names}}' |grep "dev-*" |grep "registry_*") ]]; then
-    echo "Installing and instantiating registry chain code.."
-    minifab install,approve,instantiate -n registry -v $CHAIN_CODE_VERSION
-fi
-if [[ ! $(docker ps --format '{{.Names}}' |grep "dev-*" |grep "worker_*") ]]; then
-    echo "Installing and instantiating worker chain code.."
-    minifab install,approve,instantiate -n worker -v $CHAIN_CODE_VERSION
-fi
-if [[ ! $(docker ps --format '{{.Names}}' |grep "dev-*" |grep "order_*") ]]; then
-    echo "Installing and instantiating order chain code.."
-    minifab install,approve,instantiate -n order -v $CHAIN_CODE_VERSION
-fi
-if [[ ! $(docker ps --format '{{.Names}}' |grep "dev-*" |grep "receipt_*") ]]; then
-    echo "Installing and instantiating receipt chain code.."
-    minifab install,approve,instantiate -n receipt -v $CHAIN_CODE_VERSION
-fi
-echo "Started fabric network..."
-docker ps --format '{{.Names}}'
