@@ -140,7 +140,7 @@ def parse_jrpc_evt(evt, wo_submitted_hash, wo_completed_hash):
                 bytes.fromhex(data[2:]))
         # TODO : Extract necessary fields into event to be returned
         return {"args": {"workOrderId": workOrderId, "version": version,
-                         "workOrderResponse": json.loads(workOrderResponse),
+                         "workOrderResponse": workOrderResponse,
                          "requesterId": requesterId,
                          "workOrderStatus": workOrderStatus,
                          "errorCode": errorCode},

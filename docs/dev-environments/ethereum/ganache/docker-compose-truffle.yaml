@@ -15,7 +15,7 @@
 version: '3.5'
 
 services:
-    truffle-envt-besu:
+    truffle-envt-ganache:
       image: truffle-envt:latest
       build:
         context: ./
@@ -24,7 +24,7 @@ services:
         - ./my_project:/my_project
         - $TCF_HOME/sdk/avalon_sdk/ethereum/contracts/proxy-model:/contracts
         - $TCF_HOME/sdk/avalon_sdk/ethereum/truffle_artifacts:/truffle_artifacts
-      container_name: truffle-envt-besu-setup
+      container_name: truffle-envt-ganache-setup
       command: "bash -c \"\
           cd my_project && \
           truffle init && \
@@ -32,11 +32,10 @@ services:
           cp /truffle_artifacts/truffle-config.js ./ && \
           cp /truffle_artifacts/2_deploy_contracts.js ./migrations/ && \
           sleep 20s && \
-          truffle migrate --network avalon_besu_docker
+          truffle migrate --network avalon_ganache_docker
           \""
 
 networks:
   default:
     external:
-      name: besu_local_net
-  
+      name: ganache_local_net
