@@ -11,11 +11,7 @@ spec:
       restartPolicy: OnFailure
       containers:
       - name: request-proposer
-        image: tcf-dev:latest
+        image: avalon-shell-dev:latest
         imagePullPolicy: Never
-        envFrom:
-        - prefix: TCF_
-          configMapRef:
-            name: tcf-config
         command: ["/bin/bash"]
-        args: ["$(TCF_HOME)/scripts/propose_requests.sh"]
+        args: ["/project/avalon/scripts/propose_requests.sh"]

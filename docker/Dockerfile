@@ -172,6 +172,9 @@ COPY --from=build_image /project/avalon/common/python/dist/*.whl dist/
 COPY --from=build_image /project/avalon/common/crypto_utils/dist/*.whl dist/
 COPY --from=build_image /project/avalon/sdk/dist/*.whl dist/
 
+# Copy Scripts
+COPY ./scripts /project/avalon/scripts
+
 # Install fabric python sdk
 RUN pip3 install virtualenv \
  && pip3 install git+https://github.com/hyperledger/fabric-sdk-py.git
