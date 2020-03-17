@@ -59,11 +59,11 @@ acc_pvt_key = "4F611197A6E82715F4D2446FE015D1667E9C40A351411F3A7300F71F285D01B4"
 solc_version = "v0.5.15"
 # Provider/event_provider for test network. The default urls are for a
 # Hyperledger Besu client. These addresses need to be consistent with that in
-# docs/dev-environments/besu/docker-compose.yaml.
+# docs/dev-environments/ethereum/besu/docker-compose.yaml.
 # This could be replaced with a Ropsten(Infura as the IAAS) provider or a
 # Ganache client.
-provider = "http://172.13.0.3:8555"
-event_provider = "http://172.13.0.2:8545"
+provider = "http://172.13.0.3:8555" # http://local-ganache:8545 for Ganache
+event_provider = "http://172.13.0.2:8545" # http://local-ganache:8545 for Ganache
 # chain_id is 3 for ropsten test network
 # "1": Ethereum Mainnet
 # "2": Morden Testnet (deprecated)

@@ -61,11 +61,11 @@ module.exports = {
             gas: 4500000,
             gasPrice: 0
        },
-       develop: {                   // Meant for Ganache nodes
-            host: "10.66.245.80",   // Localhost (default: none). IP address of host machine
-            port: 8545,             // Standard Ethereum port (default: none)
-            network_id: "*",        // Any network (default: none)
-       }
+       avalon_ganache_docker: {  // Meant for Ganache nodes
+        host: "local-ganache",   // Hostname of ganche cli container
+        port: 8545,              // Standard Ethereum port (default: none)
+        network_id: "*",         // Any network (default: none)
+   }
 
 
     // Another network with more advanced options...
