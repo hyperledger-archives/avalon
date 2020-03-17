@@ -1,33 +1,17 @@
 
 **Testing Avalon Proxy model with Hyperledger Besu**
-1.  Install ``truffle`` using the command
-    ```
-    sudo npm install -g truffle
-    ```
-    This requires Requires ``NodeJS v8.9.4 or later`` preinstalled.
-
-2.  Set the environment variable ``TCF_HOME`` to the Avalon root directory. Update ``no_proxy`` environment variable if you are behind a proxy
+1.  Set the environment variable ``TCF_HOME`` to the Avalon root directory. Update ``no_proxy`` environment variable if you are behind a proxy
     server. Add these private IP - ``172.13.0.2, 172.13.0.3, 172.13.0.4, 172.13.0.5``. These are the IP addresses used in the default Besu 
     network defined in the corresponding [docker-compose file](dev-environments/besu/docker-compose.yaml)
 
-3.  Start the Ethereum network with 2 nodes and 2 eth-signers. To bring up the network, do the following
-       ```
-    cd $TCF_HOME/docs/dev-environments/besu
-    docker-compose up -d
+2. Start the Hyperledger Besu based Ethereum network and deploy contracts. To do so, you need to run the following
     ```
-       This will start the Ethereum network locally.
+    cd $TCF_HOME/docs/dev-environments/besu
+    ./startup.sh
+    ```
+    This will start the Ethereum network locally and deploy the required contracts over it.
 
-4.  Now you need to create a truffle project and deploy contracts onto the Ethereum network
-       ```
-        mkdir ./my_project
-        cd my_project
-        truffle init
-        cp $TCF_HOME/sdk/avalon_sdk/ethereum/contracts/proxy-model/*.sol ./contracts/
-        cp $TCF_HOME/sdk/avalon_sdk/ethereum/truffle_artifacts/truffle-config.js ./
-        cp $TCF_HOME/sdk/avalon_sdk/ethereum/truffle_artifacts/2_deploy_contracts.js ./migrations/
-        truffle migrate --network avalon
-        ```
-5. The ``truffle migrate`` command would deploy contracts to the Ethereum network. If the command is successful, you should see something like 
+3. The previous step, if successful would leave behind logs having content similar to  
 	```
 	2_deploy_contracts.js
 	=====================
@@ -45,26 +29,27 @@
 	> ...
 	```
    Only partial output is seen here. The actual output has more data.
-6. Update configuration fields in ``$TCF_HOME/sdk/avalon_sdk/tcf_connector.toml ``
-	- **proxy_worker_registry_contract_address** - Read the field ``contract address`` from Step 4 under ``Deploying 'WorkerRegistry'``
-	- **work_order_contract_address** - Read the field ``contract address`` from Step 4 under ``Deploying 'WorkerOrderRegistry'``
-	- **eth_account** - Read the field account from Step 4
+4. Update configuration fields in ``$TCF_HOME/sdk/avalon_sdk/tcf_connector.toml ``
+	- **proxy_worker_registry_contract_address** - Read the field ``contract address`` from Step 3 under ``Deploying 'WorkerRegistry'``
+	- **work_order_contract_address** - Read the field ``contract address`` from Step 3 under ``Deploying 'WorkerOrderRegistry'``
+	- **eth_account** - Read the field account from Step 3
 
-7. Start the Avalon containers
+5. Start the Avalon containers
+    ```
+	cd $TCF_HOME
+	docker-compose -f docker-compose-eth-besu.yaml up --build
+	```
 
-    ``docker-compose -f docker-compose-eth-besu.yaml up --build``
-
-8. Go to the ``avalon-shell`` container to run ``eth_generic_client.py``:
-      ```
-       docker exec -it avalon-shell bash
-       cd examples/apps/generic_client/
-       ./eth_generic_client.py -b ethereum --workload_id "echo-result" -o --in_data "Hello"
+6. Go to the ``avalon-shell`` container to run ``eth_generic_client.py``:
+    ```
+    docker exec -it avalon-shell bash
+    cd examples/apps/generic_client/
+    ./eth_generic_client.py -b ethereum --workload_id "echo-result" -o --in_data "Hello"
+    ```
 
 One thing to note with the default Besu setup being used is that it retains the on-chain data across docker restarts. To clean this up,
 use these steps 
 ```
 cd $TCF_HOME/docs/dev-environments/besu
-docker-compose down
 ./cleanup.sh
-rm -f $TCF_HOME/blockchain_connector/bookmark $TCF_HOME/examples/apps/generic_client/bookmark
 ```
