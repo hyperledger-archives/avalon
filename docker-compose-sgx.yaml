@@ -39,12 +39,12 @@ services:
     entrypoint: bash -c "tail -f /dev/null"
     stop_signal: SIGKILL
     depends_on:
-      - avalon-enclave-manager
+      - avalon-sgx-enclave-manager
       - avalon-listener
 
-  avalon-enclave-manager:
-    container_name: avalon-enclave-manager
-    image: avalon-enclave-manager-dev
+  avalon-sgx-enclave-manager:
+    container_name: avalon-sgx-enclave-manager
+    image: avalon-sgx-enclave-manager-dev
     build:
       context: .
       dockerfile: ./enclave_manager/Dockerfile

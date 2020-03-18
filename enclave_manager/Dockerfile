@@ -218,51 +218,26 @@ RUN mkdir -p build \
 
 WORKDIR /project/avalon/common/python
 
-RUN make
+RUN make && make install
 
 WORKDIR /project/avalon/common/crypto_utils
 
-RUN make
+RUN make && make install
 
 WORKDIR /project/avalon/sdk
 
-RUN make
+RUN make && make install
 
 WORKDIR /project/avalon/enclave_manager
 
-RUN echo "Building avalon enclave manager" \
-  && make
+RUN echo "Build and Install avalon enclave manager" \
+  && make && make install
 
-# Build Final image and install dependent modules
-FROM base_image as final_image
+FROM build_image as final_image
 
-ENV TCF_HOME=/project/avalon
-
-WORKDIR /project/avalon/
-
-COPY --from=build_image /project/avalon/config/tcs_config.toml /project/avalon/config/
-COPY --from=build_image /project/avalon/tc/sgx/trusted_worker_manager/enclave/build/lib/*.so /project/avalon/tc/sgx/trusted_worker_manager/enclave/build/lib/
-COPY --from=build_image /project/avalon/tc/sgx/trusted_worker_manager/enclave_untrusted/enclave_bridge/build/lib/*.so /project/avalon/tc/sgx/trusted_worker_manager/enclave_untrusted/enclave_bridge/build/lib/
-# Copy sgxsdk, sgxssl to final image.
-COPY --from=build_image /opt/intel/sgxsdk/bin/ /opt/intel/sgxsdk/bin
-COPY --from=build_image /opt/intel/sgxsdk/lib64/ /opt/intel/sgxsdk/lib64
-COPY --from=build_image /opt/intel/sgxssl/lib64/ /opt/intel/sgxssl/lib64
-
-# Copy Python build artifacts
-COPY --from=build_image /project/avalon/common/python/dist/*.whl dist/
-COPY --from=build_image /project/avalon/common/crypto_utils/dist/*.whl dist/
-COPY --from=build_image /project/avalon/sdk/dist/*.whl dist/
-COPY --from=build_image /project/avalon/enclave_manager/dist/*.whl dist/
-
-
-# Installing wheel file requires python3-pip package.
-# But python3-pip package will increase size of final docker image.
-# So remove python3-pip package and dependencies after installing wheel file.
-RUN apt-get update \
- && apt-get install -y -q python3-pip \
- && echo "Install Common Python, SDK and Enclave Manager packages\n" \
- && pip3 install dist/*.whl \
- && echo "Remove unused packages from image\n" \
+# python3-pip package will increase size of final docker image.
+# So remove python3-pip package and dependencies
+RUN echo "Remove unused packages from image\n" \
  && apt-get autoremove --purge -y -q python3-pip \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
