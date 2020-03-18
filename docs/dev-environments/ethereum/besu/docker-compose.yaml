@@ -4,7 +4,7 @@ services:
   # node1 is first of the two-node ethereum private network based on Hyperledger Besu
   #
   node1.avalon.org:
-    image: hyperledger/besu:1.4
+    image: hyperledger/besu:1.3.9
     command: >-
       --data-path=/var/lib/besu --genesis-file=/var/lib/besu/genesis.json --rpc-http-enabled 
       --rpc-http-host=0.0.0.0 --rpc-ws-enabled --rpc-ws-host=0.0.0.0 --discovery-enabled=false 
@@ -45,7 +45,7 @@ services:
   # node2 is the second of the two-node ethereum private network based on Hyperledger Besu
   #
   node2.avalon.org:
-    image: hyperledger/besu:1.4
+    image: hyperledger/besu:1.3.9
     command: >-
       --data-path=/var/lib/besu --genesis-file=/var/lib/besu/genesis.json --rpc-http-enabled 
       --rpc-http-host=0.0.0.0 --rpc-ws-enabled --rpc-ws-host=0.0.0.0 --discovery-enabled=false 

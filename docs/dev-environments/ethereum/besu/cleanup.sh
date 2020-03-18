@@ -58,12 +58,5 @@ echo "====================================================="
 sudo rm -rf ./my_project
 check_and_exit
 
-echo ""
-echo "====================================================="
-echo "STEP 5 :: Delete event marker from Avalon"
-echo "====================================================="
-rm -f $TCF_HOME/blockchain_connector/bookmark $TCF_HOME/examples/apps/generic_client/bookmark
-check_and_exit
-
 echo "Cleanup Successful!!"
 echo ""

@@ -87,7 +87,7 @@ RUN apt-get update \
 
 
 # Installing web3 for ethereum
-RUN pip3 install --upgrade setuptools json-rpc web3 py-solc-x nose2 eth-abi
+RUN pip3 install --upgrade setuptools json-rpc web3 py-solc-x nose2
 
 # Install specific version of solc to support versions <0.6.0
 RUN python3 -m solcx.install v0.5.15
