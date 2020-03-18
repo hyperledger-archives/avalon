@@ -3,7 +3,7 @@
 1.  Set the environment variable ``TCF_HOME`` to the Avalon root directory. Update ``no_proxy`` environment variable if you are behind a proxy
     server. Add the hostname - ``local-ganache``. This is the hostname of the lone Ganache node.
 
-2. Start the Ganche Ethereum network(single node) and deploy contracts. To do so, you need to run the following
+2. Start the Ganache Ethereum network(single node) and deploy contracts. To do so, you need to run the following
     ```
     cd $TCF_HOME/docs/dev-environments/ethereum/ganache
     ./startup.sh
