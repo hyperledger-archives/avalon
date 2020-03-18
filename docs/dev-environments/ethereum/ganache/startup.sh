@@ -44,7 +44,7 @@ echo ""
 echo "========================================================="
 echo "STEP 3 :: Create truffle project"
 echo "========================================================="
-sudo rm -rf my_project
+sudo rm -rf ./my_project
 mkdir my_project
 check_and_exit
 
