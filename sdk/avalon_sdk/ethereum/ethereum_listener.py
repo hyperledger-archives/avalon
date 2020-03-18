@@ -87,7 +87,7 @@ def get_last_read_block():
         block_num = f.readline()
         return 0 if block_num == '' else int(block_num)
     except FileNotFoundError as e:
-        logging.error(e)
+        logging.debug(e)
         return 0
     finally:
         if f is not None:
