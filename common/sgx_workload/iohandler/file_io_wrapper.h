@@ -13,6 +13,12 @@
 * limitations under the License.
 */
 
+/**
+ * @file
+ * C++ non-class wrapper definitions for Avalon Inside-Out File I/O.
+ * To use, #include "file_io_wrapper.h"
+ */
+
 #include <string>
 
 // Read from given file return file data in string format

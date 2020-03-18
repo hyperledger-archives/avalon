@@ -22,23 +22,27 @@
 #include "iohandler_enclave.h"
 #include "enclave_utils.h"
 
-/*
-  Dummy ecall (non root function) to support independent
-  interface for iohandler
-*/
+
+/**
+ * Dummy ecall (non root function) to support an independent
+ * interface for the iohandler.
+ */
 void ecall_dummy() {}
 
-/*
-  Executes given io command by invoking ocall and stores result of
-  io execution in result buffer
-  handlerId - identifier for iohandler
-  command - IO command that needs to be executed outside enclave
-  result - status of IO operation
-  resultSize - Maximum size of the result buffer
-  inBuf - buffer having input data
-  inBufSize - max size of buffer having input data
-  outBuf - placeholder for output data
-  outBufSize - max size of buffer having output data
+
+/**
+ * Executes the given I/O command by invoking ocall and stores the result of
+ * I/O execution in result buffer.
+ *
+ * @param handlerId   Identifier for iohandler
+ * @param command     IO command that needs to be executed outside enclave
+ * @param commandSize Size of the command buffer
+ * @param result      Status of IO operation
+ * @param resultSize  Maximum size of the result buffer
+ * @param inBuf       Buffer having input data
+ * @param inBufSize   Maximum size of buffer having input data
+ * @param outBuf      Placeholder for output data
+ * @param outBufSize  Maximum size of buffer having output data
 */
 uint32_t TcfExecuteIoCommand(uint32_t handlerId,
                              const uint8_t* command,
@@ -53,7 +57,8 @@ uint32_t TcfExecuteIoCommand(uint32_t handlerId,
     tcf::error::ThrowIfNull(command, "IO command is null");
     try {
         ocall_Process(&status, handlerId, (const char*) command,
-            commandSize, result, resultSize, inBuf, inBufSize, outBuf, outBufSize);
+            commandSize, result, resultSize, inBuf, inBufSize, outBuf,
+            outBufSize);
     } catch (tcf::error::Error& e) {
         ocall_SetErrorMessage(e.what());
         status = e.error_code();
@@ -64,7 +69,14 @@ uint32_t TcfExecuteIoCommand(uint32_t handlerId,
     return status;
 }
 
-// Returns iohandler id corresponding to iohandler name
+
+/**
+ * Returns iohandler ID corresponding to iohandler name.
+ *
+ * @param   handlerName Name of handler
+ * @returns I/O handler ID. That is, 1 for handler "tcf-base-file-io"
+ * @returns 0 on error
+ */
 uint32_t TcfGetIoHandlerId(const char* handlerName) {
     if (handlerName == "tcf-base-file-io") {
         return 1;
