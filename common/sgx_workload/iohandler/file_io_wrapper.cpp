@@ -13,11 +13,24 @@
 * limitations under the License.
 */
 
+/**
+ * @file
+ * C++ non-class wrapper implementation for Avalon Inside-Out File I/O.
+ * To use, #include "file_io_wrapper.h"
+ */
+
 #include <string>
 
 #include "file_io.h"
 #include "file_io_wrapper.h"
 
+/**
+ * Read a file named file_name and return the contents in a string.
+ * Return an empty string ("") on failure.
+ *
+ * @param file_name Name of the file to be read
+ * @returns         String containing file contents
+ */
 std::string Read(std::string file_name) {
     FileIoExecutor file_io;
     uint32_t file_handler_id = file_io.GetIoHandlerId("tcf-base-file-io");
@@ -35,11 +48,19 @@ std::string Read(std::string file_name) {
     uint32_t status = file_io.FileRead((uint8_t *)result.c_str(), result_size,
         (uint8_t *)out_buf.c_str(), out_buf_size);
     if (status == 0) {
-        return out_buf.c_str(); 
+        return out_buf.c_str();
     }
-    return "";    
+    return "";  // failure
 }
 
+/**
+ * Write the contents of string data to a file named file_name.
+ * Return the integer status (0 is success, non-0 is failure).
+ *
+ * @param file_name Name of the file to write
+ * @param data      Contents of file to write
+ * @returns         Status of operation (0 on success, non-0 on failure)
+ */
 uint32_t Write(std::string file_name, std::string data) {
     FileIoExecutor file_io;
     uint32_t file_handler_id = file_io.GetIoHandlerId("tcf-base-file-io");
@@ -55,6 +76,13 @@ uint32_t Write(std::string file_name, std::string data) {
     return status;
 }
 
+/**
+ * Delete a file named file_name.
+ * Return the integer status (0 is success, non-0 is failure).
+ *
+ * @param file_name Name of the file to delete
+ * @returns         Status of operation (0 on success, non-0 on failure)
+ */
 uint32_t Delete(std::string file_name) {
     FileIoExecutor file_io;
     uint32_t file_handler_id = file_io.GetIoHandlerId("tcf-base-file-io");
@@ -64,6 +92,7 @@ uint32_t Delete(std::string file_name) {
     size_t result_size = file_io.GetMaxIoResultSize();
     result.reserve(result_size);
 
-    uint32_t status = file_io.FileDelete((uint8_t *)result.c_str(), result_size);
+    uint32_t status = file_io.FileDelete((uint8_t *)result.c_str(),
+        result_size);
     return status;
 }
