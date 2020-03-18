@@ -1,12 +1,11 @@
 
 **Testing Avalon Proxy model with Hyperledger Besu**
 1.  Set the environment variable ``TCF_HOME`` to the Avalon root directory. Update ``no_proxy`` environment variable if you are behind a proxy
-    server. Add these private IP - ``172.13.0.2, 172.13.0.3, 172.13.0.4, 172.13.0.5``. These are the IP addresses used in the default Besu 
-    network defined in the corresponding [docker-compose file](dev-environments/besu/docker-compose.yaml)
+    server. Add the hostname - ``local-ganache``. This is the hostname of the lone Ganache node.
 
-2. Start the Hyperledger Besu based Ethereum network and deploy contracts. To do so, you need to run the following
+2. Start the Ganche Ethereum network(single node) and deploy contracts. To do so, you need to run the following
     ```
-    cd $TCF_HOME/docs/dev-environments/ethereum/besu
+    cd $TCF_HOME/docs/dev-environments/ethereum/ganache
     ./startup.sh
     ```
     This will start the Ethereum network locally and deploy the required contracts over it.
@@ -34,11 +33,12 @@
 	- **proxy_worker_registry_contract_address** - Read the field ``contract address`` from Step 3 under ``Deploying 'WorkerRegistry'``
 	- **work_order_contract_address** - Read the field ``contract address`` from Step 3 under ``Deploying 'WorkerOrderRegistry'``
 	- **eth_account** - Read the field account from Step 3
+	- **provider**  and **event_provider** - Update both to ``http://local-ganache:8545``
 
 5. Start the Avalon containers
     ```
 	cd $TCF_HOME
-	docker-compose -f docker-compose-eth-besu.yaml up -d --build
+	docker-compose -f docker-compose-eth-ganache.yaml up -d --build
 	```
 
 6. Go to the ``avalon-shell`` container to run ``eth_generic_client.py``:
@@ -48,9 +48,8 @@
     ./eth_generic_client.py -b ethereum --workload_id "echo-result" -o --in_data "Hello"
     ```
 
-One thing to note with the default Besu setup being used is that it retains the on-chain data across docker restarts. To clean this up,
-use these steps 
+To clean up the Ganache network, use these steps 
 ```
-cd $TCF_HOME/docs/dev-environments/ethereum/besu
+cd $TCF_HOME/docs/dev-environments/ethereum/ganache
 ./cleanup.sh
 ```
