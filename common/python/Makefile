@@ -12,11 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-PY_VERSION=${shell python3 --version | sed 's/Python \(3\.[0-9]\).*/\1/' | tr -d .}
+# Get python version
+PY_VERSION=${shell python3 --version | sed 's/Python \(3\.[0-9]\).*/\1/' | cut -b 1}
 MOD_VERSION=${shell ../../bin/get_version}
 
 # Format of wheel package is <pkg_name>-{python-tag}-{abi-tag}-{platform}
-WHEEL_FILE=dist/avalon_common-${MOD_VERSION}-none-any.whl
+WHEEL_FILE=dist/avalon_common-${MOD_VERSION}-py${PY_VERSION}-none-any.whl
 SOURCE_DIR=$(shell pwd)
 
 
