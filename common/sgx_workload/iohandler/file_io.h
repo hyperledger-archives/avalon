@@ -19,6 +19,8 @@
  * To use, #include "file_io.h"
  */
 
+#pragma once
+
 #include <string>
 #include <stdint.h>
 
