@@ -19,6 +19,8 @@
  * To use, #include "file_io_wrapper.h"
  */
 
+#pragma once
+
 #include <string>
 
 // Read from given file return file data in string format
