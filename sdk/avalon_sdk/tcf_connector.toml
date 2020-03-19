@@ -79,3 +79,9 @@ gas_price = "100"
 [fabric]
 fabric_network_file = "sdk/avalon_sdk/fabric/network.json"
 channel_name = "mychannel"
+
+[WorkerConfig]
+# These configs need to be same as that in tcs_config -
+# https://github.com/hyperledger/avalon/blob/master/config/tcs_config.toml
+ApplicationTypeId = "11aa22bb33cc44dd"
+OrganizationId = "aabbcc1234ddeeff"
