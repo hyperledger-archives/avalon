@@ -12,25 +12,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-version: '3.5'
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: avalon-enclave-manager-sgx
+  name: avalon-sgx-enclave-manager
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: enclave-manager-sgx
+      app: sgx-enclave-manager
   template:
     metadata:
-      name: enclave-manager-sgx
+      name: sgx-enclave-manager
       labels:
-        app: enclave-manager-sgx
+        app: sgx-enclave-manager
     spec:
       containers:
-      - image: avalon-enclave-manager-dev:latest
-        name: enclave-manager-sgx
+      - image: avalon-sgx-enclave-manager-dev:latest
+        name: sgx-enclave-manager
         imagePullPolicy: Never
         volumeMounts:
         - mountPath: /dev/isgx
