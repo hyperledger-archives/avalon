@@ -356,7 +356,7 @@ def _handle_fabric_event(event, block_num, txn_id, status):
                      ))
         _verify_work_order_response(res["workOrderResponse"])
 
-def _get_first_active_worker(worker_registry, worker_id):
+def _get_first_active_worker(worker_registry, worker_id, config):
     """
     This function looks up all the workers registered. It then filters
     this data to get the first worker that has Active status.
@@ -367,8 +367,8 @@ def _get_first_active_worker(worker_registry, worker_id):
         # Lookup all worker id present on  blockchain
         worker_lookup_result = worker_registry.worker_lookup(
             WorkerType.TEE_SGX,
-            'aabbcc1234ddeeff',
-            '11aa22bb33cc44dd',
+            config["WorkerConfig"]["OrganizationId"],
+            config["WorkerConfig"]["ApplicationTypeId"],
             jrpc_req_id
         )
         logger.info(worker_lookup_result)
@@ -503,7 +503,7 @@ def Main(args=None):
     # Prepare worker
     worker_registry = _create_worker_registry_instance(blockchain, config)
     worker_obj, worker_id = _get_first_active_worker(worker_registry,
-                                                    worker_id)
+                                                    worker_id, config)
     if worker_obj is None:
         logger.error("Cannot proceed without a valid worker")
         sys.exit(-1)

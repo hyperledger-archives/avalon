@@ -174,8 +174,8 @@ class EthereumConnector:
         # TODO: Remove hardcoding and pass wild characters instead
         worker_lookup_result = self._worker_registry.worker_lookup(
             WorkerType.TEE_SGX,
-            'aabbcc1234ddeeff',
-            '11aa22bb33cc44dd',
+            self._config["WorkerConfig"]["OrganizationId"],
+            self._config["WorkerConfig"]["ApplicationTypeId"],
             jrpc_req_id
         )
         logging.info("Worker lookup response from blockchain: {}\n".format(
