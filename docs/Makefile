@@ -15,15 +15,31 @@
 # Doxygen requires these packages:
 # - doxygen (for doxygen)
 # - texlive-full (for pdflatex and float.sty, used by PDF generation)
-
-# Add source directories or files to the INPUT line in file Doxyfile.
+# - graphviz (for dot, used to generate dependency graphs)
 
 TARGET=refman
 PDF_TARGET=$(TARGET)/latex/refman.pdf
+REPO=https://github.com/hyperledger/avalon/blob/master/
+REPO_DOCS=$(REPO)docs/
+VERSION=$$(../bin/get_version)
+# List source directories and files to be documented by Doxygen here.
+# Doxyfile's RECURSIVE=YES makes it also use subdirectories.
+INPUT=	refman/README.md \
+	../common/sgx_workload
 
 all: $(TARGET) $(PDF_TARGET)
 
-$(TARGET):
+Doxyfile: Doxyfile.in
+	sed 's|@INPUT@|$(INPUT)|' <$@.in | \
+		sed 's|@VERSION@|'$(VERSION)'|' >$@
+
+# README.md file must be modified for use with Doxygen.
+# Doxygen bug: .md links must be obscured to .m%64 or Doxygen will not link it
+$(TARGET): README.md Doxyfile
+	mkdir -p $(TARGET)
+	sed 's|\.\./|$(REPO)|g' <README.md | \
+		sed 's|\.md|.m%64|g' | \
+		sed 's|\./|$(REPO_DOCS)/|g' >$(TARGET)/README.md
 	doxygen Doxyfile
 
 $(PDF_TARGET): $(TARGET)
@@ -31,7 +47,7 @@ $(PDF_TARGET): $(TARGET)
 	if [ -f $(PDF_TARGET) ] ; then ln -f $(PDF_TARGET) $(TARGET) ; fi
 
 clean:
-	rm -rf $(TARGET) $(PDF_TARGET)
+	rm -rf Doxyfile $(TARGET) $(PDF_TARGET)
 
 .PHONY: all
 .PHONY: clean
