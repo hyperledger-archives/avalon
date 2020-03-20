@@ -14,7 +14,7 @@
 
 """
 This file defines the Enclave class to simplify integration of the SGX
-enclave module into the rest of the tcf flow. Typically, an application
+enclave module into the rest of the Avalon flow. Typically, an application
 will call the initialize_enclave function first,
 then will call create_enclave_signup_data.
 """

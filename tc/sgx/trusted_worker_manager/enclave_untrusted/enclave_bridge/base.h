@@ -51,10 +51,10 @@ namespace tcf {
             std::string GetLastError(void);
 
             /*
-              Start the tcf services
+              Start Avalon services
 
-              inPathToEnclave - A pointer to a string that contains the path to the
-              enclave DLL.
+              inPathToEnclave - A pointer to a string that contains the path
+              to the enclave DLL.
               inSpid - A pointer to a string that contains the hex encoded SPID.
               numOfEnclaves -- Number of worker enclaves to create
             */
@@ -64,13 +64,13 @@ namespace tcf {
                 const int numOfEnclaves);
 
             /*
-              Stop the tcf services
+              Stop Avalon services
             */
             tcf_err_t Terminate();
 
             /*
-              Helper functions to determine buffer sizes for outgoing buffers filled
-              in by enclave.
+              Helper functions to determine buffer sizes for outgoing buffers
+              filled in by enclave.
             */
 
             size_t GetSignatureSize();
@@ -83,16 +83,17 @@ namespace tcf {
                 HexEncodedString& outEpidGroup);
 
             /*
-              Returns characteristics about the enclave that can be used later when
-              verifying signup information from other validators,
+              Returns characteristics about the enclave that can be used later
+              when verifying signup information from other validators,
 
-              outMrEnclave - A pointer to a buffer that upon return will contain the
-              hex encoded enclave hash (aka, mr_enclave).
-              inMrEnclaveLength - The size of the buffer pointed to by outMrEnclave.
-              The value to provide for this parameter may be obtained by calling
-              GetEnclaveMeasurementSize().
-              outEnclaveBasename - A pointer to a buffer that upon return will contain
-              the hex encoded enclave basename.
+              outMrEnclave - A pointer to a buffer that upon return will
+              contain the hex encoded enclave hash (aka, mr_enclave).
+              inMrEnclaveLength - The size of the buffer pointed to by
+              outMrEnclave.
+              The value to provide for this parameter may be obtained by
+              calling GetEnclaveMeasurementSize().
+              outEnclaveBasename - A pointer to a buffer that upon return will
+              contain the hex encoded enclave basename.
               inEnclaveBasenameLength - The size of the buffer pointed to by
               outEnclaveBasename. The value to provide for this parameter may
               be obtained by calling GetEnclaveBasenameSize().

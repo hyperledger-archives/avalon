@@ -68,13 +68,13 @@ tcf_err_t ecall_CalculateSealedEnclaveDataSize(size_t* pSealedEnclaveDataSize) {
         *pSealedEnclaveDataSize = EnclaveData::cMaxSealedDataSize;
     } catch (tcf::error::Error& e) {
         SAFE_LOG(TCF_LOG_ERROR,
-            "Error in tcf enclave(ecall_CalculateSealedEnclaveDataSize): %04X -- %s",
+            "Error in Avalon enclave(ecall_CalculateSealedEnclaveDataSize): %04X -- %s",
             e.error_code(), e.what());
         ocall_SetErrorMessage(e.what());
         result = e.error_code();
     } catch (...) {
         SAFE_LOG(
-            TCF_LOG_ERROR, "Unknown error in tcf enclave(ecall_CalculateSealedEnclaveDataSize)");
+            TCF_LOG_ERROR, "Unknown error in Avalon enclave(ecall_CalculateSealedEnclaveDataSize)");
         result = TCF_ERR_UNKNOWN;
     }
 
@@ -91,13 +91,13 @@ tcf_err_t ecall_CalculatePublicEnclaveDataSize(size_t* pPublicEnclaveDataSize) {
         *pPublicEnclaveDataSize = EnclaveData::cMaxPublicDataSize;
     } catch (tcf::error::Error& e) {
         SAFE_LOG(TCF_LOG_ERROR,
-            "Error in tcf enclave(ecall_CalculatePublicEnclaveDataSize): %04X -- %s",
+            "Error in Avalon enclave(ecall_CalculatePublicEnclaveDataSize): %04X -- %s",
             e.error_code(), e.what());
         ocall_SetErrorMessage(e.what());
         result = e.error_code();
     } catch (...) {
         SAFE_LOG(
-            TCF_LOG_ERROR, "Unknown error in tcf enclave(ecall_CalculatePublicEnclaveDataSize)");
+            TCF_LOG_ERROR, "Unknown error in Avalon enclave(ecall_CalculatePublicEnclaveDataSize)");
         result = TCF_ERR_UNKNOWN;
     }
 
@@ -177,12 +177,12 @@ tcf_err_t ecall_CreateEnclaveData(const sgx_target_info_t* inTargetInfo,
             enclaveData.get_public_data().c_str(),
             enclaveData.get_public_data_size());
     } catch (tcf::error::Error& e) {
-        SAFE_LOG(TCF_LOG_ERROR, "Error in tcf enclave(ecall_CreateEnclaveData): %04X -- %s",
+        SAFE_LOG(TCF_LOG_ERROR, "Error in Avalon enclave(ecall_CreateEnclaveData): %04X -- %s",
             e.error_code(), e.what());
         ocall_SetErrorMessage(e.what());
         result = e.error_code();
     } catch (...) {
-        SAFE_LOG(TCF_LOG_ERROR, "Unknown error in tcf enclave(ecall_CreateEnclaveData)");
+        SAFE_LOG(TCF_LOG_ERROR, "Unknown error in Avalon enclave(ecall_CreateEnclaveData)");
         result = TCF_ERR_UNKNOWN;
     }
 
@@ -221,12 +221,12 @@ tcf_err_t ecall_UnsealEnclaveData(const uint8_t* inSealedEnclaveData,
             enclaveData.get_public_data().c_str(),
             enclaveData.get_public_data_size());
     } catch (tcf::error::Error& e) {
-        SAFE_LOG(TCF_LOG_ERROR, "Error in tcf enclave(ecall_UnsealEnclaveData): %04X -- %s",
+        SAFE_LOG(TCF_LOG_ERROR, "Error in Avalon enclave(ecall_UnsealEnclaveData): %04X -- %s",
             e.error_code(), e.what());
         ocall_SetErrorMessage(e.what());
         result = e.error_code();
     } catch (...) {
-        SAFE_LOG(TCF_LOG_ERROR, "Unknown error in tcf enclave(ecall_UnsealEnclaveData)");
+        SAFE_LOG(TCF_LOG_ERROR, "Unknown error in Avalon enclave(ecall_UnsealEnclaveData)");
         result = TCF_ERR_UNKNOWN;
     }
 
