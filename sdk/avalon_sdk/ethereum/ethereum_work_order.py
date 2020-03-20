@@ -102,8 +102,8 @@ class EthereumWorkOrderProxyImpl(WorkOrderProxy):
 
             if not _is_valid_work_order_json(work_order_id, worker_id,
                                              requester_id, work_order_request):
-                logging.error("Invalid request string {}"\
-                    .format(work_order_request))
+                logging.error("Invalid request string {}"
+                              .format(work_order_request))
                 return ERROR
 
             txn_dict = self.__contract_instance.functions.workOrderSubmit(
@@ -186,7 +186,6 @@ class EthereumWorkOrderProxyImpl(WorkOrderProxy):
             return json.loads(work_order_response)
         except KeyboardInterrupt:
             asyncio.get_event_loop().run_until_complete(daemon.stop())
-        
 
     def encryption_key_retrieve(self, worker_id, last_used_key_nonce, tag,
                                 requester_id, signature_nonce=None,

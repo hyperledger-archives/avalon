@@ -31,7 +31,7 @@ class BlockchainInterface:
         self._uri_client = HttpJrpcClient(config["ethereum"]["event_provider"])
 
     def newListener(self, contract, event, fromBlock='latest'):
-        # Filter to get events from latest block by default 
+        # Filter to get events from latest block by default
         return contract.events[event].createFilter(fromBlock=fromBlock)
 
 

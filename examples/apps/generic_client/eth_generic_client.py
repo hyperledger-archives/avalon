@@ -174,6 +174,7 @@ def _retrieve_uri_from_registry_list(config):
 
     return registry_retrieve_result[0]
 
+
 def _create_work_order_params(worker_id, workload_id, in_data,
                               worker_encrypt_key, session_key, session_iv):
     # Convert workloadId to hex
@@ -356,6 +357,7 @@ def _handle_fabric_event(event, block_num, txn_id, status):
                      ))
         _verify_work_order_response(res["workOrderResponse"])
 
+
 def _get_first_active_worker(worker_registry, worker_id, config):
     """
     This function looks up all the workers registered. It then filters
@@ -402,6 +404,7 @@ def _get_first_active_worker(worker_registry, worker_id, config):
     worker_obj.load_worker(worker_retrieve_result["result"]["details"])
 
     return worker_obj, worker_id
+
 
 def _verify_work_order_response(res):
     # Verify work order response signature
@@ -503,7 +506,7 @@ def Main(args=None):
     # Prepare worker
     worker_registry = _create_worker_registry_instance(blockchain, config)
     worker_obj, worker_id = _get_first_active_worker(worker_registry,
-                                                    worker_id, config)
+                                                     worker_id, config)
     if worker_obj is None:
         logger.error("Cannot proceed without a valid worker")
         sys.exit(-1)

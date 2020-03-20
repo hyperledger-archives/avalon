@@ -159,7 +159,7 @@ class EthereumWrapper():
         tx_receipt = self.__w3.eth.waitForTransactionReceipt(
             tx_hash.hex(), 120)
         logging.debug("Executed transaction hash: %s, receipt: %s",
-                     format(tx_hash.hex()), format(tx_receipt))
+                      format(tx_hash.hex()), format(tx_receipt))
         return tx_receipt
 
     def execute_unsigned_transaction(self, tx_dict):
@@ -171,7 +171,7 @@ class EthereumWrapper():
         tx_hash = self.__w3.eth.sendTransaction(tx_dict)
         tx_receipt = self.__w3.eth.waitForTransactionReceipt(tx_hash)
         logging.debug("Executed transaction hash: %s, receipt: %s",
-                     format(tx_hash.hex()), format(tx_receipt))
+                      format(tx_hash.hex()), format(tx_receipt))
         return tx_receipt
 
     def execute_transaction(self, tx_dict):
