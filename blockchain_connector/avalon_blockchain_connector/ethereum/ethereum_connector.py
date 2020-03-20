@@ -201,8 +201,8 @@ class EthereumConnector:
         response = work_order_impl\
             .work_order_submit(work_order_id, worker_id, requester_id,
                                work_order_params, id=random.randint(0, 100000))
-        logging.info("Work order submit response : {}"\
-                     .format(json.dumps(response, indent=4)))
+        logging.info("Work order submit response : {}".format(
+            json.dumps(response, indent=4)))
 
         work_order_result = work_order_impl\
             .work_order_get_result(work_order_id,

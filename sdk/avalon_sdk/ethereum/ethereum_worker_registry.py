@@ -326,6 +326,7 @@ class EthereumWorkerRegistryImpl(WorkerRegistry):
                 contract_file_name, contract_address
             )
 
+
 def _convert_lookup_result_to_json(worker_lookup_result):
 
     result = {}
@@ -334,6 +335,7 @@ def _convert_lookup_result_to_json(worker_lookup_result):
     result["ids"] = _convert_byte32_arr_to_hex_arr(worker_lookup_result[2])
 
     return {"result": result}
+
 
 def _convert_byte32_arr_to_hex_arr(byte32_arr):
     """

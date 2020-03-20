@@ -187,7 +187,7 @@ class FabricConnector():
             response
         ))
         if response and 'error' in response and \
-            response['error']['code'] == WorkOrderStatus.PENDING.value:
+                response['error']['code'] == WorkOrderStatus.PENDING.value:
             # get the work order result
             jrpc_req_id += 1
             work_order_result = \
