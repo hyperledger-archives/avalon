@@ -84,13 +84,13 @@ namespace tcf {
             } catch (error::Error& e) {
                 /*tcf::logger::LogV(
                     TCF_LOG_ERROR,
-                    "Error unloading tcf enclave: %04X -- %s",
+                    "Error unloading Avalon enclave: %04X -- %s",
                     e.error_code(),
                     e.what());*/
             } catch (...) {
                 tcf::Log(
                     TCF_LOG_ERROR,
-                    "Unknown error unloading tcf enclave\n");
+                    "Unknown error unloading Avalon enclave\n");
             }
         }  // Enclave::~Enclave
 

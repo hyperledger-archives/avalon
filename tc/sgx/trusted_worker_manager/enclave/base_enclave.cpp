@@ -69,13 +69,13 @@ tcf_err_t ecall_CreateErsatzEnclaveReport(sgx_target_info_t* targetInfo, sgx_rep
             sgx_create_report(targetInfo, nullptr, outReport), "Failed to create report.");
     } catch (tcf::error::Error& e) {
         SAFE_LOG(TCF_LOG_ERROR,
-            "Error in tcf enclave(ecall_CreateErsatzEnclaveReport): %04X "
+            "Error in Avalon enclave(ecall_CreateErsatzEnclaveReport): %04X "
             "-- %s",
             e.error_code(), e.what());
         ocall_SetErrorMessage(e.what());
         result = e.error_code();
     } catch (...) {
-        SAFE_LOG(TCF_LOG_ERROR, "Unknown error in tcf enclave(ecall_CreateErsatzEnclaveReport)");
+        SAFE_LOG(TCF_LOG_ERROR, "Unknown error in Avalon enclave(ecall_CreateErsatzEnclaveReport)");
         result = TCF_ERR_UNKNOWN;
     }
 
