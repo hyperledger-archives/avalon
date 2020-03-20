@@ -124,25 +124,18 @@ RUN mkdir -p build \
 WORKDIR /project/avalon/common/python
 
 RUN echo "Building Avalon Common Python\n" \
-  && python setup.py bdist_wheel \
-  && echo "Installing Avalon Common Python" \
-  && pip3 install dist/*.whl
+  && make
 
 #install avalon crypto module
 WORKDIR /project/avalon/common/crypto_utils
 
 RUN echo "Building Avalon Common Crypto Python\n" \
-  && make \
-  && echo "Installing Avalon Common Crypto Python" \
-  && pip3 install dist/*.whl
-
+  && make
 
 WORKDIR /project/avalon/sdk
-#install Avalon SDK  package.
+#install Avalon SDK package.
 RUN echo "Building Avalon SDK\n" \
- && make \
- && echo "Installing Avalon SDK\n" \
- && make install
+ && make
 
 
 # Install fabric python sdk
@@ -151,8 +144,7 @@ RUN pip3 install virtualenv \
 
 # install blockchain connector module
 RUN cd /project/avalon/blockchain_connector \
-   && python setup.py bdist_wheel \
-   && pip3 install dist/*.whl
+   && make
 
 # Build final image and install modules
 FROM base_image as final_image
@@ -163,10 +155,20 @@ WORKDIR /project/avalon/blockchain_connector
 
 COPY --from=build_image /usr/local/ /usr/local
 COPY --from=build_image /root/.solcx /root/.solcx
+# Copy Python build artifacts
+COPY --from=build_image /project/avalon/common/python/dist/*.whl dist/
+COPY --from=build_image /project/avalon/common/crypto_utils/dist/*.whl dist/
+COPY --from=build_image /project/avalon/sdk/dist/*.whl dist/
+COPY --from=build_image /project/avalon/blockchain_connector/dist/*.whl dist/
 
+# Installing wheel file requires python3-pip package.
 # python3-pip package will increase size of final docker image.
 # So remove python3-pip package and dependencies.
-RUN echo "Remove unused packages from image\n" \
+RUN apt-get update \
+ && apt-get install -y -q python3-pip \
+ && echo "Install Common Python, Crypto, SDK & Blockchain_connector packages\n" \
+ && pip3 install dist/*.whl \
+ && echo "Remove unused packages from image\n" \
  && apt-get autoremove --purge -y -q python3-pip \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*

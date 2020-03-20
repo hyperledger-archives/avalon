@@ -11,19 +11,25 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+# ------------------------------------------------------------------------------
 
-# Explicitly declare text files you want to always be normalized and converted
-# to native line endings on checkout.
-Makefile text eol=lf
-Dockerfile text eol=lf
-*.c text eol=lf
-*.cpp text eol=lf
-*.csh text eol=lf
-*.h text eol=lf
-*.json text eol=lf
-*.md text eol=lf
-*.pem text eol=lf
-*.py text eol=lf
-*.sh text eol=lf
-*.toml text eol=lf
-*.txt text eol=lf
+FROM ubuntu:bionic
+
+# Ignore timezone prompt in apt
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Add necessary packages
+RUN apt-get update \
+ && apt-get install -y -q \
+    git \
+    pylint3 \
+    cppcheck \
+    pycodestyle \
+ && apt-get -y -q upgrade \
+ && apt-get clean \
+ && rm -rf /var/lib/apt/lists/*
+
+# Make Python3 default
+RUN ln -sf /usr/bin/python3 /usr/bin/python
+
+WORKDIR /project/avalon
