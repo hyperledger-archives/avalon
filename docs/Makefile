@@ -25,12 +25,18 @@ VERSION=$$(../bin/get_version)
 # List source directories and files to be documented by Doxygen here.
 # Doxyfile's RECURSIVE=YES makes it also use subdirectories.
 INPUT=	refman/README.md \
-	../common/sgx_workload
+	../common/sgx_workload \
+	../sdk
+EXCLUDE= test \
+	tests \
+	unit_tests \
+	__init__.py
 
 all: $(TARGET) $(PDF_TARGET)
 
 Doxyfile: Doxyfile.in
 	sed 's|@INPUT@|$(INPUT)|' <$@.in | \
+	sed 's|@EXCLUDE@|$(EXCLUDE)|' | \
 		sed 's|@VERSION@|'$(VERSION)'|' >$@
 
 # README.md file must be modified for use with Doxygen.
