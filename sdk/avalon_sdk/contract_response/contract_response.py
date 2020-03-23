@@ -17,5 +17,6 @@ from enum import Enum, unique
 
 @unique
 class ContractResponse(Enum):
+    """Contract response values."""
     SUCCESS = 0
     ERROR = -1

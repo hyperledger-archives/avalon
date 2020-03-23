@@ -30,16 +30,17 @@ logging.basicConfig(
 
 class FabricWrapper():
     """
-    Fabric wrapper class to interact with fabric blockchain
+    Fabric wrapper class to interact with Fabric blockchain.
     It provides wrapper functions to invoke and query chain code.
     """
 
     def __init__(self, config):
         """
-        Constructor to initialize wrapper with required parameter
-        Params:
-            config is dict containing parameters for fabric.
-            These parameters are read from toml file.
+        Constructor to initialize wrapper with required parameter.
+
+        Parameters:
+        config    Dictionary containing parameters for Fabric.
+                  These parameters are read from a .toml file
         """
         if self.__validate(config):
             # Read network file path from fabric toml file.
@@ -65,8 +66,13 @@ class FabricWrapper():
 
     def __validate(self, config):
         """
-        validates parameter from config parameters for existence.
-        Returns false if validation fails and true if it success
+        Validate a parameter from the config parameters for existence.
+
+        Parameters:
+        config    Configuration parameter
+
+        Returns:
+        True if validation succeeds or false if validation fails.
         """
         if config["fabric"]["fabric_network_file"] is None:
             logging.error("Fabric network configuration is not set!!")
@@ -85,18 +91,20 @@ class FabricWrapper():
 
     def invoke_chaincode(self, chaincode_name, method_name, params):
         """
-        This is wrapper method to invoke the chain code.
-        Params:
-            chaincode_name is name of the chain code
-            method_name is chain code method name
-            params is list of arguments to method
+        This is wrapper method to invoke chain code.
+
+        Parameters:
+        chaincode_name Name of the chain code
+        method_name    Chain code method name
+        params         List of arguments to method
+
         Returns:
-            If the call to chain code query then it
-            returns the payload of chain code response
-            on success or None on error.
-            If the call is invoking chain code then it
-            returns ContractResponse.SUCCESS on success
-            and ContractResponse.ERROR on failure.
+        If the call to chain code query, then it
+        returns the payload of the chain code response
+        on success or None on error.
+        If the call is invoking chain code, then it
+        returns ContractResponse.SUCCESS on success
+        and ContractResponse.ERROR on failure.
         """
         cc_methods = self.__valid_calls[chaincode_name]
         if cc_methods is None:
@@ -143,13 +151,15 @@ class FabricWrapper():
 
     def get_event_handler(self, event_name, chain_code, handler_func):
         """
-        function to create event handler object
-        params:
-            event_name is string to identify the event name
-            chain_code is chain code name as string
-            handler_func is call back function name
-        returns:
-            event object
+        Create event handler object.
+
+        Parameters:
+        event_name   String to identify the event name
+        chain_code   Chain code name as string
+        handler_func Callback function name
+
+        Returns:
+        Event object
         """
         event_obj = event_listener.EventListener(
             self.__network_conf_file,

@@ -30,7 +30,7 @@ logging.basicConfig(
 class EthereumWorkerRegistryListImpl(WorkerRegistryList):
     """
     This class provide APIs to read/write registry entries of workers,
-    which is stored in Ethereum blockchain.
+    which is stored in the Ethereum blockchain.
     """
 
     def __init__(self, config):
@@ -41,19 +41,25 @@ class EthereumWorkerRegistryListImpl(WorkerRegistryList):
 
     def registry_lookup(self, app_type_id=None):
         """
-        Registry Lookup identified by application type id
-        It returns following
-        1. totalCount is the total number of entries matching a specified
-        lookup criteria.  If this number is larger than the size of the ids
-        array, the caller should use the lookupTag to call workerLookUpNext
-        to retrieve the rest of the ids.
-        2. lookupTag is an optional parameter. If it is returned, it means that
-        there are more matching registry ids that can be retrieved by calling
-        the function registry_lookup_next with this tag as an input parameter.
-        3. ids is an array of the registry organization ids that match the
-        input parameters
-        Returns tuple containing count, lookup tag and list of organization
-        ids on success and returns None on error.
+        Registry Lookup identified by application type ID.
+
+        Parameters:
+        app_type_id  Application type ID to lookup in the registry
+
+        Returns:
+        Returns tuple containing totalCount, lookupTag, ids on success:
+        totalCount Total number of entries matching a specified
+                   lookup criteria.  If this number is larger than the size
+                   of the IDs array, the caller should use the lookupTag to
+                   call workerLookUpNext to retrieve the rest of the IDs
+        lookupTag  Optional parameter. If it is returned, it means that
+                   there are more matching registry IDs that can be retrieved
+                   by calling the function registry_lookup_next with this tag
+                   as an input parameter
+        ids        Array of the registry organization IDs that match the
+                   input parameters
+
+        Returns None on error.
         """
         if (self.__contract_instance is not None):
             if app_type_id is not None:
@@ -78,15 +84,21 @@ class EthereumWorkerRegistryListImpl(WorkerRegistryList):
 
     def registry_retrieve(self, org_id):
         """
-        Retrieving Registry Information identified by organization id
-        It returns tuple containing following on success.
-        1. uri is string defines a URI for this registry that supports the
-        Off-Chain Worker Registry JSON RPC API. It is going to be None
-        for proxy model.
-        2. sc_addr Ethereum address for worker registry smart contract
-        address.
-        3. application_type_ids list of application ids(array of byte[])
-        4. status of the registry
+        Retrieving Registry Information identified by organization ID.
+
+        Parameters:
+        org_id     Organization ID to lookup
+
+        Returns:
+        Tuple containing following on success:
+        uri                  string defining a URI for this registry that
+                             supports the Off-Chain Worker Registry JSON
+                             RPC API. It will be None for the proxy model
+        sc_addr              Ethereum address for worker registry
+                             smart contract address
+        application_type_ids List of application ids(array of byte[])
+        status               Status of the registry
+
         Returns None on error.
         """
         if (self.__contract_instance is not None):
@@ -106,24 +118,30 @@ class EthereumWorkerRegistryListImpl(WorkerRegistryList):
 
     def registry_lookup_next(self, app_type_id, lookup_tag):
         """
-        Getting Additional Registry Lookup Results
+        Get additional registry lookup results.
         This function is called to retrieve additional results of the
-        Registry lookup initiated by the registryLookUp call.
-        Inputs
-        1. application_type_id is an application type that has to be
-        supported by the workers retrieved.
-        2. lookup_tag is returned by a previous call to either this function
-        or to registryLookUp.
+        Registry lookup initiated by the registry_lookUp call.
 
-        Outputs tuple on success containing the below.
-        1. total_count is a total number of entries matching the lookup
-        criteria. If this number is larger than the number of ids returned
-        so far, the caller should use lookup_tag to call registry_lookup_next
-        to retrieve the rest of the ids.
-        2. new_lookup_tag is an optional parameter. If it is returned, it means
-        that there are more matching registry ids that can be retrieved by
-        calling this function again with this tag as an input parameter.
-        3. ids is an array of the registry ids that match the input parameters
+        Parameters:
+        app_type_id    Application type that has to be
+                       supported by the workers retrieved
+        lookup_tag     Returned by a previous call to either this
+                       function or to registry_lookup
+
+        Returns:
+        Outputs tuple on success containing the following:
+        total_count    Total number of entries matching the lookup
+                       criteria. If this number is larger than the number
+                       of IDs returned so far, the caller should use
+                       lookup_tag to call registry_lookup_next to
+                       the rest of the ids
+        new_lookup_tag Optional parameter. If it is returned, it means
+                       that there are more matching registry IDs that
+                       can be retrieved by calling this function again
+                       with this tag as an input parameter
+        ids            Array of the registry IDs that match the input
+                       parameters
+
         Returns None on error.
         """
         if (self.__contract_instance is not None):
@@ -143,8 +161,13 @@ class EthereumWorkerRegistryListImpl(WorkerRegistryList):
 
     def __validate(self, config):
         """
-        validates parameter from config parameters for existence.
-        Returns false if validation fails and true if it success
+        Validates parameter from config parameters for existence.
+
+        Parameters:
+        config    Configuration parameters to validate
+
+        Returns:
+        true on success or false if validation fails.
         """
         if config["ethereum"]["direct_registry_contract_file"] is None:
             logging.error("Missing direct registry contract file path!!")
@@ -170,17 +193,24 @@ class EthereumWorkerRegistryListImpl(WorkerRegistryList):
 
     def registry_add(self, org_id, uri, sc_addr, app_type_ids):
         """
-        Adding a new registry
-        Inputs
-        1. organization_id bytes[] identifies organization that hosts the
-        registry, e.g. a bank in the consortium or anonymous entity.
-        2. uri string defines a URI for this registry that supports
-        the Off-Chain Worker Registry JSON RPC API.
-        3. sc_addr bytes[] defines an Ethereum address that runs the
-        Worker Registry Smart Contract API smart contract for this registry.
-        4. app_type_ids []bytes[] is an optional parameter that defines
-        application types supported by the worker managed by the registry.
-        Returns transaction receipt on success or None on error.
+        Add a new registry.
+
+        Parameters:
+        org_id       bytes[] identifies organization that hosts the
+                     registry, e.g. a bank in the consortium or an
+                     anonymous entity
+        uri          String defines a URI for this registry that
+                     supports the Off-Chain Worker Registry
+                     JSON RPC API.
+        sc_addr      bytes[] defines an Ethereum address that
+                     runs the Worker Registry Smart Contract API
+                     smart contract for this registry
+        app_type_ids []bytes[] is an optional parameter that defines
+                     application types supported by the worker
+                     managed by the registry
+
+        Returns:
+        Transaction receipt on success or None on error.
         """
         if (self.__contract_instance is not None):
             if (is_valid_hex_str(binascii.hexlify(org_id).decode("utf8"))
@@ -214,17 +244,24 @@ class EthereumWorkerRegistryListImpl(WorkerRegistryList):
 
     def registry_update(self, org_id, uri, sc_addr, app_type_ids):
         """
-        Update a registry
-        Inputs
-        1. organization_id bytes[] identifies organization that hosts the
-        registry, e.g. a bank in the consortium or anonymous entity.
-        2. uri string defines a URI for this registry that supports the
-        Off-Chain Worker Registry JSON RPC API.
-        3. sc_addr bytes[] defines an Ethereum address that runs a
-        Worker Registry Smart Contract API smart contract for this registry.
-        4. application_type_ids []bytes[] is an optional parameter that defines
-        application types supported by the worker managed by the registry.
-        Returns transaction receipt on success or None on error.
+        Update a registry.
+
+        Parameters:
+        org_id               bytes[] identifies organization that hosts the
+                             registry, e.g. a bank in the consortium or
+                             an anonymous entity
+        uri                  string defines a URI for this registry that
+                             supports the Off-Chain Worker Registry
+                             JSON RPC API
+        sc_addr              bytes[] defines an Ethereum address that
+                             runs a Worker Registry Smart Contract API
+                             smart contract for this registry
+        app_type_ids         []bytes[] is an optional parameter that defines
+                             application types supported by the worker
+                             managed by the registry
+
+        Returns:
+        Transaction receipt on success or None on error.
         """
         if (self.__contract_instance is not None):
             if (is_valid_hex_str(binascii.hexlify(org_id).decode("utf8"))
@@ -261,16 +298,19 @@ class EthereumWorkerRegistryListImpl(WorkerRegistryList):
 
     def registry_set_status(self, org_id, status):
         """
-        Setting Registry Status
-        Inputs
-        1. organization_id bytes[] identifies organization that hosts the
-        registry
-        2. status defines registry status to set. The currently defined values
-        are:
-            1 - indicates that the registry is active
-            2 - indicates that the registry is "off-line" (temporarily)
-            3 - indicates that the registry is decommissioned
-        Returns transaction receipt on success or None on error.
+        Set registry status.
+
+        Parameters:
+        org_id  bytes[] identifies organization that hosts
+                the registry
+        status  Defines registry status to set.
+                The currently defined values are:
+                1 - the registry is active
+                2 - the registry is temporarily "off-line"
+                3 - the registry is decommissioned
+
+        Returns:
+        Transaction receipt on success or None on error.
         """
         if (self.__contract_instance is not None):
             if (is_valid_hex_str(binascii.hexlify(org_id).decode("utf8"))

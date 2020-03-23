@@ -18,14 +18,15 @@ import base64
 
 class WorkOrderRequestValidator():
     """
-    WorkOrderRequestValidator - validates work order request
-    for proper params fields and valid data formats
+    WorkOrderRequestValidator validates work order requests
+    for proper parameter fields and valid data formats.
     """
     def __init__(self):
         """
-        key value pair with field name and boolean indicator that tells
-        whether field is mandatory or not.
-        True is mandatory and False is optional.
+        Initialize __param_key_map and __value_key_map,
+        which are key-value pairs.
+        The key is the field name and value is a boolean that
+        indicates whether a field is mandatory (True) or optional (False).
         """
         self.__param_key_map = {
             "responseTimeoutMSecs": True,
@@ -55,10 +56,15 @@ class WorkOrderRequestValidator():
 
     def validate_parameters(self, params):
         """
-        Validate parameter dictionary for existence of
+        Validate params dictionary for existence of
         fields and mandatory fields
-        Returns False and string with error message on failure and
-        True and empty string on success
+
+        Parameters:
+        params    Parameter dictionary to validate
+
+        Returns:
+        True and empty string on success and
+        False and string with error message on failure.
         """
         key_list = []
         for key in params.keys():
@@ -94,9 +100,14 @@ class WorkOrderRequestValidator():
 
     def validate_data_format(self, data):
         """
-        Validate data format of the params data field (in data or out data)
-        Returns False and string with error message on failure and
-        True and empty string on success
+        Validate data format of the params data field (inData or outData).
+
+        Parameters:
+        data    Data (inData or OutData)
+
+        Returns:
+        True and empty string on success and
+        False and string with error message on failure.
         """
         for data_item in data:
             in_data_keys = []

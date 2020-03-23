@@ -25,17 +25,22 @@ LISTENER_SLEEP_DURATION = 5  # second
 
 
 class BlockchainInterface:
+    """Ethereum blockchain interface to event processor."""
     def __init__(self, config):
         # TODO: store list of contracts?
         self._config = config
         self._uri_client = HttpJrpcClient(config["ethereum"]["event_provider"])
 
     def newListener(self, contract, event, fromBlock='latest'):
-        # Filter to get events from latest block by default 
+        """Create a filter to get events from latest block by default."""
         return contract.events[event].createFilter(fromBlock=fromBlock)
 
 
 class EventProcessor:
+    """
+    This class provides an event processor to capture events
+    then send these events to event listeners.
+    """
     def __init__(self, config):
         self._config = config
         self._uri_client = HttpJrpcClient(config["ethereum"]["event_provider"])
@@ -47,6 +52,10 @@ class EventProcessor:
             + "uint256,address,bytes4)")
 
     async def listener(self, event_filter):
+        """
+        Listen to new events since the last poll on this filter.
+        Although this method uses events, it is not fully asynchronous.
+        """
         logging.info("Started listener for events from blockchain")
         while True:
             # Check for any new event logs since the last poll
@@ -58,6 +67,7 @@ class EventProcessor:
             await asyncio.sleep(LISTENER_SLEEP_DURATION)
 
     async def handler(self, callback, *kargs, **kwargs):
+        """Start event handler to handle events."""
         logging.info("Started handler to handle events")
         while True:
             event = await self.queue.get()
@@ -67,6 +77,7 @@ class EventProcessor:
             self.queue.task_done()
 
     async def sync_handler(self, *kargs, **kwargs):
+        """Start a synchronous event handler to handle an event."""
         logging.info("Started synchronous handler to handle an event")
         event = await self.queue.get()
         logging.debug("Event popped from listener queue")
@@ -75,6 +86,7 @@ class EventProcessor:
         return event
 
     async def start(self, event_filter, callback, *kargs, **kwargs):
+        """Start event processor in an infinite loop."""
         self.queue = asyncio.Queue()
         loop = asyncio.get_event_loop()
         self.listeners = [loop.create_task(
@@ -90,6 +102,7 @@ class EventProcessor:
         """
         Get a single event synchronously using the event_filter
         provided.
+
         Returns an event received for the event_filter used.
         """
         self.queue = asyncio.Queue()
@@ -103,6 +116,7 @@ class EventProcessor:
         return handler_result
 
     async def stop(self):
+        """Stop the event processor that was started with start()."""
         for process in self.listeners:
             process.cancel()
         for process in self.handlers:

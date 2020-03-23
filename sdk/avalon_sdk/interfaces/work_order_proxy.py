@@ -29,15 +29,18 @@ class WorkOrderProxy(WorkOrder):
     @abstractmethod
     def encryption_key_start(self, tag, id=None):
         """
-        Function to inform the Worker that it should start
+        Inform the Worker that it should start
         encryption key generation for this requester.
-        This API is for proxy model.
-        Params
-            tag is an optional parameter.
-            If it is zero, the transaction sender's address
-            is used as a tag.
-        Returns
-            An error code, 0 - success, otherwise an error.
+        This API is for the proxy model.
+
+        Parameters:
+        tag       is an optional parameter.
+                  If it is zero, the transaction sender's address
+                  is used as a tag
+        id        Optional JSON RPC request ID
+
+        Returns:
+        0 on success, otherwise an error code.
         """
         pass
 
@@ -46,11 +49,13 @@ class WorkOrderProxy(WorkOrder):
         """
         This function is called by the Worker Service to
         complete a Work Order successfully or in error.
-        This API is for proxy model.
-        params
-            work_order_id is unique id to identify the work order request
-            work_order_response is the Work Order response data in string
-        Returns
-            An error code, 0 - success, otherwise an error.
+        This API is for the proxy model.
+
+        Parameters:
+        work_order_id       Unique ID to identify the work order request
+        work_order_response Work order response data in a string
+
+        Returns:
+        errorCode           0 on success or non-zero on error.
         """
         pass

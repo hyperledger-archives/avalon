@@ -17,6 +17,14 @@ from enum import Enum, unique
 
 @unique
 class RegistryStatus(Enum):
+    """
+    Worker registry status values:
+    1 - registry is ACTIVE
+    2 - registry is temporarily OFF_LINE
+    3 - registry is DECOMMISSIONED
+
+    From EEA spec 5.2.
+    """
     ACTIVE = 1
     OFF_LINE = 2
     DECOMMISSIONED = 3

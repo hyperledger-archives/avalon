@@ -150,6 +150,6 @@
         "callparams": [
           {"type": "bytes32", "name": "registryId"}],
         "isQuery": true
-      }  
+      }
     }
   }

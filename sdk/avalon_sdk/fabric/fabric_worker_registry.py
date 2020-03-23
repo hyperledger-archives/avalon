@@ -32,14 +32,16 @@ logging.basicConfig(
 
 class FabricWorkerRegistryImpl(WorkerRegistry):
     """
-    This class provide worker APIs which interact with
-    Fabric blockchain. Detail method description will be
-    available in WorkerRegistry interface
+    This class provide worker APIs which interact with the
+    Hyperledger Fabric blockchain.
+    Detailed method descriptions are available in the WorkerRegistry
+    interface.
     """
 
     def __init__(self, config):
         """
-        config is dict containing fabric specific parameters.
+        Parameters:
+        config    Dictionary containing Fabric-specific parameters
         """
         self.__fabric_wrapper = None
         # Chain code name
@@ -52,11 +54,39 @@ class FabricWorkerRegistryImpl(WorkerRegistry):
     def worker_lookup(self, worker_type=None, org_id=None,
                       application_id=None, id=None):
         """
-        Lookup a worker identified worker_type, org_id and application_id
-        all fields are optional and if present condition should match for all
-        fields. If none passed it should return all workers.
-        Returns tuple containing workers count, lookup tag and list of
-        worker ids or on error returns None.
+        Lookup a worker identified worker_type, org_id, and application_id.
+        All fields are optional and, if present, condition should match for
+        all fields. If none are passed it should return all workers.
+
+        If the list is too large to fit into a single response (the maximum
+        number of entries in a single response is implementation specific),
+        the smart contract should return the first batch of the results
+        and provide a lookup_tag that can be used by the caller to
+        retrieve the next batch by calling worker_lookup_next.
+
+        Parameters:
+        worker_type         Optional characteristic of workers for which
+                            you may wish to search
+        org_id              Optional organization ID to which a worker belongs
+        application_id      Optional application type ID that is
+                            supported by the worker
+        id                  Optional JSON RPC request ID
+
+        Returns:
+        Tuple containing workers count, lookup tag, and list of
+        worker IDs:
+        total_count Total number of entries matching a specified
+                    lookup criteria. If this number is larger than the
+                    size of the IDs array, the caller should use
+                    lookupTag to call worker_lookup_next to retrieve
+                    the rest of the IDs
+        lookup_tag  Optional parameter. If it is returned, it means
+                    that there are more matching worker IDs, which can then
+                    be retrieved by calling function worker_lookup_next
+                    with this tag as an input parameter
+        ids         Array of the worker IDs that match the input parameters
+
+        On error returns None.
         """
         if (self.__fabric_wrapper is not None):
             params = []
@@ -75,7 +105,7 @@ class FabricWorkerRegistryImpl(WorkerRegistry):
             else:
                 params.append(application_id)
 
-            logging.info("Worker loookup args {}".format(params))
+            logging.info("Worker lookup args {}".format(params))
             lookupResult = self.__fabric_wrapper.invoke_chaincode(
                 self.CHAIN_CODE,
                 'workerLookUp',
@@ -87,11 +117,18 @@ class FabricWorkerRegistryImpl(WorkerRegistry):
 
     def worker_retrieve(self, worker_id, id=None):
         """
-        Retrieve the worker identified by worker id
-        Returns tuple containing worker status, worker type,
-        organization id, list of application ids and worker
-        details(json string)
-        On error returns None
+        Retrieve the worker identified by worker ID.
+
+        Parameters:
+        worker_id  Worker ID of the registry whose details are requested
+        id         Optional Optional JSON RPC request ID
+
+        Returns:
+        Tuple containing worker status (defined in worker_set_status),
+        worker type, organization ID, list of application IDs, and worker
+        details (JSON RPC string).
+
+        On error returns None.
         """
         if (self.__fabric_wrapper is not None):
             params = []
@@ -108,26 +145,31 @@ class FabricWorkerRegistryImpl(WorkerRegistry):
     def worker_lookup_next(self, worker_type, org_id, application_id,
                            lookup_tag, id=None):
         """
-        Getting Additional Worker Lookup Results
-        Inputs
-        1. worker_type is a characteristic of Workers for which you may wish
-        to search.
-        2. organization_id is an organization to which a Worker belongs.
-        3. application_type_id is an application type that has to be supported
-        by the Worker.
-        4. lookup_tag is returned by a previous call to either this function
-        or to worker_lookup.
-        5. id is used for json rpc request
+        Retrieve additional worker lookup results after calling worker_lookup.
 
-        Outputs tuple containing following.
-        1. total_count is a total number of entries matching this lookup
-        criteria.  If this number is larger than the number of ids returned
-        so far, the caller should use lookupTag to call workerLookUpNext to
-        retrieve the rest of the ids.
-        2. new_lookup_tag is an optional parameter. If it is returned, it
-        means that there are more matching Worker ids than can be retrieved
-        by calling this function again with this tag as an input parameter.
-        3. ids is an array of the Worker ids that match the input parameters.
+        Parameters:
+        worker_type         Characteristic of Workers for which you may wish
+                            to search.
+        org_id              Organization ID to which a worker belongs
+        application_id      Optional application type ID that is
+                            supported by the worker
+        lookup_tag          is returned by a previous call to either this
+                            function or to worker_lookup
+        id                  Optional Optional JSON RPC request ID
+
+        Returns:
+        Tuple containing the following:
+        total_count    Total number of entries matching this lookup
+                       criteria.  If this number is larger than the number
+                       of IDs returned so far, the caller should use
+                       lookupTag to call worker_lookup_next to retrieve
+                       the rest of the IDs
+        new_lookup_tag Optional parameter. If it is returned, it
+                       means that there are more matching worker IDs that
+                       can be retrieved by calling this function again with
+                       this tag as an input parameter
+        ids            Array of the worker IDs that match the input parameters
+
         On error returns None.
         """
         if (self.__fabric_wrapper is not None):
@@ -145,29 +187,33 @@ class FabricWorkerRegistryImpl(WorkerRegistry):
             logging.error("Fabric wrapper instance is not initialized")
             return None
 
-    def worker_register(
-            self, worker_id, worker_type, org_id,
-            application_ids, details, id=None):
+    def worker_register(self, worker_id, worker_type, org_id,
+                        application_ids, details, id=None):
         """
-        Register new worker with details of worker
-        Inputs
-        1. worker_id is a worker id, e.g. an Fabric address or
-        a value derived from the worker's DID.
-        2. worker_type defines the type of Worker. Currently defined types are:
-            1. indicates "TEE-SGX": an Intel SGX Trusted Execution Environment
-            2. indicates "MPC": Multi-Party Compute
-            3. indicates "ZK": Zero-Knowledge
-        3. organization_id is an optional parameter representing the
-        organization that hosts the Worker, e.g. a bank in the consortium or
-        anonymous entity.
-        4. application_type_ids is an optional parameter that defines
-        application types supported by the Worker.
-        5. details is detailed information about the worker in JSON format as
-        defined in
-        https://entethalliance.github.io/trusted-computing/spec.html
-        #common-data-for-all-worker-types
-        Returns ContractResponse.SUCCESS on success
-        or ContractResponse.ERROR on error.
+        Register a new worker with details of the worker.
+
+        Parameters:
+        worker_id       Worker ID value. E.g., a Fabric address
+        worker_type     Type of Worker. Currently defined types are:
+                        * "TEE-SGX": an Intel SGX Trusted Execution
+                          Environment
+                        * "MPC": Multi-Party Compute
+                        * "ZK": Zero-Knowledge
+        org_id          Optional parameter representing the
+                        organization that hosts the Worker,
+                        e.g. a bank in the consortium or
+                        anonymous entity
+        application_ids Optional parameter that defines
+                        application types supported by the Worker
+        details         Detailed information about the worker in
+                        JSON RPC format as defined in
+                https://entethalliance.github.io/trusted-computing/spec.html
+                #common-data-for-all-worker-types
+        id              Optional Optional JSON RPC request ID
+
+        Returns:
+        ContractResponse.SUCCESS on success or
+        ContractResponse.ERROR on error.
         """
         if (self.__fabric_wrapper is not None):
             params = []
@@ -187,9 +233,19 @@ class FabricWorkerRegistryImpl(WorkerRegistry):
 
     def worker_set_status(self, worker_id, status, id=None):
         """
-        Set the registry status identified by worker id
-        status is worker type enum type
-        Returns ContractResponse.SUCCESS on success
+        Set the registry status identified by worker ID
+
+        Parameters:
+        worker_id Worker ID value. E.g., a Fabric address
+        status    Worker status. The currently defined values are:
+                  1 - worker is active
+                  2 - worker is temporarily "off-line"
+                  3 - worker is decommissioned
+                  4 - worker is compromised
+        id        Optional Optional JSON RPC request ID
+
+        Returns:
+        ContractResponse.SUCCESS on success
         or ContractResponse.ERROR on error.
         """
         if (self.__fabric_wrapper is not None):
@@ -207,13 +263,15 @@ class FabricWorkerRegistryImpl(WorkerRegistry):
 
     def worker_update(self, worker_id, details, id=None):
         """
-        Update the worker with details data which is json string
-        Updating a Worker
-        Inputs
-        1. worker_id is a worker id, e.g. an Fabric address or
-        a value derived from the worker's DID.
-        2. details is detailed information about the worker in JSON format
-        Returns ContractResponse.SUCCESS on success
+        Update a worker with details data.
+
+        Parameters:
+        worker_id  Worker ID, e.g. an Fabric address
+        details    Detailed information about the worker in JSON format
+        id         Optional Optional JSON RPC request ID
+
+        Returns:
+        ContractResponse.SUCCESS on success
         or ContractResponse.ERROR on error.
         """
         if (self.__fabric_wrapper is not None):

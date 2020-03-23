@@ -30,11 +30,17 @@ logging.basicConfig(
 
 class EthereumWorkerRegistryImpl(WorkerRegistry):
     """
-    This class is meant to set/get worker related information to/from Ethereum
-    blockchain. Detailed method description is available in the interface.
+    This class is sets and gets worker-related information to and from
+    the Ethereum blockchain.
+    Detailed method descriptions are available in the WorkerRegistry
+    interfaces.
     """
 
     def __init__(self, config):
+        """
+        Parameters:
+        config    Dictionary containing Ethereum-specific parameters
+        """
         if self.__validate(config) is True:
             self.__initialize(config)
         else:
@@ -42,37 +48,41 @@ class EthereumWorkerRegistryImpl(WorkerRegistry):
 
     def worker_lookup(self, worker_type, org_id, application_id, id=None):
         """
-        Initiating Worker lookup
-        This function retrieves a list of Worker ids that match the input
-        parameters.
-        The Worker must match all input parameters (AND mode) to be included
-        in the list.
+        Lookup a worker identified by worker_type, org_id, and application_id.
+        All fields are optional and, if present, condition should match for
+        all fields. If none are passed it should return all workers.
+
         If the list is too large to fit into a single response (the maximum
         number of entries in a single response is implementation specific),
         the smart contract should return the first batch of the results
         and provide a lookupTag that can be used by the caller to
         retrieve the next batch by calling worker_lookup_next.
 
-        All input parameters are optional and can be provided in any
-        combination to select Workers.
+        Parameters:
+        worker_type    Optional characteristic of workers for which you may
+                       wish to search
+        org_id         Optional organization ID that can be used to search
+                       for one or more workers that belong to this
+                       organization
+        application_id Optional application type ID that is supported by
+                       the worker
+        id             Optional JSON RPC request ID
 
-        Inputs
-        1. worker_type is a characteristic of Workers for which you may wish
-        to search
-        2. organization_id is an id of an organization that can be used to
-        search for one or more Workers that belong to this organization
-        3. application_type_id is an application type that is supported by
-        the Worker
+        Returns:
+        Tuple containing workers count, lookup tag, and list of
+        worker IDs:
+        total_count Total number of entries matching a specified
+                    lookup criteria. If this number is larger than the
+                    size of the IDs array, the caller should use
+                    lookupTag to call worker_lookup_next to retrieve
+                    the rest of the IDs
+        lookup_tag  Optional parameter. If it is returned, it means
+                    that there are more matching worker IDs, which can then
+                    be retrieved by calling function worker_lookup_next
+                    with this tag as an input parameter
+        ids         Array of the worker IDs that match the input parameters
 
-        Returns
-        1. total_count is a total number of entries matching a specified
-        lookup criteria. If this number is bigger than size of ids array,
-        the caller should use lookupTag to call workerLookUpNext to
-        retrieve the rest of the ids.
-        2. lookup_tag is an optional parameter. If it is returned, it means
-        that there are more matching Worker ids that can be retrieved by
-        calling function workerLookUpNext with this tag as an input parameter.
-        3. ids is an array of the Worker ids that match the input parameters.
+        On error returns None.
         """
 
         if (self.__contract_instance is not None):
@@ -97,13 +107,18 @@ class EthereumWorkerRegistryImpl(WorkerRegistry):
 
     def worker_retrieve(self, worker_id, id=None):
         """
-        Retrieve worker by worker id
-        Inputs
-        1. worker_id is the id of the registry whose details are requested.
+        Retrieve the worker identified by worker ID.
+
+        Parameters:
+        worker_id  Worker ID of the registry whose details are requested
+        id         Optional JSON RPC request ID
+
         Returns:
-        The same as the input parameters to the corresponding call to
-        worker_register()
-        plus status as defined in worker_set_status.
+        Tuple containing worker status (defined in worker_set_status),
+        worker type, organization ID, list of application IDs, and worker
+        details (JSON RPC string).
+
+        On error returns None.
         """
 
         if (self.__contract_instance is not None):
@@ -122,25 +137,33 @@ class EthereumWorkerRegistryImpl(WorkerRegistry):
     def worker_lookup_next(self, worker_type, org_id, application_id,
                            lookup_tag):
         """
-        Getting Additional Worker Lookup Results
-        Inputs
-        1. worker_type is a characteristic of Workers for which you may wish
-        to search.
-        2. organization_id is an organization to which a Worker belongs.
-        3. application_type_id is an application type that has to be supported
-        by the Worker.
-        4. lookup_tag is returned by a previous call to either this function
-        or to worker_lookup.
+        Retrieve additional worker lookup results after calling worker_lookup.
+
+        Parameters:
+        worker_type         Characteristic of Workers for which you may wish
+                            to search
+        org_id              Organization ID to which a Worker belongs
+        application_id      Optional application type ID that is
+                            supported by the worker
+        lookup_tag          is returned by a previous call to either this
+                            function or to worker_lookup
+        id                  Optional Optional JSON RPC request ID
+
 
         Returns:
-        1. total_count is a total number of entries matching this lookup
-        criteria.  If this number is larger than the number of ids returned
-        so far, the caller should use lookupTag to call workerLookUpNext to
-        retrieve the rest of the ids.
-        2. new_lookup_tag is an optional parameter. If it is returned, it
-        means that there are more matching Worker ids than can be retrieved
-        by calling this function again with this tag as an input parameter.
-        3. ids is an array of the Worker ids that match the input parameters.
+        Tuple containing the following:
+        total_count    Total number of entries matching this lookup
+                       criteria.  If this number is larger than the number
+                       of IDs returned so far, the caller should use
+                       lookupTag to call worker_lookup_next to retrieve
+                       the rest of the IDs
+        new_lookup_tag Optional parameter. If it is returned, it
+                       means that there are more matching worker IDs that
+                       can be retrieved by calling this function again with
+                       this tag as an input parameter
+        ids            Array of the worker IDs that match the input parameters
+
+        On error returns None.
         """
 
         if (self.__contract_instance is not None):
@@ -166,26 +189,30 @@ class EthereumWorkerRegistryImpl(WorkerRegistry):
     def worker_register(self, worker_id, worker_type, organization_id,
                         application_type_ids, details):
         """
-        Registering a New Worker
-        Inputs
-        1. worker_id is a worker id, e.g. an Ethereum address or
-        a value derived from the worker's DID.
-        2. worker_type defines the type of Worker. Currently defined types are:
-            1. indicates "TEE-SGX": an Intel SGX Trusted Execution Environment
-            2. indicates "MPC": Multi-Party Compute
-            3. indicates "ZK": Zero-Knowledge
-        3. organization_id is an optional parameter representing the
-        organization that hosts the Worker, e.g. a bank in the consortium or
-        anonymous entity.
-        4. application_type_ids is an optional parameter that defines
-        application types supported by the Worker.
-        5. details is detailed information about the worker in JSON format as
-        defined in
-        https://entethalliance.github.io/trusted-computing/spec.html
-        #common-data-for-all-worker-types
-        Returns
-        None - if registration does not succeed
-        Transaction receipt - if registration succeeds
+        Register a new worker with details of the worker.
+
+        Parameters:
+        worker_id       Worker ID value. E.g., an Ethereum address or
+                        a value derived from the worker's DID
+        worker_type     Type of Worker. Currently defined types are:
+                        * "TEE-SGX": an Intel SGX Trusted Execution
+                          Environment
+                        * "MPC": Multi-Party Compute
+                        * "ZK": Zero-Knowledge
+        organization_id Optional parameter representing the
+                        organization that hosts the Worker,
+                        e.g. a bank in the consortium or
+                        anonymous entity
+        application_ids Optional parameter that defines
+                        application types supported by the Worker
+        details         Detailed information about the worker in
+                        JSON RPC format as defined in
+                https://entethalliance.github.io/trusted-computing/spec.html
+                #common-data-for-all-worker-types
+
+        Returns:
+        Transaction receipt if registration succeeds.
+        None if registration does not succeed.
         """
 
         if (self.__contract_instance is not None):
@@ -228,11 +255,16 @@ class EthereumWorkerRegistryImpl(WorkerRegistry):
 
     def worker_update(self, worker_id, details):
         """
-        Updating a Worker
-        Inputs
-        1. worker_id is a worker id, e.g. an Ethereum address or
-        a value derived from the worker's DID.
-        2. details is detailed information about the worker in JSON format
+        Update a worker with details data.
+
+        Parameters:
+        worker_id  Worker ID value. E.g., an Ethereum address or
+                   a value derived from the worker's DID
+        details    Detailed information about the worker in JSON format
+
+        Returns:
+        Transaction receipt if registration succeeds.
+        None if registration does not succeed.
         """
 
         if (self.__contract_instance is not None):
@@ -262,14 +294,20 @@ class EthereumWorkerRegistryImpl(WorkerRegistry):
 
     def worker_set_status(self, worker_id, status):
         """
-        Set the worker status identified by worker id
-        Inputs
-        1. worker_id is a worker id
-        2. status defines Worker status. The currently defined values are:
-            1 - indicates that the worker is active
-            2 - indicates that the worker is "off-line" (temporarily)
-            3 - indicates that the worker is decommissioned
-            4 - indicates that the worker is compromised
+        Set the worker status identified by worker ID.
+
+        Parameters:
+        worker_id Worker ID value. E.g., an Ethereum address or
+                  a value derived from the worker's DID
+        status    Worker status. The currently defined values are:
+                  1 - worker is active
+                  2 - worker is temporarily "off-line"
+                  3 - worker is decommissioned
+                  4 - worker is compromised
+
+        Returns:
+        Transaction receipt if registration succeeds.
+        None if registration does not succeed.
         """
 
         if (self.__contract_instance is not None):
@@ -300,8 +338,13 @@ class EthereumWorkerRegistryImpl(WorkerRegistry):
 
     def __validate(self, config):
         """
-        validates parameter from config parameters for existence.
-        Returns false if validation fails and true if it success
+        Validate configuration parameters for existence.
+
+        Parameters:
+        config    Ethereum-specific configuration parameters
+
+        Returns:
+        True if validation succeeds or false if validation fails.
         """
         if config["ethereum"]["worker_registry_contract_file"] is None:
             logging.error("Missing worker registry contract file path!!")
@@ -314,6 +357,9 @@ class EthereumWorkerRegistryImpl(WorkerRegistry):
     def __initialize(self, config):
         """
         Initialize the parameters from config to instance variables.
+
+        Parameters:
+        config    Ethereum-specific configuration parameters to initialize
         """
         self.__eth_client = EthereumWrapper(config)
         tcf_home = environ.get("TCF_HOME", "../../../")
@@ -326,8 +372,9 @@ class EthereumWorkerRegistryImpl(WorkerRegistry):
                 contract_file_name, contract_address
             )
 
-def _convert_lookup_result_to_json(worker_lookup_result):
 
+def _convert_lookup_result_to_json(worker_lookup_result):
+    """Convert worker lookup result to JSON format."""
     result = {}
     result["totalCount"] = worker_lookup_result[0]
     result["lookupTag"] = worker_lookup_result[1]
@@ -335,10 +382,14 @@ def _convert_lookup_result_to_json(worker_lookup_result):
 
     return {"result": result}
 
+
 def _convert_byte32_arr_to_hex_arr(byte32_arr):
     """
     This function takes in an array of byte32 strings and
-    returns an array of hex strings
+    returns an array of hex strings.
+
+    Parameters:
+    byte32_arr Strings to convert from a byte32 array to a hex array
     """
     hex_ids = []
     for byte32_str in byte32_arr:
@@ -348,8 +399,11 @@ def _convert_byte32_arr_to_hex_arr(byte32_arr):
 
 def _convert_retrieve_result_to_json(retrieve_result):
     """
-    This function takes in the result retrieved from blockchain
-    and converts it to json for external entities
+    This function takes in the result retrieved from the blockchain
+    and converts it to JSON for external entities.
+
+    Parameters:
+    retrieve_result Result to convert from a byte32 array to hex
     """
     result = {}
     result["status"] = retrieve_result[0]
@@ -365,8 +419,11 @@ def _convert_retrieve_result_to_json(retrieve_result):
 
 def _convert_retrieve_result_to_hex(retrieve_result):
     """
-    This function takes in the result retrieved from blockchain
-    and converts byte32 fiels to hex for external entities
+    This function takes in the result retrieved from the blockchain
+    and converts byte32 fields to hex for external entities.
+
+    Parameters:
+    retrieve_result Result to convert from a byte32 array to hex
     """
     result = [retrieve_result[0], retrieve_result[1],
               None, None, retrieve_result[4]]

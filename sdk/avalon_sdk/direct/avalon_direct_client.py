@@ -30,18 +30,20 @@ logger = logging.getLogger(__name__)
 class AvalonDirectClient():
     """
     This is class for the direct JSON RPC API client.
-    It is used in direct model
-    1. Worker registry list interacts with blockchain it is optional.
-    2. Worker registry interacts with json rpc listener.
-    3. Work order interacts with json rpc listener.
-    4. Work order receipt interacts with json rpc listener.
+    It is used in the direct model.
+    1. Worker registry list interacts with the blockchain; it is optional.
+    2. Worker registry interacts with the JSON RPC listener.
+    3. Work order interacts with the JSON RPC listener.
+    4. Work order receipt interacts with the JSON RPC listener.
     """
     def __init__(self, config_file=None, config=None):
         """
-        "config_file" is config file path as a string.
-        "config" is a dictionary loaded from config_file.
+        Parameters:
+        config_file Optional configuration file path as a string
+        config      Optional dictionary loaded from config_file
+
         Either one of config_file or config needs to be passed.
-        If both are passed config takes precedence.
+        If both are passed, then config takes precedence.
         """
         if(config is not None):
             self.__config = config
@@ -71,13 +73,29 @@ class AvalonDirectClient():
         self.__work_order_receipts = JRPCWorkOrderReceiptImpl(self.__config)
 
     def get_worker_registry_list_instance(self):
-            return self.__worker_registry_list
+        """
+        Return the worker's instance of the registry list.
+        This list is optional and interacts with the blockchain.
+        """
+        return self.__worker_registry_list
 
     def get_worker_registry_instance(self):
+        """
+        Return the worker's instance of the registry.
+        The registry interacts with the JSON RPC listener.
+        """
         return self.__worker_registry
 
     def get_work_order_instance(self):
+        """
+        Return the worker's instance of the work order.
+        The work order interacts with the JSON RPC listener.
+        """
         return self.__work_order
 
     def get_work_order_receipt_instance(self):
+        """
+        Return the worker's instance of the work order receipt.
+        The work order receipt interacts with the JSON RPC listener.
+        """
         return self.__work_order_receipts
