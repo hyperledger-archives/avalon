@@ -268,16 +268,9 @@ func (t *WorkerRegistry) workerLookUpNext(stub shim.ChaincodeStubInterface, args
 	for iter.HasNext() {
 		item, _ := iter.Next()
 		logger.Infof("The value: %v", item)
-		// Append only active workers
-		worker, err := t.getWorkerByID(stub, string(item.Value))
-		if err != nil {
-			return shim.Error(err.Error())
-		}
-		if worker.Status == WORKERACTIVE {
-			resparam.IDs = append(resparam.IDs, string(item.Value))
-			if len(resparam.IDs) == PAGESIZE {
-				break
-			}
+		resparam.IDs = append(resparam.IDs, string(item.Value))
+		if len(resparam.IDs) == PAGESIZE {
+			break
 		}
 	}
 	logger.Info("Result metadata: %v", metadata)
