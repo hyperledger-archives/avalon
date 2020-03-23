@@ -19,8 +19,8 @@ import errno
 import asyncio
 import logging
 import json
+import random
 import nest_asyncio
-
 
 from utility.hex_utils import byte_array_to_hex_str
 from avalon_sdk.fabric import base
@@ -76,71 +76,16 @@ class FabricConnector():
         """
         Check for existing worker and update worker to fabric blockchain
         """
-        # First get all the workers from the blockchain
-        req_id = 15
-        bc_workers = self.__fabric_worker.worker_lookup(
-            worker_type=WorkerType.TEE_SGX,
-        )
-        logging.info("Workers in blockchain {}".format(
-            bc_workers
-        ))
-        # Set worker status to Decommissioned.
-        if bc_workers and bc_workers[0] > 0:
-            for worker in bc_workers[2]:
-                update_status = self.__fabric_worker.worker_set_status(
-                    worker,
-                    WorkerStatus.DECOMMISSIONED
-                )
-                if update_status == ContractResponse.SUCCESS:
-                    logging.info("Set worker {} status to {}".format(
-                        worker,
-                        WorkerStatus.DECOMMISSIONED
-                    ))
-                else:
-                    logging.info("Failed to set worker {} status".format(
-                        worker
-                    ))
-        else:
-            logging.info("No active workers in blockchain")
-        # Get active workers from avalon
-        worker_type = WorkerType.TEE_SGX
-        active_workers = self.__jrpc_worker.worker_lookup(
-            worker_type=worker_type, id=req_id)
-        logging.info("worker lookup result {}".format(
-            active_workers
-        ))
-        if active_workers and 'result' in active_workers:
-            # Since currently we have only worker, get the first worker
-            if active_workers['result']['totalCount'] > 0:
-                worker_id = active_workers['result']['ids'][0]
-                worker_result = self.__jrpc_worker.worker_retrieve(
-                    worker_id, req_id+1)
-                logging.info("worker retrieve result {}".format(
-                    worker_result
-                ))
-                if worker_result and 'result' in worker_result:
-                    worker = worker_result['result']
-                    # add worker to fabric block chain
-                    status = self.__fabric_worker.worker_register(
-                        worker_id,
-                        WorkerType(int(worker['workerType'])),
-                        worker['organizationId'],
-                        [worker['applicationTypeId']],
-                        json.dumps(worker['details'])
-                    )
-                    if status == ContractResponse.SUCCESS:
-                        logging.info(
-                            "Added worker to fabric blockchain")
-                    else:
-                        logging.info(
-                            "Failed to add worker to fabric \
-                                blockchain")
-                else:
-                    logging.info("Failed to retrieve avalon workers")
-            else:
-                logging.info("No avalon workers are available!")
-        else:
-            logging.info("Failed to lookup avalon workers")
+        # Get all TEE SGX based workers ids from fabric blockchain
+        worker_ids_onchain = self._lookup_workers_onchain()
+        # Get all TEE SGX based worker ids from shared kv
+        worker_ids_kv = self._lookup_workers_in_kv_storage()
+        # If worker id exists in shared kv then update details of
+        # worker to with details field.
+        # otherwise add worker to blockchain
+        # Update all worker which are not in shared kv and
+        # present in blockchain to Decommissioned status
+        self._add_update_worker_to_chain(worker_ids_onchain, worker_ids_kv)
 
     def get_work_order_event_handler_tasks(self):
         """
@@ -218,3 +163,111 @@ class FabricConnector():
                 logging.info("work_order_get_result is failed")
         else:
             logging.info("work_order_submit is failed")
+
+    def _lookup_workers_in_kv_storage(self):
+        """
+        Retrieves the worker ids from shared kv using
+        worker_lookup direct API.
+        Returns list of worker ids
+        """
+        jrpc_req_id = random.randint(0, 100000)
+
+        worker_lookup_result = self.__jrpc_worker.worker_lookup(
+            worker_type=WorkerType.TEE_SGX, id=jrpc_req_id
+        )
+        logging.info("\nWorker lookup response from kv storage : {}\n".format(
+            json.dumps(worker_lookup_result, indent=4)
+        ))
+        if "result" in worker_lookup_result and \
+                "ids" in worker_lookup_result["result"].keys():
+            if worker_lookup_result["result"]["totalCount"] != 0:
+                return worker_lookup_result["result"]["ids"]
+            else:
+                logging.error("No workers found in kv storage")
+        else:
+            logging.error("Failed to lookup worker in kv storage")
+        return []
+
+    def _retrieve_worker_details_from_kv_storage(self, worker_id):
+        """
+        Retrieve worker details from shared kv using
+        direct json rpc API
+        Returns the worker details in json string format
+        """
+        jrpc_req_id = random.randint(0, 100000)
+        worker_info = self.__jrpc_worker.worker_retrieve(
+            worker_id, jrpc_req_id)
+        logging.info("Worker retrieve response from kv storage: {}"
+                     .format(json.dumps(worker_info, indent=4)))
+
+        if "error" in worker_info:
+            logging.error("Unable to retrieve worker details from kv storage")
+            return ""
+        else:
+            return worker_info["result"]
+
+    def _lookup_workers_onchain(self):
+        """
+        Lookup all workers on chain to sync up with kv storage
+        Return list of worker ids
+        """
+        worker_lookup_result = self.__fabric_worker.worker_lookup(
+            worker_type=WorkerType.TEE_SGX
+        )
+        logging.info("Worker lookup response from blockchain: {}\n".format(
+            json.dumps(worker_lookup_result, indent=4)
+        ))
+        if worker_lookup_result and worker_lookup_result[0] > 0:
+            return worker_lookup_result[2]
+        else:
+            logging.info("No workers found in fabric blockchain")
+            return []
+
+    def _add_update_worker_to_chain(self, wids_onchain, wids_kv):
+        """
+        This function adds/updates a worker in the fabric blockchain
+        """
+        for wid in wids_kv:
+            worker_info = self._retrieve_worker_details_from_kv_storage(
+                wid)
+            worker_id = wid
+            worker_type = WorkerType(worker_info["workerType"])
+            org_id = worker_info["organizationId"]
+            app_type_id = worker_info["applicationTypeId"]
+            details = json.dumps(worker_info["details"])
+
+            result = None
+            if wid in wids_onchain:
+                logging.info("Updating worker {} on fabric blockchain"
+                             .format(wid))
+                result = self.__fabric_worker.worker_update(
+                    worker_id, details)
+            else:
+                logging.info("Adding new worker {} to fabric blockchain"
+                             .format(wid))
+                result = self.__fabric_worker.worker_register(
+                    worker_id, worker_type, org_id, [app_type_id], details
+                )
+            if result != ContractResponse.SUCCESS:
+                logging.error("Error while adding/updating worker to fabric"
+                              + " blockchain")
+
+        for wid in wids_onchain:
+            # Mark all stale workers on blockchain as decommissioned
+            if wid not in wids_kv:
+                worker = self.__fabric_worker.worker_retrieve(wid)
+                # worker_retrieve returns tuple and first element
+                # denotes status of worker.
+                worker_status_onchain = worker[0]
+                # If worker is not already decommissioned,
+                # mark it decommissioned
+                # as it is no longer available in the kv storage
+                if worker_status_onchain != WorkerStatus.DECOMMISSIONED.value:
+                    update_status = self.__fabric_worker.worker_set_status(
+                        wid, WorkerStatus.DECOMMISSIONED)
+                    if update_status == ContractResponse.SUCCESS:
+                        logging.info("Marked worker " + wid +
+                                     " as decommissioned on" +
+                                     " fabric blockchain")
+                    else:
+                        logging.info("Update worker " + wid + " is failed")
