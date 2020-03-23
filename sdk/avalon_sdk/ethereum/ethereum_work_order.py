@@ -260,15 +260,14 @@ def is_wo_id_in_event(event, *kargs, **kwargs):
         True - if the work order id matches
         False - otherwise
     """
-    response = event["args"]["workOrderResponse"]
-    if "result" in response:
-        logging.debug("Event has a valid result and no error")
-        work_order_id = kwargs.get("wo_id")
-        response_json = json.loads(response)
-        if response_json["result"]["workOrderId"] == work_order_id:
-            logging.debug("Work order response event for work "
-                          + "order id {} received".format(work_order_id))
-            return True
+    wo_id_from_event_bytes = event["args"]["workOrderId"]
+    # Work order id in event is bytes32. Convert to hex
+    wo_id_from_event = wo_id_from_event_bytes.hex()
+    work_order_id = kwargs.get("wo_id")
+    if wo_id_from_event == work_order_id:
+        logging.debug("Work order response event for work "
+                      + "order id {} received".format(work_order_id))
+        return True
     return False
 
 
