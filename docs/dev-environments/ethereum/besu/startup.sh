@@ -14,38 +14,27 @@
 # limitations under the License.
 
 
-check_and_exit()
+function error_exit()
 {
-    if [ $? -ne 0 ]
-    then
-        echo "Script failed."
-        exit 1
-    else
-        echo "Done."
-    fi
+    echo "[Error]: " ${*}
+    exit 1
 }
+
 echo ""
 echo "========================================================="
 echo "STEP 1 :: Bring up HL Besu nodes"
 echo "========================================================="
 
-docker-compose up -d
-check_and_exit
-
-echo ""
-echo "========================================================="
-echo "STEP 2 :: Create truffle project"
-echo "========================================================="
-sudo rm -rf ./my_project
-mkdir my_project
-check_and_exit
+docker-compose up -d || error_exit "Failed to bring up Besu network"
+echo "Done"
 
 echo ""
 echo "========================================================="
 echo "STEP 3 :: Initialize truffle project and deploy contracts"
 echo "========================================================="
-docker-compose -f docker-compose-truffle.yaml up
-check_and_exit
+docker-compose -f docker-compose-truffle.yaml up \
+|| error_exit "Failed to initialize truffle or deploy contracts"
+echo "Done"
 
 echo ""
 echo "Contract deployment successful!!"

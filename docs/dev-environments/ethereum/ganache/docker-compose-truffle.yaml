@@ -18,20 +18,10 @@ services:
     truffle-envt-ganache:
       image: truffle-envt:latest
       build:
-        context: ./
-        dockerfile: ./Dockerfile.truffle-envt
-      volumes:
-        - ./my_project:/my_project
-        - $TCF_HOME/sdk/avalon_sdk/ethereum/contracts/proxy-model:/contracts
-        - $TCF_HOME/sdk/avalon_sdk/ethereum/truffle_artifacts:/truffle_artifacts
+        context: $TCF_HOME
+        dockerfile: ./docs/dev-environments/ethereum/Dockerfile
       container_name: truffle-envt-ganache-setup
       command: "bash -c \"\
-          cd my_project && \
-          truffle init && \
-          cp /contracts/*.sol ./contracts/ && \
-          cp /truffle_artifacts/truffle-config.js ./ && \
-          cp /truffle_artifacts/2_deploy_contracts.js ./migrations/ && \
-          sleep 20s && \
           truffle migrate --network avalon_ganache_docker
           \""
 

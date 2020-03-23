@@ -14,46 +14,38 @@
 # limitations under the License.
 
 
-check_and_exit()
+function error_exit()
 {
-    if [ $? -ne 0 ]
-    then
-        echo "Script failed."
-        exit 1
-    else
-        echo "Done."
-    fi
+    echo "[Error]: " ${*}
+    exit 1
 }
+
 echo ""
 echo "========================================================="
 echo "STEP 1 :: Create specific network for Ganache setup"
 echo "========================================================="
 
-docker network create -d bridge --subnet=172.18.0.0/16 ganache_local_net
-check_and_exit
+docker network create -d bridge --subnet=172.18.0.0/16 ganache_local_net \
+|| error_exit "Failed to create docker network for Ganache"
+echo "Done"
 
 echo ""
 echo "========================================================="
 echo "STEP 2 :: Start Ganache cli locally"
 echo "========================================================="
 
-docker run -d -p 8545:8545 --network=ganache_local_net --hostname=local-ganache --name=local-ganache trufflesuite/ganache-cli:v6.9.1
-check_and_exit
+docker run -d -p 8545:8545 --network=ganache_local_net --hostname=local-ganache \
+--name=local-ganache trufflesuite/ganache-cli:v6.9.1 || error_exit "Failed to start Ganache container"
+echo "Done"
 
 echo ""
 echo "========================================================="
-echo "STEP 3 :: Create truffle project"
+echo "STEP 3 :: Initialize truffle project and deploy contracts"
 echo "========================================================="
-sudo rm -rf ./my_project
-mkdir my_project
-check_and_exit
 
-echo ""
-echo "========================================================="
-echo "STEP 4 :: Initialize truffle project and deploy contracts"
-echo "========================================================="
-docker-compose -f ./docker-compose-truffle.yaml up
-check_and_exit
+docker-compose -f docker-compose-truffle.yaml up \
+|| error_exit "Failed to initialize truffle or deploy contracts"
+echo "Done"
 
 echo ""
 echo "Contract deployment successful!!"
