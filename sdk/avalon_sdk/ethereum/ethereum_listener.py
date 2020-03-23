@@ -76,13 +76,23 @@ class EventProcessor:
             callback(event, *kargs, **kwargs)
             self.queue.task_done()
 
-    async def sync_handler(self, *kargs, **kwargs):
+    async def sync_handler(self, check_event_callback=None, *kargs, **kwargs):
         """Start a synchronous event handler to handle an event."""
         logging.info("Started synchronous handler to handle an event")
-        event = await self.queue.get()
-        logging.debug("Event popped from listener queue")
+        while True:
 
-        self.queue.task_done()
+            event = await self.queue.get()
+            logging.debug("Event popped from listener queue")
+            self.queue.task_done()
+
+            # Break out of the loop if check_event_callback method is
+            # None(caller does not want to check the event).
+            # Also break if it is defined and returns True when called
+            # else continue waiting for a True return value.
+            if check_event_callback is None or \
+                    check_event_callback(event, *kargs, **kwargs) is True:
+                break
+
         return event
 
     async def start(self, event_filter, callback, *kargs, **kwargs):
@@ -98,7 +108,8 @@ class EventProcessor:
         await self.queue.join()  # this code should never run
         await self.stop()  # this code should never run
 
-    async def get_event_synchronously(self, event_filter, *kargs, **kwargs):
+    async def get_event_synchronously(self, event_filter,
+                                      callback, *kargs, **kwargs):
         """
         Get a single event synchronously using the event_filter
         provided.
@@ -109,7 +120,8 @@ class EventProcessor:
         loop = asyncio.get_event_loop()
         self.listeners = [loop.create_task(
             self.listener(event_filter)) for _ in range(1)]
-        self.handlers = [loop.create_task(self.sync_handler(*kargs, **kwargs))]
+        self.handlers = [loop.create_task(
+            self.sync_handler(callback, *kargs, **kwargs))]
 
         handler_result = await asyncio.gather(*self.handlers)
 

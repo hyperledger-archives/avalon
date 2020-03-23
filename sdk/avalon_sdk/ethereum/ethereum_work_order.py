@@ -203,11 +203,13 @@ class EthereumWorkOrderProxyImpl(WorkOrderProxy):
             # Wait for the workOrderCompleted event after starting the
             # listener and handler
             event = asyncio.get_event_loop()\
-                .run_until_complete(daemon.get_event_synchronously(listener))
+                .run_until_complete(daemon.get_event_synchronously(
+                    listener, is_wo_id_in_event, wo_id=work_order_id))
 
             # Get the first element as this is a list of one event
             # obtained from gather() in ethereum_listener
             work_order_response = event[0]["args"]["workOrderResponse"]
+
             return json.loads(work_order_response)
         except KeyboardInterrupt:
             asyncio.get_event_loop().run_until_complete(daemon.stop())
@@ -246,6 +248,28 @@ class EthereumWorkOrderProxyImpl(WorkOrderProxy):
         Not supported for Ethereum.
         """
         pass
+
+
+def is_wo_id_in_event(event, *kargs, **kwargs):
+    """
+    This function checks if a specific work order id(passed
+    in via kwargs) is there in the event as well. So, it is
+    basically trying to see if the event is meant for this
+    work order id.
+    Returns:
+        True - if the work order id matches
+        False - otherwise
+    """
+    response = event["args"]["workOrderResponse"]
+    if "result" in response:
+        logging.debug("Event has a valid result and no error")
+        work_order_id = kwargs.get("wo_id")
+        response_json = json.loads(response)
+        if response_json["result"]["workOrderId"] == work_order_id:
+            logging.debug("Work order response event for work "
+                          + "order id {} received".format(work_order_id))
+            return True
+    return False
 
 
 def _is_valid_work_order_json(work_order_id, worker_id, requester_id,
