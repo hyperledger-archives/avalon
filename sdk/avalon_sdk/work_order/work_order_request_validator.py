@@ -30,7 +30,7 @@ class WorkOrderRequestValidator():
         """
         self.__param_key_map = {
             "responseTimeoutMSecs": True,
-            "payloadFormat": False,
+            "payloadFormat": True,
             "resultUri": False,
             "notifyUri": False,
             "workOrderId": True,
@@ -75,6 +75,14 @@ class WorkOrderRequestValidator():
         for k, v in self.__param_key_map.items():
             if v is True and k not in key_list:
                 return False, "Missing parameter {}".format(k)
+
+        if "responseTimeoutMSecs" in params:
+            return type(params["responseTimeoutMSecs"]) == int, \
+                "Invalid data format for responseTimeoutMSecs"
+
+        if "payloadFormat" in params:
+            if params["payloadFormat"] != "JSON-RPC":
+                return False, "Invalid payload format"
 
         if not is_valid_hex_str(params["workerId"]):
             return False, "Invalid data format for Worker id"

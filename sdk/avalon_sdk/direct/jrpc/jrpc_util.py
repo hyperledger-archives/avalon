@@ -13,11 +13,11 @@ from enum import Enum, unique
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from enum import Enum, unique
+from enum import unique, IntEnum
 
 
 @unique
-class JsonRpcErrorCode(Enum):
+class JsonRpcErrorCode(IntEnum):
     """
     JSON RPC error code values:
     0 – SUCCESS
@@ -39,4 +39,3 @@ class JsonRpcErrorCode(Enum):
     INVALID_SIGNATURE = 4
     NO_LOOKUP_RESULTS = 5
     UNSUPPORTED_MODE = 6
-    KEY_EXISTS = 9

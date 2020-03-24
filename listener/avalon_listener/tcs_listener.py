@@ -114,12 +114,7 @@ class TCSListener(resource.Resource):
             input_json = json.loads(input_json_str)
         except Exception as err:
             logger.exception("exception loading Json: %s", str(err))
-            response = {
-                "error": {
-                    "code": WorkOrderStatus.INVALID_PARAMETER_FORMAT_OR_VALUE,
-                    "message": "Error: Improper Json. Unable to load",
-                },
-            }
+            response["error"]["message"] = "Improper Json request"
             return response
 
         logger.info("Received request: %s", input_json['method'])

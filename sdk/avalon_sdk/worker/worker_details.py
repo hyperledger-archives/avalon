@@ -18,6 +18,8 @@ Perform worker-related functions based on EEA Spec 1.0.
 
 import logging
 import json
+import hashlib
+
 import avalon_crypto_utils.crypto_utility as crypto_utility
 import config.config as pconfig
 from enum import Enum, unique
@@ -223,9 +225,12 @@ class SGXWorkerDetails(WorkerDetails):
             self.proof_data = json.loads(
                 worker_data['workerTypeData']['proofData'])
 
-        self.worker_id = crypto_utility.strip_begin_end_public_key(
+        w_id = crypto_utility.strip_begin_end_public_key(
             worker_data['workerTypeData']['verificationKey']) \
-            .encode("UTF-8").hex()
+            .encode("UTF-8")
+        # Calculate sha256 of worker id to get 32 bytes. The TC spec proxy
+        # model contracts expect byte32. Then take a hexdigest for hex str.
+        self.worker_id = hashlib.sha256(w_id).hexdigest()
         ''' worker_id - newline, BEGIN PUB KEY and END PUB KEY are removed
                         from worker's verification key and converted to hex '''
         logger.info("Hashing Algorithm : %s", self.hashing_algorithm)

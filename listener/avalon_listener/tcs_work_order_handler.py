@@ -15,6 +15,7 @@
 import time
 import json
 import logging
+
 from error_code.error_status import WorkOrderStatus
 from error_code.enclave_error import EnclaveError
 from avalon_sdk.direct.jrpc.jrpc_util import JsonRpcErrorCode
@@ -55,7 +56,6 @@ class TCSWorkOrderHandler:
         self.workorder_count = 0
         self.max_workorder_count = max_wo_count
         self.workorder_list = []
-
         self.__work_order_handler_on_boot()
 
 # ---------------------------------------------------------------------------------------------
@@ -88,6 +88,18 @@ class TCSWorkOrderHandler:
                 self.workorder_list.append(wo_id)
                 self.workorder_count += 1
 
+    def __is_worker_exists(self, worker_id):
+        """
+        Function to check if worker is exists or not
+        Returns
+            True if exists or False if not
+        """
+        logger.info("worker id to check in lmdb {}".format(worker_id))
+        if self.kv_helper.get("workers", worker_id):
+            return True
+        else:
+            return False
+
 # ---------------------------------------------------------------------------------------------
     def WorkOrderGetResult(self, **params):
         """
@@ -99,42 +111,51 @@ class TCSWorkOrderHandler:
               as defined in EEA spec 6.1.4
         Returns jrpc response as defined in EEA spec 6.1.2
         """
-        wo_id = params["workOrderId"]
-        if not is_valid_hex_str(wo_id):
-            logging.error("Invalid work order Id")
+        if "workOrderId" in params:
+            wo_id = params["workOrderId"]
+            if not is_valid_hex_str(wo_id):
+                logging.error("Invalid work order Id")
+                raise JSONRPCDispatchException(
+                    JsonRpcErrorCode.INVALID_PARAMETER,
+                    "Invalid work order Id"
+                )
+
+            # Work order is processed if it is in wo-response table
+            value = self.kv_helper.get("wo-responses", wo_id)
+            if value:
+                response = json.loads(value)
+                if 'result' in response:
+                    return response['result']
+
+                # response without a result should have an error
+                err_code = response["error"]["code"]
+                err_msg = response["error"]["message"]
+
+                if err_code == EnclaveError.ENCLAVE_ERR_VALUE:
+                    err_code = \
+                        WorkOrderStatus.INVALID_PARAMETER_FORMAT_OR_VALUE
+                elif err_code == EnclaveError.ENCLAVE_ERR_UNKNOWN:
+                    err_code = WorkOrderStatus.UNKNOWN_ERROR
+                else:
+                    err_code = WorkOrderStatus.FAILED
+                raise JSONRPCDispatchException(err_code, err_msg)
+
+            if(self.kv_helper.get("wo-timestamps", wo_id) is not None):
+                # work order is yet to be processed
+                raise JSONRPCDispatchException(
+                    WorkOrderStatus.PENDING,
+                    "Work order result is yet to be updated")
+
+            # work order not in 'wo-timestamps' table
             raise JSONRPCDispatchException(
-                JsonRpcErrorCode.INVALID_PARAMETER,
-                "Invalid work order Id"
+                WorkOrderStatus.INVALID_PARAMETER_FORMAT_OR_VALUE,
+                "Work order Id not found in the database. " +
+                "Hence invalid parameter")
+        else:
+            raise JSONRPCDispatchException(
+                WorkOrderStatus.INVALID_PARAMETER_FORMAT_OR_VALUE,
+                "Missing work order id"
             )
-
-        # Work order is processed if it is in wo-response table
-        value = self.kv_helper.get("wo-responses", wo_id)
-        if value:
-            response = json.loads(value)
-            if 'result' in response:
-                return response['result']
-
-            # response without a result should have an error
-            err_code = response["error"]["code"]
-            err_msg = response["error"]["message"]
-            if err_code == EnclaveError.ENCLAVE_ERR_VALUE:
-                err_code = WorkOrderStatus.INVALID_PARAMETER_FORMAT_OR_VALUE
-            elif err_code == EnclaveError.ENCLAVE_ERR_UNKNOWN:
-                err_code = WorkOrderStatus.UNKNOWN_ERROR
-            else:
-                err_code = WorkOrderStatus.FAILED
-            raise JSONRPCDispatchException(err_code, err_msg)
-
-        if(self.kv_helper.get("wo-timestamps", wo_id) is not None):
-            # work order is yet to be processed
-            raise JSONRPCDispatchException(
-                WorkOrderStatus.PENDING,
-                "Work order result is yet to be updated")
-
-        # work order not in 'wo-timestamps' table
-        raise JSONRPCDispatchException(
-            WorkOrderStatus.INVALID_PARAMETER_FORMAT_OR_VALUE,
-            "Work order Id not found in the database. Hence invalid parameter")
 
 # ---------------------------------------------------------------------------------------------
     def WorkOrderSubmit(self, **params):
@@ -179,6 +200,14 @@ class TCSWorkOrderHandler:
                 raise JSONRPCDispatchException(
                     JsonRpcErrorCode.INVALID_PARAMETER,
                     err_msg)
+        # Check if workerId is exists in avalon
+        if not self.__is_worker_exists(input_value_json["params"]["workerId"]):
+            raise JSONRPCDispatchException(
+                JsonRpcErrorCode.INVALID_PARAMETER,
+                "worker {} doesn't exists".format(
+                    input_value_json["params"]["workerId"]
+                )
+            )
 
         if((self.workorder_count + 1) > self.max_workorder_count):
 
