@@ -83,12 +83,8 @@ supports X Windows.
 7.  In Terminal 2 install the Solidity compiler:
     ```bash
     pip3 install --upgrade py-solc-x
-    python3 -m solc.install v0.4.25
     python3 -m solcx.install v0.5.15
-    export SOLC_BINARY=~/.py-solc/solc-v0.4.25/bin/solc
     ```
-    The `SOLC_BINARY` environment variable makes `solc` accessible
-    from Python to compile Solidity contracts
 8.  If your DISPLAY is not the local console, `:0`, you need to give access to
     your display from the GUI.
     Open a new terminal, Terminal 3, and run `xhost +`

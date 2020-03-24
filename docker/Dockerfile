@@ -46,11 +46,6 @@ RUN apt-get update \
 
 # Make Python3 default
 RUN ln -sf /usr/bin/python3 /usr/bin/python
-
-# Installing solidity compiler
-RUN add-apt-repository ppa:ethereum/ethereum \
-   && apt-get update \
-   && apt-get install solc
    
 # Install py-solc-x and web3 packages using pip because
 # these are not available in apt repository.
