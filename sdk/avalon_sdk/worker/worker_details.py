@@ -13,8 +13,7 @@
 # limitations under the License.
 
 """
-Functions to perform worker related functions based on Spec 1.0 compatibility.
-
+Perform worker-related functions based on EEA Spec 1.0.
 """
 
 import logging
@@ -29,6 +28,12 @@ logger = logging.getLogger(__name__)
 
 @unique
 class WorkerType(Enum):
+    """
+    Worker types are:
+    1 = TEE-SGX: Intel SGX Trusted Execution Environment (hardware based)
+    2 = MPC: Trusted Multi-Party Compute (software/hardware based)
+    3 = ZK: Zero-knowledge proofs (software based)
+    """
     TEE_SGX = 1
     MPC = 2
     ZK = 3
@@ -36,6 +41,15 @@ class WorkerType(Enum):
 
 @unique
 class WorkerStatus(Enum):
+    """
+    Worker status values:
+    1 - worker is ACTIVE
+    2 - worker is temporarily OFF_LINE
+    3 - worker is DECOMMISSIONED
+    4 - worker is COMPROMISED
+
+    From EEA spec 5.2.
+    """
     ACTIVE = 1
     OFF_LINE = 2
     DECOMMISSIONED = 3
@@ -48,8 +62,8 @@ class WorkerDetails():
 
     def __init__(self):
         """
-        Function to set the member variables of this class with default
-        value as per TCf Spec.
+        Set the member variables of this class with default
+        values as per the EEA Spec.
         """
         tcs_worker = pconfig.read_config_from_toml("tcs_config.toml",
                                                    "WorkerConfig")
@@ -69,10 +83,11 @@ class WorkerDetails():
 
     def validate_worker_details(self, details):
         """
-        Validate the details field of worker
-        params:
-            details is json formatted string
-        returns:
+        Validate the details field of a worker.
+
+        Parameters:
+            Details is json formatted string
+        Returns:
             None on success and error string on failure
         """
         details_dict = json.loads(details)
@@ -168,7 +183,7 @@ class WorkerDetails():
 
 class SGXWorkerDetails(WorkerDetails):
     """
-    TEE SGX worker type data
+    Contains Intel SGX TEE worker type data.
     """
 
     def __init__(self):
@@ -186,8 +201,11 @@ class SGXWorkerDetails(WorkerDetails):
 # -----------------------------------------------------------------------------
     def load_worker(self, worker_data):
         """
-        Function to load the member variables of this class
-        based on worker retrieved details.
+        Load member variables of this class
+        based on worker-retrieved details.
+
+        Parameters:
+            worker_data Worker Data to load into the class
         """
         logger.info("*********Updating Worker Details*********")
         self.hashing_algorithm = worker_data['hashingAlgorithm']

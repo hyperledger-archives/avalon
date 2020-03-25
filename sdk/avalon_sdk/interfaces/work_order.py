@@ -28,11 +28,20 @@ class WorkOrder(ABC):
     def work_order_submit(self, work_order_id, worker_id, requester_id,
                           work_order_request, id=None):
         """
-        Submit work order request
-        work_order_id is a unique id to identify the work order request
-        worker_id is the identifier for the worker
-        requester_id is a unique id to identify the requester
-        work_order_request is a json string containing following parameters
+        Submit a work order request.
+
+        Parameters:
+        work_order_id      Unique ID of the work order request
+        worker_id          Identifier for the worker
+        requester_id       Unique id to identify the requester
+        work_order_request JSON RPC string work order request.
+                           Defined in EEA specification 6.1.1.
+        id                 Optional JSON RPC request ID
+
+        Returns:
+        errorCode          0 on success and non-zero on error.
+
+        work_order_request is a JSON string containing following parameters:
         {
             "responseTimeoutMSecs": <integer>,
             "payloadFormat": <string>
@@ -50,14 +59,11 @@ class WorkOrder(ABC):
             "encryptedRequestHash": <hex string>,
             "requesterSignature": <BASE64 string>,
         },
-        in_data is an array of work order data objects, as defined below.
-        "inData": [<object>],
-        out_data is an array of work order output objects, as defined below.
-        "outData": [<object>]
+
         1. responseTimeoutMSecs - is a maximum timeout in milliseconds that
         the caller will wait for the response. Setting this timeout to zero
         means that the work order is submitted in the asynchronous (resultUri
-        is present), notify (notifyUri is present), or pull mode (neither
+        is present), notify (notifyUri is present), or poll mode (neither
         resultUri nor notifyUri is present). In this case, the TCS should
         schedule the request for execution and immediately return an error
         response with error code set to "scheduled". If the timeout is not
@@ -151,29 +157,31 @@ class WorkOrder(ABC):
         17. outData contains information about what and how the work order
         execution results should be delivered. Same as inData
         18. id is used for json rpc request
-        Output(Only in case of proxy-model)
-        errorCode is an error code, 0 - success, otherwise an error.
         """
         pass
 
     @abstractmethod
     def work_order_get_result(self, work_order_id, id=None):
         """
-        Get worker order result
-        If a Requester receives a response stating that its Work Order state is
-        "scheduled" or "processing", it should pull the Worker Service later to
-        get the result.
-        1. Pull the Worker Service periodically until the Work Order is
+        Query blockchain to get a work order result.
+
+        If a Requester receives a response stating that its work order state
+        is "scheduled" or "processing", it should poll the Worker Service
+        later to get the result:
+        1. Poll the Worker Service periodically until the Work Order is
         completed successfully or in error
         2. Wait for the Work Order Receipt complete event and retrieve a final
         result.
-        Inputs
-        3. id is used for json rpc request
-        work_order_id is a Work Order id that was sent in the corresponding
-        work_order_submit request.
-        Returns
-            tuple containing work order status, worker id, work order request,
-            work order response and error code.
+
+        Parameters:
+        work_order_id Work Order ID that was sent in the
+                      corresponding work_order_submit request
+        id            Optional JSON RPC request ID
+
+        Returns:
+        Tuple containing work order status, worker id, work order request,
+        work order response, and error code.
+        None on error.
         """
         pass
 
@@ -183,7 +191,8 @@ class WorkOrder(ABC):
                            signature_nonce=None,
                            signature=None, id=None):
         """
-        Get Encryption Key Request Payload
+        Get Encryption Key Request Payload.
+
         Inputs
         1. worker_id is an id of the worker to retrieve an encryption key for.
         2. last_used_key_nonce is an optional nonce associated with the
@@ -223,17 +232,21 @@ class WorkOrder(ABC):
     def encryption_key_set(self, worker_id, encryption_key,
                            encryption_nonce, tag, signature, id=None):
         """
-        Set Encryption Key Request Payload
-        Inputs
-        1. worker_id is an id of the worker to retrieve an encryption key for.
-        2. encryption_key is an encryption key.
-        3. encryption_nonce is a nonce associated with the key.
-        4. tag is tag that should be associated with the returned key,
-        e.g. requester id. This is an optional parameter. If it is not
-        provided, requesterId below is used as a key.
-        5.signature is a signature generated by
-        the worker on the worker_id, tag and encryption_nonce.
-        Returns
-            error code is the result of the operation.
+        Set encryption key request payload
+
+        Parameters:
+        worker_id        ID of the worker to retrieve an encryption key
+        encryption_key   Encryption key
+        encryption_nonce Nonce associated with the key
+        tag              Tag that should be associated with the returned key,
+                         e.g. requester id. This is an optional parameter.
+                         If it is not provided, requesterId below is used
+                         as a key
+        signature        Signature generated by the worker on the worker_id,
+                         tag, and encryption_nonce
+        id               Optional Optional JSON RPC request ID
+
+        Returns:
+        Error code is the result of the operation.
         """
         pass

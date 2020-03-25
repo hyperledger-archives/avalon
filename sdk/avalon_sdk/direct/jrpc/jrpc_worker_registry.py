@@ -34,10 +34,16 @@ class JRPCWorkerRegistryImpl(WorkerRegistry):
 
     def worker_retrieve(self, worker_id, id=None):
         """
-        Retrieve the worker identified by worker id
-        Returns jrpc response containing
-        organization id, application id, worker status,
-        worker details
+        Retrieve the worker identified by worker ID.
+
+        Parameters:
+        worker_id Worker ID value derived from the worker's DID
+        id        Optional Optional JSON RPC request ID
+
+        Returns:
+        JRPC response containing:
+        organization ID, application ID, worker status,
+        and worker details.
         """
 
         json_rpc_request = {
@@ -54,10 +60,30 @@ class JRPCWorkerRegistryImpl(WorkerRegistry):
     def worker_lookup(self, worker_type=None, organization_id=None,
                       application_type_id=None, id=None):
         """
-        Worker lookup based on worker type, organization id
-        and application id
-        Returns jrpc response containing number of workers,
-        lookup tag and list of worker ids.
+        Worker lookup based on worker type, organization ID,
+        and application ID.
+        All fields are optional and, if present, condition should match for
+        all fields. If none are passed it should return all workers.
+
+        Parameters:
+        worker_type         Optional characteristic of Workers for which you
+                            may wish to search. Currently defined types are:
+                            * "TEE-SGX": an Intel SGX Trusted Execution
+                              Environment
+                            * "MPC": Multi-Party Compute
+                            * "ZK": Zero-Knowledge
+        organization_id     Optional parameter representing the
+                            organization that hosts the Worker,
+                            e.g. a bank in the consortium or
+                            anonymous entity
+        application_type_id Optional application type that has to be supported
+                            by the worker
+        id                  Optional Optional JSON RPC request ID
+
+
+        Returns:
+        JRPC response containing number of workers,
+        lookup tag, and list of worker IDs.
         """
         json_rpc_request = {
             "jsonrpc": "2.0",
@@ -84,10 +110,30 @@ class JRPCWorkerRegistryImpl(WorkerRegistry):
                            organization_id=None, application_type_id=None,
                            id=None):
         """
-        Similar to workerLookUp with additional
-        parameter lookup_tag
-        Returns jrpc response containing number of workers,
-        lookup tag and list of worker ids.
+        Retrieve subsequent Worker lookup results based on worker type,
+        organization ID, and application ID.
+        Similar to workerLookUp with additional parameter lookup_tag.
+
+        Parameters:
+        lookup_tag          Used to lookup subsequent results after calling
+                            worker_lookup
+        worker_type         Optional characteristic of Workers for which you
+                            may wish to search. Currently defined types are:
+                            * "TEE-SGX": an Intel SGX Trusted Execution
+                              Environment
+                            * "MPC": Multi-Party Compute
+                            * "ZK": Zero-Knowledge
+        organization_id     Optional parameter representing the
+                            organization that hosts the Worker,
+                            e.g. a bank in the consortium or
+                            anonymous entity
+        application_type_id Optional application type that has to be supported
+                            by the worker
+        id                  Optional Optional JSON RPC request ID
+
+        Returns:
+        JRPC response containing number of workers,
+        lookup tag, and list of worker IDs.
         """
 
         json_rpc_request = {
@@ -116,7 +162,22 @@ class JRPCWorkerRegistryImpl(WorkerRegistry):
                         application_type_ids, details, id=None):
         """
         Adds worker details to registry
-        Returns jrpc response with worker registry status.
+
+        Parameters:
+        worker_id            Worker ID value derived from the worker's DID
+        worker_type          Type of Worker. Currently defined types are:
+                             * "TEE-SGX": an Intel SGX Trusted Execution
+                               Environment
+                             * "MPC": Multi-Party Compute
+                             * "ZK": Zero-Knowledge
+        org_id               Organization that hosts the Worker,
+                             e.g. a bank in the consortium or
+                             anonymous entity
+        application_type_ids Application types supported by the worker
+        id                   Optional JSON RPC request ID
+
+        Returns:
+        JRPC response with worker registry status.
         """
         json_rpc_request = {
             "jsonrpc": "2.0",
@@ -135,8 +196,16 @@ class JRPCWorkerRegistryImpl(WorkerRegistry):
 
     def worker_update(self, worker_id, details, id=None):
         """
-        Update worker with new information
-        Returns jrpc response with update status.
+        Update worker with new information.
+
+        Parameters:
+        worker_id Worker ID value derived from the worker's DID
+        details   Detailed information about the worker in
+                  JSON RPC format as defined in
+        id        Optional JSON RPC request ID
+
+        Returns:
+        JRPC response with update status.
         """
         json_rpc_request = {
             "jsonrpc": "2.0",
@@ -153,8 +222,15 @@ class JRPCWorkerRegistryImpl(WorkerRegistry):
     def worker_set_status(self, worker_id, status, id=None):
         """
         Set the worker status to active, offline,
-        decommissioned	or compromised state
-        Returns jrpc response with status.
+        decommissioned, or compromised state.
+
+        Parameters:
+        worker_id  Worker ID value derived from the worker's DID
+        status     Worker status value to set
+        id         Optional JSON RPC request ID
+
+        Returns:
+        JRPC response with status.
         """
         json_rpc_request = {
             "jsonrpc": "2.0",

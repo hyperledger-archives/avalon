@@ -18,6 +18,20 @@ from enum import Enum, unique
 
 @unique
 class JsonRpcErrorCode(Enum):
+    """
+    JSON RPC error code values:
+    0 – SUCCESS
+    1 – UNKNOWN_ERROR
+    2 – INVALID_PARAMETER format or value
+    3 – ACCESS_DENIED
+    4 – INVALID_SIGNATURE
+    5 - NO_LOOKUP_RESULTS no more lookup results remaining
+    6 - UNSUPPORTED_MODE (e.g. synchronous, asynchronous, pull,
+        or notification)
+    -32768 to -32000 - reserved for pre-defined errors in the JSON RPC spec.
+
+    From EEA spec 4.1.1.
+    """
     SUCCESS = 0
     UNKNOWN_ERROR = 1
     INVALID_PARAMETER = 2

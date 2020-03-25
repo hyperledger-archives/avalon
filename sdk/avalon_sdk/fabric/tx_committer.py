@@ -31,14 +31,20 @@ logger = logging.getLogger(__name__)
 
 class TxCommitter(base.ClientBase):
     """
-    Utility class to invoke chain code and query
+    Utility class to invoke Fabric chain code and query
     chain code.
-    """
-    """
-    function to get the endorsing peers.
     """
 
     def _get_endorsers(self, queryonly=False):
+        """
+        Get the endorsing peers.
+
+        Parameters:
+        queryonly  If the invocation does not result in ledger change,
+                   queryonly should be set to True.
+                   If the invocation does result in ledger change, it should
+                   be set to False.
+        """
         endorsers = dict()
         uniqueOrgs = dict()
         for org in self.client.organizations.values():
@@ -50,17 +56,21 @@ class TxCommitter(base.ClientBase):
                     break
         return endorsers
 
-    # Invoke a chaincode method
-    # txData - the json serialized data used as the
-    # sole parameter to invoke the chaincode
-    # cc_name - chaincode name
-    # fcn - chaincode function name to be invoked
-    # cc_version - chaincode version to be used
-    # queryonly - if the invocation does not result in ledger change,
-    # queryonly should be set to True,
-    # if the invocation does result in ledger change, it should
-    # be set to False.
     def cc_invoke(self, args, cc_name, fcn, cc_version, queryonly=False):
+        """
+        Invoke a chaincode method.
+
+        Parameters:
+        args       JSON RPC serialized data used as the
+                   sole parameter to invoke the chaincode
+        cc_name    chaincode name
+        fcn        chaincode function name to be invoked
+        cc_version chaincode version to be used
+        queryonly  If the invocation does not result in ledger change,
+                   queryonly should be set to True.
+                   If the invocation does result in ledger change, it should
+                   be set to False.
+        """
         if queryonly:
             return self.cc_query(args, cc_name, fcn)
 
@@ -93,12 +103,16 @@ class TxCommitter(base.ClientBase):
         logger.info('Tx response: {}'.format(responses))
         return responses
 
-    # Invoke a chaincode query method. If there is no query method from the
-    # chaincode, then this will fail
-    # args - the array of the strings used as the parameters to query method
-    # cc_name - chaincode name
-    # fcn - chaincode function name
     def cc_query(self, args, cc_name, fcn):
+        """
+        Invoke a chaincode query method. If there is no query method from the
+        chaincode, then this will fail.
+
+        Parameters:
+        args     Array of the strings used as the parameters to query method
+        cc_name  Chaincode name
+        fcn      Chaincode function name
+        """
         loop = asyncio.get_event_loop()
         try:
             responses = loop.run_until_complete(self.client.chaincode_query(

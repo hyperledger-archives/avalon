@@ -23,12 +23,15 @@ logger = logging.getLogger(__name__)
 class MessageException(Exception):
     """
     A class to capture communication exceptions when communicating with
-    services
+    services.
     """
     pass
 
 
 class HttpJrpcClient(object):
+    """
+    Class to handle HTTP JSON RPC communication by the client.
+    """
 
     def __init__(self, url):
         self.ServiceURL = url
@@ -36,7 +39,10 @@ class HttpJrpcClient(object):
 
     def _postmsg(self, request):
         """
-        Post a request JSON string and return the response.
+        Post a request JSON RPC string and return the response.
+
+        Parameters:
+        request   JSON string request to post
         """
 
         data = request.encode('utf8')

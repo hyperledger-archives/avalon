@@ -40,8 +40,9 @@ LISTENER_SLEEP_DURATION = 5
 class EthereumWorkOrderProxyImpl(WorkOrderProxy):
 
     """
-    This class is meant to write work-order related data to Ethereum
-    blockchain. Detailed method description is available in the interface
+    This class is meant to write work order-related data to the Ethereum
+    blockchain.
+    Detailed method descriptions are available in the interfaces.
     """
 
     def __init__(self, config):
@@ -52,8 +53,13 @@ class EthereumWorkOrderProxyImpl(WorkOrderProxy):
 
     def __validate(self, config):
         """
-        Validates config parameters for existence.
-        Returns false if validation fails and true if it succeeds
+        Validate configuration parameters for existence.
+
+        Parameters:
+        config    Configuration parameters
+
+        Returns:
+        True if validation succeeds or false if validation fails.
         """
         try:
             if config["ethereum"]["work_order_contract_file"] is None:
@@ -73,6 +79,9 @@ class EthereumWorkOrderProxyImpl(WorkOrderProxy):
     def __initialize(self, config):
         """
         Initialize the parameters from config to instance variables.
+
+        Parameters:
+        config    Configuration parameters to initialize
         """
         self.__eth_client = EthereumWrapper(config)
         self._config = config
@@ -89,14 +98,19 @@ class EthereumWorkOrderProxyImpl(WorkOrderProxy):
     def work_order_submit(self, work_order_id, worker_id, requester_id,
                           work_order_request, id=None):
         """
-        Submit work order request
-        work_order_id is a unique id to identify the work order request
-        worker_id is the identifier for the worker
-        requester_id is a unique id to identify the requester
-        work_order_request is a json string(Complete definition at
-        work_order.py interface file)
-        Returns
-            An error code, 0 - success, otherwise an error.
+        Submit work order request to the Ethereum block chain.
+
+        Parameters:
+        work_order_id      Unique ID of the work order request
+        worker_id          Identifier for the worker
+        requester_id       Unique id to identify the requester
+        work_order_request JSON RPC string work order request.
+                           Complete definition at work_order.py and
+                           defined in EEA specification 6.1.1.
+        id                 Optional JSON RPC request ID
+
+        Returns:
+        0 on success and non-zero on error.
         """
         if (self.__contract_instance is not None):
 
@@ -116,8 +130,8 @@ class EthereumWorkOrderProxyImpl(WorkOrderProxy):
                 return SUCCESS
             except Exception as e:
                 logging.error(
-                    "Exception occured when trying to execute workOrderSubmit "
-                    + "transaction on chain"+str(e))
+                    "Exception occurred when trying to execute "
+                    + "workOrderSubmit transaction on chain "+str(e))
                 return ERROR
         else:
             logging.error(
@@ -127,13 +141,15 @@ class EthereumWorkOrderProxyImpl(WorkOrderProxy):
     def work_order_complete(self, work_order_id, work_order_response):
         """
         This function is called by the Worker Service to
-        complete a Work Order successfully or in error.
-        This API is for proxy model.
-        params
-            work_order_id is unique id to identify the work order request
-            work_order_response is the Work Order response data in string
-        Returns
-            An error code, 0 - success, otherwise an error.
+        complete a work order successfully or in error.
+        This API is for the proxy model.
+
+        Parameters:
+        work_order_id       Unique ID to identify the work order request
+        work_order_response Work order response data in a string
+
+        Returns:
+        errorCode           0 on success or non-zero on error.
         """
         if (self.__contract_instance is not None):
 
@@ -146,8 +162,8 @@ class EthereumWorkOrderProxyImpl(WorkOrderProxy):
                 return SUCCESS
             except Exception as e:
                 logging.error(
-                    "Execption occured when trying to execute "
-                    + "workOrderComplete transaction on chain"+str(e))
+                    "Execption occurred when trying to execute "
+                    + "workOrderComplete transaction on chain "+str(e))
                 return ERROR
         else:
             logging.error(
@@ -156,10 +172,19 @@ class EthereumWorkOrderProxyImpl(WorkOrderProxy):
 
     def work_order_get_result(self, work_order_id, id=None):
         """
-        Get worker order result.
-        This function starts an event handler for handling workOrderCompleted
-        event from Ethereum blockchain.
-        Returns the reresponse of work order processing.
+        Query blockchain to get a work order result.
+        This function starts an event handler for handling the
+        workOrderCompleted event from the Ethereum blockchain.
+
+        Parameters:
+        work_order_id Work Order ID that was sent in the
+                      corresponding work_order_submit request
+        id            Optional JSON RPC request ID
+
+        Returns:
+        Tuple containing work order status, worker id, work order request,
+        work order response, and error code.
+        None on error.
         """
         logging.info("About to start Ethereum event handler")
 
@@ -191,21 +216,24 @@ class EthereumWorkOrderProxyImpl(WorkOrderProxy):
                                 requester_id, signature_nonce=None,
                                 signature=None, id=None):
         """
-        Get Encryption Key Request Payload
+        Get Encryption Key Request Payload.
+        Not supported for Ethereum.
         """
         pass
 
     def encryption_key_start(self, tag, id=None):
         """
-        Function to inform the Worker that it should start
+        Inform the Worker that it should start
         encryption key generation for this requester.
+        Not supported for Ethereum.
         """
         pass
 
     def encryption_key_set(self, worker_id, encryption_key,
                            encryption_nonce, tag, signature, id=None):
         """
-        Set Encryption Key Request Payload
+        Set Encryption Key Request Payload.
+        Not supported for Ethereum.
         """
         pass
 
@@ -214,7 +242,8 @@ class EthereumWorkOrderProxyImpl(WorkOrderProxy):
                            signature_nonce=None,
                            signature=None, id=None):
         """
-        Get Encryption Key Request Payload
+        Get Encryption Key Request Payload.
+        Not supported for Ethereum.
         """
         pass
 
@@ -222,8 +251,19 @@ class EthereumWorkOrderProxyImpl(WorkOrderProxy):
 def _is_valid_work_order_json(work_order_id, worker_id, requester_id,
                               work_order_request):
     """
-    Validate following fields in JSON request against the ones
-    provided outside the JSON - workOrderId, workerId, requesterId
+    Validate the following fields in a JSON request against the ones
+    provided outside the JSON: work_order_id, worker_id, and requester_id.
+
+    Parameters:
+    work_order_id      Unique ID of the work order request
+    worker_id          Identifier for the worker
+    requester_id       Unique id to identify the requester
+    work_order_request JSON RPC string work order request.
+                       Complete definition at work_order.py and
+                       defined in EEA specification 6.1.1.
+
+    Returns:
+    True on success and False on error.
     """
     json_request = json.loads(work_order_request)
     if (work_order_id == json_request.get("workOrderId")

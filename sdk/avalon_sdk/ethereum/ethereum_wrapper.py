@@ -35,8 +35,9 @@ PROVIDER_DICT = {
 
 class EthereumWrapper():
     """
-    Ethereum wrapper class to interact with ethereum blockchain
-    deploy compile contract code, deploy contract code, execute contract code
+    Ethereum wrapper class to interact with the Ethereum blockchain to
+    deploy compile contract code, deploy contract code,
+    and execute contract code.
     """
 
     def __init__(self, config):
@@ -56,10 +57,10 @@ class EthereumWrapper():
             # Chain id signifies the which ethereum network to use:
             # test net/main ethereum network
             self._chain_id = config["ethereum"]["chain_id"]
-            # Maximum amount of gas you’re willing to spend on
+            # Maximum amount of gas you are willing to spend on
             # a particular transaction
             self.__gas_limit = config["ethereum"]["gas_limit"]
-            # Amount of Ether you’re willing to pay for every unit of gas
+            # Amount of Ether you are willing to pay for every unit of gas
             self.__gas_price = config["ethereum"]["gas_price"]
             set_solc_version(config['ethereum']['solc_version'])
             logging.debug("Solidity compiler version being used : {}"
@@ -68,11 +69,20 @@ class EthereumWrapper():
             raise Exception("Invalid configuration parameter")
 
     def _get_provider_for_url(self, url):
+        """
+        Get Ethereum provider endpoint for submitting a transaction
+
+        Parameters:
+        url       URL of the Ethereum provider
+        """
         return web3.Web3(PROVIDER_DICT[urlparse(url).scheme](url))
 
     def _is_ropsten(self, url):
         """
-        This function checks if the url passed is one for ropsten network
+        This function checks if the URL passed is one for Ropsten network.
+
+        Parameters:
+        url       URL of the Ethereum provider
         """
         loc = urlparse(url).netloc.lower()
         if "ropsten" in loc:
@@ -82,8 +92,13 @@ class EthereumWrapper():
 
     def __validate(self, config):
         """
-        validates parameter from config parameters for existence.
-        Returns false if validation fails and true if it success
+        Validate configuration parameters for existence.
+
+        Parameters:
+        config    Configuration parameters
+
+        Returns:
+        True if validation succeeds or false if validation fails.
         """
 
         if config["ethereum"]["eth_account"] is None:
@@ -114,7 +129,13 @@ class EthereumWrapper():
 
     def compile_source_file(self, file_path):
         """
-        Compile solidity contract file and returns contract instance object
+        Compile a Solidity contract file and returns contract instance object.
+
+        Parameters:
+        file_path    Path to Solidity contract file
+
+        Returns:
+        Solidity contract instance object.
         """
         if not exists(file_path):
             raise FileNotFoundError(
@@ -125,8 +146,14 @@ class EthereumWrapper():
 
     def deploy_contract(self, contract_interface):
         """
-        Deploys solidity contract to ethereum network identified by chain_id
-        returns contract address
+        Deploys a Solidity contract to an Ethereum network identified by
+        chain_id.
+
+        Parameters:
+        contract_interace  Solidity contract interface
+
+        Returns:
+        Solidity contract address.
         """
         acct = self.__w3.eth.account.privateKeyToAccount(
             self.__eth_private_key)
@@ -149,9 +176,15 @@ class EthereumWrapper():
 
     def sign_execute_raw_transaction(self, tx_dict):
         """
-        Sign the raw transaction with private key, send it
-        and wait for receipts
-        Returns transaction receipt on success or None on error.
+        Sign the raw transaction with a private key, send it,
+        and wait for receipts.
+
+        Parameters:
+        tx_dict     Raw transaction to sign
+
+
+        Returns:
+        Transaction receipt on success or None on error.
         """
         signed_tx = self.__w3.eth.account.signTransaction(
             tx_dict, private_key=self.__eth_private_key)
@@ -164,9 +197,14 @@ class EthereumWrapper():
 
     def execute_unsigned_transaction(self, tx_dict):
         """
-        Send transaction to be executed only with account address
-        and wait for receipts
-        Returns transaction receipt on success or None on error.
+        Send a transaction to be executed only with the account address,
+        and wait for receipts.
+
+        Parameters:
+        tx_dict     Unsigned transaction to execute
+
+        Returns:
+        Transaction receipt on success or None on error.
         """
         tx_hash = self.__w3.eth.sendTransaction(tx_dict)
         tx_receipt = self.__w3.eth.waitForTransactionReceipt(tx_hash)
@@ -176,8 +214,12 @@ class EthereumWrapper():
 
     def execute_transaction(self, tx_dict):
         """
-        Wrapper function to choose appropriate function to execute
-        transaction based on provider(ropsten vs other)
+        Wrapper function to choose appropriate function to execute a
+        transaction based on provider (Ropsten vs other).
+
+        Parameters:
+        tx_dict     Transaction to execute
+
         """
         if self._is_ropsten_provider:
             return self.sign_execute_raw_transaction(tx_dict)
@@ -185,22 +227,34 @@ class EthereumWrapper():
             return self.execute_unsigned_transaction(tx_dict)
 
     def get_chain_id(self):
+        """Retrieve chain ID."""
         return self._chain_id
 
     def get_gas_limit(self):
+        """Retrieve gas limit."""
         return self.__gas_limit
 
     def get_gas_price(self):
+        """Retrieve gas price."""
         return self.__w3.toWei(self.__gas_price, "gwei")
 
     def get_account_address(self):
+        """Retrieve account address."""
         return self.__eth_account_address
 
     def get_contract_instance(self, contract_file_name, contract_address):
         """
-        This function returns 2 contract instances, first meant for committing
-        transactions or reading from blockchain. The second one is specifically
-        meant for event listening.
+        This function returns two contract instances.
+        The first is meant for committing transactions or reading from
+        a blockchain.
+        The second one is specifically meant for event listening.
+
+        Parameters:
+        contract_file_name  Contract filename
+        contract_address    Ethereum contract address
+
+        Returns:
+        Two contract instances as explained above.
         """
         compiled_sol = self.compile_source_file(contract_file_name)
         contract_id, contract_interface = compiled_sol.popitem()
@@ -213,7 +267,17 @@ class EthereumWrapper():
     def get_contract_instance_from_json(self, json_file_name,
                                         contract_address):
         """
-        Method to get contract ABI from a JSON file
+        Return two contract instances from a JSON file.
+        The first is meant for committing transactions or reading from
+        a blockchain.
+        The second one is specifically meant for event listening.
+
+        Parameters:
+        json_file_name    JSON filename
+        contract_address  Ethereum contract address
+
+        Returns:
+        Two contract instances as explained above.
         """
         return self.__w3.eth.contract(
             address=contract_address,
@@ -221,14 +285,17 @@ class EthereumWrapper():
             ContractFactoryClass=web3.contract.Contract)
 
     def get_txn_nonce(self):
+        """
+        Return a transaction nonce. Derived from the transaction address.
+        """
         return self.__w3.eth.getTransactionCount(web3.Web3.toChecksumAddress(
             self.__eth_account_address))
 
     def get_transaction_params(self):
         """
-        Method to construct a dictionary with required parameters
-        to submit the transaction
-        Return dict containing chain id, gas, gas limit and nonce.
+        Construct a dictionary with required parameters
+        to submit the transaction.
+        Return dict containing chain id, gas, gas limit, and nonce.
         """
         # Ropsten accepts only raw transactions & chain id is fixed
         if self._is_ropsten_provider:
@@ -250,14 +317,14 @@ class EthereumWrapper():
 
     def get_bytes_from_hex(self, hex_str):
         """
-        Method to convert hex string to bytes
+        Convert a hex string to bytes.
         """
         return web3.Web3.toBytes(hexstr=hex_str)
 
 
 def get_keccak_for_text(method_sign):
     """
-    Method to get the keccak hash of a method signature.
-    The HexBytes is converted to str and returned.
+    Get the Keccak hash of a method signature.
+    Convert HexBytes to a string and return it.
     """
     return web3.Web3.keccak(text=method_sign).hex()

@@ -31,14 +31,15 @@ logging.basicConfig(
 
 class FabricWorkOrderImpl(WorkOrderProxy):
     """
-    This class provide work order management APIs which interact with
-    Fabric blockchain. Detail method description will be
-    available in WorkOrder interface
+    This class provides work order management APIs which interact with the
+    Fabric blockchain. Detail method descriptions are
+    available in WorkOrder interface.
     """
 
     def __init__(self, config):
         """
-        config is dict containing fabric specific parameters.
+        Parameters:
+        config    Dictionary containing Fabric-specific parameters
         """
         self.__fabric_wrapper = None
         # Chain code name
@@ -55,15 +56,19 @@ class FabricWorkOrderImpl(WorkOrderProxy):
     def work_order_submit(self, work_order_id, worker_id, requester_id,
                           work_order_request, id=None):
         """
-        Submit work order request to fabric block chain.
-        Params
-            work_order_id is unique id of the work order request
-            worker_id is identifier for the worker
-            requester_id is unique id to identify the requester
-            work_order_request is json string work order request
-            defined in EEA specification 6.1.1.
-        Returns
-        0 on success and non zero on error.
+        Submit work order request to the Fabric block chain.
+
+        Parameters:
+        work_order_id      Unique ID of the work order request
+        worker_id          Identifier for the worker
+        requester_id       Unique id to identify the requester
+        work_order_request JSON RPC string work order request.
+                           Complete definition at work_order.py and
+                           defined in EEA specification 6.1.1
+        id                 Optional JSON RPC request ID
+
+        Returns:
+        0 on success and non-zero on error.
         """
         if (self.__fabric_wrapper is not None):
             params = []
@@ -82,12 +87,17 @@ class FabricWorkOrderImpl(WorkOrderProxy):
 
     def work_order_get_result(self, work_order_id, id=None):
         """
-        Function to query blockchain to get work order result.
-        Params
-            work_order_id is a Work Order id that was
-            sent in the corresponding work_order_submit request.
-        Returns
-        None on error, result on Success.
+        Query blockchain to get work order result.
+
+        Parameters:
+        work_order_id Work Order ID that was sent in the
+                      corresponding work_order_submit request
+        id            Optional JSON RPC request ID
+
+        Returns:
+        Tuple containing work order status, worker id, work order request,
+        work order response, and error code.
+        None on error.
         """
         # Calling the contract workOrderGet() will result in error
         # work order id doesn't exist. This is because committing will
@@ -115,13 +125,15 @@ class FabricWorkOrderImpl(WorkOrderProxy):
     def work_order_complete(self, work_order_id, work_order_response):
         """
         This function is called by the Worker Service to
-        complete a Work Order successfully or in error.
-        This API is for proxy model.
-        params
-            work_order_id is unique id to identify the work order request
-            work_order_response is the Work Order response data in string
-        Returns
-            errorCode is a result of operation.
+        complete a work order successfully or in error.
+        This API is for the proxy model.
+
+        Parameters:
+        work_order_id       Unique ID to identify the work order request
+        work_order_response Work order response data in a string
+
+        Returns:
+        errorCode           0 on success or non-zero on error.
         """
         if (self.__fabric_wrapper is not None):
             if work_order_response is None:
@@ -142,8 +154,8 @@ class FabricWorkOrderImpl(WorkOrderProxy):
 
     def encryption_key_start(self, tag):
         """
-        Function to initiate to set the encryption key of
-        worker.
+        Initiate setting the encryption key of the worker.
+        Not supported for Fabric.
         """
         logging.error("This API is not supported")
         return None
@@ -153,7 +165,8 @@ class FabricWorkOrderImpl(WorkOrderProxy):
                            signature_nonce=None,
                            signature=None):
         """
-        Function to worker's key from fabric block chain.
+        Get worker's key from Fabric blockchain.
+        Not supported for Fabric.
         """
         logging.error("This API is not supported")
         return None
@@ -161,19 +174,21 @@ class FabricWorkOrderImpl(WorkOrderProxy):
     def encryption_key_set(self, worker_id, encryption_key,
                            encryption_nonce, tag, signature):
         """
-        Function to set worker's encryption key.
+        Set worker's encryption key.
+        Not supported for Fabric.
         """
         logging.error("This API is not supported")
         return None
 
     def get_work_order_submitted_event_handler(self, handler_func):
         """
-        Function to start event handler loop for
-        workOrderSubmitted event
-        params:
-            handler_func is call back function name as string
-        returns:
-            event handler object
+        Start event handler loop for a workOrderSubmitted event.
+
+        Parameters:
+        handler_func  Callback function name as a string
+
+        Returns:
+        Event handler object.
         """
         if (self.__fabric_wrapper is not None):
             event_handler = self.__fabric_wrapper.get_event_handler(
@@ -189,10 +204,10 @@ class FabricWorkOrderImpl(WorkOrderProxy):
 
     def get_work_order_completed_event_handler(self, handler_func):
         """
-        Function to start event handler loop for
-        workOrderCompleted event
-        params:
-            handler_func is call back function name as string
+        Start event handler loop for a workOrderCompleted event.
+
+        Parameters:
+        handler_func Callback function name as a string
         """
         if (self.__fabric_wrapper is not None):
             event_handler = self.__fabric_wrapper.get_event_handler(
@@ -208,7 +223,13 @@ class FabricWorkOrderImpl(WorkOrderProxy):
 
     def handle_fabric_event(self, event, block_num, txn_id, status):
         """
-        callback function for fabric event handler
+        Callback function for Fabric event handler.
+
+        Parameters:
+        event      Event payload
+        block_num  Block number (unused)
+        txn_id     Transaction ID (unused)
+        status     Status (unused)
         """
         payload = event['payload'].decode("utf-8")
         resp = json.loads(payload)

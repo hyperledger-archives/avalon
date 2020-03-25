@@ -19,12 +19,20 @@ from hfc.fabric.client import Client
 
 logger = logging.getLogger(__name__)
 
+"""
+Hyperledger Fabric low-level utilities.
+"""
+
 
 def get_net_info(netinfo, *key_path):
     """
-    Get the info from network_info
-    :param key_path: path of the key, e.g., a.b.c means info['a']['b']['c']
-        :return: The value, or None
+    Get information from network_info.
+
+    Parameters:
+    key_path path of the key, e.g., a.b.c means info['a']['b']['c']
+
+    Returns:
+    The network information value, or None
     """
     result = netinfo
     if result:
@@ -47,6 +55,7 @@ async def get_stream_result(stream):
 
 
 class ClientBase:
+    """Base class for a Hyperledger Fabric client."""
     def __init__(self, profile, channel_name, org_name, peer_name, user_name):
         self.client = Client(profile)
         self._channel_name = channel_name

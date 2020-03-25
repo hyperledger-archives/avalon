@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 
 class EventListener(base.ClientBase):
     """
-    Utility class to listen to block chain events
+    Utility class to listen to Fabric block chain events.
     """
 
     def __init__(self, profile, channel_name, org_name, peer_name, user_name):
@@ -74,6 +74,7 @@ class EventListener(base.ClientBase):
 
     @config.setter
     def config(self, config):
+        """Open configuration file named config."""
         self._config = config
         try:
             with open(self._config, 'r') as file:
@@ -85,13 +86,14 @@ class EventListener(base.ClientBase):
             pass
 
     def _save_config(self):
+        """Save configuration file."""
         with open(self._config, 'w') as file:
             file.write(str(self._last_block))
             logger.info('Saved blockmark: %s', self._last_block)
 
     async def start_event_handling(self):
         """
-        Function to start event listener.
+        Start event listener.
         """
         def _event_handler(event, block_num, txnid, status):
             logger.debug(
@@ -117,7 +119,7 @@ class EventListener(base.ClientBase):
 
     async def stop_event_handling(self, seconds):
         """
-        Function to stop event listener.
+        Stop event listener.
         """
         await asyncio.sleep(seconds)
         self._channel_event_hub.unregisterChaincodeEvent(self._event_regid)
