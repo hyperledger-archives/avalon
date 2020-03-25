@@ -573,7 +573,7 @@ def Main(args=None):
     if "result" in res:
         # Verify work order response signature
         if generic_client.verify_wo_res_signature(
-            res['result'], worker_obj.verification_key) is False:
+                res['result'], worker_obj.verification_key) is False:
             logger.error(
                 "Work order response signature verification Failed")
             sys.exit(1)

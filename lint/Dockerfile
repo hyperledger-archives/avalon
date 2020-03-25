@@ -13,6 +13,23 @@
 # limitations under the License.
 # ------------------------------------------------------------------------------
 
-FROM node:13.10.1-slim
+FROM ubuntu:bionic
 
-RUN npm install -g --unsafe-perm truffle@5.1.16
+# Ignore timezone prompt in apt
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Add necessary packages
+RUN apt-get update \
+ && apt-get install -y -q \
+    git \
+    pylint3 \
+    cppcheck \
+    pycodestyle \
+ && apt-get -y -q upgrade \
+ && apt-get clean \
+ && rm -rf /var/lib/apt/lists/*
+
+# Make Python3 default
+RUN ln -sf /usr/bin/python3 /usr/bin/python
+
+WORKDIR /project/avalon

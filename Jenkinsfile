@@ -61,6 +61,12 @@ pipeline {
             }
         }
 
+        stage('Run Lint') {
+            steps {
+                sh 'docker-compose -f docker-compose-lint.yaml up --exit-code-from avalon-lint'
+            }
+        }
+ 
         stage('Build Avalon') {
             steps {
                 sh 'docker-compose -f ci/docker-compose-build.yaml build'

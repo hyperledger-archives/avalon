@@ -11,8 +11,26 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# ------------------------------------------------------------------------------
 
-FROM node:13.10.1-slim
+version: '3.5'
 
-RUN npm install -g --unsafe-perm truffle@5.1.16
+services:
+  avalon-lint:
+    image: avalon-lint
+    build:
+      context: .
+      dockerfile: ./lint/Dockerfile
+      args:
+        - http_proxy
+        - https_proxy
+        - no_proxy
+    environment:
+      - http_proxy
+      - https_proxy
+      - no_proxy
+    command: |
+      bash -c "
+        bin/run_lint
+        "
+    volumes:
+      - ./:/project/avalon

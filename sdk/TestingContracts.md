@@ -31,16 +31,12 @@
     make sure
     ```
 
-4.  (Standalone builds only) Install the Solicity compiler to compile
+4.  (Standalone builds only) Install the Solidity compiler to compile
     Solidity contracts from Python:
     ```bash
     pip3 install --upgrade py-solc-x
-    python3 -m solc.install v0.4.25
     python3 -m solcx.install v0.5.15
-    export SOLC_BINARY=~/.py-solc/solc-v0.4.25/bin/solc
     ```
-    The `SOLC_BINARY` environment variable makes `solc` accessible
-    from Python to compile Solidity contracts
 
 5.  (Standalone builds only) To run smart contracts using a
     Ropsten network account, first install the MetaMask Chrome plugin

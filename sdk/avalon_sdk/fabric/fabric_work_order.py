@@ -111,7 +111,7 @@ class FabricWorkOrderImpl(WorkOrderProxy):
             tasks = [
                 event_handler.start_event_handling(),
                 event_handler.stop_event_handling(int(self.WAIT_TIME))
-                ]
+            ]
             loop = asyncio.get_event_loop()
             loop.run_until_complete(
                 asyncio.wait(tasks,

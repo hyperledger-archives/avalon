@@ -245,31 +245,36 @@ std::string HeartDiseaseEvalLogic::executeWorkOrder(
                     std::to_string(count) + " people";
             break;
         case 14: { // return individual calculation
-            int risk = 100 -
-                int(score_age(std::stoi(medData[0])) * 0.03
-                + score_sex(std::stoi(medData[1])) * 0.01
-                + score_cp(std::stoi(medData[2])) * 0.21
-                + score_trestbps(std::stoi(medData[3])) * 0.05
-                + score_chol(std::stoi(medData[4])) * 0.05
-                + score_fbs(std::stoi(medData[5])) * 0.04
-                + score_restecg(std::stoi(medData[6])) * 0.19
-                + score_thalach(std::stoi(medData[7])) * 0.06
-                + score_exang(std::stoi(medData[8])) * 0.18
-                + score_oldpeak(std::stoi(medData[9])) * 0.05
-                + score_slop(std::stoi(medData[10])) * 0.03
-                + score_ca(std::stoi(medData[11])) * 0.04
-                + score_thaldur(std::stoi(medData[12])) * 0.02
-                + score_num(std::stoi(medData[13])) * 0.04);
+            try {
+                int risk = 100 -
+                    int(score_age(std::stoi(medData[0])) * 0.03
+                    + score_sex(std::stoi(medData[1])) * 0.01
+                    + score_cp(std::stoi(medData[2])) * 0.21
+                    + score_trestbps(std::stoi(medData[3])) * 0.05
+                    + score_chol(std::stoi(medData[4])) * 0.05
+                    + score_fbs(std::stoi(medData[5])) * 0.04
+                    + score_restecg(std::stoi(medData[6])) * 0.19
+                    + score_thalach(std::stoi(medData[7])) * 0.06
+                    + score_exang(std::stoi(medData[8])) * 0.18
+                    + score_oldpeak(std::stoi(medData[9])) * 0.05
+                    + score_slop(std::stoi(medData[10])) * 0.03
+                    + score_ca(std::stoi(medData[11])) * 0.04
+                    + score_thaldur(std::stoi(medData[12])) * 0.02
+                    + score_num(std::stoi(medData[13])) * 0.04);
 
-            // Update accumulation
-            totalRisk += risk;
-            count++;
+                // Update accumulation
+                totalRisk += risk;
+                count++;
 
-            // Format the result
-            resultString = "You have a " + std::to_string(risk) +
-                "% risk of heart disease";
-            break;
+                // Format the result
+                resultString = "You have a " + std::to_string(risk) +
+                    "% risk of heart disease";
+                break;
+            } catch (std::invalid_argument& ia) {
+                resultString = "Invalid data found in input data";
+                break;
             }
+        }
         default: // error
             return "Error with missing or incorrect input format";
         }
