@@ -90,7 +90,7 @@ sudo apt-get install -y python3-venv
 
 Also, install the following pip3 packages:
 ```bash
-pip3 install --upgrade setuptools json-rpc py-solc web3 colorlog twisted wheel
+pip3 install --upgrade setuptools json-rpc py-solc web3 colorlog twisted wheel toml
 ```
 
 # <a name="docker"></a>Docker
