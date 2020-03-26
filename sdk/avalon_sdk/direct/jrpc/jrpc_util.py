@@ -20,13 +20,13 @@ from enum import unique, IntEnum
 class JsonRpcErrorCode(IntEnum):
     """
     JSON RPC error code values:
-    0 – SUCCESS
-    1 – UNKNOWN_ERROR
-    2 – INVALID_PARAMETER format or value
-    3 – ACCESS_DENIED
-    4 – INVALID_SIGNATURE
+    0 - SUCCESS
+    1 - UNKNOWN_ERROR
+    2 - INVALID_PARAMETER format or value
+    3 - ACCESS_DENIED
+    4 - INVALID_SIGNATURE
     5 - NO_LOOKUP_RESULTS no more lookup results remaining
-    6 - UNSUPPORTED_MODE (e.g. synchronous, asynchronous, pull,
+    6 - UNSUPPORTED_MODE (e.g. synchronous, asynchronous, poll,
         or notification)
     -32768 to -32000 - reserved for pre-defined errors in the JSON RPC spec.
 

@@ -51,8 +51,8 @@ class JRPCWorkOrderReceiptImpl(WorkOrderReceipt):
         Avalon listener.
 
         Parameters:
-        work_order_id            Work Order ID
-        worker_service_id        Work Service ID
+        work_order_id            Work order ID
+        worker_service_id        Worker service ID
         worker_id                Worker ID value derived from the worker's DID
         requester_id             Requester ID
         receipt_create_status    Receipt creation status
@@ -176,7 +176,7 @@ class JRPCWorkOrderReceiptImpl(WorkOrderReceipt):
         work order receipts.
 
         Parameters:
-        worker_service_id        Optional work service ID to lookup
+        worker_service_id        Optional worker service ID to lookup
         worker_id                Optional worker ID value derived from
                                  the worker's DID
         requester_id             Optional requester ID to lookup
@@ -218,7 +218,7 @@ class JRPCWorkOrderReceiptImpl(WorkOrderReceipt):
         Parameters:
         last_lookup_tag          Last lookup tag returned by
                                  work_order_receipt_lookup
-        worker_service_id        Optional work service ID to lookup
+        worker_service_id        Optional worker service ID to lookup
         worker_id                Optional worker ID value derived from
                                  the worker's DID
         requester_id             Optional requester ID to lookup

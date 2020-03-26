@@ -46,7 +46,8 @@ class WorkerRegistry(ABC):
     def worker_lookup(self, worker_type, organization_id, application_type_id,
                       id=None):
         """
-        Lookup a worker identified worker_type, org_id, and application_id.
+        Lookup a worker identified worker_type, organization, and
+        application_id.
         All fields are optional and, if present, condition should match for
         all fields. If none are passed it should return all workers.
 
@@ -57,14 +58,14 @@ class WorkerRegistry(ABC):
         retrieve the next batch by calling worker_lookup_next.
 
         Parameters:
-        worker_type    Optional characteristic of workers for which you may
-                       wish to search
-        org_id         Optional organization ID that can be used to search
-                       for one or more workers that belong to this
-                       organization
-        application_id Optional application type ID that is supported by
-                       the worker
-        id             Optional JSON RPC request ID
+        worker_type     Optional characteristic of workers for which you may
+                        wish to search
+        organization_id Optional organization ID that can be used to search
+                        for one or more workers that belong to this
+                        organization
+        application_id  Optional application type ID that is supported by
+                        the worker
+        id              Optional JSON RPC request ID
 
         Returns:
         Tuple containing workers count, lookup tag, and list of
@@ -93,7 +94,7 @@ class WorkerRegistry(ABC):
         Parameters:
         worker_type         Characteristic of Workers for which you may wish
                             to search.
-        org_id              Organization ID to which a Worker belongs
+        organization_id     Organization ID to which a Worker belongs
         application_id      Optional application type ID that is
                             supported by the worker
         lookup_tag          is returned by a previous call to either this
@@ -126,12 +127,13 @@ class WorkerRegistry(ABC):
 
         Parameters:
         worker_id       Worker ID value. E.g., a Fabric address
+                        or Ethereum DID
         worker_type     Type of Worker. Currently defined types are:
                         * "TEE-SGX": an Intel SGX Trusted Execution
                           Environment
                         * "MPC": Multi-Party Compute
                         * "ZK": Zero-Knowledge
-        org_id          Optional parameter representing the
+        organization_id Optional parameter representing the
                         organization that hosts the Worker,
                         e.g. a bank in the consortium or
                         anonymous entity
@@ -172,6 +174,7 @@ class WorkerRegistry(ABC):
 
         Parameters:
         worker_id Worker ID value. E.g., a Fabric address
+                  or Ethereum DID
         status    Worker status. The currently defined values are:
                   1 - worker is active
                   2 - worker is temporarily "off-line"

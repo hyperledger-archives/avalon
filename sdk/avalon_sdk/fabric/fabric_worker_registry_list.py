@@ -184,7 +184,7 @@ class FabricWorkerRegistryListImpl(WorkerRegistryList):
         uri          String defining a URI for this registry that
                      supports the Off-Chain Worker Registry
                      JSON RPC API
-        sc_addr      bytes[] defines an Fabric chain code name that
+        sc_addr      bytes[] defines a Fabric chain code name that
                      runs the Worker Registry Smart Contract API
                      smart contract for this registry
         app_type_ids []bytes[] is an optional parameter that defines
@@ -241,7 +241,7 @@ class FabricWorkerRegistryListImpl(WorkerRegistryList):
         uri          string that defines a URI for this registry that
                      supports the Off-Chain Worker Registry
                      JSON RPC API
-        sc_addr      bytes[] defines an Fabric chain code name that
+        sc_addr      bytes[] defines a Fabric chain code name that
                      runs the Worker Registry Smart Contract API
                      smart contract for this registry
         app_type_ids []bytes[] is an optional parameter that defines

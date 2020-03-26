@@ -266,7 +266,7 @@ class FabricWorkerRegistryImpl(WorkerRegistry):
         Update a worker with details data.
 
         Parameters:
-        worker_id  Worker ID, e.g. an Fabric address
+        worker_id  Worker ID, e.g. a Fabric address
         details    Detailed information about the worker in JSON format
         id         Optional Optional JSON RPC request ID
 
