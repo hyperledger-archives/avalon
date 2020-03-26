@@ -55,7 +55,7 @@ module.exports = {
             gasPrice: 0
        },
        avalon_besu_docker: {     // Meant for Hyperledger Besu network when contract deployed from same network
-            host: "172.13.0.3",  // Private IP of local Besu node used in https://github.com/hyperledger/avalon/blob/master/docs/BesuProxyModel.md
+            host: "rpc.node1.avalon.local",  // Host address of local Besu node used in https://github.com/hyperledger/avalon/blob/master/docs/BesuProxyModel.md
             network_id: "*",
             port: 8555,
             gas: 4500000,
@@ -65,7 +65,7 @@ module.exports = {
         host: "local-ganache",   // Hostname of ganche cli container
         port: 8545,              // Standard Ethereum port (default: none)
         network_id: "*",         // Any network (default: none)
-   }
+       }
 
 
     // Another network with more advanced options...

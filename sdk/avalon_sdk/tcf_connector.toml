@@ -55,8 +55,8 @@ solc_version = "v0.5.15"
 # docs/dev-environments/ethereum/besu/docker-compose.yaml.
 # This could be replaced with a Ropsten(Infura as the IAAS) provider or a
 # Ganache client.
-provider = "http://172.13.0.3:8555" # http://local-ganache:8545 for Ganache
-event_provider = "http://172.13.0.2:8545" # http://local-ganache:8545 for Ganache
+provider = "http://rpc.node1.avalon.local:8555" # http://local-ganache:8545 for Ganache
+event_provider = "http://node1.avalon.local:8545" # http://local-ganache:8545 for Ganache
 # chain_id is 3 for ropsten test network
 # "1": Ethereum Mainnet
 # "2": Morden Testnet (deprecated)
