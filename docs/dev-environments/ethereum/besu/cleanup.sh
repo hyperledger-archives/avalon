@@ -13,24 +13,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-function error_exit()
+exit_status=0
+function log_error()
 {
     echo "[Error]: " ${*}
-    exit 1
+    exit_status=1
 }
 
 echo ""
 echo "====================================================="
 echo "STEP 1 :: Stop HL Besu network and destroy containers"
 echo "====================================================="
-docker-compose down || error_exit "Failed to cleanup Besu network"
+docker-compose down || log_error "Failed to cleanup Besu network"
 echo "Done"
 
 echo ""
 echo "====================================================="
 echo "STEP 2 :: Stop truffle setup container and destroy"
 echo "====================================================="
-docker-compose -f docker-compose-truffle.yaml down || error_exit "Failed to cleanup truffle setup"
+docker-compose -f docker-compose-truffle.yaml down || log_error "Failed to cleanup truffle setup"
 echo "Done"
 
 echo ""
@@ -39,11 +40,16 @@ echo "STEP 3 :: Delete persistent blockchain data"
 echo "====================================================="
 # To clean up all persistent data for a running node
 cd ./besu/node1
-sudo rm -rf caches database DATABASE_METADATA.json || error_exit "Failed to cleanup node1"
+sudo rm -rf caches database DATABASE_METADATA.json || log_error "Failed to cleanup node1"
 cd ../node2
-sudo rm -rf caches database DATABASE_METADATA.json || error_exit "Failed to cleanup node2"
+sudo rm -rf caches database DATABASE_METADATA.json || log_error "Failed to cleanup node2"
 cd ../../
 echo "Done"
 
-echo "Cleanup Successful!!"
+echo ""
+if [ $exit_status -eq 0 ]; then
+    echo "Cleanup successful!!"
+else
+    echo "Cleanup failed!!"
+fi
 echo ""

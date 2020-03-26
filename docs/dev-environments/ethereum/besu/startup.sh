@@ -13,10 +13,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
+exit_status=0
 function error_exit()
 {
     echo "[Error]: " ${*}
+    exit_status=1
     exit 1
 }
 
@@ -32,10 +33,24 @@ echo ""
 echo "========================================================="
 echo "STEP 3 :: Initialize truffle project and deploy contracts"
 echo "========================================================="
-docker-compose -f docker-compose-truffle.yaml up \
-|| error_exit "Failed to initialize truffle or deploy contracts"
+
+# Check if TCF_HOME is defined and current working directory
+# is a subtree of TCF_HOME
+if [[ -z "$TCF_HOME" ]] || [[ `pwd` != "$TCF_HOME"* ]];
+then
+    error_exit "TCF_HOME environment variable not defined appropriately. Please check."
+fi
+
+# Verify if contract deployments are successful else log error
+docker-compose -f docker-compose-truffle.yaml up --exit-code-from truffle-envt-besu\
+    || error_exit "Failed to initialize truffle or deploy contracts"
 echo "Done"
 
 echo ""
-echo "Contract deployment successful!!"
+if [ $exit_status -eq 0 ];
+then
+    echo "Contract deployment successful!!"
+else
+    echo "Contract deployment failed!!"
+fi
 echo ""
