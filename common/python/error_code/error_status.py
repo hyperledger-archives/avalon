@@ -32,7 +32,8 @@ class WorkOrderStatus(IntEnum):
     SCHEDULED = 6
     PROCESSING = 7
     BUSY = 8
-    UNKNOWN_ERROR = 9
+    INVALID_WORKLOAD = 9
+    UNKNOWN_ERROR = 10
 
 
 @unique
