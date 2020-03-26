@@ -136,6 +136,8 @@ class TCSWorkOrderHandler:
                         WorkOrderStatus.INVALID_PARAMETER_FORMAT_OR_VALUE
                 elif err_code == EnclaveError.ENCLAVE_ERR_UNKNOWN:
                     err_code = WorkOrderStatus.UNKNOWN_ERROR
+                elif err_code == EnclaveError.ENCLAVE_ERR_INVALID_WORKLOAD:
+                    err_code = WorkOrderStatus.INVALID_WORKLOAD
                 else:
                     err_code = WorkOrderStatus.FAILED
                 raise JSONRPCDispatchException(err_code, err_msg)

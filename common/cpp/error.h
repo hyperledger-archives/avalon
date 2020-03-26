@@ -124,6 +124,14 @@ namespace tcf {
         }; // class SystemBusyError
 
         // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+        class WorkloadError : public Error {
+        public:
+            explicit WorkloadError(
+                const std::string& msg
+                ) : Error(TCF_ERR_INVALID_WORKLOAD, msg) {}
+        }; // class WorkloadError
+
+        // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
         class UnknownError : public Error {
         public:
             explicit UnknownError(

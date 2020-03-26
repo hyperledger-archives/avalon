@@ -260,7 +260,8 @@ namespace tcf {
             std::string workload_type(workload_bytes.begin(), workload_bytes.end());
             WorkloadProcessor *processor = 
                 WorkloadProcessor::CreateWorkloadProcessor(workload_type);
-            tcf::error::ThrowIfNull(processor, "CreateWorkloadProcessor function returned null");
+            tcf::error::ThrowIf<tcf::error::WorkloadError>(
+                processor == nullptr, "Invalid workload id");
             processor->ProcessWorkOrder(
                         workload_type,
                         StrToByteArray(requester_id),

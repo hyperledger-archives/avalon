@@ -28,13 +28,14 @@ typedef enum {
     TCF_ERR_OVERFLOW = -7,
     TCF_ERR_VALUE = -8,
     TCF_ERR_SYSTEM = -9,
-    TCF_ERR_CRYPTO = -11,
-    TCF_ERR_SYSTEM_BUSY = -10   /*
+    TCF_ERR_SYSTEM_BUSY = -10,  /*
                                   Indicates that the system is busy and
                                   the operation may be retried again.  If
                                   retries fail this should be converted to
                                   a TCF_ERR_SYSTEM for reporting.
                                 */
+    TCF_ERR_CRYPTO = -11,
+    TCF_ERR_INVALID_WORKLOAD = -12  /* Invalid workload id */
 } tcf_err_t;
 
 typedef enum {
