@@ -30,7 +30,7 @@ services:
       - no_proxy
     command: |
       bash -c "
-        bin/run_lint
+        bin/run_lint ${LINT_MODULES}
         "
     volumes:
       - ./:/project/avalon
