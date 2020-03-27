@@ -446,6 +446,15 @@ namespace tcf {
         JsonSetNumber(error, "code", err_code, "failed to serialize error code");
         JsonSetStr(error, "message", err_message, "failed to serialize error message");
 
+        jret = json_object_set_value(error, "data", json_value_init_object());
+        tcf::error::ThrowIf<tcf::error::RuntimeError>(
+            jret != JSONSuccess, "failed to serialize data");
+        JSON_Object* data = json_object_get_object(error, "data");
+        tcf::error::ThrowIfNull(data, "failed to serialize the data object");
+
+        JsonSetStr(data, "workOrderId", work_order_id.c_str(),
+            "failed to serialize work order id");
+
         // Serialize the resulting json
         size_t serializedSize = json_serialization_size(resp_value);
         ByteArray serialized_response;
@@ -457,7 +466,6 @@ namespace tcf {
             jret != JSONSuccess, "workorder response serialization failed");
 
         return serialized_response;
-
     }
 
     ByteArray WorkOrderProcessor::Process(EnclaveData& enclaveData, std::string json_str) {
