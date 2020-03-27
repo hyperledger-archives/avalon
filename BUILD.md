@@ -20,6 +20,7 @@ The Docker-based build is recommended.
     - [Prerequisites](#prerequisites)
     - [Installing Avalon Using Scripts](#install)
 - [Testing](#testing)
+    - [Static Analysis](#staticanalysis)
     - [Troubleshooting](#troubleshooting)
     - [Troubleshooting: Standalone Build](#troubleshootingstandalone)
 
@@ -235,6 +236,19 @@ Follow these steps to run the `Demo.py` testcase:
 
 A GUI is also available to run this demo.
 See [examples/apps/heart_disease_eval](examples/apps/heart_disease_eval)
+
+## <a name="staticanalysis"></a>Static Analysis
+To run lint checks on codebase, execute the following commands -
+```
+cd $TCF_HOME
+docker-compose -f docker-compose-lint.yaml up
+```
+Above steps would run lint on all modules by defualt. If you want to run lint on selective modules, you need to pass the modules via `LINT_MODULES`. For example -
+```
+cd $TCF_HOME
+LINT_MODULES={sdk,common} docker-compose -f docker-compose-lint.yaml up
+```
+Module names can be found [here](bin/run_lint#L205) in the codebase.
 
 ## <a name="troubleshooting"></a>Troubleshooting
 - If you see the message
