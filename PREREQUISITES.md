@@ -357,10 +357,11 @@ problems.
   cd ~/sgxssl
   ```
 
-- Download the latest SGX SSL git repository for your version of OpenSSL:
+- Download specific version of SGX SSL git repository. 
+  Using SGX SSL tag "lin_2.5_1.1.1d" corresponding to openSSL version 1.1.1d
 
   ```bash
-  git clone 'https://github.com/intel/intel-sgx-ssl.git'
+  git clone -b lin_2.5_1.1.1d 'https://github.com/intel/intel-sgx-ssl.git'
   ```
 
 - Download the OpenSSL source package for your version of OpenSSL.
