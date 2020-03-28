@@ -415,20 +415,3 @@ def _convert_retrieve_result_to_json(retrieve_result):
 
     # Convert to make similar to JRPC response structure
     return {"result": result}
-
-
-def _convert_retrieve_result_to_hex(retrieve_result):
-    """
-    This function takes in the result retrieved from the blockchain
-    and converts byte32 fields to hex for external entities.
-
-    Parameters:
-    retrieve_result Result to convert from a byte32 array to hex
-    """
-    result = [retrieve_result[0], retrieve_result[1],
-              None, None, retrieve_result[4]]
-    result[2] = retrieve_result[2].hex()
-    result[3] = _convert_byte32_arr_to_hex_arr(
-        retrieve_result[3])
-
-    return result

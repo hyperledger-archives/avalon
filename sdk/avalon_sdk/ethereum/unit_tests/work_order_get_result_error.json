@@ -1,0 +1,8 @@
+{
+    "error": {
+        "code": 2,
+        "message": "Indata is empty"
+    },
+    "id": 13122,
+    "jsonrpc": "2.0"
+}
