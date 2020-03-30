@@ -118,12 +118,12 @@ class FabricWorkOrderImpl(WorkOrderProxy):
             resp = json.loads(payload)
             response = json.loads(resp["workOrderResponse"])
             # Event has result tag in case work order successful
-            if "result" in response and
-            work_order_id in response["result"].values():
+            if "result" in response and \
+                    work_order_id in response["result"].values():
                 self.__wo_resp = response
             # Event has error tag if work order failed
-            elif "error" in response and
-            work_order_id in response["error"]["data"].values():
+            elif "error" in response and \
+                    work_order_id in response["error"]["data"].values():
                 self.__wo_resp = response
             logging.debug("Work order response from event : {}".format(
                 self.__wo_resp
