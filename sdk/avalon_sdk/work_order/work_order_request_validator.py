@@ -14,6 +14,7 @@
 
 from utility.hex_utils import is_valid_hex_str
 import base64
+import binascii
 
 
 class WorkOrderRequestValidator():
@@ -66,6 +67,9 @@ class WorkOrderRequestValidator():
         True and empty string on success and
         False and string with error message on failure.
         """
+        if len(params) == 0:
+            return False, "Empty params in the request"
+
         key_list = []
         for key in params.keys():
             if key not in self.__param_key_map.keys():
@@ -76,13 +80,11 @@ class WorkOrderRequestValidator():
             if v is True and k not in key_list:
                 return False, "Missing parameter {}".format(k)
 
-        if "responseTimeoutMSecs" in params:
-            return type(params["responseTimeoutMSecs"]) == int, \
-                "Invalid data format for responseTimeoutMSecs"
+        if type(params["responseTimeoutMSecs"]) != int:
+            return False, "Invalid data format for responseTimeoutMSecs"
 
-        if "payloadFormat" in params:
-            if params["payloadFormat"] != "JSON-RPC":
-                return False, "Invalid payload format"
+        if params["payloadFormat"] != "JSON-RPC":
+            return False, "Invalid payload format"
 
         if not is_valid_hex_str(params["workerId"]):
             return False, "Invalid data format for Worker id"
@@ -104,6 +106,14 @@ class WorkOrderRequestValidator():
         if "encryptedRequestHash" in params and \
                 not is_valid_hex_str(params["encryptedRequestHash"]):
             return False, "Invalid data format for encrypted request hash"
+        if not is_valid_hex_str(params["requesterNonce"]):
+            return False, "Invalid data format for requesterNonce"
+        if "requesterSignature" in params:
+            try:
+                decoded_str = base64.b64decode(
+                    params["requesterSignature"], validate=True)
+            except Exception:
+                return False, "Invalid data format for requesterSignature"
         return True, ""
 
     def validate_data_format(self, data):
@@ -117,7 +127,10 @@ class WorkOrderRequestValidator():
         True and empty string on success and
         False and string with error message on failure.
         """
+        # In/out data is array of dict/json objects
         for data_item in data:
+            if type(data_item) is not dict:
+                return False, "Invalid data format for in/out data"
             in_data_keys = []
             for key in data_item.keys():
                 if key not in self.__data_key_map.keys():
