@@ -30,6 +30,24 @@
 * [Example Avalon applications](../examples/apps/)
 * [Contributing source code](../CONTRIBUTING.md)
 
+## SDK Reference Manual
+The Avalon SDK Reference Manual is generated with Doxygen.
+To generate the Reference Manual, type the following:
+```
+cd $TCF_HOME/docs # this directory
+sudo apt-get update
+sudo apt-get install -y make doxygen texlive-full graphviz
+make
+```
+
+Documentation generated will be here:
+* ``$TCF_HOME/docs/refman/html/``HTML documentation
+* ``$TCF_HOME/docs/refman/man/man3``man page documentation
+* ``$TCF_HOME/docs/refman/latex``LaTeX documentation
+* ``$TCF_HOME/docs/refman/refman.pdf``PDF documentation (generated from LaTex)
+
+
+
 ## Reference
 * [_Hyperleder Avalon Architecture Overview_](
   https://github.com/hyperledger/avalon/blob/master/docs//avalon-arch.pdf).

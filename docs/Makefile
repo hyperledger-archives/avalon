@@ -12,7 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Doxygen requires these packages:
+# Building documentation with Doxygen requires these packages:
+# - make
 # - doxygen (for doxygen)
 # - texlive-full (for pdflatex and float.sty, used by PDF generation)
 # - graphviz (for dot, used to generate dependency graphs)
