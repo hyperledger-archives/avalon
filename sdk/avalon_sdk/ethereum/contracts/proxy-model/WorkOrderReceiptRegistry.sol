@@ -1,4 +1,4 @@
-/* Copyright 2019 iExec Blockchain Tech
+/* Copyright 2020 iExec Blockchain Tech
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -49,6 +49,7 @@ contract WorkOrderReceiptRegistry
 	// Members
 	mapping(bytes32 => WorkOrderReceipt)                                                               internal m_workorders;
 	WorkOrderReceiptUpdate[]                                                                           internal m_workorderupdates;
+	// workerServiceId → workerId → requesterId → receiptCreateStatus → Set<workOrderId>
 	mapping(bytes32 => mapping(bytes32 => mapping(bytes32 => mapping(uint256 => LibSet_bytes32.set)))) internal m_lookuptable;
 
 	// Events
@@ -57,14 +58,14 @@ contract WorkOrderReceiptRegistry
 		bytes32 indexed workerServiceId,
 		bytes32 indexed requesterId,   // CHANGE (order): cannot have indexed after non indexed
 		bytes32         workerId,      // CHANGE (order): cannot have indexed after non indexed
-		uint256         receiptStatus, // CHANGE (consistenty): status/update types are uint256, not bytes32
+		uint256         receiptStatus, // CHANGE (consistency): status/update types are uint256, not bytes32
 		bytes           workOrderRequestHash,
 		uint256         errorCode);
 
 	event workOrderReceiptUpdated(
 		bytes32 indexed workOrderId,
 		bytes32 indexed updaterId,
-		uint256 indexed updateType, // CHANGE (consistenty): status/update types are uint256, not bytes32
+		uint256 indexed updateType, // CHANGE (consistency): status/update types are uint256, not bytes32
 		bytes           updateData,
 		bytes           updateSignature,
 		string          signatureRules,
