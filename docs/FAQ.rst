@@ -355,6 +355,10 @@ Application type ID
     Identifier for a type of Avalon application. An Avalon worker supports
     one or more application types
 
+Attestation
+    Proof that something (such as code or data) was checked for validity
+    (such as with signature validation)
+
 Attested oracle
     A device that uses Trusted Compute to attest some data
     (e.g. environmental characteristics, financial values, inventory levels)
@@ -385,6 +389,10 @@ Client
     meaning as used in client-server architecture.
     To avoid ambiguity, an Avalon client is properly referred to as a
     requester
+
+Confidential computing
+    Protection of data in use by performing computation within
+    hardware-based trusted execution environments (TEEs)
 
 DCAP
     Intel SGX Data Center Attestation Primitives. Allows an enterprise
@@ -605,11 +613,6 @@ Tag
 Truffle
     A popular Ethereum development environment
 
-
-Trusted compute service (TCS)
-    A service that provides trusted compute
-    functionality. Hyperledger Avalon is an example of a TCS
-
 Trusted compute (TC)
     Trusted computational resource for work order
     execution. It preserves data confidentiality, execution integrity and
@@ -619,6 +622,14 @@ Trusted compute (TC)
     software-based cryptographic security guarantees, a service's reputation,
     virtualization, or a hardware-based Trusted Execution Environment such
     as Intel's SGX
+
+Trusted compute base (TCB)
+    The hardware, firmware, and software resources used by trusted compute
+
+Trusted compute service (TCS)
+    A service that provides trusted compute
+    functionality. Hyperledger Avalon is an example of a TCS
+
 
 Trusted execution environment (TEE)
     Hardware-based technology that executes only validated tasks,
