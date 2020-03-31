@@ -59,7 +59,7 @@ class EnclaveManager:
         # Need to come up with a scheme to generate both for every unique
         # encryption key.
         self.encryption_key_nonce = ""
-        self.encryption_key_signature = ""
+        self.encryption_key_signature = signup_data.encryption_key_signature
         self.enclave_id = signup_data.enclave_id
         self.extended_measurements = measurements
 

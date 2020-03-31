@@ -29,17 +29,16 @@
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 std::string HandleWorkOrderRequest(
-    const std::string& sealed_signup_data,
     const std::string& serialized_request) {
     tcf_err_t presult;
 
     uint32_t response_identifier;
     size_t response_size;
 
-    tcf::enclave_queue::ReadyEnclave readyEnclave = tcf::enclave_api::base::GetReadyEnclave();
+    tcf::enclave_queue::ReadyEnclave readyEnclave = \
+        tcf::enclave_api::base::GetReadyEnclave();
 
     presult = tcf::enclave_api::workorder::HandleWorkOrderRequest(
-        sealed_signup_data,
         serialized_request,
         response_identifier,
         response_size,
@@ -48,7 +47,6 @@ std::string HandleWorkOrderRequest(
 
     Base64EncodedString response;
     presult = tcf::enclave_api::workorder::GetSerializedResponse(
-        sealed_signup_data,
         response_identifier,
         response_size,
         response,

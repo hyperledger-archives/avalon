@@ -45,12 +45,16 @@
 #include "signup_enclave.h"
 #include "verify-report.h"
 
+// Initializing singleton class object which gets initialized when
+// getInstance is called
+EnclaveData* EnclaveData::instance = 0;
+
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 // XX Declaration of static helper functions                         XX
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 static void CreateSignupReportData(const char* pOriginatorPublicKeyHash,
-    const EnclaveData& enclaveData,
+    EnclaveData* enclaveData,
     sgx_report_data_t* pReportData);
 
 void CreateReportData(const char* pOriginatorPublicKeyHash,
@@ -64,8 +68,8 @@ tcf_err_t ecall_CalculateSealedEnclaveDataSize(size_t* pSealedEnclaveDataSize) {
 
     try {
         tcf::error::ThrowIfNull(pSealedEnclaveDataSize, "Sealed signup data size pointer is NULL");
-
-        *pSealedEnclaveDataSize = EnclaveData::cMaxSealedDataSize;
+        EnclaveData* enclaveData = EnclaveData::getInstance();
+        *pSealedEnclaveDataSize = enclaveData->get_sealed_data_size();
     } catch (tcf::error::Error& e) {
         SAFE_LOG(TCF_LOG_ERROR,
             "Error in Avalon enclave(ecall_CalculateSealedEnclaveDataSize): %04X -- %s",
@@ -87,8 +91,8 @@ tcf_err_t ecall_CalculatePublicEnclaveDataSize(size_t* pPublicEnclaveDataSize) {
 
     try {
         tcf::error::ThrowIfNull(pPublicEnclaveDataSize, "Publicp signup data size pointer is NULL");
-
-        *pPublicEnclaveDataSize = EnclaveData::cMaxPublicDataSize;
+        EnclaveData* enclaveData = EnclaveData::getInstance();
+        *pPublicEnclaveDataSize = enclaveData->get_public_data_size();
     } catch (tcf::error::Error& e) {
         SAFE_LOG(TCF_LOG_ERROR,
             "Error in Avalon enclave(ecall_CalculatePublicEnclaveDataSize): %04X -- %s",
@@ -105,57 +109,83 @@ tcf_err_t ecall_CalculatePublicEnclaveDataSize(size_t* pPublicEnclaveDataSize) {
 }  // ecall_CalculatePublicEnclaveDataSize
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-tcf_err_t ecall_CreateEnclaveData(const sgx_target_info_t* inTargetInfo,
+tcf_err_t ecall_CreateEnclaveData(size_t* outPublicEnclaveDataSize,
+    size_t* outSealedEnclaveDataSize) {
+    tcf_err_t result = TCF_SUCCESS;
+    try {
+        tcf::error::ThrowIfNull(outPublicEnclaveDataSize,
+            "Public data size pointer is NULL");
+        tcf::error::ThrowIfNull(outSealedEnclaveDataSize,
+            "Sealed data size pointer is NULL");
+
+        (*outPublicEnclaveDataSize) = 0;
+        (*outSealedEnclaveDataSize) = 0;
+
+        // Create the enclave data
+        EnclaveData* enclaveData = EnclaveData::getInstance();
+
+        // Pass back the actual size of the enclave data
+        (*outPublicEnclaveDataSize) = enclaveData->get_public_data_size();
+        (*outSealedEnclaveDataSize) = enclaveData->get_sealed_data_size();
+    } catch (tcf::error::Error& e) {
+        SAFE_LOG(TCF_LOG_ERROR,
+            "Error in Avalon enclave(ecall_CreateEnclaveData): %04X -- %s",
+            e.error_code(), e.what());
+        ocall_SetErrorMessage(e.what());
+        result = e.error_code();
+    } catch (...) {
+        SAFE_LOG(TCF_LOG_ERROR,
+            "Unknown error in Avalon enclave(ecall_CreateEnclaveData)");
+        result = TCF_ERR_UNKNOWN;
+    }
+
+    return result;
+}  // ecall_CreateEnclaveData
+    
+
+// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+tcf_err_t ecall_CreateSignupData(const sgx_target_info_t* inTargetInfo,
     const char* inOriginatorPublicKeyHash,
     char* outPublicEnclaveData,
     size_t inAllocatedPublicEnclaveDataSize,
-    size_t* outPublicEnclaveDataSize,
     uint8_t* outSealedEnclaveData,
     size_t inAllocatedSealedEnclaveDataSize,
-    size_t* outSealedEnclaveDataSize,
     sgx_report_t* outEnclaveReport) {
     tcf_err_t result = TCF_SUCCESS;
 
     try {
         tcf::error::ThrowIfNull(inTargetInfo, "Target info pointer is NULL");
-        tcf::error::ThrowIfNull(
-            inOriginatorPublicKeyHash, "Originator public key hash pointer is NULL");
+        tcf::error::ThrowIfNull(inOriginatorPublicKeyHash,
+            "Originator public key hash pointer is NULL");
 
-        tcf::error::ThrowIfNull(outPublicEnclaveData, "Public enclave data pointer is NULL");
-        tcf::error::ThrowIfNull(outPublicEnclaveDataSize, "Public data size pointer is NULL");
-
-        tcf::error::ThrowIfNull(outSealedEnclaveData, "Sealed enclave data pointer is NULL");
-        tcf::error::ThrowIfNull(outSealedEnclaveDataSize, "Sealed data size pointer is NULL");
-
+        tcf::error::ThrowIfNull(outPublicEnclaveData,
+            "Public enclave data pointer is NULL");
+        tcf::error::ThrowIfNull(outSealedEnclaveData,
+            "Sealed enclave data pointer is NULL");
         tcf::error::ThrowIfNull(outEnclaveReport,
             "Intel SGX report pointer is NULL");
 
-        (*outPublicEnclaveDataSize) = 0;
         Zero(outPublicEnclaveData, inAllocatedPublicEnclaveDataSize);
-
-        (*outSealedEnclaveDataSize) = 0;
         Zero(outSealedEnclaveData, inAllocatedSealedEnclaveDataSize);
 
-        // Create the enclave data
-        EnclaveData enclaveData;
+        // Get instance of enclave data
+        EnclaveData* enclaveData = EnclaveData::getInstance();
 
         tcf::error::ThrowIf<tcf::error::ValueError>(
-            inAllocatedPublicEnclaveDataSize < enclaveData.get_public_data_size(),
+            inAllocatedPublicEnclaveDataSize < enclaveData->get_public_data_size(),
             "Public enclave data buffer size is too small");
 
         tcf::error::ThrowIf<tcf::error::ValueError>(
-            inAllocatedSealedEnclaveDataSize < enclaveData.get_sealed_data_size(),
+            inAllocatedSealedEnclaveDataSize < enclaveData->get_sealed_data_size(),
             "Sealed enclave data buffer size is too small");
-
-        // Pass back the actual size of the enclave data
-        (*outPublicEnclaveDataSize) = enclaveData.get_public_data_size();
-        (*outSealedEnclaveDataSize) = enclaveData.get_sealed_data_size();
 
         // Create the report data we want embedded in the enclave report.
         sgx_report_data_t reportData = {0};
-        CreateSignupReportData(inOriginatorPublicKeyHash, enclaveData, &reportData);
+        CreateSignupReportData(
+            inOriginatorPublicKeyHash, enclaveData, &reportData);
 
-        sgx_status_t ret = sgx_create_report(inTargetInfo, &reportData, outEnclaveReport);
+        sgx_status_t ret = sgx_create_report(
+            inTargetInfo, &reportData, outEnclaveReport);
         tcf::error::ThrowSgxError(ret, "Failed to create enclave report");
 
         // Seal up the signup data into the caller's buffer.
@@ -167,60 +197,55 @@ tcf_err_t ecall_CreateEnclaveData(const sgx_target_info_t* inTargetInfo,
             0,        // misc_mask
             0,        // additional mac text length
             nullptr,  // additional mac text
-            enclaveData.get_private_data_size(),
-            reinterpret_cast<const uint8_t*>(enclaveData.get_private_data().c_str()),
-            static_cast<uint32_t>(*outSealedEnclaveDataSize),
+            enclaveData->get_private_data_size(),
+            reinterpret_cast<const uint8_t*>(enclaveData->get_private_data().c_str()),
+            static_cast<uint32_t>(enclaveData->get_sealed_data_size()),
             reinterpret_cast<sgx_sealed_data_t*>(outSealedEnclaveData));
         tcf::error::ThrowSgxError(ret, "Failed to seal signup data");
 
         // Give the caller a copy of the signing and encryption keys
-        strncpy_s(outPublicEnclaveData, inAllocatedPublicEnclaveDataSize,
-            enclaveData.get_public_data().c_str(),
-            enclaveData.get_public_data_size());
+        // inAllocatedPublicEnclaveDataSize + 1 is to consider NULL character
+        strncpy_s(outPublicEnclaveData, inAllocatedPublicEnclaveDataSize+1,
+            enclaveData->get_public_data().c_str(),
+            enclaveData->get_public_data_size());
     } catch (tcf::error::Error& e) {
-        SAFE_LOG(TCF_LOG_ERROR, "Error in Avalon enclave(ecall_CreateEnclaveData): %04X -- %s",
+        SAFE_LOG(TCF_LOG_ERROR,
+            "Error in Avalon enclave(ecall_CreateSignupData): %04X -- %s",
             e.error_code(), e.what());
         ocall_SetErrorMessage(e.what());
         result = e.error_code();
     } catch (...) {
-        SAFE_LOG(TCF_LOG_ERROR, "Unknown error in Avalon enclave(ecall_CreateEnclaveData)");
+        SAFE_LOG(TCF_LOG_ERROR,
+            "Unknown error in Avalon enclave(ecall_CreateSignupData)");
         result = TCF_ERR_UNKNOWN;
     }
 
     return result;
-}  // ecall_CreateEnclaveData
+}  // ecall_CreateSignupData
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-tcf_err_t ecall_UnsealEnclaveData(const uint8_t* inSealedEnclaveData,
-    size_t inSealedEnclaveDataSize,
+tcf_err_t ecall_UnsealEnclaveData(
     char* outPublicEnclaveData,
-    size_t inAllocatedPublicEnclaveDataSize,
-    size_t* outPublicEnclaveDataSize) {
+    size_t inAllocatedPublicEnclaveDataSize) {
     tcf_err_t result = TCF_SUCCESS;
 
     try
     {
-        tcf::error::ThrowIfNull(inSealedEnclaveData, "SealedEnclaveData pointer is NULL");
-
         tcf::error::ThrowIfNull(outPublicEnclaveData, "Public enclave data pointer is NULL");
-        tcf::error::ThrowIfNull(outPublicEnclaveDataSize, "Public data size pointer is NULL");
 
-        (*outPublicEnclaveDataSize) = 0;
         Zero(outPublicEnclaveData, inAllocatedPublicEnclaveDataSize);
 
         // Unseal the enclave data
-        EnclaveData enclaveData(inSealedEnclaveData);
+        EnclaveData* enclaveData = EnclaveData::getInstance();
 
         tcf::error::ThrowIf<tcf::error::ValueError>(
-            inAllocatedPublicEnclaveDataSize < enclaveData.get_public_data_size(),
+            inAllocatedPublicEnclaveDataSize < enclaveData->get_public_data_size(),
             "Public enclave data buffer size is too small");
-
-        (*outPublicEnclaveDataSize) = enclaveData.get_public_data_size();
 
         // Give the caller a copy of the signing and encryption keys
         strncpy_s(outPublicEnclaveData, inAllocatedPublicEnclaveDataSize,
-            enclaveData.get_public_data().c_str(),
-            enclaveData.get_public_data_size());
+            enclaveData->get_public_data().c_str(),
+            enclaveData->get_public_data_size());
     } catch (tcf::error::Error& e) {
         SAFE_LOG(TCF_LOG_ERROR, "Error in Avalon enclave(ecall_UnsealEnclaveData): %04X -- %s",
             e.error_code(), e.what());
@@ -240,7 +265,7 @@ tcf_err_t ecall_UnsealEnclaveData(const uint8_t* inSealedEnclaveData,
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 void CreateSignupReportData(const char* pOriginatorPublicKeyHash,
-    const EnclaveData& enclaveData,
+    EnclaveData* enclaveData,
     sgx_report_data_t* pReportData) {
     // We will put the following in the report data SHA256(PPK|PEK|OPK_HASH)
 
@@ -253,8 +278,8 @@ void CreateSignupReportData(const char* pOriginatorPublicKeyHash,
     // WARNING - WARNING - WARNING - WARNING - WARNING - WARNING - WARNING
     std::string hashString;
 
-    hashString.append(enclaveData.get_serialized_signing_key());
-    hashString.append(enclaveData.get_serialized_encryption_key());
+    hashString.append(enclaveData->get_serialized_signing_key());
+    hashString.append(enclaveData->get_serialized_encryption_key());
 
     // Canonicalize the originator public key hash string to ensure a consistent
     // format.

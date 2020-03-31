@@ -68,6 +68,8 @@ class EnclaveHelper(object):
         enclave_info['sealed_data'] = enclave_data.sealed_signup_data
         enclave_info['verifying_key'] = enclave_data.verifying_key
         enclave_info['encryption_key'] = enclave_data.encryption_key
+        enclave_info['encryption_key_signature'] = \
+            enclave_data.encryption_key_signature
         enclave_info['enclave_id'] = enclave_data.verifying_key
         enclave_info['proof_data'] = ''
         if not avalon_enclave.enclave.is_sgx_simulator():
@@ -87,6 +89,8 @@ class EnclaveHelper(object):
             self.sealed_data = enclave_info['sealed_data']
             self.verifying_key = enclave_info['verifying_key']
             self.encryption_key = enclave_info['encryption_key']
+            self.encryption_key_signature = \
+                enclave_info['encryption_key_signature']
             self.proof_data = enclave_info['proof_data']
             self.enclave_id = enclave_info['enclave_id']
         except KeyError as ke:
@@ -103,9 +107,7 @@ class EnclaveHelper(object):
 
         :param encrypted_request: base64 encoded encrypted workorder request
         """
-        return avalon_enclave.send_to_sgx_worker(
-            self.sealed_data,
-            encrypted_request)
+        return avalon_enclave.send_to_sgx_worker(encrypted_request)
 
     # -------------------------------------------------------
     def get_enclave_public_info(self):

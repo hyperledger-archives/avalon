@@ -210,6 +210,7 @@ def create_signup_info(originator_public_key_hash, nonce):
     signup_info = {
         'verifying_key': signup_data['verifying_key'],
         'encryption_key': signup_data['encryption_key'],
+        'encryption_key_signature': signup_data['encryption_key_signature'],
         'proof_data': 'Not present',
         'enclave_persistent_id': 'Not present'
     }

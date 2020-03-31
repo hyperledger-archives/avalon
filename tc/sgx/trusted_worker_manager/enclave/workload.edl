@@ -22,8 +22,6 @@ enclave {
         // inSerializedRequest is a binary encoding of the encrypted request
         // outSerializedResponseSize is the computed size of the response
         public tcf_err_t ecall_HandleWorkOrderRequest(
-            [in, size=inSealedSignupDataSize] const uint8_t* inSealedSignupData,
-            size_t inSealedSignupDataSize,
             [in, size=inSerializedRequestSize] const uint8_t* inSerializedRequest,
             size_t inSerializedRequestSize,
             [out] size_t* outSerializedResponseSize
@@ -31,8 +29,6 @@ enclave {
 
         // outSerializedResponse is a base64 encoding of a JSON object encrypted with the AES session key
         public tcf_err_t ecall_GetSerializedResponse(
-            [in, size=inSealedSignupDataSize] const uint8_t* inSealedSignupData,
-            size_t inSealedSignupDataSize,
             [out, size = inSerializedResponseSize] uint8_t* outSerializedResponse,
             size_t inSerializedResponseSize
             );

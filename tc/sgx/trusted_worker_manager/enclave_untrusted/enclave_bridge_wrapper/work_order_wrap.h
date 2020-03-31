@@ -18,5 +18,4 @@
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 std::string HandleWorkOrderRequest(
-    const std::string& sealedSignupData,
     const std::string& serializedRequest);

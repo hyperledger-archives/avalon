@@ -33,17 +33,17 @@ namespace tcf {
                     session_key.clear();
                 }
                 ByteArray CreateErrorResponse(int err_code, const char* err_message);
-                ByteArray Process(EnclaveData& enclaveData, std::string json_str);
+                ByteArray Process(EnclaveData* enclaveData, std::string json_str);
 
         private:
-                void ParseJsonInput(EnclaveData& enclaveData, std::string json_str);
+                void ParseJsonInput(EnclaveData* enclaveData, std::string json_str);
                 ByteArray CreateJsonOutput();
                 std::vector<tcf::WorkOrderData> ExecuteWorkOrder();
                 ByteArray ComputeRequestHash();
                 ByteArray ResponseHashCalculate(std::vector<tcf::WorkOrderData>& wo_data);
                 tcf_err_t VerifyEncryptedRequestHash();
                 int VerifyRequesterSignature();
-                void ComputeSignature(EnclaveData& enclaveData, ByteArray& message_hash);
+                void ComputeSignature(EnclaveData* enclaveData, ByteArray& message_hash);
                 void ConcatHash(ByteArray& dst, ByteArray& src);
                 /***Required for work order processing **/
                 std::string tc_service_address;

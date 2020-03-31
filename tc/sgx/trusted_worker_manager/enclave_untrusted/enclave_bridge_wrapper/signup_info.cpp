@@ -39,32 +39,46 @@ tcf_err_t SignupInfo::DeserializeSignupInfo(
 
         // Parse the incoming wait certificate
         JsonValue parsed(json_parse_string(serialized_signup_info.c_str()));
-        tcf::error::ThrowIfNull(parsed.value, "failed to parse serialized signup info; badly formed JSON");
+        tcf::error::ThrowIfNull(parsed.value,
+            "failed to parse serialized signup info; badly formed JSON");
 
         JSON_Object* data_object = json_value_get_object(parsed);
-        tcf::error::ThrowIfNull(data_object, "invalid serialized signup info; missing root object");
+        tcf::error::ThrowIfNull(data_object,
+            "invalid serialized signup info; missing root object");
 
         // --------------- verifying key ---------------
         pvalue = json_object_dotget_string(data_object, "verifying_key");
-        tcf::error::ThrowIfNull(pvalue, "invalid serialized signup info; missing verifying_key");
+        tcf::error::ThrowIfNull(pvalue,
+            "invalid serialized signup info; missing verifying_key");
 
         verifying_key.assign(pvalue);
 
         // --------------- encryption key ---------------
         pvalue = json_object_dotget_string(data_object, "encryption_key");
-        tcf::error::ThrowIfNull(pvalue, "invalid serialized signup info; missing encryption_key");
+        tcf::error::ThrowIfNull(pvalue,
+            "invalid serialized signup info; missing encryption_key");
 
         encryption_key.assign(pvalue);
 
+        // --------------- encryption key signature ---------------
+        pvalue = json_object_dotget_string(data_object,
+            "encryption_key_signature");
+        tcf::error::ThrowIfNull(pvalue,
+            "invalid serialized signup info; missing encryption_key_signature");
+
+        encryption_key_signature.assign(pvalue);
+
         // --------------- proof data ---------------
         pvalue = json_object_dotget_string(data_object, "proof_data");
-        tcf::error::ThrowIfNull(pvalue, "invalid serialized signup info; missing proof_data");
+        tcf::error::ThrowIfNull(pvalue,
+            "invalid serialized signup info; missing proof_data");
 
         proof_data.assign(pvalue);
 
         // --------------- enclave id ---------------
         pvalue = json_object_dotget_string(data_object, "enclave_persistent_id");
-        tcf::error::ThrowIfNull(pvalue, "invalid serialized signup info; missing enclave_persistent_id");
+        tcf::error::ThrowIfNull(pvalue,
+            "invalid serialized signup info; missing enclave_persistent_id");
 
         enclave_persistent_id.assign(pvalue);
     } catch (tcf::error::Error& e) {
@@ -100,7 +114,8 @@ SignupInfo* deserialize_signup_info(
 static tcf_err_t DeserializePublicEnclaveData(
     const std::string& public_enclave_data,
     std::string& verifying_key,
-    std::string& encryption_key) {
+    std::string& encryption_key,
+    std::string& encryption_key_signature) {
     tcf_err_t result = TCF_SUCCESS;
 
     try {
@@ -108,22 +123,34 @@ static tcf_err_t DeserializePublicEnclaveData(
 
         // Parse the incoming wait certificate
         JsonValue parsed(json_parse_string(public_enclave_data.c_str()));
-        tcf::error::ThrowIfNull(parsed.value, "failed to parse the public enclave data, badly formed JSON");
+        tcf::error::ThrowIfNull(parsed.value,
+            "failed to parse the public enclave data, badly formed JSON");
 
         JSON_Object* data_object = json_value_get_object(parsed);
-        tcf::error::ThrowIfNull(data_object, "invalid public enclave data; missing root object");
+        tcf::error::ThrowIfNull(data_object,
+            "invalid public enclave data; missing root object");
 
         // --------------- verifying key ---------------
         pvalue = json_object_dotget_string(data_object, "VerifyingKey");
-        tcf::error::ThrowIfNull(pvalue, "invalid public enclave data; missing VerifyingKey");
+        tcf::error::ThrowIfNull(pvalue,
+            "invalid public enclave data; missing VerifyingKey");
 
         verifying_key.assign(pvalue);
 
         // --------------- encryption key ---------------
         pvalue = json_object_dotget_string(data_object, "EncryptionKey");
-        tcf::error::ThrowIfNull(pvalue, "invalid public enclave data; missing EncryptionKey");
+        tcf::error::ThrowIfNull(pvalue,
+            "invalid public enclave data; missing EncryptionKey");
 
         encryption_key.assign(pvalue);
+
+        // --------------- encryption key signature ---------------
+        pvalue = json_object_dotget_string(data_object,
+            "EncryptionKeySignature");
+        tcf::error::ThrowIfNull(pvalue,
+            "invalid public enclave data; missing EncryptionKeySignature");
+
+        encryption_key_signature.assign(pvalue);
     } catch (tcf::error::Error& e) {
         tcf::enclave_api::base::SetLastError(e.what());
         result = e.error_code();
@@ -144,7 +171,8 @@ std::map<std::string, std::string> CreateEnclaveData(
     ) {
     tcf_err_t presult;
     // Create some buffers for receiving the output parameters
-    StringArray public_enclave_data(0);  // CreateEnclaveData will resize appropriately
+    // CreateEnclaveData will resize appropriately
+    StringArray public_enclave_data(0);
     Base64EncodedString sealed_enclave_data;
     Base64EncodedString enclave_quote;
 
@@ -156,22 +184,23 @@ std::map<std::string, std::string> CreateEnclaveData(
         enclave_quote);
     ThrowTCFError(presult);
 
-    // PyLog(TCF_LOG_DEBUG, public_enclave_data.str().c_str());
-
     // Parse the json and save the verifying and encryption keys
     std::string verifying_key;
     std::string encryption_key;
+    std::string encryption_key_signature;
 
     presult = DeserializePublicEnclaveData(
         public_enclave_data.str(),
         verifying_key,
-        encryption_key);
+        encryption_key,
+        encryption_key_signature);
     ThrowTCFError(presult);
 
     // Save the information
     std::map<std::string, std::string> result;
     result["verifying_key"] = verifying_key;
     result["encryption_key"] = encryption_key;
+    result["encryption_key_signature"] = encryption_key_signature;
     result["sealed_enclave_data"] = sealed_enclave_data;
     result["enclave_quote"] = enclave_quote;
 
@@ -179,29 +208,30 @@ std::map<std::string, std::string> CreateEnclaveData(
 }
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-std::map<std::string, std::string> UnsealEnclaveData(
-    const std::string& sealed_enclave_data) {
+std::map<std::string, std::string> UnsealEnclaveData() {
     tcf_err_t presult;
-    StringArray public_enclave_data(0);  // UnsealEnclaveData will resize appropriately
+    // UnsealEnclaveData will resize appropriately
+    StringArray public_enclave_data(0);
 
-    presult = tcf::enclave_api::enclave_data::UnsealEnclaveData(
-        sealed_enclave_data,
-        public_enclave_data);
+    presult = tcf::enclave_api::enclave_data::UnsealEnclaveData(public_enclave_data);
     ThrowTCFError(presult);
 
     // Parse the json and save the verifying and encryption keys
     std::string verifying_key;
     std::string encryption_key;
+    std::string encryption_key_signature;
 
     presult = DeserializePublicEnclaveData(
         public_enclave_data.str(),
         verifying_key,
-        encryption_key);
+        encryption_key,
+        encryption_key_signature);
     ThrowTCFError(presult);
 
     std::map<std::string, std::string> result;
     result["verifying_key"] = verifying_key;
     result["encryption_key"] = encryption_key;
+    result["encryption_key_signature"] = encryption_key_signature;
 
     return result;
 }  // _unseal_signup_data
@@ -215,5 +245,3 @@ size_t VerifyEnclaveInfo(const std::string& enclaveInfo,
     size_t verify_status = result;
     return verify_status;
 }  // VerifyEnclaveInfo
-
-

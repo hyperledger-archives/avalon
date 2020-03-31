@@ -25,9 +25,7 @@ DESCRIPTION:   Function declarations for the workorder enclave
 #include "enclave_utils.h"
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-extern tcf_err_t ecall_HandleWorkOrderRequest(const uint8_t* inSealedSignupData,
-    size_t inSealedSignupDataSize,
-    const uint8_t* inSerializedRequest,
+extern tcf_err_t ecall_HandleWorkOrderRequest(const uint8_t* inSerializedRequest,
     size_t inSerializedRequestSize,
     size_t* outSerializedResponseSize);
 

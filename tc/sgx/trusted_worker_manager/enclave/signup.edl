@@ -28,23 +28,23 @@ enclave {
             );
 
         public tcf_err_t ecall_CreateEnclaveData(
+            [out] size_t* outPublicEnclaveDataSize,
+            [out] size_t* outSealedEnclaveDataSize
+            );
+
+        public tcf_err_t ecall_CreateSignupData(
             [in] const sgx_target_info_t* inTargetInfo,
             [in, string] const char* inOriginatorPublicKeyHash,
             [out, size=inAllocatedPublicEnclaveDataSize] char* outPublicEnclaveData,
             size_t inAllocatedPublicEnclaveDataSize,
-            [out] size_t* outPublicEnclaveDataSize,
             [out, size=inAllocatedSealedEnclaveDataSize] uint8_t* outSealedEnclaveData,
             size_t inAllocatedSealedEnclaveDataSize,
-            [out] size_t* outSealedEnclaveDataSize,
             [out] sgx_report_t* outEnclaveReport
             );
 
         public tcf_err_t ecall_UnsealEnclaveData(
-            [in, size=inSealedEnclaveDataSize] const uint8_t* inSealedEnclaveData,
-            size_t inSealedEnclaveDataSize,
             [out, size=inAllocatedPublicEnclaveDataSize] char* outPublicEnclaveData,
-            size_t inAllocatedPublicEnclaveDataSize,
-            [out] size_t* outPublicEnclaveDataSize
+            size_t inAllocatedPublicEnclaveDataSize
             );
 
          public tcf_err_t ecall_VerifyEnclaveInfo(

@@ -37,7 +37,7 @@
 #include "workload_processor.h"
 
 namespace tcf {
-    void WorkOrderProcessor::ParseJsonInput(EnclaveData& enclaveData, std::string json_str) {
+    void WorkOrderProcessor::ParseJsonInput(EnclaveData* enclaveData, std::string json_str) {
         // Parse the work order request
         JsonValue parsed(json_parse_string(json_str.c_str()));
         tcf::error::ThrowIfNull(
@@ -158,7 +158,7 @@ namespace tcf {
 
         // Decrypt Encryption key
         ByteArray encrypted_session_key_bytes = HexStringToBinary(encrypted_session_key);
-        session_key = enclaveData.decrypt_message(encrypted_session_key_bytes);
+        session_key = enclaveData->decrypt_message(encrypted_session_key_bytes);
         ByteArray session_key_iv_bytes = HexStringToBinary(session_key_iv);
         JSON_Array* data_array = json_object_get_array(params_object, "inData");
         size_t count = json_array_get_count(data_array);
@@ -414,8 +414,8 @@ namespace tcf {
         return final_hash;
     }
 
-    void WorkOrderProcessor::ComputeSignature(EnclaveData& enclave_data, ByteArray& message_hash) {
-        ByteArray sig = enclave_data.sign_message(message_hash);
+    void WorkOrderProcessor::ComputeSignature(EnclaveData* enclave_data, ByteArray& message_hash) {
+        ByteArray sig = enclave_data->sign_message(message_hash);
         worker_signature = base64_encode(sig);
     }
 
@@ -468,7 +468,7 @@ namespace tcf {
         return serialized_response;
     }
 
-    ByteArray WorkOrderProcessor::Process(EnclaveData& enclaveData, std::string json_str) {
+    ByteArray WorkOrderProcessor::Process(EnclaveData* enclaveData, std::string json_str) {
         try {
             ParseJsonInput(enclaveData, json_str);
             tcf::error::ThrowIf<tcf::error::ValueError>(VerifyEncryptedRequestHash()!= TCF_SUCCESS,
