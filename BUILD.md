@@ -76,7 +76,7 @@ The steps below will set up a Python virtual environment to run Avalon.
 
    - To use the current stable branch (recommended), run this command:
      ```bash
-     git clone https://github.com/hyperledger/avalon --branch v0.5-pre-release.1
+     git clone https://github.com/hyperledger/avalon --branch v0.5-pre-release.4
      ```
 
    - Or, to use the latest branch, run this command:
