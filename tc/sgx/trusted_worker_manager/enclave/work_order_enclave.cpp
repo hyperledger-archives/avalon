@@ -43,23 +43,22 @@
 ByteArray last_result;
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-tcf_err_t ecall_HandleWorkOrderRequest(const uint8_t* inSealedSignupData,
-    size_t inSealedSignupDataSize,
-    const uint8_t* inSerializedRequest,
+tcf_err_t ecall_HandleWorkOrderRequest(const uint8_t* inSerializedRequest,
     size_t inSerializedRequestSize,
     size_t* outSerializedResponseSize) {
     tcf_err_t result = TCF_SUCCESS;
 
     try {
-        tcf::error::ThrowIfNull(inSealedSignupData, "Sealed signup data pointer is NULL");
-        tcf::error::ThrowIfNull(inSerializedRequest, "Serialized request pointer is NULL");
-        tcf::error::ThrowIfNull(outSerializedResponseSize, "Response size pointer is NULL");
+        tcf::error::ThrowIfNull(inSerializedRequest,
+            "Serialized request pointer is NULL");
+        tcf::error::ThrowIfNull(outSerializedResponseSize,
+            "Response size pointer is NULL");
 
         // Unseal the enclave persistent data
-        EnclaveData enclaveData(inSealedSignupData);
+        EnclaveData* enclaveData = EnclaveData::getInstance(); 
 
-        ByteArray request(
-               inSerializedRequest, inSerializedRequest + inSerializedRequestSize);
+        ByteArray request(inSerializedRequest,
+            inSerializedRequest + inSerializedRequestSize);
 
         tcf::WorkOrderProcessor wo_processor;
         std::string wo_string(request.begin(), request.end());
@@ -69,12 +68,13 @@ tcf_err_t ecall_HandleWorkOrderRequest(const uint8_t* inSealedSignupData,
         (*outSerializedResponseSize) = last_result.size();
     } catch (tcf::error::Error& e) {
         SAFE_LOG(TCF_LOG_ERROR,
-            "Error in worker enclave (ecall_HandleWorkOrderRequest): %04X -- %s", e.error_code(),
-            e.what());
+            "Error in worker enclave (ecall_HandleWorkOrderRequest): %04X -- %s",
+            e.error_code(), e.what());
         ocall_SetErrorMessage(e.what());
         result = e.error_code();
     } catch (...) {
-        SAFE_LOG(TCF_LOG_ERROR, "Unknown error in worker enclave (ecall_HandleWorkOrderRequest)");
+        SAFE_LOG(TCF_LOG_ERROR,
+            "Unknown error in worker enclave (ecall_HandleWorkOrderRequest)");
         result = TCF_ERR_UNKNOWN;
     }
 
@@ -82,31 +82,31 @@ tcf_err_t ecall_HandleWorkOrderRequest(const uint8_t* inSealedSignupData,
 }
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-tcf_err_t ecall_GetSerializedResponse(const uint8_t* inSealedSignupData,
-    size_t inSealedSignupDataSize,
-    uint8_t* outSerializedResponse,
+tcf_err_t ecall_GetSerializedResponse(uint8_t* outSerializedResponse,
     size_t inSerializedResponseSize) {
     tcf_err_t result = TCF_SUCCESS;
 
     try {
-        tcf::error::ThrowIfNull(inSealedSignupData, "Sealed signup data pointer is NULL");
-        tcf::error::ThrowIfNull(outSerializedResponse, "Serialized response pointer is NULL");
+        tcf::error::ThrowIfNull(outSerializedResponse,
+            "Serialized response pointer is NULL");
         tcf::error::ThrowIf<tcf::error::ValueError>(
-            inSerializedResponseSize < last_result.size(), "Not enough space for the response");
+            inSerializedResponseSize < last_result.size(),
+            "Not enough space for the response");
 
         // Unseal the enclave persistent data
-        EnclaveData enclaveData(inSealedSignupData);
+        EnclaveData* enclaveData = EnclaveData::getInstance();
 
-        memcpy_s(outSerializedResponse, inSerializedResponseSize, last_result.data(),
-            last_result.size());
+        memcpy_s(outSerializedResponse, inSerializedResponseSize,
+            last_result.data(), last_result.size());
     } catch (tcf::error::Error& e) {
         SAFE_LOG(TCF_LOG_ERROR,
-            "Error in worker enclave(ecall_GetSerializedResponse): %04X -- %s", e.error_code(),
-            e.what());
+            "Error in worker enclave(ecall_GetSerializedResponse): %04X -- %s",
+            e.error_code(), e.what());
         ocall_SetErrorMessage(e.what());
         result = e.error_code();
     } catch (...) {
-        SAFE_LOG(TCF_LOG_ERROR, "Unknown error in worker enclave (ecall_GetSerializedResponse)");
+        SAFE_LOG(TCF_LOG_ERROR,
+            "Unknown error in worker enclave (ecall_GetSerializedResponse)");
         result = TCF_ERR_UNKNOWN;
     }
 

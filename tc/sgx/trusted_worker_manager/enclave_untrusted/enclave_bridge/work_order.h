@@ -26,7 +26,6 @@ namespace tcf {
         namespace workorder {
             // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
             tcf_err_t HandleWorkOrderRequest(
-                const Base64EncodedString& inSealedEnclaveData,
                 const Base64EncodedString& inSerializedRequest,
                 uint32_t& outResponseIdentifier,
                 size_t& outSerializedResponseSize,
@@ -34,7 +33,6 @@ namespace tcf {
 
             // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
             tcf_err_t GetSerializedResponse(
-                const Base64EncodedString& inSealedEnclaveData,
                 const uint32_t inResponseIdentifier,
                 const size_t inSerializedResponseSize,
                 Base64EncodedString& outSerializedResponse,

@@ -53,7 +53,7 @@ namespace tcf {
                 this->iv = iv;
             }
 
-            void Unpack(EnclaveData& enclaveData,
+            void Unpack(EnclaveData* enclaveData,
                         const JSON_Object* object);
 
             void Pack(JSON_Array* json_array);

@@ -38,7 +38,7 @@
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 namespace tcf {
 
-    void WorkOrderDataHandler::Unpack(EnclaveData& enclaveData,
+    void WorkOrderDataHandler::Unpack(EnclaveData* enclaveData,
                                       const JSON_Object* object) {
         ByteArray encrypted_input_data;
         std::string input_data_hash;
@@ -57,7 +57,7 @@ namespace tcf {
             data_iv = HexStringToBinary(iv);
             ByteArray encrypted_key = tcf::crypto::skenc::DecryptMessage(
                    session_key, enc_data_key);
-            data_encryption_key = enclaveData.decrypt_message(encrypted_key);
+            data_encryption_key = enclaveData->decrypt_message(encrypted_key);
         }
 
         std::string data_b64 = GetJsonStr(object, "data");

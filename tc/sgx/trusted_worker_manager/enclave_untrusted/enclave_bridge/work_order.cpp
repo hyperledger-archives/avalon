@@ -29,7 +29,6 @@
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 tcf_err_t tcf::enclave_api::workorder::HandleWorkOrderRequest(
-    const Base64EncodedString& inSealedEnclaveData,
     const Base64EncodedString& inSerializedRequest,
     uint32_t& outResponseIdentifier,
     size_t& outSerializedResponseSize,
@@ -38,8 +37,8 @@ tcf_err_t tcf::enclave_api::workorder::HandleWorkOrderRequest(
 
     try {
         size_t response_size = 0;
-        ByteArray sealed_enclave_data = Base64EncodedStringToByteArray(inSealedEnclaveData);
-        ByteArray serialized_request = Base64EncodedStringToByteArray(inSerializedRequest);
+        ByteArray serialized_request = \
+            Base64EncodedStringToByteArray(inSerializedRequest);
 
         // xxxxx Call the enclave
 
@@ -52,7 +51,6 @@ tcf_err_t tcf::enclave_api::workorder::HandleWorkOrderRequest(
                 [
                     enclaveid,
                     &presult,
-                    sealed_enclave_data,
                     serialized_request,
                     &response_size
                 ]
@@ -60,19 +58,16 @@ tcf_err_t tcf::enclave_api::workorder::HandleWorkOrderRequest(
                     sgx_status_t sresult_inner = ecall_HandleWorkOrderRequest(
                         enclaveid,
                         &presult,
-                        sealed_enclave_data.data(),
-                        sealed_enclave_data.size(),
                         serialized_request.data(),
                         serialized_request.size(),
                         &response_size);
                     return tcf::error::ConvertErrorStatus(sresult_inner, presult);
                 });
         tcf::error::ThrowSgxError(sresult,
-            "Intel SGX enclave call failed (InitializeContract)");
+            "Intel SGX enclave call failed (ecall_HandleWorkOrderRequest)");
         g_Enclave[enclaveIndex].ThrowTCFError(presult);
 
         outSerializedResponseSize = response_size;
-
     } catch (tcf::error::Error& e) {
         tcf::enclave_api::base::SetLastError(e.what());
         result = e.error_code();
@@ -89,7 +84,6 @@ tcf_err_t tcf::enclave_api::workorder::HandleWorkOrderRequest(
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 tcf_err_t tcf::enclave_api::workorder::GetSerializedResponse(
-    const Base64EncodedString& inSealedEnclaveData,
     const uint32_t inResponseIdentifier,
     const size_t inSerializedResponseSize,
     Base64EncodedString& outSerializedResponse,
@@ -98,13 +92,11 @@ tcf_err_t tcf::enclave_api::workorder::GetSerializedResponse(
 
     try {
         ByteArray serialized_response(inSerializedResponseSize);
-        ByteArray sealed_enclave_data = Base64EncodedStringToByteArray(inSealedEnclaveData);
 
         // xxxxx Call the enclave
 
         // Get the enclave id for passing into the ecall
         sgx_enclave_id_t enclaveid = g_Enclave[enclaveIndex].GetEnclaveId();
-        // tcf::logger::LogV(TCF_LOG_DEBUG, "GetSerializedResponse[%ld] %u ", (long)enclaveid, enclaveIndex);
 
         tcf_err_t presult = TCF_SUCCESS;
         sgx_status_t sresult =
@@ -113,15 +105,12 @@ tcf_err_t tcf::enclave_api::workorder::GetSerializedResponse(
                 [
                     enclaveid,
                     &presult,
-                    sealed_enclave_data,
                     &serialized_response
                 ]
                 () {
                     sgx_status_t sresult_inner = ecall_GetSerializedResponse(
                         enclaveid,
                         &presult,
-                        sealed_enclave_data.data(),
-                        sealed_enclave_data.size(),
                         serialized_response.data(),
                         serialized_response.size());
                     return tcf::error::ConvertErrorStatus(sresult_inner, presult);

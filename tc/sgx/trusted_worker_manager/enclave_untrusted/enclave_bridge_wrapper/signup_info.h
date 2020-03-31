@@ -35,6 +35,7 @@ public:
     // Signup info properties
     std::string verifying_key;
     std::string encryption_key;
+    std::string encryption_key_signature;
     std::string sealed_signup_data;
     std::string proof_data;
     std::string enclave_persistent_id;
@@ -60,8 +61,7 @@ SignupInfo* deserialize_signup_info(
 std::map<std::string, std::string> CreateEnclaveData(
     const std::string& originator_public_key_hash);
 
-std::map<std::string, std::string> UnsealEnclaveData(
-    const std::string& sealed_enclave_data);
+std::map<std::string, std::string> UnsealEnclaveData();
 
 size_t VerifyEnclaveInfo(const std::string& enclaveInfo,
     const std::string& mr_enclave,

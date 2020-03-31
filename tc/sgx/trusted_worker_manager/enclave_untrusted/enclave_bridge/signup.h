@@ -31,7 +31,6 @@ namespace tcf {
 
             // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
             tcf_err_t UnsealEnclaveData(
-                const Base64EncodedString& inSealedEnclaveData,
                 StringArray& outPublicEnclaveData);
 
             tcf_err_t VerifyEnclaveInfo(const std::string& enclaveInfo,
