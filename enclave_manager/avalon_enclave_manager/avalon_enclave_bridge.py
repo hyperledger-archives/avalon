@@ -100,7 +100,7 @@ def __update_sig_rl():
 # -----------------------------------------------------------------
 def initialize_with_configuration(config):
     """
-    Create and Initialize a SGX enclave with passed config
+    Create and Initialize a Intel SGX enclave with passed config
     """
     global _tcf_enclave_info
     global _ias
@@ -119,7 +119,7 @@ def initialize_with_configuration(config):
                 'Avalon enclave config file missing the following keys: '
                 '{}'.format(
                     ', '.join(sorted(list(missing_keys)))))
-    # IAS is not initialized in SGX SIM mode
+    # IAS is not initialized in Intel SGX SIM mode
     if not _ias and not enclave.is_sgx_simulator():
         _ias = \
             ias_client.IasClient(

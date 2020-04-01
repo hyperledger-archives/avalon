@@ -127,7 +127,8 @@ tcf_err_t ecall_CreateEnclaveData(const sgx_target_info_t* inTargetInfo,
         tcf::error::ThrowIfNull(outSealedEnclaveData, "Sealed enclave data pointer is NULL");
         tcf::error::ThrowIfNull(outSealedEnclaveDataSize, "Sealed data size pointer is NULL");
 
-        tcf::error::ThrowIfNull(outEnclaveReport, "SGX report pointer is NULL");
+        tcf::error::ThrowIfNull(outEnclaveReport,
+            "Intel SGX report pointer is NULL");
 
         (*outPublicEnclaveDataSize) = 0;
         Zero(outPublicEnclaveData, inAllocatedPublicEnclaveDataSize);
@@ -159,7 +160,7 @@ tcf_err_t ecall_CreateEnclaveData(const sgx_target_info_t* inTargetInfo,
 
         // Seal up the signup data into the caller's buffer.
         // NOTE - the attributes mask 0xfffffffffffffff3 seems rather
-        // arbitrary, but according to SGX SDK documentation, this is
+        // arbitrary, but according to Intel SGX SDK documentation, this is
         // what sgx_seal_data uses, so it is good enough for us.
         sgx_attributes_t attribute_mask = {0xfffffffffffffff3, 0};
         ret = sgx_seal_data_ex(SGX_KEYPOLICY_MRENCLAVE, attribute_mask,

@@ -39,9 +39,9 @@ if("${SGX_MODE} " STREQUAL " ")
     message(STATUS "Setting default SGX_MODE=${SGX_MODE}")
 endif()
 IF("${SGX_MODE}" STREQUAL "SIM")
-    OPTION(SGX_USE_SIMULATOR "Use the sgx simulator" TRUE)
+    OPTION(SGX_USE_SIMULATOR "Use the Intel SGX simulator" TRUE)
 ELSE()
-    OPTION(SGX_USE_SIMULATOR "Use the sgx simulator" FALSE)
+    OPTION(SGX_USE_SIMULATOR "Use the Intel SGX simulator" FALSE)
 ENDIF()
 
 SET(SGX_SDK "$ENV{SGX_SDK}")
@@ -58,7 +58,7 @@ endif()
 # ADDITIONAL LIBRARIES
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
-# sgx edger is a utility that generates edl artifacts
+# Intel SGX edger is a utility that generates edl artifacts
 SET(SGX_EDGER "${SGX_SDK}/bin/x64/sgx_edger8r")
 SET(SGX_SIGN "${SGX_SDK}/bin/x64/sgx_sign")
 
@@ -152,7 +152,7 @@ SGX_EDGE_TRUSTED(${PROJECT_EDL} PROJECT_EDGE_SOURCES)
 SOURCE_GROUP("Generated" FILES ${PROJECT_EDGE_SOURCES})
 
 # These compiler and linker flags for g++/gcc were derived from the make
-# files provided with the SGX sample enclave
+# files provided with the Intel SGX sample enclave.
 # To generate a proper enclave, it is recommended to follow below guideline
 # to link the trusted libraries:
 #    1. Link sgx_trts with the `--whole-archive' and `--no-whole-archive'

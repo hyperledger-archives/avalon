@@ -44,7 +44,7 @@ namespace tcf {
         sgx_status_t ConvertErrorStatus(
             sgx_status_t ret,
             tcf_err_t tcfRet) {
-            // If the SGX code is success and the Avalon error code is
+            // If the Intel SGX code is success and the Avalon error code is
             // "busy", then convert to appropriate value.
             if ((SGX_SUCCESS == ret) &&
                 (TCF_ERR_SYSTEM_BUSY == tcfRet)) {
@@ -67,7 +67,8 @@ namespace tcf {
             sealedSignupDataSize(0) {
             uint32_t size;
             sgx_status_t ret = sgx_calc_quote_size(nullptr, 0, &size);
-            tcf::error::ThrowSgxError(ret, "Failed to get SGX quote size.");
+            tcf::error::ThrowSgxError(ret,
+                "Failed to get Intel SGX quote size.");
             this->quoteSize = size;
 
             // Initialize the targetinfo and epid variables
@@ -332,8 +333,10 @@ namespace tcf {
 
                 sgx_launch_token_t token = { 0 };
                 int flags = SGX_DEBUG_FLAG;
-                tcf::error::ThrowSgxError((SGX_DEBUG_FLAG == 0 ? SGX_ERROR_UNEXPECTED:SGX_SUCCESS),
-                    "SGX DEBUG flag is 0 (possible cause: wrong compile flags)");
+                tcf::error::ThrowSgxError((SGX_DEBUG_FLAG == 0 ?
+                    SGX_ERROR_UNEXPECTED:SGX_SUCCESS),
+                    "Intel SGX DEBUG flag is 0"
+                    " (possible cause: wrong compile flags)");
 
                 // First attempt to load the enclave executable
                 sgx_status_t ret = SGX_SUCCESS;
@@ -416,10 +419,10 @@ namespace tcf {
         // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
         /* This function is run as the very first step in the attestation
-           process to check the device status; query the status of the SGX
-           device. If not enabled before, enable it. If the device is not
-           enabled, SGX device not found error is expected when the enclave is
-           created.
+           process to check the device status; query the status of the
+           Intel SGX device. If not enabled before, enable it.
+           If the device is not enabled, Intel SGX device not found error
+           is expected when the enclave is created.
         */
         void Enclave::QuerySgxStatus() {
             sgx_device_status_t sgx_device_status;
@@ -431,16 +434,16 @@ namespace tcf {
                 break;
             case SGX_DISABLED_REBOOT_REQUIRED:
                 throw tcf::error::RuntimeError(
-                    "SGX device will be enabled after this machine is "
+                    "Intel SGX device will be enabled after this machine is "
                     "rebooted.\n");
                 break;
             case SGX_DISABLED_LEGACY_OS:
                 throw tcf::error::RuntimeError(
-                    "SGX device can't be enabled on an OS that doesn't "
+                    "Intel SGX device can't be enabled on an OS that doesn't "
                     "support EFI interface.\n");
                 break;
             case SGX_DISABLED:
-                throw tcf::error::RuntimeError("SGX device not found.\n");
+                throw tcf::error::RuntimeError("Intel SGX device not found.\n");
                 break;
             default:
                 throw tcf::error::RuntimeError("Unexpected error.\n");

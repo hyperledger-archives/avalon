@@ -42,7 +42,7 @@ class WorkerDetails():
 
 class SGXWorkerDetails(WorkerDetails):
     """
-    TEE SGX worker type data
+    Intel SGX TEE worker type data
     """
     def __init__(self):
         super(SGXWorkerDetails, self).__init__()

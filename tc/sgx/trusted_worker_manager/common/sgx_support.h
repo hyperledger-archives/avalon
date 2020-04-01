@@ -15,9 +15,9 @@
 
 #pragma once
 
-// There are some Windows SGX library features that do not exist in the Linux
-// version, so we are going to add the missing stuff here to make the other
-// code platform-independent.
+// There are some Windows Intel SGX library features that do not exist in the
+// Linux version, so we are going to add the missing stuff here to make the
+// other code platform-independent.
 
 #include "sgx_error.h"
 

@@ -101,7 +101,7 @@ version = subprocess.check_output(
 
 setup(name='avalon_enclave_manager',
       version = version,
-      description = 'Avalon SGX Enclave Manager',
+      description = 'Avalon Intel SGX Enclave Manager',
       author = 'Hyperledger Avalon',
       url = 'https://github.com/hyperledger/avalon',
       packages = find_packages(),

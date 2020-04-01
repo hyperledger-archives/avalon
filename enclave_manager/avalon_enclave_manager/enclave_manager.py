@@ -461,7 +461,7 @@ def start_enclave_manager(config):
         kv_helper = connector.open(config['KvStorage']['remote_url'])
     except Exception as err:
         logger.error("Failed to open KV storage interface; " +
-                     "exiting SGX Enclave manager: {err}")
+                     "exiting Intel SGX Enclave manager: {err}")
         sys.exit(-1)
 
     try:
@@ -470,7 +470,7 @@ def start_enclave_manager(config):
         logger.info("--------------- Boot time flow Complete ----------------")
     except Exception as err:
         logger.error("Failed to execute boot time flow; " +
-                     "exiting SGX Enclave manager: {err}")
+                     "exiting Intel SGX Enclave manager: {err}")
         exit(1)
 
     try:

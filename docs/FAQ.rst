@@ -303,7 +303,7 @@ enclaves:
 https://software.intel.com/en-us/blogs/2016/06/06/overview-of-intel-software-guard-extension-enclave
 
 How can I create a TEE with Intel SGX using Avalon?
-----------------------------------------------------------------------------------
+---------------------------------------------------
 Start with the examples and tutorial at https://github.com/hyperledger/avalon/tree/master/docs#tutorial
 The technical details of Intel SGX enclaves are encapsulated in the
 Avalon libraries and Avalon Enclave Manager.
@@ -316,7 +316,7 @@ Intel SGX needs to be enabled in BIOS.
 
 Is there a maximum size of input data when using Intel SGX?
 -----------------------------------------------------------
-Avalon does not expect application-specific code to use SGX sealed data.
+Avalon does not expect application-specific code to use Intel SGX sealed data.
 Avalon uses sealed data internally for storing private enclave signing and
 encryption keys.
 As result application specific data size is not dependent on the sealed data

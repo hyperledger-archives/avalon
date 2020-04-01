@@ -28,11 +28,11 @@
 #include "sgx_tcrypto.h"
 
 namespace Intel {
-// SGX SHA256 State handle specialization
-// When using an SGX SHA256 state handle file handle, you must specify the
+// Intel SGX SHA256 State handle specialization.
+// When using an Intel SGX SHA256 state handle file handle, you must specify the
 // second type to the AutoHandle template because the handle is really just a
 // typedef for a opaque void pointer, and there are several other handles like
-// that in SGX.  For example:
+// that in Intel SGX.  For example:
 //
 // AutoHandle<sgx_sha_state_handle_t, SgxSha256StateHandleTraits>
 
@@ -42,11 +42,11 @@ struct SgxSha256StateHandleTraits {
     static void Cleanup(sgx_sha_state_handle_t handle) { sgx_sha256_close(handle); }
 };
 
-// SGX CMAC128 State handle specialization
-// When using an SGX CMAC128 state handle file handle, you must specify the
-// second type to the AutoHandle template because the handle is really just a
-// typedef for a opaque void pointer, and there are several other handles like
-// that in SGX.  For example:
+// Intel SGX CMAC128 State handle specialization.
+// When using an Intel SGX CMAC128 state handle file handle, you must specify
+// the second type to the AutoHandle template because the handle is really just
+// a typedef for a opaque void pointer, and there are several other handles
+// like that in Intel SGX. For example:
 //
 // AutoHandle<sgx_cmac_state_handle_t, SgxCmac128StateHandleTraits>
 
@@ -56,8 +56,8 @@ struct SgxCmac128StateHandleTraits {
     static void Cleanup(sgx_cmac_state_handle_t handle) { sgx_cmac128_close(handle); }
 };
 
-// SGX ECC256 State handle specialization
-// When using an SGX ECC256 state handle file handle, you must specify the
+// Intel SGX ECC256 State handle specialization.
+// When using an Intel SGX ECC256 state handle file handle, you must specify the
 // second type to the AutoHandle template because the handle is really just a
 // typedef for a opaque void pointer, and there are several other handles like
 // that in SGX.  For example:
@@ -70,7 +70,7 @@ struct SgxEcc256StateHandleTraits {
     static void Cleanup(sgx_ecc_state_handle_t handle) { sgx_ecc256_close_context(handle); }
 };
 
-// Typedefs for the SGX handle types.
+// Typedefs for the Intel SGX handle types.
 
 typedef AutoHandle<sgx_sha_state_handle_t, SgxSha256StateHandleTraits> SgxSha256StateHandle;
 typedef AutoHandle<sgx_cmac_state_handle_t, SgxCmac128StateHandleTraits> SgxCmac128StateHandle;

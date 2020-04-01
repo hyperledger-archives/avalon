@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-This file defines the Enclave class to simplify integration of the SGX
+This file defines the Enclave class to simplify integration of the Intel SGX
 enclave module into the rest of the Avalon flow. Typically, an application
 will call the initialize_enclave function first,
 then will call create_enclave_signup_data.
@@ -99,7 +99,7 @@ class EnclaveHelper(object):
     # -------------------------------------------------------
     def send_to_sgx_worker(self, encrypted_request):
         """
-        Submit workorder request to the SGX Worker enclave
+        Submit workorder request to the Intel SGX Worker enclave
 
         :param encrypted_request: base64 encoded encrypted workorder request
         """
