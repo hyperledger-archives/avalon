@@ -73,6 +73,12 @@ pipeline {
             }
         }
 
+        stage('Setup fabric network') {
+            steps {
+                sh './scripts/start_fabric.sh -u'
+            }
+        }
+
         stage('Run Avalon Tests') {
             steps {
                 sh 'INSTALL_TYPE="" ./bin/run_tests'

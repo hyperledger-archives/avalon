@@ -116,6 +116,18 @@ try $generic_client_path/generic_client.py --uri "http://$LISTENER_URL:1947" \
     --workload_id "heart-disease-eval" \
     --in_data "Data: 25 10 1 67  102 125 1 95 5 10 1 11 36 1"
 
+yell "Start testing fabric generic client for echo result workload ................"
+yell "#------------------------------------------------------------------------------------------------"
+try $generic_client_path/fabric_generic_client.py --blockchain fabric \
+    --workload_id "echo-result" \
+    --in_data "Hello Fabric proxy model"
+
+yell "Start testing fabric generic client for heart disease eval workload ................"
+yell "#------------------------------------------------------------------------------------------------"
+try $generic_client_path/fabric_generic_client.py --blockchain fabric \
+    --workload_id "heart-disease-eval" \
+    --in_data "Data: 25 10 1 67  102 125 1 95 5 10 1 11 36 1"
+
 yell "#------------------------------------------------------------------------------------------------"
 yell "#------------------------------------------------------------------------------------------------"
 sleep 10s

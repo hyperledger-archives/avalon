@@ -17,13 +17,10 @@ version: '3.5'
 services:
   avalon-tests:
     image: avalon-shell:${ISOLATION_ID}
-    build:
-      context: .
-    environment:
-      - http_proxy
-      - https_proxy
-      - no_proxy
     working_dir: "/project/avalon/"
+    volumes:
+      - ~/mywork/vars/keyfiles:/keyfiles
+      - ~/mywork/vars/profiles/mychannel_network_for_pysdk.json:/project/avalon/sdk/avalon_sdk/fabric/network.json
     entrypoint: "bash -c \"\
         ./tools/run_tests.sh -l avalon-listener \""
     depends_on:
@@ -32,11 +29,6 @@ services:
 
   avalon-enclave-manager:
     image: avalon-enclave-manager:${ISOLATION_ID}
-    build:
-      context: .
-      dockerfile: ./enclave_manager/Dockerfile
-      args:
-        - TCF_DEBUG_BUILD=${TCF_DEBUG_BUILD:-}
     environment:
       - http_proxy
       - https_proxy
@@ -51,8 +43,6 @@ services:
 
   avalon-lmdb:
     image: avalon-lmdb:${ISOLATION_ID}
-    build:
-      context: .
     environment:
       - http_proxy
       - https_proxy
@@ -67,8 +57,6 @@ services:
 
   avalon-listener:
     image: avalon-listener:${ISOLATION_ID}
-    build:
-      context: .
     environment:
       - http_proxy
       - https_proxy
@@ -82,3 +70,29 @@ services:
       "
     depends_on:
       - avalon-lmdb
+
+  avalon-blockchain-connector:
+    image: avalon-blockchain-connector:${ISOLATION_ID}
+    environment:
+      - http_proxy
+      - https_proxy
+      - no_proxy
+    command: |
+      bash -c "
+        avalon_blockchain_connector -b fabric -u http://avalon-listener:1947
+        tail -f /dev/null
+        "
+    volumes:
+      # Fabric crypto materials has to be shared to connector to
+      # interact with fabric blockchain
+      - ~/mywork/vars/keyfiles:/keyfiles
+      - ~/mywork/vars/profiles/mychannel_network_for_pysdk.json:/project/avalon/sdk/avalon_sdk/fabric/network.json
+      - ~/mywork/vars/blockmark:/project/avalon/blockchain_connector/blockmark
+    depends_on:
+      - avalon-listener
+      - avalon-enclave-manager
+
+networks:
+  default:
+    external:
+      name: minifab

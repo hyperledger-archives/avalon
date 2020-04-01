@@ -57,3 +57,13 @@ services:
         - http_proxy
         - https_proxy
         - no_proxy
+
+  avalon-blockchain-connector:
+    image: avalon-blockchain-connector:${ISOLATION_ID}
+    build:
+      context: ..
+      dockerfile: ./blockchain_connector/Dockerfile
+      args:
+        - http_proxy
+        - https_proxy
+        - no_proxy
