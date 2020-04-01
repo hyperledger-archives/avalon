@@ -76,9 +76,9 @@ class FabricConnector():
         """
         Check for existing worker and update worker to fabric blockchain
         """
-        # Get all TEE SGX based workers ids from fabric blockchain
+        # Get all TEE Intel SGX based workers ids from the Fabric blockchain
         worker_ids_onchain = self._lookup_workers_onchain()
-        # Get all TEE SGX based worker ids from shared kv
+        # Get all Intel SGX TEE based worker ids from shared kv
         worker_ids_kv = self._lookup_workers_in_kv_storage()
         # If worker id exists in shared kv then update details of
         # worker to with details field.

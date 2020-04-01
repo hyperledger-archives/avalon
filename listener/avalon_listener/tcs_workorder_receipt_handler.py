@@ -31,7 +31,7 @@ class TCSWorkOrderReceiptHandler:
     requests. It reads appropriate work order information from the
     KV storage to create the response.
     Work order receipts are created and placed in the KV storage by the
-    SGX Enclave Manager after the work order (successfully) completed.
+    Intel SGX Enclave Manager after the work order (successfully) completed.
     """
 # -----------------------------------------------------------------------------
 

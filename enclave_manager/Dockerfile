@@ -14,11 +14,11 @@
 # ------------------------------------------------------------------------------
 
 # Description:
-#   Builds the environment needed to build Avalon SGX Enclave manager.
+#   Builds the environment needed to build Avalon Intel SGX Enclave manager.
 #
 #  Configuration (build) parameters
 #  - proxy configuration: https_proxy http_proxy ftp_proxy
-#  - sgx mode:
+#  - sgx_mode:
 #
 
 # -------------=== build avalon Enclave Manager image ===-------------
@@ -105,18 +105,19 @@ RUN apt-get update \
 # Install setuptools packages using pip because
 RUN pip3 install --upgrade setuptools
 
-# SGX common library and SDK are installed in /opt/intel directory.
-# Installation of SGX libsgx-common packages requires /etc/init directory. In docker image this directory doesn't exist.
+# Intel SGX common library and SDK are installed in /opt/intel directory.
+# Installation of Intel SGX libsgx-common packages requires
+# /etc/init directory. In the Docker image this directory doesn't exist.
 # Hence creating /etc/init directory.
 RUN mkdir -p /opt/intel \
  && mkdir -p /etc/init
 WORKDIR /opt/intel
 
-# Install SGX common library
+# Install Intel SGX common library
 RUN wget https://download.01.org/intel-sgx/sgx-linux/2.7.1/distro/ubuntu18.04-server/libsgx-enclave-common_2.7.101.3-bionic1_amd64.deb \
  && dpkg -i libsgx-enclave-common_2.7.101.3-bionic1_amd64.deb
 
-# Install SGX SDK
+# Install Intel SGX SDK
 RUN SGX_SDK_FILE=sgx_linux_x64_sdk_2.7.101.3.bin \
  && wget https://download.01.org/intel-sgx/sgx-linux/2.7.1/distro/ubuntu18.04-server/$SGX_SDK_FILE \
  && echo "yes" | bash ./$SGX_SDK_FILE \
@@ -131,7 +132,7 @@ COPY --from=openssl_image /usr/local/include /usr/local/include
 COPY --from=openssl_image /usr/local/lib /usr/local/lib
 COPY --from=openssl_image /tmp/openssl-$OPENSSL_VER.tar.gz /tmp/
 
-# Build ("trusted") SGX OpenSSL
+# Build ("trusted") Intel SGX OpenSSL
 # Note: This will compile in HW or SIM mode depending on the
 
 # Note: This will compile in HW or SIM mode depending on the
@@ -139,7 +140,7 @@ COPY --from=openssl_image /tmp/openssl-$OPENSSL_VER.tar.gz /tmp/
 
 WORKDIR /tmp
 
-# Using specific SGX SSL tag "lin_2.5_1.1.1d" corresponding to
+# Using specific Intel SGX SSL tag "lin_2.5_1.1.1d" corresponding to
 # openSSL version 1.1.1d
 RUN ldconfig \
  && ln -s /etc/ssl/certs/* /usr/local/ssl/certs/ \
@@ -179,8 +180,8 @@ RUN mkdir -p build \
   && cmake .. \
   && make
 
-# apps directory contains SGX workloads which need to be build
-# and linked to SGX enclave
+# Directory apps contains Intel SGX workloads which need to be built
+# and linked to the Intel SGX enclave
 WORKDIR /project/avalon/examples/apps
 
 RUN mkdir -p build \

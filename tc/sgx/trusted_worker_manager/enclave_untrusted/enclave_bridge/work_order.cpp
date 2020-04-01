@@ -67,7 +67,8 @@ tcf_err_t tcf::enclave_api::workorder::HandleWorkOrderRequest(
                         &response_size);
                     return tcf::error::ConvertErrorStatus(sresult_inner, presult);
                 });
-        tcf::error::ThrowSgxError(sresult, "SGX enclave call failed (InitializeContract)");
+        tcf::error::ThrowSgxError(sresult,
+            "Intel SGX enclave call failed (InitializeContract)");
         g_Enclave[enclaveIndex].ThrowTCFError(presult);
 
         outSerializedResponseSize = response_size;
@@ -125,7 +126,8 @@ tcf_err_t tcf::enclave_api::workorder::GetSerializedResponse(
                         serialized_response.size());
                     return tcf::error::ConvertErrorStatus(sresult_inner, presult);
                 });
-        tcf::error::ThrowSgxError(sresult, "SGX enclave call failed (GetSerializedResponse)");
+        tcf::error::ThrowSgxError(sresult,
+            "Intel SGX enclave call failed (GetSerializedResponse)");
         g_Enclave[enclaveIndex].ThrowTCFError(presult);
 
         outSerializedResponse = ByteArrayToBase64EncodedString(serialized_response);

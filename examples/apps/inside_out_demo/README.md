@@ -1,9 +1,9 @@
-# Demo Application to execute file i/o operations from SGX enclave
+# Demo Application to execute file i/o operations from the Intel SGX enclave
 
 This simple demo application executes file operations such as read and write
 based on the input from the user.
 
-## Using the Generic Command Line Client to execute file i/o form SGX enclave
+## Using the Generic Command Line Client to execute file I/O from the Intel SGX enclave
 
 The generic command line client, `generic_client.py`, sends an input request
 with file operation, filepath, content to be written, etc. to the worker

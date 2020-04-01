@@ -16,12 +16,15 @@
 #ifndef IAS_CA_CERT_H
 #define IAS_CA_CERT_H
 
-//IAS attestation verification report signing certification authority certificate
+// IAS attestation verification report signing certification authority
+// certificate.
+
 /*
-This certificate is the root of trust for enclave attestation verification.
-This is in PEM format of the SGX root certificate as can be downloaded from
-https://software.intel.com/sites/default/files/managed/7b/de/RK_PUB.zip
-*/
+ * This certificate is the root of trust for enclave attestation verification.
+ * This is in PEM format of the Intel SGX root certificate as downloaded
+ * and unzipped from
+ * https://software.intel.com/sites/default/files/managed/7b/de/RK_PUB.zip
+ */
 #ifdef __cplusplus
 extern "C" {
 #endif

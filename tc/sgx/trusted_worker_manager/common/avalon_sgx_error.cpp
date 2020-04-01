@@ -50,7 +50,7 @@ namespace tcf {
             },
             {
                 SGX_ERROR_INVALID_STATE,
-                "SGX API is invoked in incorrect order or state",
+                "Intel SGX API is invoked in incorrect order or state",
                 nullptr
             },
             SGX_ERR_ITEM(SGX_ERROR_HYPERV_ENABLED),
@@ -89,9 +89,9 @@ namespace tcf {
             },
             {
                 SGX_ERROR_NO_DEVICE,
-                "Invalid SGX device.",
-                "Please make sure SGX module is enabled in the BIOS, \
-                    and install SGX driver afterwards."
+                "Invalid Intel SGX device.",
+                "Please make sure Intel SGX module is enabled in the BIOS,"
+                    " and install Intel SGX driver afterwards."
             },
             {
                 SGX_ERROR_MEMORY_MAP_CONFLICT,
@@ -105,7 +105,7 @@ namespace tcf {
             },
             {
                 SGX_ERROR_DEVICE_BUSY,
-                "SGX device was busy.",
+                "Intel SGX device was busy.",
                 nullptr
             },
             {
@@ -161,7 +161,7 @@ namespace tcf {
                         snprintf(
                             buffer,
                             sizeof(buffer),
-                            "%s: SGX ERROR: %s",
+                            "%s: INTEL SGX ERROR: %s",
                             msg,
                             sgx_errlist[idx].msg);
 
@@ -176,7 +176,7 @@ namespace tcf {
                 snprintf(
                     buffer,
                     sizeof(buffer),
-                    "%s: UNKNOWN SGX ERROR: 0x%.8X",
+                    "%s: UNKNOWN INTEL SGX ERROR: 0x%.8X",
                     msg,
                     ret);
                 throw error::SystemError(buffer);
