@@ -67,15 +67,37 @@ pipeline {
             }
         }
  
-        stage('Build Avalon') {
+        stage('Build avalon components') {
             steps {
-                sh 'docker-compose -f ci/docker-compose-build.yaml build'
+                parallel (
+                    "Build Avalon Direct Model Components": {
+                        script {
+                            sh 'docker-compose -f ci/docker-compose-direct-model-build.yaml build'
+                        }
+                    },
+                    "Build Avalon Proxy Model Components": {
+                        script {
+                            sh 'docker-compose -f ci/docker-compose-proxy-model-build.yaml build'
+                        }
+                    },
+                    "Start fabric network": {
+                        script {
+                            sh './scripts/start_fabric.sh -w ./ -u'
+                        }
+                    }
+                )
+            }
+        }
+ 
+        stage('Run Avalon Direct Model Tests') {
+            steps {
+                sh 'INSTALL_TYPE="" ./bin/run_tests -d'
             }
         }
 
-        stage('Run Avalon Tests') {
+        stage('Run Avalon proxy Model Tests') {
             steps {
-                sh 'INSTALL_TYPE="" ./bin/run_tests'
+                sh 'INSTALL_TYPE="" ./bin/run_tests -p'
             }
         }
 
@@ -92,6 +114,10 @@ pipeline {
     }
 
     post {
+        always {
+            echo 'Cleaning up fabric network'
+            sh './scripts/start_fabric.sh -w ./ -c'
+        }
         success {
             archiveArtifacts '*.tgz, *.zip'
         }

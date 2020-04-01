@@ -86,7 +86,7 @@ class FabricWrapper():
         if not exists(self.__network_conf_file):
             raise FileNotFoundError(
                 "File not found at path: {0}".format(
-                    realpath(__network_conf_file)))
+                    realpath(self.__network_conf_file)))
         if config["fabric"]["channel_name"] is None:
             logging.error("Channel name is not specified")
             return False

@@ -1,4 +1,4 @@
-# Copyright 2020 Intel Corporation
+# Copyright 2019 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,12 +12,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-#Ignore Kv files
-config/Kv*
+version: '3.5'
 
-#Ignore documentation files
-*.md
-docs/*
-CODEOWNERS
-# Fabric certificates folder
-vars/*
+services:
+  avalon-proxy-model-tests:
+    image: avalon-shell:${ISOLATION_ID}
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      args:
+        - http_proxy
+        - https_proxy
+        - no_proxy
+
+  avalon-blockchain-connector:
+    image: avalon-blockchain-connector:${ISOLATION_ID}
+    build:
+      context: ..
+      dockerfile: ./blockchain_connector/Dockerfile
+      args:
+        - http_proxy
+        - https_proxy
+        - no_proxy

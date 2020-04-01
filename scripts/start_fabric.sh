@@ -138,8 +138,8 @@ elif [ $START_FABRIC == 1 ]; then
         echo "Chain codes are built and use existing built artifacts"
     else
         echo "Copying avalon fabric chaincodes to $WORK_DIR/vars/chaincode"
-        mkdir -p ./vars/chaincode
-        cp -R $TCF_HOME/sdk/avalon_sdk/connector/blockchains/fabric/chaincode/* vars/chaincode/
+        mkdir -p $WORK_DIR/vars/chaincode
+        cp -R $TCF_HOME/sdk/avalon_sdk/connector/blockchains/fabric/chaincode/* $WORK_DIR/vars/chaincode/
     fi
 
     # If already fabric network up and running skip start again.
