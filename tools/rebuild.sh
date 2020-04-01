@@ -82,9 +82,9 @@ fi
 : "${PKG_CONFIG_PATH?Missing environment variable PKG_CONFIG_PATH}"
 
 if [[ ${SGX_MODE} &&  "${SGX_MODE}" == "HW" ]]; then
-    echo "SGX mode is set to HW"
+    echo "Intel SGX mode is set to HW"
 else
-    echo "Setting default SGX mode to SIM"
+    echo "Setting default Intel SGX mode to SIM"
     export SGX_MODE=SIM
 fi
 
@@ -138,7 +138,7 @@ NUM_CORES=1
 # BUILD
 # -----------------------------------------------------------------
 
-yell --------------- "COMMON SGX (WORKLOAD & IOHANDLER)" ---------------
+yell --------------- "COMMON INTEL SGX (WORKLOAD & IOHANDLER)" ---------------
 cd $TCF_HOME/common/sgx_workload/ || error_exit "Failed to change to the directory"
 
 mkdir -p build

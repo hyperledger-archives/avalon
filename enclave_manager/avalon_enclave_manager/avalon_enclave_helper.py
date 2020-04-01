@@ -99,7 +99,7 @@ class EnclaveHelper(object):
     # -------------------------------------------------------
     def send_to_sgx_worker(self, encrypted_request):
         """
-        Submit workorder request to the SGX Worker enclave
+        Submit workorder request to the Intel SGX Worker enclave
 
         :param encrypted_request: base64 encoded encrypted workorder request
         """

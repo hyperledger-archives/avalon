@@ -32,7 +32,7 @@ namespace tcf {
             sgx_status_t error() { return errorCode; }
 
             virtual char const * what() const throw() {
-                return "Sgx Call Failed.";
+                return "Intel SGX Call Failed.";
             }
 
         private:

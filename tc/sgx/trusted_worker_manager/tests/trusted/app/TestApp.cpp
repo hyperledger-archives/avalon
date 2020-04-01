@@ -47,11 +47,12 @@ static sgx_errlist_t sgx_errlist[] = {
     {SGX_ERROR_INVALID_ENCLAVE_ID, "Invalid enclave identification.", NULL},
     {SGX_ERROR_INVALID_SIGNATURE, "Invalid enclave signature.", NULL},
     {SGX_ERROR_OUT_OF_EPC, "Out of EPC memory.", NULL},
-    {SGX_ERROR_NO_DEVICE, "Invalid SGX device.",
-     "Please make sure SGX module is enabled in the BIOS, and install SGX driver afterwards."},
+    {SGX_ERROR_NO_DEVICE, "Invalid Intel SGX device.",
+     "Please make sure Intel SGX module is enabled in the BIOS,"
+     " and install Intel SGX driver afterwards."},
     {SGX_ERROR_MEMORY_MAP_CONFLICT, "Memory map conflicted.", NULL},
     {SGX_ERROR_INVALID_METADATA, "Invalid enclave metadata.", NULL},
-    {SGX_ERROR_DEVICE_BUSY, "SGX device was busy.", NULL},
+    {SGX_ERROR_DEVICE_BUSY, "Intel SGX device was busy.", NULL},
     {SGX_ERROR_INVALID_VERSION, "Enclave version was invalid.", NULL},
     {SGX_ERROR_INVALID_ATTRIBUTE, "Enclave was not authorized.", NULL},
     {SGX_ERROR_ENCLAVE_FILE_ACCESS, "Can't open enclave file.", NULL},
@@ -76,7 +77,8 @@ void print_error_message(sgx_status_t ret)
 
     if (idx == ttl)
         fprintf(stderr,
-            "Error code is 0x%X. Please refer to the \"Intel SGX SDK Developer Reference\" for "
+            "Error code is 0x%X. Please refer to the"
+            " \"Intel SGX SDK Developer Reference\" for "
             "more details.\n",
             ret);
 }
@@ -192,7 +194,7 @@ int SGX_CDECL main(int argc, char* argv[])
     /* Initialize the enclave */
     if (initialize_enclave() < 0)
     {
-        fprintf(stderr, "Error: could not initialize SGX Enclave\n");
+        fprintf(stderr, "Error: could not initialize Intel SGX Enclave\n");
         return -1;
     }
 

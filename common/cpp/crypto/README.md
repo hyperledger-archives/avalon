@@ -6,19 +6,21 @@ https://creativecommons.org/licenses/by/4.0/
 Common Crypto library documentation
 ===================================
 
-This `common/cpp/crypto/` directory contains cryptographic code used by untrusted and
-trusted (SGX Enclave) code.
+This `common/cpp/crypto/` directory contains cryptographic code used by
+untrusted and trusted (Intel SGX Enclave) code.
 
-This code is written in C++, but a Python wrapper is also available (see [../README.md](../README.md))
+This code is written in C++, but a Python wrapper is also available
+(see [../README.md](../README.md))
 
-Avalon applications are free to use third-party cryptographic implementations (such as what a
-programming language binding may provide) or the cryptographic interfaces provided here.
+Avalon applications are free to use third-party cryptographic implementations
+(such as what a programming language binding may provide)
+or the cryptographic interfaces provided here.
 
 
 Software Components Required
 ----------------------------
 
-OpenSSL 1.1 library and SGX OpenSSL library built from OpenSSL 1.1:
+OpenSSL 1.1 library and Intel SGX OpenSSL library built from OpenSSL 1.1:
 
 * https://www.openssl.org/
 * https://github.com/intel/intel-sgx-ssl
@@ -74,9 +76,10 @@ Cryptographic elements include cryptographic keys, signature, ciphertexts, plain
 Security notes
 --------------
 
-* **AES-GCM** When using of AES-GCM inside SGX enclaves to preserve confidentiality
-and integrity of data to be stored outside of the SGX enclaves a different unique
-or random 12-byte IV must be used for each encrypted message.
-At most 2^32 distinct IVs can be used until the key needs to be regenerated for
-security. This limitation can possibly be mitigated in the future by using
-alternatives to AES-GCM like AES-GCM SIV.
+* **AES-GCM** When using of AES-GCM inside Intel SGX enclaves to preserve
+  confidentiality and integrity of data to be stored outside of the
+  Intel SGX enclaves a different unique or random 12-byte IV must be used
+  for each encrypted message.
+  At most 2^32 distinct IVs can be used until the key needs to be regenerated
+  for security. This limitation can possibly be mitigated in the future by
+  using alternatives to AES-GCM like AES-GCM SIV.

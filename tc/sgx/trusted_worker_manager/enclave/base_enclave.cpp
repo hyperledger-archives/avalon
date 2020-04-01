@@ -63,7 +63,7 @@ tcf_err_t ecall_CreateErsatzEnclaveReport(sgx_target_info_t* targetInfo, sgx_rep
 
         // Create a relatively useless enclave report.  Well....the report
         // itself is not useful for anything except that it can be used to
-        // create SGX quotes, which contain potentially useful information
+        // create Intel SGX quotes, which contain potentially useful information
         // (like the enclave basename, mr_enclave, etc.).
         tcf::error::ThrowSgxError(
             sgx_create_report(targetInfo, nullptr, outReport), "Failed to create report.");

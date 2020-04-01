@@ -35,9 +35,9 @@ if("${SGX_MODE} " STREQUAL " ")
     message(STATUS "Setting default SGX_MODE=${SGX_MODE}")
 endif()
 IF("${SGX_MODE}" STREQUAL "SIM")
-    OPTION(SGX_USE_SIMULATOR "Use the sgx simulator" TRUE)
+    OPTION(SGX_USE_SIMULATOR "Use the Intel SGX simulator" TRUE)
 ELSE()
-    OPTION(SGX_USE_SIMULATOR "Use the sgx simulator" FALSE)
+    OPTION(SGX_USE_SIMULATOR "Use the Intel SGX simulator" FALSE)
 ENDIF()
 
 SET(SGX_SDK "$ENV{SGX_SDK}")
@@ -54,7 +54,7 @@ endif()
 # ADDITIONAL LIBRARIES
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
-# sgx edger is a utility that generates edl artifacts
+# Intel SGX edger is a utility that generates edl artifacts
 SET(SGX_EDGER "${SGX_SDK}/bin/x64/sgx_edger8r")
 
 SET(SGX_INCLUDE "${SGX_SDK}/include")

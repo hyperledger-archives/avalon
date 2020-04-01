@@ -36,8 +36,8 @@ class TCSWorkOrderHandler:
     TCSWorkOrderHandler processes Worker Order Direct API requests. It puts a
     new work order requests into the KV storage or it reads appropriate work
     order information from the KV storage when processing “getter” and
-    enumeration requests. Actual work order processing is done by the SGX
-    Enclave Manager within the enclaves its manages.
+    enumeration requests. Actual work order processing is done by the
+    Intel SGX Enclave Manager within the enclaves its manages.
     All raised exceptions will be caught and handled by any
     jsonrpc.dispatcher.Dispatcher delegating work to this handler. In our case,
     the exact dispatcher will be the one configured by the TCSListener in the

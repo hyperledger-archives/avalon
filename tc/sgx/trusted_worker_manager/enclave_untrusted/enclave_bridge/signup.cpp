@@ -55,7 +55,8 @@ static size_t CalculateSealedEnclaveDataSize(void) {
                     &sealed_data_size);
                 return tcf::error::ConvertErrorStatus(ret, presult);
             });
-    tcf::error::ThrowSgxError(sresult, "SGX enclave call failed (ecall_CalculateSealedEnclaveDataSize)");
+    tcf::error::ThrowSgxError(sresult,
+        "Intel SGX enclave call failed (ecall_CalculateSealedEnclaveDataSize)");
     g_Enclave[0].ThrowTCFError(presult);
 
     return sealed_data_size;
@@ -84,7 +85,8 @@ static size_t CalculatePublicEnclaveDataSize(void) {
                     &public_data_size);
                 return tcf::error::ConvertErrorStatus(ret, presult);
             });
-    tcf::error::ThrowSgxError(sresult, "SGX enclave call failed (ecall_CalculatePublicEnclaveDataSize)");
+    tcf::error::ThrowSgxError(sresult,
+        "Intel SGX enclave call failed (ecall_CalculatePublicEnclaveDataSize)");
     g_Enclave[0].ThrowTCFError(presult);
 
     return public_data_size;
@@ -120,7 +122,9 @@ tcf_err_t tcf::enclave_api::enclave_data::CreateEnclaveData(
                  &epidGroupId] () {
                     return sgx_init_quote(&target_info, &epidGroupId);
                 });
-        tcf::error::ThrowSgxError(sresult, "SGX enclave call failed (sgx_init_quote), failed to initialize the quote");
+        tcf::error::ThrowSgxError(sresult,
+            "Intel SGX enclave call failed (sgx_init_quote);"
+            " failed to initialize the quote");
 
         // Properly size the sealed signup data buffer for the caller
         // and call into the enclave to create the signup data
@@ -153,7 +157,9 @@ tcf_err_t tcf::enclave_api::enclave_data::CreateEnclaveData(
                     &enclave_report);
                 return tcf::error::ConvertErrorStatus(ret, presult);
             });
-        tcf::error::ThrowSgxError(sresult, "SGX enclave call failed (ecall_CreateSignupData), failed to create signup data");
+        tcf::error::ThrowSgxError(sresult,
+            "Intel SGX enclave call failed (ecall_CreateSignupData);"
+            " failed to create signup data");
         g_Enclave[0].ThrowTCFError(presult);
 
         // Reset the size of the public data
@@ -218,7 +224,8 @@ tcf_err_t tcf::enclave_api::enclave_data::UnsealEnclaveData(
                 return tcf::error::ConvertErrorStatus(sresult, presult);
             });
 
-        tcf::error::ThrowSgxError(sresult, "SGX enclave call failed (ecall_UnsealSignupData)");
+        tcf::error::ThrowSgxError(sresult,
+            "Intel SGX enclave call failed (ecall_UnsealSignupData)");
         g_Enclave[0].ThrowTCFError(presult);
 
         outPublicEnclaveData.resize(computed_public_enclave_data_size);
@@ -263,7 +270,8 @@ tcf_err_t tcf::enclave_api::enclave_data::VerifyEnclaveInfo(
 	      return tcf::error::ConvertErrorStatus(sresult, presult);
 	});
 
-        tcf::error::ThrowSgxError(sresult, "SGX enclave call failed (ecall_VerifyEnclaveInfo)");
+        tcf::error::ThrowSgxError(sresult,
+            "Intel SGX enclave call failed (ecall_VerifyEnclaveInfo)");
         g_Enclave[0].ThrowTCFError(presult);
 
     } catch (tcf::error::Error& e) {

@@ -5,17 +5,18 @@ https://creativecommons.org/licenses/by/4.0/
 
 Purpose of Common
 -----------------
-The common directory contains source code shared by untrusted and trusted (SGX Enclave) code.
+The common directory contains source code shared by untrusted and trusted
+(Intel SGX Enclave) code.
 
 Dependencies:
 -------------
 1. OpenSSL 1.1
 https://www.openssl.org/
 
-2. SGX OpenSSL library built from OpenSSL 1.1
+2. Intel SGX OpenSSL library built from OpenSSL 1.1
 https://github.com/intel/intel-sgx-ssl
 
-3. SGX SDK
+3. Intel SGX SDK
 https://software.intel.com/en-us/sgx-sdk/download
 
 Source Directories

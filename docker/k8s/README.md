@@ -8,9 +8,9 @@ in SGX-SIM and SGX-HW mode.
 - kubectl-v1.15.2
 - A Kubernetes cluster. [Minikube] (https://kubernetes.io/docs/setup/learning-environment/minikube/)
   can be used to setup a single node Kubernetes cluster.
-- To enable SGX HW, follow the instructions in
+- To enable Intel SGX HW mode, follow the instructions in
   [PREREQUISITES.md](../../PREREQUISITES.md#intel-sgx-in-hardware-mode)
-- To use SGX HW, build docker image using below command  
+- To use Intel SGX HW mode, build docker image using below command  
   `docker-compose -f docker-compose-sgx.yaml build`
 
 ## Running 
@@ -20,12 +20,12 @@ in SGX-SIM and SGX-HW mode.
     # bootstrap the deployment and service
     kubectl create -f lmdb.yaml
     ```
-2. Start `EnclaveManager` (to manage SGX enclaves)  
-   For SGX simulator mode, use the below command
+2. Start `EnclaveManager` (to manage Intel SGX enclaves)  
+   For Intel SGX simulator mode, use the below command
     ```bash
     kubectl create -f enclave-manager-deployment.yaml
     ```
-   For SGX hardware mode, use the below command
+   For Intel SGX hardware mode, use the below command
     ```bash
     kubectl create -f sgx-enclave-manager-deployment.yaml
     ```

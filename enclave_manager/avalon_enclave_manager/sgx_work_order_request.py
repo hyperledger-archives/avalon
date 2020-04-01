@@ -27,7 +27,7 @@ class SgxWorkOrderRequest(object):
         self.enclave_service = enclave_service
         self.work_order = work_order
 
-    # Execute work order in SGX worker enclave
+    # Execute work order in Intel SGX worker enclave
     def execute(self):
         serialized_byte_array = crypto.string_to_byte_array(self.work_order)
         encrypted_request = crypto.byte_array_to_base64(serialized_byte_array)
