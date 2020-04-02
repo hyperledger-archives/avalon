@@ -25,7 +25,7 @@ import asyncio
 import config.config as pconfig
 import utility.logger as plogger
 import avalon_crypto_utils.crypto_utility as crypto_utility
-from avalon_sdk.worker.worker_details import WorkerType
+from avalon_sdk.worker.worker_details import WorkerType, WorkerStatus
 import avalon_sdk.worker.worker_details as worker_details
 from avalon_sdk.work_order.work_order_params import WorkOrderParams
 from avalon_sdk.ethereum.ethereum_worker_registry_list import \
@@ -195,7 +195,15 @@ class GenericClient():
                 logger.error("ERROR: No workers found")
                 worker_id = None
         elif blockchain_type and worker_lookup_result[0] > 0:
-            worker_id = worker_lookup_result[2][0]
+            # Iterate through all workers and find get
+            # first active worker.
+            for wo_id in worker_lookup_result[2]:
+                wo_ret_result = worker_registry.worker_retrieve(wo_id)
+                # First argument indicates status of worker.
+                if wo_ret_result[0] == WorkerStatus.ACTIVE.value:
+                    worker_id = wo_id
+                    break
+            return worker_id
         else:
             logger.error("ERROR: Failed to lookup worker")
             worker_id = None

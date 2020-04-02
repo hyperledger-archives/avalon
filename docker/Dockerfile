@@ -34,26 +34,36 @@ ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update \
  && apt-get install -y -q \
     software-properties-common \
-    python3-pip \
     python3-toml \
     python3-requests \
     python3-colorlog \
     python3-twisted \
-    git \
- && apt-get -y -q upgrade \
- && apt-get clean \
- && rm -rf /var/lib/apt/lists/*
+ && apt-get clean
 
 # Make Python3 default
 RUN ln -sf /usr/bin/python3 /usr/bin/python
-   
-# Install py-solc-x and web3 packages using pip because
-# these are not available in apt repository.
-# Install nose2 for running tests.
-RUN pip3 install --upgrade json-rpc web3 py-solc-x nose2
 
-# Install specific version of solc to support versions <0.6.0
-RUN python3 -m solcx.install v0.5.15
+
+# -------------=== python build ===-------------
+
+#Build python intermediate docker image
+FROM ubuntu:bionic as python_image
+
+
+# Add necessary packages
+RUN apt-get update \
+ && apt-get install -y -q \
+    ca-certificates \
+    pkg-config \
+    python3-pip \
+    python3-dev \
+    make \
+ && apt-get clean
+
+# Install setuptools packages using pip because
+# these are not available in apt repository.
+RUN pip3 install setuptools
+
 
 # -------------=== Build openssl_image ===-------------
 
@@ -67,7 +77,6 @@ RUN apt-get update \
     make \
     wget \
     tar \
- && apt-get -y -q upgrade \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
 
@@ -75,7 +84,7 @@ WORKDIR /tmp
 
 # Build ("Untrusted") OpenSSL
 RUN OPENSSL_VER=1.1.1d \
- && wget https://www.openssl.org/source/openssl-$OPENSSL_VER.tar.gz \
+ && wget https://www.openssl.org/source/old/1.1.1/openssl-$OPENSSL_VER.tar.gz \
  && tar -zxf openssl-$OPENSSL_VER.tar.gz \
  && cd openssl-$OPENSSL_VER/ \
  && ./config \
@@ -84,23 +93,18 @@ RUN OPENSSL_VER=1.1.1d \
  && make test \
  && make install -j$THREADS
 
-#Build Avalon Enclave Manager intermediate docker image
-FROM base_image as build_image
+
+# -------------=== common/cpp build ===-------------
+
+#Build common/cpp intermediate docker image
+FROM ubuntu:bionic as common_cpp_image
 
 RUN apt-get update \
  && apt-get install -y -q \
-    build-essential \
     pkg-config \
     cmake \
-    make \
-    git \
-    libprotobuf-dev \
-    libssl-dev \
-    python3-dev \
-    swig \
-    tar
+    make
 
-RUN pip3 install --upgrade setuptools
 
 # Copy openssl build artifacts from openssl_image
 COPY --from=openssl_image /usr/local/ssl /usr/local/ssl
@@ -111,38 +115,102 @@ COPY --from=openssl_image /usr/local/lib /usr/local/lib
 RUN ldconfig \
  && ln -s /etc/ssl/certs/* /usr/local/ssl/certs/
 
-COPY VERSION /project/avalon/
-COPY ./bin /project/avalon/bin
+ENV TCF_HOME=/project/avalon
+
 COPY ./common/cpp /project/avalon/common/cpp
-COPY ./common/python /project/avalon/common/python
-COPY ./common/crypto_utils /project/avalon/common/crypto_utils
-COPY ./sdk /project/avalon/sdk
 
 WORKDIR /project/avalon/common/cpp
 
-RUN echo "Building Avalon Common CPP\n" \
-  && mkdir -p build \
+RUN mkdir -p build \
   && cd build \
   && cmake .. -DUNTRUSTED_ONLY=1 \
   && make
 
+
+# -------------=== common/python build ===-------------
+
+#Build common/python intermediate docker image
+FROM python_image as common_python_image
+
+COPY VERSION /project/avalon/
+COPY ./bin /project/avalon/bin
+
+ENV TCF_HOME=/project/avalon
+
+COPY ./common/python /project/avalon/common/python
+
 WORKDIR /project/avalon/common/python
 
 RUN echo "Building Avalon Common Python\n" \
-  && make
+ && make
+
+
+# -------------=== common/crypto_utils build ===-------------
+
+#Build common/crypto_utils intermediate docker image
+FROM python_image as common_crypto_utils_image
+
+RUN apt-get install -y -q \
+    swig
+
+# Copy openssl build artifacts from openssl_image
+COPY --from=openssl_image /usr/local/ssl /usr/local/ssl
+COPY --from=openssl_image /usr/local/bin /usr/local/bin
+COPY --from=openssl_image /usr/local/include /usr/local/include
+COPY --from=openssl_image /usr/local/lib /usr/local/lib
+
+RUN ldconfig \
+ && ln -s /etc/ssl/certs/* /usr/local/ssl/certs/
+
+COPY --from=common_cpp_image /project/avalon/common/cpp/build /project/avalon/common/cpp/build
+COPY VERSION /project/avalon/
+COPY ./bin /project/avalon/bin
+COPY ./common/cpp /project/avalon/common/cpp
+
+ENV TCF_HOME=/project/avalon
+
+COPY ./common/crypto_utils /project/avalon/common/crypto_utils
 
 WORKDIR /project/avalon/common/crypto_utils
 
 RUN echo "Building Avalon Common Crypto Python\n" \
-  && make
+ && make
+
+
+# -------------=== Avalon SDK build ===-------------
+
+#Build Avalon SDK intermediate docker image
+FROM python_image as avalon_sdk_image
+
+COPY VERSION /project/avalon/
+COPY ./bin /project/avalon/bin
+COPY ./sdk /project/avalon/sdk
+
+ENV TCF_HOME=/project/avalon
 
 WORKDIR /project/avalon/sdk
 
+#install Avalon SDK  package.
 RUN echo "Building Avalon SDK\n" \
-  && make
+ && make
+
+
 
 # Build Final image and install dependent modules
 FROM base_image as final_image
+
+RUN apt-get install -y -q \
+    git
+
+RUN apt-get install -y -q python3-pip \
+ && pip3 install json-rpc web3 py-solc-x nose2 \
+ && echo "Install fabric python sdk\n" \
+ && pip3 install virtualenv \
+ && pip3 install git+https://github.com/hyperledger/fabric-sdk-py.git \
+ && apt-get autoremove --purge -y -q python3-pip
+ 
+# Install specific version of solc to support versions <0.6.0
+RUN python3 -m solcx.install v0.5.15
 
 ARG DISPLAY
 ARG XAUTHORITY
@@ -163,22 +231,14 @@ COPY ./sdk/avalon_sdk/ethereum/contracts /project/avalon/sdk/avalon_sdk/ethereum
 COPY ./sdk/avalon_sdk/fabric/methods.json /project/avalon/sdk/avalon_sdk/fabric/
 
 # Copy Python build artifacts
-COPY --from=build_image /project/avalon/common/python/dist/*.whl dist/
-COPY --from=build_image /project/avalon/common/crypto_utils/dist/*.whl dist/
-COPY --from=build_image /project/avalon/sdk/dist/*.whl dist/
-
-# Copy Scripts
-COPY ./scripts /project/avalon/scripts
-
-# Install fabric python sdk
-RUN pip3 install virtualenv \
- && pip3 install git+https://github.com/hyperledger/fabric-sdk-py.git
+COPY --from=common_python_image /project/avalon/common/python/dist/*.whl dist/
+COPY --from=common_crypto_utils_image /project/avalon/common/crypto_utils/dist/*.whl dist/
+COPY --from=avalon_sdk_image /project/avalon/sdk/dist/*.whl dist/
 
 # Installing wheel file requires python3-pip package.
 # But python3-pip package will increase size of final docker image.
 # So remove python3-pip package and dependencies after installing wheel file.
-RUN apt-get update \
- && apt-get install -y -q python3-pip \
+RUN apt-get install -y -q python3-pip \
  && echo "Install Common Python and SDK packages\n" \
  && pip3 install dist/*.whl \
  && echo "Remove unused packages from image\n" \

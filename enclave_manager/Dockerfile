@@ -14,36 +14,55 @@
 # ------------------------------------------------------------------------------
 
 # Description:
-#   Builds the environment needed to build Avalon SGX Enclave manager.
+#   Builds the environment needed to build Avalon Intel SGX Enclave manager.
 #
 #  Configuration (build) parameters
 #  - proxy configuration: https_proxy http_proxy ftp_proxy
-#  - sgx mode:
+#  - sgx_mode:
 #
 
 # -------------=== build avalon Enclave Manager image ===-------------
 #Build base docker image
 FROM ubuntu:bionic as base_image
 
+# Ignore timezone prompt in apt
 ENV DEBIAN_FRONTEND=noninteractive
 
+# Add necessary packages
 RUN apt-get update \
  && apt-get install -y -q \
     ca-certificates \
     python3-toml \
-    python3-pip \
     python3-requests \
     python3-colorlog \
     python3-twisted \
- && apt-get -y -q upgrade \
- && apt-get clean \
- && rm -rf /var/lib/apt/lists/*
+ && apt-get clean
 
 # Make Python3 default
 RUN ln -sf /usr/bin/python3 /usr/bin/python
 
+
+
+# -------------=== python build ===-------------
+
+#Build python intermediate docker image
+FROM ubuntu:bionic as python_image
+
+
+# Add necessary packages
+RUN apt-get update \
+ && apt-get install -y -q \
+    ca-certificates \
+    pkg-config \
+    python3-pip \
+    python3-dev \
+    make \
+ && apt-get clean
+
 # Install setuptools packages using pip because
-RUN pip3 install --upgrade json-rpc nose2
+# these are not available in apt repository.
+RUN pip3 install setuptools
+
 
 # -------------=== Build openssl_image ===-------------
 
@@ -57,7 +76,6 @@ RUN apt-get update \
     make \
     wget \
     tar \
- && apt-get -y -q upgrade \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
 
@@ -65,7 +83,7 @@ WORKDIR /tmp
 
 # Build ("Untrusted") OpenSSL
 RUN OPENSSL_VER=1.1.1d \
- && wget https://www.openssl.org/source/openssl-$OPENSSL_VER.tar.gz \
+ && wget https://www.openssl.org/source/old/1.1.1/openssl-$OPENSSL_VER.tar.gz \
  && tar -zxf openssl-$OPENSSL_VER.tar.gz \
  && cd openssl-$OPENSSL_VER/ \
  && ./config \
@@ -74,11 +92,50 @@ RUN OPENSSL_VER=1.1.1d \
  && make test \
  && make install -j$THREADS
 
+
+
+# -------------=== common/python build ===-------------
+
+#Build common/python intermediate docker image
+FROM python_image as common_python_image
+
+COPY VERSION /project/avalon/
+COPY ./bin /project/avalon/bin
+
+ENV TCF_HOME=/project/avalon
+
+COPY ./common/python /project/avalon/common/python
+
+WORKDIR /project/avalon/common/python
+
+RUN echo "Building Avalon Common Python\n" \
+ && make
+
+
+
+# -------------=== Avalon SDK build ===-------------
+
+#Build Avalon SDK intermediate docker image
+FROM python_image as avalon_sdk_image
+
+COPY VERSION /project/avalon/
+COPY ./bin /project/avalon/bin
+COPY ./sdk /project/avalon/sdk
+
+ENV TCF_HOME=/project/avalon
+
+WORKDIR /project/avalon/sdk
+
+#install Avalon SDK  package.
+RUN echo "Building Avalon SDK\n" \
+ && make
+
+
+
 #Build Avalon Listener intermediate docker image
 FROM base_image as build_image
 
-RUN apt-get update \
- && apt-get install -y -q \
+RUN apt-get install -y -q \
     build-essential \
     software-properties-common \
     pkg-config \
@@ -86,7 +143,6 @@ RUN apt-get update \
     make \
     git \
     libprotobuf-dev \
-    python3-dev \
     swig \
     wget \
     tar \
@@ -98,25 +154,26 @@ RUN apt-get update \
     xxd \
     unzip \
     ocamlbuild \
- && apt-get -y -q upgrade \
+    python3-pip \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
 
 # Install setuptools packages using pip because
-RUN pip3 install --upgrade setuptools
+RUN pip3 install setuptools
 
-# SGX common library and SDK are installed in /opt/intel directory.
-# Installation of SGX libsgx-common packages requires /etc/init directory. In docker image this directory doesn't exist.
+# Intel SGX common library and SDK are installed in /opt/intel directory.
+# Installation of Intel SGX libsgx-common packages requires
+# /etc/init directory. In the Docker image this directory doesn't exist.
 # Hence creating /etc/init directory.
 RUN mkdir -p /opt/intel \
  && mkdir -p /etc/init
 WORKDIR /opt/intel
 
-# Install SGX common library
+# Install Intel SGX common library
 RUN wget https://download.01.org/intel-sgx/sgx-linux/2.7.1/distro/ubuntu18.04-server/libsgx-enclave-common_2.7.101.3-bionic1_amd64.deb \
  && dpkg -i libsgx-enclave-common_2.7.101.3-bionic1_amd64.deb
 
-# Install SGX SDK
+# Install Intel SGX SDK
 RUN SGX_SDK_FILE=sgx_linux_x64_sdk_2.7.101.3.bin \
  && wget https://download.01.org/intel-sgx/sgx-linux/2.7.1/distro/ubuntu18.04-server/$SGX_SDK_FILE \
  && echo "yes" | bash ./$SGX_SDK_FILE \
@@ -131,7 +188,7 @@ COPY --from=openssl_image /usr/local/include /usr/local/include
 COPY --from=openssl_image /usr/local/lib /usr/local/lib
 COPY --from=openssl_image /tmp/openssl-$OPENSSL_VER.tar.gz /tmp/
 
-# Build ("trusted") SGX OpenSSL
+# Build ("trusted") Intel SGX OpenSSL
 # Note: This will compile in HW or SIM mode depending on the
 
 # Note: This will compile in HW or SIM mode depending on the
@@ -139,7 +196,7 @@ COPY --from=openssl_image /tmp/openssl-$OPENSSL_VER.tar.gz /tmp/
 
 WORKDIR /tmp
 
-# Using specific SGX SSL tag "lin_2.5_1.1.1d" corresponding to
+# Using specific Intel SGX SSL tag "lin_2.5_1.1.1d" corresponding to
 # openSSL version 1.1.1d
 RUN ldconfig \
  && ln -s /etc/ssl/certs/* /usr/local/ssl/certs/ \
@@ -156,6 +213,13 @@ RUN ldconfig \
  && echo "SGX_SSL=/opt/intel/sgxssl" >> /etc/environment
 
 COPY . /project/avalon
+
+# Copy Python build artifacts
+COPY --from=common_python_image /project/avalon/common/python/dist/*.whl dist/
+COPY --from=avalon_sdk_image /project/avalon/sdk/dist/*.whl dist/
+
+RUN echo "Install common/python and sdk packages\n" \
+ && pip3 install dist/*.whl
 
 ARG SGX_MODE
 ARG MAKECLEAN
@@ -179,8 +243,8 @@ RUN mkdir -p build \
   && cmake .. \
   && make
 
-# apps directory contains SGX workloads which need to be build
-# and linked to SGX enclave
+# Directory apps contains Intel SGX workloads which need to be built
+# and linked to the Intel SGX enclave
 WORKDIR /project/avalon/examples/apps
 
 RUN mkdir -p build \
@@ -216,15 +280,7 @@ RUN mkdir -p build \
   && cmake .. \
   && make
 
-WORKDIR /project/avalon/common/python
-
-RUN make && make install
-
 WORKDIR /project/avalon/common/crypto_utils
-
-RUN make && make install
-
-WORKDIR /project/avalon/sdk
 
 RUN make && make install
 
@@ -233,11 +289,3 @@ WORKDIR /project/avalon/enclave_manager
 RUN echo "Build and Install avalon enclave manager" \
   && make && make install
 
-FROM build_image as final_image
-
-# python3-pip package will increase size of final docker image.
-# So remove python3-pip package and dependencies
-RUN echo "Remove unused packages from image\n" \
- && apt-get autoremove --purge -y -q python3-pip \
- && apt-get clean \
- && rm -rf /var/lib/apt/lists/*

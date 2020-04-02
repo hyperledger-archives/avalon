@@ -104,9 +104,35 @@ class FabricWorkOrderImpl(WorkOrderProxy):
         # take some time to commit to chain.
         # Instead of calling contract api to get result chosen the
         # event based approach.
+        def handle_fabric_event(event, block_num, txn_id, status):
+            """
+            Callback function for Fabric event handler.
+
+            Parameters:
+                event      Event payload
+                block_num  Block number (unused)
+                txn_id     Transaction ID (unused)
+                status     Status (unused)
+            """
+            payload = event['payload'].decode("utf-8")
+            resp = json.loads(payload)
+            response = json.loads(resp["workOrderResponse"])
+            # Event has result tag in case work order successful
+            if "result" in response and \
+                    work_order_id in response["result"].values():
+                self.__wo_resp = response
+            # Event has error tag if work order failed
+            elif "error" in response and \
+                    work_order_id in response["error"]["data"].values():
+                self.__wo_resp = response
+            logging.debug("Work order response from event : {}".format(
+                self.__wo_resp
+            ))
+
         event_handler = \
             self.get_work_order_completed_event_handler(
-                self.handle_fabric_event)
+                handle_fabric_event
+            )
         if event_handler:
             tasks = [
                 event_handler.start_event_handling(),
@@ -220,20 +246,3 @@ class FabricWorkOrderImpl(WorkOrderProxy):
             logging.error(
                 "Fabric wrapper instance is not initialized")
             return None
-
-    def handle_fabric_event(self, event, block_num, txn_id, status):
-        """
-        Callback function for Fabric event handler.
-
-        Parameters:
-        event      Event payload
-        block_num  Block number (unused)
-        txn_id     Transaction ID (unused)
-        status     Status (unused)
-        """
-        payload = event['payload'].decode("utf-8")
-        resp = json.loads(payload)
-        self.__wo_resp = json.loads(resp["workOrderResponse"])
-        logging.debug("Work order response from event : {}".format(
-            self.__wo_resp
-        ))

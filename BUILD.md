@@ -20,6 +20,7 @@ The Docker-based build is recommended.
     - [Prerequisites](#prerequisites)
     - [Installing Avalon Using Scripts](#install)
 - [Testing](#testing)
+    - [Static Analysis](#staticanalysis)
     - [Troubleshooting](#troubleshooting)
     - [Troubleshooting: Standalone Build](#troubleshootingstandalone)
 
@@ -41,8 +42,8 @@ Follow the instructions below to execute a Docker-based build and execution.
 
    **SGX Hardware mode (for hosts with Intel SGX)**:
    1. Refer to Intel SGX in Hardware-mode section in
-      [PREREQUISITES document](PREREQUISITES.md) to install SGX pre-requisites
-      and to configure IAS keys.
+      [PREREQUISITES document](PREREQUISITES.md) to install Intel SGX
+      pre-requisites and to configure IAS keys.
    2. Run `sudo docker-compose -f docker-compose-sgx.yaml up --build`
    3. For subsequent runs on the same workspace, if you changed a
       source or configuration file, run the above command again
@@ -75,7 +76,7 @@ The steps below will set up a Python virtual environment to run Avalon.
 
    - To use the current stable branch (recommended), run this command:
      ```bash
-     git clone https://github.com/hyperledger/avalon --branch v0.5-pre-release.1
+     git clone https://github.com/hyperledger/avalon --branch v0.5-pre-release.4
      ```
 
    - Or, to use the latest branch, run this command:
@@ -153,7 +154,7 @@ The steps below will set up a Python virtual environment to run Avalon.
 10. Install PIP3 packages into your Python virtual environment:
 
     ```bash
-    pip3 install --upgrade setuptools json-rpc py-solc-x web3 colorlog twisted wheel
+    pip3 install --upgrade setuptools json-rpc py-solc-x web3 colorlog twisted wheel toml
     ```
 
 11. Build and install Avalon components:
@@ -235,6 +236,19 @@ Follow these steps to run the `Demo.py` testcase:
 
 A GUI is also available to run this demo.
 See [examples/apps/heart_disease_eval](examples/apps/heart_disease_eval)
+
+## <a name="staticanalysis"></a>Static Analysis
+To run lint checks on codebase, execute the following commands -
+```
+cd $TCF_HOME
+docker-compose -f docker-compose-lint.yaml up
+```
+Above steps would run lint on all modules by defualt. If you want to run lint on selective modules, you need to pass the modules via `LINT_MODULES`. For example -
+```
+cd $TCF_HOME
+LINT_MODULES={sdk,common} docker-compose -f docker-compose-lint.yaml up
+```
+Module names can be found [here](bin/run_lint#L205) in the codebase.
 
 ## <a name="troubleshooting"></a>Troubleshooting
 - If you see the message

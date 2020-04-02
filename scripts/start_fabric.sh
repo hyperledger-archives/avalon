@@ -20,6 +20,8 @@ FABRIC_VERSION=1.4.4
 CHAIN_CODE_VERSION=1.0
 WORK_DIR=~/mywork
 MINIFAB=$WORK_DIR/minifab
+# Minifab url for 0.1.0 stable version
+MINIFAB_URL=https://tinyurl.com/s8fmmvx
 
 # Default chaincode path is different for 1.4.4 and 2.0
 DEFAULT_CHAIN_CODE_PATH=""
@@ -62,7 +64,7 @@ if [ -f "$MINIFAB" ]; then
     echo "minifab is already installed in $MINIFAB"
 else
     echo "Installing minifab in $MINIFAB"
-    mkdir -p $WORK_DIR && cd $WORK_DIR && curl -o minifab -sL https://tinyurl.com/twrt8zv && chmod +x minifab
+    mkdir -p $WORK_DIR && cd $WORK_DIR && curl -o minifab -sL $MINIFAB_URL && chmod +x minifab
 fi
 
 if [[ ! -v TCF_HOME ]]; then

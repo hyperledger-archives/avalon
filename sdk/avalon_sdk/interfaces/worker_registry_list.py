@@ -30,7 +30,7 @@ class WorkerRegistryList(ABC):
         Retrieve registry information identified by the organization ID.
 
         Parameters:
-        org_id                Organization ID to lookup
+        organization_id      Organization ID to lookup
 
         Returns:
         Tuple containing following on success:
@@ -108,7 +108,7 @@ class WorkerRegistryList(ABC):
         Add a new registry.
 
         Parameters:
-        org_id               bytes[] identifies organization that hosts the
+        organization_id      bytes[] identifies organization that hosts the
                              registry, e.g. a bank in the consortium or an
                              anonymous entity
         uri                  String defines a URI for this registry that
@@ -133,9 +133,9 @@ class WorkerRegistryList(ABC):
         Update a registry.
 
         Parameters:
-        org_id               bytes[] identifies organization that hosts the
-                             registry, e.g. a bank in the consortium or
-                             an anonymous entity
+        organization_id      bytes[] identifies organization that hosts the
+                             registry, e.g. a bank in the consortium or an
+                             anonymous entity
         uri                  string defines a URI for this registry that
                              supports the Off-Chain Worker Registry
                              JSON RPC API
@@ -157,14 +157,14 @@ class WorkerRegistryList(ABC):
         Set registry status.
 
         Parameters:
-        org_id  bytes[] identifies organization that hosts the
-                registry, e.g. a bank in the consortium or an
-                anonymous entity
-        status  Defines the registry status to set.
-                The currently defined values are:
-                1 - the registry is active
-                2 - the registry is temporarily "off-line"
-                3 - the registry is decommissioned
+        organization_id bytes[] identifies organization that hosts the
+                        registry, e.g. a bank in the consortium or an
+                        anonymous entity
+        status          Defines the registry status to set.
+                        The currently defined values are:
+                        1 - the registry is active
+                        2 - the registry is temporarily "off-line"
+                        3 - the registry is decommissioned
 
         Returns:
         Transaction receipt on success or None on error.

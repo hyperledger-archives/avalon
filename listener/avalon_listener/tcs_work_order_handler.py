@@ -36,8 +36,8 @@ class TCSWorkOrderHandler:
     TCSWorkOrderHandler processes Worker Order Direct API requests. It puts a
     new work order requests into the KV storage or it reads appropriate work
     order information from the KV storage when processing “getter” and
-    enumeration requests. Actual work order processing is done by the SGX
-    Enclave Manager within the enclaves its manages.
+    enumeration requests. Actual work order processing is done by the
+    Intel SGX Enclave Manager within the enclaves its manages.
     All raised exceptions will be caught and handled by any
     jsonrpc.dispatcher.Dispatcher delegating work to this handler. In our case,
     the exact dispatcher will be the one configured by the TCSListener in the
@@ -113,11 +113,17 @@ class TCSWorkOrderHandler:
         """
         if "workOrderId" in params:
             wo_id = params["workOrderId"]
+            # Work order status payload should have
+            # data field with work order id as defined in EEA spec section 6.
+            data = {
+                "workOrderId": wo_id
+            }
             if not is_valid_hex_str(wo_id):
                 logging.error("Invalid work order Id")
                 raise JSONRPCDispatchException(
                     JsonRpcErrorCode.INVALID_PARAMETER,
-                    "Invalid work order Id"
+                    "Invalid work order Id",
+                    data
                 )
 
             # Work order is processed if it is in wo-response table
@@ -136,21 +142,29 @@ class TCSWorkOrderHandler:
                         WorkOrderStatus.INVALID_PARAMETER_FORMAT_OR_VALUE
                 elif err_code == EnclaveError.ENCLAVE_ERR_UNKNOWN:
                     err_code = WorkOrderStatus.UNKNOWN_ERROR
+                elif err_code == EnclaveError.ENCLAVE_ERR_INVALID_WORKLOAD:
+                    err_code = WorkOrderStatus.INVALID_WORKLOAD
                 else:
                     err_code = WorkOrderStatus.FAILED
-                raise JSONRPCDispatchException(err_code, err_msg)
+                raise JSONRPCDispatchException(
+                    err_code,
+                    err_msg,
+                    data
+                )
 
             if(self.kv_helper.get("wo-timestamps", wo_id) is not None):
                 # work order is yet to be processed
                 raise JSONRPCDispatchException(
                     WorkOrderStatus.PENDING,
-                    "Work order result is yet to be updated")
+                    "Work order result is yet to be updated",
+                    data)
 
             # work order not in 'wo-timestamps' table
             raise JSONRPCDispatchException(
                 WorkOrderStatus.INVALID_PARAMETER_FORMAT_OR_VALUE,
                 "Work order Id not found in the database. " +
-                "Hence invalid parameter")
+                "Hence invalid parameter",
+                data)
         else:
             raise JSONRPCDispatchException(
                 WorkOrderStatus.INVALID_PARAMETER_FORMAT_OR_VALUE,
@@ -170,14 +184,19 @@ class TCSWorkOrderHandler:
         wo_id = params["workOrderId"]
         input_json_str = params["raw"]
         input_value_json = json.loads(input_json_str)
-
+        # Work order status payload should have
+        # data filed with work order id as defined in EEA spec section 6.
+        data = {
+            "workOrderId": wo_id
+        }
         req_validator = WorkOrderRequestValidator()
         valid, err_msg = req_validator.validate_parameters(
             input_value_json["params"])
         if not valid:
             raise JSONRPCDispatchException(
                 JsonRpcErrorCode.INVALID_PARAMETER,
-                err_msg
+                err_msg,
+                data
             )
 
         if "inData" in input_value_json["params"]:
@@ -186,11 +205,13 @@ class TCSWorkOrderHandler:
             if not valid:
                 raise JSONRPCDispatchException(
                     JsonRpcErrorCode.INVALID_PARAMETER,
-                    err_msg)
+                    err_msg,
+                    data)
         else:
             raise JSONRPCDispatchException(
                 JsonRpcErrorCode.INVALID_PARAMETER,
-                "Missing inData parameter"
+                "Missing inData parameter",
+                data
             )
 
         if "outData" in input_value_json["params"]:
@@ -199,14 +220,16 @@ class TCSWorkOrderHandler:
             if not valid:
                 raise JSONRPCDispatchException(
                     JsonRpcErrorCode.INVALID_PARAMETER,
-                    err_msg)
+                    err_msg,
+                    data)
         # Check if workerId is exists in avalon
         if not self.__is_worker_exists(input_value_json["params"]["workerId"]):
             raise JSONRPCDispatchException(
                 JsonRpcErrorCode.INVALID_PARAMETER,
                 "worker {} doesn't exists".format(
                     input_value_json["params"]["workerId"]
-                )
+                ),
+                data
             )
 
         if((self.workorder_count + 1) > self.max_workorder_count):
@@ -231,7 +254,8 @@ class TCSWorkOrderHandler:
             if((self.workorder_count + 1) > self.max_workorder_count):
                 raise JSONRPCDispatchException(
                     WorkOrderStatus.BUSY,
-                    "Work order handler is busy updating the result")
+                    "Work order handler is busy updating the result",
+                    data)
 
         if(self.kv_helper.get("wo-timestamps", wo_id) is None):
 
@@ -252,12 +276,14 @@ class TCSWorkOrderHandler:
             raise JSONRPCDispatchException(
                 WorkOrderStatus.PENDING,
                 "Work order is computing. Please query for WorkOrderGetResult \
-                 to view the result")
+                to view the result",
+                data)
 
         # Workorder id already exists
         raise JSONRPCDispatchException(
             WorkOrderStatus.INVALID_PARAMETER_FORMAT_OR_VALUE,
-            "Work order id already exists in the database. \
-                Hence invalid parameter")
+            "Work order id already exists in the database. "
+            + "Hence invalid parameter",
+            data)
 
 # ---------------------------------------------------------------------------------------------

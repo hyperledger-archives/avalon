@@ -27,31 +27,48 @@ SRCDIR="$(realpath ${SCRIPTDIR}/..)"
 rm -f $SRCDIR/enclave.pem
 
 # Remove generated ias-certificate file
-rm -f $SRCDIR/tc/sgx/common/crypto/verify_ias_report/ias-certificates.cpp
+rm -f $SRCDIR/common/cpp/verify_ias_report/ias-certificates.cpp
 
 # Remove LMDB files
 echo "******** DELETE LMDB FILES **************"
 rm -f $SRCDIR/config/Kv_Shared*
 
-# --------------- EXAMPLES COMMON ---------------
-cd $SRCDIR/common/python
-make clean
-
-# --------------- ENCLAVE MANAGER ---------------
-cd $SRCDIR/enclave_manager
-SGX_MODE=${SGX_MODE:-SIM} make clean
-
-# --------------- COMMON SGX WORKLOAD ---------------
-rm -rf $SRCDIR/common/sgx_workload/build
-
-# --------------- ENCLAVE ---------------
-cd $SRCDIR/tc/sgx/trusted_worker_manager/enclave
-rm -rf build deps
-
+# --------------- COMMON CPP ---------------
 cd $SRCDIR/common/cpp
+rm -rf build
+
+# --------------- COMMON INTEL SGX WORKLOAD ---------------
+cd $SRCDIR/common/sgx_workload
+rm -rf build
+
+# --------------- INTEL SGX COMMON ---------------
+cd $SRCDIR/tc/sgx/trusted_worker_manager/common
 rm -rf build
 
 # --------------- WORKLOADS -------------
 cd $SRCDIR/examples/apps
 rm -rf build
 
+# --------------- ENCLAVE ---------------
+cd $SRCDIR/tc/sgx/trusted_worker_manager/enclave
+rm -rf build deps
+
+# --------------- ENCLAVE BRIDGE ---------------
+cd $SRCDIR/tc/sgx/trusted_worker_manager/enclave_untrusted/enclave_bridge
+rm -rf build
+
+# --------------- COMMON PYTHON ---------------
+cd $SRCDIR/common/python
+make clean
+
+# --------------- CRYPTO UTILS ---------------
+cd $SRCDIR/common/crypto_utils
+make clean
+
+# --------------- SDK ---------------
+cd $SRCDIR/sdk
+make clean
+
+# --------------- ENCLAVE MANAGER ---------------
+cd $SRCDIR/enclave_manager
+make clean

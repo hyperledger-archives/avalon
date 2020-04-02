@@ -19,6 +19,7 @@ Avalon FAQ Sections
 - `Software Development`_
 - `Docker and Containers`_
 - `TEEs and Intel® SGX`_
+- `Glossary`_
 
 Hyperledger Avalon in General
 =============================
@@ -82,7 +83,7 @@ Where are videos about Hyperledger Avalon?
   - `Entire presentation (parts 1-5)
     <https://youtu.be/EdYJ-8eTqNc>`_ (1:30:56)
   - Or view presentations split into five parts by speaker:
-  - `Part 1: Introduction and Architecture (Eugene Yarmosh) 
+  - `Part 1: Introduction and Architecture (Eugene Yarmosh)
     <https://www.youtube.com/watch?v=ex5k5QPSXdU>`_ (19:19)
   - `Part 2: Cold Chain Supply Chain Case Study (Joshua Satten)
     <https://youtu.be/hPBRtUhO_w0>`_ (21:31)
@@ -133,9 +134,10 @@ File a Pull Request (PR) against this file in the
 Avalon source code. See
 https://github.com/hyperledger/avalon/blob/master/CONTRIBUTING.md
 
-How do I raise a defect or a new feature request to the hyperledger Avalon community?
+How do I raise a defect or a new feature request to the Hyperledger Avalon community?
 -------------------------------------------------------------------------------------
-You can log any new feature request OR issues/defects you find with the Avalon code here:
+You can log any new feature request OR issues/defects you find with the
+Avalon code here:
 https://github.com/hyperledger/avalon/issues
 
 Installation and Configuration
@@ -205,7 +207,8 @@ https://github.com/hyperledger/avalon/tree/master/docs/workload-tutorial
 
 Is there a way to get more info about an execution?
 ---------------------------------------------------
-Using ``export TCF_DEBUG_BUILD=1`` might help. See https://github.com/hyperledger/avalon/blob/master/PREREQUISITES.md#environment
+Using ``export TCF_DEBUG_BUILD=1`` might help. See
+https://github.com/hyperledger/avalon/blob/master/PREREQUISITES.md#environment
 Also look at the Avalon Listener and Enclave Manager output.
 The output goes to the terminal. It can be redirected to a file if needed.
 
@@ -228,7 +231,7 @@ https://github.com/hyperledger/avalon/blob/master/tc/sgx/common/crypto/README.md
 I get multiple Error 5 messages after submitting a work order: ``Work order is computing. Please query for WorkOrderGetResult to view the result``
 -------------------------------------------------------------------
 That's normal operation. Currently only pull model is implemented by Avalon.
-The Client is expected to call ``WorkOrderGetResult`` periodically to poll
+The client is expected to call ``WorkOrderGetResult`` periodically to poll
 the work order result.
 
 Where are error codes defined?
@@ -246,9 +249,8 @@ Currently it is not being verified in Avalon's SDK as the communication is over
 HTTP and only a single call is included in each call.
 When there is significant traffic, multi-call JRPC requests might be possible
 in a single HTTP request. This field would play a role there to map requests
-to responses. A shift from HTTP (synchronous request-response) would also require
-proper handling of this field.
-
+to responses. A shift from HTTP (synchronous request-response) would also
+require proper handling of this field.
 
 
 Docker and Containers
@@ -301,7 +303,7 @@ enclaves:
 https://software.intel.com/en-us/blogs/2016/06/06/overview-of-intel-software-guard-extension-enclave
 
 How can I create a TEE with Intel SGX using Avalon?
-----------------------------------------------------------------------------------
+---------------------------------------------------
 Start with the examples and tutorial at https://github.com/hyperledger/avalon/tree/master/docs#tutorial
 The technical details of Intel SGX enclaves are encapsulated in the
 Avalon libraries and Avalon Enclave Manager.
@@ -314,7 +316,7 @@ Intel SGX needs to be enabled in BIOS.
 
 Is there a maximum size of input data when using Intel SGX?
 -----------------------------------------------------------
-Avalon doesn’t expect application-specific code to use SGX sealed data.
+Avalon does not expect application-specific code to use Intel SGX sealed data.
 Avalon uses sealed data internally for storing private enclave signing and
 encryption keys.
 As result application specific data size is not dependent on the sealed data
@@ -328,7 +330,7 @@ which greatly slows things down.
 
 Is there a SDK for work order submissions?
 ------------------------------------------
-We don’t have a client SDK for Avalon yet which can be used by Avalon clients
+We do not have a client SDK for Avalon yet which can be used by Avalon clients
 to submit work order requests to Avalon. So there is no formal documentation
 available. The Client SDK for Avalon is work in progress.
 The Generic client uses some utility functions to create and submit work order.
@@ -339,6 +341,353 @@ When starting Avalon with Intel SGX why do I get an error SGX_ERROR_BUSY from th
 If you are behind a corporate proxy, make sure you have ``proxy type`` and
 ``aesm proxy`` lines set in ``/etc/aesmd.conf`` .
 This file may be overwritten if you reinstall Intel SGX SDK.
+
+
+Glossary
+========
+
+AES-GCM 256
+    Avalon's authenticated encryption algorithm, with a 96b IV
+    and 128b tag. Encrypts data within a work order request or response.
+    Also used to encrypt a request digest and custom data encryption keys
+
+Application type ID
+    Identifier for a type of Avalon application. An Avalon worker supports
+    one or more application types
+
+Attestation
+    Proof that something (such as code or data) was checked for validity
+    (such as with signature validation)
+
+Attested oracle
+    A device that uses Trusted Compute to attest some data
+    (e.g. environmental characteristics, financial values, inventory levels)
+
+Base64
+    base 64 numbers encoded with A-Z, a-z, 0-9, +, and /. Encodes
+    binary data to be printable ASCII characters. Sometimes appended with
+    one or two "=" padding characters representing unused bits. First used
+    with MIME encoding to encode binary attachments in email
+
+Besu
+    Hyperledger Besu is an Ethereum client for public and private
+    permissioned blockchains designed to be enterprise-friendly
+
+Blockchain
+    A single-link list of blocks used to record transactions. The
+    blockchain is immutable, distributed, and cryptographically-secured
+
+Burrow
+    EVM compatible Ethereum smart contract platform
+
+Chain code (CC)
+    Signed, versioned, addressable programs that execute
+    on a Hyperledger Fabric blockchain using the Fabric ledger as data
+
+Client
+    For Ethereum, it is any blockchain node.  This is not the traditional
+    meaning as used in client-server architecture.
+    To avoid ambiguity, an Avalon client is properly referred to as a
+    requester
+
+Confidential computing
+    Protection of data in use by performing computation within
+    hardware-based trusted execution environments (TEEs)
+
+DCAP
+    Intel SGX Data Center Attestation Primitives. Allows an enterprise
+    to provide their own attestation services for Intel SGX TEEs
+
+Dapp (or ÐApp)
+    Ethereum distributed application.  Uses a smart contract for the back end
+    and usually uses a web browser to execute the front end
+
+DID
+    Ethereum decentralized ID that is globally unique within a blockchain
+
+DLT
+    Distributed Ledger Technology; Blockchain is a DLT
+
+Direct model
+    Avalon work order execution model in which a requester application
+    directly invokes a JSON RPC network API for work order execution in
+    a Worker
+
+Docker
+    A light-weight OS-level VM technology which isolates processes into
+    separate "containers"
+
+ECDSA-SECP256K1 256
+    Avalon's digital signing algorithm  Also used by
+    Bitcoin and other blockchain platforms. Signs work order response
+    digest and worker's encryption RSA-OAEP public key
+
+Ethereum Enterprise Alliance (EEA)
+    A consortium that seeks to use
+    Ethereum software on a private enterprise blockchain instead of the
+    Ethereum Mainnet
+
+EEA Spec
+    Off-Chain Trusted Compute Specification defined by EEA. Avalon
+    is an implementation of this EEA specification
+
+Enclave
+    Instantiation of Trusted Compute within a hardware based
+    TEE. Certain hardware based TEEs, including Intel SGX, allow multiple
+    instances of Enclaves executing concurrently. For simplification, in
+    this specification the terms TEE and Enclave are used interchangeably
+
+Ether (ETH)
+    Digital cryptocurrency used on the Ethereum network
+
+Ethereum Virtual Machine (EVM)
+    A virtual machine executes Ethereum smart contracts
+    that have been compiled into EVM bytecode
+
+Fabric
+    Hyperledger Fabric. An enterprise blockchain platform technology
+    contributed by IBM
+
+Gas
+    Ethereum cryptocurrency used to pay for an Ethereum transaction
+    or smart contract execution
+
+Ganache
+    A personal blockchain software for Ethereum development
+
+Hyperledger
+    An open source collaborative effort created to advance
+    enterprise blockchain technologies. It is hosted by
+    The Linux Foundation
+
+ID
+    Identifier
+
+JSON RPC (JRPC)
+    Remote procedure call interface that uses the HTTP
+    protocol to send JSON-formatted strings. Avalon uses TCP port 1947 for
+    this JRPC
+
+JRPC error codes
+    JSON RPC error code return values are:
+    0 is success, 1 is unknown error, 2 is invalid parameter
+    format or value, 3 is access denied, 4 is invalid signature,
+    5 is no more lookup results remaining,
+    6 is unsupported mode (synchronous, asynchronous, poll,
+    or notification).
+    Error codes -32768 to -3200 are reserved for pre-defined
+    errors from the JSON RPC specification
+
+K8S
+    Kubernetes container platform
+
+KECCACK-256
+    One of Avalon's digest algorithms. Used for work order
+    requests and responses or Ethereum raw transaction packet bytes. Bitcoin
+    and other blockchains used an early form of Keccak, "submitted version
+    3", before Keccak was standardized to SHA-3 (FIPS-202) and Keccak has
+    minor variations from SHA-3
+
+KV
+    simple key-value lookup database
+
+Last lookup tag
+    A tag returned by a function returning partial results
+    (e.g., work orders or workers). If it is returned, it means that there
+    are more matching results that can be retrieved by passing this tag as
+    an input parameter to a matching function with "_next" appended to the
+    function name
+
+LMDB
+    Lightning Memory-mapped Database, which is implemented with
+    sparse random-access files
+
+Multi-party compute (mpc)
+    secure computation that uses cryptography
+    to compute a result using input from multiple parties, yet the input is
+    kept private from these parties
+
+Nonce
+    A unique number that is guaranteed to be unique and never
+    repeat. Usually generated from a long random number generator or a
+    non-repeating hardware sequence number generator
+
+Off-chain
+    Information stored externally to the blockchain
+
+On-chain
+    Information stored internally in the blockchain
+
+Organization ID
+    For Avalon, the organization identifier of the organization that hosts
+    the worker, e.g. a bank in the consortium or anonymous entity
+
+Proxy model
+    Avalon work order execution model in which a work order Invocation
+    Proxy smart contract is used by an enterprise application smart contract
+    to invoke work order execution in a Worker
+
+Query only
+    For Hyperledger Fabric, a parameter indicating if the
+    function call will not result in a blockchain ledger change
+
+Receipt
+    For Avalon, a transaction proving a work order was processed
+    by a worker
+
+Receipt create status
+    An Avalon work order receipt creation status with one of
+    these values: 0 is pending, 1 is completed, 2 is processed, 3 is failed,
+    and 4 is rejected. Values 5-254 are reserved. 255 means any status,
+    and >255 are application-specific values. Defined in the EEA spec 7.1
+
+Receipt status
+    Status of an Avalon work order receipt
+
+Registry
+    For Avalon, a registry of workers for use in forwarding work
+    orders to the proper worker
+
+Registry status
+    An Avalon worker registry status with one of these values:
+    1 is active, 2 is temporarily off-line, and 3 is decommissioned
+
+Request
+    For Avalon, a JSON RPC message sent from the requester to
+    an application or smart contract
+
+Request ID
+    For Avalon, a unique identifier that identifies a JSON RPC (JRPC) request
+
+Requester
+    Avalon entity that issues work orders using either an application or
+    a smart contract. Requesters are identified by an Ethereum
+    address or a DID that can be resolved to an Ethereum address
+
+Requester ID
+    For Avalon, a unique identifier that identifies a requester
+    that generates work orders
+
+Ropsten
+    An Ethereum testnet. Allows one to test Ethereum smart contracts
+    without spending Ether (ETH)
+
+RSA-OAEP 3072
+    Avalon's asymmetric encryption algorithm. Encrypts
+    symmetric data encryption keys
+
+SGX
+    Intel Software Guard Extensions, Intel SGX, a hardware TEE implementation
+
+SHA-256
+    One of Avalon's digest algorithm for work order requests
+    and responses
+
+Signature
+    In Avalon a signature signs data, often concatenated, with
+    a private key to help assure the generator is authentic. A signature is
+    verified with the signer's corresponding public key
+
+Signature rules
+    In Avalon, defined hashing and signing algorithms. In Avalon the
+    rules are separated by a forward slash (/)
+
+Smart contract address
+    For Ethereum, an Ethereum address that runs a
+    Worker Registry Smart Contract API smart contract for this registry. For
+    Fabric, a Fabric chain code name
+
+Smart contract (SC)
+    Signed, addressable program that executes on an
+    Ethereum blockchain using the Ethereum ledger as data
+
+Solidity
+    A smart contract-oriented programming language used to write
+    Ethereum smart contracts.
+    Solidity source is compiled into EVM bytecode
+
+Tag
+    In Avalon an identifier for an encryption key. Usually the requester
+    ID is used instead
+
+Truffle
+    A popular Ethereum development environment
+
+Trusted compute (TC)
+    Trusted computational resource for work order
+    execution. It preserves data confidentiality, execution integrity and
+    enforces data access policies. All Workers described in this specification
+    are also Trusted Compute. Trusted Compute may implement those assurances
+    in various ways. For example, Trusted Compute can base its trust on
+    software-based cryptographic security guarantees, a service's reputation,
+    virtualization, or a hardware-based Trusted Execution Environment such
+    as Intel's SGX
+
+Trusted compute base (TCB)
+    The hardware, firmware, and software resources used by trusted compute
+
+Trusted compute service (TCS)
+    A service that provides trusted compute
+    functionality. Hyperledger Avalon is an example of a TCS
+
+
+Trusted execution environment (TEE)
+    Hardware-based technology that executes only validated tasks,
+    produces attested results, provides protection from
+    malicious host software, and ensures confidentiality of
+    shared encrypted data
+
+Worker
+    For Avalon, an off-chain confidential compute processor for
+    work order execution, usually executing in a TEE, such as Intel SGX,
+    that takes input data and produces a result.
+    A Worker may be identified by an Ethereum address or a DID
+
+Worker ID
+    A unique identifier that identifies an Avalon worker that processes
+    work orders. For Fabric, a Fabric address. For Ethereum, it could be
+    derived from the worker's DID
+
+Worker service ID
+    Worker service Identifier
+
+Worker service
+    Implementation-dependent middleware entity that acts as
+    a bridge for communications between a blockchain and a worker. A
+    worker service may belong to an enterprise, a cloud service provider,
+    or an individual sharing his or her available computational resources
+    (subject to provisioning)
+
+Worker status
+    The status of an Avalon worker with one of these values:
+    1 is active, 2 is temporarily off-line, 3 is decommissioned, and 4
+    is compromised
+
+Worker type
+    A characteristic or classification of Avalon workers.
+    Currently defined types are "TEE-SGX" for Intel SGX TEE, "MPC"
+    for multi-party compute, and "ZK" for zero-knowledge proofs
+
+Work order (WO)
+    For Avalon, a unit of work submitted by a requester to
+    a Worker for execution. Work orders may include one or more inputs
+    (e.g. messages, input parameters, state, and datasets) and one or
+    more outputs. Work order inputs and outputs can be sent as part of the
+    request or response body (a.k.a. inline) or as links to remote storage
+    locations. Work order inputs and outputs are normally sent encrypted
+
+Work order ID
+    A unique identifier that identifies an Avalon work
+    order. Generated in a work order submit request by a requester
+
+Work order response
+    A response generated by an Avalon worker to a work
+    order. The response is a JSON string
+
+Zero-knowledge proofs (zk proofs)
+    Proofs where one can be assured of a result without being aware
+    of the input. For example, not knowing someone's age,
+    but knowing if they are in an age range
 
 
 © Copyright 2020, Intel Corporation.
