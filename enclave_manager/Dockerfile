@@ -65,7 +65,7 @@ WORKDIR /tmp
 
 # Build ("Untrusted") OpenSSL
 RUN OPENSSL_VER=1.1.1d \
- && wget https://www.openssl.org/source/openssl-$OPENSSL_VER.tar.gz \
+ && wget https://www.openssl.org/source/old/1.1.1/openssl-$OPENSSL_VER.tar.gz \
  && tar -zxf openssl-$OPENSSL_VER.tar.gz \
  && cd openssl-$OPENSSL_VER/ \
  && ./config \
