@@ -49,7 +49,7 @@ contract WorkOrderReceiptRegistry
 	// Members
 	mapping(bytes32 => WorkOrderReceipt)                                                               internal m_workorders;
 	WorkOrderReceiptUpdate[]                                                                           internal m_workorderupdates;
-	// workerServiceId → workerId → requesterId → receiptCreateStatus → Set<workOrderId>
+	// workerServiceId => workerId => requesterId => receiptCreateStatus => Set<workOrderId>
 	mapping(bytes32 => mapping(bytes32 => mapping(bytes32 => mapping(uint256 => LibSet_bytes32.set)))) internal m_lookuptable;
 
 	// Events
