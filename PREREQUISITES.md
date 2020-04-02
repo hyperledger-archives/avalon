@@ -307,7 +307,7 @@ These steps detail installing OpenSSL to the `~/openssl/install` directory.
 ```bash
 mkdir -p ~/openssl/install
 cd ~/openssl
-wget https://www.openssl.org/source/openssl-1.1.1d.tar.gz
+wget https://www.openssl.org/source/old/1.1.1/openssl-1.1.1d.tar.gz
 tar -xzf openssl-1.1.1d.tar.gz
 cd openssl-1.1.1d/
 ./Configure --prefix=$PWD/../install
