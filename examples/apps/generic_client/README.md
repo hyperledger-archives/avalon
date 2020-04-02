@@ -40,9 +40,9 @@ optional arguments:
 ```
 
 The `--mode` option is used only with an Ethereum smart contract address.
-Currently only “listing” mode is supported.
-This will fetch the uri from ethereum blockchain, do a worker lookup to fetch
-worker details of first worker in the list, and submit work order.
+Currently only "listing" mode is supported.
+This will fetch the URI from the Ethereum blockchain, do a worker lookup to fetch
+worker details of first worker in the list, and submit the work order.
 
 If `--uri` is passed, `--mode` is not used. It will fetch the worker details
 from the LMDB database and submit work order to the first available worker.
@@ -53,11 +53,11 @@ to the command line.
 
 ## Using the Generic Client
 
-The command line client `generic_client.py` allows you to submit
+Running `generic_client.py` allows you to submit
 worker requests on the command line.
 
 1. If needed, update the Ethereum account and direct registry contract
-   information in `sdk/avalon_sdk/tcf_connector.toml`
+   information in `$TCF_HOME/sdk/avalon_sdk/tcf_connector.toml`
 2. Follow the build instructions in the
    [build document](../../../BUILD.md)
 3. Install the Solidity compiler:
@@ -76,40 +76,39 @@ worker requests on the command line.
 
 ### Echo workload using a URI
 ```bash
-./generic_client.py --uri "http://localhost:1947" \
+./generic_client.py -o --uri "http://localhost:1947" \
     --workload_id "echo-result" --in_data "Hello"
 ```
 
 Add or change the `--uri` parameter if using Docker:
 ```bash
-./generic_client.py --uri "http://avalon-listener:1947" \
+./generic_client.py -o --uri "http://avalon-listener:1947" \
     --workload_id "echo-result" --in_data "Hello"
 ```
 
 Or omit the URI if you use the default URI (standalone mode) :
 ```bash
-./generic_client.py --workload_id "echo-result" --in_data "Hello"
+./generic_client.py -o --workload_id "echo-result" --in_data "Hello"
 ```
 
 ### Heart disease eval workload using a URI
 Standalone mode (no Docker):
 ```bash
-./generic_client.py --uri "http://localhost:1947" \
+./generic_client.py -o --uri "http://localhost:1947" \
     --workload_id "heart-disease-eval" \
     --in_data "Data: 25 10 1 67  102 125 1 95 5 10 1 11 36 1"
 ```
 
 With Docker:
 ```bash
-./generic_client.py --uri "http://avalon-listener:1947" \
+./generic_client.py -o --uri "http://avalon-listener:1947" \
     --workload_id "heart-disease-eval" \
     --in_data "Data: 25 10 1 67  102 125 1 95 5 10 1 11 36 1"
 ```
 
 ### Echo workload using registry listing smart contract address
 ```bash
-./generic_client.py \
+./generic_client.py -o \
     --address "0x9Be28B132aeE1b2c5A1C50529a636cEd807842cd" --mode "listing" \
     --workload_id "echo-result" --in_data "Hello"
 ```
-
