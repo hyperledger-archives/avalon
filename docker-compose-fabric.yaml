@@ -141,8 +141,7 @@ services:
         tail -f /dev/null
         "
     volumes:
-      - ./:/project/avalon
-      # Fabric crypto materials has to be shared to connector to
+      # Fabric crypto materials has to be shared with connector to
       # interact with fabric blockchain
       - ~/mywork/vars/keyfiles:/keyfiles
       - ~/mywork/vars/profiles/mychannel_network_for_pysdk.json:/project/avalon/sdk/avalon_sdk/fabric/network.json

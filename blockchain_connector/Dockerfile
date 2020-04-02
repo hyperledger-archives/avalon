@@ -241,6 +241,9 @@ COPY --from=common_python_image /project/avalon/common/python/dist/*.whl dist/
 COPY --from=avalon_sdk_image /project/avalon/sdk/dist/*.whl dist/
 COPY --from=common_crypto_utils_image /project/avalon/common/crypto_utils/dist/*.whl dist/
 COPY --from=build_image /project/avalon/blockchain_connector/dist/*.whl dist/
+COPY ./sdk/avalon_sdk/tcf_connector.toml /project/avalon/sdk/avalon_sdk/
+# methods.json has valid contract api names and their arguments
+COPY ./sdk/avalon_sdk/fabric/methods.json /project/avalon/sdk/avalon_sdk/fabric/
 
 # Installing wheel file requires python3-pip package.
 # python3-pip package will increase size of final docker image.
