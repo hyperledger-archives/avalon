@@ -25,25 +25,44 @@
 #Build base docker image
 FROM ubuntu:bionic as base_image
 
+# Ignore timezone prompt in apt
 ENV DEBIAN_FRONTEND=noninteractive
 
+# Add necessary packages
 RUN apt-get update \
  && apt-get install -y -q \
     ca-certificates \
     python3-toml \
-    python3-pip \
     python3-requests \
     python3-colorlog \
     python3-twisted \
- && apt-get -y -q upgrade \
- && apt-get clean \
- && rm -rf /var/lib/apt/lists/*
+ && apt-get clean
 
 # Make Python3 default
 RUN ln -sf /usr/bin/python3 /usr/bin/python
 
+
+
+# -------------=== python build ===-------------
+
+#Build python intermediate docker image
+FROM ubuntu:bionic as python_image
+
+
+# Add necessary packages
+RUN apt-get update \
+ && apt-get install -y -q \
+    ca-certificates \
+    pkg-config \
+    python3-pip \
+    python3-dev \
+    make \
+ && apt-get clean
+
 # Install setuptools packages using pip because
-RUN pip3 install --upgrade json-rpc nose2
+# these are not available in apt repository.
+RUN pip3 install setuptools
+
 
 # -------------=== Build openssl_image ===-------------
 
@@ -57,7 +76,6 @@ RUN apt-get update \
     make \
     wget \
     tar \
- && apt-get -y -q upgrade \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
 
@@ -74,11 +92,50 @@ RUN OPENSSL_VER=1.1.1d \
  && make test \
  && make install -j$THREADS
 
+
+
+# -------------=== common/python build ===-------------
+
+#Build common/python intermediate docker image
+FROM python_image as common_python_image
+
+COPY VERSION /project/avalon/
+COPY ./bin /project/avalon/bin
+
+ENV TCF_HOME=/project/avalon
+
+COPY ./common/python /project/avalon/common/python
+
+WORKDIR /project/avalon/common/python
+
+RUN echo "Building Avalon Common Python\n" \
+ && make
+
+
+
+# -------------=== Avalon SDK build ===-------------
+
+#Build Avalon SDK intermediate docker image
+FROM python_image as avalon_sdk_image
+
+COPY VERSION /project/avalon/
+COPY ./bin /project/avalon/bin
+COPY ./sdk /project/avalon/sdk
+
+ENV TCF_HOME=/project/avalon
+
+WORKDIR /project/avalon/sdk
+
+#install Avalon SDK  package.
+RUN echo "Building Avalon SDK\n" \
+ && make
+
+
+
 #Build Avalon Listener intermediate docker image
 FROM base_image as build_image
 
-RUN apt-get update \
- && apt-get install -y -q \
+RUN apt-get install -y -q \
     build-essential \
     software-properties-common \
     pkg-config \
@@ -86,7 +143,6 @@ RUN apt-get update \
     make \
     git \
     libprotobuf-dev \
-    python3-dev \
     swig \
     wget \
     tar \
@@ -98,12 +154,12 @@ RUN apt-get update \
     xxd \
     unzip \
     ocamlbuild \
- && apt-get -y -q upgrade \
+    python3-pip \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
 
 # Install setuptools packages using pip because
-RUN pip3 install --upgrade setuptools
+RUN pip3 install setuptools
 
 # Intel SGX common library and SDK are installed in /opt/intel directory.
 # Installation of Intel SGX libsgx-common packages requires
@@ -157,6 +213,13 @@ RUN ldconfig \
  && echo "SGX_SSL=/opt/intel/sgxssl" >> /etc/environment
 
 COPY . /project/avalon
+
+# Copy Python build artifacts
+COPY --from=common_python_image /project/avalon/common/python/dist/*.whl dist/
+COPY --from=avalon_sdk_image /project/avalon/sdk/dist/*.whl dist/
+
+RUN echo "Install common/python and sdk packages\n" \
+ && pip3 install dist/*.whl
 
 ARG SGX_MODE
 ARG MAKECLEAN
@@ -217,15 +280,7 @@ RUN mkdir -p build \
   && cmake .. \
   && make
 
-WORKDIR /project/avalon/common/python
-
-RUN make && make install
-
 WORKDIR /project/avalon/common/crypto_utils
-
-RUN make && make install
-
-WORKDIR /project/avalon/sdk
 
 RUN make && make install
 
@@ -234,11 +289,3 @@ WORKDIR /project/avalon/enclave_manager
 RUN echo "Build and Install avalon enclave manager" \
   && make && make install
 
-FROM build_image as final_image
-
-# python3-pip package will increase size of final docker image.
-# So remove python3-pip package and dependencies
-RUN echo "Remove unused packages from image\n" \
- && apt-get autoremove --purge -y -q python3-pip \
- && apt-get clean \
- && rm -rf /var/lib/apt/lists/*

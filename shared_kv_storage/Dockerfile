@@ -27,9 +27,7 @@ RUN apt-get update \
     curl \
     wget \
     liblmdb-dev \
- && apt-get -y -q upgrade \
- && apt-get clean \
- && rm -rf /var/lib/apt/lists/*
+ && apt-get clean
 
 # Make Python3 default
 RUN ln -sf /usr/bin/python3 /usr/bin/python
@@ -38,8 +36,7 @@ RUN ln -sf /usr/bin/python3 /usr/bin/python
 # Build Shared KV intermediate docker image.
 FROM base_image as build_image
 
-RUN apt-get update \
- && apt-get install -y -q \
+RUN apt-get install -y -q \
     build-essential \
     software-properties-common \
     pkg-config \
@@ -49,7 +46,7 @@ RUN apt-get update \
     python3-pip \
     swig
 
-RUN pip3 install --upgrade setuptools
+RUN pip3 install setuptools
 
 ENV TCF_HOME=/project/avalon
 
@@ -87,8 +84,7 @@ COPY --from=build_image /project/avalon/shared_kv_storage/lmdb_config.toml \
 # Installing wheel file requires python3-pip package.
 # But python3-pip package will increase size of final docker image.
 # So remove python3-pip package and dependencies after installing wheel file.
-RUN apt-get update \
- && apt-get install -y -q python3-pip \
+RUN apt-get install -y -q python3-pip \
  && echo "Install Shared KV package\n" \
  && pip3 install dist/*.whl \
  && echo "Remove unused packages from image\n" \
