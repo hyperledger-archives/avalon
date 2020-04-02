@@ -18,10 +18,15 @@
 # default fabric version is set to 1.4.4
 FABRIC_VERSION=1.4.4
 CHAIN_CODE_VERSION=1.0
-WORK_DIR=~/mywork
-MINIFAB=$WORK_DIR/minifab
+SCRIPT_DIR="$(dirname $(readlink --canonicalize ${BASH_SOURCE}))"
 # Minifab url for 0.1.0 stable version
 MINIFAB_URL=https://tinyurl.com/s8fmmvx
+MINIFAB_INSTALL_DIR=~/.local/bin/
+# Command line options
+WORK_DIR=~/mywork
+START_FABRIC=0
+STOP_FABRIC=0
+CLEAN_UP_WORK_DIR=0
 
 # Default chaincode path is different for 1.4.4 and 2.0
 DEFAULT_CHAIN_CODE_PATH=""
@@ -60,24 +65,69 @@ check_if_cc_artifacts_exists()
     return $exists
 }
 
-if [ -f "$MINIFAB" ]; then
-    echo "minifab is already installed in $MINIFAB"
+while getopts "w:udch" OPTCHAR ; do
+    case $OPTCHAR in
+        u )
+            START_FABRIC=1
+            if [[ $STOP_FABRIC == 1 || $CLEAN_UP_WORK_DIR == 1 ]]; then
+                echo "Only one of these options should be specified: [u|d|c]"
+                exit
+            fi
+            ;;
+        d )
+            STOP_FABRIC=1
+            if [[ $START_FABRIC == 1 || $CLEAN_UP_WORK_DIR == 1 ]]; then
+                echo "Only one of these options should be specified: [u|d|c]"
+                exit
+            fi
+            ;;
+        c )
+            CLEAN_UP_WORK_DIR=1
+            if [[ $START_FABRIC == 1 || $START_FABRIC == 1 ]]; then
+                echo "Only one of these options should be specified: [u|d|c]"
+                exit
+            fi
+            ;;
+        w )
+            WORK_DIR=$OPTARG
+            ;;
+        \?|h )
+            BN=$(basename $0)
+            echo "$BN: Start or Stop or Clean Hyperledger Fabric setup" 1>&2
+            echo "Usage: $BN [-w|[-u|-d|-c|-h]|-?]" 1>&2
+            echo "Where:" 1>&2
+            echo "   -w       Work directory. Default is $WORK_DIR" 1>&2
+            echo "   -u       Bring up Fabric network" 1>&2
+            echo "   -d       Bring down Fabric network" 1>&2
+            echo "   -c       Clean up Fabric work directory" 1>&2
+            echo "   -? or -h print usage information" 1>&2
+            echo "Examples:" 1>&2
+            echo "   $BN -u" 1>&2
+            echo "   $BN -w ~/mywork -u" 1>&2
+            echo "   $BN -w ~/mywork -d" 1>&2
+            echo "   $BN -w ~/mywork -c" 1>&2
+            exit 2
+            ;;
+    esac
+done
+
+if [ -f "$MINIFAB_INSTALL_DIR/minifab" ]; then
+    echo "minifab is already installed in $MINIFAB_INSTALL_DIR"
 else
-    echo "Installing minifab in $MINIFAB"
-    mkdir -p $WORK_DIR && cd $WORK_DIR && curl -o minifab -sL $MINIFAB_URL && chmod +x minifab
+    echo "Installing minifab in $MINIFAB_INSTALL_DIR"
+    mkdir -p $MINIFAB_INSTALL_DIR && cd $MINIFAB_INSTALL_DIR && curl -o minifab -sL $MINIFAB_URL && chmod +x minifab
 fi
 
-if [[ ! -v TCF_HOME ]]; then
-    echo "TCF_HOME is not set"
-    exit
+if [[ -z "$TCF_HOME" ]] ; then
+    export TCF_HOME="$(realpath ${SCRIPT_DIR}/..)"
 fi
 
+export PATH=$MINIFAB_INSTALL_DIR/:$PATH
 cd $WORK_DIR
-export PATH=$WORK_DIR/:$PATH
 
-if [[ $1 != "" && $1 == "stop" ]]; then
+if [ $STOP_FABRIC == 1 ]; then
     minifab down
-elif [[ $1 != "" && $1 == "start" ]]; then
+elif [ $START_FABRIC == 1 ]; then
     # If we copy chaincode files everytime, go build take more time to generate
     # build artifact.
     check_if_cc_artifacts_exists
@@ -135,7 +185,7 @@ elif [[ $1 != "" && $1 == "start" ]]; then
     fi
     echo "Started fabric network..."
     docker ps --format '{{.Names}}'
-else
-    echo "Invalid input: $1"
-    echo "Valid inputs are 'start' or 'stop'"
+elif [ $CLEAN_UP_WORK_DIR == 1 ]; then
+    minifab cleanup
+    rm -rf $WORK_DIR/vars
 fi
