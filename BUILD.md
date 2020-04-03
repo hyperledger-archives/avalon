@@ -16,7 +16,7 @@ version
 
 - To use the current stable branch (recommended), run this command:
   ```bash
-  git clone https://github.com/hyperledger/avalon --branch v0.5-pre-release.4
+  git clone https://github.com/hyperledger/avalon --branch pre-release-v0.5
   ```
 
 - Or, to use the latest branch, run this command:
