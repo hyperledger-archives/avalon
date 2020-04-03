@@ -45,21 +45,21 @@ Deposit transaction:
 In Terminal 2, Create deposits for two wallets named `alice` and `bob`
 
 ```
-./generic_client.py --workload_id "simple-wallet" --in_data "deposit alice 100"
+./generic_client.py --workload_id "simple-wallet" --in_data "deposit alice 100" -o
 
-./generic_client.py --workload_id "simple-wallet" --in_data "deposit bob 100"
+./generic_client.py --workload_id "simple-wallet" --in_data "deposit bob 100" -o
 ```
 
 Withdraw transaction:
 
 ```
-./generic_client.py --workload_id "simple-wallet" --in_data "withdraw alice 100"
+./generic_client.py --workload_id "simple-wallet" --in_data "withdraw alice 100" -o
 ```
 
 Transfer transaction:
 
 ```
-./generic_client.py --workload_id "simple-wallet" --in_data "transfer alice bob 50"
+./generic_client.py --workload_id "simple-wallet" --in_data "transfer alice bob 50" -o
 ```
 
 6.  You will see output showing:

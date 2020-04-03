@@ -24,7 +24,7 @@ To use:
 
 To read a file:
 
-5.  In Terminal 2, run `./generic_client.py --workload_id "inside-out-eval" --in_data "read <file>"` .
+5.  In Terminal 2, run `./generic_client.py --workload_id "inside-out-eval" --in_data "read <file>" -o` .
     File parameter should point to an absolute path which can be accessed by
     the enclave manager.
     For example, if the enclave manager is running in a Docker container, the
@@ -33,7 +33,7 @@ To read a file:
 
 To write a file:
 
-5. In Terminal 2, run `./generic_client.py --workload_id "inside-out-eval" --in_data "write <file> <content-to-be-written>"` .
+5. In Terminal 2, run `./generic_client.py --workload_id "inside-out-eval" --in_data "write <file> <content-to-be-written>" -o` .
    File parameter should point to an absolute path which can be accessed by
    the enclave manager.
    For example, if the enclave manager is running in a Docker container, the
