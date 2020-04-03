@@ -33,14 +33,14 @@ requests on the command line.
 5.  If you are running with Docker, then run this in Terminal 2:
     ``` bash
     ./generic_client.py --workload_id "heart-disease-eval" \
-        --in_data "Data: 25 10 1 67 102 125 1 95 5 10 1 11 36 1"
+        --in_data "Data: 25 10 1 67 102 125 1 95 5 10 1 11 36 1" -o
     ```
 
      If you are running standalone, then run this in Terminal 2:
     ``` bash
     ./generic_client.py --workload_id "heart-disease-eval" \
          --uri "http://localhost:1947/" \
-        --in_data "Data: 25 10 1 67 102 125 1 95 5 10 1 11 36 1"
+        --in_data "Data: 25 10 1 67 102 125 1 95 5 10 1 11 36 1" -o
     ```
 
 6.  The data will be submitted to the worker and the results will appear
