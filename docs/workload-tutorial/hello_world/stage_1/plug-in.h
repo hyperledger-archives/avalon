@@ -21,7 +21,7 @@
 
 namespace HelloWorld {
 
-const char* workload_id="hello-world";
+const char* workload_id = "hello-world";
 
 class Workload : public WorkloadProcessor {
 public:

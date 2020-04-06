@@ -5,6 +5,12 @@ workload application. The intention is to get up to speed quickly
 in application development by providing a generic client that works
 with any worker.
 
+The client application accepts only strings as input parameters and assumes
+that all outputs returned from the woorkload application are also provided
+as strings. If other data types are needed (such as numbers or binaries),
+then create a custom test application
+(potentially by modifying this application)
+
 The command line client, `generic_client.py`, sends a message to the worker.
 For command line options, type `./generic_client.py -h` from this directory.
 
