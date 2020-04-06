@@ -105,7 +105,7 @@ Where are videos about Hyperledger Avalon?
 - `Hyperledger Avalon Installation Part 1: with Docker Containers
   (Dan Anderson, 2020) <https://youtu.be/uC4mAXrwgoc>`_ (19:22)
 - `Hyperledger Avalon Installation Part 2: Standalone build (without Docker)
-  (Dan Anderson, 2020) <https://youtu.be/xoMjJDIxNrY>`_ (17:41)
+  (Dan Anderson, 2020) <https://youtu.be/XuSbKh0LOCg>`_ (17:06)
 - `Hyperledger Avalon
   (Manoj Gopalakrishnan, 2019, 20 minutes, begins at 55:57)
   <https://www.youtube.com/watch?v=N02vxA6qFPg&feature=youtu.be&t=3357>`_

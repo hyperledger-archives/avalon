@@ -22,7 +22,7 @@
 namespace $NameSpace$ {
 
 // replace $WorkloadId$ below with a workload id, e.g. "hello-world"
-const char* workload_id = $WorkloadId$;
+const char* workload_id = "$WorkloadId$";
 
 class Workload : public WorkloadProcessor {
 public:

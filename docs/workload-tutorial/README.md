@@ -43,7 +43,7 @@ Before beginning this tutorial, review the following items:
 
 * Review the base class `WorkloadProcessor`,
   which any workload class inherits, at
-  [$TCF_HOME/common/sgx_workload/workload_processor.h](../../common/sgx_workload/workload_processor.h)
+  [$TCF_HOME/common/sgx_workload/workload_processor.h](../../common/sgx_workload/workload/workload_processor.h)
 
   Observe the following:
   * Each workload must implement method `ProcessWorkOrder()`
@@ -110,7 +110,8 @@ will be created next in [Phase 2](#phase2).
 * Change placeholder `$WorkloadId$` (one location) in file `plug-in.h` to an
   appropriate workload ID, `hello-world` (note the dash, `-`)
 
-* Change placeholder `$WORKLOAD_STATIC_NAME$` in file `CMakeLists.txt`
+* Change placeholder `$WORKLOAD_STATIC_NAME$` (one location)
+  in file `CMakeLists.txt`
   to an appropriate name, `hello_world` (note the underscore, `_`)
 
 * To include the new workload into the build,
@@ -129,7 +130,8 @@ will be created next in [Phase 2](#phase2).
   SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,-L,${TCF_TOP_DIR}/examples/apps/build/$WORKLOAD_STATIC_NAME$/workload")
   TARGET_LINK_LIBRARIES(${PROJECT_NAME} -Wl,--whole-archive -l$WORKLOAD_STATIC_NAME$ -Wl,--no-whole-archive)
   ```
-  Replace `$WORKLOAD_STATIC_NAME$` with `hello_world` so it becomes:
+  Replace `$WORKLOAD_STATIC_NAME$` (two locations)
+  with `hello_world` so it becomes:
   ```bash
   # Add hello_world workload
   SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,-L,${TCF_TOP_DIR}/examples/apps/build/hello_world/workload")
@@ -143,15 +145,21 @@ will be created next in [Phase 2](#phase2).
 * From the `$TCF_HOME` directory, load the framework and use the
   generic command line utility to test the newly-added workload:
   ```bash
-  examples/apps/generic_client/generic_client.py \
-      --workload_id "hello-world" --in_data "Jane" "Dan"
+  examples/apps/generic_client/generic_client.py -o \
+      --workload_id "hello-world" --in_data "Dan"
+
   ```
 
-  > **_NOTE:_** If you are running Avalon in a container you can shell into
-  the container like this:
+  If you are running Docker, run the utility from a Docker shell
+  specifying the Avalon Listner container:
   ```bash
   docker exec -it avalon-shell bash
+
+  examples/apps/generic_client/generic_client.py -o \
+      --uri "http://avalon-listener:1947" \
+      --workload_id "hello-world" --in_data "Dan"
   ```
+
 
 * The Hello World worker should return the string `Error: under construction`
   as the result (hard-coded placeholder string in `plug-in.cpp`):
@@ -234,8 +242,18 @@ In this example we name the worker-specific function `ProcessHelloWorld()`.
 * Load the framework and use the generic command line utility to test the
   newly-added workload:
   ```bash
-  examples/apps/generic_client/generic_client.py \
-     --uri "http://localhost:1947" --workload_id "hello-world" --in_data "Dan"
+  examples/apps/generic_client/generic_client.py -o \
+     --workload_id "hello-world" --in_data "Jane" "Dan"
+  ```
+
+  If you are running Docker, run the utility from a Docker shell
+  specifying the Avalon Listner container:
+  ```bash
+  docker exec -it avalon-shell bash
+
+  examples/apps/generic_client/generic_client.py -o \
+      --uri "http://avalon-listener:1947" \
+      --workload_id "hello-world" --in_data "Jane" "Dan"
   ```
 
 * The Hello World worker should return a string
@@ -401,8 +419,18 @@ For this phase, follow these steps to extend the worker functionality:
 * Submit a work order request with user name `jack`
 
   ```bash
-  examples/apps/generic_client/generic_client.py --uri "http://localhost:1947" \
-     -o --workload_id "hello-world" --in_data "jack"
+  examples/apps/generic_client/generic_client.py -o \
+     --workload_id "hello-world" --in_data "jack"
+  ```
+
+  If you are running Docker, run the utility from a Docker shell
+  specifying the Avalon Listner container:
+  ```bash
+  docker exec -it avalon-shell bash
+
+  examples/apps/generic_client/generic_client.py -o \
+      --uri "http://avalon-listener:1947" \
+      --workload_id "hello-world" --in_data "jack"
   ```
 
 * The Hello World worker should return the string
@@ -412,8 +440,10 @@ For this phase, follow these steps to extend the worker functionality:
   (without the `<>` angle brackets).
 
   ```
-  [10:29:35 INFO    crypto_utils.crypto_utility] Decryption result at client -
-  Hello jack [8342EFBE7C379231A4E03C80E5BA1AC9E8ACBC5338976CE6146431D8CBF2318D]
+  [10:29:35 INFO    crypto_utils.crypto_utility]
+  Decryption result at client -
+  Hello jack
+  [8342EFBE7C379231A4E03C80E5BA1AC9E8ACBC5338976CE6146431D8CBF2318D]
   [10:29:35 INFO    __main__]
   Decrypted response:
     [{'index': 0, 'dataHash':
@@ -427,13 +457,21 @@ For this phase, follow these steps to extend the worker functionality:
   received in the previous step.
 
   ```bash
-  examples/apps/generic_client/generic_client.py \
-     --uri "http://localhost:1947" -o --workload_id "hello-world" --in_data \
-     "jack" "8342EFBE7C379231A4E03C80E5BA1AC9E8ACBC5338976CE6146431D8CBF2318D"
+  examples/apps/generic_client/generic_client.py -o \
+      --workload_id "hello-world" --in_data "jack" \
+      "8342EFBE7C379231A4E03C80E5BA1AC9E8ACBC5338976CE6146431D8CBF2318D"
+  ```
+  For Docker:
+  ```bash
+  docker exec -it avalon-shell bash
+  examples/apps/generic_client/generic_client.py -o \
+      --uri "http://avalon-listener:1947" \
+      --workload_id "hello-world" --in_data "jack" \
+      "8342EFBE7C379231A4E03C80E5BA1AC9E8ACBC5338976CE6146431D8CBF2318D"
   ```
 * The Hello World worker should return the string
-  `Hello <name> <count>` where `<count>` is the number of times the workload has
-  been invoked by the user `<name>`.
+  `Hello <name> <count>` where `<count>` is the number of times
+  the workload has been invoked by the user `<name>`.
 
   ```
   [10:36:46 INFO    crypto_utils.crypto_utility]
