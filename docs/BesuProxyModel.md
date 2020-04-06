@@ -31,7 +31,7 @@
    Only partial output is seen here. The actual output has more data.
    
 4. Update configuration fields in ``$TCF_HOME/sdk/avalon_sdk/tcf_connector.toml ``
-	- **proxy_worker_registry_contract_address** - Read the field ``contract address`` from Step 3 under ``Deploying 'WorkerRegistry'``
+	- **worker_registry_contract_address** - Read the field ``contract address`` from Step 3 under ``Deploying 'WorkerRegistry'``
 	- **work_order_contract_address** - Read the field ``contract address`` from Step 3 under ``Deploying 'WorkerOrderRegistry'``
 	- **eth_account** - Read the field account from Step 3
 
