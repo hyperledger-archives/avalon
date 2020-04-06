@@ -63,9 +63,9 @@ class EthereumConnector:
         tcf_home = os.environ.get("TCF_HOME", "../../")
 
         worker_reg_contract_file = tcf_home + "/" + \
-            config["ethereum"]["proxy_worker_registry_contract_file"]
+            config["ethereum"]["worker_registry_contract_file"]
         worker_reg_contract_address = \
-            config["ethereum"]["proxy_worker_registry_contract_address"]
+            config["ethereum"]["worker_registry_contract_address"]
         self._worker_reg_contract_instance,\
             self._worker_reg_contract_instance_evt = self._eth_client\
             .get_contract_instance(
