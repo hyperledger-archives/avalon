@@ -370,7 +370,7 @@ problems.
 
   ```bash
   cd intel-sgx-ssl/openssl_source
-  wget 'https://www.openssl.org/source/openssl-1.1.1d.tar.gz'
+  wget 'https://www.openssl.org/source/old/1.1.1/openssl-1.1.1d.tar.gz'
   cd ..
   ```
 
