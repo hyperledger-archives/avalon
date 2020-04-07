@@ -20,8 +20,20 @@
 #define USER_FILES_PATH "/tmp/tutorial/"
 
 std::string ProcessHelloWorld(std::string in_str) {
-    return "Hello " + in_str;
-}
+    std::string name;
+    std::string hex_key;
+
+    std::size_t pos = in_str.find(':');
+    if (pos == std::string::npos) {
+        name = in_str;
+    } else { // split name and key
+        name = in_str.substr(0, pos);
+        hex_key = in_str.substr(pos + 1, in_str.length() - pos - 1);
+    }
+
+    return "Hello " + name + ", your result is " +
+        GetCountOrKey(name, hex_key);
+} // ProcessHelloWorld
 
 std::string GetCountOrKey(std::string name, std::string hex_key) {
     std::string file_path = USER_FILES_PATH + name;
@@ -31,12 +43,12 @@ std::string GetCountOrKey(std::string name, std::string hex_key) {
     if (hex_key.empty()) {
         io_helper.DeleteFile();
         // Generate symmetric hex key
-        ret_str = io_helper.GenerateKey();        
+        ret_str = io_helper.GenerateKey();
         io_helper.SetKey(ret_str);
         io_helper.WriteFile("1");
-    } else {
+    } else { // read, increment, and write count
         io_helper.SetKey(hex_key);
-        if (!io_helper.ReadFile(ret_str)) {
+        if (io_helper.ReadFile(ret_str) == 0) {
             size_t count = std::stoul(ret_str);
             count++;
             ret_str = std::to_string(count);
@@ -45,4 +57,4 @@ std::string GetCountOrKey(std::string name, std::string hex_key) {
     }
 
     return ret_str;
-}  // GetCountOrKey
+} // GetCountOrKey

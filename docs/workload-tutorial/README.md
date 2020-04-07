@@ -1,4 +1,15 @@
+<!--
+Licensed under Creative Commons Attribution 4.0 International License
+https://creativecommons.org/licenses/by/4.0/
+-->
+
 # Avalon Worker Application Development Tutorial
+
+- [Prerequisites](#prerequisites)
+- [Phase 1: Avalon Plug-in Code](#phase1)
+- [Phase 2: Worker-specific Code](#phase2)
+- [Phase 3: Worker-specific Code
+  to execute I/O operations inside the TEE](#phase3)
 
 This tutorial describes how to build a trusted workload application.
 We begin by copying template files to a new directory.
@@ -37,7 +48,7 @@ The directory structure for this tutorial is as follows:
     * [logic.cpp](hello_world/stage_2/logic.cpp) Modified with worker code added
     * [plug-in.cpp](hello_world/stage_2/plug-in.cpp) Modified to call worker
 
-## Prerequisites
+## <a name="prerequisites"></a>Prerequisites
 
 Before beginning this tutorial, review the following items:
 
@@ -79,11 +90,11 @@ As a best practice, this tutorial separates the actual workload-specific logic
 from the Avalon plumbing required to link the workload to the Avalon framework
 into separate files.
 
-## Tutorial
 
-This tutorial creates a workload application in two phases:
+This tutorial creates a workload application in three phases:
 1. [Create generic plug-in logic](#phase1)
 2. [Incrementally add workload-specific logic](#phase2)
+3. (optional) [Incrementally add I/O operations inside the TEE](#phase3)
 
 ### <a name="phase1"></a>Phase 1: Avalon Plug-in Code
 
@@ -151,7 +162,7 @@ will be created next in [Phase 2](#phase2).
   ```
 
   If you are running Docker, run the utility from a Docker shell
-  specifying the Avalon Listner container:
+  specifying the Avalon Listener container:
   ```bash
   docker exec -it avalon-shell bash
 
@@ -209,7 +220,7 @@ In this example we name the worker-specific function `ProcessHelloWorld()`.
   separate it from Avalon-specific plug-in code
 
 * Modify the `ProcessWorkOrder()` method in `plug-in.cpp`
-  to call `ProcessHelloWorld()`.  That is, change:
+  to call `ProcessHelloWorld()`. That is, change:
 
   ```cpp
   // Replace the dummy implementation below with invocation of
@@ -247,7 +258,7 @@ In this example we name the worker-specific function `ProcessHelloWorld()`.
   ```
 
   If you are running Docker, run the utility from a Docker shell
-  specifying the Avalon Listner container:
+  specifying the Avalon Listener container:
   ```bash
   docker exec -it avalon-shell bash
 
@@ -300,20 +311,19 @@ The directory structure for this tutorial is as follows:
 
 * [hello_world/](hello_world/)
   * [stage_3/](hello_world/stage_3/) Results from adding Inside Out I/O code
-    * [logic.h](hello_world/stage_1/logic.h) Modified with worker definitions
-      added
-    * [CMakeLists.txt](hello_world/stage_3/CMakeLists.txt) CMake file with new
-      include directory added to build this application
+    * [logic.h](hello_world/stage_1/logic.h) Modified with worker
+      function definition added
+    * [CMakeLists.txt](hello_world/stage_3/CMakeLists.txt) CMake file with
+      new include directory added to build this application
     * [io_helper.h](hello_world/stage_3/io_helper.h) Header file defining
       Inside Out I/O helper
     * [io_helper.cpp](hello_world/stage_3/io_helper.cpp) C file for
-      Inside Out I/O helper code, which invokes the inside out I/O functionality
+      Inside Out I/O helper code, which invokes the inside out I/O
+      functionality
     * [logic.h](hello_world/stage_3/logic.h) Header file with new
       `GetCountOrKey()` definition
     * [logic.cpp](hello_world/stage_3/logic.cpp) C file with new
-      `GetCountOrKey()` function
-    * [plug-in.cpp](hello_world/stage_3/plug-in.cpp) C file with modified
-      `ProcessWorkOrder()` function
+      `GetCountOrKey()` function and modified `ProcessHelloWorld` function
 
 For this phase, follow these steps to extend the worker functionality:
 
@@ -329,78 +339,87 @@ For this phase, follow these steps to extend the worker functionality:
   ```bash
   cp ../../../../docs/workload-tutorial/hello_world/stage_3/io_helper.* .
   ```
-  Examine file `io_helper.cpp`. Notice that it calls the inside out I/O
+  Examine file [`io_helper.cpp`](hello_world/stage_3/io_helper.cpp) .
+  Notice that it calls the inside out I/O
   functions `Read()`, `Write()`, and `Delete()`, which are defined in file
   [$TCF_HOME/common/sgx_workload/iohandler/file_io_wrapper.h
-  ](../../common/sgx_workload/iohandler/file_io_wrapper.h)
+  ](../../common/sgx_workload/iohandler/file_io_wrapper.h) ,
+  and that it performs encryption and decryption of the file contents
+
+* Add the following to the beginning of file `logic.cpp` :
+  ```cpp
+  #include "io_helper.h"
+
+  #define USER_FILES_PATH "/tmp/tutorial/"
+  ```
+
+* Modify the ProcessHelloWorld() function in `logic.cpp`. That is, change:
+
+  ```cpp
+  std::string ProcessHelloWorld(std::string in_str) {
+      return "Hello " + in_str;
+  }
+  ```
+
+to
+
+  ```cpp
+  std::string ProcessHelloWorld(std::string in_str) {
+      std::string name;
+      std::string hex_key;
+
+      std::size_t pos = in_str.find(':');
+      if (pos == std::string::npos) {
+          name = in_str;
+      } else { // split name and key
+          name = in_str.substr(0, pos);
+          hex_key = in_str.substr(pos + 1, in_str.length() - pos - 1);
+      }
+
+      return "Hello " + name + ", your result is " +
+          GetCountOrKey(name, hex_key);
+  } // ProcessHelloWorld
+ ```
+
+* Add the `GetCountOrKey()` function implementation to `logic.cpp`
+  ```cpp
+  std::string GetCountOrKey(std::string name, std::string hex_key) {
+      std::string file_path = USER_FILES_PATH + name;
+      IoHelper io_helper(file_path);
+      std::string ret_str;
+
+      if (hex_key.empty()) {
+          io_helper.DeleteFile();
+          // Generate symmetric hex key
+          ret_str = io_helper.GenerateKey();
+          io_helper.SetKey(ret_str);
+          io_helper.WriteFile("1");
+      } else { // read, increment, and write count
+          io_helper.SetKey(hex_key);
+          if (io_helper.ReadFile(ret_str) == 0) {
+              size_t count = std::stoul(ret_str);
+              count++;
+              ret_str = std::to_string(count);
+              io_helper.WriteFile(ret_str);
+          }
+      }
+
+      return ret_str;
+  } // GetCountOrKey
+  ```
 
 * Add the `GetCountOrKey()` function declaration to `logic.h`
   ```cpp
   extern std::string GetCountOrKey(std::string name, std::string hex_key);
   ```
 
-* Add the `GetCountOrKey()` function implementation to `logic.cpp`
-  ```cpp
-  std::string GetCountOrKey(std::string name, std::string hex_key) {
-    std::string file_path = USER_FILES_PATH + name;
-    IoHelper io_helper(file_path);
-    std::string ret_str;
+* Change to the top-level Avalon source repository directory,
+  `$TCF_HOME`, and rebuild the Avalon framework
+  (see [$TCF_HOME/BUILD.md](../../BUILD.md)).
+  It should build the updated hello_world workload
 
-    if (hex_key.empty()) {
-        io_helper.DeleteFile();
-        // Generate symmetric hex key
-        ret_str = io_helper.GenerateKey();
-        io_helper.SetKey(ret_str);
-        io_helper.WriteFile("1");
-    } else {
-        io_helper.SetKey(hex_key);
-        if (!io_helper.ReadFile(ret_str)) {
-            size_t count = std::stoul(ret_str);
-            count++;
-            ret_str = std::to_string(count);
-            io_helper.WriteFile(ret_str);
-        }
-    }
-
-    return ret_str;
-  }  // GetCountOrKey
-  ```
-
-* Modify the `ProcessWorkOrder()` method in `plug-in.cpp`
-  to call `ProcessHelloWorld()` and `GetCountOrKey()`. That is, change:
-
-  ```cpp
-  // Replace the dummy implementation below with invocation of
-  // actual logic defined in logic.h and implemented in logic.cpp.
-  std::string result_str("Error: under construction");
-  ByteArray ba(result_str.begin(), result_str.end());
-  AddOutput(0, out_work_order_data, ba);
-  ```
-
-  to
-
-  ```cpp
-  std::string name;
-  std::string hex_key;
-  std::string result;
-  int count = 0;
-
-  // For each work order, process the input data
-  for (auto wo_data : in_work_order_data) {
-      if (count++ == 0) {
-          name = ByteArrayToString(wo_data.decrypted_data);
-      } else {
-          hex_key = ByteArrayToString(wo_data.decrypted_data);
-      }
-  }
-
-  result = ProcessHelloWorld(name) + " [" +
-      GetCountOrKey(name, hex_key) + "]";
-  ByteArray ba(result.begin(), result.end());
-  AddOutput(0, out_work_order_data, ba);
-  ```
-
-* Add line `#include "io_helper.h"` to the beginning of file `logic.cpp`
+* Start the Avalon framework
+  (see "Testing" in [$TCF_HOME/BUILD.md](../../BUILD.md#testing))
 
 * Create a directory to store files for persistent storage of
   values outside the TEE
@@ -408,13 +427,13 @@ For this phase, follow these steps to extend the worker functionality:
   mkdir /tmp/tutorial
   ```
 
-* Change to the top-level Avalon source repository directory,
-  `$TCF_HOME`, and rebuild the framework
-  (see [$TCF_HOME/BUILD.md](../../BUILD.md)).
-  It should now include updated hello_world workload
+  If you are running Docker, make the directory inside the
+  Avalon Enclave Manager container:
+  ```bash
+  sudo docker exec -it avalon-enclave-manager bash
 
-* Load the framework and use the generic command line utility to
-  test the IO operations performed by workload :
+  mkdir /tmp/tutorial
+  ```
 
 * Submit a work order request with user name `jack`
 
@@ -423,10 +442,10 @@ For this phase, follow these steps to extend the worker functionality:
      --workload_id "hello-world" --in_data "jack"
   ```
 
-  If you are running Docker, run the utility from a Docker shell
-  specifying the Avalon Listner container:
+  If you are running Docker, run the utility from the Docker shell
+  container specifying the Avalon Listener container:
   ```bash
-  docker exec -it avalon-shell bash
+  sudo docker exec -it avalon-shell bash
 
   examples/apps/generic_client/generic_client.py -o \
       --uri "http://avalon-listener:1947" \
@@ -434,10 +453,10 @@ For this phase, follow these steps to extend the worker functionality:
   ```
 
 * The Hello World worker should return the string
-  `Hello <name> <key>` where `<name>` is the string sent in the first
-  input parameter and `<key>` is the file encryption key.
-  This will create an encrypted file named `<name>` in `/tmp/tutorial/`
-  (without the `<>` angle brackets).
+  `Hello <name> your result is <key>` where `<name>`
+  is the string sent in the input parameter and
+  `<key>` is the file encryption key.
+  This will create an encrypted file named `/tmp/tutorial/<name>`
 
   ```
   [10:29:35 INFO    crypto_utils.crypto_utility]
@@ -448,29 +467,46 @@ For this phase, follow these steps to extend the worker functionality:
   Decrypted response:
     [{'index': 0, 'dataHash':
       '5493B8B39AFE2F7D4F1490D6E04AD410E394958C6BD85324BC28B540EDF0A462',
-      'data': 'Hello jack
-      [8342EFBE7C379231A4E03C80E5BA1AC9E8ACBC5338976CE6146431D8CBF2318D]',
+      'data': 'Hello jack, your result is
+      8342EFBE7C379231A4E03C80E5BA1AC9E8ACBC5338976CE6146431D8CBF2318D',
       'encryptedDataEncryptionKey': '', 'iv': ''}]
   ```
 
+* Verify the file `jack` was created outside the TEE and is encrypted and
+  hex-encoded:
+  ```bash
+  ls /tmp/tutorial
+  cat /tmp/tutorial/jack
+  ```
+
+  For Docker:
+  ```bash
+  sudo docker exec -it avalon-enclave-manager bash
+
+  ls /tmp/tutorial
+  cat /tmp/tutorial/jack
+  ```
+
 * Submit a work order request with user name `jack` and the encryption key
-  received in the previous step.
+  received in the above step separated by a colon `:`. For example,
+  with the above key:
 
   ```bash
   examples/apps/generic_client/generic_client.py -o \
-      --workload_id "hello-world" --in_data "jack" \
-      "8342EFBE7C379231A4E03C80E5BA1AC9E8ACBC5338976CE6146431D8CBF2318D"
+      --workload_id "hello-world" --in_data \
+      "jack:8342EFBE7C379231A4E03C80E5BA1AC9E8ACBC5338976CE6146431D8CBF2318D"
   ```
   For Docker:
   ```bash
-  docker exec -it avalon-shell bash
+  sudo docker exec -it avalon-shell bash
   examples/apps/generic_client/generic_client.py -o \
       --uri "http://avalon-listener:1947" \
-      --workload_id "hello-world" --in_data "jack" \
-      "8342EFBE7C379231A4E03C80E5BA1AC9E8ACBC5338976CE6146431D8CBF2318D"
+      --workload_id "hello-world" --in_data \
+      "jack:8342EFBE7C379231A4E03C80E5BA1AC9E8ACBC5338976CE6146431D8CBF2318D"
   ```
 * The Hello World worker should return the string
-  `Hello <name> <count>` where `<count>` is the number of times
+  `Hello <name>, your result is <count>`
+  where `<count>` is the number of times
   the workload has been invoked by the user `<name>`.
 
   ```
@@ -480,7 +516,8 @@ For this phase, follow these steps to extend the worker functionality:
   Decrypted response:
     [{'index': 0, 'dataHash':
       'D040AFA0D78276BAFD1360A6170D7EB53446731F25E0F77343A07EEE3628731A',
-      'data': 'Hello jack [2]', 'encryptedDataEncryptionKey': '', 'iv': ''}]
+      'data': 'Hello jack, your result is 2',
+      'encryptedDataEncryptionKey': '', 'iv': ''}]
   ```
 
 To see what the updated source files should look like,
