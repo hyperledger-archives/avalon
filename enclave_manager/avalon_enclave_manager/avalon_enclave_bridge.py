@@ -203,8 +203,7 @@ def create_signup_info(originator_public_key_hash, nonce):
         return None
 
     # We don't really have any reason to call back down into the enclave
-    # as we have everything we now need. For other objects such as wait
-    # timer and certificate they are serialized into JSON down in C++ code.
+    # as we have everything we now need.
     #
     # Start building up the signup info dictionary we will serialize
     signup_info = {
