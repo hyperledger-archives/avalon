@@ -221,7 +221,9 @@ To run lint checks on codebase, execute the following commands -
 cd $TCF_HOME
 docker-compose -f docker-compose-lint.yaml up
 ```
-Above steps would run lint on all modules by defualt. If you want to run lint on selective modules, you need to pass the modules via `LINT_MODULES`. For example -
+The steps above runs lint on all modules by default.
+If you want to run lint on selective modules, you need to pass the modules via
+`LINT_MODULES`. For example:
 ```
 cd $TCF_HOME
 LINT_MODULES={sdk,common} docker-compose -f docker-compose-lint.yaml up
