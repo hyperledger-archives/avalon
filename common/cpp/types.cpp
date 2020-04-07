@@ -13,6 +13,12 @@
  * limitations under the License.
  */
 
+/**
+ * @file
+ * Avalon string utilities,
+ * including base 64, hex, and byte array conversion.
+ */
+
 #include <algorithm>
 #include <string>
 #include <vector>
@@ -21,9 +27,10 @@
 #include "base64.h"
 #include "hex_string.h"
 
-// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-// Simple conversion from ByteArray to std::string
-// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+/**
+ * Simple conversion from ByteArray to std::string
+ */
 std::string ByteArrayToString(const ByteArray& inArray) {
     std::string outString;
     std::transform(inArray.begin(), inArray.end(), std::back_inserter(outString),
@@ -32,9 +39,10 @@ std::string ByteArrayToString(const ByteArray& inArray) {
     return outString;
 }
 
-// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-// Conversion from byte array to string array
-// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+/**
+ * Conversion from byte array to string array.
+ */
 StringArray ByteArrayToStringArray(const ByteArray& inArray) {
     StringArray sarray(0);
     std::transform(inArray.begin(), inArray.end(), std::back_inserter(sarray),
@@ -42,28 +50,35 @@ StringArray ByteArrayToStringArray(const ByteArray& inArray) {
     return sarray;
 }
 
-// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-// Simple conversion from ByteArray to Base64EncodedString
-// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+/**
+ * Simple conversion from ByteArray to Base64EncodedString.
+ */
 Base64EncodedString ByteArrayToBase64EncodedString(const ByteArray& buf) {
     return base64_encode(buf);
 }  // ByteArrayToBase64EncodedString
 
-// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-// Simple conversion from Base64EncodedString to ByteArray
+
+/**
+ * Simple conversion from Base64EncodedString to ByteArray.
+ */
 ByteArray Base64EncodedStringToByteArray(const Base64EncodedString& encoded) {
     return base64_decode(encoded);
 }  // Base64EncodedStringToByteArray
 
-// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-// Simple conversion from ByteArray to HexEncodedString
+
+/**
+ * Simple conversion from ByteArray to HexEncodedString.
+ */
 HexEncodedString ByteArrayToHexEncodedString(const ByteArray& buf) {
     return tcf::BinaryToHexString(buf);
 }  // ByteArrayToHexEncodedString
 
-// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-// Simple conversion from HexEncodedString to ByteArray
-// throws ValueError
+
+/**
+ * Simple conversion from HexEncodedString to ByteArray.
+ * Throws ValueError.
+ */
 ByteArray HexEncodedStringToByteArray(const HexEncodedString& encoded) {
     return tcf::HexStringToBinary(encoded);
 }  // HexEncodedStringToByteArray

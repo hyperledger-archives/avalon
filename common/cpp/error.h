@@ -13,6 +13,11 @@
  * limitations under the License.
  */
 
+/**
+ * @file
+ * Avalon error and exception handling functions.
+ */
+
 #pragma once
 
 #include <stdexcept>

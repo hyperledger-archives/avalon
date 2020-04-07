@@ -26,6 +26,8 @@ VERSION=$$(../bin/get_version)
 # List source directories and files to be documented by Doxygen here.
 # Doxyfile's RECURSIVE=YES makes it also use subdirectories.
 INPUT=	refman/README.md \
+	../common/cpp \
+	../common/crypto_utils \
 	../common/sgx_workload \
 	../sdk
 EXCLUDE= test \

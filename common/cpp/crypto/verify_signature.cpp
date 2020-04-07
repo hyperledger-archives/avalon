@@ -67,4 +67,3 @@ bool verify_signature(const char* cert_pem,
 
     return true; /* Success */
 }
-

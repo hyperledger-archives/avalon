@@ -13,6 +13,11 @@
 * limitations under the License.
 */
 
+/**
+ * @file
+ * Avalon JSON utilities.
+ */
+
 const char* GetJsonStr(const JSON_Object* json_object,
                        const char* name,
                        const char* err_msg = NULL);

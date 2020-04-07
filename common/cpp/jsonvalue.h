@@ -13,6 +13,11 @@
  * limitations under the License.
  */
 
+/**
+ * @file
+ * Avalon JSON object extraction utilities.
+ */
+
 #pragma once
 #include "packages/parson/parson.h"
 

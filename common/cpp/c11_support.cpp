@@ -20,12 +20,15 @@
 
 #ifndef __STDC_LIB_EXT1__
 
+/**
+ * Figure out how many characters we are going to set (either the count or
+ * the max) and only set that many. Also, the real reason the memset_s is
+ * being used is to prevent the clearing away of a buffer that may contain
+ * sensitive information from being optimized away.
+ */
 int memset_s(void *dest, size_t max, int c, size_t count) {
-    // Figure out how many characters we are going to set (either the count or
-    // the max) and only set that many.  Also, the real reason the memset_s is
-    // being used is to prevent the zero-ing of a buffer that may contain
-    // sensitive information from being optimized away.  Convert the pointer to
-    // a volatile to try to prevent the compiler from doing this.
+    // Convert the pointer to a volatile to try to prevent the compiler
+    // from optimizing the clearing away.
     memset(static_cast<void * volatile>(dest), c,  max < count ? max : count);
 
     // If we are able to set all of the bytes, then we return an error.

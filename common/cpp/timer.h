@@ -13,6 +13,11 @@
  * limitations under the License.
  */
 
+/**
+ * @file
+ * Avalon timer utilities.
+ */
+
 #pragma once
 
 #include <stdint.h>

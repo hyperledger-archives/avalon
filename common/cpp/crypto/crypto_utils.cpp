@@ -33,6 +33,7 @@
 #include "c11_support.h"
 #include "crypto.h"
 #include "utils.h"
+
 /*** Conditional compile untrusted/trusted ***/
 #if _UNTRUSTED_
 #include <openssl/crypto.h>
@@ -60,7 +61,8 @@ ByteArray pcrypto::RandomBitString(size_t length) {
     int res = 0;
 
     if (length < 1) {
-        std::string msg("Crypto Error (RandomBitString): length argument must be at least 1");
+        std::string msg("Crypto Error (RandomBitString): "
+            "length argument must be at least 1");
         throw Error::ValueError(msg);
     }
 
@@ -77,14 +79,17 @@ ByteArray pcrypto::RandomBitString(size_t length) {
     return buf;
 }  // pcrypto::RandomBitString
 
-// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-// Compute SHA256 hash of message.data()
-// returns ByteArray containing raw binary data
+
+/**
+ * Compute SHA256 hash of message.data().
+ * Returns ByteArray containing raw binary data.
+ */
 ByteArray pcrypto::ComputeMessageHash(const ByteArray& message) {
     ByteArray hash(SHA256_DIGEST_LENGTH);
     SHA256((const unsigned char*)message.data(), message.size(), hash.data());
     return hash;
 }  // pcrypto::ComputeMessageHash
+
 
 int pcrypto::EVP_DecodeBlock_wrapper(unsigned char* out,
                                      int out_len,
@@ -115,24 +120,29 @@ int pcrypto::decode_base64_block(unsigned char *decoded_data,
     return EVP_DecodeBlock(decoded_data, base64_data, num_of_blocks);
 }
 
-// Create symmetric encryption key and return hex encoded key string
+
+/** Create symmetric encryption key and return hex encoded key string. */
 std::string pcrypto::CreateHexEncodedEncryptionKey() {
     ByteArray enc_key = tcf::crypto::skenc::GenerateKey();
     return ByteArrayToHexEncodedString(enc_key);
 }   // pcrypto::CreateHexEncodedEncryptionKey
 
-// Decrypt cipher using given encryption key and return message
+
+/** Decrypt cipher using given encryption key and return message. */
 std::string pcrypto::DecryptData(std::string cipher, std::string key) {
     ByteArray ciphers_bytes = Base64EncodedStringToByteArray(cipher);
     ByteArray key_bytes = tcf::HexStringToBinary(key);
-    ByteArray msg = tcf::crypto::skenc::DecryptMessage(key_bytes, ciphers_bytes);
+    ByteArray msg = tcf::crypto::skenc::DecryptMessage(key_bytes,
+        ciphers_bytes);
     return ByteArrayToStr(msg);
 }  // pcrypto::DecryptData
 
-// Encrypt the message using given encryption key and return cipher
+
+/** Encrypt the message using given encryption key and return cipher. */
 std::string pcrypto::EncryptData(std::string msg, std::string key) {
     ByteArray msg_bytes = StrToByteArray(msg);
     ByteArray key_bytes = tcf::HexStringToBinary(key);
-    ByteArray cipher = tcf::crypto::skenc::EncryptMessage(key_bytes, msg_bytes);
+    ByteArray cipher = tcf::crypto::skenc::EncryptMessage(key_bytes,
+        msg_bytes);
     return ByteArrayToBase64EncodedString(cipher);
 }  // pcrypto::EncryptData

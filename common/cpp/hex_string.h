@@ -13,19 +13,28 @@
  * limitations under the License.
  */
 
+/**
+ * @file
+ * Avalon hexadecimal string conversion functions.
+ */
+
 #pragma once
 #include <stdint.h>
 #include <string>
 #include <vector>
 
-// This macro calculates the length of the actual data portion of the
-// hex-string encoding of a buffer with x bytes PLUS the additional byte
-// needed for the string terminator.
+/**
+ * This macro calculates the length of the actual data portion of the
+ * hex-string encoding of a buffer with x bytes PLUS the additional byte
+ * needed for the string terminator.
+ */
 #define HEX_STRING_SIZE(x) (static_cast<size_t>(((x) * 2)))
 
 namespace tcf {
-    // Convert a hex string (i.e., a string of characters with values
-    // between '0'-'9', 'A'-'F') to an array of bytes
+    /**
+     * Convert a hex string (i.e., a string of characters with values
+     * between '0'-'9', 'A'-'F') to an array of bytes.
+     */
     std::vector<uint8_t> HexStringToBinary(
         const std::string& inHexString);
 
@@ -34,8 +43,10 @@ namespace tcf {
         size_t inBinaryDataLength,
         const std::string& inHexString);
 
-    // Convert an array of bytes (represented as either a std::vector of
-    // bytes or a raw array) to a hex string.
+    /**
+     * Convert an array of bytes (represented as either a std::vector of
+     * bytes or a raw array) to a hex string.
+     */
     std::string BinaryToHexString(
         const std::vector<uint8_t>& inBinaryData);
     std::string BinaryToHexString(
