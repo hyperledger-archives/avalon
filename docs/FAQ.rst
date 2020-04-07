@@ -19,6 +19,7 @@ Avalon FAQ Sections
 - `Software Development`_
 - `Docker and Containers`_
 - `TEEs and Intel® SGX`_
+- `Videos`_
 - `Glossary`_
 
 Hyperledger Avalon in General
@@ -74,59 +75,6 @@ For details see:
 https://lists.hyperledger.org/g/avalon/topic/68762393
 or
 https://wiki.hyperledger.org/display/avalon/Hyperledger+Avalon
-
-Where are videos about Hyperledger Avalon?
-------------------------------------------
-- *Hyperledger Avalon Hands-on Experience* at
-  Hyperledger Global Forum 2020
-
-  - `Entire presentation (parts 1-5)
-    <https://youtu.be/EdYJ-8eTqNc>`_ (1:30:56)
-  - Or view presentations split into five parts by speaker:
-  - `Part 1: Introduction and Architecture (Eugene Yarmosh)
-    <https://www.youtube.com/watch?v=ex5k5QPSXdU>`_ (19:19)
-  - `Part 2: Cold Chain Supply Chain Case Study (Joshua Satten)
-    <https://youtu.be/hPBRtUhO_w0>`_ (21:31)
-  - `Part 3: Avalon Setup and Development Options (Dan Anderson)
-    <https://youtu.be/DeKixYXddCE>`_ (9:24)
-  - `Part 4: Hyperledger Fabric Development (Tong Li)
-    <https://youtu.be/sA-J-4e--bE>`_ (27:45)
-  - `Part 5: Hyperledger Besu Development (Jim Zhang)
-    <https://youtu.be/WzI6XkJFtF8>`_ (12:50)
-  - Part 6: Tutorial not recorded; see slide link below and
-    `online tutorial
-    <https://github.com/hyperledger/avalon/tree/master/docs/workload-tutorial>`_
-    (Dan Anderson and Manjunath A C)
-  - `Avalon hands-on presentation description and speaker biographies
-    <https://hgf20.sched.com/event/XogI/hands-on-experience-with-avalon-on-how-to-bridge-on-chain-and-off-chain-worlds-yevgeniy-yarmosh-dan-anderson-intel>`_
-  - `PDF slides for Avalon hands-on presentation
-    <https://static.sched.com/hosted_files/hgf20/e3/HLGF-AvalonWorkshop-T.pdf>`_
-
-- `Hyperledger Avalon Installation Part 1: with Docker Containers
-  (Dan Anderson, 2020) <https://youtu.be/uC4mAXrwgoc>`_ (19:22)
-- `Hyperledger Avalon Installation Part 2: Standalone build (without Docker)
-  (Dan Anderson, 2020) <https://youtu.be/XuSbKh0LOCg>`_ (17:06)
-- `Hyperledger Avalon
-  (Manoj Gopalakrishnan, 2019, 20 minutes, begins at 55:57)
-  <https://www.youtube.com/watch?v=N02vxA6qFPg&feature=youtu.be&t=3357>`_
-- `Hyperledger Avalon Developer Forum videos
-  <https://wiki.hyperledger.org/display/avalon/Meetings>`_
-  including:
-
-  - `Introduction to Hyperledger Avalon
-    (Eugene Yarmosh, 2019, 55:54)
-    <https://wiki.hyperledger.org/display/avalon/2019-12-03+Avalon+Introduction>`_
-  - `Hyperledger Avalon Developer Forum Kick-off
-    (Eugene Yarmosh, 2019, 31:56)
-    <https://wiki.hyperledger.org/display/avalon/2019-11-19+Kickoff>`_
-
-- `Hyperledger Avalon Heart Disease Demo
-  (Dan Anderson, 2019, 10:25)
-  <https://youtu.be/6L_UOhi7Rxs>`_
-- `iExec, Microsoft and Intel present Trusted Compute Framework [Avalon] at
-  Devcon (EEA token & other uses)
-  (Sanjay Bakshi and others, 2019, 1:38:18)
-  <https://youtu.be/lveTxAQ6rmQ>`_
 
 What is Trusted Compute Framework (TCF)?
 ----------------------------------------
@@ -345,6 +293,75 @@ When starting Avalon with Intel SGX why do I get an error SGX_ERROR_BUSY from th
 If you are behind a corporate proxy, make sure you have ``proxy type`` and
 ``aesm proxy`` lines set in ``/etc/aesmd.conf`` .
 This file may be overwritten if you reinstall Intel SGX SDK.
+
+
+Videos
+========
+
+- *Hyperledger Avalon Hands-on Experience* at
+  Hyperledger Global Forum 2020
+
+  - `Entire presentation (parts 1-5)
+    <https://youtu.be/EdYJ-8eTqNc>`_ (1:30:56)
+  - Or view presentations split into five parts by speaker:
+  - `Part 1: Introduction and Architecture (Eugene Yarmosh)
+    <https://www.youtube.com/watch?v=ex5k5QPSXdU>`_ (19:19)
+  - `Part 2: Cold Chain Supply Chain Case Study (Joshua Satten)
+    <https://youtu.be/hPBRtUhO_w0>`_ (21:31)
+  - `Part 3: Avalon Setup and Development Options (Dan Anderson)
+    <https://youtu.be/DeKixYXddCE>`_ (9:24)
+  - `Part 4: Hyperledger Fabric Development (Tong Li)
+    <https://youtu.be/sA-J-4e--bE>`_ (27:45)
+  - `Part 5: Hyperledger Besu Development (Jim Zhang)
+    <https://youtu.be/WzI6XkJFtF8>`_ (12:50)
+  - Part 6: Tutorial not recorded; see slide link below and
+    `online tutorial
+    <https://github.com/hyperledger/avalon/tree/master/docs/workload-tutorial>`_
+    (Dan Anderson and Manjunath A C)
+  - `Avalon hands-on presentation description and speaker biographies
+    <https://hgf20.sched.com/event/XogI/hands-on-experience-with-avalon-on-how-to-bridge-on-chain-and-off-chain-worlds-yevgeniy-yarmosh-dan-anderson-intel>`_
+  - `PDF slides for Avalon hands-on presentation
+    <https://static.sched.com/hosted_files/hgf20/e3/HLGF-AvalonWorkshop-T.pdf>`_
+
+- `Hyperledger Avalon Installation Part 1: with Docker Containers
+  (Dan Anderson, 2020) <https://youtu.be/uC4mAXrwgoc>`_ (19:22)
+- `Hyperledger Avalon Installation Part 2: Standalone build (without Docker)
+  (Dan Anderson, 2020) <https://youtu.be/XuSbKh0LOCg>`_ (17:06)
+- `Hyperledger Avalon Application Development
+  (Dan Anderson, 2020) <https://youtu.be/yKDFJH9J3IU>`_ (39:56)
+- `Hyperledger Avalon
+  (Manoj Gopalakrishnan, 2019, 20 minutes, begins at 55:57)
+  <https://www.youtube.com/watch?v=N02vxA6qFPg&feature=youtu.be&t=3357>`_
+
+- `Hyperledger Avalon Developer Forum videos
+  <https://wiki.hyperledger.org/display/avalon/Meetings>`_
+  including:
+
+  - `Introduction to Hyperledger Avalon
+    (Eugene Yarmosh, 2019, 55:54)
+    <https://wiki.hyperledger.org/display/avalon/2019-12-03+Avalon+Introduction>`_
+  - `Hyperledger Avalon Developer Forum Kick-off
+    (Eugene Yarmosh, 2019, 31:56)
+    <https://wiki.hyperledger.org/display/avalon/2019-11-19+Kickoff>`_
+
+- `Hyperledger Avalon Heart Disease Demo
+  (Dan Anderson, 2019, 10:25)
+  <https://youtu.be/6L_UOhi7Rxs>`_
+- `iExec, Microsoft and Intel present Trusted Compute Framework [Avalon] at
+  Devcon (EEA token & other uses)
+  (Sanjay Bakshi and others, 2019, 1:38:18)
+  <https://youtu.be/lveTxAQ6rmQ>`_
+
+What does this error mean: ``avalon_sdk.http_client.http_jrpc_client] operation failed: [Errno 99] Cannot assign requested address``?
+-------------------------------------------------------------------------------------------------------------------------------------
+The requester (client) could not communicate with the Avalon Listener.
+This could be caused by Avalon Listener not running or by not specifying the
+URI of the Avalon Listener. The default URI for the Avalon Listener is
+``http://localhost:1947`` .
+If using Docker, specify the URI as the name of the Docker container running
+the Avalon Listener:  ``http://avalon-listener:1947`` on the
+command line (the option is usually ``--uri`` or ``--service-uri``).
+
 
 
 Glossary

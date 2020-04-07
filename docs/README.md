@@ -3,9 +3,11 @@
 ## Introduction
 * [README](../README.md). Overview of Avalon and its source code
 * [FAQ](./FAQ.rst). Frequently-asked questions with answers about Avalon
-* [Proposal](
+  * [Glossary](./FAQ.rst#glossary)
+  * [Videos](./FAQ.rst#videos)
+* [Avalon Proposal](
   https://wiki.hyperledger.org/pages/viewpage.action?pageId=16324764).
-  Proposal of the project, members, motivation, proposed solutions, and FAQ
+  Avalon Proposal, initial members, motivation, and proposed solutions
   (2019)
 * ["Ecosystem Support for EEA Trusted Compute Specification v1.0 Improves
   Blockchain Privacy and Scalability"](
@@ -49,7 +51,7 @@ Documentation generated will be here:
 
 
 ## Reference
-* [_Hyperleder Avalon Architecture Overview_](
+* [_Hyperledger Avalon Architecture Overview_](
   https://github.com/hyperledger/avalon/blob/master/docs//avalon-arch.pdf).
   Overview of Avalon architecture by Eugene Yarmosh (2020)
 * [ _Off-Chain Trusted Compute Specification_](
