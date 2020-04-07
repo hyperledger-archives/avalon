@@ -262,7 +262,7 @@ class EnclaveManager:
         Parameters:
             - kv_helper is lmdb instance to access database
             - wo_id is work order id of request for which receipt is to be
-              created.
+              updated.
             - wo_json_resp is json rpc response of the work order execution.
             status of the work order receipt and updater signature update in
             the receipt.
