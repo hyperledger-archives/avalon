@@ -27,6 +27,8 @@ VERSION=$$(../bin/get_version)
 # Doxyfile's RECURSIVE=YES makes it also use subdirectories.
 INPUT=	refman/README.md \
 	../common/sgx_workload \
+	../common/crypto_utils \
+	../common/cpp/crypto \
 	../sdk
 EXCLUDE= test \
 	tests \
