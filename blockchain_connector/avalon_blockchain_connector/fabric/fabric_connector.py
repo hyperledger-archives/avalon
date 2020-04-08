@@ -23,15 +23,18 @@ import random
 import nest_asyncio
 
 from utility.hex_utils import byte_array_to_hex_str
-from avalon_sdk.fabric import base
-from avalon_sdk.fabric import event_listener
 from avalon_sdk.worker.worker_details import WorkerType, WorkerStatus
 from error_code.error_status import WorkOrderStatus
-from avalon_sdk.direct.jrpc.jrpc_worker_registry import JRPCWorkerRegistryImpl
-from avalon_sdk.direct.jrpc.jrpc_work_order import JRPCWorkOrderImpl
-from avalon_sdk.fabric.fabric_worker_registry import FabricWorkerRegistryImpl
-from avalon_sdk.fabric.fabric_work_order import FabricWorkOrderImpl
-from avalon_sdk.contract_response.contract_response import ContractResponse
+from avalon_sdk.connector.direct.jrpc.jrpc_worker_registry \
+    import JRPCWorkerRegistryImpl
+from avalon_sdk.connector.direct.jrpc.jrpc_work_order \
+    import JRPCWorkOrderImpl
+from avalon_sdk.connector.blockchains.fabric.fabric_worker_registry \
+    import FabricWorkerRegistryImpl
+from avalon_sdk.connector.blockchains.fabric.fabric_work_order \
+    import FabricWorkOrderImpl
+from avalon_sdk.connector.blockchains.common.contract_response \
+    import ContractResponse
 
 logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(message)s", level=logging.INFO)

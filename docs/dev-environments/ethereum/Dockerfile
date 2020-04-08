@@ -25,10 +25,10 @@ WORKDIR my_project
 RUN truffle init
 
 # Copy contracts to the newly created truffle project
-COPY ./sdk/avalon_sdk/ethereum/contracts/*sol contracts/
+COPY ./sdk/avalon_sdk/connector/blockchains/ethereum/contracts/*sol contracts/
 
 # Copy the config file which has Avalon specific networks/configs defined
-COPY ./sdk/avalon_sdk/ethereum/truffle_artifacts/truffle-config.js ./
+COPY ./sdk/avalon_sdk/connector/blockchains/ethereum/truffle_artifacts/truffle-config.js ./
 
 # Copy the migration script
-COPY ./sdk/avalon_sdk/ethereum/truffle_artifacts/2_deploy_contracts.js migrations/
+COPY ./sdk/avalon_sdk/connector/blockchains/ethereum/truffle_artifacts/2_deploy_contracts.js migrations/

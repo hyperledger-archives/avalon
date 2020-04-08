@@ -205,6 +205,10 @@ RUN apt-get update \
  && pip3 install json-rpc web3 py-solc-x nose2 \
  && echo "Install fabric python sdk\n" \
  && pip3 install virtualenv \
+ && echo "fastapi==0.27.*" >>requirement.txt \
+ && echo "grpcio-tools==1.21.*" >>requirement.txt \
+ && echo "uvicorn==0.7.*" >>requirement.txt \
+ && pip3 install -r requirement.txt \
  && pip3 install git+https://github.com/hyperledger/fabric-sdk-py.git \
  && apt-get autoremove --purge -y -q python3-pip git
  
@@ -226,8 +230,8 @@ COPY ./config/tcs_config.toml /project/avalon/config/
 COPY ./tests /project/avalon/tests
 COPY ./sdk/avalon_sdk/tcf_connector.toml /project/avalon/sdk/avalon_sdk/
 COPY ./examples/apps/ /project/avalon/examples/apps
-COPY ./sdk/avalon_sdk/ethereum/contracts /project/avalon/sdk/avalon_sdk/ethereum/contracts
-COPY ./sdk/avalon_sdk/fabric/methods.json /project/avalon/sdk/avalon_sdk/fabric/
+COPY ./sdk/avalon_sdk/connector/blockchains/ethereum/contracts /project/avalon/sdk/avalon_sdk/connector/blockchains/ethereum/contracts
+COPY ./sdk/avalon_sdk/connector/blockchains/fabric/methods.json /project/avalon/sdk/avalon_sdk/connector/blockchains/fabric/
 
 # Copy Python build artifacts
 COPY --from=common_python_image /project/avalon/common/python/dist/*.whl dist/

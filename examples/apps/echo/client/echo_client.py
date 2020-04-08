@@ -28,7 +28,7 @@ import avalon_crypto_utils.crypto_utility as utility
 from avalon_sdk.worker.worker_details import WorkerType
 import avalon_sdk.worker.worker_details as worker
 from avalon_sdk.work_order.work_order_params import WorkOrderParams
-from avalon_sdk.direct.avalon_direct_client \
+from avalon_sdk.connector.direct.avalon_direct_client \
     import AvalonDirectClient
 import avalon_crypto_utils.crypto.crypto as crypto
 from error_code.error_status import WorkOrderStatus, ReceiptCreateStatus

@@ -17,7 +17,7 @@ import json
 import logging
 from error_code.error_status import WorkOrderStatus
 from error_code.enclave_error import EnclaveError
-from avalon_sdk.direct.jrpc.jrpc_util import JsonRpcErrorCode
+from avalon_sdk.connector.direct.jrpc.jrpc_util import JsonRpcErrorCode
 from avalon_sdk.work_order.work_order_request_validator \
     import WorkOrderRequestValidator
 from avalon_listener.tcs_work_order_handler import TCSWorkOrderHandler

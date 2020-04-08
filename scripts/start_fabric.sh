@@ -139,7 +139,7 @@ elif [ $START_FABRIC == 1 ]; then
     else
         echo "Copying avalon fabric chaincodes to $WORK_DIR/vars/chaincode"
         mkdir -p ./vars/chaincode
-        cp -R $TCF_HOME/sdk/avalon_sdk/fabric/chaincode/* vars/chaincode/
+        cp -R $TCF_HOME/sdk/avalon_sdk/connector/blockchains/fabric/chaincode/* vars/chaincode/
     fi
 
     # If already fabric network up and running skip start again.

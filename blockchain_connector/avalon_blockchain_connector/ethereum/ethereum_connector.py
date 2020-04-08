@@ -24,17 +24,17 @@ from avalon_sdk.worker.worker_details import WorkerType, WorkerStatus
 import avalon_sdk.worker.worker_details as worker_details
 from avalon_sdk.work_order.work_order_params import WorkOrderParams
 
-from avalon_sdk.ethereum.ethereum_work_order \
+from avalon_sdk.connector.blockchains.ethereum.ethereum_work_order \
     import EthereumWorkOrderProxyImpl
-from avalon_sdk.ethereum.ethereum_worker_registry \
+from avalon_sdk.connector.blockchains.ethereum.ethereum_worker_registry \
     import EthereumWorkerRegistryImpl
-from avalon_sdk.ethereum.ethereum_wrapper \
+from avalon_sdk.connector.blockchains.ethereum.ethereum_wrapper \
     import EthereumWrapper
-from avalon_sdk.ethereum.ethereum_listener \
+from avalon_sdk.connector.blockchains.ethereum.ethereum_listener \
     import BlockchainInterface, EventProcessor
-from avalon_sdk.direct.jrpc.jrpc_worker_registry \
+from avalon_sdk.connector.direct.jrpc.jrpc_worker_registry \
     import JRPCWorkerRegistryImpl
-from avalon_sdk.direct.jrpc.jrpc_work_order \
+from avalon_sdk.connector.direct.jrpc.jrpc_work_order \
     import JRPCWorkOrderImpl
 
 

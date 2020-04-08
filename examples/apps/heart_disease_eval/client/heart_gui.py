@@ -37,7 +37,7 @@ import avalon_crypto_utils.crypto_utility as utility
 import avalon_sdk.worker.worker_details as worker
 from avalon_sdk.worker.worker_details import WorkerType
 from avalon_sdk.work_order.work_order_params import WorkOrderParams
-from avalon_sdk.direct.avalon_direct_client import AvalonDirectClient
+from avalon_sdk.connector.direct.avalon_direct_client import AvalonDirectClient
 import config.config as pconfig
 import utility.logger as plogger
 import avalon_crypto_utils.crypto.crypto as crypto
