@@ -42,8 +42,6 @@ import avalon_crypto_utils.signature as signature
 from error_code.error_status import SignatureStatus
 from avalon_sdk.work_order_receipt.work_order_receipt \
     import WorkOrderReceiptRequest
-# from avalon_sdk.fabric.fabric_worker_registry import FabricWorkerRegistryImpl
-# from avalon_sdk.fabric.fabric_work_order import FabricWorkOrderImpl
 from avalon_sdk.ethereum.ethereum_worker_registry \
     import EthereumWorkerRegistryImpl
 from avalon_sdk.ethereum.ethereum_work_order import EthereumWorkOrderProxyImpl
@@ -78,8 +76,7 @@ def _parse_command_line(args):
         "-b", "--blockchain",
         help="Blockchain type to use in proxy model",
         choices={"fabric", "ethereum"},
-        type=str,
-        default="ethereum"
+        type=str
     )
     parser.add_argument(
         "-a", "--address",
@@ -290,9 +287,7 @@ def _verify_wo_res_signature(work_order_res,
 
 def _create_worker_registry_instance(blockchain_type, config):
     # create worker registry instance for direct/proxy model
-    if blockchain_type == 'fabric':
-        return FabricWorkerRegistryImpl(config)
-    elif blockchain_type == 'ethereum':
+    if blockchain_type == 'ethereum':
         return EthereumWorkerRegistryImpl(config)
     else:
         return JRPCWorkerRegistryImpl(config)
@@ -300,9 +295,7 @@ def _create_worker_registry_instance(blockchain_type, config):
 
 def _create_work_order_instance(blockchain_type, config):
     # create work order instance for direct/proxy model
-    if blockchain_type == 'fabric':
-        return FabricWorkOrderImpl(config)
-    elif blockchain_type == 'ethereum':
+    if blockchain_type == 'ethereum':
         return EthereumWorkOrderProxyImpl(config)
     else:
         return JRPCWorkOrderImpl(config)
@@ -310,52 +303,21 @@ def _create_work_order_instance(blockchain_type, config):
 
 def _create_work_order_receipt_instance(blockchain_type, config):
     # create work order receipt instance for direct/proxy model
-    if blockchain_type == 'fabric':
-        return None
-    elif blockchain_type == 'ethereum':
+    if blockchain_type == 'ethereum':
         # TODO need to implement
         return None
     else:
         return JRPCWorkOrderReceiptImpl(config)
 
 
-def _get_work_order_result(blockchain_type, work_order,
-                           work_order_id, jrpc_req_id):
+def _get_work_order_result(work_order, work_order_id,
+                           jrpc_req_id):
     # Get the work order result for direct/proxy model
 
-    if blockchain_type == 'fabric':
-        event_handler = work_order.get_work_order_completed_event_handler(
-            _handle_fabric_event
+    res = work_order.work_order_get_result(
+        work_order_id, jrpc_req_id
         )
-        if event_handler:
-            tasks = [
-                event_handler.start_event_handling(),
-                event_handler.stop_event_handling(int(100))
-            ]
-            loop = asyncio.get_event_loop()
-            loop.run_until_complete(
-                asyncio.wait(tasks,
-                             return_when=asyncio.ALL_COMPLETED))
-            loop.close()
-    else:
-        res = work_order.work_order_get_result(
-            work_order_id,
-            jrpc_req_id
-        )
-        return res
-
-
-def _handle_fabric_event(event, block_num, txn_id, status):
-    payload = event['payload'].decode("utf-8")
-    resp = json.loads(payload)
-    wo_resp = json.loads(resp["workOrderResponse"])
-    logger.info("Work order response {}".format(wo_resp))
-    if wo_resp["workOrderId"] == wo_id:
-        logging.info("Event payload: {}\n Block number: {}\n"
-                     "Transaction id: {}\n Status {}".format(
-                         event, block_num, txn_id, status
-                     ))
-        _verify_work_order_response(res["workOrderResponse"])
+    return res
 
 
 def _get_first_active_worker(worker_registry, worker_id, config):
@@ -566,8 +528,8 @@ def Main(args=None):
                                    client_private_key, jrpc_req_id)
 
     # Retrieve work order result
-    res = _get_work_order_result(blockchain, work_order,
-                                 wo_params.get_work_order_id(), jrpc_req_id+1)
+    res = _get_work_order_result(work_order, wo_params.get_work_order_id(),
+                                 jrpc_req_id+1)
     if res:
         logger.info("Work order get result : {}\n ".format(
             json.dumps(res, indent=4)
