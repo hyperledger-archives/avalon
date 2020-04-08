@@ -29,22 +29,23 @@ import avalon_crypto_utils.crypto_utility as crypto_utility
 from avalon_sdk.worker.worker_details import WorkerType, WorkerStatus
 import avalon_sdk.worker.worker_details as worker_details
 from avalon_sdk.work_order.work_order_params import WorkOrderParams
-from avalon_sdk.ethereum.ethereum_worker_registry_list import \
-    EthereumWorkerRegistryListImpl
-from avalon_sdk.direct.jrpc.jrpc_worker_registry import \
+from avalon_sdk.connector.blockchains.ethereum.ethereum_worker_registry_list \
+    import EthereumWorkerRegistryListImpl
+from avalon_sdk.connector.direct.jrpc.jrpc_worker_registry import \
     JRPCWorkerRegistryImpl
-from avalon_sdk.direct.jrpc.jrpc_work_order import \
+from avalon_sdk.connector.direct.jrpc.jrpc_work_order import \
     JRPCWorkOrderImpl
-from avalon_sdk.direct.jrpc.jrpc_work_order_receipt \
+from avalon_sdk.connector.direct.jrpc.jrpc_work_order_receipt \
     import JRPCWorkOrderReceiptImpl
 from error_code.error_status import WorkOrderStatus, ReceiptCreateStatus
 import avalon_crypto_utils.signature as signature
 from error_code.error_status import SignatureStatus
 from avalon_sdk.work_order_receipt.work_order_receipt \
     import WorkOrderReceiptRequest
-from avalon_sdk.ethereum.ethereum_worker_registry \
+from avalon_sdk.connector.blockchains.ethereum.ethereum_worker_registry \
     import EthereumWorkerRegistryImpl
-from avalon_sdk.ethereum.ethereum_work_order import EthereumWorkOrderProxyImpl
+from avalon_sdk.connector.blockchains.ethereum.ethereum_work_order \
+    import EthereumWorkOrderProxyImpl
 
 
 # Remove duplicate loggers
@@ -316,7 +317,7 @@ def _get_work_order_result(work_order, work_order_id,
 
     res = work_order.work_order_get_result(
         work_order_id, jrpc_req_id
-        )
+    )
     return res
 
 

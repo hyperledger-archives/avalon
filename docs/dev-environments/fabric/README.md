@@ -20,7 +20,7 @@ curl -o minifab -sL https://tinyurl.com/twrt8zv && chmod +x minifab
 The Fabric connection profile is vars/mychannel_connection.json which is needed for application to connect to Fabric network
 
 
-### Extract Avalon [chaincode](https://github.com/hyperledger/avalon/tree/master/sdk/avalon_sdk/fabric/chaincode) and deploy them on the Fabirc network
+### Extract Avalon [chaincode](https://github.com/hyperledger/avalon/tree/master/sdk/avalon_sdk/connector/blockchains/fabric/chaincode) and deploy them on the Fabric network
 
 ```
 ./getandinstall.sh
@@ -28,7 +28,7 @@ The Fabric connection profile is vars/mychannel_connection.json which is needed 
 
 
 ### Run your tests
-Once you have all the chaincode installed and connection profile available, you can use [Avalon python connector libary](https://github.com/hyperledger/avalon/tree/master/sdk/avalon_sdk/fabric) to make Avalon API 1.1 calls.
+Once you have all the chaincode installed and connection profile available, you can use [Avalon python connector library](https://github.com/hyperledger/avalon/tree/master/sdk/avalon_sdk/connector/blockchains/fabric) to make Avalon API 1.1 calls.
 
 Watch the [demo](https://wiki.hyperledger.org/display/avalon/2020-02-11+Fabric+integration) to learn more.
 

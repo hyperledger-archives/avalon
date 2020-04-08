@@ -29,11 +29,11 @@ type = "ethereum"
 
 [ethereum]
 # Direct registry contract file
-direct_registry_contract_file = "sdk/avalon_sdk/ethereum/contracts/WorkerRegistryList.sol"
+direct_registry_contract_file = "sdk/avalon_sdk/connector/blockchains/ethereum/contracts/WorkerRegistryList.sol"
 # Worker registry contract file
-worker_registry_contract_file = "sdk/avalon_sdk/ethereum/contracts/WorkerRegistry.sol"
-# Worker registry contract file
-work_order_contract_file = "sdk/avalon_sdk/ethereum/contracts/WorkOrderRegistry.sol"
+worker_registry_contract_file = "sdk/avalon_sdk/connector/blockchains/ethereum/contracts/WorkerRegistry.sol"
+# Work Order registry contract file
+work_order_contract_file = "sdk/avalon_sdk/connector/blockchains/ethereum/contracts/WorkOrderRegistry.sol"
 
 # Initially deploy the contracts using eth_cli.py to get the these addresses
 # Deployed contract address of direct registry contract address.
@@ -70,7 +70,7 @@ gas_price = "100"
 
 # Fabric blockchain
 [fabric]
-fabric_network_file = "sdk/avalon_sdk/fabric/network.json"
+fabric_network_file = "sdk/avalon_sdk/connector/blockchains/fabric/network.json"
 channel_name = "mychannel"
 
 [WorkerConfig]

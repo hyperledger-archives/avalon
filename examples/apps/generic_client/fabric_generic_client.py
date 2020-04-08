@@ -28,22 +28,25 @@ import avalon_crypto_utils.crypto_utility as crypto_utility
 from avalon_sdk.worker.worker_details import WorkerType, WorkerStatus
 import avalon_sdk.worker.worker_details as worker_details
 from avalon_sdk.work_order.work_order_params import WorkOrderParams
-from avalon_sdk.ethereum.ethereum_worker_registry_list import \
-    EthereumWorkerRegistryListImpl
-from avalon_sdk.direct.jrpc.jrpc_worker_registry import \
+from avalon_sdk.connector.blockchains.ethereum.ethereum_worker_registry_list \
+    import EthereumWorkerRegistryListImpl
+from avalon_sdk.connector.direct.jrpc.jrpc_worker_registry import \
     JRPCWorkerRegistryImpl
-from avalon_sdk.direct.jrpc.jrpc_work_order import \
+from avalon_sdk.connector.direct.jrpc.jrpc_work_order import \
     JRPCWorkOrderImpl
-from avalon_sdk.direct.jrpc.jrpc_work_order_receipt \
+from avalon_sdk.connector.direct.jrpc.jrpc_work_order_receipt \
     import JRPCWorkOrderReceiptImpl
 from error_code.error_status import WorkOrderStatus, ReceiptCreateStatus
 import avalon_crypto_utils.signature as signature
 from error_code.error_status import SignatureStatus
 from avalon_sdk.work_order_receipt.work_order_receipt \
     import WorkOrderReceiptRequest
-from avalon_sdk.fabric.fabric_worker_registry import FabricWorkerRegistryImpl
-from avalon_sdk.fabric.fabric_work_order import FabricWorkOrderImpl
-from avalon_sdk.contract_response.contract_response import ContractResponse
+from avalon_sdk.connector.blockchains.fabric.fabric_worker_registry \
+    import FabricWorkerRegistryImpl
+from avalon_sdk.connector.blockchains.fabric.fabric_work_order \
+    import FabricWorkOrderImpl
+from avalon_sdk.connector.blockchains.common.contract_response \
+    import ContractResponse
 
 # Remove duplicate loggers
 for handler in logging.root.handlers[:]:
