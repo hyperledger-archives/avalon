@@ -2,9 +2,7 @@
 1.  Install ``curl``, ``docker`` and ``docker-compose``.
     See [PREREQUISITES](PREREQUISITES.md#docker) for instructions for Docker.
 
-2.  Set the environment variable ``TCF_HOME`` to the Avalon root directory
-
-3.  If the host machine is behind any firewall/proxy, you need to define the
+2.  If the host machine is behind any firewall/proxy, you need to define the
     following parameters in /etc/environment file:
     http_proxy=<http-proxy-url>:<port>
     https_proxy=<https-proxy-url>:<port>
@@ -18,11 +16,11 @@
     If, you modify the number of orderers, peers or organisations, please update
     the no_proxy accordingly.
 
-4.  Start the Fabric network with 2 organizations, 4 peers and 3 orderers
+3.  Start the Fabric network with 2 organizations, 4 peers and 3 orderers
     using the ``start_fabric.sh`` script.
     ```
     cd $TCF_HOME
-    ./scripts/start_fabric.sh start
+    ./scripts/start_fabric.sh -u
     ```
     Starting Fabric Docker containers will take some time.
     Once it is up and running check for Fabric containers named
@@ -46,6 +44,6 @@
     ````
 6. To stop fabric network run below command
     ```
-    ./scripts/start_fabric.sh stop
+    ./scripts/start_fabric.sh -d
     ```
 
