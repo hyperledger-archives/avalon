@@ -245,12 +245,13 @@ do
         ;;
     esac
 done
+
 # Default to lint all modules if no module is specified
 if [ -z "$@" ]; then
-    echo "$0: No target MODULE(s) specified to lint."
-    usage
+    echo "No target MODULE(s) specified to lint."
+    echo "For usage information, type: run_lint -h."
     echo ""
-    echo "Lint will be run on all modules(default) now."
+    echo "Lint will run on all modules (default)."
     echo ""
     MODULES=$ALL_MODULES
 else
