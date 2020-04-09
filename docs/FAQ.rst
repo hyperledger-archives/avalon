@@ -42,6 +42,16 @@ The TCS is defined by the Enterprise Ethereum Alliance (EEA) Task Force and
 is at
 https://entethalliance.github.io/trusted-computing/spec.html
 
+What is the difference between Proxy Mode and Direct Mode?
+----------------------------------------------------------
+Proxy Mode is where the requester (client) executes a smart contract
+(or chaincode or similar) on the blockchain.
+The smart contract event invokes Avalon and Avalon executes an
+Avalon workload processor through the Blockchain Connector
+interface for that blockchain platform (Ethereum, Fabric, etc.).
+Direct mode is where the requester (client) operates directly with
+Avalon workload processors (via the HTTP JRPC listener), without a blockchain.
+
 How is Avalon source code licensed?
 -----------------------------------
 As with all Hyperledger projects, Avalon is Apache 2.0 licensed.
@@ -204,6 +214,17 @@ in a single HTTP request. This field would play a role there to map requests
 to responses. A shift from HTTP (synchronous request-response) would also
 require proper handling of this field.
 
+What does this error mean: ``avalon_sdk.http_client.http_jrpc_client] operation failed: [Errno 99] Cannot assign requested address``?
+-------------------------------------------------------------------------------------------------------------------------------------
+The requester (client) could not communicate with the Avalon Listener.
+This could be caused by Avalon Listener not running or by not specifying the
+URI of the Avalon Listener. The default URI for the Avalon Listener is
+``http://localhost:1947`` .
+If using Docker, specify the URI as the name of the Docker container running
+the Avalon Listener:  ``http://avalon-listener:1947`` on the
+command line (the option is usually ``--uri`` or ``--service-uri``).
+
+
 
 Docker and Containers
 =====================
@@ -298,6 +319,18 @@ This file may be overwritten if you reinstall Intel SGX SDK.
 Videos
 ========
 
+- Introduction
+
+  - `Introduction to Hyperledger Avalon (Manoj Gopalakrishnan, 2019)
+    <https://youtu.be/YRXfzHzJVaU>`_
+    (from Hyperledger India Meetup) (20:24)
+  - `Introduction and Architecture (Eugene Yarmosh, 2020)
+    <https://www.youtube.com/watch?v=ex5k5QPSXdU>`_
+    (from Hyperledger Global Forum) (19:19)
+  - `Hyperledger Avalon Introduction (Eugene Yarmosh, 2019)
+    <https://youtu.be/KCa0Z2-Yins>`_
+    (from Avalon Developer Forum) (49:26)
+
 - *Hyperledger Avalon Hands-on Experience* at
   Hyperledger Global Forum 2020
 
@@ -314,54 +347,38 @@ Videos
     <https://youtu.be/sA-J-4e--bE>`_ (27:45)
   - `Part 5: Hyperledger Besu Development (Jim Zhang)
     <https://youtu.be/WzI6XkJFtF8>`_ (12:50)
-  - Part 6: Tutorial not recorded; see slide link below and
-    `online tutorial
+  - Part 6: Tutorial (Dan Anderson and Manjunath A C).
+    Not recorded; instead see
+    `tutorial instructions
     <https://github.com/hyperledger/avalon/tree/master/docs/workload-tutorial>`_
-    (Dan Anderson and Manjunath A C)
-  - `Avalon hands-on presentation description and speaker biographies
+    and
+    `tutorial video <https://youtu.be/yKDFJH9J3IU>`_
+  - `Presentation description and speaker biographies
     <https://hgf20.sched.com/event/XogI/hands-on-experience-with-avalon-on-how-to-bridge-on-chain-and-off-chain-worlds-yevgeniy-yarmosh-dan-anderson-intel>`_
-  - `PDF slides for Avalon hands-on presentation
+  - `PDF slideset for these presentations
     <https://static.sched.com/hosted_files/hgf20/e3/HLGF-AvalonWorkshop-T.pdf>`_
 
 - `Hyperledger Avalon Installation Part 1: with Docker Containers
   (Dan Anderson, 2020) <https://youtu.be/uC4mAXrwgoc>`_ (19:22)
 - `Hyperledger Avalon Installation Part 2: Standalone build (without Docker)
   (Dan Anderson, 2020) <https://youtu.be/XuSbKh0LOCg>`_ (17:06)
-- `Hyperledger Avalon Application Development
+- `Hyperledger Avalon Application Development Tutorial
   (Dan Anderson, 2020) <https://youtu.be/yKDFJH9J3IU>`_ (39:56)
-- `Hyperledger Avalon
-  (Manoj Gopalakrishnan, 2019, 20 minutes, begins at 55:57)
-  <https://www.youtube.com/watch?v=N02vxA6qFPg&feature=youtu.be&t=3357>`_
 
 - `Hyperledger Avalon Developer Forum videos
   <https://wiki.hyperledger.org/display/avalon/Meetings>`_
-  including:
 
-  - `Introduction to Hyperledger Avalon
-    (Eugene Yarmosh, 2019, 55:54)
-    <https://wiki.hyperledger.org/display/avalon/2019-12-03+Avalon+Introduction>`_
   - `Hyperledger Avalon Developer Forum Kick-off
-    (Eugene Yarmosh, 2019, 31:56)
-    <https://wiki.hyperledger.org/display/avalon/2019-11-19+Kickoff>`_
+    (Eugene Yarmosh, 2019)
+    <https://wiki.hyperledger.org/display/avalon/2019-11-19+Kickoff>`_ (31:56)
 
 - `Hyperledger Avalon Heart Disease Demo
-  (Dan Anderson, 2019, 10:25)
-  <https://youtu.be/6L_UOhi7Rxs>`_
+  (Dan Anderson, 2019)
+  <https://youtu.be/6L_UOhi7Rxs>`_ (10:25)
 - `iExec, Microsoft and Intel present Trusted Compute Framework [Avalon] at
   Devcon (EEA token & other uses)
-  (Sanjay Bakshi and others, 2019, 1:38:18)
-  <https://youtu.be/lveTxAQ6rmQ>`_
-
-What does this error mean: ``avalon_sdk.http_client.http_jrpc_client] operation failed: [Errno 99] Cannot assign requested address``?
--------------------------------------------------------------------------------------------------------------------------------------
-The requester (client) could not communicate with the Avalon Listener.
-This could be caused by Avalon Listener not running or by not specifying the
-URI of the Avalon Listener. The default URI for the Avalon Listener is
-``http://localhost:1947`` .
-If using Docker, specify the URI as the name of the Docker container running
-the Avalon Listener:  ``http://avalon-listener:1947`` on the
-command line (the option is usually ``--uri`` or ``--service-uri``).
-
+  (Sanjay Bakshi and others, 2019)
+  <https://youtu.be/lveTxAQ6rmQ>`_  (1:38:18)
 
 
 Glossary
