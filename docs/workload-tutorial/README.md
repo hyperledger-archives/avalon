@@ -5,6 +5,8 @@ https://creativecommons.org/licenses/by/4.0/
 
 # Avalon Worker Application Development Tutorial
 
+- [Video Presentation](#video)
+- [Directory Structure](#directory)
 - [Prerequisites](#prerequisites)
 - [Phase 1: Avalon Plug-in Code](#phase1)
 - [Phase 2: Worker-specific Code](#phase2)
@@ -17,6 +19,14 @@ Then we show how to modify the files to create a workload application.
 
 The example we create will be a workload application that takes a name as
 input and echos back "Hello *name*".
+
+## <a name="video"></a>Video Presentation
+
+[![Sawtooth Application development video](../../images/screenshot-introduction-to-application-development.jpg)
+*Video presentation*](https://youtu.be/yKDFJH9J3IU)
+
+
+## <a name="directory"></a>Directory Structure
 
 Under directory `hello_world/` are the desired results of modifying the
 template files, `hello_world/stage_1` and, with further modifications,
