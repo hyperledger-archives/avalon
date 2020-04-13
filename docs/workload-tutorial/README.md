@@ -19,8 +19,8 @@ Then we show how to modify the files to create a workload application.
 The example we create will be a workload application that takes a name as
 input and echos back "Hello *name*".
 
-[![Hyperledger Avalon Application Development
-video](../../images/screenshot-hyperledger-avalon-application-development.jpg)
+[![Hyperledger Avalon Application Development video
+](../../images/screenshot-hyperledger-avalon-application-development.jpg)
 <br />*Video presentation (39:56)*](https://youtu.be/yKDFJH9J3IU)
 
 
