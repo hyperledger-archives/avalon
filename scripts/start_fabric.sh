@@ -123,6 +123,8 @@ if [[ -z "$TCF_HOME" ]] ; then
 fi
 
 export PATH=$MINIFAB_INSTALL_DIR/:$PATH
+# Create work dir
+mkdir -p $WORK_DIR
 cd $WORK_DIR
 
 if [ $STOP_FABRIC == 1 ]; then
