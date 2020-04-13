@@ -15,8 +15,9 @@
   Introductory blog by Michael Reed (2019)
 
 [![Introduction to Hyperledger Avalon video
-video](../../images/screenshot-introduction-to-hyperledger-avalon.jpg)
-<br />*Introduction to Hyperledger Avalon video (20:24)*](https://youtu.be/YRXfzHzJVaU)
+](/../images/screenshot-introduction-to-hyperledger-avalon.jpg)
+<br />*Introduction to Hyperledger Avalon video
+(20:24)*](https://youtu.be/YRXfzHzJVaU)
 
 ## Community
 * [Project Wiki](https://wiki.hyperledger.org/display/avalon/Hyperledger+Avalon)
