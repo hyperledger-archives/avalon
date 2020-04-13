@@ -34,7 +34,7 @@ from avalon_sdk.direct.jrpc.jrpc_worker_registry import \
 from avalon_sdk.direct.jrpc.jrpc_work_order import \
     JRPCWorkOrderImpl
 from avalon_sdk.direct.jrpc.jrpc_work_order_receipt \
-     import JRPCWorkOrderReceiptImpl
+    import JRPCWorkOrderReceiptImpl
 from error_code.error_status import WorkOrderStatus, ReceiptCreateStatus
 import avalon_crypto_utils.signature as signature
 from error_code.error_status import SignatureStatus
@@ -126,8 +126,8 @@ def _retrieve_uri_from_registry_list(config):
     # Get block chain type
     blockchain_type = config['blockchain']['type']
     if blockchain_type == "Ethereum":
-            worker_registry_list = EthereumWorkerRegistryListImpl(
-                config)
+        worker_registry_list = EthereumWorkerRegistryListImpl(
+            config)
     else:
         worker_registry_list = None
         logger.error("\n Worker registry list is currently supported only for "
@@ -239,9 +239,9 @@ def _create_work_order_receipt(wo_receipt, wo_params,
 def _retrieve_work_order_receipt(wo_receipt, wo_params, jrpc_req_id):
     # Retrieve work order receipt
     receipt_res = wo_receipt.work_order_receipt_retrieve(
-                        wo_params.get_work_order_id(),
-                        id=jrpc_req_id
-                    )
+        wo_params.get_work_order_id(),
+        id=jrpc_req_id
+    )
     logger.info("\n Retrieve receipt response:\n {}".format(
         json.dumps(receipt_res, indent=4)
     ))
@@ -462,7 +462,7 @@ def Main(args=None):
         # Decrypt work order response
         if show_decrypted_output:
             decrypted_res = crypto_utility.decrypted_response(
-                    res['result'], session_key, session_iv)
+                res['result'], session_key, session_iv)
             logger.info("\nDecrypted response:\n {}"
                         .format(decrypted_res))
     else:
@@ -478,8 +478,13 @@ def Main(args=None):
             = _retrieve_work_order_receipt(wo_receipt,
                                            wo_params, jrpc_req_id)
         # Verify receipt signature
-        if _verify_receipt_signature(retrieve_wo_receipt) is False:
-            logger.error("Receipt signature verification Failed")
+        if "result" in retrieve_wo_receipt:
+            if _verify_receipt_signature(
+                    retrieve_wo_receipt) is False:
+                logger.error("Receipt signature verification Failed")
+                sys.exit(1)
+        else:
+            logger.info("Work Order receipt retrieve failed")
             sys.exit(1)
 
 
