@@ -19,8 +19,8 @@ Then we show how to modify the files to create a workload application.
 The example we create will be a workload application that takes a name as
 input and echos back "Hello *name*".
 
-[![Sawtooth Application development video](../../images/screenshot-introduction-to-application-development.jpg) 
-*Video presentation*](https://youtu.be/yKDFJH9J3IU)
+[![Sawtooth Application development video](../../images/screenshot-introduction-to-application-development.jpg)
+<br />*Video presentation*](https://youtu.be/yKDFJH9J3IU)
 
 
 ## <a name="directory"></a>Directory Structure
