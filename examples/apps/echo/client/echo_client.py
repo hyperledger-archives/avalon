@@ -356,15 +356,21 @@ def Main(args=None):
     logger.info("\n Last update to receipt receipt is:\n {}".format(
         json.dumps(receipt_update_retrieve, indent=4)
     ))
-    status = sig_obj.verify_update_receipt_signature(
-        receipt_update_retrieve['result'])
-    if status == SignatureStatus.PASSED:
-        logger.info(
-            "Work order receipt retrieve signature verification Successful")
+    if "result" in receipt_update_retrieve:
+        status = sig_obj.verify_update_receipt_signature(
+            receipt_update_retrieve['result'])
+        if status == SignatureStatus.PASSED:
+            logger.info(
+                "Work order receipt retrieve signature" +
+                " verification Successful")
+        else:
+            logger.info(
+                "Work order receipt retrieve signature" +
+                " verification failed!!")
+            sys.exit(1)
     else:
-        logger.info(
-            "Work order receipt retrieve signature verification failed!!")
-        sys.exit(1)
+        logger.info("Work order receipt update failed")
+
     # Receipt lookup based on requesterId
     req_id += 1
     receipt_lookup_res = wo_receipt_instance.work_order_receipt_lookup(

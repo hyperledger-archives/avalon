@@ -298,7 +298,7 @@ class GenericClient():
         # Verify receipt signature
         sig_obj = signature.ClientSignature()
         status = sig_obj.verify_update_receipt_signature(
-            receipt_update_retrieve)
+            receipt_update_retrieve["result"])
         if status == SignatureStatus.PASSED:
             logger.info(
                 "Work order receipt retrieve signature verification " +
@@ -604,9 +604,13 @@ def Main(args=None):
                 wo_receipt,
                 wo_params, jrpc_req_id)
         # Verify receipt signature
-        if generic_client.verify_receipt_signature(
-                retrieve_wo_receipt) is False:
-            logger.error("Receipt signature verification Failed")
+        if "result" in retrieve_wo_receipt:
+            if generic_client.verify_receipt_signature(
+                    retrieve_wo_receipt) is False:
+                logger.error("Receipt signature verification Failed")
+                sys.exit(1)
+        else:
+            logger.info("Work Order receipt retrieve failed")
             sys.exit(1)
 
 
