@@ -15,7 +15,7 @@
   Introductory blog by Michael Reed (2019)
 
 [![Introduction to Hyperledger Avalon video
-](/../images/screenshot-introduction-to-hyperledger-avalon.jpg)
+](../images/screenshot-introduction-to-hyperledger-avalon.jpg)
 <br />*Introduction to Hyperledger Avalon video
 (20:24)*](https://youtu.be/YRXfzHzJVaU)
 
