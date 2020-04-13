@@ -4,6 +4,11 @@ This demo performs a heart disease evaluation based on input parameters.
 Three clients are available: batch command line client,
 interactive command line client, and GUI client.
 
+[![Heart disease evaluation demo video
+](../../../images/screenshot-introduction-to-hyperledger-avalon.jpg)
+<br />*Heart Disease evaluation demo video
+(10:26)*](https://youtu.be/6L_UOhi7Rxs)
+
 
 ## Using the Heart Disease Evaluation Batch Command Line Client
 
