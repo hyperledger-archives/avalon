@@ -135,7 +135,8 @@ RUN echo "Building Avalon SDK\n" \
 #Build Avalon Listener intermediate docker image
 FROM base_image as build_image
 
-RUN apt-get install -y -q \
+RUN apt-get update \
+ && apt-get install -y -q \
     build-essential \
     software-properties-common \
     pkg-config \

@@ -138,7 +138,8 @@ RUN echo "Building Avalon Common Python\n" \
 #Build common/crypto_utils intermediate docker image
 FROM python_image as common_crypto_utils_image
 
-RUN apt-get install -y -q \
+RUN apt-get update \
+ && apt-get install -y -q \
     swig
 
 # Copy openssl build artifacts from openssl_image
@@ -186,7 +187,8 @@ RUN echo "Building Avalon SDK\n" \
 # Build Avalon blockchain connector docker image
 FROM python_image as build_image
 # Add necessary packages to build
-RUN apt-get install -y -q \
+RUN apt-get update \
+ && apt-get install -y -q \
     protobuf-compiler \
     libprotobuf-dev \
     software-properties-common \
@@ -248,7 +250,8 @@ COPY ./sdk/avalon_sdk/fabric/methods.json /project/avalon/sdk/avalon_sdk/fabric/
 # Installing wheel file requires python3-pip package.
 # python3-pip package will increase size of final docker image.
 # So remove python3-pip package and dependencies.
-RUN apt-get install -y -q python3-pip \
+RUN apt-get update \
+ && apt-get install -y -q python3-pip \
  && echo "Install Common Python, SDK & Blockchain_connector packages\n" \
  && pip3 install dist/*.whl \
  && echo "Remove unused packages from image\n" \

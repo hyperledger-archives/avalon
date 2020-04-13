@@ -150,7 +150,8 @@ RUN echo "Building Avalon Common Python\n" \
 #Build common/crypto_utils intermediate docker image
 FROM python_image as common_crypto_utils_image
 
-RUN apt-get install -y -q \
+RUN apt-get update \
+ && apt-get install -y -q \
     swig
 
 # Copy openssl build artifacts from openssl_image
@@ -199,15 +200,13 @@ RUN echo "Building Avalon SDK\n" \
 # Build Final image and install dependent modules
 FROM base_image as final_image
 
-RUN apt-get install -y -q \
-    git
-
-RUN apt-get install -y -q python3-pip \
+RUN apt-get update \
+ && apt-get install -y -q python3-pip git \
  && pip3 install json-rpc web3 py-solc-x nose2 \
  && echo "Install fabric python sdk\n" \
  && pip3 install virtualenv \
  && pip3 install git+https://github.com/hyperledger/fabric-sdk-py.git \
- && apt-get autoremove --purge -y -q python3-pip
+ && apt-get autoremove --purge -y -q python3-pip git
  
 # Install specific version of solc to support versions <0.6.0
 RUN python3 -m solcx.install v0.5.15
@@ -238,7 +237,8 @@ COPY --from=avalon_sdk_image /project/avalon/sdk/dist/*.whl dist/
 # Installing wheel file requires python3-pip package.
 # But python3-pip package will increase size of final docker image.
 # So remove python3-pip package and dependencies after installing wheel file.
-RUN apt-get install -y -q python3-pip \
+RUN apt-get update \
+ && apt-get install -y -q python3-pip \
  && echo "Install Common Python and SDK packages\n" \
  && pip3 install dist/*.whl \
  && echo "Remove unused packages from image\n" \
