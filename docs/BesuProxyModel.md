@@ -1,7 +1,7 @@
 
 **Testing Avalon Proxy model with Hyperledger Besu**
 1.  Set the environment variable ``TCF_HOME`` to the Avalon root directory. Update ``no_proxy`` environment variable if you are behind a proxy
-    server. Add these hostnames - ``node1.avalon.local, rpc.node1.avalon.local, node2.avalon.local, rpc.node2.avalon.local``. These are the IP addresses used in the default Besu network defined in the corresponding [docker-compose file](dev-environments/besu/docker-compose.yaml)
+    server. Add these hostnames - ``node1.avalon.local, rpc.node1.avalon.local, node2.avalon.local, rpc.node2.avalon.local``. These are hostnames used in the default Besu network defined in the corresponding [docker-compose file](dev-environments/besu/docker-compose.yaml)
 
 2. Start the Hyperledger Besu based Ethereum network and deploy contracts. To do so, you need to run the following
     ```
