@@ -90,3 +90,15 @@ class JRPCErrorCodes(IntEnum):
     INVALID_SIGNATURE = 4
     NO_MORE_LOOKUP_RESULTS = 5
     UNSUPPORTED_MODE = 6
+
+
+@unique
+class WPERegisterStatus(IntEnum):
+    SUCCESS = 0
+    FAILURE = 1
+
+
+@unique
+class WOPreprocessStatus(IntEnum):
+    SUCCESS = 0
+    FAILURE = 1

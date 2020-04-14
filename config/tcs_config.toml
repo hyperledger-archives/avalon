@@ -63,6 +63,12 @@ enclave_library_path = "tc/sgx/trusted_worker_manager/enclave/build/lib/"
 # -------------------------------------------------------------
 # TCS Worker configuration details
 # -------------------------------------------------------------
+
+[KMEListener]
+# URL of KMEListener where a Work order processor can send requests meant for
+# the Key Management Enclave(KME)  
+bind = "http://kme-listener:1948" 
+
 [WorkerConfig]
 ProofDataType = "TEE-SGX-IAS"
 
