@@ -83,6 +83,8 @@ class EthereumConnector:
                 work_order_contract_file, work_order_contract_address)
 
         self._work_order_proxy = EthereumWorkOrderProxyImpl(config)
+        # List of active available worker ids in Avalon
+        self.__worker_ids = []
 
     def _lookup_workers_in_kv_storage(self, worker_registry):
         """
@@ -120,13 +122,13 @@ class EthereumConnector:
             logging.error("Unable to retrieve worker details from kv storage")
         return worker_info["result"]
 
-    def _add_update_worker_to_chain(self, wids_onchain, wids_kv,
+    def _add_update_worker_to_chain(self, wids_onchain,
                                     jrpc_worker_registry):
         """
         This function adds/updates a worker in the Ethereum blockchain
         """
 
-        for wid in wids_kv:
+        for wid in self.__worker_ids:
             worker_info = self._retrieve_worker_details_from_kv_storage(
                 jrpc_worker_registry, wid)
             worker_id = wid
@@ -153,7 +155,7 @@ class EthereumConnector:
 
         for wid in wids_onchain:
             # Mark all stale workers on blockchain as decommissioned
-            if wid not in wids_kv:
+            if wid not in self.__worker_ids:
                 worker_id = wid
                 worker = self._worker_registry\
                     .worker_retrieve(wid, random.randint(0, 100000))
@@ -203,15 +205,21 @@ class EthereumConnector:
                                work_order_params, id=random.randint(0, 100000))
         logging.info("Work order submit response : {}".format(
             json.dumps(response, indent=4)))
-
-        work_order_result = work_order_impl\
-            .work_order_get_result(work_order_id,
-                                   id=random.randint(0, 100000))
-
-        logging.info("Work order get result : {} "
-                     .format(json.dumps(work_order_result, indent=4)))
-
-        return work_order_result
+        if response and 'error' in response and \
+                response['error']['code'] == \
+                WorkOrderStatus.PENDING.value:
+            # get the work order result
+            work_order_result = work_order_impl\
+                .work_order_get_result(work_order_id,
+                                       id=random.randint(0, 100000))
+            logging.info("Work order get result : {} "
+                         .format(json.dumps(work_order_result, indent=4)))
+        # With Synchronous work order processing work order submit
+        # return result
+        elif response and 'result' in response:
+            return response
+        else:
+            return None
 
     def _add_work_order_result_to_chain(self, work_order_id, response):
         """
@@ -239,11 +247,15 @@ class EthereumConnector:
         requester_id = work_order_request["requesterId"]
         work_order_params = event["args"]["workOrderRequest"]
         logging.info("Received event from blockchain")
-        response = self\
-            ._submit_work_order_and_get_result(work_order_id, worker_id,
-                                               requester_id,
-                                               work_order_params)
-        self._add_work_order_result_to_chain(work_order_id, response)
+        if worker_id in self.__worker_ids:
+            response = self\
+                ._submit_work_order_and_get_result(work_order_id, worker_id,
+                                                   requester_id,
+                                                   work_order_params)
+            if response:
+                self._add_work_order_result_to_chain(work_order_id, response)
+            else:
+                logging.info("Work order submit failed")
 
     def start(self):
         logging.info("Ethereum Connector service started")
@@ -254,10 +266,10 @@ class EthereumConnector:
         # and do 2-way sync.
         jrpc_worker_registry = JRPCWorkerRegistryImpl(self._config)
         worker_ids_onchain = self._lookup_workers_onchain()
-        worker_ids_kv = self._lookup_workers_in_kv_storage(
+        self.__worker_ids = self._lookup_workers_in_kv_storage(
             jrpc_worker_registry)
 
-        self._add_update_worker_to_chain(worker_ids_onchain, worker_ids_kv,
+        self._add_update_worker_to_chain(worker_ids_onchain,
                                          jrpc_worker_registry)
 
         # Start an event listener that listens for events from the proxy
