@@ -336,7 +336,9 @@ def _get_first_active_worker(worker_registry, worker_id, config):
             config["WorkerConfig"]["ApplicationTypeId"],
             jrpc_req_id
         )
-        logger.info(worker_lookup_result)
+        logger.info("\n Worker lookup response: {}\n".format(
+            json.dumps(worker_lookup_result, indent=4)
+        ))
         if "result" in worker_lookup_result and \
                 "ids" in worker_lookup_result["result"].keys():
             if worker_lookup_result["result"]["totalCount"] != 0:
@@ -363,6 +365,9 @@ def _get_first_active_worker(worker_registry, worker_id, config):
         logger.error("Failed to lookup worker")
         return None, None
     # Initializing Worker Object
+    logger.info("\n Worker retrieve response: {}\n".format(
+        json.dumps(worker_retrieve_result, indent=4)
+    ))
     worker_obj = worker_details.SGXWorkerDetails()
     worker_obj.load_worker(worker_retrieve_result["result"]["details"])
 
