@@ -150,34 +150,34 @@ class TCSWorkOrderHandlerSync(TCSWorkOrderHandler):
                 replymessage = socket.recv()
                 logger.info(replymessage)
                 socket.disconnect(self.zmq_url + self.zmq_port_number)
-                # Work order is processed. Fetch result from wo-respose table
-                value = self.kv_helper.get("wo-responses", wo_id)
-                if value:
-                    response = json.loads(value)
-                    if 'result' in response:
-                        return response['result']
-
-                    # response without result should have an error
-                    # return error
-                    err_code = response["error"]["code"]
-                    err_msg = response["error"]["message"]
-                    if err_code == EnclaveError.ENCLAVE_ERR_VALUE:
-                        err_code = \
-                            WorkOrderStatus.INVALID_PARAMETER_FORMAT_OR_VALUE
-                    elif err_code == EnclaveError.ENCLAVE_ERR_UNKNOWN:
-                        err_code = WorkOrderStatus.UNKNOWN_ERROR
-                    else:
-                        err_code = WorkOrderStatus.FAILED
-                    raise JSONRPCDispatchException(err_code, err_msg)
             except Exception as er:
                 raise JSONRPCDispatchException(
                     WorkOrderStatus.UNKNOWN_ERROR,
                     "Failed to connect with enclave-manager socket: " + er)
+            # Work order is processed. Fetch result from wo-respose table
+            value = self.kv_helper.get("wo-responses", wo_id)
+            if value:
+                response = json.loads(value)
+                if 'result' in response:
+                    return response['result']
 
-        # Workorder id already exists
-        raise JSONRPCDispatchException(
-            WorkOrderStatus.INVALID_PARAMETER_FORMAT_OR_VALUE,
-            "Work order id already exists in the database. \
+                # response without result should have an error
+                # return error
+                err_code = response["error"]["code"]
+                err_msg = response["error"]["message"]
+                if err_code == EnclaveError.ENCLAVE_ERR_VALUE:
+                    err_code = \
+                            WorkOrderStatus.INVALID_PARAMETER_FORMAT_OR_VALUE
+                elif err_code == EnclaveError.ENCLAVE_ERR_UNKNOWN:
+                    err_code = WorkOrderStatus.UNKNOWN_ERROR
+                else:
+                    err_code = WorkOrderStatus.FAILED
+                raise JSONRPCDispatchException(err_code, err_msg)
+        else:
+            # Workorder id already exists
+            raise JSONRPCDispatchException(
+                WorkOrderStatus.INVALID_PARAMETER_FORMAT_OR_VALUE,
+                "Work order id already exists in the database. \
                 Hence invalid parameter")
 
 # ---------------------------------------------------------------------------------------------
