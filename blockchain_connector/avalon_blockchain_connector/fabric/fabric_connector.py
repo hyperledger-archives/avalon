@@ -62,6 +62,8 @@ class FabricConnector():
         self.__fabric_work_order = FabricWorkOrderImpl(self.__config)
         self.__jrpc_worker = JRPCWorkerRegistryImpl(self.__config)
         self.__jrpc_work_order = JRPCWorkOrderImpl(self.__config)
+        # List of active available worker ids in Avalon
+        self.__worker_ids = []
         # Wait time in sec
         self.WAIT_TIME = 31536000
         nest_asyncio.apply()
@@ -82,13 +84,13 @@ class FabricConnector():
         # Get all TEE Intel SGX based workers ids from the Fabric blockchain
         worker_ids_onchain = self._lookup_workers_onchain()
         # Get all Intel SGX TEE based worker ids from shared kv
-        worker_ids_kv = self._lookup_workers_in_kv_storage()
+        self.__worker_ids = self._lookup_workers_in_kv_storage()
         # If worker id exists in shared kv then update details of
         # worker to with details field.
         # otherwise add worker to blockchain
         # Update all worker which are not in shared kv and
         # present in blockchain to Decommissioned status
-        self._add_update_worker_to_chain(worker_ids_onchain, worker_ids_kv)
+        self._add_update_worker_to_chain(worker_ids_onchain, self.__worker_ids)
 
     def get_work_order_event_handler_tasks(self):
         """
@@ -122,50 +124,57 @@ class FabricConnector():
         payload_string = event['payload'].decode("utf-8")
         work_order_req = json.loads(payload_string)
         work_order_id = work_order_req['workOrderId']
-        # Submit the work order to listener
-        logging.info("Submitting to work order to listener")
-        response = self.__jrpc_work_order.work_order_submit(
-            work_order_req['workOrderId'],
-            work_order_req['workerId'],
-            work_order_req['requesterId'],
-            work_order_req["workOrderRequest"],
-            id=jrpc_req_id
-        )
-        logging.info("Work order submit response {}".format(
-            response
-        ))
-        if response and 'error' in response and \
-                response['error']['code'] == WorkOrderStatus.PENDING.value:
-            # get the work order result
-            jrpc_req_id += 1
-            work_order_result = \
-                self.__jrpc_work_order.work_order_get_result(
-                    work_order_req['workOrderId'],
-                    jrpc_req_id
-                )
-            logging.info("Work order get result {}".format(
-                work_order_result
+        # Submit the work order to listener if worker id from the event
+        # matches with available worker ids
+        if work_order_req['workerId'] in self.__worker_ids:
+            logging.info("Submitting to work order to listener")
+            response = self.__jrpc_work_order.work_order_submit(
+                work_order_req['workOrderId'],
+                work_order_req['workerId'],
+                work_order_req['requesterId'],
+                work_order_req["workOrderRequest"],
+                id=jrpc_req_id
+            )
+            logging.info("Work order submit response {}".format(
+                response
             ))
+            if response and 'error' in response and \
+                    response['error']['code'] == \
+                            WorkOrderStatus.PENDING.value:
+                # get the work order result
+                jrpc_req_id += 1
+                work_order_result = \
+                    self.__jrpc_work_order.work_order_get_result(
+                        work_order_req['workOrderId'],
+                        jrpc_req_id
+                    )
+                logging.info("Work order get result {}".format(
+                    work_order_result
+                ))
+            # With Synchronous work order processing work order submit
+            # return result
+            elif response and 'result' in response:
+                work_order_result = response
+            else:
+                logging.info(
+                    "work_order_submit is failed")
+                work_order_result = None
             if work_order_result:
                 logging.info("Commit work order result to blockchain")
                 # call to chain code to store result to blockchain
                 status = self.__fabric_work_order.work_order_complete(
                     work_order_id,
                     json.dumps(work_order_result)
-                )
+                    )
                 if status == ContractResponse.SUCCESS:
                     # remove the entry from work order list
                     logging.info(
                         "Chaincode invoke call work_order_complete success"
-                    )
+                        )
                 else:
                     logging.info(
                         "Chaincode invoke call work_order_complete failed"
                     )
-            else:
-                logging.info("work_order_get_result is failed")
-        else:
-            logging.info("work_order_submit is failed")
 
     def _lookup_workers_in_kv_storage(self):
         """
