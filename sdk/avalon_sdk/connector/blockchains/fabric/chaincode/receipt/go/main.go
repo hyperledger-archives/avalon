@@ -194,7 +194,7 @@ func (t *Receipt) workOrderReceiptUpdate(stub shim.ChaincodeStubInterface, args 
     // values from 5 to 254 are reserved
     // value 255 indicates any status
     // values above 255 are application specific values
-    if args2>=0 && arg2 < 256 {
+    if arg2>=0 && arg2 < 256 {
         r.ReceiptUpdates = append(r.ReceiptUpdates, ru)
         err_code = 0
     } else {
