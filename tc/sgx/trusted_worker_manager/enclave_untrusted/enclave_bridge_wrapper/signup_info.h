@@ -15,8 +15,6 @@
 
 #pragma once
 
-#include <Python.h>
-
 #include <map>
 #include <string>
 #include <vector>
@@ -58,11 +56,16 @@ private:
 SignupInfo* deserialize_signup_info(
     const std::string& serialized_signup_info);
 
-std::map<std::string, std::string> CreateEnclaveData(
-    const std::string& originator_public_key_hash);
+tcf_err_t DeserializePublicEnclaveData(
+    const std::string& public_enclave_data,
+    std::string& verifying_key,
+    std::string& encryption_key,
+    std::string& encryption_key_signature);
+
+std::map<std::string, std::string> CreateEnclaveData();
 
 std::map<std::string, std::string> UnsealEnclaveData();
 
-size_t VerifyEnclaveInfo(const std::string& enclaveInfo,
-    const std::string& mr_enclave,
-    const std::string& originator_public_key_hash);
+size_t VerifyEnclaveInfo(
+    const std::string& enclaveInfo,
+    const std::string& mr_enclave);

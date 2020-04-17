@@ -49,6 +49,7 @@ max_work_order_count = 10
 # EnclaveModule -- configuration of the Intel SGX Enclave
 # -------------------------------------------------------
 [EnclaveModule]
+
 # Service Provider ID (SPID) is a 32-digit hex string tied to the
 # enclave implementation. Replace dummy SPID with value obtained after
 # subscription to run TCS in Intel SGX HW mode.

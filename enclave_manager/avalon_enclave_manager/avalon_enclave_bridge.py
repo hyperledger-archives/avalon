@@ -178,34 +178,39 @@ def get_enclave_basename():
 
 
 # -----------------------------------------------------------------
-def verify_enclave_info(enclave_info, mr_enclave, originator_public_key_hash):
+def verify_enclave_info(enclave_info, mr_enclave):
     """
     Verifies enclave signup info
-    - enclave_info is a JSON serialised enclave signup info
+    @param enclave_info is a JSON serialised enclave signup info
       along with IAS attestation report
-    - mr_enclave is enclave measurement value
+    @param mr_enclave - enclave measurement value
     """
+
     return enclave.VerifyEnclaveInfo(
-        enclave_info, mr_enclave, originator_public_key_hash)
+        enclave_info, mr_enclave)
 
 
 # -----------------------------------------------------------------
-def create_signup_info(originator_public_key_hash, nonce):
+def create_signup_info(nonce):
     """
     Create enclave signup data
+    @param nonce - nonce is used in IAS request to verify attestation
+                   as distinguishing factor
     """
+
     # Part of what is returned with the signup data is an enclave quote, we
     # want to update the revocation list first.
     __update_sig_rl()
     # Now, let the enclave create the signup data
-    signup_data = enclave.CreateEnclaveData(originator_public_key_hash)
+
+    signup_data = enclave.CreateEnclaveData()
     if signup_data is None:
         return None
 
     # We don't really have any reason to call back down into the enclave
-    # as we have everything we now need.
+    # as we have everything we need.
     #
-    # Start building up the signup info dictionary we will serialize
+    # Start building up the signup info dictionary and we will serialize
     signup_info = {
         'verifying_key': signup_data['verifying_key'],
         'encryption_key': signup_data['encryption_key'],
@@ -249,8 +254,7 @@ def create_signup_info(originator_public_key_hash, nonce):
             verification_report_dict.get('epidPseudonym')
 
         mr_enclave = get_enclave_measurement()
-        status = verify_enclave_info(
-            json.dumps(signup_info), mr_enclave, originator_public_key_hash)
+        status = verify_enclave_info(json.dumps(signup_info), mr_enclave)
         if status != 0:
             logger.error("Verification of enclave signup info failed")
         else:

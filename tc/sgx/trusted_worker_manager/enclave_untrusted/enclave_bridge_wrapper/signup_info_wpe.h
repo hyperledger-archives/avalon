@@ -1,4 +1,4 @@
-/* Copyright 2018 Intel Corporation
+/* Copyright 2020 Intel Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,14 +13,17 @@
  * limitations under the License.
  */
 
-enclave {
-    from "sgx_tstdc.edl" import *;
-    from "sgx_tsgxssl.edl" import *;
-    from "base.edl" import *;
-    from "signup.edl" import *;
-    from "signup_kme.edl" import *;
-    from "signup_wpe.edl" import *;
-    from "workload.edl" import *;
-    from "iohandler.edl" import *;
-};
+#pragma once
 
+#include <map>
+#include <string>
+
+std::map<std::string, std::string> CreateEnclaveDataWPE(
+    const std::string& in_ext_data,
+    const std::string& in_ext_data_signature,
+    const std::string& in_kme_attestation);
+
+size_t VerifyEnclaveInfoWPE(
+    const std::string& enclaveInfo,
+    const std::string& mr_enclave,
+    const std::string& ext_data);

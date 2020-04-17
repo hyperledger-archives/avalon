@@ -19,36 +19,6 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-# -----------------------------------------------------------------
-class TransactionKeys(object):
-    """
-    Wrapper for managing Avalon transaction keys
-    """
-
-    def __init__(self):
-        private_key_obj = crypto.SIG_PrivateKey()
-        self.private_key = private_key_obj.Generate()
-        self.public_key = private_key_obj.GetPublicKey()
-
-    @property
-    def hashed_identity(self):
-        key_byte_array = crypto.string_to_byte_array(self.txn_public)
-        hashed_txn_key = crypto.compute_message_hash(key_byte_array)
-        encoded_hashed_key = crypto.byte_array_to_hex(hashed_txn_key)
-        encoded_hashed_key = encoded_hashed_key.lower()
-        return encoded_hashed_key
-
-    @property
-    def txn_private(self):
-        return self.private_key.Serialize()
-
-    @property
-    def txn_public(self):
-        return self.public_key.Serialize()
-
-
-# -----------------------------------------------------------------
-# -----------------------------------------------------------------
 class EnclaveKeys(object):
     """
     Wrapper for managing the enclave's keys, the verifying_key is an

@@ -346,7 +346,7 @@ class EnclaveManager:
                         "so skipping the update")
 
 
-# ----------------------------------------------------------------
+# -----------------------------------------------------------------
 def create_enclave_signup_data():
     """
     Create enclave signup data
@@ -480,7 +480,7 @@ def start_enclave_manager(config):
         logger.exception("failed to initialize enclave; %s", str(e))
         sys.exit(-1)
 
-    logger.info("creating a new enclave")
+    logger.info("creating enclave signup data")
     enclave_signup_data = create_enclave_signup_data()
 
     logger.info("initialize enclave_manager")

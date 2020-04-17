@@ -1,4 +1,4 @@
-/* Copyright 2018 Intel Corporation
+/* Copyright 2020 Intel Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,20 +21,20 @@
 
 namespace tcf {
     namespace enclave_api {
-        namespace enclave_data {
-            // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-            tcf_err_t CreateEnclaveData(
+        namespace enclave_data_wpe {
+            tcf_err_t CreateEnclaveDataWPE(
+                const std::string& inExtData,
+                const std::string& inExtDataSignature,
+                const std::string& inKmeAttestation,
                 StringArray& outPublicEnclaveData,
-                Base64EncodedString& outSealedEnclaveData,
                 Base64EncodedString& outEnclaveQuote);
 
-            tcf_err_t UnsealEnclaveData(StringArray& outPublicEnclaveData);
-
-            tcf_err_t VerifyEnclaveInfo(
+            tcf_err_t VerifyEnclaveInfoWPE(
                 const std::string& enclaveInfo,
-                const std::string& mr_enclave);
+                const std::string& mr_enclave,
+                const std::string& ext_data);
             // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-        }  /* namespace enclave_data */
+        }  /* namespace enclave_data_wpe */
 
     }  /* namespace enclave_api */
 
