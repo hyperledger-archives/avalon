@@ -13,8 +13,6 @@
  * limitations under the License.
  */
 
-#include <map>
-#include <string>
 #include <vector>
 
 #include "error.h"
@@ -26,7 +24,6 @@
 
 #include "base.h"
 #include "signup.h"
-
 #include "signup_info.h"
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -111,7 +108,7 @@ SignupInfo* deserialize_signup_info(
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 // the parallel serialization is in enclave_data.cpp
-static tcf_err_t DeserializePublicEnclaveData(
+tcf_err_t DeserializePublicEnclaveData(
     const std::string& public_enclave_data,
     std::string& verifying_key,
     std::string& encryption_key,
@@ -166,9 +163,7 @@ static tcf_err_t DeserializePublicEnclaveData(
 }
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-std::map<std::string, std::string> CreateEnclaveData(
-    const std::string& originator_public_key_hash
-    ) {
+std::map<std::string, std::string> CreateEnclaveData() {
     tcf_err_t presult;
     // Create some buffers for receiving the output parameters
     // CreateEnclaveData will resize appropriately
@@ -178,10 +173,7 @@ std::map<std::string, std::string> CreateEnclaveData(
 
     // Create the signup data
     presult = tcf::enclave_api::enclave_data::CreateEnclaveData(
-        originator_public_key_hash,
-        public_enclave_data,
-        sealed_enclave_data,
-        enclave_quote);
+        public_enclave_data, sealed_enclave_data, enclave_quote);
     ThrowTCFError(presult);
 
     // Parse the json and save the verifying and encryption keys
@@ -213,7 +205,8 @@ std::map<std::string, std::string> UnsealEnclaveData() {
     // UnsealEnclaveData will resize appropriately
     StringArray public_enclave_data(0);
 
-    presult = tcf::enclave_api::enclave_data::UnsealEnclaveData(public_enclave_data);
+    presult = tcf::enclave_api::enclave_data::UnsealEnclaveData(
+        public_enclave_data);
     ThrowTCFError(presult);
 
     // Parse the json and save the verifying and encryption keys
@@ -237,11 +230,11 @@ std::map<std::string, std::string> UnsealEnclaveData() {
 }  // _unseal_signup_data
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-size_t VerifyEnclaveInfo(const std::string& enclaveInfo,
-                            const std::string& mr_enclave,
-                            const std::string& originator_public_key_hash) {
-    tcf_err_t result = tcf::enclave_api::enclave_data::VerifyEnclaveInfo(enclaveInfo,
-                    mr_enclave, originator_public_key_hash);
+size_t VerifyEnclaveInfo(const std::string& enclave_info,
+    const std::string& mr_enclave) {
+
+    tcf_err_t result = tcf::enclave_api::enclave_data::VerifyEnclaveInfo(
+        enclave_info, mr_enclave);
     size_t verify_status = result;
     return verify_status;
 }  // VerifyEnclaveInfo

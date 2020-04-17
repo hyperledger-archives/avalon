@@ -34,7 +34,6 @@ enclave {
 
         public tcf_err_t ecall_CreateSignupData(
             [in] const sgx_target_info_t* inTargetInfo,
-            [in, string] const char* inOriginatorPublicKeyHash,
             [out, size=inAllocatedPublicEnclaveDataSize] char* outPublicEnclaveData,
             size_t inAllocatedPublicEnclaveDataSize,
             [out, size=inAllocatedSealedEnclaveDataSize] uint8_t* outSealedEnclaveData,
@@ -47,11 +46,9 @@ enclave {
             size_t inAllocatedPublicEnclaveDataSize
             );
 
-         public tcf_err_t ecall_VerifyEnclaveInfo(
-             [in, string] const char* inEnclaveInfo,
-             [in, string] const char* mr_enclave,
-             [in, string] const char* originator_public_key_hash
-         );
-
+        public tcf_err_t ecall_VerifyEnclaveInfo(
+            [in, string] const char* inEnclaveInfo,
+            [in, string] const char* mr_enclave
+            );
     };
 };

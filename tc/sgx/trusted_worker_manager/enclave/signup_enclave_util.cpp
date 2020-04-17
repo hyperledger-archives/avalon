@@ -1,4 +1,4 @@
-/* Copyright 2018 Intel Corporation
+/* Copyright 2020 Intel Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,14 +13,17 @@
  * limitations under the License.
  */
 
-enclave {
-    from "sgx_tstdc.edl" import *;
-    from "sgx_tsgxssl.edl" import *;
-    from "base.edl" import *;
-    from "signup.edl" import *;
-    from "signup_kme.edl" import *;
-    from "signup_wpe.edl" import *;
-    from "workload.edl" import *;
-    from "iohandler.edl" import *;
-};
 
+#include <sgx_tcrypto.h>
+
+#include "avalon_sgx_error.h"
+#include "tcf_error.h"
+#include "signup_enclave_util.h"
+
+void ComputeSHA256Hash(const std::string& src, uint8_t* data) {
+    sgx_status_t ret = sgx_sha256_msg(
+        reinterpret_cast<const uint8_t*>(src.c_str()),
+        static_cast<uint32_t>(src.size()),
+        reinterpret_cast<sgx_sha256_hash_t*>(data));
+    tcf::error::ThrowSgxError(ret, "Failed to retrieve SHA256 hash of data");
+}  // ComputeSHA256Hash

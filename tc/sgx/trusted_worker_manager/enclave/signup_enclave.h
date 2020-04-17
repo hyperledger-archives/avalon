@@ -20,6 +20,7 @@
 #include <sgx_report.h>
 #include <sgx_tcrypto.h>
 
+
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 extern tcf_err_t ecall_CalculateSealedEnclaveDataSize(size_t* pSealedEnclaveDataSize);
 
@@ -43,3 +44,9 @@ extern tcf_err_t ecall_UnsealEnclaveData(const uint8_t* inSealedEnclaveData,
     char* outPublicEnclaveData,
     size_t inAllocatedPublicEnclaveDataSize,
     size_t* outPublicEnclaveDataSize);
+
+// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+void CreateSignupReportData(uint64_t worker_mode,
+    const uint8_t* ext_data,
+    EnclaveData* enclave_data,
+    sgx_report_data_t* report_data);

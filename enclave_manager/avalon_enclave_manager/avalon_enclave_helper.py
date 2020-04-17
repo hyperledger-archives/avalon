@@ -44,21 +44,15 @@ class EnclaveHelper(object):
 
     # -------------------------------------------------------
     @classmethod
-    def create_enclave_signup_data(cls, tcf_instance_keys=None):
-        """create_enclave_signup_data -- Create enclave signup data
-
-        :param tcf_instance_keys: Object of type TransactionKeys
+    def create_enclave_signup_data(cls):
+        """
+        Creates enclave signup data
         """
 
-        if tcf_instance_keys is None:
-            tcf_instance_keys = keys.TransactionKeys()
-
         nonce = '{0:016X}'.format(random.getrandbits(64))
-        hashed_identity = tcf_instance_keys.hashed_identity
-        logger.debug("tx hashed identity: %s", hashed_identity)
         try:
-            enclave_data = avalon_enclave.create_signup_info(
-                hashed_identity, nonce)
+            enclave_data = \
+                avalon_enclave.create_signup_info(nonce)
         except Exception as err:
             raise Exception('failed to create enclave signup data; {}'
                             .format(str(err)))
@@ -75,14 +69,13 @@ class EnclaveHelper(object):
         if not avalon_enclave.enclave.is_sgx_simulator():
             enclave_info['proof_data'] = enclave_data.proof_data
 
-        return cls(enclave_info, tcf_instance_keys)
+        return cls(enclave_info)
 
     # -------------------------------------------------------
-    def __init__(self, enclave_info, tcf_instance_keys):
+    def __init__(self, enclave_info):
 
         # Initialize the keys that can be used later to
         # register the enclave
-        self.tcf_instance_keys = tcf_instance_keys
 
         try:
             self.nonce = enclave_info['nonce']
