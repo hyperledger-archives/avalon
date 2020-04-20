@@ -435,11 +435,11 @@ def create_json_worker(enclave_data, config):
         config.get("WorkerConfig")["WorkOrderNotifyUri"]
     details_info["receiptInvocationUri"] = \
         config.get("WorkerConfig")["ReceiptInvocationUri"]
-    details_info["workOrderInvocationAddress"] = config.get(
-        "WorkerConfig")["WorkOrderInvocationAddress"]
-    details_info["receiptInvocationAddress"] = config.get(
-        "WorkerConfig")["ReceiptInvocationAddress"]
-    details_info["fromAddress"] = config.get("WorkerConfig")["FromAddress"]
+    # workOrderInvocationAddress/receiptInvocationAddress/fromAddress
+    # are not being used as of now. So removed from config.
+    details_info["workOrderInvocationAddress"] = ""
+    details_info["receiptInvocationAddress"] = ""
+    details_info["fromAddress"] = ""
     details_info["hashingAlgorithm"] = \
         config.get("WorkerConfig")["HashingAlgorithm"]
     details_info["signingAlgorithm"] = \
@@ -532,8 +532,8 @@ def start_enclave_manager(config):
         except Exception as inst:
             logger.error("Error while processing work-order; " +
                          "shutting down enclave manager")
-            logger.error("Exception: {} args {} details {}".format(type(inst),
-                         inst.args, inst))
+            logger.error("Exception: {} args {} details {}"
+                         .format(type(inst), inst.args, inst))
             exit(1)
     else:
         try:
@@ -553,8 +553,8 @@ def start_enclave_manager(config):
         except Exception as inst:
             logger.error("Error while processing work-order; " +
                          "shutting down enclave manager")
-            logger.error("Exception: {} args {} details {}".format(type(inst),
-                         inst.args, inst))
+            logger.error("Exception: {} args {} details {}"
+                         .format(type(inst), inst.args, inst))
             exit(1)
 
 
@@ -584,8 +584,8 @@ def parse_command_line(config, args):
         help="Name of the log file, __screen__ for standard output", type=str)
     parser.add_argument("--loglevel", help="Logging leve", type=str)
     parser.add_argument(
-            "--lmdb_url",
-            help="DB url to connect to lmdb", type=str)
+        "--lmdb_url",
+        help="DB url to connect to lmdb", type=str)
 
     options = parser.parse_args(args)
 
@@ -609,8 +609,9 @@ def main(args=None):
     import utility.logger as plogger
 
     # parse out the configuration file first
-    conffiles = ["tcs_config.toml"]
-    confpaths = [".", TCFHOME + "/" + "config"]
+    conffiles = ["singleton_config.toml"]
+    confpaths = [".", TCFHOME + "/"
+                 + "enclave_manager/avalon_enclave_manager/singleton"]
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", help="configuration file", nargs="+")

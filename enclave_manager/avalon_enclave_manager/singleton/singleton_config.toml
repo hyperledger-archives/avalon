@@ -41,10 +41,6 @@ sleep_interval = "10"
 # Port for socket interaction with listener
 zmq_port = '5555'
 
-[Listener]
-listener_port = 1947
-max_work_order_count = 10
-
 # -------------------------------------------------------
 # EnclaveModule -- configuration of the Intel SGX Enclave
 # -------------------------------------------------------
@@ -76,33 +72,21 @@ enclave_library_path = "tc/sgx/trusted_worker_manager/enclave/build/lib/"
 # TCS Worker configuration details
 # -------------------------------------------------------------
 
-[KMEListener]
-# URL of KMEListener where a Work order processor can send requests meant for
-# the Key Management Enclave(KME)  
-bind = "http://kme-listener:1948" 
-
 [WorkerConfig]
 ProofDataType = "TEE-SGX-IAS"
 
 # The Following URIs are used in direct model to submit work orders in
 # synchronous, asynchronous, pull and notification modes.
-WorkOrderSyncUri = "http://localhost:8080"
-WorkOrderAsyncUri = "http://localhost:8080"
-WorkOrderPullUri = "http://localhost:8080"
-WorkOrderNotifyUri = "http://localhost:8080"
+WorkOrderSyncUri = ""
+WorkOrderAsyncUri = ""
+WorkOrderPullUri = ""
+WorkOrderNotifyUri = ""
 # Replace ApplicationTypeId and OrganizationId with real hexadecimal values
 ApplicationTypeId = "11aa22bb33cc44dd"
 OrganizationId = "aabbcc1234ddeeff"
 
 # URI used by worker to process work order receipts
-ReceiptInvocationUri = "http://localhost:8080"
-
-# Deployed address of Work order invocation smart contract used in proxy model
-WorkOrderInvocationAddress = ""
-# Work Order Receipt smart contract used in proxy model
-ReceiptInvocationAddress = ""
-# Ethereum Address used by the worker to submit transactions
-FromAddress = ""
+ReceiptInvocationUri = ""
 
 # Optional - Comma separated list of Hashing algorithms. Default is SHA-256
 HashingAlgorithm = "SHA-256"

@@ -55,3 +55,32 @@ bind = "http://kme-listener:1948"
 [WPEConfig]
 
 wo_processor_mrenclave = ""
+
+[WorkerConfig]
+ProofDataType = "TEE-SGX-IAS"
+
+# The Following URIs are used in direct model to submit work orders in
+# synchronous, asynchronous, pull and notification modes.
+WorkOrderSyncUri = ""
+WorkOrderAsyncUri = ""
+WorkOrderPullUri = ""
+WorkOrderNotifyUri = ""
+# Replace ApplicationTypeId and OrganizationId with real hexadecimal values
+ApplicationTypeId = "11aa22bb33cc44dd"
+OrganizationId = "aabbcc1234ddeeff"
+
+# URI used by worker to process work order receipts
+ReceiptInvocationUri = ""
+
+# Optional - Comma separated list of Hashing algorithms. Default is SHA-256
+HashingAlgorithm = "SHA-256"
+# Optional - Comma separated list of signing algorithms. Default is SECP256K1
+SigningAlgorithm = "SECP256K1"
+# Asymmetric encryption algorithm used to encrypt Symmetric data encryption key.
+# Default is RSA-OAEP-3072
+KeyEncryptionAlgorithm = "RSA-OAEP-3072"
+# Comma separated list of encryption algorithms. Default is AES-GCM-256
+DataEncryptionAlgorithm = "AES-GCM-256"
+# Supported work order formats are JSON-RPC, JSON-RPC-JWT, and Custom format
+# starting with tilde "~"
+workOrderPayloadFormats = "JSON-RPC"
