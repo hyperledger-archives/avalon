@@ -117,7 +117,7 @@ The steps below will set up a Python virtual environment to run Avalon.
    from the portal
    https://api.portal.trustedservices.intel.com/
    Replace the SPID and IAS Subscription key values in file
-   `$TCF_HOME/config/tcs_config.toml` with the actual hexadecimal values
+   `$TCF_HOME/enclave_manager/avalon_enclave_manager/singleton/singleton_config.toml` with the actual hexadecimal values
    (the IAS key may be either your Primary key or Secondary key):
 
    ```bash
