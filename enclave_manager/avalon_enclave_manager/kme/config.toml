@@ -1,0 +1,57 @@
+# Copyright 2020 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+[Logging]
+LogLevel = "INFO"
+LogFile  = "__screen__"
+
+# -------------------------------------------------------
+# EnclaveModule -- configuration of the Intel SGX Enclave
+# -------------------------------------------------------
+[EnclaveModule]
+# Service Provider ID (SPID) is a 32-digit hex string tied to the
+# enclave implementation. Replace dummy SPID with value obtained after
+# subscription to run TCS in Intel SGX HW mode.
+spid = "DEADBEEF00000000DEADBEEF00000000"
+
+num_of_enclaves = "1"
+
+# ias_url is the URL of the Intel Attestation Service (IAS) server.
+ias_url = "https://api.trustedservices.intel.com/sgx/dev"
+
+# Proxy for https. Leave commented out for direct Internet connections or
+# uncomment and change to your corporate proxy.
+#https_proxy = "http://your-proxy:your-port/"
+
+# IAS API key is a 32-digit hex string subscription key used for authentication
+# of requests submitted to the IAS server. Obtain the key by subscribing in
+# the portal https://api.portal.trustedservices.intel.com/
+ias_api_key = "112233445566778899aabbccddeeff00"
+
+# TEE enclave library to use.
+enclave_library = ""
+enclave_library_path = ""
+
+[KMEListener]
+# URL of KMEListener where a Work order processor can send requests meant for
+# the Key Management Enclave(KME)  
+bind = "http://kme-listener:1948" 
+
+# -------------------------------------------------------------
+# TCS Worker configuration details
+# -------------------------------------------------------------
+
+[WPEConfig]
+
+wo_processor_mrenclave = ""
