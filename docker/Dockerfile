@@ -210,6 +210,8 @@ RUN apt-get update \
  && echo "uvicorn==0.7.*" >>requirement.txt \
  && pip3 install -r requirement.txt \
  && pip3 install git+https://github.com/hyperledger/fabric-sdk-py.git \
+# nest_asyncio allows to run nested asyncio event loops
+ && pip3 install nest_asyncio \
  && apt-get autoremove --purge -y -q python3-pip git
  
 # Install specific version of solc to support versions <0.6.0

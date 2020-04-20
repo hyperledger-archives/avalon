@@ -18,6 +18,7 @@ import logging
 from os import environ
 import time
 import asyncio
+import nest_asyncio
 
 from utility.hex_utils import is_valid_hex_str
 from avalon_sdk.connector.blockchains.common.contract_response \
@@ -48,8 +49,7 @@ class FabricWorkOrderImpl(WorkOrderProxy):
         self.CHAIN_CODE = 'order'
         self.WORK_ORDER_SUBMITTED_EVENT_NAME = 'workOrderSubmitted'
         self.WORK_ORDER_COMPLETED_EVENT_NAME = 'workOrderCompleted'
-        self.WAIT_TIME = 30
-        self.__wo_resp = ''
+        nest_asyncio.apply()
         if config is not None:
             self.__fabric_wrapper = FabricWrapper(config)
         else:
@@ -101,11 +101,13 @@ class FabricWorkOrderImpl(WorkOrderProxy):
         work order response, and error code.
         None on error.
         """
+        wo_resp = None
         # Calling the contract workOrderGet() will result in error
         # work order id doesn't exist. This is because committing will
         # take some time to commit to chain.
         # Instead of calling contract api to get result chosen the
         # event based approach.
+
         def handle_fabric_event(event, block_num, txn_id, status):
             """
             Callback function for Fabric event handler.
@@ -119,17 +121,22 @@ class FabricWorkOrderImpl(WorkOrderProxy):
             payload = event['payload'].decode("utf-8")
             resp = json.loads(payload)
             response = json.loads(resp["workOrderResponse"])
+            # to use global scope of wo_resp
+            nonlocal wo_resp
             # Event has result tag in case work order successful
             if "result" in response and \
                     work_order_id in response["result"].values():
-                self.__wo_resp = response
+                wo_resp = response
+                # Return this flag event listener to stop the
+                # event handling
+                return True
             # Event has error tag if work order failed
             elif "error" in response and \
                     work_order_id in response["error"]["data"].values():
-                self.__wo_resp = response
-            logging.debug("Work order response from event : {}".format(
-                self.__wo_resp
-            ))
+                wo_resp = response
+                return True
+            else:
+                return False
 
         event_handler = \
             self.get_work_order_completed_event_handler(
@@ -137,15 +144,14 @@ class FabricWorkOrderImpl(WorkOrderProxy):
             )
         if event_handler:
             tasks = [
-                event_handler.start_event_handling(),
-                event_handler.stop_event_handling(int(self.WAIT_TIME))
+                event_handler.get_single_event(),
             ]
             loop = asyncio.get_event_loop()
             loop.run_until_complete(
                 asyncio.wait(tasks,
                              return_when=asyncio.ALL_COMPLETED))
             loop.close()
-            return self.__wo_resp
+            return wo_resp
         else:
             logging.info("Failed while creating event handler")
             return None
