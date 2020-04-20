@@ -93,7 +93,9 @@ class EventListener(base.ClientBase):
 
     async def start_event_handling(self):
         """
-        Start event listener.
+        Start event listener and listen for events forever
+        Only way to stop the event listener by calling
+        stop_event_listener()
         """
         def _event_handler(event, block_num, txnid, status):
             logger.debug(
@@ -117,10 +119,46 @@ class EventListener(base.ClientBase):
         finally:
             self._save_config()
 
-    async def stop_event_handling(self, seconds):
+    async def stop_event_handling(self, seconds=0):
         """
         Stop event listener.
         """
         await asyncio.sleep(seconds)
         self._channel_event_hub.unregisterChaincodeEvent(self._event_regid)
         self._channel_event_hub.disconnect()
+
+    async def get_single_event(self):
+        """
+        Start event listener and listen for particular event.
+        Once we got the particular event then unregister and
+        close the event listenerhub.
+        """
+        def _event_handler(event, block_num, txnid, status):
+            logger.debug(
+                'Event: {0}\nblock_num: {1}\ntxid: {2}\nstatus: {3}'.format(
+                    event, block_num, txnid, status))
+            try:
+                # When to stop event handling?
+                # Based the flag return by the _handler
+                is_done = self._handler(event, block_num, txnid, status)
+                if is_done:
+                    asyncio.get_event_loop().run_until_complete(
+                        self.stop_event_handling())
+                self._last_block = block_num
+            except Exception as ex:
+                logger.error('Handler error: {0}'.format(ex))
+
+        self._event_regid = self._channel_event_hub.registerChaincodeEvent(
+            self._chaincode, self._event, start=self._last_block,
+            onEvent=_event_handler)
+        logger.info('Event handler registered!')
+        try:
+            # wait for the connect() to get the stream of events
+            # it will call the event handler function(_event_handler)
+            # it will be unblocked only when call disconnect()
+            await self._channel_event_hub.connect(False)
+        except grpc.RpcError as ex:
+            # This is expected when event hub gets disconnected
+            logger.info("Event handler disconnected")
+        finally:
+            self._save_config()
