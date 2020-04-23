@@ -435,11 +435,11 @@ def create_json_worker(enclave_data, config):
         config.get("WorkerConfig")["WorkOrderNotifyUri"]
     details_info["receiptInvocationUri"] = \
         config.get("WorkerConfig")["ReceiptInvocationUri"]
-    # workOrderInvocationAddress/receiptInvocationAddress/fromAddress
-    # are not being used as of now. So removed from config.
-    details_info["workOrderInvocationAddress"] = ""
-    details_info["receiptInvocationAddress"] = ""
-    details_info["fromAddress"] = ""
+    details_info["workOrderInvocationAddress"] = config.get(
+        "WorkerConfig")["WorkOrderInvocationAddress"]
+    details_info["receiptInvocationAddress"] = config.get(
+        "WorkerConfig")["ReceiptInvocationAddress"]
+    details_info["fromAddress"] = config.get("WorkerConfig")["FromAddress"]
     details_info["hashingAlgorithm"] = \
         config.get("WorkerConfig")["HashingAlgorithm"]
     details_info["signingAlgorithm"] = \
@@ -492,7 +492,7 @@ def start_enclave_manager(config):
         kv_helper = connector.open(config['KvStorage']['remote_url'])
     except Exception as err:
         logger.error("Failed to open KV storage interface; " +
-                     "exiting Intel SGX Enclave manager: {err}")
+                     "exiting Intel SGX Enclave manager: {}".format(err))
         sys.exit(-1)
 
     try:
@@ -501,7 +501,7 @@ def start_enclave_manager(config):
         logger.info("--------------- Boot time flow Complete ----------------")
     except Exception as err:
         logger.error("Failed to execute boot time flow; " +
-                     "exiting Intel SGX Enclave manager: {err}")
+                     "exiting Intel SGX Enclave manager: {}".format(err))
         exit(1)
 
     if int(config["WorkloadExecution"]["sync_workload_execution"]) == 1:
@@ -609,9 +609,8 @@ def main(args=None):
     import utility.logger as plogger
 
     # parse out the configuration file first
-    conffiles = ["singleton_config.toml"]
-    confpaths = [".", TCFHOME + "/"
-                 + "enclave_manager/avalon_enclave_manager/singleton"]
+    conf_files = ["singleton_enclave_config.toml"]
+    conf_paths = [".", TCFHOME + "/"+"config"]
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", help="configuration file", nargs="+")
@@ -619,13 +618,13 @@ def main(args=None):
     (options, remainder) = parser.parse_known_args(args)
 
     if options.config:
-        conffiles = options.config
+        conf_files = options.config
 
     if options.config_dir:
-        confpaths = options.config_dir
+        conf_paths = options.config_dir
 
     try:
-        config = pconfig.parse_configuration_files(conffiles, confpaths)
+        config = pconfig.parse_configuration_files(conf_files, conf_paths)
         json.dumps(config, indent=4)
     except pconfig.ConfigurationException as e:
         logger.error(str(e))

@@ -1,4 +1,4 @@
-# Copyright 2018 Intel Corporation
+# Copyright 2020 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -81,6 +81,12 @@ WorkOrderSyncUri = ""
 WorkOrderAsyncUri = ""
 WorkOrderPullUri = ""
 WorkOrderNotifyUri = ""
+# Deployed address of Work order invocation smart contract used in proxy model
+WorkOrderInvocationAddress = ""	
+# Work Order Receipt smart contract used in proxy model	
+ReceiptInvocationAddress = ""	
+# Ethereum Address used by the worker to submit transactions	
+FromAddress = ""
 # Replace ApplicationTypeId and OrganizationId with real hexadecimal values
 ApplicationTypeId = "11aa22bb33cc44dd"
 OrganizationId = "aabbcc1234ddeeff"
