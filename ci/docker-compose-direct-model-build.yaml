@@ -15,7 +15,7 @@
 version: '3.5'
 
 services:
-  avalon-shell:
+  avalon-direct-model-tests:
     image: avalon-shell:${ISOLATION_ID}
     build:
       context: ..
@@ -57,3 +57,4 @@ services:
         - http_proxy
         - https_proxy
         - no_proxy
+

@@ -228,6 +228,7 @@ ENV DISPLAY=:0
 WORKDIR /project/avalon/
 
 COPY ./tools/run_tests.sh /project/avalon/tools/
+COPY ./tools/run_proxy_model_tests.sh /project/avalon/tools/
 COPY ./config/tcs_config.toml /project/avalon/config/
 COPY ./tests /project/avalon/tests
 COPY ./sdk/avalon_sdk/tcf_connector.toml /project/avalon/sdk/avalon_sdk/

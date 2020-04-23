@@ -15,14 +15,8 @@
 version: '3.5'
 
 services:
-  avalon-tests:
+  avalon-direct-model-tests:
     image: avalon-shell:${ISOLATION_ID}
-    build:
-      context: .
-    environment:
-      - http_proxy
-      - https_proxy
-      - no_proxy
     working_dir: "/project/avalon/"
     entrypoint: "bash -c \"\
         ./tools/run_tests.sh -l avalon-listener \""
@@ -32,11 +26,6 @@ services:
 
   avalon-enclave-manager:
     image: avalon-enclave-manager:${ISOLATION_ID}
-    build:
-      context: .
-      dockerfile: ./enclave_manager/Dockerfile
-      args:
-        - TCF_DEBUG_BUILD=${TCF_DEBUG_BUILD:-}
     environment:
       - http_proxy
       - https_proxy
@@ -51,8 +40,6 @@ services:
 
   avalon-lmdb:
     image: avalon-lmdb:${ISOLATION_ID}
-    build:
-      context: .
     environment:
       - http_proxy
       - https_proxy
@@ -67,8 +54,6 @@ services:
 
   avalon-listener:
     image: avalon-listener:${ISOLATION_ID}
-    build:
-      context: .
     environment:
       - http_proxy
       - https_proxy
@@ -82,3 +67,4 @@ services:
       "
     depends_on:
       - avalon-lmdb
+
