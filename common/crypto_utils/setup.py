@@ -63,25 +63,29 @@ crypto_include_dirs = [
 
 verify_report_include_dirs = [
     os.path.join(tcf_root_dir, 'common/cpp'),
+    os.path.join(tcf_root_dir, 'common/cpp/crypto'),
+    os.path.join(tcf_root_dir, 'common/cpp/packages/parson'),
+    os.path.join(tcf_root_dir, 'common/cpp/packages/base64'),
     os.path.join(tcf_root_dir, 'common/cpp/verify_ias_report'),
-]
+] + openssl_include_dirs
 
 library_dirs = [
     os.path.join(tcf_root_dir, "common/cpp/build"),
 ] + openssl_lib_dirs
 
+# Do not change the order of these
+# libraries otherwise we will get the undefined
+# symbols in verify_report shared library
 libraries = [
+    'uavalon-verify-ias-report',
+    'uavalon-crypto',
     'uavalon-common',
     'uavalon-base64',
     'uavalon-parson',
-    'uavalon-crypto',
-    'uavalon-verify-ias-report'
 ] + openssl_libs
 
-libraries = libraries + openssl_libs
-
 crypto_modulefiles = [
-    "avalon_crypto_utils/crypto/crypto.i"
+    "avalon_crypto_utils/crypto/crypto.i",
 ]
 
 crypto_module = Extension(

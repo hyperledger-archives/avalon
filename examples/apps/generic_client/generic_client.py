@@ -24,6 +24,8 @@ import secrets
 import config.config as pconfig
 import utility.logger as plogger
 import avalon_crypto_utils.crypto_utility as crypto_utility
+import avalon_crypto_utils.verify_report.verify_attestation_report \
+    as attestation_util
 from avalon_sdk.worker.worker_details import WorkerType
 import avalon_sdk.worker.worker_details as worker_details
 from avalon_sdk.work_order.work_order_params import WorkOrderParams
@@ -176,6 +178,33 @@ def _lookup_first_worker(worker_registry, jrpc_req_id):
         worker_id = None
 
     return worker_id
+
+
+def _do_worker_verification(worker_obj):
+    # Do worker verfication on proof data if it exists
+    # Proof data exists in SGX hardware mode.
+    # TODO Need to do verify MRENCLAVE value
+    # in the attestation report
+    if not worker_obj.proof_data:
+        logger.info("Proof data is empty. " +
+                    "Skipping verification of attestation report")
+    else:
+        # Construct enclave signup info json
+        enclave_info = {
+            'verifying_key': worker_obj.verification_key,
+            'encryption_key': worker_obj.encryption_key,
+            'proof_data': worker_obj.proof_data,
+            'enclave_persistent_id': ''
+        }
+
+        logger.info("Perform verification of attestation report")
+        verify_report_status = attestation_util.verify_attestation_report(
+            enclave_info)
+        if verify_report_status is False:
+            logger.error("Verification of enclave signup info failed")
+            exit(1)
+        else:
+            logger.info("Verification of enclave signup info passed")
 
 
 def _create_work_order_params(worker_id, workload_id, in_data,
@@ -398,6 +427,9 @@ def Main(args=None):
     # Initializing Worker Object
     worker_obj = worker_details.SGXWorkerDetails()
     worker_obj.load_worker(worker_retrieve_result['result']['details'])
+
+    # Do worker verification
+    _do_worker_verification(worker_obj)
 
     logger.info("**********Worker details Updated with Worker ID" +
                 "*********\n%s\n", worker_id)
