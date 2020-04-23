@@ -95,8 +95,7 @@ def main(args=None):
 
     # parse out the configuration file first
     conf_file = ['kme_config.toml']
-    conf_path = [get_config_dir(
-        'enclave_manager/avalon_enclave_manager/kme')]
+    conf_path = [get_config_dir('config')]
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--config', help='configuration file', nargs='+')

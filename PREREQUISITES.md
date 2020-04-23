@@ -445,7 +445,7 @@ problems.
   [Intel SGX](#sgx) section
 
 - If you get the error `failed to create enclave signup data`,
-  check the `ias_api_key` line in `$TCF_HOME/enclave_manager/avalon_enclave_manager/singleton/singleton_config.toml` .
+  check the `ias_api_key` line in `$TCF_HOME/config/singleton_enclave_config.toml` .
   It should be either either the Primary key or Secondary key you received
   from your IAS subscription as instructed in the
   [Intel SGX](#sgx) section
@@ -456,12 +456,12 @@ problems.
   device driver must be removed first
 
 - If you are running in Intel SGX hardware mode, you need to modify
-  the `ias_api_key` in `enclave_manager/avalon_enclave_manager/singleton/singleton_config.toml` with your
+  the `ias_api_key` in `$TCF_HOME/config/singleton_enclave_config.toml` with your
   IAS Subscription key obtained in the instructions above
 
 - If you are not running in a corporate proxy environment (and not connected
   directly to Internet), comment out the `https_proxy` line in
-  `config/tcs_config.toml`
+  `$TCF_HOME/config/tcs_config.toml`
 
 - If you reinstall the Intel SGX SDK and you modified `/etc/aesmd.conf`
   then save and restore the file before installing the SDK.
