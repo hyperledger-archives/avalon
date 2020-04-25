@@ -13,6 +13,13 @@
  * limitations under the License.
  */
 
+/**
+ * @file
+ * Avalon secret key encryption.
+ * Uses AES-GCM 256, which also includes authentication.
+ */
+
+
 #pragma once
 
 #include <string>
@@ -22,32 +29,46 @@
 namespace tcf {
 namespace crypto {
     namespace constants {
-        //***AES-GCM 256 for authenticated encryption
+        /** AES-GCM 256 for authenticated encryption. */
         const int IV_LEN = 12;       // AES-GCM IV length
         const int SYM_KEY_LEN = 32;  // AES-GCM Key length.
         const int TAG_LEN = 16;      // AES-GCM TAG length.
     }  // namespace constants
 
-    // Authenticated encryption
+    /** Authenticated encryption. */
     namespace skenc {
-        // ByteArray here is used to encapsulate raw binary data and does not apply/assume any
-        // encoding
-        // throws RuntimeError
+        /**
+         * ByteArray here is used to encapsulate raw binary data and does not
+         * apply/assume any encoding.
+         * Throws RuntimeError.
+         */
         ByteArray GenerateKey();
-        // throws RuntimeError
+        /** Throws RuntimeError. */
         ByteArray GenerateIV(const std::string& IVstring = std::string(""));
-        // throws RuntimeError, ValueError
+        /** Throws RuntimeError, ValueError. */
         ByteArray EncryptMessage(
-            const ByteArray& key, const ByteArray& iv, const ByteArray& message);
-        // Uses random IV prepended the returned ciphertext
-        // throws RuntimeError, ValueError
-        ByteArray EncryptMessage(const ByteArray& key, const ByteArray& message);
-        // throws RuntimeError, ValueError, CryptoError (message authentication failure)
+            const ByteArray& key, const ByteArray& iv,
+            const ByteArray& message);
+        /**
+         * Uses random IV prepended the returned ciphertext.
+         * Throws RuntimeError, ValueError.
+         */
+        ByteArray EncryptMessage(const ByteArray& key,
+            const ByteArray& message);
+        /**
+         * Throws RuntimeError, ValueError,
+         * CryptoError (message authentication failure).
+         */
         ByteArray DecryptMessage(
-            const ByteArray& key, const ByteArray& iv, const ByteArray& message);
-        // throws RuntimeError, ValueError, CryptoError (message authentication failure)
-        // expects IV prepended to message ciphertext
-        ByteArray DecryptMessage(const ByteArray& key, const ByteArray& message);
+            const ByteArray& key, const ByteArray& iv,
+            const ByteArray& message);
+        /**
+         * Throws RuntimeError, ValueError,
+         * CryptoError (message authentication failure).
+         * Expects IV prepended to message ciphertext.
+         */
+        ByteArray DecryptMessage(const ByteArray& key,
+            const ByteArray& message);
     }  // namespace skenc
 }  // namespace crypto
 }  // namespace tcf

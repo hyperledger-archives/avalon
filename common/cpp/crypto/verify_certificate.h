@@ -13,6 +13,11 @@
  * limitations under the License.
  */
 
-// Verifies certificate against CA certificate
+/**
+ * @file
+ * Avalon CA certification verification.
+ */
+
+/** Verifies certificate against CA certificate. */
 bool verify_certificate_chain(const char* cert_pem,
                               const char* ca_cert_pem);

@@ -13,6 +13,12 @@
  * limitations under the License.
  */
 
+/**
+ * @file
+ * Avalon string utilities,
+ * including base 64, hex, and byte array conversion.
+ */
+
 #pragma once
 
 #include <stdint.h>
