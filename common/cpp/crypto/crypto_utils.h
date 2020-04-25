@@ -34,18 +34,6 @@ namespace crypto {
     // throws RuntimeError
     ByteArray RandomBitString(size_t length);
 
-    /** Wrapper function for EVP_DecodeBlock.
-     * EVP_DecodeBlock pads its output with \0 if the output length
-     * is not a multiple of 3. Check if the base64 string is padded at the end
-     * and adjust the output length.
-     */
-    int EVP_DecodeBlock_wrapper(unsigned char* out, int out_len,
-        const unsigned char* in, int in_len);
-
-    /** Decodes specified number of blocks of base64 encoded data. */
-    int decode_base64_block(unsigned char *decoded_data,
-        const unsigned char *base64_data, int num_of_blocks);
-
     /** Create symmetric encryption key and return hex encoded key string. */
     std::string CreateHexEncodedEncryptionKey();
 
