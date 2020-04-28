@@ -27,4 +27,3 @@ ADD_SUBDIRECTORY(simple_wallet/workload)
 # To add a new workload, uncomment the following line and change
 # $WORKLOAD_STATIC_NAME$ to the appropriate name (such as hello_world):
 #ADD_SUBDIRECTORY($WORKLOAD_STATIC_NAME$/workload)
-

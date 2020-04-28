@@ -154,6 +154,14 @@ cd build
 try cmake ..
 try make "-j$NUM_CORES"
 
+yell --------------- KME WORKLOAD ---------------
+cd $TCF_HOME/tc/sgx/trusted_worker_manager/enclave/kme_workload || error_exit "Failed to change to the directory"
+
+mkdir -p build
+cd build
+try cmake ..
+try make "-j$NUM_CORES"
+
 yell --------------- COMMON CPP ---------------
 cd $TCF_HOME/common/cpp || error_exit "Failed to change to the directory"
 

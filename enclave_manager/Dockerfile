@@ -248,7 +248,14 @@ RUN mkdir -p build \
 # Directory apps contains Intel SGX workloads which need to be built
 # and linked to the Intel SGX enclave
 WORKDIR /project/avalon/examples/apps
+RUN mkdir -p build \
+  && cd build \
+  && cmake .. \
+  && make
 
+# Build Key Management Enclave workload which will be
+# linked to enclave shared library
+WORKDIR /project/avalon/tc/sgx/trusted_worker_manager/enclave/kme_workload
 RUN mkdir -p build \
   && cd build \
   && cmake .. \
