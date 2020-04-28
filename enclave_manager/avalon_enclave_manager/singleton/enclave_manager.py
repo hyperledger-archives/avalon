@@ -25,7 +25,7 @@ import hashlib
 import zmq
 
 import avalon_enclave_manager.sgx_work_order_request as work_order_request
-import avalon_enclave_manager.avalon_enclave_helper as enclave_helper
+import avalon_enclave_manager.avalon_enclave_info as enclave_info
 import avalon_crypto_utils.signature as signature
 import avalon_crypto_utils.crypto_utility as crypto_utils
 from database import connector
@@ -89,7 +89,7 @@ class EnclaveManager:
             for worker in workers_list:
                 kv_helper.remove("workers", worker)
 
-        worker_info = create_json_worker(self, self.config)
+        worker_info = _create_json_worker(self, self.config)
         logger.info("Adding enclave workers to workers table")
         worker_id = crypto_utils.strip_begin_end_public_key(self.enclave_id) \
             .encode("UTF-8")
@@ -259,11 +259,11 @@ class EnclaveManager:
         # Execute work order request
 
         logger.info("Execute workorder with id %s", wo_id)
-        wo_json_resp = execute_work_order(self.enclave_data, wo_json_req)
+        wo_json_resp = _execute_work_order(self.enclave_data, wo_json_req)
         wo_resp = json.loads(wo_json_resp)
 
         logger.info("Update workorder receipt for workorder %s", wo_id)
-        receipt = self.__update_receipt(kv_helper, wo_id, wo_resp)
+        self.__update_receipt(kv_helper, wo_id, wo_resp)
 
         if "Response" in wo_resp and \
                 wo_resp["Response"]["Status"] == WorkOrderStatus.FAILED:
@@ -347,13 +347,13 @@ class EnclaveManager:
 
 
 # -----------------------------------------------------------------
-def create_enclave_signup_data():
+def _create_enclave_signup_data():
     """
     Create enclave signup data
     """
     try:
         enclave_signup_data = \
-            enclave_helper.EnclaveHelper.create_enclave_signup_data()
+            enclave_info.EnclaveInfo.create_enclave_signup_data()
     except Exception as e:
         logger.error("failed to create enclave signup data; %s", str(e))
         sys.exit(-1)
@@ -362,7 +362,7 @@ def create_enclave_signup_data():
 
 
 # -----------------------------------------------------------------
-def execute_work_order(enclave_data, input_json_str, indent=4):
+def _execute_work_order(enclave_data, input_json_str, indent=4):
     """
     Submits workorder request to Worker enclave and retrieves the response
     """
@@ -403,7 +403,7 @@ def validate_request(wo_request):
 
 
 # -----------------------------------------------------------------
-def create_json_worker(enclave_data, config):
+def _create_json_worker(enclave_data, config):
     """
     Create JSON worker object which gets saved in KvStorage
     """
@@ -475,13 +475,13 @@ def start_enclave_manager(config):
         # Extended measurements is a list of enclave basename and
         # enclave measurement
         extended_measurements = \
-            enclave_helper.initialize_enclave(config.get("EnclaveModule"))
+            enclave_info.initialize_enclave(config.get("EnclaveModule"))
     except Exception as e:
         logger.exception("failed to initialize enclave; %s", str(e))
         sys.exit(-1)
 
     logger.info("creating enclave signup data")
-    enclave_signup_data = create_enclave_signup_data()
+    enclave_signup_data = _create_enclave_signup_data()
 
     logger.info("initialize enclave_manager")
     enclave_manager = EnclaveManager(

@@ -16,6 +16,7 @@ import json
 import logging
 
 import avalon_crypto_utils.crypto.crypto as crypto
+import avalon_enclave_manager.avalon_enclave as enclave
 
 logger = logging.getLogger(__name__)
 
@@ -34,7 +35,7 @@ class SgxWorkOrderRequest(object):
 
         try:
             encoded_encrypted_response = \
-                self.enclave_service.send_to_sgx_worker(encrypted_request)
+                enclave.HandleWorkOrderRequest(encrypted_request)
             assert encoded_encrypted_response
         except Exception as err:
             logger.exception('workorder request invocation failed: %s',
