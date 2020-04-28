@@ -15,10 +15,12 @@
 import os
 import json
 import time
+import random
 
 from ssl import SSLError
 from requests.exceptions import Timeout
 from requests.exceptions import HTTPError
+import avalon_crypto_utils.keys as keys
 import avalon_enclave_manager.ias_client as ias_client
 import avalon_enclave_manager.avalon_enclave as enclave
 
@@ -26,9 +28,6 @@ import logging
 logger = logging.getLogger(__name__)
 
 TCFHOME = os.environ.get("TCF_HOME", "../../../")
-
-send_to_sgx_worker = enclave.HandleWorkOrderRequest
-get_enclave_public_info = enclave.UnsealEnclaveData
 
 
 # -----------------------------------------------------------------
@@ -42,7 +41,7 @@ _epid_group = None
 
 
 # ----------------------------------------------------------------
-def __find_enclave_library(config):
+def _find_enclave_library(config):
     """
     Find enclave library file from the parsed config
     """
@@ -74,7 +73,7 @@ def __find_enclave_library(config):
 
 
 # -----------------------------------------------------------------
-def __update_sig_rl():
+def _update_sig_rl():
     """
     Update the signature revocation lists for EPID group on IAS server
     """
@@ -98,7 +97,15 @@ def __update_sig_rl():
 
 
 # -----------------------------------------------------------------
-def initialize_with_configuration(config):
+def initialize_enclave(enclave_config):
+    """initialize_enclave -- Call the initialization function on the
+    enclave module
+    """
+    return _initialize_with_configuration(enclave_config)
+
+
+# -----------------------------------------------------------------
+def _initialize_with_configuration(config):
     """
     Create and Initialize a Intel SGX enclave with passed config
     """
@@ -129,17 +136,17 @@ def initialize_with_configuration(config):
                 HttpsProxy=config.get('https_proxy', ""))
 
     if not _tcf_enclave_info:
-        signed_enclave = __find_enclave_library(config)
+        signed_enclave = _find_enclave_library(config)
         logger.debug("Attempting to load enclave at: %s", signed_enclave)
         _tcf_enclave_info = enclave.tcf_enclave_info(
             signed_enclave, config['spid'], int(config['num_of_enclaves']))
-        logger.info("Basename: %s", get_enclave_basename())
-        logger.info("MRENCLAVE: %s", get_enclave_measurement())
+        logger.info("Basename: %s", _get_enclave_basename())
+        logger.info("MRENCLAVE: %s", _get_enclave_measurement())
 
     sig_rl_updated = False
     while not sig_rl_updated:
         try:
-            __update_sig_rl()
+            _update_sig_rl()
             sig_rl_updated = True
         except (SSLError, Timeout, HTTPError) as e:
             logger.warning(
@@ -147,7 +154,7 @@ def initialize_with_configuration(config):
             logger.warning("Retrying in 60 sec")
             time.sleep(60)
 
-    return get_enclave_basename(), get_enclave_measurement()
+    return _get_enclave_basename(), _get_enclave_measurement()
 
 
 # -----------------------------------------------------------------
@@ -164,21 +171,21 @@ def shutdown():
 
 
 # -----------------------------------------------------------------
-def get_enclave_measurement():
+def _get_enclave_measurement():
     global _tcf_enclave_info
     return _tcf_enclave_info.mr_enclave \
         if _tcf_enclave_info is not None else None
 
 
 # -----------------------------------------------------------------
-def get_enclave_basename():
+def _get_enclave_basename():
     global _tcf_enclave_info
     return _tcf_enclave_info.basename \
         if _tcf_enclave_info is not None else None
 
 
 # -----------------------------------------------------------------
-def verify_enclave_info(enclave_info, mr_enclave):
+def _verify_enclave_info(enclave_info, mr_enclave):
     """
     Verifies enclave signup info
     @param enclave_info is a JSON serialised enclave signup info
@@ -191,7 +198,7 @@ def verify_enclave_info(enclave_info, mr_enclave):
 
 
 # -----------------------------------------------------------------
-def create_signup_info(nonce):
+def _create_signup_info(nonce):
     """
     Create enclave signup data
     @param nonce - nonce is used in IAS request to verify attestation
@@ -200,7 +207,7 @@ def create_signup_info(nonce):
 
     # Part of what is returned with the signup data is an enclave quote, we
     # want to update the revocation list first.
-    __update_sig_rl()
+    _update_sig_rl()
     # Now, let the enclave create the signup data
 
     signup_data = enclave.CreateEnclaveData()
@@ -253,8 +260,8 @@ def create_signup_info(nonce):
         signup_info['enclave_persistent_id'] = \
             verification_report_dict.get('epidPseudonym')
 
-        mr_enclave = get_enclave_measurement()
-        status = verify_enclave_info(json.dumps(signup_info), mr_enclave)
+        mr_enclave = _get_enclave_measurement()
+        status = _verify_enclave_info(json.dumps(signup_info), mr_enclave)
         if status != 0:
             logger.error("Verification of enclave signup info failed")
         else:
@@ -267,3 +274,70 @@ def create_signup_info(nonce):
 
     # Now we can return the real object
     return signup_info_obj
+
+
+# -----------------------------------------------------------------
+class EnclaveInfo(object):
+    """
+    Class to create/hold signup information for an enclave which
+    includes keys, sealed_data, enclave_id,etc.
+    """
+
+    # -------------------------------------------------------
+    @classmethod
+    def create_enclave_signup_data(cls):
+        """
+        Create enclave signup data
+        """
+
+        nonce = '{0:032X}'.format(random.getrandbits(128))
+        try:
+            enclave_data = _create_signup_info(nonce)
+        except Exception as err:
+            raise Exception('failed to create enclave signup data; {}'
+                            .format(str(err)))
+
+        enclave_info = dict()
+        enclave_info['nonce'] = nonce
+        enclave_info['sealed_data'] = enclave_data.sealed_signup_data
+        enclave_info['verifying_key'] = enclave_data.verifying_key
+        enclave_info['encryption_key'] = enclave_data.encryption_key
+        enclave_info['encryption_key_signature'] = \
+            enclave_data.encryption_key_signature
+        enclave_info['enclave_id'] = enclave_data.verifying_key
+        enclave_info['proof_data'] = ''
+        if not enclave.is_sgx_simulator():
+            enclave_info['proof_data'] = enclave_data.proof_data
+
+        return cls(enclave_info)
+
+    # -------------------------------------------------------
+    def __init__(self, enclave_info):
+
+        # Initialize the keys that can be used later to
+        # register the enclave
+
+        try:
+            self.nonce = enclave_info['nonce']
+            self.sealed_data = enclave_info['sealed_data']
+            self.verifying_key = enclave_info['verifying_key']
+            self.encryption_key = enclave_info['encryption_key']
+            self.encryption_key_signature = \
+                enclave_info['encryption_key_signature']
+            self.proof_data = enclave_info['proof_data']
+            self.enclave_id = enclave_info['enclave_id']
+        except KeyError as ke:
+            raise Exception("missing enclave initialization parameter; {}"
+                            .format(str(ke)))
+
+        self.enclave_keys = \
+            keys.EnclaveKeys(self.verifying_key, self.encryption_key)
+
+    # -------------------------------------------------------
+
+    def get_enclave_public_info(self):
+        """
+        Return information about the enclave
+        """
+        return enclave.UnsealEnclaveData(self.sealed_data)
+    # -------------------------------------------------------

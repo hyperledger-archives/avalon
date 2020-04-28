@@ -48,4 +48,3 @@ SigningAlgorithm = "SECP256K1"
 KeyEncryptionAlgorithm = "RSA-OAEP-3072"
 # Comma separated list of encryption algorithms. Default is AES-GCM-256
 DataEncryptionAlgorithm = "AES-GCM-256"
-# Deployed address of Work order invocation smart contract used in proxy model	
