@@ -18,16 +18,17 @@
 #include <string.h>
 #include <openssl/x509v3.h>
 #include <openssl/pem.h>
+#include <openssl/evp.h>
 
 #include "verify_signature.h"
 #include "c11_support.h"
 #include "crypto_utils.h"
 
 bool verify_signature(const char* cert_pem,
-                                 const char* msg,
-                                 unsigned int msg_len,
-                                 char* signature,
-                                 unsigned int signature_len)
+                      const char* msg,
+                      unsigned int msg_len,
+                      char* signature,
+                      unsigned int signature_len)
 {
     X509* crt = NULL;
     int ret;
@@ -47,13 +48,14 @@ bool verify_signature(const char* cert_pem,
     ret = EVP_VerifyUpdate(ctx, msg, msg_len);
     assert(ret == 1);
 
-    int signature_decoded_len = 2048;
-    unsigned char signature_decoded[signature_decoded_len];
-    ret = tcf::crypto::EVP_DecodeBlock_wrapper(signature_decoded,
-                                  signature_decoded_len,
-                                  (unsigned char*)signature,
-                                  signature_len);
-    assert(ret!=-1);
+    // Decode base64-encoded signature.
+    // Decoded output may have 1-3 extra '\0' bytes appended.
+    static const int signature_decoded_len = 2048;
+    unsigned char signature_decoded[signature_decoded_len + 3];
+    ret = EVP_DecodeBlock(signature_decoded,
+                          (unsigned char*)signature,
+                          signature_len + 3);
+    assert(ret != -1);
 
     ret = EVP_VerifyFinal(ctx, (unsigned char*)signature_decoded, ret, key);
 

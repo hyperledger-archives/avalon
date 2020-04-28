@@ -4,8 +4,9 @@
 //
 
 /*
-    The original source code has been modified to be used with Trusted Compute Framework (TCFs).
-*/
+ * The original source code has been modified to be used with
+ * Hyperledger Avalon.
+ */
 
 #pragma once
 
