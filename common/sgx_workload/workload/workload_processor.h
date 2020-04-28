@@ -25,6 +25,13 @@
 #include <map>
 #include <string>
 #include "work_order_data.h"
+#include "ext_work_order_info_impl.h"
+
+enum WORKLOAD_TYPE {
+    SINGLETON,
+    KEY_MANAGEMENT_ENCLAVE,
+    WO_PROCESSING_ENCLAVE
+};
 
 /** Class to register, create, and process a workload. */
 class WorkloadProcessor {
@@ -53,8 +60,24 @@ public:
     static WorkloadProcessor* RegisterWorkloadProcessor(std::string workload_id,
         WorkloadProcessor* processor);
 
+    /**
+     * Register a WorkloadProcessor and instantiate extended workorder interface
+     * Used by the workloads to register themselves
+     *
+     * @param workload_id Workload identifier
+     * @param workload_type Workload type. Supported values are SINGLETON,
+     *                  KEY_MANAGEMENT_ENCLAVE and WORKORDER_MANAGEMENT_ENCLAVE
+     * @returns           Pointer to WorkloadProcessor
+     */
+    static WorkloadProcessor* RegisterWorkloadProcessor(std::string workload_id,
+        WORKLOAD_TYPE workload_type,
+        WorkloadProcessor* processor);
+
     /** Mapping between workload id and WorkloadProcessor. */
     static std::map<std::string, WorkloadProcessor*> workload_processor_table;
+
+    /** Extended workorder info instance **/
+    ExtWorkOrderInfoImpl* ext_work_order_info;
 
     /**
      * Process the workload.
@@ -72,12 +95,12 @@ public:
      *                            work order processor
      */
     virtual void ProcessWorkOrder(
-                std::string workload_id,
-                const ByteArray& requester_id,
-                const ByteArray& worker_id,
-                const ByteArray& work_order_id,
-                const std::vector<tcf::WorkOrderData>& in_work_order_data,
-                std::vector<tcf::WorkOrderData>& out_work_order_data) = 0;
+        std::string workload_id,
+        const ByteArray& requester_id,
+        const ByteArray& worker_id,
+        const ByteArray& work_order_id,
+        const std::vector<tcf::WorkOrderData>& in_work_order_data,
+        std::vector<tcf::WorkOrderData>& out_work_order_data) = 0;
 };
 
 /**
@@ -91,6 +114,13 @@ public:
 #define IMPL_WORKLOAD_PROCESSOR_CLONE(TYPE) \
    WorkloadProcessor* Clone() const { return new TYPE(*this); }
 
+#define GET_WORKLOAD_PROCESSOR(_1,_2,_3,NAME,...) NAME
+
+// Workloads are expected to use REGISTER_WORKLOAD_PROCESSOR macro.
+// This macro will invoke appropriate macro based on number of arguments.
+#define REGISTER_WORKLOAD_PROCESSOR(...) \
+    GET_WORKLOAD_PROCESSOR(__VA_ARGS__, REGISTER_WORKLOAD_PROCESSOR3, REGISTER_WORKLOAD_PROCESSOR2)(__VA_ARGS__)
+
 /**
  * This macro registers a workload processor for a specific application.
  * It associates a string with a workload.
@@ -103,6 +133,26 @@ public:
  *                       type
  * @param TYPE           Name of the Workload class
  */
-#define REGISTER_WORKLOAD_PROCESSOR(WORKLOADID_STR,TYPE) \
+#define REGISTER_WORKLOAD_PROCESSOR2(WORKLOADID_STR,TYPE) \
    WorkloadProcessor* TYPE##_myProcessor = \
       WorkloadProcessor::RegisterWorkloadProcessor(WORKLOADID_STR, new TYPE());
+
+/**
+ * This macro registers a workload processor for a specific application
+ * and instantiates extended workorder interface appropriate to workload type.
+ * It associates a string with a workload.
+ * This is the same string that is passed in the work order request
+ * JSON payload.
+ * Example usage in a .cpp source file:
+ * REGISTER_WORKLOAD_PROCESSOR(workload_id_string, Workload)
+ *
+ * @param WORKLOADID_STR A string literal or variable identifying the workload
+ *                       type
+ * @param WORKLOAD_TYPE  Type of workload. Supported values are SINGLETON,
+ *                  KEY_MANAGEMENT_ENCLAVE and WORKORDER_MANAGEMENT_ENCLAVE
+ * @param TYPE           Name of the Workload class
+ */
+#define REGISTER_WORKLOAD_PROCESSOR3(WORKLOADID_STR,WORKLOAD_TYPE,TYPE) \
+    WorkloadProcessor* TYPE##_myProcessor = \
+    WorkloadProcessor::RegisterWorkloadProcessor(\
+        WORKLOADID_STR, WORKLOAD_TYPE, new TYPE());

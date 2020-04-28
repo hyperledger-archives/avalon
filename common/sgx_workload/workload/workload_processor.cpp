@@ -22,27 +22,49 @@
 #include <string>
 #include "workload_processor.h"
 #include "enclave_utils.h"
+#include "ext_work_order_info_kme.h"
+#include "ext_work_order_info_wpe.h"
 
 std::map<std::string, WorkloadProcessor*> \
     WorkloadProcessor::workload_processor_table;
 
-WorkloadProcessor::WorkloadProcessor() {}
+WorkloadProcessor::WorkloadProcessor() {
+    this->ext_work_order_info = nullptr;
+}
 
 WorkloadProcessor::~WorkloadProcessor() {}
 
 WorkloadProcessor* WorkloadProcessor::RegisterWorkloadProcessor(
     std::string workload_id,
-    WorkloadProcessor* processor)
-{
+    WorkloadProcessor* processor) {
    Log(TCF_LOG_INFO, "Register Workload Processor - %s",
        workload_id.c_str());
    workload_processor_table[workload_id] = processor;
    return processor;
 }
 
+WorkloadProcessor* WorkloadProcessor::RegisterWorkloadProcessor(
+    std::string workload_id,
+    WORKLOAD_TYPE workload_type,
+    WorkloadProcessor* processor) {
+
+    Log(TCF_LOG_INFO, "Register Workload Processor - %s of type - %d",
+       workload_id.c_str(), workload_type);
+    workload_processor_table[workload_id] = processor;
+    if (workload_type == KEY_MANAGEMENT_ENCLAVE) {
+        processor->ext_work_order_info = new ExtWorkOrderInfoKME();
+    } else if (workload_type == WO_PROCESSING_ENCLAVE) {
+        processor->ext_work_order_info = new ExtWorkOrderInfoWPE();
+    } else {
+        // SINGLETON ENCLAVE doesn't use extended workorder data,
+        // hence initializing it to null
+        processor->ext_work_order_info = nullptr;
+   }
+    return processor;
+}
+
 WorkloadProcessor* WorkloadProcessor::CreateWorkloadProcessor(
-    std::string workload_id)
-{
+    std::string workload_id) {
    WorkloadProcessor* processor;
 
    // Search the workload processor type in the table
@@ -62,4 +84,3 @@ WorkloadProcessor* WorkloadProcessor::CreateWorkloadProcessor(
        return processor->Clone();
    }
 }
-
