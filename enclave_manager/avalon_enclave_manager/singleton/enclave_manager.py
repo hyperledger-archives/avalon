@@ -347,21 +347,6 @@ class EnclaveManager:
 
 
 # -----------------------------------------------------------------
-def _create_enclave_signup_data():
-    """
-    Create enclave signup data
-    """
-    try:
-        enclave_signup_data = \
-            enclave_info.EnclaveInfo.create_enclave_signup_data()
-    except Exception as e:
-        logger.error("failed to create enclave signup data; %s", str(e))
-        sys.exit(-1)
-
-    return enclave_signup_data
-
-
-# -----------------------------------------------------------------
 def _execute_work_order(enclave_data, input_json_str, indent=4):
     """
     Submits workorder request to Worker enclave and retrieves the response
@@ -471,17 +456,15 @@ def start_enclave_manager(config):
         logger.error("Kv Storage path is missing")
         sys.exit(-1)
     try:
-        logger.debug("initialize the enclave")
+        logger.info("Initialize enclave and create signup data")
+        enclave_signup_data = enclave_info.\
+            EnclaveInfo(config.get("EnclaveModule"))
         # Extended measurements is a list of enclave basename and
         # enclave measurement
-        extended_measurements = \
-            enclave_info.initialize_enclave(config.get("EnclaveModule"))
+        extended_measurements = enclave_signup_data.get_extended_measurements()
     except Exception as e:
-        logger.exception("failed to initialize enclave; %s", str(e))
+        logger.exception("failed to initialize/signup enclave; %s", str(e))
         sys.exit(-1)
-
-    logger.info("creating enclave signup data")
-    enclave_signup_data = _create_enclave_signup_data()
 
     logger.info("initialize enclave_manager")
     enclave_manager = EnclaveManager(
