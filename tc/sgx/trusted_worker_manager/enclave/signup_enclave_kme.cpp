@@ -38,11 +38,11 @@
 
 #define KME_SIGNUP_EXT_DATA_SIZE 32
 
-void CreateReportDataKME(std::string& enclave_signing_key,
+static void CreateReportDataKME(std::string& enclave_signing_key,
     const uint8_t* ext_data,
     sgx_report_data_t* report_data);
 
-void CreateSignupReportDataKME(const uint8_t* ext_data,
+static void CreateSignupReportDataKME(const uint8_t* ext_data,
     EnclaveData* enclave_data,
     sgx_report_data_t* report_data);
 
