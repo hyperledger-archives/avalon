@@ -36,11 +36,11 @@
 #include "verify-report.h"
 
 
-void CreateReportDataWPE(const uint8_t* ext_data,
+static void CreateReportDataWPE(const uint8_t* ext_data,
     std::string& enclave_encrypt_key,
     sgx_report_data_t* report_data);
 
-void CreateSignupReportDataWPE(const uint8_t* ext_data,
+static void CreateSignupReportDataWPE(const uint8_t* ext_data,
     EnclaveData* enclave_data,
     sgx_report_data_t* report_data);
 
