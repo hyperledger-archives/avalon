@@ -59,7 +59,7 @@ RSA* deserializeRSAPublicKey(const std::string& encoded) {
         throw Error::RuntimeError(msg);
     }
 
-    RSA* public_key = PEM_read_bio_RSAPublicKey(bio.get(), NULL, NULL, NULL);
+    RSA* public_key = PEM_read_bio_RSA_PUBKEY(bio.get(), NULL, NULL, NULL);
     if (!public_key) {
         std::string msg(
             "Crypto Error (deserializeRSAPublicKey): Could not "
@@ -163,7 +163,7 @@ std::string pcrypto::pkenc::PublicKey::Serialize() const {
         throw Error::RuntimeError(msg);
     }
 
-    int res = PEM_write_bio_RSAPublicKey(bio.get(), public_key_);
+    int res = PEM_write_bio_RSA_PUBKEY(bio.get(), public_key_);
     if (!res) {
         std::string msg("Crypto Error (Serialize): Could not write to BIO");
         throw Error::RuntimeError(msg);
