@@ -54,7 +54,7 @@ bool verify_signature(const char* cert_pem,
     unsigned char signature_decoded[signature_decoded_len + 3];
     ret = EVP_DecodeBlock(signature_decoded,
                           (unsigned char*)signature,
-                          signature_len + 3);
+                          signature_len);
     assert(ret != -1);
 
     ret = EVP_VerifyFinal(ctx, (unsigned char*)signature_decoded, ret, key);
