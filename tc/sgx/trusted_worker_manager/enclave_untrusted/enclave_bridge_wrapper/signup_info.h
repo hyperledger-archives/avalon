@@ -24,26 +24,26 @@
 
 class SignupInfo {
 public:
-    friend SignupInfo* deserialize_signup_info(const std::string& s);
+    SignupInfo() {}
 
     std::string serialize() const {
         return serialized_;
     }
 
+    tcf_err_t DeserializePublicEnclaveData(
+        const std::string& public_enclave_data,
+        std::string& verifying_key,
+        std::string& encryption_key,
+        std::string& encryption_key_signature);
+
+    tcf_err_t DeserializeSignupInfo(const std::string& serialized_signup_info);
+
     // Signup info properties
     std::string verifying_key;
     std::string encryption_key;
     std::string encryption_key_signature;
-    std::string sealed_signup_data;
     std::string proof_data;
     std::string enclave_persistent_id;
-
-protected:
-    tcf_err_t DeserializeSignupInfo(
-        const std::string& serialized_signup_info);
-
-    SignupInfo(
-        const std::string& serializedSignupInfo);
 
 private:
     /*
@@ -52,20 +52,3 @@ private:
     */
     std::string serialized_;
 };  // class SignupInfo
-
-SignupInfo* deserialize_signup_info(
-    const std::string& serialized_signup_info);
-
-tcf_err_t DeserializePublicEnclaveData(
-    const std::string& public_enclave_data,
-    std::string& verifying_key,
-    std::string& encryption_key,
-    std::string& encryption_key_signature);
-
-std::map<std::string, std::string> CreateEnclaveData();
-
-std::map<std::string, std::string> UnsealEnclaveData();
-
-size_t VerifyEnclaveInfo(
-    const std::string& enclaveInfo,
-    const std::string& mr_enclave);

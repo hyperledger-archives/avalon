@@ -81,6 +81,8 @@ namespace std {
 %thread;
 %{
 #include "swig_utils.h"
+#include "signup_info.h"
+#include "signup_info_singleton.h"
 %}
 
 %{
@@ -88,6 +90,7 @@ namespace std {
 %}
 
 %include "signup_info.h"
+%include "signup_info_singleton.h"
 %include "enclave_info.h"
 %include "work_order_wrap.h"
 %include "tcf_enclave.h"

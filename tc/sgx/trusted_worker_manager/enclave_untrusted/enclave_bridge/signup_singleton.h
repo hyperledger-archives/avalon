@@ -1,4 +1,4 @@
-/* Copyright 2018 Intel Corporation
+/* Copyright 2020 Intel Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,15 +13,25 @@
  * limitations under the License.
  */
 
+
 #pragma once
 
 #include <stdlib.h>
 
+#include "tcf_error.h"
 #include "types.h"
+#include "signup.h"
 
-class SignupData {
+class SignupDataSingleton : public SignupData {
 public:
-    static size_t CalculateSealedEnclaveDataSize(void);
+    tcf_err_t CreateEnclaveData(
+            StringArray& outPublicEnclaveData,
+            Base64EncodedString& outSealedEnclaveData,
+            Base64EncodedString& outEnclaveQuote);
 
-    static size_t CalculatePublicEnclaveDataSize(void);
-};
+    tcf_err_t VerifyEnclaveInfo(
+        const std::string& enclaveInfo,
+        const std::string& mr_enclave);
+
+    tcf_err_t UnsealEnclaveData(StringArray& outPublicEnclaveData);
+};  // SignupDataSingleton

@@ -112,7 +112,8 @@ class EnclaveInfo():
         self._update_sig_rl()
         # Now, let the enclave create the signup data
 
-        signup_data = enclave.CreateEnclaveData()
+        signup_cpp_obj = enclave.SignupInfoSingleton()
+        signup_data = signup_cpp_obj.CreateEnclaveData()
         if signup_data is None:
             return None
 
@@ -124,7 +125,7 @@ class EnclaveInfo():
             'verifying_key': signup_data['verifying_key'],
             'encryption_key': signup_data['encryption_key'],
             'encryption_key_signature':
-            signup_data['encryption_key_signature'],
+                signup_data['encryption_key_signature'],
             'proof_data': 'Not present',
             'enclave_persistent_id': 'Not present'
         }
@@ -141,11 +142,12 @@ class EnclaveInfo():
             if not self._ias.verify_report_fields(
                     signup_data['enclave_quote'],
                     response['verification_report']):
-                logger.debug("last error: " +
-                             self._ias.last_verification_error())
+                logger.debug(
+                    "last error: " + self._ias.last_verification_error())
                 if self._ias.last_verification_error() == "GROUP_OUT_OF_DATE":
-                    logger.warning("failure GROUP_OUT_OF_DATE " +
-                                   "(update the BIOS/microcode!!!) keep going")
+                    logger.warning(
+                        "failure GROUP_OUT_OF_DATE " +
+                        "(update your BIOS/microcode!!!) keep going")
                 else:
                     logger.error("invalid report fields")
                     return None
@@ -153,34 +155,33 @@ class EnclaveInfo():
             logger.info("report fields verified")
 
             # Now put the proof data into the dictionary
-            signup_info['proof_data'] = \
-                json.dumps({
-                    'verification_report': response['verification_report'],
-                    'ias_report_signature': response['ias_signature'],
-                    'ias_report_signing_certificate':
-                    response['ias_certificate']
+            signup_info['proof_data'] = json.dumps({
+                'verification_report': response['verification_report'],
+                'ias_report_signature': response['ias_signature'],
+                'ias_report_signing_certificate': response['ias_certificate']
                 })
-            # Grab the EPID pseudonym and put it in the enclave-persistent ID
-            # for the signup info
-            verification_report_dict = json.loads(
-                response['verification_report'])
+            # Grab the EPID pseudonym and put it in the enclave-persistent
+            # ID for the signup info
+            verification_report_dict = \
+                json.loads(response['verification_report'])
             signup_info['enclave_persistent_id'] = \
                 verification_report_dict.get('epidPseudonym')
 
             mr_enclave = self.get_enclave_measurement()
             status = self._verify_enclave_info(
-                json.dumps(signup_info), mr_enclave)
+                json.dumps(signup_info), mr_enclave, signup_cpp_obj)
             if status != 0:
                 logger.error("Verification of enclave signup info failed")
             else:
                 logger.info("Verification of enclave signup info passed")
+
         # Now we can finally serialize the signup info and create a
-        # corresponding signup info object. Because we don't want the sealed
-        # signup data in the serialized version, we set it separately.
+        # corresponding signup info object. Because we don't want the
+        # sealed signup data in the serialized version, we set it separately.
         signup_info_obj = enclave.deserialize_signup_info(
             json.dumps(signup_info))
-        signup_info_obj.sealed_signup_data = signup_data['sealed_enclave_data']
-
+        signup_info_obj.sealed_signup_data = \
+            signup_data['sealed_enclave_data']
         # Now we can return the real object
         return signup_info_obj
 
@@ -289,15 +290,15 @@ class EnclaveInfo():
 
     # -----------------------------------------------------------------
 
-    def _verify_enclave_info(self, enclave_info, mr_enclave):
+    def _verify_enclave_info(self, enclave_info, mr_enclave, signup_cpp_obj):
         """
         Verifies enclave signup info
         @param enclave_info is a JSON serialised enclave signup info
         along with IAS attestation report
         @param mr_enclave - enclave measurement value
+        @param signup_cpp_obj - CPP object to access signup APIs
         """
-        return enclave.VerifyEnclaveInfo(
-            enclave_info, mr_enclave)
+        return signup_cpp_obj.VerifyEnclaveInfo(enclave_info, mr_enclave)
 
     # ----------------------------------------------------------------
 
@@ -334,6 +335,7 @@ class EnclaveInfo():
         """
         Return information about the enclave
         """
-        return enclave.UnsealEnclaveData(self.sealed_data)
+        signup_cpp_obj = enclave.SignupInfoSingleton()
+        return signup_cpp_obj.UnsealEnclaveData()
 
     # -------------------------------------------------------
