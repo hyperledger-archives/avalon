@@ -248,6 +248,10 @@ security model or Intel SGX enclaves. Docker makes it easier to
 build and setup Avalon, but you can also build without Docker
 (although it requires several more steps).
 
+How do I fix this docker-compose error: ``Invalid interpolation format for "build" option``
+-------------------------------------------------------------------------------------------
+Your docker-compose is too old.  Version 1.17.1 works OK.
+
 
 TEEs and Intel® SGX
 ===================

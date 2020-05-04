@@ -13,11 +13,10 @@
   Blockchain Privacy and Scalability"](
   https://software.intel.com/en-us/articles/ecosystem-support-for-eea-trusted-compute-specification-v10-improves-blockchain-privacy-and).
   Introductory blog by Michael Reed (2019)
+* [Introduction to Hyperledger Avalon video (20:24)](
+  https://youtu.be/YRXfzHzJVaU)
 
-[![Introduction to Hyperledger Avalon video
-](../images/screenshot-introduction-to-hyperledger-avalon.jpg)
-<br />*Introduction to Hyperledger Avalon video
-(20:24)*](https://youtu.be/YRXfzHzJVaU)
+[![Introduction to Hyperledger Avalon video](../images/screenshot-introduction-to-hyperledger-avalon.jpg)](https://youtu.be/YRXfzHzJVaU)
 
 ## Community
 * [Project Wiki](https://wiki.hyperledger.org/display/avalon/Hyperledger+Avalon)
@@ -38,6 +37,10 @@
 * [Contributing source code](../CONTRIBUTING.md)
 
 ## SDK Reference Manual
+The [Hyperledger Avalon SDK Reference Manual](https://danintel.github.io/refman.pdf)
+(also available as a [PDF](https://danintel.github.io/refman.pdf) file)
+documents the SDK used to create worker order requestors (clients) and processors.
+
 The Avalon SDK Reference Manual is generated with Doxygen.
 To generate the Reference Manual, type the following:
 ```
