@@ -25,5 +25,5 @@
 bool verify_signature(const char* cert_pem,
                       const char* msg,
                       unsigned int msg_len,
-                      char* signature,
+                      const char* signature,
                       unsigned int signature_len);
