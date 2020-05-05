@@ -16,7 +16,7 @@
 /**
  * @file
  * Avalon string utilities,
- * including base 64, hex, and byte array conversion.
+ * including base 64, hex, byte array, and string array conversion.
  */
 
 #include <algorithm>
@@ -33,7 +33,8 @@
  */
 std::string ByteArrayToString(const ByteArray& inArray) {
     std::string outString;
-    std::transform(inArray.begin(), inArray.end(), std::back_inserter(outString),
+    std::transform(inArray.begin(), inArray.end(),
+                   std::back_inserter(outString),
                    [](unsigned char c) -> char { return (char)c; });
 
     return outString;
@@ -41,7 +42,7 @@ std::string ByteArrayToString(const ByteArray& inArray) {
 
 
 /**
- * Conversion from byte array to string array.
+ * Conversion from ByteArray to StringArray.
  */
 StringArray ByteArrayToStringArray(const ByteArray& inArray) {
     StringArray sarray(0);

@@ -16,6 +16,7 @@
 /**
  * @file
  * Avalon error and exception handling functions.
+ * Namespace tcf::error
  */
 
 #pragma once

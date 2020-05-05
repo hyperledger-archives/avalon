@@ -58,7 +58,7 @@ if(NOT UNTRUSTED_ONLY)
 
     SET(SGX_SSL "$ENV{SGX_SSL}")
     if("${SGX_SSL} " STREQUAL " ")
-        SET(SGX_SSL "/opt/intel/sgxssl")     
+        SET(SGX_SSL "/opt/intel/sgxssl")
         message(STATUS "Setting default SGX_SSL=${SGX_SSL}")
     endif()
 endif()

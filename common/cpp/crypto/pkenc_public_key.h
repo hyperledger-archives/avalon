@@ -13,6 +13,11 @@
  * limitations under the License.
  */
 
+/**
+ * @file
+ * Avalon RSA public key generation, serialization, and encryption functions.
+ */
+
 #pragma once
 #include <openssl/rsa.h>
 #include <string>
@@ -24,21 +29,22 @@ namespace crypto {
     // Public Key encryption functions
     namespace pkenc {
         class PrivateKey;
+
         class PublicKey {
             friend PrivateKey;
 
         public:
-            // default constructor: UNINITIALIZED PublicKey!
+            // Default constructor for UNINITIALIZED PublicKey.
             PublicKey();
-            // copy constructor
+            // Copy constructor.
             // throws RuntimeError
             PublicKey(const PublicKey& publicKey);
-            // move constructor
+            // Move constructor.
             // throws RuntimeError
             PublicKey(PublicKey&& publicKey);
             // throws RuntimeError
             PublicKey(const PrivateKey& privateKey);
-            // deserializing constructor
+            // Deserializing constructor.
             // throws RuntimeError, ValueError
             PublicKey(const std::string& encoded);
             ~PublicKey();
@@ -48,7 +54,7 @@ namespace crypto {
             void Deserialize(const std::string& encoded);
             // throws RuntimeError
             std::string Serialize() const;
-            // Encrypt message.data() and return ByteArray containing raw binary ciphertext
+            // Encrypt message.data() and return ciphertext.
             // throws RuntimeError
             ByteArray EncryptMessage(const ByteArray& message) const;
 

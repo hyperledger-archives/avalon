@@ -13,6 +13,11 @@
  * limitations under the License.
  */
 
+/**
+ * @file
+ * Uses AES-GCM 256, which also includes authentication.
+ */
+
 #include "skenc.h"
 #include <openssl/err.h>
 #include <openssl/pem.h>
@@ -26,6 +31,7 @@
 #include "crypto_utils.h"
 #include "error.h"
 #include "hex_string.h"
+#include "skenc.h"
 
 /***Conditional compile untrusted/trusted***/
 
@@ -53,16 +59,20 @@ namespace Error = tcf::error;
 
 namespace constants = tcf::crypto::constants;
 
-// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-// Generate symmetric authenticated encryption key
-// throws RuntimeError
+
+/**
+ * Generate symmetric authenticated encryption key.
+ * Throws RuntimeError.
+ */
 ByteArray pcrypto::skenc::GenerateKey() {
     return pcrypto::RandomBitString(constants::SYM_KEY_LEN);
 }  // pcrypto::skenc::GenerateKey
 
-// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-// Generate symmetric authenticated encryption IV
-// throws RuntimeError
+
+/**
+ * Generate symmetric authenticated encryption IV.
+ * Throws RuntimeError.
+ */
 ByteArray pcrypto::skenc::GenerateIV(const std::string& IVstring) {
     // generate random IV if no input
     if (IVstring.compare("") == 0)
@@ -74,9 +84,11 @@ ByteArray pcrypto::skenc::GenerateIV(const std::string& IVstring) {
     return hash;
 }  // pcrypto::skenc::GenerateIV
 
-// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-// Encrypt message.data() using authenticated encryption
-// throws RuntimeError, ValueError
+
+/**
+ * Encrypt message.data() using authenticated encryption.
+ * Throws RuntimeError, ValueError.
+ */
 ByteArray pcrypto::skenc::EncryptMessage(
     const ByteArray& key, const ByteArray& iv, const ByteArray& message) {
     unsigned char tag[constants::TAG_LEN];
@@ -89,17 +101,20 @@ ByteArray pcrypto::skenc::EncryptMessage(
     ByteArray ct(ct_buf_len);
 
     if (key.size() != constants::SYM_KEY_LEN) {
-        std::string msg("Crypto Error (EncryptMessage): Wrong AES-GCM key length");
+        std::string msg(
+            "Crypto Error (EncryptMessage): Wrong AES-GCM key length");
         throw Error::ValueError(msg);
     }
 
     if (iv.size() != constants::IV_LEN) {
-        std::string msg("Crypto Error (EncryptMessage): Wrong AES-GCM IV length");
+        std::string msg(
+            "Crypto Error (EncryptMessage): Wrong AES-GCM IV length");
         throw Error::ValueError(msg);
     }
 
     if (message.size() == 0) {
-        std::string msg("Crypto Error (EncryptMessage): Cannot encrypt the empty message");
+        std::string msg(
+            "Crypto Error (EncryptMessage): Cannot encrypt the empty message");
         throw Error::ValueError(msg);
     }
 
@@ -111,15 +126,16 @@ ByteArray pcrypto::skenc::EncryptMessage(
         throw Error::RuntimeError(msg);
     }
 
-    if (EVP_EncryptInit_ex(context.get(), EVP_aes_256_gcm(), NULL, NULL, NULL) != 1) {
+    if (EVP_EncryptInit_ex(context.get(), EVP_aes_256_gcm(),
+            NULL, NULL, NULL) != 1) {
         std::string msg(
             "Crypto Error (EncryptMessage): OpenSSL could not "
-            "initialize EVP_CIPHER_CTX with "
-            "AES-GCM");
+            "initialize EVP_CIPHER_CTX with AES-GCM");
         throw Error::RuntimeError(msg);
     }
 
-    if (EVP_EncryptInit_ex(context.get(), NULL, NULL, (const unsigned char*)key.data(),
+    if (EVP_EncryptInit_ex(context.get(), NULL, NULL,
+            (const unsigned char*)key.data(),
             (const unsigned char*)iv.data()) != 1) {
         std::string msg(
             "Crypto Error (EncryptMessage): OpenSSL could not "
@@ -142,8 +158,10 @@ ByteArray pcrypto::skenc::EncryptMessage(
     }
     ct_len += len;
 
-    if (EVP_CIPHER_CTX_ctrl(context.get(), EVP_CTRL_GCM_GET_TAG, constants::TAG_LEN, tag) != 1) {
-        std::string msg("Crypto Error (EncryptMessage): OpenSSL could not get AES-GCM TAG");
+    if (EVP_CIPHER_CTX_ctrl(context.get(), EVP_CTRL_GCM_GET_TAG,
+            constants::TAG_LEN, tag) != 1) {
+        std::string msg(
+            "Crypto Error (EncryptMessage): OpenSSL could not get AES-GCM TAG");
         throw Error::RuntimeError(msg);
     }
     ct.resize(ct_len);
@@ -155,18 +173,23 @@ ByteArray pcrypto::skenc::EncryptMessage(
     return out;
 }  // pcrypto::skenc::EncryptMessage
 
-// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-// Encrypt message.data() using authenticated encryption with random IV
-// prepended to ciphertext
-// throws RuntimeError, ValueError
-ByteArray pcrypto::skenc::EncryptMessage(const ByteArray& key, const ByteArray& message) {
+
+/**
+ * Encrypt message.data() using authenticated encryption with random IV
+ * prepended to ciphertext.
+ * Throws RuntimeError, ValueError.
+ */
+ByteArray pcrypto::skenc::EncryptMessage(const ByteArray& key,
+        const ByteArray& message) {
     if (message.size() == 0) {
-        std::string msg("Crypto Error (EncryptMessage): Cannot encrypt the empty message");
+        std::string msg(
+            "Crypto Error (EncryptMessage): Cannot encrypt the empty message");
         throw Error::ValueError(msg);
     }
 
     if (key.size() != constants::SYM_KEY_LEN) {
-        std::string msg("Crypto Error (EncryptMessage): Wrong AES-GCM key length");
+        std::string msg(
+            "Crypto Error (EncryptMessage): Wrong AES-GCM key length");
         throw Error::ValueError(msg);
     }
 
@@ -176,9 +199,11 @@ ByteArray pcrypto::skenc::EncryptMessage(const ByteArray& key, const ByteArray& 
     return ct;
 }  // pcrypto::skenc::EncryptMessage
 
-// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-// Decrypt message.data() using authenticated decryption.
-// throws RuntimeError, ValueError, CryptoError
+
+/**
+ * Decrypt message.data() using authenticated decryption.
+ * Throws RuntimeError, ValueError, CryptoError.
+ */
 ByteArray pcrypto::skenc::DecryptMessage(
     const ByteArray& key, const ByteArray& iv, const ByteArray& message) {
     int res;
@@ -189,20 +214,21 @@ ByteArray pcrypto::skenc::DecryptMessage(
     int pt_buf_len = ct_len;
     ByteArray pt(pt_buf_len);
     if (key.size() != constants::SYM_KEY_LEN) {
-        std::string msg("Crypto Error (DecryptMessage): Wrong AES-GCM key length");
+        std::string msg(
+            "Crypto Error (DecryptMessage): Wrong AES-GCM key length");
         throw Error::ValueError(msg);
     }
 
     if (iv.size() != constants::IV_LEN) {
-        std::string msg("Crypto Error (DecryptMessage): Wrong AES-GCM IV length");
+        std::string msg(
+            "Crypto Error (DecryptMessage): Wrong AES-GCM IV length");
         throw Error::ValueError(msg);
     }
 
     if (message.size() < constants::TAG_LEN) {
         std::string msg(
             "Crypto Error (DecryptMessage): AES-GCM message smaller "
-            "than minimum length (TAG "
-            "length)");
+            "than minimum length (TAG length)");
         throw Error::ValueError(msg);
     }
 
@@ -214,7 +240,8 @@ ByteArray pcrypto::skenc::DecryptMessage(
         throw Error::RuntimeError(msg);
     }
 
-    if (!EVP_DecryptInit_ex(context.get(), EVP_aes_256_gcm(), NULL, NULL, NULL)) {
+    if (!EVP_DecryptInit_ex(context.get(), EVP_aes_256_gcm(),
+            NULL, NULL, NULL)) {
         std::string msg(
             "Crypto Error (DecryptMessage): OpenSSL could not "
             "initialize EVP_CIPHER_CTX with "
@@ -222,7 +249,8 @@ ByteArray pcrypto::skenc::DecryptMessage(
         throw Error::RuntimeError(msg);
     }
 
-    if (!EVP_DecryptInit_ex(context.get(), NULL, NULL, (const unsigned char*)key.data(),
+    if (!EVP_DecryptInit_ex(context.get(), NULL, NULL,
+            (const unsigned char*)key.data(),
             (const unsigned char*)iv.data())) {
         std::string msg(
             "Crypto Error (DecryptMessage): OpenSSL could not "
@@ -239,9 +267,10 @@ ByteArray pcrypto::skenc::DecryptMessage(
     }
     pt_len = len;
 
-    if (!EVP_CIPHER_CTX_ctrl(context.get(), EVP_CTRL_GCM_SET_TAG, constants::TAG_LEN,
-                  ct + ct_len - constants::TAG_LEN)) {
-        std::string msg("Crypto Error (DecryptMessage): OpenSSL could not get AES-GCM TAG");
+    if (!EVP_CIPHER_CTX_ctrl(context.get(), EVP_CTRL_GCM_SET_TAG,
+            constants::TAG_LEN, ct + ct_len - constants::TAG_LEN)) {
+        std::string msg(
+            "Crypto Error (DecryptMessage): OpenSSL could not get AES-GCM TAG");
         throw Error::RuntimeError(msg);
     }
 
@@ -249,8 +278,7 @@ ByteArray pcrypto::skenc::DecryptMessage(
     if (res < 1) {
         std::string msg(
             "Crypto Error (DecryptMessage): AES_GCM authentication "
-            "failed, plaintext is not "
-            "trustworthy");
+            "failed, plaintext is not trustworthy");
         throw Error::CryptoError(msg);
     } else {
         pt_len += len;
@@ -260,13 +288,16 @@ ByteArray pcrypto::skenc::DecryptMessage(
     return pt;
 }  // pcrypto::skenc::DecryptMessage
 
-// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-// Decrypt message.data() using authenticated encryption
-// expects IV prepended to message ciphertext and authentication tag
-// appended to cipther text.
-// message = IV + ciphertext + authentication tag
-// throws RuntimeError, ValueError
-ByteArray pcrypto::skenc::DecryptMessage(const ByteArray& key, const ByteArray& message) {
+
+/**
+ * Decrypt message.data() using authenticated encryption.
+ * Expects IV prepended to message ciphertext and authentication tag
+ * appended to cipther text:
+ * message = IV + ciphertext + authentication tag
+ * Throws RuntimeError, ValueError.
+ */
+ByteArray pcrypto::skenc::DecryptMessage(const ByteArray& key,
+        const ByteArray& message) {
     int res;
     unsigned char* ct = (unsigned char*)message.data();
     int len;
@@ -276,7 +307,8 @@ ByteArray pcrypto::skenc::DecryptMessage(const ByteArray& key, const ByteArray& 
     ByteArray pt(pt_buf_len);
 
     if (key.size() != constants::SYM_KEY_LEN) {
-        std::string msg("Crypto Error (DecryptMessage): Wrong AES-GCM key length");
+        std::string msg(
+            "Crypto Error (DecryptMessage): Wrong AES-GCM key length");
         throw Error::ValueError(msg);
     }
 
@@ -296,15 +328,16 @@ ByteArray pcrypto::skenc::DecryptMessage(const ByteArray& key, const ByteArray& 
         throw Error::RuntimeError(msg);
     }
 
-    if (!EVP_DecryptInit_ex(context.get(), EVP_aes_256_gcm(), NULL, NULL, NULL)) {
+    if (!EVP_DecryptInit_ex(context.get(), EVP_aes_256_gcm(),
+            NULL, NULL, NULL)) {
         std::string msg(
             "Crypto Error (DecryptMessage): OpenSSL could not "
-            "initialize EVP_CIPHER_CTX with "
-            "AES-GCM");
+            "initialize EVP_CIPHER_CTX with AES-GCM");
         throw Error::RuntimeError(msg);
     }
 
-    if (!EVP_DecryptInit_ex(context.get(), NULL, NULL, (const unsigned char*)key.data(),
+    if (!EVP_DecryptInit_ex(context.get(), NULL, NULL,
+            (const unsigned char*)key.data(),
             (const unsigned char*)message.data())) {
         std::string msg(
             "Crypto Error (DecryptMessage): OpenSSL could not "
@@ -325,7 +358,8 @@ ByteArray pcrypto::skenc::DecryptMessage(const ByteArray& key, const ByteArray& 
     if (!EVP_CIPHER_CTX_ctrl(
             context.get(), EVP_CTRL_GCM_SET_TAG, constants::TAG_LEN,
             ct + ct_len - constants::TAG_LEN)) {
-        std::string msg("Crypto Error (DecryptMessage): OpenSSL could not get AES-GCM TAG");
+        std::string msg(
+            "Crypto Error (DecryptMessage): OpenSSL could not get AES-GCM TAG");
         throw Error::RuntimeError(msg);
     }
 
@@ -333,8 +367,7 @@ ByteArray pcrypto::skenc::DecryptMessage(const ByteArray& key, const ByteArray& 
     if (res < 1) {
         std::string msg(
             "Crypto Error (DecryptMessage): AES_GCM authentication "
-            "failed, plaintext is not "
-            "trustworthy");
+            "failed, plaintext is not trustworthy");
         throw Error::CryptoError(msg);
     } else {
         pt_len += len;

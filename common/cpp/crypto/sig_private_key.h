@@ -13,6 +13,12 @@
  * limitations under the License.
  */
 
+/**
+ * @file
+ * Avalon ECDSA private key functions: generation, serialization, and signing.
+ * ECDSA used for Secp256k1 elliptical curves.
+ */
+
 #pragma once
 #include <openssl/ec.h>
 #include <string>
