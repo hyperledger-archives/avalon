@@ -124,49 +124,49 @@ class WorkOrderKVDelegate:
             the receipt.
         """
         receipt_entry = self._kv_helper.get("wo-receipts", wo_id)
-        if receipt_entry:
-            update_type = None
-            if "error" in wo_json_resp and \
-                    wo_json_resp["error"]["code"] != \
-                    WorkOrderStatus.PENDING.value:
-                update_type = ReceiptCreateStatus.FAILED.value
-            else:
-                update_type = ReceiptCreateStatus.PROCESSED.value
-            receipt_obj = WorkOrderReceiptRequest()
-            wo_receipt = receipt_obj.update_receipt(
-                wo_id,
-                update_type,
-                wo_json_resp,
-                self.private_key
-            )
-            updated_receipt = None
-            # load previous updates to receipt
-            updates_to_receipt = self._kv_helper.get(
-                "wo-receipt-updates", wo_id)
-            # If it is first update to receipt
-            if updates_to_receipt is None:
-                updated_receipt = []
-            else:
-                updated_receipt = json.loads(updates_to_receipt)
-                # Get the last update to receipt
-                last_receipt = updated_receipt[len(updated_receipt) - 1]
-
-                # If receipt updateType is completed,
-                # then no further update allowed
-                if last_receipt["updateType"] == \
-                        ReceiptCreateStatus.COMPLETED.value:
-                    logger.info(
-                        "Receipt for the workorder id %s is completed " +
-                        "and no further updates are allowed",
-                        wo_id)
-                    return
-            updated_receipt.append(wo_receipt)
-
-            # Since receipts_json is jrpc request updating only params object.
-            self._kv_helper.set("wo-receipt-updates", wo_id, json.dumps(
-                updated_receipt))
-            logger.info("Receipt for the workorder id %s is updated to %s",
-                        wo_id, wo_receipt)
+        # If receipt is not created yet, add tag "receiptUpdates" to
+        # Receipt entry and update it
+        if receipt_entry is None:
+            receipt_entry = {
+                "params": {
+                    "receiptUpdates": []
+                }
+            }
+        # load previous updates to receipt
+        receipt_update_entry = receipt_entry["params"]["receiptUpdates"]
+        update_type = None
+        if "error" in wo_json_resp and \
+                wo_json_resp["error"]["code"] != \
+                WorkOrderStatus.PENDING.value:
+            update_type = ReceiptCreateStatus.FAILED.value
         else:
-            logger.info("Work order receipt is not created, " +
-                        "so skipping the update")
+            update_type = ReceiptCreateStatus.PROCESSED.value
+        receipt_obj = WorkOrderReceiptRequest()
+        wo_receipt = receipt_obj.update_receipt(
+            wo_id,
+            update_type,
+            wo_json_resp,
+            self.private_key
+        )
+
+        # If it is first update to receipt
+        if len(receipt_update_entry) > 0:
+            # Get the last update to receipt
+            last_receipt = receipt_update_entry[len(receipt_update_entry) - 1]
+            # If receipt updateType is completed,
+            # then no further update allowed
+            if last_receipt["updateType"] == \
+                    ReceiptCreateStatus.COMPLETED.value:
+                logger.info(
+                    "Receipt for the workorder id %s is completed " +
+                    "and no further updates are allowed",
+                    wo_id)
+                return
+        receipt_update_entry.append(wo_receipt)
+
+        # Since receipts_json is jrpc request updating only params object.
+        receipt_entry["receiptUpdates"] = receipt_update_entry
+        self._kv_helper.set("wo-receipts", wo_id, json.dumps(
+            receipt_entry))
+        logger.info("Receipt for the workorder id %s is updated to %s",
+                    wo_id, wo_receipt)

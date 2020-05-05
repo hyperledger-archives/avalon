@@ -99,11 +99,10 @@ done
 
 #yell "Start testing echo client with reading registry from blockchain................"
 #yell "#------------------------------------------------------------------------------------------------"
-#try $echo_client_path/echo_client.py -m "Hello world" -rs -dh
 
 yell "Start testing echo client with service uri ................"
 yell "#------------------------------------------------------------------------------------------------"
-try $echo_client_path/echo_client.py -m "Hello world" -s "http://$LISTENER_URL:1947" -dh
+try $echo_client_path/echo_client.py -m "Hello world" -s "http://$LISTENER_URL:1947" -dh -rs
 
 yell "Start testing generic client for echo workload ................"
 yell "#------------------------------------------------------------------------------------------------"
