@@ -20,7 +20,7 @@ namespace crypto {
     namespace constants {
         //***RSA is not quantum resistant ***//
         //*** USE 3072 for long term security ***//
-        const int RSA_KEY_SIZE = 2048;
+        const int RSA_KEY_SIZE = 3072;
         const int RSA_PADDING_SIZE = 41;
 
         //*** OAEP or better should always be used for RSA encryption ***//
