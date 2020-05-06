@@ -78,7 +78,10 @@ enclave_module_files = [
     os.path.join(enclave_bridge_wrapper_path, 'enclave_info.cpp'),
     os.path.join(enclave_bridge_wrapper_path, 'signup_info.cpp'),
     os.path.join(enclave_bridge_wrapper_path, 'signup_info_singleton.cpp'),
-    os.path.join(enclave_bridge_wrapper_path, 'signup_info_kme.cpp')
+    # TODO: Move signup_info_kme.cpp to KME enclave manager and 
+    # move move signup_info_wpe.cpp to WPE enclave manager
+    os.path.join(enclave_bridge_wrapper_path, 'signup_info_kme.cpp'),
+    os.path.join(enclave_bridge_wrapper_path, 'signup_info_wpe.cpp')
 ]
 
 enclave_module = Extension(

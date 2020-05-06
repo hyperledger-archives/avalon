@@ -13,17 +13,25 @@
  * limitations under the License.
  */
 
-#include "types.h"
+#include "tcf_error.h"
 #include "swig_utils.h"
 
-#include "base.h"
-#include "signup_info.h"
 #include "signup_wpe.h"
 #include "signup_info_wpe.h"
 
+// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+SignupInfo* SignupInfoWPE::DeserializeSignupInfo(
+   const std::string&  serialized_signup_info) {
+
+   SignupInfo* signup_info = new SignupInfoWPE();
+    tcf_err_t result = signup_info->DeserializeSignupInfo(
+        serialized_signup_info);
+    return signup_info;
+}  // SignupInfoWPE::DeserializeSignupInfo
+
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-std::map<std::string, std::string> CreateEnclaveData(
+std::map<std::string, std::string> SignupInfoWPE::CreateEnclaveData(
     const std::string& in_ext_data,
     const std::string& in_ext_data_signature,
     const std::string& in_kme_attestation) {
@@ -33,8 +41,9 @@ std::map<std::string, std::string> CreateEnclaveData(
     StringArray public_enclave_data(0);
     Base64EncodedString enclave_quote;
 
+    SignupDataWPE signup_data_wpe;
     // sealed data is not generated in case of WPE
-    presult = tcf::enclave_api::enclave_data_wpe::CreateEnclaveDataWPE(
+    presult = signup_data_wpe.CreateEnclaveData(
         in_ext_data, in_ext_data_signature, in_kme_attestation,
         public_enclave_data, enclave_quote);
 
@@ -45,7 +54,7 @@ std::map<std::string, std::string> CreateEnclaveData(
     std::string encryption_key;
     std::string encryption_key_signature;
 
-    presult = DeserializePublicEnclaveData(
+    presult = SignupInfo::DeserializePublicEnclaveData(
         public_enclave_data.str(),
         verifying_key,
         encryption_key,
@@ -62,16 +71,16 @@ std::map<std::string, std::string> CreateEnclaveData(
     result["enclave_quote"] = enclave_quote;
 
     return result;
-}
+}  // SignupInfoWPE::CreateEnclaveData
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-size_t VerifyEnclaveInfoWPE(
+size_t SignupInfoWPE::VerifyEnclaveInfo(
     const std::string& enclave_info,
     const std::string& mr_enclave,
     const std::string& ext_data) {
 
-    tcf_err_t result = tcf::enclave_api::enclave_data_wpe::VerifyEnclaveInfoWPE(
+    SignupDataWPE signup_data_wpe;
+    tcf_err_t result = signup_data_wpe.VerifyEnclaveInfo(
         enclave_info, mr_enclave, ext_data);
-    size_t verify_status = result;
-    return verify_status;
-}  // VerifyEnclaveInfoWPE
+    return (size_t) result;
+}  // SignupInfoWPE::VerifyEnclaveInfo
