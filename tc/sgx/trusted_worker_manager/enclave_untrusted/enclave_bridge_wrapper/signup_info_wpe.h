@@ -15,15 +15,30 @@
 
 #pragma once
 
-#include <map>
-#include <string>
+#include "signup_info.h"
 
-std::map<std::string, std::string> CreateEnclaveDataWPE(
-    const std::string& in_ext_data,
-    const std::string& in_ext_data_signature,
-    const std::string& in_kme_attestation);
+class SignupInfoWPE : public SignupInfo {
+public:
 
-size_t VerifyEnclaveInfoWPE(
-    const std::string& enclaveInfo,
-    const std::string& mr_enclave,
-    const std::string& ext_data);
+    SignupInfoWPE() {}
+
+    std::map<std::string, std::string> CreateEnclaveData(
+        const std::string& in_ext_data,
+        const std::string& in_ext_data_signature,
+        const std::string& in_kme_attestation);
+
+    size_t VerifyEnclaveInfo(
+        const std::string& enclaveInfo,
+        const std::string& mr_enclave,
+        const std::string& ext_data);
+    SignupInfo* DeserializeSignupInfo(
+        const std::string& serialized_signup_info);
+
+private:
+    /*
+    Json serialization of the signup info Parameters, this serves as the
+    canonical representation of the signup info.
+    */
+    std::string serialized_;
+};  // SignupInfoWPE
+

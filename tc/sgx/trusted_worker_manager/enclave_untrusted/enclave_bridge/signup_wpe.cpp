@@ -26,7 +26,7 @@
 #include "signup_wpe.h"
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-tcf_err_t tcf::enclave_api::enclave_data_wpe::CreateEnclaveDataWPE(
+tcf_err_t SignupDataWPE::CreateEnclaveData(
     const std::string& inExtData,
     const std::string& inExtDataSignature,
     const std::string& inKmeAttestation,
@@ -127,10 +127,10 @@ tcf_err_t tcf::enclave_api::enclave_data_wpe::CreateEnclaveDataWPE(
     }
 
     return result;
-}  // tcf::enclave_api::enclave_data_wpe::CreateEnclaveDataWPE
+}  // SignupDataWPE::CreateEnclaveData
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-tcf_err_t tcf::enclave_api::enclave_data_wpe::VerifyEnclaveInfoWPE(
+tcf_err_t SignupDataWPE::VerifyEnclaveInfo(
     const std::string& enclaveInfo,
     const std::string& mr_enclave,
     const std::string& ext_data) {
@@ -153,8 +153,8 @@ tcf_err_t tcf::enclave_api::enclave_data_wpe::VerifyEnclaveInfoWPE(
                              enclaveInfo.c_str(),
                              mr_enclave.c_str(),
                              (const uint8_t*) ext_data.c_str());
-	      return tcf::error::ConvertErrorStatus(sresult, presult);
-	});
+          return tcf::error::ConvertErrorStatus(sresult, presult);
+    });
 
         tcf::error::ThrowSgxError(sresult,
             "Intel SGX enclave call failed (ecall_VerifyEnclaveInfoWPE)");
@@ -171,4 +171,4 @@ tcf_err_t tcf::enclave_api::enclave_data_wpe::VerifyEnclaveInfoWPE(
         result = TCF_ERR_UNKNOWN;
     }
     return result;
-}  // tcf::enclave_api::enclave_data_wpe::VerifyEnclaveInfoWPE
+}  // SignupDataWPE::VerifyEnclaveInfo
