@@ -3,8 +3,8 @@ Licensed under Creative Commons Attribution 4.0 International License
 https://creativecommons.org/licenses/by/4.0/
 -->
 
-Purpose of Common SGX Workload Hyperledger Avalon Code
-======================================================
+Purpose of Common Intel SGX Workload Hyperledger Avalon Code
+============================================================
 
 The common/sgx_workload directory contains source code
 shared by trusted (Intel SGX Enclave) code and
