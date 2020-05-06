@@ -15,14 +15,34 @@
 
 #pragma once
 
-#include <map>
-#include <string>
+#include "signup_info.h"
 
-std::map<std::string, std::string> CreateEnclaveDataKME(
-    const std::string& in_ext_data,
-    const std::string& in_ext_data_signature);
+class SignupInfoKME : public SignupInfo {
+public:
 
-size_t VerifyEnclaveInfoKME(
-    const std::string& enclaveInfo,
-    const std::string& mr_enclave,
-    const std::string& ext_data);
+    SignupInfoKME() {}
+
+    std::map<std::string, std::string> CreateEnclaveData(
+        const std::string& in_ext_data,
+        const std::string& in_ext_data_signature);
+
+    std::map<std::string, std::string> UnsealEnclaveData();
+
+    size_t VerifyEnclaveInfo(
+        const std::string& enclaveInfo,
+        const std::string& mr_enclave,
+        const std::string& ext_data);
+
+    static SignupInfo* DeserializeSignupInfo(
+        const std::string& serialized_signup_info);
+
+    std::string sealed_signup_data;
+
+private:
+    /*
+    Json serialization of the signup info Parameters, this serves as the
+    canonical representation of the signup info.
+    */
+    std::string serialized_;
+};  // SignupInfoKME
+

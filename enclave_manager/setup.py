@@ -72,16 +72,17 @@ libraries = [
 ]
 
 enclave_module_files = [
-    "avalon_enclave_manager/avalon_enclave.i",
+    "avalon_enclave_manager/avalon_enclave_singleton.i",
     os.path.join(enclave_bridge_wrapper_path, 'swig_utils.cpp'),
     os.path.join(enclave_bridge_wrapper_path, 'work_order_wrap.cpp'),
     os.path.join(enclave_bridge_wrapper_path, 'enclave_info.cpp'),
     os.path.join(enclave_bridge_wrapper_path, 'signup_info.cpp'),
     os.path.join(enclave_bridge_wrapper_path, 'signup_info_singleton.cpp'),
+    os.path.join(enclave_bridge_wrapper_path, 'signup_info_kme.cpp')
 ]
 
 enclave_module = Extension(
-    'avalon_enclave_manager._avalon_enclave',
+    'avalon_enclave_manager._avalon_enclave_singleton',
     enclave_module_files,
     swig_opts = ['-c++', '-threads'] + ['-I%s' % i for i in include_dirs],
     extra_compile_args = compile_args,

@@ -1,4 +1,4 @@
-/* Copyright 2018 Intel Corporation
+/* Copyright 2020 Intel Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-%module avalon_enclave
+%module avalon_enclave_kme
 
 %include <std_vector.i>
 %include <std_map.i>
@@ -82,7 +82,7 @@ namespace std {
 %{
 #include "swig_utils.h"
 #include "signup_info.h"
-#include "signup_info_singleton.h"
+#include "signup_info_kme.h"
 %}
 
 %{
@@ -90,7 +90,7 @@ namespace std {
 %}
 
 %include "signup_info.h"
-%include "signup_info_singleton.h"
+%include "signup_info_kme.h"
 %include "enclave_info.h"
 %include "work_order_wrap.h"
 %include "tcf_enclave.h"

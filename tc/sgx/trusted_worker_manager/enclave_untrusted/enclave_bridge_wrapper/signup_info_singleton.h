@@ -30,6 +30,9 @@ public:
         const std::string& enclaveInfo,
         const std::string& mr_enclave);
 
+    static SignupInfo* DeserializeSignupInfo(
+        const std::string& serialized_signup_info);
+
     std::string sealed_signup_data;
 
 private:
@@ -39,7 +42,4 @@ private:
     */
     std::string serialized_;
 };  // class SignupInfoSingleton
-
-SignupInfo* deserialize_signup_info(
-    const std::string& serialized_signup_info);
 

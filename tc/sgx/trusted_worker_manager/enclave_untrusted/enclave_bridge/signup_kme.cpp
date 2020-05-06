@@ -26,7 +26,7 @@
 #include "base.h"
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-tcf_err_t tcf::enclave_api::enclave_data_kme::CreateEnclaveDataKME(
+tcf_err_t SignupDataKME::CreateEnclaveData(
     const std::string& inExtData,
     const std::string& inExtDataSignature,
     StringArray& outPublicEnclaveData,
@@ -130,10 +130,54 @@ tcf_err_t tcf::enclave_api::enclave_data_kme::CreateEnclaveDataKME(
     }
 
     return result;
-}  // tcf::enclave_api::enclave_data_kme::CreateEnclaveDataKME
+}  // SignupDataKME::CreateEnclaveData
+
+// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+tcf_err_t SignupDataKME::UnsealEnclaveData(
+    StringArray& outPublicEnclaveData) {
+    tcf_err_t result = TCF_SUCCESS;
+
+    try {
+        outPublicEnclaveData.resize(
+            SignupData::CalculatePublicEnclaveDataSize());
+
+        // xxxxx call the enclave
+        sgx_enclave_id_t enclaveid = g_Enclave[0].GetEnclaveId();
+
+        tcf_err_t presult = TCF_SUCCESS;
+        sgx_status_t sresult = g_Enclave[0].CallSgx(
+            [ enclaveid,
+              &presult,
+              &outPublicEnclaveData] () {
+                sgx_status_t sresult =
+                ecall_UnsealEnclaveData(
+                    enclaveid,
+                    &presult,
+                    outPublicEnclaveData.data(),
+                    outPublicEnclaveData.size());
+                return tcf::error::ConvertErrorStatus(sresult, presult);
+            });
+
+        tcf::error::ThrowSgxError(sresult,
+            "Intel SGX enclave call failed (ecall_UnsealSignupData)");
+        g_Enclave[0].ThrowTCFError(presult);
+
+    } catch (tcf::error::Error& e) {
+        tcf::enclave_api::base::SetLastError(e.what());
+        result = e.error_code();
+    } catch (std::exception& e) {
+        tcf::enclave_api::base::SetLastError(e.what());
+        result = TCF_ERR_UNKNOWN;
+    } catch (...) {
+        tcf::enclave_api::base::SetLastError("Unexpected exception");
+        result = TCF_ERR_UNKNOWN;
+    }
+
+    return result;
+}  // SignupDataKME::UnsealSignupData
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-tcf_err_t tcf::enclave_api::enclave_data_kme::VerifyEnclaveInfoKME(
+tcf_err_t SignupDataKME::VerifyEnclaveInfo(
     const std::string& enclaveInfo,
     const std::string& mr_enclave,
     const std::string& ext_data) {
@@ -156,8 +200,8 @@ tcf_err_t tcf::enclave_api::enclave_data_kme::VerifyEnclaveInfoKME(
                              enclaveInfo.c_str(),
                              mr_enclave.c_str(),
                              (const uint8_t*) ext_data.c_str());
-	      return tcf::error::ConvertErrorStatus(sresult, presult);
-	});
+          return tcf::error::ConvertErrorStatus(sresult, presult);
+    });
 
         tcf::error::ThrowSgxError(sresult,
             "Intel SGX enclave call failed (ecall_VerifyEnclaveInfo)");
@@ -174,4 +218,4 @@ tcf_err_t tcf::enclave_api::enclave_data_kme::VerifyEnclaveInfoKME(
         result = TCF_ERR_UNKNOWN;
     }
     return result;
-}  // tcf::enclave_api::enclave_data_kme::VerifyEnclaveInfoKME
+}  // SignupDataKME::VerifyEnclaveInfo
