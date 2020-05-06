@@ -1,4 +1,9 @@
-# EEA Token Execution Example Application
+<!--
+Licensed under Creative Commons Attribution 4.0 International License
+https://creativecommons.org/licenses/by/4.0/
+-->
+
+# EEA Token Execution Example Hyperledger Avalon Application
 
 The EEA Token Execution application demonstrates running
 EEA execution logic based on token requests.

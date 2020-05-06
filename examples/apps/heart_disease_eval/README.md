@@ -1,4 +1,9 @@
-# Running the Heart Disease Evaluation Demo
+<!--
+Licensed under Creative Commons Attribution 4.0 International License
+https://creativecommons.org/licenses/by/4.0/
+-->
+
+# Running the Heart Disease Evaluation Hyperledger Avalon Demo
 
 This demo performs a heart disease evaluation based on input parameters.
 Three clients are available: batch command line client,

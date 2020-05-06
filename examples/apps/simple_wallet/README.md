@@ -1,14 +1,20 @@
-# Simple Wallet Demo Application
+<!--
+Licensed under Creative Commons Attribution 4.0 International License
+https://creativecommons.org/licenses/by/4.0/
+-->
+
+# Simple Wallet Demo Hyperledger Avalon Application
 
 This application demonstrates basic wallet transactions like deposit, withdraw
-and transfer by accessing encrypted wallet ledger file using inside-out API and
-applying crypto operations on the ledger data.
+and transfer. It accesses an encrypted wallet ledger file using the
+inside-out API and applying crypto operations on the ledger data.
 
 ## Using the Generic Command Line Client to execute Simple Wallet operations
 
-Generic command line client, `generic_client.py` sends an input request
-with transaction type, account identifier(s), and amount to the worker
-which stores stores wallet details in encrypted ledger using inside-out API.
+The generic command line client, `generic_client.py` sends an input request
+with transaction type, account identifier(s), and amount to the worker.
+The worker stores stores wallet details in an encrypted ledger using the
+inside-out API.
 The encrypted ledger data is then decrypted by the workload by making use of
 crypto functions. Once the balance is updated, the result is encrypted and
 written to ledger using file I/O. Both encryption and decryption of the

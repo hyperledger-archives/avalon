@@ -39,7 +39,22 @@ Hyperledger Avalon uses the
 defined by Enterprise Ethereum Alliance (EEA) Task Force as a starting point to
 apply a consistent and compatible approach to all supported blockchains.
 
-Hyperledger Avalon architecture can be found [_avalon-arch.pdf_](docs/avalon-arch.pdf).
+For more details on Hyperledger Avalon architecture, see
+[_avalon-arch.pdf_](docs/avalon-arch.pdf).
+
+## Building
+
+To build Hyperledger Avalon, follow instructions in the
+[build document](BUILD.md).
+
+## Documentation
+
+[Hyperledger Avalon Documentation](https://hyperledger.github.io/avalon/)
+
+## Contributing
+
+See the [contributing document](CONTRIBUTING.md)
+for information on how to contribute and the guidelines for contributions.
 
 ## Initial Committers
 * Manjunath A C (manju956)
@@ -54,19 +69,6 @@ Hyperledger Avalon architecture can be found [_avalon-arch.pdf_](docs/avalon-arc
 ## Sponsor
 * Mic Bowman (cmickeyb) - TSC member
 
-## Building
-
-To build Hyperledger Avalon, follow instructions in the [build document](BUILD.md).
-
-## Documentation
-
-[Hyperledger Avalon Documentation](https://hyperledger.github.io/avalon/)
-
-## Contributing
-
-See the [contributing document](CONTRIBUTING.md)
-for information on how to contribute and the guidelines for contributions.
-
 ## License
 Hyperledger Avalon is released under the Apache License
 Version 2.0 software license. See the [license file](LICENSE) for more details.
@@ -75,4 +77,4 @@ Hyperledger Avalon documentation is licensed under the
 Creative Commons Attribution 4.0 International License. You may obtain a copy
 of the license at: http://creativecommons.org/licenses/by/4.0/.
 
-© Copyright 2019, Intel Corporation.
+© Copyright 2019-2020, Intel Corporation.
