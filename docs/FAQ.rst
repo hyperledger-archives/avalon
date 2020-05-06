@@ -201,7 +201,7 @@ What TCP ports does Avalon use?
 - TCP 9090: connections to LMDB listener for KV Storage.
   The URL is ``http://localhost:9090/`` or, for Docker,
   ``http://avalon-lmdb:9090/``
-- TCP 5555: connections to Avalon Enclave Manager from Avalon Listener.
+- TCP 5555: ZMQ connections to Avalon Enclave Manager from Avalon Listener.
   The URL is ``tcp://localhost:5555`` or, for Docker,
   ``tcp://avalon-enclave-manager:5555``
 
@@ -775,5 +775,8 @@ Zero-knowledge proofs (zk proofs)
     of the input. For example, not knowing someone's age,
     but knowing if they are in an age range
 
+ZMQ (aka 0MQ, ZeroMQ)
+    Zero Message Queue. A message transport API available on Linux; used
+    between Avalon Enclave Manager and Listener
 
 © Copyright 2020, Intel Corporation.
