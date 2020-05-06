@@ -1,0 +1,14 @@
+<map id="tcf::error::Error" name="tcf::error::Error">
+<area shape="rect" id="node3" href="$classtcf_1_1error_1_1CryptoError.html" title="tcf::error::CryptoError" alt="" coords="350,5,497,32"/>
+<area shape="rect" id="node4" href="$classtcf_1_1error_1_1DivisionByZero.html" title="tcf::error::DivisionByZero" alt="" coords="339,56,507,83"/>
+<area shape="rect" id="node5" href="$classtcf_1_1error_1_1IndexError.html" title="tcf::error::IndexError" alt="" coords="354,107,493,133"/>
+<area shape="rect" id="node6" href="$classtcf_1_1error_1_1IOError.html" title="tcf::error::IOError" alt="" coords="363,157,484,184"/>
+<area shape="rect" id="node7" href="$classtcf_1_1error_1_1MemoryError.html" title="tcf::error::MemoryError" alt="" coords="346,208,501,235"/>
+<area shape="rect" id="node8" href="$classtcf_1_1error_1_1OverflowError.html" title="tcf::error::OverflowError" alt="" coords="344,259,503,285"/>
+<area shape="rect" id="node9" href="$classtcf_1_1error_1_1RuntimeError.html" title="tcf::error::RuntimeError" alt="" coords="345,309,501,336"/>
+<area shape="rect" id="node10" href="$classtcf_1_1error_1_1SystemBusyError.html" title="tcf::error::SystemBusyError" alt="" coords="332,360,515,387"/>
+<area shape="rect" id="node11" href="$classtcf_1_1error_1_1SystemError.html" title="tcf::error::SystemError" alt="" coords="347,411,499,437"/>
+<area shape="rect" id="node12" href="$classtcf_1_1error_1_1UnknownError.html" title="tcf::error::UnknownError" alt="" coords="342,461,505,488"/>
+<area shape="rect" id="node13" href="$classtcf_1_1error_1_1ValueError.html" title="tcf::error::ValueError" alt="" coords="353,512,493,539"/>
+<area shape="rect" id="node14" href="$classtcf_1_1error_1_1WorkloadError.html" title="tcf::error::WorkloadError" alt="" coords="342,563,505,589"/>
+</map>
