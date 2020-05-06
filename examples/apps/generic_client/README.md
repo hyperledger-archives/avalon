@@ -1,4 +1,9 @@
-# Generic Workload Client
+<!--
+Licensed under Creative Commons Attribution 4.0 International License
+https://creativecommons.org/licenses/by/4.0/
+-->
+
+# Generic Hyperledger Avalon Workload Client
 
 This is a generic command line client intended to work with any
 workload application. The intention is to get up to speed quickly
@@ -6,7 +11,7 @@ in application development by providing a generic client that works
 with any worker.
 
 The client application accepts only strings as input parameters and assumes
-that all outputs returned from the woorkload application are also provided
+that all outputs returned from the workload application are also provided
 as strings. If other data types are needed (such as numbers or binaries),
 then create a custom test application
 (potentially by modifying this application)

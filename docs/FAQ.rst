@@ -195,8 +195,15 @@ There was a PR to add Java, for example.
 
 What TCP ports does Avalon use?
 -------------------------------
-- TCP 1947: connections to Avalon listener from Avalon clients
-- TCP 9090: connections to LMDB listener for KV Storage
+- TCP 1947: connections to Avalon listener from Avalon clients.
+  The URL is ``http://localhost:1947/`` or, for Docker,
+  ``http://avalon-listener:9090/``
+- TCP 9090: connections to LMDB listener for KV Storage.
+  The URL is ``http://localhost:9090/`` or, for Docker,
+  ``http://avalon-lmdb:9090/``
+- TCP 5555: connections to Avalon Enclave Manager from Avalon Listener.
+  The URL is ``tcp://localhost:5555`` or, for Docker,
+  ``tcp://avalon-enclave-manager:5555``
 
 What cryptography does Avalon use?
 ----------------------------------

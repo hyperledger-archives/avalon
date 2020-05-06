@@ -1,3 +1,7 @@
+<!--
+Licensed under Creative Commons Attribution 4.0 International License
+https://creativecommons.org/licenses/by/4.0/
+-->
 # Hyperledger Avalon Documentation
 
 ## Introduction
@@ -37,12 +41,15 @@
 * [Contributing source code](../CONTRIBUTING.md)
 
 ## SDK Reference Manual
-The [Hyperledger Avalon SDK Reference Manual](https://danintel.github.io/refman.pdf)
-(also available as a [PDF](https://danintel.github.io/refman.pdf) file)
-documents the SDK used to create worker order requestors (clients) and processors.
+The
+[Hyperledger Avalon SDK Reference Manual](https://hyperledger.github.io/avalon/)
+(also available as a [PDF](https://hyperledger.github.io/avalon/refman.pdf)
+file)
+documents the SDK used to
+create worker order requestors (clients) and processors.
 
 The Avalon SDK Reference Manual is generated with Doxygen.
-To generate the Reference Manual, type the following:
+To generate the Reference Manual using this repository, type the following:
 ```
 cd $TCF_HOME/docs # this directory
 sudo apt-get update

@@ -1,9 +1,15 @@
-# Demo Application to execute file i/o operations from the Intel SGX enclave
+<!--
+Licensed under Creative Commons Attribution 4.0 International License
+https://creativecommons.org/licenses/by/4.0/
+-->
 
-This simple demo application executes file operations such as read and write
+# Inside Out File I/O Demo Hyperledger Avalon Application
+
+This simple demo application executes file I/O operations, such as read and write, from inside the Intel SGX enclave,
 based on the input from the user.
+This allows access inside the enclave to files outside the enclave, so is sometimes called Inside/Out I/O.
 
-## Using the Generic Command Line Client to execute file I/O from the Intel SGX enclave
+## Using the Generic Command Line Client to execute file I/O
 
 The generic command line client, `generic_client.py`, sends an input request
 with file operation, filepath, content to be written, etc. to the worker
@@ -24,8 +30,9 @@ To use:
 
 To read a file:
 
-5.  In Terminal 2, run `./generic_client.py --workload_id "inside-out-eval" --in_data "read <file>" -o` .
-    File parameter should point to an absolute path which can be accessed by
+5.  In Terminal 2, run
+    `./generic_client.py --workload_id "inside-out-eval" --in_data "read <file>" -o` .
+    The file parameter should point to an absolute path which can be accessed by
     the enclave manager.
     For example, if the enclave manager is running in a Docker container, the
     file path could be `/project/trusted-compute-framework/tests/read.txt` .
@@ -33,8 +40,9 @@ To read a file:
 
 To write a file:
 
-5. In Terminal 2, run `./generic_client.py --workload_id "inside-out-eval" --in_data "write <file> <content-to-be-written>" -o` .
-   File parameter should point to an absolute path which can be accessed by
+5. In Terminal 2, run
+   `./generic_client.py --workload_id "inside-out-eval" --in_data "write <file> <content-to-be-written>" -o` .
+   The file parameter should point to an absolute path which can be accessed by
    the enclave manager.
    For example, if the enclave manager is running in a Docker container, the
    file path could be `/project/trusted-compute-framework/tests/write.txt` .

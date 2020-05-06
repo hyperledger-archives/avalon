@@ -3,11 +3,11 @@ Licensed under Creative Commons Attribution 4.0 International License
 https://creativecommons.org/licenses/by/4.0/
 -->
 
-Common Crypto library documentation
-===================================
+Hyperledger Avalon Common Crypto Library
+========================================
 
 This `common/cpp/crypto/` directory contains cryptographic code used by
-untrusted and trusted (Intel SGX Enclave) code.
+untrusted and trusted (Intel SGX Enclave) Hyperledger Avalon code.
 
 This code is written in C++, but a Python wrapper is also available
 (see [../README.md](../README.md))
@@ -29,15 +29,15 @@ OpenSSL 1.1 library and Intel SGX OpenSSL library built from OpenSSL 1.1:
 Cryptographic Primitives Used
 -----------------------------
 
-| Primitive | Algorithm | Keysize | Comments |
-| --------- | --------- | ------- | -------- |
-| Digital signature | ECDSA-SECP256K1 | 256 | (1) (2) |
-| Asymmetric encryption | RSA-OAEP | 3072 | (1) |
-| Authenticated encryption | AES-GCM | 256 | 96b IV, 128b tag |
-| Digest | SHA-256 | 256 | (2) |
-| Digest | KECCACK | 256 | (2) Differs from SHA-3 |
+| Primitive                | Algorithm       | Keysize | Comments |
+| ---------                | ---------       | ------- | -------- |
+| Digital signature        | ECDSA-SECP256K1 | 256     | (1) (2) |
+| Asymmetric encryption    | RSA-OAEP        | 3072    | (1) |
+| Authenticated encryption | AES-GCM         | 256     | 96b IV, 128b tag |
+| Digest                   | SHA-256         | 256     | (2) |
+| Digest                   | KECCACK         | 256     | (2) Differs from SHA-3 |
 
-(1) Not PQ resistant
+(1) Not post-quantum crypto (PQ) resistant
 
 (2) Blockchain legacy algorithm
 
@@ -46,20 +46,24 @@ Cryptographic Primitive Usage
 -----------------------------
 
 * **SHA-256** Computing digests of the work order request and response
-* **KECCAK-256** Computing digests of the work order request and response or Ethereum raw transactions Packet bytes
-* **AES-GCM-256** Encrypts data items within work order request and response. It also used to encrypt a request digest and custom data encryption keys
+* **KECCAK-256** Computing digests of the work order request and response
+  or Ethereum raw transactions Packet bytes
+* **AES-GCM-256** Encrypts data items within work order request and response.
+  It also used to encrypt a request digest and custom data encryption keys
 * **RSA-OAEP-3072** Encrypt symmetric data encryption keys
-* **ECSDA-SECP256K1** Signs work order response digest and worker’s encryption RSA-OAEP public key
+* **ECSDA-SECP256K1** Signs work order response digest and
+  worker’s encryption RSA-OAEP public key
 
 
 Implementation of Cryptographic Elements
 ----------------------------------------
 
-Cryptographic elements include cryptographic keys, signature, ciphertexts, plaintexts, hashes, and random bitstrings.
+Cryptographic elements include cryptographic keys, signature, ciphertexts,
+plaintexts, hashes, and random bitstrings.
 
 | Element | Implementation | Representation | Serialize/Deserialize function? |
 | ------- | -------------- | -------------- | ------------------------------- |
-| ECDSA public key | C++ class | Custom object | Yes, PEM encoding and 65-byte Bitcoin Hex format |
+| ECDSA public key       | C++ class  | Custom object | Yes, PEM encoding and 65-byte Bitcoin Hex format |
 | ECDSA private key      | C++ class  | Custom object | Yes, PEM encoding     |
 | ECDSA signature        | C++ string | DER binary    | No, user defined      |
 | RSA public key         | C++ class  | Custom object | Yes, PEM encoding     |
