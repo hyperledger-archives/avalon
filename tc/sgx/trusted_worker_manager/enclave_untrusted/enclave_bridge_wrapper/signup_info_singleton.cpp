@@ -20,14 +20,14 @@
 #include "signup_info_singleton.h"
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-SignupInfo* deserialize_signup_info(
+SignupInfo* SignupInfoSingleton::DeserializeSignupInfo(
     const std::string&  serialized_signup_info) {
     SignupInfo* signup_info = new SignupInfoSingleton();
     tcf_err_t result = signup_info->DeserializeSignupInfo(
         serialized_signup_info);
 
     return signup_info;
-}  // deserialize_signup_info
+}  // SignupInfoSingleton::DeserializeSignupInfo
 
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX

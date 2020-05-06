@@ -22,7 +22,7 @@ from requests.exceptions import Timeout
 from requests.exceptions import HTTPError
 import avalon_crypto_utils.keys as keys
 import avalon_enclave_manager.ias_client as ias_client
-import avalon_enclave_manager.avalon_enclave as enclave
+import avalon_enclave_manager.avalon_enclave_singleton as enclave
 
 import logging
 logger = logging.getLogger(__name__)
@@ -178,7 +178,7 @@ class EnclaveInfo():
         # Now we can finally serialize the signup info and create a
         # corresponding signup info object. Because we don't want the
         # sealed signup data in the serialized version, we set it separately.
-        signup_info_obj = enclave.deserialize_signup_info(
+        signup_info_obj = signup_cpp_obj.DeserializeSignupInfo(
             json.dumps(signup_info))
         signup_info_obj.sealed_signup_data = \
             signup_data['sealed_enclave_data']
