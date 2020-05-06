@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright 2019 Intel Corporation
+# Copyright 2020 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import avalon_enclave_manager.sgx_work_order_request as work_order_request
 import avalon_enclave_manager.avalon_enclave_info as enclave_info
 import avalon_crypto_utils.crypto_utility as crypto_utils
 from database import connector
+from avalon_enclave_manager.base_enclave_manager import EnclaveManager
 from avalon_enclave_manager.worker_kv_delegate import WorkerKVDelegate
 from avalon_enclave_manager.work_order_kv_delegate import WorkOrderKVDelegate
 from error_code.error_status import ReceiptCreateStatus, WorkOrderStatus
@@ -38,37 +39,14 @@ from avalon_sdk.work_order_receipt.work_order_receipt \
 logger = logging.getLogger(__name__)
 
 
-class EnclaveManager:
+class SingletonEnclaveManager(EnclaveManager):
     """
     Wrapper for managing Worker data
     """
 
     def __init__(self, config):
 
-        self._config = config
-
-        signup_data, measurements = self._setup_enclave()
-        self._kv_helper = self._connect_to_kv_store()
-        self._worker_kv_delegate = WorkerKVDelegate(self._kv_helper)
-        self._wo_kv_delegate = WorkOrderKVDelegate(self._kv_helper)
-        self.enclave_data = signup_data
-        self.sealed_data = signup_data.sealed_data
-        self.verifying_key = signup_data.verifying_key
-        self.encryption_key = signup_data.encryption_key
-
-        # TODO: EncryptionKeyNonce and EncryptionKeySignature are hardcoded
-        # to dummy values.
-        # Need to come up with a scheme to generate both for every unique
-        # encryption key.
-        self.encryption_key_nonce = ""
-        self.encryption_key_signature = signup_data.encryption_key_signature
-        self.enclave_id = signup_data.enclave_id
-        self.extended_measurements = measurements
-
-        # ProofDataType is one of TEE prefixed type
-        # TODO: Read ProofDataType from config file
-        self.proof_data_type = config.get("WorkerConfig")["ProofDataType"]
-        self.proof_data = signup_data.proof_data
+        super().__init__(config)
 
 # -------------------------------------------------------------------------
 
@@ -82,7 +60,7 @@ class EnclaveManager:
         self._worker_kv_delegate.cleanup_worker()
 
         # Add a new worker
-        worker_info = create_json_worker(self, self._config)
+        worker_info = EnclaveManager.create_json_worker(self, self._config)
         worker_id = crypto_utils.strip_begin_end_public_key(self.enclave_id) \
             .encode("UTF-8")
         # Calculate sha256 of worker id to get 32 bytes. The TC spec proxy
@@ -150,10 +128,13 @@ class EnclaveManager:
 
     def _process_work_order_by_id(self, wo_id):
         """
-        Process the work-order of the specified work-order id
-        Parameters:
-        - wo_id is work-order id of the work-order that is to be processed
-        Execute the work-order and update the tables accordingly
+        Process the work-order of the specified work-order id. Execute the
+        work-order and update the tables accordingly.
+        Parameters :
+            wo_id - It is the work-order id of the work-order that is to be
+                    processed
+        Returns :
+            wo_resp - A JSON response of the executed work order
         """
         try:
             self._kv_helper.set("wo-processing", wo_id,
@@ -183,7 +164,7 @@ class EnclaveManager:
         self._kv_helper.remove("wo-scheduled", wo_id)
 
         logger.info("Validating JSON workorder request %s", wo_id)
-        validation_status = validate_request(wo_json_req)
+        validation_status = EnclaveManager.validate_request(wo_json_req)
 
         if not validation_status:
             logger.error(
@@ -237,7 +218,13 @@ class EnclaveManager:
     def _execute_work_order(self, input_json_str, indent=4):
         """
         Submits workorder request to Worker enclave and retrieves the response
+
+        Returns :
+            json_response - A JSON formatted str of the response recieved from
+                            the enclave. Errors are also wrapped in a JSON str
+                            if exceptions have occurred.
         """
+        wo_response = dict()
         try:
             wo_request = work_order_request.SgxWorkOrderRequest(
                 self.enclave_data,
@@ -247,12 +234,14 @@ class EnclaveManager:
             try:
                 json_response = json.dumps(wo_response, indent=indent)
             except Exception as err:
+                wo_response["Response"] = dict()
                 logger.error("ERROR: Failed to serialize JSON; %s", str(err))
                 wo_response["Response"]["Status"] = WorkOrderStatus.FAILED
                 wo_response["Response"]["Message"] = "Failed to serialize JSON"
                 json_response = json.dumps(wo_response)
 
         except Exception as e:
+            wo_response["Response"] = dict()
             logger.error("failed to execute work order; %s", str(e))
             wo_response["Response"]["Status"] = WorkOrderStatus.FAILED
             wo_response["Response"]["Message"] = str(e)
@@ -327,7 +316,7 @@ class EnclaveManager:
         """
         # Binding with ZMQ Port
         try:
-            socket = bind_zmq_socket(
+            socket = EnclaveManager.bind_zmq_socket(
                 self._config.get("EnclaveManager")["zmq_port"])
             logger.info("ZMQ Port hosted by Enclave")
         except Exception as ex:
@@ -356,175 +345,6 @@ class EnclaveManager:
                          .format(type(inst), inst.args, inst))
             exit(1)
 
-# -------------------------------------------------------------------------
-
-    def _connect_to_kv_store(self):
-        """
-        This function creates a connection to the KVStorage.
-
-        Returns :
-            kv_helper - An instance of LMDBHelperProxy that helps interact
-                        with the database
-        """
-        if self._config.get("KvStorage") is None:
-            logger.error("Kv Storage path is missing")
-            sys.exit(-1)
-        try:
-            kv_helper = connector.open(self._config['KvStorage']['remote_url'])
-        except Exception as err:
-            logger.error("Failed to open KV storage interface; " +
-                         "exiting Intel SGX Enclave manager: {}".format(err))
-            sys.exit(-1)
-        return kv_helper
-
-# -------------------------------------------------------------------------
-
-    def _setup_enclave(self):
-        """
-        This function is responsible for initialization of the trusted
-        enclave. It does so via the EnclaveInfo class which not only
-        initializes the enclave but also ensures the enclave creates
-        the signup data. This signup data is key to all the trusted
-        functionalities over this instance of the enclave. Therefore
-        all relevant data is sent back here. This is kept in memory
-        for use hereafter.
-
-        Returns :
-            signup_data - Relevant signup data to be used for requests to the
-                          enclave
-            extended_measurements - A tuple of enclave basename & measurements
-        """
-        try:
-            logger.info("Initialize enclave and create signup data")
-            signup_data = enclave_info.\
-                EnclaveInfo(self._config.get("EnclaveModule"))
-            # Extended measurements is a list of enclave basename and
-            # enclave measurement
-            extended_measurements = signup_data.get_extended_measurements()
-        except Exception as e:
-            logger.exception("failed to initialize/signup enclave; %s", str(e))
-            sys.exit(-1)
-        return signup_data, extended_measurements
-
-
-# -----------------------------------------------------------------
-def validate_request(wo_request):
-    """
-    Validate JSON workorder request
-    """
-    try:
-        json.loads(wo_request)
-    except ValueError as e:
-        logger.error("Invalid JSON format found for workorder - %s", e)
-        return False
-    return True
-
-
-# -----------------------------------------------------------------
-def create_json_worker(enclave_data, config):
-    """
-    Create JSON worker object which gets saved in KvStorage
-    """
-    worker_type_data = dict()
-    worker_type_data["verificationKey"] = enclave_data.verifying_key
-    worker_type_data["extendedMeasurements"] = \
-        enclave_data.extended_measurements
-    worker_type_data["proofDataType"] = enclave_data.proof_data_type
-    worker_type_data["proofData"] = enclave_data.proof_data
-    worker_type_data["encryptionKey"] = enclave_data.encryption_key
-    worker_type_data["encryptionKeySignature"] = \
-        enclave_data.encryption_key_signature
-
-    worker_info = dict()
-    worker_info["workerType"] = WorkerType.TEE_SGX.value
-    worker_info["organizationId"] = \
-        config.get("WorkerConfig")["OrganizationId"]
-    worker_info["applicationTypeId"] = \
-        config.get("WorkerConfig")["ApplicationTypeId"]
-
-    details_info = dict()
-    details_info["workOrderSyncUri"] = \
-        config.get("WorkerConfig")["WorkOrderSyncUri"]
-    details_info["workOrderAsyncUri"] = \
-        config.get("WorkerConfig")["WorkOrderAsyncUri"]
-    details_info["workOrderPullUri"] = \
-        config.get("WorkerConfig")["WorkOrderPullUri"]
-    details_info["workOrderNotifyUri"] = \
-        config.get("WorkerConfig")["WorkOrderNotifyUri"]
-    details_info["receiptInvocationUri"] = \
-        config.get("WorkerConfig")["ReceiptInvocationUri"]
-    details_info["workOrderInvocationAddress"] = config.get(
-        "WorkerConfig")["WorkOrderInvocationAddress"]
-    details_info["receiptInvocationAddress"] = config.get(
-        "WorkerConfig")["ReceiptInvocationAddress"]
-    details_info["fromAddress"] = config.get("WorkerConfig")["FromAddress"]
-    details_info["hashingAlgorithm"] = \
-        config.get("WorkerConfig")["HashingAlgorithm"]
-    details_info["signingAlgorithm"] = \
-        config.get("WorkerConfig")["SigningAlgorithm"]
-    details_info["keyEncryptionAlgorithm"] = \
-        config.get("WorkerConfig")["KeyEncryptionAlgorithm"]
-    details_info["dataEncryptionAlgorithm"] = \
-        config.get("WorkerConfig")["DataEncryptionAlgorithm"]
-    details_info["workOrderPayloadFormats"] = \
-        config.get("WorkerConfig")["workOrderPayloadFormats"]
-    details_info["workerTypeData"] = worker_type_data
-
-    worker_info["details"] = details_info
-    worker_info["status"] = WorkerStatus.ACTIVE.value
-
-    # JSON serialize worker_info
-    json_worker_info = json.dumps(worker_info)
-    logger.info("JSON serialized worker info is %s", json_worker_info)
-    return json_worker_info
-
-
-# -----------------------------------------------------------------
-
-
-TCFHOME = os.environ.get("TCF_HOME", "../../../../")
-
-# -----------------------------------------------------------------
-# -----------------------------------------------------------------
-
-
-def bind_zmq_socket(zmq_port):
-    context = zmq.Context()
-    socket = context.socket(zmq.REP)
-    socket.bind("tcp://0.0.0.0:"+zmq_port)
-    return socket
-
-
-def parse_command_line(config, args):
-    """
-    Parse command line arguments
-    """
-    # global consensus_file_name
-
-    parser = argparse.ArgumentParser()
-
-    parser.add_argument(
-        "--logfile",
-        help="Name of the log file, __screen__ for standard output", type=str)
-    parser.add_argument("--loglevel", help="Logging leve", type=str)
-    parser.add_argument(
-        "--lmdb_url",
-        help="DB url to connect to lmdb", type=str)
-
-    options = parser.parse_args(args)
-
-    if config.get("Logging") is None:
-        config["Logging"] = {
-            "LogFile": "__screen__",
-            "LogLevel": "INFO"
-        }
-    if options.logfile:
-        config["Logging"]["LogFile"] = options.logfile
-    if options.loglevel:
-        config["Logging"]["LogLevel"] = options.loglevel.upper()
-    if options.lmdb_url:
-        config["KvStorage"]["remote_url"] = options.lmdb_url
-
 # -----------------------------------------------------------------
 
 
@@ -533,8 +353,10 @@ def main(args=None):
     import utility.logger as plogger
 
     # parse out the configuration file first
+    tcf_home = os.environ.get("TCF_HOME", "../../../../")
+
     conf_files = ["singleton_enclave_config.toml"]
-    conf_paths = [".", TCFHOME + "/"+"config"]
+    conf_paths = [".", tcf_home + "/"+"config"]
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", help="configuration file", nargs="+")
@@ -560,9 +382,9 @@ def main(args=None):
     sys.stderr = plogger.stream_to_logger(
         logging.getLogger("STDERR"), logging.WARN)
 
-    parse_command_line(config, remainder)
+    EnclaveManager.parse_command_line(config, remainder)
     logger.info("Initialize singleton enclave_manager")
-    enclave_manager = EnclaveManager(config)
+    enclave_manager = SingletonEnclaveManager(config)
     logger.info("About to start Singleton Enclave manager")
     enclave_manager.start_enclave_manager()
 
