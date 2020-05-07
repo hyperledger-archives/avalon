@@ -27,21 +27,17 @@ import zmq
 import avalon_enclave_manager.sgx_work_order_request as work_order_request
 import avalon_enclave_manager.avalon_enclave_info as enclave_info
 import avalon_crypto_utils.crypto_utility as crypto_utils
-from database import connector
 from avalon_enclave_manager.base_enclave_manager import EnclaveManager
 from avalon_enclave_manager.worker_kv_delegate import WorkerKVDelegate
 from avalon_enclave_manager.work_order_kv_delegate import WorkOrderKVDelegate
 from error_code.error_status import ReceiptCreateStatus, WorkOrderStatus
-from avalon_sdk.worker.worker_details import WorkerStatus, WorkerType
-from avalon_sdk.work_order_receipt.work_order_receipt \
-    import WorkOrderReceiptRequest
 
 logger = logging.getLogger(__name__)
 
 
 class SingletonEnclaveManager(EnclaveManager):
     """
-    Wrapper for managing Worker data
+    Manager class to handle single enclave based work order processing
     """
 
     def __init__(self, config):
@@ -219,8 +215,10 @@ class SingletonEnclaveManager(EnclaveManager):
         """
         Submits workorder request to Worker enclave and retrieves the response
 
+        Parameters :
+            input_json_str - A JSON formatted str of the request to execute
         Returns :
-            json_response - A JSON formatted str of the response recieved from
+            json_response - A JSON formatted str of the response received from
                             the enclave. Errors are also wrapped in a JSON str
                             if exceptions have occurred.
         """
