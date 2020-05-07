@@ -1,3 +1,7 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$classavalon__sdk_1_1connector_1_1blockchains_1_1ethereum_1_1ethereum__listener_1_1BlockchainInterface.html" title="avalon_sdk.connector.blockchains.ethereum.ethereum\l_listener.BlockchainInterface" alt="" coords="5,5,344,47"/>
+<area shape="rect" id="node2" href="$classavalon__sdk_1_1connector_1_1blockchains_1_1common_1_1contract__response_1_1ContractResponse.html" title="avalon_sdk.connector.blockchains.common.contract\l_response.ContractResponse" alt="" coords="109,5,436,47"/>
+<area shape="rect" id="node3" href="$classavalon__sdk_1_1registry_1_1registry__status_1_1RegistryStatus.html" title="avalon_sdk.registry.registry\l_status.RegistryStatus" alt="" coords="181,71,364,112"/>
+<area shape="rect" id="node4" href="$classavalon__sdk_1_1work__order__receipt_1_1work__order__receipt_1_1ReceiptCreateStatus.html" title="avalon_sdk.work_order\l_receipt.work_order_receipt.\lReceiptCreateStatus" alt="" coords="179,137,366,193"/>
+<area shape="rect" id="node5" href="$classavalon__sdk_1_1worker_1_1worker__details_1_1WorkerStatus.html" title="avalon_sdk.worker.worker\l_details.WorkerStatus" alt="" coords="185,217,360,259"/>
+<area shape="rect" id="node6" href="$classavalon__sdk_1_1worker_1_1worker__details_1_1WorkerType.html" title="avalon_sdk.worker.worker\l_details.WorkerType" alt="" coords="185,283,360,324"/>
 </map>

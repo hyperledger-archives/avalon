@@ -75,14 +75,14 @@ $(function() {
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a36aa771020fd5a1916f40b0dda5675da"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="verify__signature_8h.html#a36aa771020fd5a1916f40b0dda5675da">verify_signature</a> (const char *cert_pem, const char *msg, unsigned int msg_len, char *signature, unsigned int signature_len)</td></tr>
-<tr class="separator:a36aa771020fd5a1916f40b0dda5675da"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a054b9ad0fd4352121d28442f790daaff"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="verify__signature_8h.html#a054b9ad0fd4352121d28442f790daaff">verify_signature</a> (const char *cert_pem, const char *msg, unsigned int msg_len, const char *signature, unsigned int signature_len)</td></tr>
+<tr class="separator:a054b9ad0fd4352121d28442f790daaff"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Avalon signature verification. </p>
 </div><h2 class="groupheader">Function Documentation</h2>
-<a id="a36aa771020fd5a1916f40b0dda5675da"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a36aa771020fd5a1916f40b0dda5675da">&#9670;&nbsp;</a></span>verify_signature()</h2>
+<a id="a054b9ad0fd4352121d28442f790daaff"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a054b9ad0fd4352121d28442f790daaff">&#9670;&nbsp;</a></span>verify_signature()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -108,7 +108,7 @@ Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">char *&#160;</td>
+          <td class="paramtype">const char *&#160;</td>
           <td class="paramname"><em>signature</em>, </td>
         </tr>
         <tr>
@@ -124,7 +124,19 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Verifies signature of the message by extracting public key from certificate. </p>
+<p>Verifies signature of the message by extracting public key from certificate.</p>
+<p>Verify a signature given a message, signature, and cert. Use SHA-256 to hash the message.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">cert_pem</td><td>X.509 Certificate to verify with BEGIN end BLOCKS and new lines </td></tr>
+    <tr><td class="paramname">msg</td><td>Message to verify </td></tr>
+    <tr><td class="paramname">msg_len</td><td>Length of msg </td></tr>
+    <tr><td class="paramname">signature</td><td>Signature to verify message, base64 encoded </td></tr>
+    <tr><td class="paramname">signature_len</td><td>Length of signature </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>true on success and false on failure. </dd></dl>
 
 </div>
 </div>

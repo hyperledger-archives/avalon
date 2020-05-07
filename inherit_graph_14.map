@@ -1,3 +1,8 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node2" href="$classavalon__sdk_1_1http__client_1_1http__jrpc__client_1_1MessageException.html" title="avalon_sdk.http_client.http\l_jrpc_client.MessageException" alt="" coords="133,5,336,47"/>
+<area shape="rect" id="node2" href="$classavalon__sdk_1_1connector_1_1interfaces_1_1work__order_1_1WorkOrder.html" title="avalon_sdk.connector.interfaces.work\l_order.WorkOrder" alt="" coords="109,37,352,79"/>
+<area shape="rect" id="node5" href="$classavalon__sdk_1_1connector_1_1interfaces_1_1work__order__receipt_1_1WorkOrderReceipt.html" title="avalon_sdk.connector.interfaces.work\l_order_receipt.WorkOrderReceipt" alt="" coords="109,103,352,144"/>
+<area shape="rect" id="node6" href="$classavalon__sdk_1_1connector_1_1interfaces_1_1worker__registry_1_1WorkerRegistry.html" title="avalon_sdk.connector.interfaces.worker\l_registry.WorkerRegistry" alt="" coords="104,168,357,209"/>
+<area shape="rect" id="node7" href="$classavalon__sdk_1_1connector_1_1interfaces_1_1worker__registry__list_1_1WorkerRegistryList.html" title="avalon_sdk.connector.interfaces.worker\l_registry_list.WorkerRegistryList" alt="" coords="104,233,357,275"/>
+<area shape="rect" id="node3" href="$classavalon__sdk_1_1connector_1_1direct_1_1jrpc_1_1jrpc__work__order_1_1JRPCWorkOrderImpl.html" title="avalon_sdk.connector.direct.jrpc.jrpc\l_work_order.JRPCWorkOrderImpl" alt="" coords="409,5,644,47"/>
+<area shape="rect" id="node4" href="$classavalon__sdk_1_1connector_1_1interfaces_1_1work__order__proxy_1_1WorkOrderProxy.html" title="avalon_sdk.connector.interfaces.work\l_order_proxy.WorkOrderProxy" alt="" coords="405,71,648,112"/>
 </map>

@@ -106,7 +106,16 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Verifies certificate against CA certificate. </p>
+<p>Verifies certificate against CA certificate.</p>
+<p>Verify that cert_pem is signed by CA, using CA certificate ca_cert_pem as a root of trust.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">cert_pem</td><td>X.509 Certificate to verify with BEGIN end BLOCKS and new lines </td></tr>
+    <tr><td class="paramname">ca_cert_pem</td><td>CA Certificate (usually the IAS CA cert) with BEGIN end BLOCKS and new lines </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>true on success and false on failure. </dd></dl>
 
 </div>
 </div>

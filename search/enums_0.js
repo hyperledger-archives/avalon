@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['tcf_5ferr_5ft',['tcf_err_t',['../tcf__error_8h.html#a60f371a45c03875cdb1d52e2ec004fab',1,'tcf_error.h']]]
+  ['enclavetype',['EnclaveType',['../types_8h.html#a92704130155612cfd69d7f31f7564fb5',1,'types.h']]]
 ];

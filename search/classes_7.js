@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['indexerror',['IndexError',['../classtcf_1_1error_1_1IndexError.html',1,'tcf::error']]],
-  ['ioerror',['IOError',['../classtcf_1_1error_1_1IOError.html',1,'tcf::error']]]
+  ['httpjrpcclient',['HttpJrpcClient',['../classavalon__sdk_1_1http__client_1_1http__jrpc__client_1_1HttpJrpcClient.html',1,'avalon_sdk::http_client::http_jrpc_client']]]
 ];

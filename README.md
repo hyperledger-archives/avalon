@@ -1,10 +1,10 @@
 # Hyperledger Avalon Documentation
 
 ## Introduction
-* [README](https://github.com/hyperledger/avalon/blob/master/README.m%64). Overview of Avalon and its source code
-* [FAQ](https://github.com/hyperledger/avalon/blob/master/docs//FAQ.rst). Frequently-asked questions with answers about Avalon
-  * [Glossary](https://github.com/hyperledger/avalon/blob/master/docs//FAQ.rst#glossary)
-  * [Videos](https://github.com/hyperledger/avalon/blob/master/docs//FAQ.rst#videos)
+* [README](../README.md). Overview of Avalon and its source code
+* [FAQ](./FAQ.rst). Frequently-asked questions with answers about Avalon
+  * [Glossary](./FAQ.rst#glossary)
+  * [Videos](./FAQ.rst#videos)
 * [Avalon Proposal](
   https://wiki.hyperledger.org/pages/viewpage.action?pageId=16324764).
   Avalon Proposal, initial members, motivation, and proposed solutions
@@ -16,7 +16,7 @@
 * [Introduction to Hyperledger Avalon video (20:24)](
   https://youtu.be/YRXfzHzJVaU)
 
-[![Introduction to Hyperledger Avalon video](https://github.com/hyperledger/avalon/blob/master/images/screenshot-introduction-to-hyperledger-avalon.jpg)](https://youtu.be/YRXfzHzJVaU)
+[![Introduction to Hyperledger Avalon video](../images/screenshot-introduction-to-hyperledger-avalon.jpg)](https://youtu.be/YRXfzHzJVaU)
 
 ## Community
 * [Project Wiki](https://wiki.hyperledger.org/display/avalon/Hyperledger+Avalon)
@@ -26,17 +26,21 @@
   https://jira.hyperledger.org/secure/RapidBoard.jspa?rapidView=241&view=planning.nodetail)
 
 ## Tutorial
-* [Workload Application Tutorial](https://github.com/hyperledger/avalon/blob/master/docs//workload-tutorial/)
-* [Example Applications](https://github.com/hyperledger/avalon/blob/master/examples/apps/)
+* [Workload Application Tutorial](./workload-tutorial/)
+* [Example Applications](../examples/apps/)
 
 ## Source Code
 * [Avalon source code repository, https://github.com/hyperledger/avalon](
   https://github.com/hyperledger/avalon)
-* [Building source code](https://github.com/hyperledger/avalon/blob/master/BUILD.m%64)
-* [Example Avalon applications](https://github.com/hyperledger/avalon/blob/master/examples/apps/)
-* [Contributing source code](https://github.com/hyperledger/avalon/blob/master/CONTRIBUTING.m%64)
+* [Building source code](../BUILD.md)
+* [Example Avalon applications](../examples/apps/)
+* [Contributing source code](../CONTRIBUTING.md)
 
 ## SDK Reference Manual
+The [Hyperledger Avalon SDK Reference Manual](https://danintel.github.io/refman.pdf)
+(also available as a [PDF](https://danintel.github.io/refman.pdf) file)
+documents the SDK used to create worker order requestors (clients) and processors.
+
 The Avalon SDK Reference Manual is generated with Doxygen.
 To generate the Reference Manual, type the following:
 ```
@@ -61,5 +65,5 @@ Documentation generated will be here:
 * [ _Off-Chain Trusted Compute Specification_](
   https://entethalliance.github.io/trusted-computing/spec.html)
   defined by Enterprise Ethereum Alliance (EEA) Task Force
-* [Cryptography](https://github.com/hyperledger/avalon/blob/master/common/cpp/crypto/README.m%64). Cryptographic primitives
+* [Cryptography](../common/cpp/crypto/README.md). Cryptographic primitives
   used, libraries used, and implementation
