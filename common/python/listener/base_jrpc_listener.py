@@ -67,6 +67,15 @@ class BaseJRPCListener(resource.Resource):
             self.dispatcher.add_method(m)
 
     def _process_request(self, input_json_str):
+        """
+        Handles incoming requests or rather dispatches to appropriate
+        rpc method
+
+        Parameters :
+            input_json_str - JSON formatted str of the request
+        Returns :
+            response - data field from the response received which is a dict
+        """
         response = {}
         response['error'] = {}
         response['error']['code'] = \
@@ -88,6 +97,15 @@ class BaseJRPCListener(resource.Resource):
         return response.data
 
     def render_GET(self, request):
+        """
+        Handle a GET request to the listener. Not supported. So only
+        error is expected to be returned as response.
+
+        Parameters :
+            request - Request coming in from a client
+        Returns :
+            response - A dict type response which always contains error
+        """
         # JRPC response with id 0 is returned because id parameter
         # will not be found in GET request
         response = jrpc_utility.create_error_response(
@@ -99,6 +117,15 @@ class BaseJRPCListener(resource.Resource):
         return response
 
     def render_POST(self, request):
+        """
+        Handle a POST request to the listener. Decode and delegate to
+        _process_request for handling.
+
+        Parameters :
+            request - Request coming in from a client
+        Returns :
+            response - A dict type response
+        """
         response = {}
 
         logger.info('Received a new request from the client')
@@ -163,36 +190,43 @@ class BaseJRPCListener(resource.Resource):
                 "request {0}: {1}".format(request.path, str(err)))
             return response
 
+    def start(self, host_name, port):
+        """
+        Start the listener instance on specified socket.
+
+        Parameters :
+            host_name - The hostname where this listener is reachable
+            port - The port at which this listener needs to listen
+        """
+        root = self
+        site = server.Site(root)
+        reactor.listenTCP(port, site, interface=host_name)
+
+        logger.info('%s started on port %s', type(self).__name__, port)
+
+        try:
+            reactor.run()
+        except reactor_error.ReactorNotRunning:
+            logger.error('shutdown')
+        except Exception as err:
+            logger.error('shutdown: %s', str(err))
+
+        exit(0)
+
 # -----------------------------------------------------------------
 # -----------------------------------------------------------------
-
-
-def start_listener(host_name, port, listener):
-
-    root = listener
-    site = server.Site(root)
-    reactor.listenTCP(port, site, interface=host_name)
-
-    logger.info('%s started on port %s', type(listener).__name__, port)
-
-    try:
-        reactor.run()
-    except reactor_error.ReactorNotRunning:
-        logger.error('shutdown')
-    except Exception as err:
-        logger.error('shutdown: %s', str(err))
-
-    exit(0)
 
 
 def parse_bind_url(url):
     """
-    Parse the url and validate against supported format
-    params:
-        url is string
-    returns:
-        returns tuple containing hostname and port,
-        both are of type string
+    Parse the url, validate against supported format and return
+    the hostname and port
+
+    Parameters :
+        url - Input url str
+    Returns :
+        host_name - Hostname that is a str
+        port - Port address that is a str
     """
     try:
         parsed_str = urlsplit(url)

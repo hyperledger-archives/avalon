@@ -31,14 +31,14 @@ import argparse
 from avalon_listener.tcs_work_order_handler import TCSWorkOrderHandler
 from avalon_listener.tcs_work_order_handler_sync import TCSWorkOrderHandlerSync
 from avalon_listener.tcs_worker_registry_handler \
-        import TCSWorkerRegistryHandler
+    import TCSWorkerRegistryHandler
 from avalon_listener.tcs_workorder_receipt_handler \
-        import TCSWorkOrderReceiptHandler
+    import TCSWorkOrderReceiptHandler
 from avalon_listener.tcs_worker_encryption_key_handler \
-        import WorkerEncryptionKeyHandler
+    import WorkerEncryptionKeyHandler
 from database import connector
 from listener.base_jrpc_listener \
-    import BaseJRPCListener, start_listener, parse_bind_url, get_config_dir
+    import BaseJRPCListener, parse_bind_url, get_config_dir
 
 logger = logging.getLogger(__name__)
 
@@ -62,7 +62,7 @@ class TCSListener(BaseJRPCListener):
     def __init__(self, config):
         try:
             self.kv_helper = \
-                    connector.open(config['KvStorage']['remote_storage_url'])
+                connector.open(config['KvStorage']['remote_storage_url'])
         except Exception as err:
             logger.error(f"failed to open db: {err}")
             sys.exit(-1)
@@ -70,14 +70,14 @@ class TCSListener(BaseJRPCListener):
         self.worker_registry_handler = TCSWorkerRegistryHandler(self.kv_helper)
         if int(config["WorkloadExecution"]["sync_workload_execution"]) == 1:
             self.workorder_handler = TCSWorkOrderHandlerSync(
-                                    self.kv_helper,
-                                    config["Listener"]["max_work_order_count"],
-                                    config["Listener"]["zmq_url"],
-                                    config["Listener"]["zmq_port"])
+                self.kv_helper,
+                config["Listener"]["max_work_order_count"],
+                config["Listener"]["zmq_url"],
+                config["Listener"]["zmq_port"])
         else:
             self.workorder_handler = TCSWorkOrderHandler(
-                                    self.kv_helper,
-                                    config["Listener"]["max_work_order_count"])
+                self.kv_helper,
+                config["Listener"]["max_work_order_count"])
 
         self.workorder_receipt_handler = TCSWorkOrderReceiptHandler(
             self.kv_helper)
@@ -138,8 +138,8 @@ def parse_command_line(config, args):
     else:
         if config.get("Listener") is None or \
                 config["Listener"].get("bind") is None:
-                    logger.error("Quit : no bind config found for Listener")
-                    sys.exit(-1)
+            logger.error("Quit : no bind config found for Listener")
+            sys.exit(-1)
         host_name, port = parse_bind_url(
             config["Listener"].get("bind"))
     if options.lmdb_url:
@@ -147,9 +147,9 @@ def parse_command_line(config, args):
     else:
         if config.get("KvStorage") is None or \
                 config["KvStorage"].get("remote_storage_url") is None:
-                    logger.error("Quit : remote_storage_url is not \
+            logger.error("Quit : remote_storage_url is not \
                             present in config for Listener")
-                    sys.exit(-1)
+            sys.exit(-1)
 
     return host_name, port
 
@@ -189,7 +189,8 @@ def main(args=None):
         logging.getLogger('STDERR'), logging.WARN)
 
     host_name, port = parse_command_line(config, remainder)
-    start_listener(host_name, port, TCSListener(config))
+    tcs_listener = TCSListener(config)
+    tcs_listener.start(host_name, port)
 
 
 main()
