@@ -13,13 +13,20 @@
  * limitations under the License.
  */
 
+/*
+ * Private header file for use by sig_*_key.cpp.
+ * Secp256k1 ECDSA signature definitions.
+ */
+
 #pragma once
 #include <openssl/obj_mac.h>
+
 namespace tcf {
 namespace crypto {
     namespace constants {
-        // Elliptic curve
+        // Secp256k1 elliptical curve cryptography
         const int CURVE = NID_secp256k1;
+        // Secp256k1 signature size = 64 bytes (512b) + 8 byte DER prefix
         const int MAX_SIG_SIZE = 72;
     }  // namespace constants
 }  // namespace crypto

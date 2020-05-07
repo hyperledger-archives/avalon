@@ -18,11 +18,14 @@
  * Avalon JSON utilities.
  */
 
+#pragma once
+
 const char* GetJsonStr(const JSON_Object* json_object,
                        const char* name,
                        const char* err_msg = NULL);
 
-void JsonSetStr(JSON_Object* json, const char* name, const char* value, const char* err);
+void JsonSetStr(JSON_Object* json, const char* name, const char* value,
+    const char* err);
 
 void GetByteArray(const JSON_Object* object,
                   const char* name,
@@ -31,5 +34,5 @@ void GetByteArray(const JSON_Object* object,
 
 double GetJsonNumber(const JSON_Object* object, const char* name);
 
-void JsonSetNumber(JSON_Object* json, const char* name, double value, const char* err);
-
+void JsonSetNumber(JSON_Object* json, const char* name, double value,
+    const char* err);

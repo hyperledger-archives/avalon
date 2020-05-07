@@ -12,20 +12,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "sig_private_key.h"
+
+/**
+ * @file
+ * Avalon ECDSA private key functions: generation, serialization, and signing.
+ * Used for Secp256k1.
+ */
+
 #include <openssl/err.h>
 #include <openssl/pem.h>
 #include <openssl/rand.h>
 #include <openssl/sha.h>
+#include <openssl/ecdsa.h>
+
 #include <algorithm>
 #include <memory>
 #include <vector>
+
 #include "base64.h"  //simple base64 enc/dec routines
 #include "crypto_shared.h"
 #include "error.h"
 #include "hex_string.h"
 #include "sig.h"
 #include "sig_public_key.h"
+#include "sig_private_key.h"
+
 /***Conditional compile untrusted/trusted***/
 #if _UNTRUSTED_
 #include <openssl/crypto.h>
@@ -38,8 +49,8 @@
 namespace pcrypto = tcf::crypto;
 namespace constants = tcf::crypto::constants;
 
-// Typedefs for memory management
-// Specify type and destroy function type for unique_ptrs
+// Typedefs for memory management.
+// Specify type and destroy function type for unique_ptr
 typedef std::unique_ptr<BIO, void (*)(BIO*)> BIO_ptr;
 typedef std::unique_ptr<EVP_CIPHER_CTX, void (*)(EVP_CIPHER_CTX*)> CTX_ptr;
 typedef std::unique_ptr<BN_CTX, void (*)(BN_CTX*)> BN_CTX_ptr;
@@ -51,17 +62,27 @@ typedef std::unique_ptr<ECDSA_SIG, void (*)(ECDSA_SIG*)> ECDSA_SIG_ptr;
 // Error handling
 namespace Error = tcf::error;
 
-// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-// Utility function: Deserialize ECDSA Private Key
-// throws RuntimeError, ValueError
+#if OPENSSL_API_COMPAT < 0x10100000L
+extern void ECDSA_SIG_get0(const ECDSA_SIG *sig, const BIGNUM **ptr_r,
+        const BIGNUM **ptr_s);
+extern int ECDSA_SIG_set0(ECDSA_SIG *sig, BIGNUM *r, BIGNUM *s);
+#endif
+
+
+/**
+ * Utility function: Deserialize ECDSA Private Key.
+ * Throws RuntimeError, ValueError.
+ */
 EC_KEY* deserializeECDSAPrivateKey(const std::string& encoded) {
     BIO_ptr bio(BIO_new_mem_buf(encoded.c_str(), -1), BIO_free_all);
     if (!bio) {
-        std::string msg("Crypto Error (deserializeECDSAPrivateKey): Could not create BIO");
+        std::string msg(
+            "Crypto Error (deserializeECDSAPrivateKey): Could not create BIO");
         throw Error::RuntimeError(msg);
     }
 
-    EC_KEY* private_key = PEM_read_bio_ECPrivateKey(bio.get(), NULL, NULL, NULL);
+    EC_KEY* private_key = PEM_read_bio_ECPrivateKey(bio.get(),
+        NULL, NULL, NULL);
     if (!private_key) {
         std::string msg(
             "Crypto Error (deserializeECDSAPrivateKey): Could not "
@@ -71,45 +92,59 @@ EC_KEY* deserializeECDSAPrivateKey(const std::string& encoded) {
     return private_key;
 }  // deserializeECDSAPrivateKey
 
-// Constructor from encoded string
-// throws RuntimeError, ValueError
+
+/**
+ * Constructor from encoded string.
+ * Throws RuntimeError, ValueError.
+ */
 pcrypto::sig::PrivateKey::PrivateKey(const std::string& encoded) {
     private_key_ = deserializeECDSAPrivateKey(encoded);
 }  // pcrypto::sig::PrivateKey::PrivateKey
 
-// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-// Copy constructor
-// throws RuntimeError
-pcrypto::sig::PrivateKey::PrivateKey(const pcrypto::sig::PrivateKey& privateKey) {
+
+/**
+ * Copy constructor.
+ * Throws RuntimeError.
+ */
+pcrypto::sig::PrivateKey::PrivateKey(
+        const pcrypto::sig::PrivateKey& privateKey) {
     private_key_ = EC_KEY_dup(privateKey.private_key_);
     if (!private_key_) {
-        std::string msg("Crypto Error (sig::PrivateKey() copy): Could not copy private key");
+        std::string msg("Crypto Error (sig::PrivateKey() copy): "
+            "Could not copy private key");
         throw Error::RuntimeError(msg);
     }
 }  // pcrypto::sig::PrivateKey::PrivateKey (copy constructor)
 
-// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-// Move constructor
-// throws RuntimeError
+
+/**
+ * Move constructor.
+ * Throws RuntimeError.
+ */
 pcrypto::sig::PrivateKey::PrivateKey(pcrypto::sig::PrivateKey&& privateKey) {
     private_key_ = privateKey.private_key_;
     privateKey.private_key_ = nullptr;
     if (!private_key_) {
-        std::string msg("Crypto Error (sig::PrivateKey() move): Cannot move null private key");
+        std::string msg("Crypto Error (sig::PrivateKey() move): "
+            "Cannot move null private key");
         throw Error::RuntimeError(msg);
     }
 }  // pcrypto::sig::PrivateKey::PrivateKey (move constructor)
 
-// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-// Destructor
+
+/**
+ * PrivateKey Destructor.
+ */
 pcrypto::sig::PrivateKey::~PrivateKey() {
     if (private_key_)
         EC_KEY_free(private_key_);
 }  // pcrypto::sig::PrivateKey::~PrivateKey
 
-// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-// assignment operator overload
-// throws RuntimeError
+
+/**
+ * Assignment operator = overload.
+ * Throws RuntimeError.
+ */
 pcrypto::sig::PrivateKey& pcrypto::sig::PrivateKey::operator=(
     const pcrypto::sig::PrivateKey& privateKey) {
     if (this == &privateKey)
@@ -118,15 +153,18 @@ pcrypto::sig::PrivateKey& pcrypto::sig::PrivateKey::operator=(
         EC_KEY_free(private_key_);
     private_key_ = EC_KEY_dup(privateKey.private_key_);
     if (!private_key_) {
-        std::string msg("Crypto Error (sig::PrivateKey operator =): Could not copy private key");
+        std::string msg("Crypto Error (sig::PrivateKey operator =): "
+            "Could not copy private key");
         throw Error::RuntimeError(msg);
     }
     return *this;
 }  // pcrypto::sig::PrivateKey::operator =
 
-// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-// Deserialize ECDSA Private Key
-// throws RuntimeError, ValueError
+
+/**
+ * Deserialize ECDSA Private Key.
+ * Throws RuntimeError, ValueError.
+ */
 void pcrypto::sig::PrivateKey::Deserialize(const std::string& encoded) {
     EC_KEY* key = deserializeECDSAPrivateKey(encoded);
     if (private_key_)
@@ -134,54 +172,66 @@ void pcrypto::sig::PrivateKey::Deserialize(const std::string& encoded) {
     private_key_ = key;
 }  // pcrypto::sig::PrivateKey::Deserialize
 
-// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-// Generate ECDSA private key
-// throws RuntimeError
+
+/**
+ * Generate ECDSA private key.
+ * Throws RuntimeError.
+ */
 void pcrypto::sig::PrivateKey::Generate() {
     if (private_key_)
         EC_KEY_free(private_key_);
-    
+
     EC_KEY_ptr private_key(EC_KEY_new(), EC_KEY_free);
 
     if (!private_key) {
-        std::string msg("Crypto Error (sig::PrivateKey()): Could not create new EC_KEY");
+        std::string msg(
+            "Crypto Error (sig::PrivateKey()): Could not create new EC_KEY");
         throw Error::RuntimeError(msg);
     }
 
-    EC_GROUP_ptr ec_group(EC_GROUP_new_by_curve_name(constants::CURVE), EC_GROUP_clear_free);
+    EC_GROUP_ptr ec_group(EC_GROUP_new_by_curve_name(constants::CURVE),
+        EC_GROUP_clear_free);
     if (!ec_group) {
-        std::string msg("Crypto Error (sig::PrivateKey()): Could not create EC_GROUP");
+        std::string msg(
+            "Crypto Error (sig::PrivateKey()): Could not create EC_GROUP");
         throw Error::RuntimeError(msg);
     }
 
     if (!EC_KEY_set_group(private_key.get(), ec_group.get())) {
-        std::string msg("Crypto Error (sig::PrivateKey()): Could not set EC_GROUP");
+        std::string msg(
+            "Crypto Error (sig::PrivateKey()): Could not set EC_GROUP");
         throw Error::RuntimeError(msg);
     }
 
     if (!EC_KEY_generate_key(private_key.get())) {
-        std::string msg("Crypto Error (sig::PrivateKey()): Could not generate EC_KEY");
+        std::string msg(
+            "Crypto Error (sig::PrivateKey()): Could not generate EC_KEY");
         throw Error::RuntimeError(msg);
     }
 
     private_key_ = EC_KEY_dup(private_key.get());
     if (!private_key_) {
-        std::string msg("Crypto Error (sig::PrivateKey()): Could not dup private EC_KEY");
+        std::string msg(
+            "Crypto Error (sig::PrivateKey()): Could not dup private EC_KEY");
         throw Error::RuntimeError(msg);
     }
 }  // pcrypto::sig::PrivateKey::Generate
 
-// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-// Derive Digital Signature public key from private key
-// throws RuntimeError
+
+/**
+ * Derive Digital Signature public key from private key.
+ * Throws RuntimeError.
+ */
 pcrypto::sig::PublicKey pcrypto::sig::PrivateKey::GetPublicKey() const {
     PublicKey publicKey(*this);
     return publicKey;
 }  // pcrypto::sig::GetPublicKey()
 
-// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-// Serialize ECDSA PrivateKey
-// throws RuntimeError
+
+/**
+ * Serialize ECDSA PrivateKey.
+ * Throws RuntimeError.
+ */
 std::string pcrypto::sig::PrivateKey::Serialize() const {
     BIO_ptr bio(BIO_new(BIO_s_mem()), BIO_free_all);
 
@@ -205,11 +255,14 @@ std::string pcrypto::sig::PrivateKey::Serialize() const {
     return str;
 }  // pcrypto::sig::PrivateKey::Serialize
 
-// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-// Signs hashMessage.data() with ECDSA privkey and returns ByteArray
-// containing raw binary data. It's expected that caller of this function
-// passes hash value of original message to this function for signing.
-// throws RuntimeError
+
+/**
+ * Signs hashMessage.data() with ECDSA privkey.
+ * It's expected that caller of this function passes the
+ * hash value of the original message to this function for signing.
+ * Throws RuntimeError.
+ * @returns ByteArray containing raw binary signature data
+ */
 ByteArray pcrypto::sig::PrivateKey::SignMessage(
     const ByteArray& hashMessage) const {
     // Sign
@@ -217,7 +270,8 @@ ByteArray pcrypto::sig::PrivateKey::SignMessage(
         hashMessage.size(), private_key_),
         ECDSA_SIG_free);
     if (!sig) {
-        std::string msg("Crypto Error (SignMessage): Could not compute ECDSA signature");
+        std::string msg(
+            "Crypto Error (SignMessage): Could not compute ECDSA signature");
         throw Error::RuntimeError(msg);
     }
     const BIGNUM* sc;
@@ -229,27 +283,32 @@ ByteArray pcrypto::sig::PrivateKey::SignMessage(
 
     s = BN_dup(sc);
     if (!s) {
-        std::string msg("Crypto Error (SignMessage): Could not dup BIGNUM for s");
+        std::string msg(
+            "Crypto Error (SignMessage): Could not dup BIGNUM for s");
         throw Error::RuntimeError(msg);
     }
     r = BN_dup(rc);
     if (!r) {
-        std::string msg("Crypto Error (SignMessage): Could not dup BIGNUM for r");
+        std::string msg(
+            "Crypto Error (SignMessage): Could not dup BIGNUM for r");
         throw Error::RuntimeError(msg);
     }
     BIGNUM_ptr ord(BN_new(), BN_free);
     if (!ord) {
-        std::string msg("Crypto Error (SignMessage): Could not create BIGNUM for ord");
+        std::string msg(
+            "Crypto Error (SignMessage): Could not create BIGNUM for ord");
         throw Error::RuntimeError(msg);
     }
 
     BIGNUM_ptr ordh(BN_new(), BN_free);
     if (!ordh) {
-        std::string msg("Crypto Error (SignMessage): Could not create BIGNUM for ordh");
+        std::string msg(
+            "Crypto Error (SignMessage): Could not create BIGNUM for ordh");
         throw Error::RuntimeError(msg);
     }
 
-    int res = EC_GROUP_get_order(EC_KEY_get0_group(private_key_), ord.get(), NULL);
+    int res = EC_GROUP_get_order(EC_KEY_get0_group(private_key_), ord.get(),
+        NULL);
     if (!res) {
         std::string msg("Crypto Error (SignMessage): Could not get order");
         throw Error::RuntimeError(msg);
@@ -283,7 +342,8 @@ ByteArray pcrypto::sig::PrivateKey::SignMessage(
     res = i2d_ECDSA_SIG(sig.get(), &data);
 
     if (!res) {
-        std::string msg("Crypto Error (SignMessage): Could not convert signatureto DER");
+        std::string msg(
+            "Crypto Error (SignMessage): Could not convert signature to DER");
         throw Error::RuntimeError(msg);
     }
     return der_SIG;

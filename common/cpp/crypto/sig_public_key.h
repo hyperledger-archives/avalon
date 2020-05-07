@@ -13,6 +13,12 @@
  * limitations under the License.
  */
 
+/**
+ * @file
+ * Avalon ECDSA signature public key serialization and verification functions.
+ * Used for Secp256k1.
+ */
+
 #pragma once
 #include <openssl/ec.h>
 #include <string>

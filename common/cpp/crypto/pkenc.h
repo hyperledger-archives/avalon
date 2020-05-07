@@ -13,19 +13,28 @@
  * limitations under the License.
  */
 
+/*
+ * Private header file for use by pkenc_*_key.cpp.
+ * Avalon RSA definitions common for public/private keypair functions.
+ */
+
 #pragma once
 #include <openssl/rsa.h>
+
 namespace tcf {
 namespace crypto {
     namespace constants {
-        //***RSA is not quantum resistant ***//
-        //*** USE 3072 for long term security ***//
+         // Use RSA-3072 for long-term security,
+         // with OAEP padding and SHA-256 digest.
+         // The 2048 byte buffer allows for future key sizes <= RSA-16384.
+         // RSA is not quantum resistant.
         const int RSA_KEY_SIZE = 2048;
         const int RSA_PADDING_SIZE = 41;
 
-        //*** OAEP or better should always be used for RSA encryption ***//
+        // OAEP or better should always be used for RSA encryption.
         const int RSA_PADDING_SCHEME = RSA_PKCS1_OAEP_PADDING;
-        constexpr int RSA_PLAINTEXT_LEN = ((RSA_KEY_SIZE - RSA_PADDING_SIZE) >> 3);
+        constexpr int RSA_PLAINTEXT_LEN =
+            ((RSA_KEY_SIZE - RSA_PADDING_SIZE) >> 3);
     }  // namespace constants
 }  // namespace crypto
 }  // namespace tcf
