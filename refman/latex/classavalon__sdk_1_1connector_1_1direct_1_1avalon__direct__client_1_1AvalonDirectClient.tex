@@ -1,0 +1,85 @@
+\hypertarget{classavalon__sdk_1_1connector_1_1direct_1_1avalon__direct__client_1_1AvalonDirectClient}{}\section{avalon\+\_\+sdk.\+connector.\+direct.\+avalon\+\_\+direct\+\_\+client.\+Avalon\+Direct\+Client Class Reference}
+\label{classavalon__sdk_1_1connector_1_1direct_1_1avalon__direct__client_1_1AvalonDirectClient}\index{avalon\+\_\+sdk.\+connector.\+direct.\+avalon\+\_\+direct\+\_\+client.\+Avalon\+Direct\+Client@{avalon\+\_\+sdk.\+connector.\+direct.\+avalon\+\_\+direct\+\_\+client.\+Avalon\+Direct\+Client}}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+def \hyperlink{classavalon__sdk_1_1connector_1_1direct_1_1avalon__direct__client_1_1AvalonDirectClient_ad64378b0434e723bf4c30edd28d602f6}{\+\_\+\+\_\+init\+\_\+\+\_\+} (self, config\+\_\+file=None, config=None)
+\item 
+def \hyperlink{classavalon__sdk_1_1connector_1_1direct_1_1avalon__direct__client_1_1AvalonDirectClient_aa783017b8526a49693f02a2d854acb86}{get\+\_\+worker\+\_\+registry\+\_\+list\+\_\+instance} (self)
+\item 
+def \hyperlink{classavalon__sdk_1_1connector_1_1direct_1_1avalon__direct__client_1_1AvalonDirectClient_a4b5c73957a38d43d6cc45a48543c4dd2}{get\+\_\+worker\+\_\+registry\+\_\+instance} (self)
+\item 
+def \hyperlink{classavalon__sdk_1_1connector_1_1direct_1_1avalon__direct__client_1_1AvalonDirectClient_ae0870a0d36c9bf9f9c40df6041b56b2e}{get\+\_\+work\+\_\+order\+\_\+instance} (self)
+\item 
+def \hyperlink{classavalon__sdk_1_1connector_1_1direct_1_1avalon__direct__client_1_1AvalonDirectClient_af8be5119b4f254c690f0d5a8ceb75f41}{get\+\_\+work\+\_\+order\+\_\+receipt\+\_\+instance} (self)
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+\begin{DoxyVerb}This is class for the direct JSON RPC API client.
+It is used in the direct model.
+1. Worker registry list interacts with the blockchain; it is optional.
+2. Worker registry interacts with the JSON RPC listener.
+3. Work order interacts with the JSON RPC listener.
+4. Work order receipt interacts with the JSON RPC listener.
+\end{DoxyVerb}
+ 
+
+\subsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classavalon__sdk_1_1connector_1_1direct_1_1avalon__direct__client_1_1AvalonDirectClient_ad64378b0434e723bf4c30edd28d602f6}\label{classavalon__sdk_1_1connector_1_1direct_1_1avalon__direct__client_1_1AvalonDirectClient_ad64378b0434e723bf4c30edd28d602f6}} 
+\index{avalon\+\_\+sdk\+::connector\+::direct\+::avalon\+\_\+direct\+\_\+client\+::\+Avalon\+Direct\+Client@{avalon\+\_\+sdk\+::connector\+::direct\+::avalon\+\_\+direct\+\_\+client\+::\+Avalon\+Direct\+Client}!\+\_\+\+\_\+init\+\_\+\+\_\+@{\+\_\+\+\_\+init\+\_\+\+\_\+}}
+\index{\+\_\+\+\_\+init\+\_\+\+\_\+@{\+\_\+\+\_\+init\+\_\+\+\_\+}!avalon\+\_\+sdk\+::connector\+::direct\+::avalon\+\_\+direct\+\_\+client\+::\+Avalon\+Direct\+Client@{avalon\+\_\+sdk\+::connector\+::direct\+::avalon\+\_\+direct\+\_\+client\+::\+Avalon\+Direct\+Client}}
+\subsubsection{\texorpdfstring{\+\_\+\+\_\+init\+\_\+\+\_\+()}{\_\_init\_\_()}}
+{\footnotesize\ttfamily def avalon\+\_\+sdk.\+connector.\+direct.\+avalon\+\_\+direct\+\_\+client.\+Avalon\+Direct\+Client.\+\_\+\+\_\+init\+\_\+\+\_\+ (\begin{DoxyParamCaption}\item[{}]{self,  }\item[{}]{config\+\_\+file = {\ttfamily None},  }\item[{}]{config = {\ttfamily None} }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Parameters:
+config_file Optional configuration file path as a string
+config      Optional dictionary loaded from config_file
+
+Either one of config_file or config needs to be passed.
+If both are passed, then config takes precedence.
+\end{DoxyVerb}
+ 
+
+\subsection{Member Function Documentation}
+\mbox{\Hypertarget{classavalon__sdk_1_1connector_1_1direct_1_1avalon__direct__client_1_1AvalonDirectClient_ae0870a0d36c9bf9f9c40df6041b56b2e}\label{classavalon__sdk_1_1connector_1_1direct_1_1avalon__direct__client_1_1AvalonDirectClient_ae0870a0d36c9bf9f9c40df6041b56b2e}} 
+\index{avalon\+\_\+sdk\+::connector\+::direct\+::avalon\+\_\+direct\+\_\+client\+::\+Avalon\+Direct\+Client@{avalon\+\_\+sdk\+::connector\+::direct\+::avalon\+\_\+direct\+\_\+client\+::\+Avalon\+Direct\+Client}!get\+\_\+work\+\_\+order\+\_\+instance@{get\+\_\+work\+\_\+order\+\_\+instance}}
+\index{get\+\_\+work\+\_\+order\+\_\+instance@{get\+\_\+work\+\_\+order\+\_\+instance}!avalon\+\_\+sdk\+::connector\+::direct\+::avalon\+\_\+direct\+\_\+client\+::\+Avalon\+Direct\+Client@{avalon\+\_\+sdk\+::connector\+::direct\+::avalon\+\_\+direct\+\_\+client\+::\+Avalon\+Direct\+Client}}
+\subsubsection{\texorpdfstring{get\+\_\+work\+\_\+order\+\_\+instance()}{get\_work\_order\_instance()}}
+{\footnotesize\ttfamily def avalon\+\_\+sdk.\+connector.\+direct.\+avalon\+\_\+direct\+\_\+client.\+Avalon\+Direct\+Client.\+get\+\_\+work\+\_\+order\+\_\+instance (\begin{DoxyParamCaption}\item[{}]{self }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Return the worker's instance of the work order.
+The work order interacts with the JSON RPC listener.
+\end{DoxyVerb}
+ \mbox{\Hypertarget{classavalon__sdk_1_1connector_1_1direct_1_1avalon__direct__client_1_1AvalonDirectClient_af8be5119b4f254c690f0d5a8ceb75f41}\label{classavalon__sdk_1_1connector_1_1direct_1_1avalon__direct__client_1_1AvalonDirectClient_af8be5119b4f254c690f0d5a8ceb75f41}} 
+\index{avalon\+\_\+sdk\+::connector\+::direct\+::avalon\+\_\+direct\+\_\+client\+::\+Avalon\+Direct\+Client@{avalon\+\_\+sdk\+::connector\+::direct\+::avalon\+\_\+direct\+\_\+client\+::\+Avalon\+Direct\+Client}!get\+\_\+work\+\_\+order\+\_\+receipt\+\_\+instance@{get\+\_\+work\+\_\+order\+\_\+receipt\+\_\+instance}}
+\index{get\+\_\+work\+\_\+order\+\_\+receipt\+\_\+instance@{get\+\_\+work\+\_\+order\+\_\+receipt\+\_\+instance}!avalon\+\_\+sdk\+::connector\+::direct\+::avalon\+\_\+direct\+\_\+client\+::\+Avalon\+Direct\+Client@{avalon\+\_\+sdk\+::connector\+::direct\+::avalon\+\_\+direct\+\_\+client\+::\+Avalon\+Direct\+Client}}
+\subsubsection{\texorpdfstring{get\+\_\+work\+\_\+order\+\_\+receipt\+\_\+instance()}{get\_work\_order\_receipt\_instance()}}
+{\footnotesize\ttfamily def avalon\+\_\+sdk.\+connector.\+direct.\+avalon\+\_\+direct\+\_\+client.\+Avalon\+Direct\+Client.\+get\+\_\+work\+\_\+order\+\_\+receipt\+\_\+instance (\begin{DoxyParamCaption}\item[{}]{self }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Return the worker's instance of the work order receipt.
+The work order receipt interacts with the JSON RPC listener.
+\end{DoxyVerb}
+ \mbox{\Hypertarget{classavalon__sdk_1_1connector_1_1direct_1_1avalon__direct__client_1_1AvalonDirectClient_a4b5c73957a38d43d6cc45a48543c4dd2}\label{classavalon__sdk_1_1connector_1_1direct_1_1avalon__direct__client_1_1AvalonDirectClient_a4b5c73957a38d43d6cc45a48543c4dd2}} 
+\index{avalon\+\_\+sdk\+::connector\+::direct\+::avalon\+\_\+direct\+\_\+client\+::\+Avalon\+Direct\+Client@{avalon\+\_\+sdk\+::connector\+::direct\+::avalon\+\_\+direct\+\_\+client\+::\+Avalon\+Direct\+Client}!get\+\_\+worker\+\_\+registry\+\_\+instance@{get\+\_\+worker\+\_\+registry\+\_\+instance}}
+\index{get\+\_\+worker\+\_\+registry\+\_\+instance@{get\+\_\+worker\+\_\+registry\+\_\+instance}!avalon\+\_\+sdk\+::connector\+::direct\+::avalon\+\_\+direct\+\_\+client\+::\+Avalon\+Direct\+Client@{avalon\+\_\+sdk\+::connector\+::direct\+::avalon\+\_\+direct\+\_\+client\+::\+Avalon\+Direct\+Client}}
+\subsubsection{\texorpdfstring{get\+\_\+worker\+\_\+registry\+\_\+instance()}{get\_worker\_registry\_instance()}}
+{\footnotesize\ttfamily def avalon\+\_\+sdk.\+connector.\+direct.\+avalon\+\_\+direct\+\_\+client.\+Avalon\+Direct\+Client.\+get\+\_\+worker\+\_\+registry\+\_\+instance (\begin{DoxyParamCaption}\item[{}]{self }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Return the worker's instance of the registry.
+The registry interacts with the JSON RPC listener.
+\end{DoxyVerb}
+ \mbox{\Hypertarget{classavalon__sdk_1_1connector_1_1direct_1_1avalon__direct__client_1_1AvalonDirectClient_aa783017b8526a49693f02a2d854acb86}\label{classavalon__sdk_1_1connector_1_1direct_1_1avalon__direct__client_1_1AvalonDirectClient_aa783017b8526a49693f02a2d854acb86}} 
+\index{avalon\+\_\+sdk\+::connector\+::direct\+::avalon\+\_\+direct\+\_\+client\+::\+Avalon\+Direct\+Client@{avalon\+\_\+sdk\+::connector\+::direct\+::avalon\+\_\+direct\+\_\+client\+::\+Avalon\+Direct\+Client}!get\+\_\+worker\+\_\+registry\+\_\+list\+\_\+instance@{get\+\_\+worker\+\_\+registry\+\_\+list\+\_\+instance}}
+\index{get\+\_\+worker\+\_\+registry\+\_\+list\+\_\+instance@{get\+\_\+worker\+\_\+registry\+\_\+list\+\_\+instance}!avalon\+\_\+sdk\+::connector\+::direct\+::avalon\+\_\+direct\+\_\+client\+::\+Avalon\+Direct\+Client@{avalon\+\_\+sdk\+::connector\+::direct\+::avalon\+\_\+direct\+\_\+client\+::\+Avalon\+Direct\+Client}}
+\subsubsection{\texorpdfstring{get\+\_\+worker\+\_\+registry\+\_\+list\+\_\+instance()}{get\_worker\_registry\_list\_instance()}}
+{\footnotesize\ttfamily def avalon\+\_\+sdk.\+connector.\+direct.\+avalon\+\_\+direct\+\_\+client.\+Avalon\+Direct\+Client.\+get\+\_\+worker\+\_\+registry\+\_\+list\+\_\+instance (\begin{DoxyParamCaption}\item[{}]{self }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Return the worker's instance of the registry list.
+This list is optional and interacts with the blockchain.
+\end{DoxyVerb}
+ 
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/home/dano/git/avalon/sdk/avalon\+\_\+sdk/connector/direct/avalon\+\_\+direct\+\_\+client.\+py\end{DoxyCompactItemize}

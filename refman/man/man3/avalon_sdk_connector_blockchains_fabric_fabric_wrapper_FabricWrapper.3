@@ -1,0 +1,92 @@
+.TH "avalon_sdk.connector.blockchains.fabric.fabric_wrapper.FabricWrapper" 3 "Wed May 6 2020" "Version 0.5.0.dev1" "Hyperledger Avalon" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+avalon_sdk.connector.blockchains.fabric.fabric_wrapper.FabricWrapper
+.SH SYNOPSIS
+.br
+.PP
+.SS "Public Member Functions"
+
+.in +1c
+.ti -1c
+.RI "def \fB__init__\fP (self, config)"
+.br
+.ti -1c
+.RI "def \fBinvoke_chaincode\fP (self, chaincode_name, method_name, params)"
+.br
+.ti -1c
+.RI "def \fBget_event_handler\fP (self, event_name, chain_code, handler_func)"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+
+.PP
+.nf
+Fabric wrapper class to interact with Fabric blockchain.
+It provides wrapper functions to invoke and query chain code.
+
+.fi
+.PP
+ 
+.SH "Constructor & Destructor Documentation"
+.PP 
+.SS "def avalon_sdk\&.connector\&.blockchains\&.fabric\&.fabric_wrapper\&.FabricWrapper\&.__init__ ( self,  config)"
+
+.PP
+.nf
+Constructor to initialize wrapper with required parameter.
+
+Parameters:
+config    Dictionary containing parameters for Fabric.
+  These parameters are read from a .toml file
+
+.fi
+.PP
+ 
+.SH "Member Function Documentation"
+.PP 
+.SS "def avalon_sdk\&.connector\&.blockchains\&.fabric\&.fabric_wrapper\&.FabricWrapper\&.get_event_handler ( self,  event_name,  chain_code,  handler_func)"
+
+.PP
+.nf
+Create event handler object.
+
+Parameters:
+event_name   String to identify the event name
+chain_code   Chain code name as string
+handler_func Callback function name
+
+Returns:
+Event object
+
+.fi
+.PP
+ 
+.SS "def avalon_sdk\&.connector\&.blockchains\&.fabric\&.fabric_wrapper\&.FabricWrapper\&.invoke_chaincode ( self,  chaincode_name,  method_name,  params)"
+
+.PP
+.nf
+This is wrapper method to invoke chain code.
+
+Parameters:
+chaincode_name Name of the chain code
+method_name    Chain code method name
+params         List of arguments to method
+
+Returns:
+If the call to chain code query, then it
+returns the payload of the chain code response
+on success or None on error.
+If the call is invoking chain code, then it
+returns ContractResponse.SUCCESS on success
+and ContractResponse.ERROR on failure.
+
+.fi
+.PP
+ 
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Hyperledger Avalon from the source code\&.

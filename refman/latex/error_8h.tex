@@ -1,0 +1,63 @@
+\hypertarget{error_8h}{}\section{/home/dano/git/avalon/common/cpp/error.h File Reference}
+\label{error_8h}\index{/home/dano/git/avalon/common/cpp/error.\+h@{/home/dano/git/avalon/common/cpp/error.\+h}}
+{\ttfamily \#include $<$stdexcept$>$}\newline
+{\ttfamily \#include $<$string$>$}\newline
+{\ttfamily \#include \char`\"{}tcf\+\_\+error.\+h\char`\"{}}\newline
+Include dependency graph for error.\+h\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=277pt]{error_8h__incl}
+\end{center}
+\end{figure}
+This graph shows which files directly or indirectly include this file\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{error_8h__dep__incl}
+\end{center}
+\end{figure}
+\subsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+class \hyperlink{classtcf_1_1error_1_1Error}{tcf\+::error\+::\+Error}
+\item 
+class \hyperlink{classtcf_1_1error_1_1CryptoError}{tcf\+::error\+::\+Crypto\+Error}
+\item 
+class \hyperlink{classtcf_1_1error_1_1MemoryError}{tcf\+::error\+::\+Memory\+Error}
+\item 
+class \hyperlink{classtcf_1_1error_1_1IOError}{tcf\+::error\+::\+I\+O\+Error}
+\item 
+class \hyperlink{classtcf_1_1error_1_1RuntimeError}{tcf\+::error\+::\+Runtime\+Error}
+\item 
+class \hyperlink{classtcf_1_1error_1_1IndexError}{tcf\+::error\+::\+Index\+Error}
+\item 
+class \hyperlink{classtcf_1_1error_1_1DivisionByZero}{tcf\+::error\+::\+Division\+By\+Zero}
+\item 
+class \hyperlink{classtcf_1_1error_1_1OverflowError}{tcf\+::error\+::\+Overflow\+Error}
+\item 
+class \hyperlink{classtcf_1_1error_1_1ValueError}{tcf\+::error\+::\+Value\+Error}
+\item 
+class \hyperlink{classtcf_1_1error_1_1SystemError}{tcf\+::error\+::\+System\+Error}
+\item 
+class \hyperlink{classtcf_1_1error_1_1SystemBusyError}{tcf\+::error\+::\+System\+Busy\+Error}
+\item 
+class \hyperlink{classtcf_1_1error_1_1WorkloadError}{tcf\+::error\+::\+Workload\+Error}
+\item 
+class \hyperlink{classtcf_1_1error_1_1UnknownError}{tcf\+::error\+::\+Unknown\+Error}
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{error_8h_a86adb3c1b99b1d954a416c3d20f0f0e9}\label{error_8h_a86adb3c1b99b1d954a416c3d20f0f0e9}} 
+{\footnotesize template$<$typename Pointer\+Type $>$ }\\void {\bfseries tcf\+::error\+::\+Throw\+If\+Null} (const Pointer\+Type ptr, const char $\ast$msg=nullptr)
+\item 
+\mbox{\Hypertarget{error_8h_ab0ef1ae524d9905bdc550e6da6697e8d}\label{error_8h_ab0ef1ae524d9905bdc550e6da6697e8d}} 
+{\footnotesize template$<$typename except $>$ }\\void {\bfseries tcf\+::error\+::\+Throw\+If} (bool condition, const char $\ast$msg)
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Avalon error and exception handling functions. Namespace tcf\+::error 

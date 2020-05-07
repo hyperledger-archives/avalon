@@ -1,0 +1,97 @@
+\hypertarget{classtcf_1_1crypto_1_1pkenc_1_1PrivateKey}{}\section{tcf\+:\+:crypto\+:\+:pkenc\+:\+:Private\+Key Class Reference}
+\label{classtcf_1_1crypto_1_1pkenc_1_1PrivateKey}\index{tcf\+::crypto\+::pkenc\+::\+Private\+Key@{tcf\+::crypto\+::pkenc\+::\+Private\+Key}}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classtcf_1_1crypto_1_1pkenc_1_1PrivateKey_afda382deaac827d6e25f92e8362364a6}\label{classtcf_1_1crypto_1_1pkenc_1_1PrivateKey_afda382deaac827d6e25f92e8362364a6}} 
+{\bfseries Private\+Key} (const \hyperlink{classtcf_1_1crypto_1_1pkenc_1_1PrivateKey}{Private\+Key} \&private\+Key)
+\item 
+\mbox{\Hypertarget{classtcf_1_1crypto_1_1pkenc_1_1PrivateKey_a5cafe629c341db86bda64d334867a3d4}\label{classtcf_1_1crypto_1_1pkenc_1_1PrivateKey_a5cafe629c341db86bda64d334867a3d4}} 
+{\bfseries Private\+Key} (\hyperlink{classtcf_1_1crypto_1_1pkenc_1_1PrivateKey}{Private\+Key} \&\&private\+Key)
+\item 
+\hyperlink{classtcf_1_1crypto_1_1pkenc_1_1PrivateKey_ad2ab68cb5da100dc1bf973de4b302ef3}{Private\+Key} (const std\+::string \&encoded)
+\item 
+\hyperlink{classtcf_1_1crypto_1_1pkenc_1_1PrivateKey_a8d981703b97bc83b8b89fb1af226dc51}{$\sim$\+Private\+Key} ()
+\item 
+\hyperlink{classtcf_1_1crypto_1_1pkenc_1_1PrivateKey}{Private\+Key} \& \hyperlink{classtcf_1_1crypto_1_1pkenc_1_1PrivateKey_a7c2477079f7f65622ddba491a6fa5a32}{operator=} (const \hyperlink{classtcf_1_1crypto_1_1pkenc_1_1PrivateKey}{Private\+Key} \&private\+Key)
+\item 
+void \hyperlink{classtcf_1_1crypto_1_1pkenc_1_1PrivateKey_ad18262c20398caae0c5243cbddfd0d24}{Deserialize} (const std\+::string \&encoded)
+\item 
+void \hyperlink{classtcf_1_1crypto_1_1pkenc_1_1PrivateKey_a7b7d056b923d999356da1fee68e7247d}{Generate} ()
+\item 
+\hyperlink{classtcf_1_1crypto_1_1pkenc_1_1PublicKey}{Public\+Key} \hyperlink{classtcf_1_1crypto_1_1pkenc_1_1PrivateKey_ad15aaa6b8d4e656304502a60526bbfa3}{Get\+Public\+Key} () const
+\item 
+std\+::string \hyperlink{classtcf_1_1crypto_1_1pkenc_1_1PrivateKey_a56f53348e7b2e88c7c2eb4cc839727b2}{Serialize} () const
+\item 
+\hyperlink{types_8h_a35da937e2331acce98d47f44892f4a76}{Byte\+Array} \hyperlink{classtcf_1_1crypto_1_1pkenc_1_1PrivateKey_abc60da947e8776a38376ad0a4b2fc391}{Decrypt\+Message} (const \hyperlink{types_8h_a35da937e2331acce98d47f44892f4a76}{Byte\+Array} \&ct) const
+\end{DoxyCompactItemize}
+
+
+\subsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classtcf_1_1crypto_1_1pkenc_1_1PrivateKey_ad2ab68cb5da100dc1bf973de4b302ef3}\label{classtcf_1_1crypto_1_1pkenc_1_1PrivateKey_ad2ab68cb5da100dc1bf973de4b302ef3}} 
+\index{tcf\+::crypto\+::pkenc\+::\+Private\+Key@{tcf\+::crypto\+::pkenc\+::\+Private\+Key}!Private\+Key@{Private\+Key}}
+\index{Private\+Key@{Private\+Key}!tcf\+::crypto\+::pkenc\+::\+Private\+Key@{tcf\+::crypto\+::pkenc\+::\+Private\+Key}}
+\subsubsection{\texorpdfstring{Private\+Key()}{PrivateKey()}}
+{\footnotesize\ttfamily tcf\+::crypto\+::pkenc\+::\+Private\+Key\+::\+Private\+Key (\begin{DoxyParamCaption}\item[{const std\+::string \&}]{encoded }\end{DoxyParamCaption})}
+
+Constructor from encoded string. Throws Runtime\+Error, Value\+Error. \mbox{\Hypertarget{classtcf_1_1crypto_1_1pkenc_1_1PrivateKey_a8d981703b97bc83b8b89fb1af226dc51}\label{classtcf_1_1crypto_1_1pkenc_1_1PrivateKey_a8d981703b97bc83b8b89fb1af226dc51}} 
+\index{tcf\+::crypto\+::pkenc\+::\+Private\+Key@{tcf\+::crypto\+::pkenc\+::\+Private\+Key}!````~Private\+Key@{$\sim$\+Private\+Key}}
+\index{````~Private\+Key@{$\sim$\+Private\+Key}!tcf\+::crypto\+::pkenc\+::\+Private\+Key@{tcf\+::crypto\+::pkenc\+::\+Private\+Key}}
+\subsubsection{\texorpdfstring{$\sim$\+Private\+Key()}{~PrivateKey()}}
+{\footnotesize\ttfamily tcf\+::crypto\+::pkenc\+::\+Private\+Key\+::$\sim$\+Private\+Key (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+\hyperlink{classtcf_1_1crypto_1_1pkenc_1_1PrivateKey}{Private\+Key} Destructor. 
+
+\subsection{Member Function Documentation}
+\mbox{\Hypertarget{classtcf_1_1crypto_1_1pkenc_1_1PrivateKey_abc60da947e8776a38376ad0a4b2fc391}\label{classtcf_1_1crypto_1_1pkenc_1_1PrivateKey_abc60da947e8776a38376ad0a4b2fc391}} 
+\index{tcf\+::crypto\+::pkenc\+::\+Private\+Key@{tcf\+::crypto\+::pkenc\+::\+Private\+Key}!Decrypt\+Message@{Decrypt\+Message}}
+\index{Decrypt\+Message@{Decrypt\+Message}!tcf\+::crypto\+::pkenc\+::\+Private\+Key@{tcf\+::crypto\+::pkenc\+::\+Private\+Key}}
+\subsubsection{\texorpdfstring{Decrypt\+Message()}{DecryptMessage()}}
+{\footnotesize\ttfamily \hyperlink{types_8h_a35da937e2331acce98d47f44892f4a76}{Byte\+Array} tcf\+::crypto\+::pkenc\+::\+Private\+Key\+::\+Decrypt\+Message (\begin{DoxyParamCaption}\item[{const \hyperlink{types_8h_a35da937e2331acce98d47f44892f4a76}{Byte\+Array} \&}]{ciphertext }\end{DoxyParamCaption}) const}
+
+Decrypt message with R\+SA private key and return plaintext. Throws Runtime\+Error.
+
+
+\begin{DoxyParams}{Parameters}
+{\em ciphertext} & string contains raw binary ciphertext \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Byte\+Array containing raw binary plaintext 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classtcf_1_1crypto_1_1pkenc_1_1PrivateKey_ad18262c20398caae0c5243cbddfd0d24}\label{classtcf_1_1crypto_1_1pkenc_1_1PrivateKey_ad18262c20398caae0c5243cbddfd0d24}} 
+\index{tcf\+::crypto\+::pkenc\+::\+Private\+Key@{tcf\+::crypto\+::pkenc\+::\+Private\+Key}!Deserialize@{Deserialize}}
+\index{Deserialize@{Deserialize}!tcf\+::crypto\+::pkenc\+::\+Private\+Key@{tcf\+::crypto\+::pkenc\+::\+Private\+Key}}
+\subsubsection{\texorpdfstring{Deserialize()}{Deserialize()}}
+{\footnotesize\ttfamily void tcf\+::crypto\+::pkenc\+::\+Private\+Key\+::\+Deserialize (\begin{DoxyParamCaption}\item[{const std\+::string \&}]{encoded }\end{DoxyParamCaption})}
+
+Deserialize R\+SA Private Key. Throws Runrime\+Error, Value\+Error. \mbox{\Hypertarget{classtcf_1_1crypto_1_1pkenc_1_1PrivateKey_a7b7d056b923d999356da1fee68e7247d}\label{classtcf_1_1crypto_1_1pkenc_1_1PrivateKey_a7b7d056b923d999356da1fee68e7247d}} 
+\index{tcf\+::crypto\+::pkenc\+::\+Private\+Key@{tcf\+::crypto\+::pkenc\+::\+Private\+Key}!Generate@{Generate}}
+\index{Generate@{Generate}!tcf\+::crypto\+::pkenc\+::\+Private\+Key@{tcf\+::crypto\+::pkenc\+::\+Private\+Key}}
+\subsubsection{\texorpdfstring{Generate()}{Generate()}}
+{\footnotesize\ttfamily void tcf\+::crypto\+::pkenc\+::\+Private\+Key\+::\+Generate (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+Generate R\+SA private key. Throws Runtime\+Error. \mbox{\Hypertarget{classtcf_1_1crypto_1_1pkenc_1_1PrivateKey_ad15aaa6b8d4e656304502a60526bbfa3}\label{classtcf_1_1crypto_1_1pkenc_1_1PrivateKey_ad15aaa6b8d4e656304502a60526bbfa3}} 
+\index{tcf\+::crypto\+::pkenc\+::\+Private\+Key@{tcf\+::crypto\+::pkenc\+::\+Private\+Key}!Get\+Public\+Key@{Get\+Public\+Key}}
+\index{Get\+Public\+Key@{Get\+Public\+Key}!tcf\+::crypto\+::pkenc\+::\+Private\+Key@{tcf\+::crypto\+::pkenc\+::\+Private\+Key}}
+\subsubsection{\texorpdfstring{Get\+Public\+Key()}{GetPublicKey()}}
+{\footnotesize\ttfamily pcrypto\+::pkenc\+::\+Public\+Key tcf\+::crypto\+::pkenc\+::\+Private\+Key\+::\+Get\+Public\+Key (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const}
+
+Get Public encryption from \hyperlink{classtcf_1_1crypto_1_1pkenc_1_1PrivateKey}{Private\+Key}. Throws Runtime\+Error. \mbox{\Hypertarget{classtcf_1_1crypto_1_1pkenc_1_1PrivateKey_a7c2477079f7f65622ddba491a6fa5a32}\label{classtcf_1_1crypto_1_1pkenc_1_1PrivateKey_a7c2477079f7f65622ddba491a6fa5a32}} 
+\index{tcf\+::crypto\+::pkenc\+::\+Private\+Key@{tcf\+::crypto\+::pkenc\+::\+Private\+Key}!operator=@{operator=}}
+\index{operator=@{operator=}!tcf\+::crypto\+::pkenc\+::\+Private\+Key@{tcf\+::crypto\+::pkenc\+::\+Private\+Key}}
+\subsubsection{\texorpdfstring{operator=()}{operator=()}}
+{\footnotesize\ttfamily pcrypto\+::pkenc\+::\+Private\+Key \& tcf\+::crypto\+::pkenc\+::\+Private\+Key\+::operator= (\begin{DoxyParamCaption}\item[{const \hyperlink{classtcf_1_1crypto_1_1pkenc_1_1PrivateKey}{Private\+Key} \&}]{private\+Key }\end{DoxyParamCaption})}
+
+Assignment operator = overload. Throws Runtime\+Error. \mbox{\Hypertarget{classtcf_1_1crypto_1_1pkenc_1_1PrivateKey_a56f53348e7b2e88c7c2eb4cc839727b2}\label{classtcf_1_1crypto_1_1pkenc_1_1PrivateKey_a56f53348e7b2e88c7c2eb4cc839727b2}} 
+\index{tcf\+::crypto\+::pkenc\+::\+Private\+Key@{tcf\+::crypto\+::pkenc\+::\+Private\+Key}!Serialize@{Serialize}}
+\index{Serialize@{Serialize}!tcf\+::crypto\+::pkenc\+::\+Private\+Key@{tcf\+::crypto\+::pkenc\+::\+Private\+Key}}
+\subsubsection{\texorpdfstring{Serialize()}{Serialize()}}
+{\footnotesize\ttfamily std\+::string tcf\+::crypto\+::pkenc\+::\+Private\+Key\+::\+Serialize (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const}
+
+Serialize Private Key. Throws Runrime\+Error. 
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+/home/dano/git/avalon/common/cpp/crypto/\hyperlink{pkenc__private__key_8h}{pkenc\+\_\+private\+\_\+key.\+h}\item 
+/home/dano/git/avalon/common/cpp/crypto/\hyperlink{pkenc__private__key_8cpp}{pkenc\+\_\+private\+\_\+key.\+cpp}\end{DoxyCompactItemize}

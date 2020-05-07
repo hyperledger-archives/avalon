@@ -1,0 +1,214 @@
+.TH "FileIoExecutor" 3 "Wed May 6 2020" "Version 0.5.0.dev1" "Hyperledger Avalon" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+FileIoExecutor
+.SH SYNOPSIS
+.br
+.PP
+.SS "Public Member Functions"
+
+.in +1c
+.ti -1c
+.RI "void \fBSetIoHandlerId\fP (uint32_t handler_id)"
+.br
+.ti -1c
+.RI "void \fBSetFileName\fP (std::string file_name)"
+.br
+.ti -1c
+.RI "uint32_t \fBGetIoHandlerId\fP (const char *handlerName)"
+.br
+.ti -1c
+.RI "size_t \fBGetMaxFileSize\fP ()"
+.br
+.ti -1c
+.RI "size_t \fBGetMaxIoResultSize\fP ()"
+.br
+.ti -1c
+.RI "uint32_t \fBFileOpen\fP (uint8_t *result, size_t result_size)"
+.br
+.ti -1c
+.RI "uint32_t \fBFileClose\fP (uint8_t *result, size_t result_size)"
+.br
+.ti -1c
+.RI "uint32_t \fBFileRead\fP (uint8_t *result, size_t result_size, uint8_t *out_buf, size_t out_buf_size)"
+.br
+.ti -1c
+.RI "uint32_t \fBFileWrite\fP (uint8_t *result, size_t result_size, const uint8_t *in_buf, size_t in_buf_size)"
+.br
+.ti -1c
+.RI "uint32_t \fBFileTell\fP (uint8_t *result, size_t result_size, uint8_t *out_buf, size_t out_buf_size)"
+.br
+.ti -1c
+.RI "uint32_t \fBFileSeek\fP (size_t position, uint8_t *result, size_t result_size)"
+.br
+.ti -1c
+.RI "uint32_t \fBFileDelete\fP (uint8_t *result, size_t result_size)"
+.br
+.in -1c
+.SH "Member Function Documentation"
+.PP 
+.SS "uint32_t FileIoExecutor::FileClose (uint8_t * result, size_t result_size)"
+Closes given file and updates status in the result buffer\&.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIresult\fP Status of file close operation (0 is success, non-0 is failure) 
+.br
+\fIresult_size\fP Maximum size of the result buffer in bytes 
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+Status of operation (0 on success, non-0 on failure) 
+.RE
+.PP
+
+.SS "uint32_t FileIoExecutor::FileDelete (uint8_t * result, size_t result_size)"
+Deletes the file whose name is stored in the \fBFileIoExecutor\fP instance\&.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIresult\fP Status of file delete operation (0 is success, non-0 is failure) 
+.br
+\fIresult_size\fP Maximum size of the result buffer in bytes 
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+Status of operation (0 on success, non-0 on failure) 
+.RE
+.PP
+
+.SS "uint32_t FileIoExecutor::FileOpen (uint8_t * result, size_t result_size)"
+Opens given file and updates status in the result buffer\&.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIresult\fP Status of file open operation (0 is success, non-0 is failure) 
+.br
+\fIresult_size\fP Maximum size of the result buffer in bytes 
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+Status of operation (0 on success, non-0 on failure) 
+.RE
+.PP
+
+.SS "uint32_t FileIoExecutor::FileRead (uint8_t * result, size_t result_size, uint8_t * out_buf, size_t out_buf_size)"
+Reads given file, stores content in out buffer and updates status in result buffer\&.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIresult\fP Status of file read operation (0 is success, non-0 is failure) 
+.br
+\fIresult_size\fP Maximum size of the result buffer in bytes 
+.br
+\fIout_buf\fP Buffer to hold file content 
+.br
+\fIout_buf_size\fP Maximum size of out_buf to contain the file contents in bytes 
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+Status of operation (0 on success, non-0 on failure) 
+.RE
+.PP
+
+.SS "uint32_t FileIoExecutor::FileSeek (size_t position, uint8_t * result, size_t result_size)"
+Moves the file position the file to the given position and updates the status in result buffer\&.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIposition\fP Byte offset of new file position 
+.br
+\fIresult\fP Status of file seek operation (0 is success, non-0 is failure) 
+.br
+\fIresult_size\fP Maximum size of the result buffer in bytes 
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+Status of operation (0 on success, non-0 on failure) 
+.RE
+.PP
+
+.SS "uint32_t FileIoExecutor::FileTell (uint8_t * result, size_t result_size, uint8_t * out_buf, size_t out_buf_size)"
+Gets the current position of the file, stores it in buffer out_buf, and updates status in result buffer\&.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIresult\fP status of file tell operation (0 is success, non-0 is failure) 
+.br
+\fIresult_size\fP Maximum size of the result buffer in bytes 
+.br
+\fIout_buf\fP Buffer to hold file position 
+.br
+\fIout_buf_size\fP Maximum size of out_buf to contain the file position in bytes 
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+Status of operation (0 on success, non-0 on failure) 
+.RE
+.PP
+
+.SS "uint32_t FileIoExecutor::FileWrite (uint8_t * result, size_t result_size, const uint8_t * in_buf, size_t in_buf_size)"
+Writes given file with content in input buffer and updates status in result buffer\&.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIresult\fP Status of file write operation (0 is success, non-0 is failure) 
+.br
+\fIresult_size\fP Maximum size of the result buffer in bytes 
+.br
+\fIin_buf\fP Buffer with content to be written to the file 
+.br
+\fIin_buf_size\fP Maximum size of in_buf to write to the file in bytes 
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+Status of operation (0 on success, non-0 on failure) 
+.RE
+.PP
+
+.SS "uint32_t FileIoExecutor::GetIoHandlerId (const char * handler_name)"
+Get the I/O handler ID corresponding to IoHandler handler_name\&.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIhandlerName\fP Name of handler 
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+I/O handler ID\&. That is, 1 for handler 'tcf-base-file-io' 
+.PP
+0 on error 
+.RE
+.PP
+
+.SS "size_t FileIoExecutor::GetMaxFileSize ()"
+Get the maximum size of the buffer used for file I/O\&.
+.PP
+\fBReturns:\fP
+.RS 4
+Maximum buffer size in bytes 
+.RE
+.PP
+
+.SS "size_t FileIoExecutor::GetMaxIoResultSize ()"
+Get the maximum size of the result buffer used to store the I/O status\&.
+.PP
+\fBReturns:\fP
+.RS 4
+Maximum result buffer size in bytes 
+.RE
+.PP
+
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Hyperledger Avalon from the source code\&.

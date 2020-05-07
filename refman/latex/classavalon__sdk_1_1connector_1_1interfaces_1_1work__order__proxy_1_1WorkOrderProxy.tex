@@ -1,0 +1,83 @@
+\hypertarget{classavalon__sdk_1_1connector_1_1interfaces_1_1work__order__proxy_1_1WorkOrderProxy}{}\section{avalon\+\_\+sdk.\+connector.\+interfaces.\+work\+\_\+order\+\_\+proxy.\+Work\+Order\+Proxy Class Reference}
+\label{classavalon__sdk_1_1connector_1_1interfaces_1_1work__order__proxy_1_1WorkOrderProxy}\index{avalon\+\_\+sdk.\+connector.\+interfaces.\+work\+\_\+order\+\_\+proxy.\+Work\+Order\+Proxy@{avalon\+\_\+sdk.\+connector.\+interfaces.\+work\+\_\+order\+\_\+proxy.\+Work\+Order\+Proxy}}
+
+
+Inheritance diagram for avalon\+\_\+sdk.\+connector.\+interfaces.\+work\+\_\+order\+\_\+proxy.\+Work\+Order\+Proxy\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=262pt]{classavalon__sdk_1_1connector_1_1interfaces_1_1work__order__proxy_1_1WorkOrderProxy__inherit__graph}
+\end{center}
+\end{figure}
+
+
+Collaboration diagram for avalon\+\_\+sdk.\+connector.\+interfaces.\+work\+\_\+order\+\_\+proxy.\+Work\+Order\+Proxy\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=262pt]{classavalon__sdk_1_1connector_1_1interfaces_1_1work__order__proxy_1_1WorkOrderProxy__coll__graph}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classavalon__sdk_1_1connector_1_1interfaces_1_1work__order__proxy_1_1WorkOrderProxy_a3f90335f75b4703148fbe2aef058bd93}\label{classavalon__sdk_1_1connector_1_1interfaces_1_1work__order__proxy_1_1WorkOrderProxy_a3f90335f75b4703148fbe2aef058bd93}} 
+def {\bfseries \+\_\+\+\_\+init\+\_\+\+\_\+} (self)
+\item 
+def \hyperlink{classavalon__sdk_1_1connector_1_1interfaces_1_1work__order__proxy_1_1WorkOrderProxy_a64f36c9534e5e4f5559b78da6edad2c6}{encryption\+\_\+key\+\_\+start} (self, tag, id=None)
+\item 
+def \hyperlink{classavalon__sdk_1_1connector_1_1interfaces_1_1work__order__proxy_1_1WorkOrderProxy_a8d0ab392d8e30c98f854f8cc87fee33c}{work\+\_\+order\+\_\+complete} (self, work\+\_\+order\+\_\+id, work\+\_\+order\+\_\+response)
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+\begin{DoxyVerb}This class is an abstract base class that contains
+abstract APIs to manage work orders.
+This interface is going to be used by proxy model.
+\end{DoxyVerb}
+ 
+
+\subsection{Member Function Documentation}
+\mbox{\Hypertarget{classavalon__sdk_1_1connector_1_1interfaces_1_1work__order__proxy_1_1WorkOrderProxy_a64f36c9534e5e4f5559b78da6edad2c6}\label{classavalon__sdk_1_1connector_1_1interfaces_1_1work__order__proxy_1_1WorkOrderProxy_a64f36c9534e5e4f5559b78da6edad2c6}} 
+\index{avalon\+\_\+sdk\+::connector\+::interfaces\+::work\+\_\+order\+\_\+proxy\+::\+Work\+Order\+Proxy@{avalon\+\_\+sdk\+::connector\+::interfaces\+::work\+\_\+order\+\_\+proxy\+::\+Work\+Order\+Proxy}!encryption\+\_\+key\+\_\+start@{encryption\+\_\+key\+\_\+start}}
+\index{encryption\+\_\+key\+\_\+start@{encryption\+\_\+key\+\_\+start}!avalon\+\_\+sdk\+::connector\+::interfaces\+::work\+\_\+order\+\_\+proxy\+::\+Work\+Order\+Proxy@{avalon\+\_\+sdk\+::connector\+::interfaces\+::work\+\_\+order\+\_\+proxy\+::\+Work\+Order\+Proxy}}
+\subsubsection{\texorpdfstring{encryption\+\_\+key\+\_\+start()}{encryption\_key\_start()}}
+{\footnotesize\ttfamily def avalon\+\_\+sdk.\+connector.\+interfaces.\+work\+\_\+order\+\_\+proxy.\+Work\+Order\+Proxy.\+encryption\+\_\+key\+\_\+start (\begin{DoxyParamCaption}\item[{}]{self,  }\item[{}]{tag,  }\item[{}]{id = {\ttfamily None} }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Inform the Worker that it should start
+encryption key generation for this requester.
+This API is for the proxy model.
+
+Parameters:
+tag       is an optional parameter.
+  If it is zero, the transaction sender's address
+  is used as a tag
+id        Optional JSON RPC request ID
+
+Returns:
+0 on success, otherwise an error code.
+\end{DoxyVerb}
+ \mbox{\Hypertarget{classavalon__sdk_1_1connector_1_1interfaces_1_1work__order__proxy_1_1WorkOrderProxy_a8d0ab392d8e30c98f854f8cc87fee33c}\label{classavalon__sdk_1_1connector_1_1interfaces_1_1work__order__proxy_1_1WorkOrderProxy_a8d0ab392d8e30c98f854f8cc87fee33c}} 
+\index{avalon\+\_\+sdk\+::connector\+::interfaces\+::work\+\_\+order\+\_\+proxy\+::\+Work\+Order\+Proxy@{avalon\+\_\+sdk\+::connector\+::interfaces\+::work\+\_\+order\+\_\+proxy\+::\+Work\+Order\+Proxy}!work\+\_\+order\+\_\+complete@{work\+\_\+order\+\_\+complete}}
+\index{work\+\_\+order\+\_\+complete@{work\+\_\+order\+\_\+complete}!avalon\+\_\+sdk\+::connector\+::interfaces\+::work\+\_\+order\+\_\+proxy\+::\+Work\+Order\+Proxy@{avalon\+\_\+sdk\+::connector\+::interfaces\+::work\+\_\+order\+\_\+proxy\+::\+Work\+Order\+Proxy}}
+\subsubsection{\texorpdfstring{work\+\_\+order\+\_\+complete()}{work\_order\_complete()}}
+{\footnotesize\ttfamily def avalon\+\_\+sdk.\+connector.\+interfaces.\+work\+\_\+order\+\_\+proxy.\+Work\+Order\+Proxy.\+work\+\_\+order\+\_\+complete (\begin{DoxyParamCaption}\item[{}]{self,  }\item[{}]{work\+\_\+order\+\_\+id,  }\item[{}]{work\+\_\+order\+\_\+response }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}This function is called by the Worker Service to
+complete a Work Order successfully or in error.
+This API is for the proxy model.
+
+Parameters:
+work_order_id       Unique ID to identify the work order request
+work_order_response Work order response data in a string
+
+Returns:
+errorCode           0 on success or non-zero on error.
+\end{DoxyVerb}
+ 
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/home/dano/git/avalon/sdk/avalon\+\_\+sdk/connector/interfaces/work\+\_\+order\+\_\+proxy.\+py\end{DoxyCompactItemize}

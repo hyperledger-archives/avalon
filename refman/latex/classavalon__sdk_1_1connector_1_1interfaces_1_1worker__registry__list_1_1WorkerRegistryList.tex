@@ -1,0 +1,205 @@
+\hypertarget{classavalon__sdk_1_1connector_1_1interfaces_1_1worker__registry__list_1_1WorkerRegistryList}{}\section{avalon\+\_\+sdk.\+connector.\+interfaces.\+worker\+\_\+registry\+\_\+list.\+Worker\+Registry\+List Class Reference}
+\label{classavalon__sdk_1_1connector_1_1interfaces_1_1worker__registry__list_1_1WorkerRegistryList}\index{avalon\+\_\+sdk.\+connector.\+interfaces.\+worker\+\_\+registry\+\_\+list.\+Worker\+Registry\+List@{avalon\+\_\+sdk.\+connector.\+interfaces.\+worker\+\_\+registry\+\_\+list.\+Worker\+Registry\+List}}
+
+
+Inheritance diagram for avalon\+\_\+sdk.\+connector.\+interfaces.\+worker\+\_\+registry\+\_\+list.\+Worker\+Registry\+List\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=270pt]{classavalon__sdk_1_1connector_1_1interfaces_1_1worker__registry__list_1_1WorkerRegistryList__inherit__graph}
+\end{center}
+\end{figure}
+
+
+Collaboration diagram for avalon\+\_\+sdk.\+connector.\+interfaces.\+worker\+\_\+registry\+\_\+list.\+Worker\+Registry\+List\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=270pt]{classavalon__sdk_1_1connector_1_1interfaces_1_1worker__registry__list_1_1WorkerRegistryList__coll__graph}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classavalon__sdk_1_1connector_1_1interfaces_1_1worker__registry__list_1_1WorkerRegistryList_a30b1b826ffd44a955c9b734aa2840bbd}\label{classavalon__sdk_1_1connector_1_1interfaces_1_1worker__registry__list_1_1WorkerRegistryList_a30b1b826ffd44a955c9b734aa2840bbd}} 
+def {\bfseries \+\_\+\+\_\+init\+\_\+\+\_\+} (self)
+\item 
+def \hyperlink{classavalon__sdk_1_1connector_1_1interfaces_1_1worker__registry__list_1_1WorkerRegistryList_ab8b94f02d2de2581f87f60fd3a516dfd}{registry\+\_\+retrieve} (self, organization\+\_\+id)
+\item 
+def \hyperlink{classavalon__sdk_1_1connector_1_1interfaces_1_1worker__registry__list_1_1WorkerRegistryList_a68ae07225e81d171c25d922a4b801678}{registry\+\_\+lookup} (self, application\+\_\+type\+\_\+id)
+\item 
+def \hyperlink{classavalon__sdk_1_1connector_1_1interfaces_1_1worker__registry__list_1_1WorkerRegistryList_a3f32539b44fe6d922d486a8ae89cc2d3}{registry\+\_\+lookup\+\_\+next} (self, application\+\_\+type\+\_\+id, lookup\+\_\+tag)
+\item 
+def \hyperlink{classavalon__sdk_1_1connector_1_1interfaces_1_1worker__registry__list_1_1WorkerRegistryList_a5da3781009cf3758f0c694811636e7b6}{registry\+\_\+add} (self, organization\+\_\+id, uri, sc\+\_\+addr, application\+\_\+type\+\_\+ids)
+\item 
+def \hyperlink{classavalon__sdk_1_1connector_1_1interfaces_1_1worker__registry__list_1_1WorkerRegistryList_a253090eed6a5578e6fb5d0aee6b57828}{registry\+\_\+update} (self, organization\+\_\+id, uri, sc\+\_\+addr, application\+\_\+type\+\_\+ids)
+\item 
+def \hyperlink{classavalon__sdk_1_1connector_1_1interfaces_1_1worker__registry__list_1_1WorkerRegistryList_a9b824d1006e63cbdb74fc4dd99b65c63}{registry\+\_\+set\+\_\+status} (self, organization\+\_\+id, status)
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+\begin{DoxyVerb}This is an abstract base class to read/write the worker registries,
+which can be called by client.
+\end{DoxyVerb}
+ 
+
+\subsection{Member Function Documentation}
+\mbox{\Hypertarget{classavalon__sdk_1_1connector_1_1interfaces_1_1worker__registry__list_1_1WorkerRegistryList_a5da3781009cf3758f0c694811636e7b6}\label{classavalon__sdk_1_1connector_1_1interfaces_1_1worker__registry__list_1_1WorkerRegistryList_a5da3781009cf3758f0c694811636e7b6}} 
+\index{avalon\+\_\+sdk\+::connector\+::interfaces\+::worker\+\_\+registry\+\_\+list\+::\+Worker\+Registry\+List@{avalon\+\_\+sdk\+::connector\+::interfaces\+::worker\+\_\+registry\+\_\+list\+::\+Worker\+Registry\+List}!registry\+\_\+add@{registry\+\_\+add}}
+\index{registry\+\_\+add@{registry\+\_\+add}!avalon\+\_\+sdk\+::connector\+::interfaces\+::worker\+\_\+registry\+\_\+list\+::\+Worker\+Registry\+List@{avalon\+\_\+sdk\+::connector\+::interfaces\+::worker\+\_\+registry\+\_\+list\+::\+Worker\+Registry\+List}}
+\subsubsection{\texorpdfstring{registry\+\_\+add()}{registry\_add()}}
+{\footnotesize\ttfamily def avalon\+\_\+sdk.\+connector.\+interfaces.\+worker\+\_\+registry\+\_\+list.\+Worker\+Registry\+List.\+registry\+\_\+add (\begin{DoxyParamCaption}\item[{}]{self,  }\item[{}]{organization\+\_\+id,  }\item[{}]{uri,  }\item[{}]{sc\+\_\+addr,  }\item[{}]{application\+\_\+type\+\_\+ids }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Add a new registry.
+
+Parameters:
+organization_id      bytes[] identifies organization that hosts the
+             registry, e.g. a bank in the consortium or an
+             anonymous entity
+uri                  String defines a URI for this registry that
+             supports the Off-Chain Worker Registry
+             JSON RPC API.
+sc_addr              bytes[] defines an smart contract address that
+             runs the Worker Registry Smart Contract API
+             smart contract for this registry
+application_type_ids []bytes[] is an optional parameter that defines
+             application types supported by the worker
+             managed by the registry
+
+Returns:
+Transaction receipt on success or None on error.
+\end{DoxyVerb}
+ \mbox{\Hypertarget{classavalon__sdk_1_1connector_1_1interfaces_1_1worker__registry__list_1_1WorkerRegistryList_a68ae07225e81d171c25d922a4b801678}\label{classavalon__sdk_1_1connector_1_1interfaces_1_1worker__registry__list_1_1WorkerRegistryList_a68ae07225e81d171c25d922a4b801678}} 
+\index{avalon\+\_\+sdk\+::connector\+::interfaces\+::worker\+\_\+registry\+\_\+list\+::\+Worker\+Registry\+List@{avalon\+\_\+sdk\+::connector\+::interfaces\+::worker\+\_\+registry\+\_\+list\+::\+Worker\+Registry\+List}!registry\+\_\+lookup@{registry\+\_\+lookup}}
+\index{registry\+\_\+lookup@{registry\+\_\+lookup}!avalon\+\_\+sdk\+::connector\+::interfaces\+::worker\+\_\+registry\+\_\+list\+::\+Worker\+Registry\+List@{avalon\+\_\+sdk\+::connector\+::interfaces\+::worker\+\_\+registry\+\_\+list\+::\+Worker\+Registry\+List}}
+\subsubsection{\texorpdfstring{registry\+\_\+lookup()}{registry\_lookup()}}
+{\footnotesize\ttfamily def avalon\+\_\+sdk.\+connector.\+interfaces.\+worker\+\_\+registry\+\_\+list.\+Worker\+Registry\+List.\+registry\+\_\+lookup (\begin{DoxyParamCaption}\item[{}]{self,  }\item[{}]{application\+\_\+type\+\_\+id }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Registry Lookup identified by application type ID
+
+Parameters:
+application_type_id  Application type ID to lookup in the registry
+
+Returns:
+Tuple containing totalCount, lookupTag, and ids on success:
+totalCount Total number of entries matching a specified lookup
+   criteria. If this number is larger than the size of the
+   ids array, the caller should use the lookupTag to call
+   registry_lookup_next to retrieve the rest of the IDs
+lookupTag  Optional parameter. If it is returned, it means that
+   there are more matching registry IDs that can be
+   retrieved by calling the function registry_lookup_next
+   with this tag as an input parameter.
+ids        Array of the registry organization ids that match the
+   input parameters.
+
+Returns None on error.
+\end{DoxyVerb}
+ \mbox{\Hypertarget{classavalon__sdk_1_1connector_1_1interfaces_1_1worker__registry__list_1_1WorkerRegistryList_a3f32539b44fe6d922d486a8ae89cc2d3}\label{classavalon__sdk_1_1connector_1_1interfaces_1_1worker__registry__list_1_1WorkerRegistryList_a3f32539b44fe6d922d486a8ae89cc2d3}} 
+\index{avalon\+\_\+sdk\+::connector\+::interfaces\+::worker\+\_\+registry\+\_\+list\+::\+Worker\+Registry\+List@{avalon\+\_\+sdk\+::connector\+::interfaces\+::worker\+\_\+registry\+\_\+list\+::\+Worker\+Registry\+List}!registry\+\_\+lookup\+\_\+next@{registry\+\_\+lookup\+\_\+next}}
+\index{registry\+\_\+lookup\+\_\+next@{registry\+\_\+lookup\+\_\+next}!avalon\+\_\+sdk\+::connector\+::interfaces\+::worker\+\_\+registry\+\_\+list\+::\+Worker\+Registry\+List@{avalon\+\_\+sdk\+::connector\+::interfaces\+::worker\+\_\+registry\+\_\+list\+::\+Worker\+Registry\+List}}
+\subsubsection{\texorpdfstring{registry\+\_\+lookup\+\_\+next()}{registry\_lookup\_next()}}
+{\footnotesize\ttfamily def avalon\+\_\+sdk.\+connector.\+interfaces.\+worker\+\_\+registry\+\_\+list.\+Worker\+Registry\+List.\+registry\+\_\+lookup\+\_\+next (\begin{DoxyParamCaption}\item[{}]{self,  }\item[{}]{application\+\_\+type\+\_\+id,  }\item[{}]{lookup\+\_\+tag }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}This function is called to retrieve additional results of the
+Registry lookup initiated by the registry_lookUp call.
+
+Parameters:
+application_type_id    Application type that has to be
+               supported by the workers retrieved
+lookup_tag             Returned by a previous call to either this
+               function or to registry_lookup
+
+Returns:
+Outputs tuple on success containing the following:
+total_count    Total number of entries matching the lookup
+       criteria. If this number is larger than the number
+       of IDs returned so far, the caller should use
+       lookup_tag to call registry_lookup_next to
+       retrieve the rest of the IDs
+new_lookup_tag Optional parameter. If it is returned, it means
+       that there are more matching registry IDs that
+       can be retrieved by calling this function again
+       with this tag as an input parameter
+ids            Array of the registry IDs that match the input
+       parameters
+
+Returns None on error.
+\end{DoxyVerb}
+ \mbox{\Hypertarget{classavalon__sdk_1_1connector_1_1interfaces_1_1worker__registry__list_1_1WorkerRegistryList_ab8b94f02d2de2581f87f60fd3a516dfd}\label{classavalon__sdk_1_1connector_1_1interfaces_1_1worker__registry__list_1_1WorkerRegistryList_ab8b94f02d2de2581f87f60fd3a516dfd}} 
+\index{avalon\+\_\+sdk\+::connector\+::interfaces\+::worker\+\_\+registry\+\_\+list\+::\+Worker\+Registry\+List@{avalon\+\_\+sdk\+::connector\+::interfaces\+::worker\+\_\+registry\+\_\+list\+::\+Worker\+Registry\+List}!registry\+\_\+retrieve@{registry\+\_\+retrieve}}
+\index{registry\+\_\+retrieve@{registry\+\_\+retrieve}!avalon\+\_\+sdk\+::connector\+::interfaces\+::worker\+\_\+registry\+\_\+list\+::\+Worker\+Registry\+List@{avalon\+\_\+sdk\+::connector\+::interfaces\+::worker\+\_\+registry\+\_\+list\+::\+Worker\+Registry\+List}}
+\subsubsection{\texorpdfstring{registry\+\_\+retrieve()}{registry\_retrieve()}}
+{\footnotesize\ttfamily def avalon\+\_\+sdk.\+connector.\+interfaces.\+worker\+\_\+registry\+\_\+list.\+Worker\+Registry\+List.\+registry\+\_\+retrieve (\begin{DoxyParamCaption}\item[{}]{self,  }\item[{}]{organization\+\_\+id }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Retrieve registry information identified by the organization ID.
+
+Parameters:
+organization_id      Organization ID to lookup
+
+Returns:
+Tuple containing following on success:
+uri                  String defines a URI for this registry that
+             supports the Off-Chain Worker Registry JSON RPC
+             API. It will be None for the proxy model
+sc_addr              smart contract address for worker registry
+             smart contract address
+application_type_ids List of application ids (array of byte[])
+status               Status of the registry
+
+Returns None on error.
+\end{DoxyVerb}
+ \mbox{\Hypertarget{classavalon__sdk_1_1connector_1_1interfaces_1_1worker__registry__list_1_1WorkerRegistryList_a9b824d1006e63cbdb74fc4dd99b65c63}\label{classavalon__sdk_1_1connector_1_1interfaces_1_1worker__registry__list_1_1WorkerRegistryList_a9b824d1006e63cbdb74fc4dd99b65c63}} 
+\index{avalon\+\_\+sdk\+::connector\+::interfaces\+::worker\+\_\+registry\+\_\+list\+::\+Worker\+Registry\+List@{avalon\+\_\+sdk\+::connector\+::interfaces\+::worker\+\_\+registry\+\_\+list\+::\+Worker\+Registry\+List}!registry\+\_\+set\+\_\+status@{registry\+\_\+set\+\_\+status}}
+\index{registry\+\_\+set\+\_\+status@{registry\+\_\+set\+\_\+status}!avalon\+\_\+sdk\+::connector\+::interfaces\+::worker\+\_\+registry\+\_\+list\+::\+Worker\+Registry\+List@{avalon\+\_\+sdk\+::connector\+::interfaces\+::worker\+\_\+registry\+\_\+list\+::\+Worker\+Registry\+List}}
+\subsubsection{\texorpdfstring{registry\+\_\+set\+\_\+status()}{registry\_set\_status()}}
+{\footnotesize\ttfamily def avalon\+\_\+sdk.\+connector.\+interfaces.\+worker\+\_\+registry\+\_\+list.\+Worker\+Registry\+List.\+registry\+\_\+set\+\_\+status (\begin{DoxyParamCaption}\item[{}]{self,  }\item[{}]{organization\+\_\+id,  }\item[{}]{status }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Set registry status.
+
+Parameters:
+organization_id bytes[] identifies organization that hosts the
+        registry, e.g. a bank in the consortium or an
+        anonymous entity
+status          Defines the registry status to set.
+        The currently defined values are:
+        1 - the registry is active
+        2 - the registry is temporarily "off-line"
+        3 - the registry is decommissioned
+
+Returns:
+Transaction receipt on success or None on error.
+\end{DoxyVerb}
+ \mbox{\Hypertarget{classavalon__sdk_1_1connector_1_1interfaces_1_1worker__registry__list_1_1WorkerRegistryList_a253090eed6a5578e6fb5d0aee6b57828}\label{classavalon__sdk_1_1connector_1_1interfaces_1_1worker__registry__list_1_1WorkerRegistryList_a253090eed6a5578e6fb5d0aee6b57828}} 
+\index{avalon\+\_\+sdk\+::connector\+::interfaces\+::worker\+\_\+registry\+\_\+list\+::\+Worker\+Registry\+List@{avalon\+\_\+sdk\+::connector\+::interfaces\+::worker\+\_\+registry\+\_\+list\+::\+Worker\+Registry\+List}!registry\+\_\+update@{registry\+\_\+update}}
+\index{registry\+\_\+update@{registry\+\_\+update}!avalon\+\_\+sdk\+::connector\+::interfaces\+::worker\+\_\+registry\+\_\+list\+::\+Worker\+Registry\+List@{avalon\+\_\+sdk\+::connector\+::interfaces\+::worker\+\_\+registry\+\_\+list\+::\+Worker\+Registry\+List}}
+\subsubsection{\texorpdfstring{registry\+\_\+update()}{registry\_update()}}
+{\footnotesize\ttfamily def avalon\+\_\+sdk.\+connector.\+interfaces.\+worker\+\_\+registry\+\_\+list.\+Worker\+Registry\+List.\+registry\+\_\+update (\begin{DoxyParamCaption}\item[{}]{self,  }\item[{}]{organization\+\_\+id,  }\item[{}]{uri,  }\item[{}]{sc\+\_\+addr,  }\item[{}]{application\+\_\+type\+\_\+ids }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Update a registry.
+
+Parameters:
+organization_id      bytes[] identifies organization that hosts the
+             registry, e.g. a bank in the consortium or an
+             anonymous entity
+uri                  string defines a URI for this registry that
+             supports the Off-Chain Worker Registry
+             JSON RPC API
+sc_addr              bytes[] defines an smart contract address that
+             runs a Worker Registry Smart Contract API
+             smart contract for this registry
+application_type_ids []bytes[] is an optional parameter that defines
+             application types supported by the worker
+             managed by the registry
+
+Returns:
+Transaction receipt on success or None on error.
+\end{DoxyVerb}
+ 
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/home/dano/git/avalon/sdk/avalon\+\_\+sdk/connector/interfaces/worker\+\_\+registry\+\_\+list.\+py\end{DoxyCompactItemize}

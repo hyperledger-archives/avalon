@@ -1,0 +1,74 @@
+\hypertarget{types_8cpp}{}\section{/home/dano/git/avalon/common/cpp/types.cpp File Reference}
+\label{types_8cpp}\index{/home/dano/git/avalon/common/cpp/types.\+cpp@{/home/dano/git/avalon/common/cpp/types.\+cpp}}
+{\ttfamily \#include $<$algorithm$>$}\newline
+{\ttfamily \#include $<$string$>$}\newline
+{\ttfamily \#include $<$vector$>$}\newline
+{\ttfamily \#include \char`\"{}types.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}base64.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}hex\+\_\+string.\+h\char`\"{}}\newline
+Include dependency graph for types.\+cpp\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{types_8cpp__incl}
+\end{center}
+\end{figure}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+std\+::string \hyperlink{types_8cpp_aa8672c277e7ca299e9270de593c211ed}{Byte\+Array\+To\+String} (const \hyperlink{types_8h_a35da937e2331acce98d47f44892f4a76}{Byte\+Array} \&in\+Array)
+\item 
+\hyperlink{classStringArray}{String\+Array} \hyperlink{types_8cpp_acdfbe9a632817136907bd79474fcf782}{Byte\+Array\+To\+String\+Array} (const \hyperlink{types_8h_a35da937e2331acce98d47f44892f4a76}{Byte\+Array} \&in\+Array)
+\item 
+\hyperlink{types_8h_afb58b05103180e3d86a61e706df355ef}{Base64\+Encoded\+String} \hyperlink{types_8cpp_af62acc63ae43708b7a8e5a278369b5a3}{Byte\+Array\+To\+Base64\+Encoded\+String} (const \hyperlink{types_8h_a35da937e2331acce98d47f44892f4a76}{Byte\+Array} \&buf)
+\item 
+\hyperlink{types_8h_a35da937e2331acce98d47f44892f4a76}{Byte\+Array} \hyperlink{types_8cpp_a964845aff0af6850394f7414ead821af}{Base64\+Encoded\+String\+To\+Byte\+Array} (const \hyperlink{types_8h_afb58b05103180e3d86a61e706df355ef}{Base64\+Encoded\+String} \&encoded)
+\item 
+\hyperlink{types_8h_a570efb2a11324042261b5478c6e5c866}{Hex\+Encoded\+String} \hyperlink{types_8cpp_a06d5469edbaa5ef64aa7bb0a8ea0ef47}{Byte\+Array\+To\+Hex\+Encoded\+String} (const \hyperlink{types_8h_a35da937e2331acce98d47f44892f4a76}{Byte\+Array} \&buf)
+\item 
+\hyperlink{types_8h_a35da937e2331acce98d47f44892f4a76}{Byte\+Array} \hyperlink{types_8cpp_a6210596dae7e20fbba67ad15197f3cf9}{Hex\+Encoded\+String\+To\+Byte\+Array} (const \hyperlink{types_8h_a570efb2a11324042261b5478c6e5c866}{Hex\+Encoded\+String} \&encoded)
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Avalon string utilities, including base 64, hex, byte array, and string array conversion. 
+
+\subsection{Function Documentation}
+\mbox{\Hypertarget{types_8cpp_a964845aff0af6850394f7414ead821af}\label{types_8cpp_a964845aff0af6850394f7414ead821af}} 
+\index{types.\+cpp@{types.\+cpp}!Base64\+Encoded\+String\+To\+Byte\+Array@{Base64\+Encoded\+String\+To\+Byte\+Array}}
+\index{Base64\+Encoded\+String\+To\+Byte\+Array@{Base64\+Encoded\+String\+To\+Byte\+Array}!types.\+cpp@{types.\+cpp}}
+\subsubsection{\texorpdfstring{Base64\+Encoded\+String\+To\+Byte\+Array()}{Base64EncodedStringToByteArray()}}
+{\footnotesize\ttfamily \hyperlink{types_8h_a35da937e2331acce98d47f44892f4a76}{Byte\+Array} Base64\+Encoded\+String\+To\+Byte\+Array (\begin{DoxyParamCaption}\item[{const \hyperlink{types_8h_afb58b05103180e3d86a61e706df355ef}{Base64\+Encoded\+String} \&}]{encoded }\end{DoxyParamCaption})}
+
+Simple conversion from Base64\+Encoded\+String to Byte\+Array. \mbox{\Hypertarget{types_8cpp_af62acc63ae43708b7a8e5a278369b5a3}\label{types_8cpp_af62acc63ae43708b7a8e5a278369b5a3}} 
+\index{types.\+cpp@{types.\+cpp}!Byte\+Array\+To\+Base64\+Encoded\+String@{Byte\+Array\+To\+Base64\+Encoded\+String}}
+\index{Byte\+Array\+To\+Base64\+Encoded\+String@{Byte\+Array\+To\+Base64\+Encoded\+String}!types.\+cpp@{types.\+cpp}}
+\subsubsection{\texorpdfstring{Byte\+Array\+To\+Base64\+Encoded\+String()}{ByteArrayToBase64EncodedString()}}
+{\footnotesize\ttfamily \hyperlink{types_8h_afb58b05103180e3d86a61e706df355ef}{Base64\+Encoded\+String} Byte\+Array\+To\+Base64\+Encoded\+String (\begin{DoxyParamCaption}\item[{const \hyperlink{types_8h_a35da937e2331acce98d47f44892f4a76}{Byte\+Array} \&}]{buf }\end{DoxyParamCaption})}
+
+Simple conversion from Byte\+Array to Base64\+Encoded\+String. \mbox{\Hypertarget{types_8cpp_a06d5469edbaa5ef64aa7bb0a8ea0ef47}\label{types_8cpp_a06d5469edbaa5ef64aa7bb0a8ea0ef47}} 
+\index{types.\+cpp@{types.\+cpp}!Byte\+Array\+To\+Hex\+Encoded\+String@{Byte\+Array\+To\+Hex\+Encoded\+String}}
+\index{Byte\+Array\+To\+Hex\+Encoded\+String@{Byte\+Array\+To\+Hex\+Encoded\+String}!types.\+cpp@{types.\+cpp}}
+\subsubsection{\texorpdfstring{Byte\+Array\+To\+Hex\+Encoded\+String()}{ByteArrayToHexEncodedString()}}
+{\footnotesize\ttfamily \hyperlink{types_8h_a570efb2a11324042261b5478c6e5c866}{Hex\+Encoded\+String} Byte\+Array\+To\+Hex\+Encoded\+String (\begin{DoxyParamCaption}\item[{const \hyperlink{types_8h_a35da937e2331acce98d47f44892f4a76}{Byte\+Array} \&}]{buf }\end{DoxyParamCaption})}
+
+Simple conversion from Byte\+Array to Hex\+Encoded\+String. \mbox{\Hypertarget{types_8cpp_aa8672c277e7ca299e9270de593c211ed}\label{types_8cpp_aa8672c277e7ca299e9270de593c211ed}} 
+\index{types.\+cpp@{types.\+cpp}!Byte\+Array\+To\+String@{Byte\+Array\+To\+String}}
+\index{Byte\+Array\+To\+String@{Byte\+Array\+To\+String}!types.\+cpp@{types.\+cpp}}
+\subsubsection{\texorpdfstring{Byte\+Array\+To\+String()}{ByteArrayToString()}}
+{\footnotesize\ttfamily std\+::string Byte\+Array\+To\+String (\begin{DoxyParamCaption}\item[{const \hyperlink{types_8h_a35da937e2331acce98d47f44892f4a76}{Byte\+Array} \&}]{in\+Array }\end{DoxyParamCaption})}
+
+Simple conversion from Byte\+Array to std\+::string \mbox{\Hypertarget{types_8cpp_acdfbe9a632817136907bd79474fcf782}\label{types_8cpp_acdfbe9a632817136907bd79474fcf782}} 
+\index{types.\+cpp@{types.\+cpp}!Byte\+Array\+To\+String\+Array@{Byte\+Array\+To\+String\+Array}}
+\index{Byte\+Array\+To\+String\+Array@{Byte\+Array\+To\+String\+Array}!types.\+cpp@{types.\+cpp}}
+\subsubsection{\texorpdfstring{Byte\+Array\+To\+String\+Array()}{ByteArrayToStringArray()}}
+{\footnotesize\ttfamily \hyperlink{classStringArray}{String\+Array} Byte\+Array\+To\+String\+Array (\begin{DoxyParamCaption}\item[{const \hyperlink{types_8h_a35da937e2331acce98d47f44892f4a76}{Byte\+Array} \&}]{in\+Array }\end{DoxyParamCaption})}
+
+Conversion from Byte\+Array to \hyperlink{classStringArray}{String\+Array}. \mbox{\Hypertarget{types_8cpp_a6210596dae7e20fbba67ad15197f3cf9}\label{types_8cpp_a6210596dae7e20fbba67ad15197f3cf9}} 
+\index{types.\+cpp@{types.\+cpp}!Hex\+Encoded\+String\+To\+Byte\+Array@{Hex\+Encoded\+String\+To\+Byte\+Array}}
+\index{Hex\+Encoded\+String\+To\+Byte\+Array@{Hex\+Encoded\+String\+To\+Byte\+Array}!types.\+cpp@{types.\+cpp}}
+\subsubsection{\texorpdfstring{Hex\+Encoded\+String\+To\+Byte\+Array()}{HexEncodedStringToByteArray()}}
+{\footnotesize\ttfamily \hyperlink{types_8h_a35da937e2331acce98d47f44892f4a76}{Byte\+Array} Hex\+Encoded\+String\+To\+Byte\+Array (\begin{DoxyParamCaption}\item[{const \hyperlink{types_8h_a570efb2a11324042261b5478c6e5c866}{Hex\+Encoded\+String} \&}]{encoded }\end{DoxyParamCaption})}
+
+Simple conversion from Hex\+Encoded\+String to Byte\+Array. Throws Value\+Error. 

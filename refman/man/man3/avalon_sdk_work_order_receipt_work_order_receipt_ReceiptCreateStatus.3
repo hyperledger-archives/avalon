@@ -1,0 +1,57 @@
+.TH "avalon_sdk.work_order_receipt.work_order_receipt.ReceiptCreateStatus" 3 "Wed May 6 2020" "Version 0.5.0.dev1" "Hyperledger Avalon" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+avalon_sdk.work_order_receipt.work_order_receipt.ReceiptCreateStatus
+.SH SYNOPSIS
+.br
+.PP
+.PP
+Inherits Enum\&.
+.SS "Static Public Attributes"
+
+.in +1c
+.ti -1c
+.RI "int \fBPENDING\fP = 0"
+.br
+.ti -1c
+.RI "int \fBCOMPLETED\fP = 1"
+.br
+.ti -1c
+.RI "int \fBPROCESSED\fP = 2"
+.br
+.ti -1c
+.RI "int \fBFAILED\fP = 3"
+.br
+.ti -1c
+.RI "int \fBREJECTED\fP = 4"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+
+.PP
+.nf
+Receipt creation status values:
+0 - PENDING. The work order is waiting to be processed by the worker
+1 - COMPLETED. The worker processed the Work Order and no more worker
+    updates are expected
+2 - PROCESSED. The worker processed the Work Order, but additional worker
+    updates are expected, e.g. oracle notifications
+3 - FAILED. The Work Order processing failed, e.g. by the worker service
+    because of an invalid workerId
+4 - REJECTED. The Work Order is rejected by the smart contract,
+    e.g. invalid workerServiceId
+5 to 254 - reserved
+255 - indicates any status
+>255 - application-specific values
+
+Defined in EEA spec 7.1.
+
+.fi
+.PP
+ 
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Hyperledger Avalon from the source code\&.

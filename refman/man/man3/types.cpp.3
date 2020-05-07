@@ -1,0 +1,63 @@
+.TH "/home/dano/git/avalon/common/cpp/types.cpp" 3 "Wed May 6 2020" "Version 0.5.0.dev1" "Hyperledger Avalon" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+/home/dano/git/avalon/common/cpp/types.cpp
+.SH SYNOPSIS
+.br
+.PP
+\fC#include <algorithm>\fP
+.br
+\fC#include <string>\fP
+.br
+\fC#include <vector>\fP
+.br
+\fC#include 'types\&.h'\fP
+.br
+\fC#include 'base64\&.h'\fP
+.br
+\fC#include 'hex_string\&.h'\fP
+.br
+
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "std::string \fBByteArrayToString\fP (const \fBByteArray\fP &inArray)"
+.br
+.ti -1c
+.RI "\fBStringArray\fP \fBByteArrayToStringArray\fP (const \fBByteArray\fP &inArray)"
+.br
+.ti -1c
+.RI "\fBBase64EncodedString\fP \fBByteArrayToBase64EncodedString\fP (const \fBByteArray\fP &buf)"
+.br
+.ti -1c
+.RI "\fBByteArray\fP \fBBase64EncodedStringToByteArray\fP (const \fBBase64EncodedString\fP &encoded)"
+.br
+.ti -1c
+.RI "\fBHexEncodedString\fP \fBByteArrayToHexEncodedString\fP (const \fBByteArray\fP &buf)"
+.br
+.ti -1c
+.RI "\fBByteArray\fP \fBHexEncodedStringToByteArray\fP (const \fBHexEncodedString\fP &encoded)"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+Avalon string utilities, including base 64, hex, byte array, and string array conversion\&. 
+.SH "Function Documentation"
+.PP 
+.SS "\fBByteArray\fP Base64EncodedStringToByteArray (const \fBBase64EncodedString\fP & encoded)"
+Simple conversion from Base64EncodedString to ByteArray\&. 
+.SS "\fBBase64EncodedString\fP ByteArrayToBase64EncodedString (const \fBByteArray\fP & buf)"
+Simple conversion from ByteArray to Base64EncodedString\&. 
+.SS "\fBHexEncodedString\fP ByteArrayToHexEncodedString (const \fBByteArray\fP & buf)"
+Simple conversion from ByteArray to HexEncodedString\&. 
+.SS "std::string ByteArrayToString (const \fBByteArray\fP & inArray)"
+Simple conversion from ByteArray to std::string 
+.SS "\fBStringArray\fP ByteArrayToStringArray (const \fBByteArray\fP & inArray)"
+Conversion from ByteArray to \fBStringArray\fP\&. 
+.SS "\fBByteArray\fP HexEncodedStringToByteArray (const \fBHexEncodedString\fP & encoded)"
+Simple conversion from HexEncodedString to ByteArray\&. Throws ValueError\&. 
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Hyperledger Avalon from the source code\&.

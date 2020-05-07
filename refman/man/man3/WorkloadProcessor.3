@@ -1,0 +1,99 @@
+.TH "WorkloadProcessor" 3 "Wed May 6 2020" "Version 0.5.0.dev1" "Hyperledger Avalon" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+WorkloadProcessor
+.SH SYNOPSIS
+.br
+.PP
+.PP
+\fC#include <workload_processor\&.h>\fP
+.SS "Public Member Functions"
+
+.in +1c
+.ti -1c
+.RI "virtual \fBWorkloadProcessor\fP * \fBClone\fP () const =0"
+.br
+.ti -1c
+.RI "virtual void \fBProcessWorkOrder\fP (std::string workload_id, const \fBByteArray\fP &requester_id, const \fBByteArray\fP &worker_id, const \fBByteArray\fP &work_order_id, const std::vector< \fBtcf::WorkOrderData\fP > &in_work_order_data, std::vector< \fBtcf::WorkOrderData\fP > &out_work_order_data)=0"
+.br
+.in -1c
+.SS "Static Public Member Functions"
+
+.in +1c
+.ti -1c
+.RI "static \fBWorkloadProcessor\fP * \fBCreateWorkloadProcessor\fP (std::string workload_id)"
+.br
+.ti -1c
+.RI "static \fBWorkloadProcessor\fP * \fBRegisterWorkloadProcessor\fP (std::string workload_id, \fBWorkloadProcessor\fP *processor)"
+.br
+.in -1c
+.SS "Static Public Attributes"
+
+.in +1c
+.ti -1c
+.RI "static std::map< std::string, \fBWorkloadProcessor\fP * > \fBworkload_processor_table\fP"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+Class to register, create, and process a workload\&. 
+.SH "Member Function Documentation"
+.PP 
+.SS "virtual \fBWorkloadProcessor\fP* WorkloadProcessor::Clone () const\fC [pure virtual]\fP"
+Clone a \fBWorkloadProcessor\fP 
+.SS "\fBWorkloadProcessor\fP * WorkloadProcessor::CreateWorkloadProcessor (std::string workload_id)\fC [static]\fP"
+Create a \fBWorkloadProcessor\fP
+.PP
+\fBParameters:\fP
+.RS 4
+\fIworkload_id\fP Workload identifier 
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+Pointer to \fBWorkloadProcessor\fP 
+.RE
+.PP
+
+.SS "virtual void WorkloadProcessor::ProcessWorkOrder (std::string workload_id, const \fBByteArray\fP & requester_id, const \fBByteArray\fP & worker_id, const \fBByteArray\fP & work_order_id, const std::vector< \fBtcf::WorkOrderData\fP > & in_work_order_data, std::vector< \fBtcf::WorkOrderData\fP > & out_work_order_data)\fC [pure virtual]\fP"
+Process the workload\&.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIworkload_id\fP Workload identifier string 
+.br
+\fIrequester_id\fP Requester ID to identify who submitted work order 
+.br
+\fIworker_id\fP Worker ID, a unique string identifying this type of work order processor 
+.br
+\fIwork_order_id\fP Unique work order ID for this type of work order processor 
+.br
+\fIin_work_order_data\fP Work order data input submitted to the work order processor 
+.br
+\fIout_work_order_data\fP Work order data returned by the work order processor 
+.RE
+.PP
+
+.SS "\fBWorkloadProcessor\fP * WorkloadProcessor::RegisterWorkloadProcessor (std::string workload_id, \fBWorkloadProcessor\fP * processor)\fC [static]\fP"
+Register a \fBWorkloadProcessor\fP\&. Used by the workloads to register themselves
+.PP
+\fBParameters:\fP
+.RS 4
+\fIworkload_id\fP Workload identifier 
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+Pointer to \fBWorkloadProcessor\fP 
+.RE
+.PP
+
+.SH "Member Data Documentation"
+.PP 
+.SS "std::map< std::string, \fBWorkloadProcessor\fP * > WorkloadProcessor::workload_processor_table\fC [static]\fP"
+Mapping between workload id and \fBWorkloadProcessor\fP\&. 
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Hyperledger Avalon from the source code\&.

@@ -1,0 +1,374 @@
+.TH "avalon_sdk.work_order.work_order_params.WorkOrderParams" 3 "Wed May 6 2020" "Version 0.5.0.dev1" "Hyperledger Avalon" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+avalon_sdk.work_order.work_order_params.WorkOrderParams
+.SH SYNOPSIS
+.br
+.PP
+.SS "Public Member Functions"
+
+.in +1c
+.ti -1c
+.RI "def \fB__init__\fP (self, work_order_id, worker_id, workload_id, requester_id, session_key, session_iv, requester_nonce, verifying_key=None, payload_format='JSON\-RPC', response_timeout_msecs=6000, result_uri=None, notify_uri=None, worker_encryption_key=None, data_encryption_algorithm=None)"
+.br
+.ti -1c
+.RI "def \fBset_response_timeout_msecs\fP (self, response_timeout_msecs)"
+.br
+.ti -1c
+.RI "def \fBset_payload_format\fP (self, payload_format)"
+.br
+.ti -1c
+.RI "def \fBset_result_uri\fP (self, result_uri)"
+.br
+.ti -1c
+.RI "def \fBset_notify_uri\fP (self, notify_uri)"
+.br
+.ti -1c
+.RI "def \fBset_worker_id\fP (self, worker_id)"
+.br
+.ti -1c
+.RI "def \fBset_work_order_id\fP (self, work_order_id)"
+.br
+.ti -1c
+.RI "def \fBset_workload_id\fP (self, workload_id)"
+.br
+.ti -1c
+.RI "def \fBset_requester_id\fP (self, requester_id)"
+.br
+.ti -1c
+.RI "def \fBset_worker_encryption_key\fP (self, worker_encryption_key)"
+.br
+.ti -1c
+.RI "def \fBset_data_encryption_algorithm\fP (self, data_encryption_algorithm)"
+.br
+.ti -1c
+.RI "def \fBset_encrypted_session_key\fP (self, encrypted_session_key)"
+.br
+.ti -1c
+.RI "def \fBset_session_key_iv\fP (self, session_iv)"
+.br
+.ti -1c
+.RI "def \fBset_requester_nonce\fP (self, requester_nonce)"
+.br
+.ti -1c
+.RI "def \fBadd_encrypted_request_hash\fP (self)"
+.br
+.ti -1c
+.RI "def \fBadd_requester_signature\fP (self, private_key)"
+.br
+.ti -1c
+.RI "def \fBset_verifying_key\fP (self, verifying_key)"
+.br
+.ti -1c
+.RI "def \fBadd_in_data\fP (self, data, data_hash=None, encrypted_data_encryption_key=None, data_iv=None)"
+.br
+.ti -1c
+.RI "def \fBadd_out_data\fP (self, data, data_hash=None, encrypted_data_encryption_key=None, data_iv=None)"
+.br
+.ti -1c
+.RI "def \fBget_params\fP (self)"
+.br
+.ti -1c
+.RI "def \fBget_in_data\fP (self)"
+.br
+.ti -1c
+.RI "def \fBget_out_data\fP (self)"
+.br
+.ti -1c
+.RI "def \fBget_requester_nonce\fP (self)"
+.br
+.ti -1c
+.RI "def \fBget_worker_id\fP (self)"
+.br
+.ti -1c
+.RI "def \fBget_workload_id\fP (self)"
+.br
+.ti -1c
+.RI "def \fBget_requester_id\fP (self)"
+.br
+.ti -1c
+.RI "def \fBget_session_key_iv\fP (self)"
+.br
+.ti -1c
+.RI "def \fBget_work_order_id\fP (self)"
+.br
+.ti -1c
+.RI "def \fBto_jrpc_string\fP (self, id)"
+.br
+.ti -1c
+.RI "def \fBto_string\fP (self)"
+.br
+.in -1c
+.SS "Public Attributes"
+
+.in +1c
+.ti -1c
+.RI "\fBparams_obj\fP"
+.br
+.ti -1c
+.RI "\fBsession_iv\fP"
+.br
+.ti -1c
+.RI "\fBsession_key\fP"
+.br
+.ti -1c
+.RI "\fBfinal_hash\fP"
+.br
+.in -1c
+.SH "Member Function Documentation"
+.PP 
+.SS "def avalon_sdk\&.work_order\&.work_order_params\&.WorkOrderParams\&.add_encrypted_request_hash ( self)"
+
+.PP
+.nf
+Calculates request hash based on EEA trusted-computing spec 6.1.8.1
+and set encryptedRequestHash parameter in the request.
+
+.fi
+.PP
+ 
+.SS "def avalon_sdk\&.work_order\&.work_order_params\&.WorkOrderParams\&.add_in_data ( self,  data,  data_hash = \fCNone\fP,  encrypted_data_encryption_key = \fCNone\fP,  data_iv = \fCNone\fP)"
+
+.PP
+.nf
+Add inData work order parameter.
+.fi
+.PP
+ 
+.SS "def avalon_sdk\&.work_order\&.work_order_params\&.WorkOrderParams\&.add_out_data ( self,  data,  data_hash = \fCNone\fP,  encrypted_data_encryption_key = \fCNone\fP,  data_iv = \fCNone\fP)"
+
+.PP
+.nf
+Add outData work order parameter.
+.fi
+.PP
+ 
+.SS "def avalon_sdk\&.work_order\&.work_order_params\&.WorkOrderParams\&.add_requester_signature ( self,  private_key)"
+
+.PP
+.nf
+Calculate the signature of the request
+as defined in Off-Chain Trusted Compute EEA spec 6.1.8.3
+and set the requesterSignature parameter in the request.
+
+.fi
+.PP
+ 
+.SS "def avalon_sdk\&.work_order\&.work_order_params\&.WorkOrderParams\&.get_in_data ( self)"
+
+.PP
+.nf
+Return inData work order parameter.
+.fi
+.PP
+ 
+.SS "def avalon_sdk\&.work_order\&.work_order_params\&.WorkOrderParams\&.get_out_data ( self)"
+
+.PP
+.nf
+Return outData work order parameter.
+.fi
+.PP
+ 
+.SS "def avalon_sdk\&.work_order\&.work_order_params\&.WorkOrderParams\&.get_params ( self)"
+
+.PP
+.nf
+Return a copy of work order parameters.
+.fi
+.PP
+ 
+.SS "def avalon_sdk\&.work_order\&.work_order_params\&.WorkOrderParams\&.get_requester_id ( self)"
+
+.PP
+.nf
+Return requesterId work order parameter.
+.fi
+.PP
+ 
+.SS "def avalon_sdk\&.work_order\&.work_order_params\&.WorkOrderParams\&.get_requester_nonce ( self)"
+
+.PP
+.nf
+Return requesterNonce work order parameter.
+.fi
+.PP
+ 
+.SS "def avalon_sdk\&.work_order\&.work_order_params\&.WorkOrderParams\&.get_session_key_iv ( self)"
+
+.PP
+.nf
+Return sessionKeyIv work order parameter.
+.fi
+.PP
+ 
+.SS "def avalon_sdk\&.work_order\&.work_order_params\&.WorkOrderParams\&.get_work_order_id ( self)"
+
+.PP
+.nf
+Return workOrderId work order parameter.
+.fi
+.PP
+ 
+.SS "def avalon_sdk\&.work_order\&.work_order_params\&.WorkOrderParams\&.get_worker_id ( self)"
+
+.PP
+.nf
+Return workerId work order parameter.
+.fi
+.PP
+ 
+.SS "def avalon_sdk\&.work_order\&.work_order_params\&.WorkOrderParams\&.get_workload_id ( self)"
+
+.PP
+.nf
+Return workloadId work order parameter.
+.fi
+.PP
+ 
+.SS "def avalon_sdk\&.work_order\&.work_order_params\&.WorkOrderParams\&.set_data_encryption_algorithm ( self,  data_encryption_algorithm)"
+
+.PP
+.nf
+Set dataEncryptionAlgorithm work order parameter.
+.fi
+.PP
+ 
+.SS "def avalon_sdk\&.work_order\&.work_order_params\&.WorkOrderParams\&.set_encrypted_session_key ( self,  encrypted_session_key)"
+
+.PP
+.nf
+Set encryptedSessionKey work order parameter.
+.fi
+.PP
+ 
+.SS "def avalon_sdk\&.work_order\&.work_order_params\&.WorkOrderParams\&.set_notify_uri ( self,  notify_uri)"
+
+.PP
+.nf
+Set notifyUri work order parameter.
+.fi
+.PP
+ 
+.SS "def avalon_sdk\&.work_order\&.work_order_params\&.WorkOrderParams\&.set_payload_format ( self,  payload_format)"
+
+.PP
+.nf
+Set payloadFormat work order parameter.
+.fi
+.PP
+ 
+.SS "def avalon_sdk\&.work_order\&.work_order_params\&.WorkOrderParams\&.set_requester_id ( self,  requester_id)"
+
+.PP
+.nf
+Set requesterId work order parameter.
+.fi
+.PP
+ 
+.SS "def avalon_sdk\&.work_order\&.work_order_params\&.WorkOrderParams\&.set_requester_nonce ( self,  requester_nonce)"
+
+.PP
+.nf
+Set requesterNonce work order parameter.
+.fi
+.PP
+ 
+.SS "def avalon_sdk\&.work_order\&.work_order_params\&.WorkOrderParams\&.set_response_timeout_msecs ( self,  response_timeout_msecs)"
+
+.PP
+.nf
+Set responseTimeoutMSecs work order parameter.
+.fi
+.PP
+ 
+.SS "def avalon_sdk\&.work_order\&.work_order_params\&.WorkOrderParams\&.set_result_uri ( self,  result_uri)"
+
+.PP
+.nf
+Set resultUri work order parameter.
+.fi
+.PP
+ 
+.SS "def avalon_sdk\&.work_order\&.work_order_params\&.WorkOrderParams\&.set_session_key_iv ( self,  session_iv)"
+
+.PP
+.nf
+Set sessionKeyIv work order parameter.
+.fi
+.PP
+ 
+.SS "def avalon_sdk\&.work_order\&.work_order_params\&.WorkOrderParams\&.set_verifying_key ( self,  verifying_key)"
+
+.PP
+.nf
+Set verifyingKey work order parameter.
+.fi
+.PP
+ 
+.SS "def avalon_sdk\&.work_order\&.work_order_params\&.WorkOrderParams\&.set_work_order_id ( self,  work_order_id)"
+
+.PP
+.nf
+Set workOrderId work order parameter.
+.fi
+.PP
+ 
+.SS "def avalon_sdk\&.work_order\&.work_order_params\&.WorkOrderParams\&.set_worker_encryption_key ( self,  worker_encryption_key)"
+
+.PP
+.nf
+Set workerEncryptionKey work order parameter.
+.fi
+.PP
+ 
+.SS "def avalon_sdk\&.work_order\&.work_order_params\&.WorkOrderParams\&.set_worker_id ( self,  worker_id)"
+
+.PP
+.nf
+Set workerId work order parameter.
+.fi
+.PP
+ 
+.SS "def avalon_sdk\&.work_order\&.work_order_params\&.WorkOrderParams\&.set_workload_id ( self,  workload_id)"
+
+.PP
+.nf
+Set workloadId work order parameter.
+.fi
+.PP
+ 
+.SS "def avalon_sdk\&.work_order\&.work_order_params\&.WorkOrderParams\&.to_jrpc_string ( self,  id)"
+
+.PP
+.nf
+Create a JRPC request in string format using
+the work order params_obj.
+
+Parameters:
+id         JRPC request ID
+
+Returns:
+Work order JRPC request as a string.
+
+.fi
+.PP
+ 
+.SS "def avalon_sdk\&.work_order\&.work_order_params\&.WorkOrderParams\&.to_string ( self)"
+
+.PP
+.nf
+Create work order request string.
+It is used to submit a work order.
+
+Returns:
+Work order request as a string
+
+.fi
+.PP
+ 
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Hyperledger Avalon from the source code\&.

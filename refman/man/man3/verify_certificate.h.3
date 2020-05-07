@@ -1,0 +1,41 @@
+.TH "/home/dano/git/avalon/common/cpp/crypto/verify_certificate.h" 3 "Wed May 6 2020" "Version 0.5.0.dev1" "Hyperledger Avalon" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+/home/dano/git/avalon/common/cpp/crypto/verify_certificate.h
+.SH SYNOPSIS
+.br
+.PP
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "bool \fBverify_certificate_chain\fP (const char *cert_pem, const char *ca_cert_pem)"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+Avalon CA certification verification\&. 
+.SH "Function Documentation"
+.PP 
+.SS "bool verify_certificate_chain (const char * cert_pem, const char * ca_cert_pem)"
+Verifies certificate against CA certificate\&.
+.PP
+Verify that cert_pem is signed by CA, using CA certificate ca_cert_pem as a root of trust\&.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIcert_pem\fP X\&.509 Certificate to verify with BEGIN end BLOCKS and new lines 
+.br
+\fIca_cert_pem\fP CA Certificate (usually the IAS CA cert) with BEGIN end BLOCKS and new lines 
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+true on success and false on failure\&. 
+.RE
+.PP
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Hyperledger Avalon from the source code\&.

@@ -1,0 +1,161 @@
+\hypertarget{classavalon__sdk_1_1connector_1_1direct_1_1jrpc_1_1jrpc__work__order__receipt_1_1JRPCWorkOrderReceiptImpl}{}\section{avalon\+\_\+sdk.\+connector.\+direct.\+jrpc.\+jrpc\+\_\+work\+\_\+order\+\_\+receipt.\+J\+R\+P\+C\+Work\+Order\+Receipt\+Impl Class Reference}
+\label{classavalon__sdk_1_1connector_1_1direct_1_1jrpc_1_1jrpc__work__order__receipt_1_1JRPCWorkOrderReceiptImpl}\index{avalon\+\_\+sdk.\+connector.\+direct.\+jrpc.\+jrpc\+\_\+work\+\_\+order\+\_\+receipt.\+J\+R\+P\+C\+Work\+Order\+Receipt\+Impl@{avalon\+\_\+sdk.\+connector.\+direct.\+jrpc.\+jrpc\+\_\+work\+\_\+order\+\_\+receipt.\+J\+R\+P\+C\+Work\+Order\+Receipt\+Impl}}
+
+
+Inheritance diagram for avalon\+\_\+sdk.\+connector.\+direct.\+jrpc.\+jrpc\+\_\+work\+\_\+order\+\_\+receipt.\+J\+R\+P\+C\+Work\+Order\+Receipt\+Impl\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=314pt]{classavalon__sdk_1_1connector_1_1direct_1_1jrpc_1_1jrpc__work__order__receipt_1_1JRPCWorkOrderReceiptImpl__inherit__graph}
+\end{center}
+\end{figure}
+
+
+Collaboration diagram for avalon\+\_\+sdk.\+connector.\+direct.\+jrpc.\+jrpc\+\_\+work\+\_\+order\+\_\+receipt.\+J\+R\+P\+C\+Work\+Order\+Receipt\+Impl\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=314pt]{classavalon__sdk_1_1connector_1_1direct_1_1jrpc_1_1jrpc__work__order__receipt_1_1JRPCWorkOrderReceiptImpl__coll__graph}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classavalon__sdk_1_1connector_1_1direct_1_1jrpc_1_1jrpc__work__order__receipt_1_1JRPCWorkOrderReceiptImpl_a3becd18e957222cceaebc8d23893201e}\label{classavalon__sdk_1_1connector_1_1direct_1_1jrpc_1_1jrpc__work__order__receipt_1_1JRPCWorkOrderReceiptImpl_a3becd18e957222cceaebc8d23893201e}} 
+def {\bfseries \+\_\+\+\_\+init\+\_\+\+\_\+} (self, config)
+\item 
+def \hyperlink{classavalon__sdk_1_1connector_1_1direct_1_1jrpc_1_1jrpc__work__order__receipt_1_1JRPCWorkOrderReceiptImpl_ae2cbec3e402c983c0560d2b98c537f07}{work\+\_\+order\+\_\+receipt\+\_\+create} (self, work\+\_\+order\+\_\+id, worker\+\_\+service\+\_\+id, worker\+\_\+id, requester\+\_\+id, receipt\+\_\+create\+\_\+status, work\+\_\+order\+\_\+request\+\_\+hash, requester\+\_\+nonce, requester\+\_\+signature, signature\+\_\+rules, receipt\+\_\+verification\+\_\+key, id=None)
+\item 
+def \hyperlink{classavalon__sdk_1_1connector_1_1direct_1_1jrpc_1_1jrpc__work__order__receipt_1_1JRPCWorkOrderReceiptImpl_ad8523ddc94e5f3cd9836f2baf820e843}{work\+\_\+order\+\_\+receipt\+\_\+update} (self, work\+\_\+order\+\_\+id, updater\+\_\+id, update\+\_\+type, update\+\_\+data, update\+\_\+signature, signature\+\_\+rules, id=None)
+\item 
+def \hyperlink{classavalon__sdk_1_1connector_1_1direct_1_1jrpc_1_1jrpc__work__order__receipt_1_1JRPCWorkOrderReceiptImpl_ad4a088c0a4999994ff61ae696b9b4c4c}{work\+\_\+order\+\_\+receipt\+\_\+retrieve} (self, work\+\_\+order\+\_\+id, id=None)
+\item 
+def \hyperlink{classavalon__sdk_1_1connector_1_1direct_1_1jrpc_1_1jrpc__work__order__receipt_1_1JRPCWorkOrderReceiptImpl_aaab5946fb57879475620ae202d039654}{work\+\_\+order\+\_\+receipt\+\_\+update\+\_\+retrieve} (self, work\+\_\+order\+\_\+id, updater\+\_\+id, update\+\_\+index, id=None)
+\item 
+def \hyperlink{classavalon__sdk_1_1connector_1_1direct_1_1jrpc_1_1jrpc__work__order__receipt_1_1JRPCWorkOrderReceiptImpl_ace4ee01a071cd19dc7a125227fd0994d}{work\+\_\+order\+\_\+receipt\+\_\+lookup} (self, worker\+\_\+service\+\_\+id=None, worker\+\_\+id=None, requester\+\_\+id=None, receipt\+\_\+status=None, id=None)
+\item 
+def \hyperlink{classavalon__sdk_1_1connector_1_1direct_1_1jrpc_1_1jrpc__work__order__receipt_1_1JRPCWorkOrderReceiptImpl_a5aea6a56cf260bd4d0d12d8d55cd5212}{work\+\_\+order\+\_\+receipt\+\_\+lookup\+\_\+next} (self, last\+\_\+lookup\+\_\+tag, worker\+\_\+service\+\_\+id=None, worker\+\_\+id=None, requester\+\_\+id=None, receipt\+\_\+status=None, id=None)
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+\begin{DoxyVerb}This class is an implementation of WorkOrderReceiptInterface
+to manage work order receipts from the client side.
+\end{DoxyVerb}
+ 
+
+\subsection{Member Function Documentation}
+\mbox{\Hypertarget{classavalon__sdk_1_1connector_1_1direct_1_1jrpc_1_1jrpc__work__order__receipt_1_1JRPCWorkOrderReceiptImpl_ae2cbec3e402c983c0560d2b98c537f07}\label{classavalon__sdk_1_1connector_1_1direct_1_1jrpc_1_1jrpc__work__order__receipt_1_1JRPCWorkOrderReceiptImpl_ae2cbec3e402c983c0560d2b98c537f07}} 
+\index{avalon\+\_\+sdk\+::connector\+::direct\+::jrpc\+::jrpc\+\_\+work\+\_\+order\+\_\+receipt\+::\+J\+R\+P\+C\+Work\+Order\+Receipt\+Impl@{avalon\+\_\+sdk\+::connector\+::direct\+::jrpc\+::jrpc\+\_\+work\+\_\+order\+\_\+receipt\+::\+J\+R\+P\+C\+Work\+Order\+Receipt\+Impl}!work\+\_\+order\+\_\+receipt\+\_\+create@{work\+\_\+order\+\_\+receipt\+\_\+create}}
+\index{work\+\_\+order\+\_\+receipt\+\_\+create@{work\+\_\+order\+\_\+receipt\+\_\+create}!avalon\+\_\+sdk\+::connector\+::direct\+::jrpc\+::jrpc\+\_\+work\+\_\+order\+\_\+receipt\+::\+J\+R\+P\+C\+Work\+Order\+Receipt\+Impl@{avalon\+\_\+sdk\+::connector\+::direct\+::jrpc\+::jrpc\+\_\+work\+\_\+order\+\_\+receipt\+::\+J\+R\+P\+C\+Work\+Order\+Receipt\+Impl}}
+\subsubsection{\texorpdfstring{work\+\_\+order\+\_\+receipt\+\_\+create()}{work\_order\_receipt\_create()}}
+{\footnotesize\ttfamily def avalon\+\_\+sdk.\+connector.\+direct.\+jrpc.\+jrpc\+\_\+work\+\_\+order\+\_\+receipt.\+J\+R\+P\+C\+Work\+Order\+Receipt\+Impl.\+work\+\_\+order\+\_\+receipt\+\_\+create (\begin{DoxyParamCaption}\item[{}]{self,  }\item[{}]{work\+\_\+order\+\_\+id,  }\item[{}]{worker\+\_\+service\+\_\+id,  }\item[{}]{worker\+\_\+id,  }\item[{}]{requester\+\_\+id,  }\item[{}]{receipt\+\_\+create\+\_\+status,  }\item[{}]{work\+\_\+order\+\_\+request\+\_\+hash,  }\item[{}]{requester\+\_\+nonce,  }\item[{}]{requester\+\_\+signature,  }\item[{}]{signature\+\_\+rules,  }\item[{}]{receipt\+\_\+verification\+\_\+key,  }\item[{}]{id = {\ttfamily None} }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Create a Work Order Receipt JSON RPC request and submit to an
+Avalon listener.
+
+Parameters:
+work_order_id            Work order ID
+worker_service_id        Worker service ID
+worker_id                Worker ID value derived from the worker's DID
+requester_id             Requester ID
+receipt_create_status    Receipt creation status
+work_order_request_hash  Work order request hash value
+requester_nonce          Requester generated nonce
+requester_signature      Signature generated by the requester
+signature_rules          Defines hashing and signing algorithms;
+                 separated by forward slash '/'
+receipt_verification_key Receipt verification key
+id                       Optional JSON RPC request ID
+\end{DoxyVerb}
+ \mbox{\Hypertarget{classavalon__sdk_1_1connector_1_1direct_1_1jrpc_1_1jrpc__work__order__receipt_1_1JRPCWorkOrderReceiptImpl_ace4ee01a071cd19dc7a125227fd0994d}\label{classavalon__sdk_1_1connector_1_1direct_1_1jrpc_1_1jrpc__work__order__receipt_1_1JRPCWorkOrderReceiptImpl_ace4ee01a071cd19dc7a125227fd0994d}} 
+\index{avalon\+\_\+sdk\+::connector\+::direct\+::jrpc\+::jrpc\+\_\+work\+\_\+order\+\_\+receipt\+::\+J\+R\+P\+C\+Work\+Order\+Receipt\+Impl@{avalon\+\_\+sdk\+::connector\+::direct\+::jrpc\+::jrpc\+\_\+work\+\_\+order\+\_\+receipt\+::\+J\+R\+P\+C\+Work\+Order\+Receipt\+Impl}!work\+\_\+order\+\_\+receipt\+\_\+lookup@{work\+\_\+order\+\_\+receipt\+\_\+lookup}}
+\index{work\+\_\+order\+\_\+receipt\+\_\+lookup@{work\+\_\+order\+\_\+receipt\+\_\+lookup}!avalon\+\_\+sdk\+::connector\+::direct\+::jrpc\+::jrpc\+\_\+work\+\_\+order\+\_\+receipt\+::\+J\+R\+P\+C\+Work\+Order\+Receipt\+Impl@{avalon\+\_\+sdk\+::connector\+::direct\+::jrpc\+::jrpc\+\_\+work\+\_\+order\+\_\+receipt\+::\+J\+R\+P\+C\+Work\+Order\+Receipt\+Impl}}
+\subsubsection{\texorpdfstring{work\+\_\+order\+\_\+receipt\+\_\+lookup()}{work\_order\_receipt\_lookup()}}
+{\footnotesize\ttfamily def avalon\+\_\+sdk.\+connector.\+direct.\+jrpc.\+jrpc\+\_\+work\+\_\+order\+\_\+receipt.\+J\+R\+P\+C\+Work\+Order\+Receipt\+Impl.\+work\+\_\+order\+\_\+receipt\+\_\+lookup (\begin{DoxyParamCaption}\item[{}]{self,  }\item[{}]{worker\+\_\+service\+\_\+id = {\ttfamily None},  }\item[{}]{worker\+\_\+id = {\ttfamily None},  }\item[{}]{requester\+\_\+id = {\ttfamily None},  }\item[{}]{receipt\+\_\+status = {\ttfamily None},  }\item[{}]{id = {\ttfamily None} }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Work Order Receipt Lookup
+All fields are optional and, if present, condition should match for
+all fields. If none are passed it should return all
+work order receipts.
+
+Parameters:
+worker_service_id        Optional worker service ID to lookup
+worker_id                Optional worker ID value derived from
+                 the worker's DID
+requester_id             Optional requester ID to lookup
+receipt_status           Optional receipt status
+id                       Optional JSON RPC request ID
+\end{DoxyVerb}
+ \mbox{\Hypertarget{classavalon__sdk_1_1connector_1_1direct_1_1jrpc_1_1jrpc__work__order__receipt_1_1JRPCWorkOrderReceiptImpl_a5aea6a56cf260bd4d0d12d8d55cd5212}\label{classavalon__sdk_1_1connector_1_1direct_1_1jrpc_1_1jrpc__work__order__receipt_1_1JRPCWorkOrderReceiptImpl_a5aea6a56cf260bd4d0d12d8d55cd5212}} 
+\index{avalon\+\_\+sdk\+::connector\+::direct\+::jrpc\+::jrpc\+\_\+work\+\_\+order\+\_\+receipt\+::\+J\+R\+P\+C\+Work\+Order\+Receipt\+Impl@{avalon\+\_\+sdk\+::connector\+::direct\+::jrpc\+::jrpc\+\_\+work\+\_\+order\+\_\+receipt\+::\+J\+R\+P\+C\+Work\+Order\+Receipt\+Impl}!work\+\_\+order\+\_\+receipt\+\_\+lookup\+\_\+next@{work\+\_\+order\+\_\+receipt\+\_\+lookup\+\_\+next}}
+\index{work\+\_\+order\+\_\+receipt\+\_\+lookup\+\_\+next@{work\+\_\+order\+\_\+receipt\+\_\+lookup\+\_\+next}!avalon\+\_\+sdk\+::connector\+::direct\+::jrpc\+::jrpc\+\_\+work\+\_\+order\+\_\+receipt\+::\+J\+R\+P\+C\+Work\+Order\+Receipt\+Impl@{avalon\+\_\+sdk\+::connector\+::direct\+::jrpc\+::jrpc\+\_\+work\+\_\+order\+\_\+receipt\+::\+J\+R\+P\+C\+Work\+Order\+Receipt\+Impl}}
+\subsubsection{\texorpdfstring{work\+\_\+order\+\_\+receipt\+\_\+lookup\+\_\+next()}{work\_order\_receipt\_lookup\_next()}}
+{\footnotesize\ttfamily def avalon\+\_\+sdk.\+connector.\+direct.\+jrpc.\+jrpc\+\_\+work\+\_\+order\+\_\+receipt.\+J\+R\+P\+C\+Work\+Order\+Receipt\+Impl.\+work\+\_\+order\+\_\+receipt\+\_\+lookup\+\_\+next (\begin{DoxyParamCaption}\item[{}]{self,  }\item[{}]{last\+\_\+lookup\+\_\+tag,  }\item[{}]{worker\+\_\+service\+\_\+id = {\ttfamily None},  }\item[{}]{worker\+\_\+id = {\ttfamily None},  }\item[{}]{requester\+\_\+id = {\ttfamily None},  }\item[{}]{receipt\+\_\+status = {\ttfamily None},  }\item[{}]{id = {\ttfamily None} }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Work Order Receipt Lookup Next.
+Call to retrieve subsequent results after calling
+work_order_receipt_lookup or
+
+Parameters:
+last_lookup_tag          Last lookup tag returned by
+                 work_order_receipt_lookup
+worker_service_id        Optional worker service ID to lookup
+worker_id                Optional worker ID value derived from
+                 the worker's DID
+requester_id             Optional requester ID to lookup
+receipt_status           Optional receipt status
+id                       Optional JSON RPC request ID
+\end{DoxyVerb}
+ \mbox{\Hypertarget{classavalon__sdk_1_1connector_1_1direct_1_1jrpc_1_1jrpc__work__order__receipt_1_1JRPCWorkOrderReceiptImpl_ad4a088c0a4999994ff61ae696b9b4c4c}\label{classavalon__sdk_1_1connector_1_1direct_1_1jrpc_1_1jrpc__work__order__receipt_1_1JRPCWorkOrderReceiptImpl_ad4a088c0a4999994ff61ae696b9b4c4c}} 
+\index{avalon\+\_\+sdk\+::connector\+::direct\+::jrpc\+::jrpc\+\_\+work\+\_\+order\+\_\+receipt\+::\+J\+R\+P\+C\+Work\+Order\+Receipt\+Impl@{avalon\+\_\+sdk\+::connector\+::direct\+::jrpc\+::jrpc\+\_\+work\+\_\+order\+\_\+receipt\+::\+J\+R\+P\+C\+Work\+Order\+Receipt\+Impl}!work\+\_\+order\+\_\+receipt\+\_\+retrieve@{work\+\_\+order\+\_\+receipt\+\_\+retrieve}}
+\index{work\+\_\+order\+\_\+receipt\+\_\+retrieve@{work\+\_\+order\+\_\+receipt\+\_\+retrieve}!avalon\+\_\+sdk\+::connector\+::direct\+::jrpc\+::jrpc\+\_\+work\+\_\+order\+\_\+receipt\+::\+J\+R\+P\+C\+Work\+Order\+Receipt\+Impl@{avalon\+\_\+sdk\+::connector\+::direct\+::jrpc\+::jrpc\+\_\+work\+\_\+order\+\_\+receipt\+::\+J\+R\+P\+C\+Work\+Order\+Receipt\+Impl}}
+\subsubsection{\texorpdfstring{work\+\_\+order\+\_\+receipt\+\_\+retrieve()}{work\_order\_receipt\_retrieve()}}
+{\footnotesize\ttfamily def avalon\+\_\+sdk.\+connector.\+direct.\+jrpc.\+jrpc\+\_\+work\+\_\+order\+\_\+receipt.\+J\+R\+P\+C\+Work\+Order\+Receipt\+Impl.\+work\+\_\+order\+\_\+receipt\+\_\+retrieve (\begin{DoxyParamCaption}\item[{}]{self,  }\item[{}]{work\+\_\+order\+\_\+id,  }\item[{}]{id = {\ttfamily None} }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Retrieve a work order receipt JSON RPC request and submit to an
+Avalon listener.
+
+Parameters:
+work_order_id Work order ID
+id            Optional Optional JSON RPC request ID
+\end{DoxyVerb}
+ \mbox{\Hypertarget{classavalon__sdk_1_1connector_1_1direct_1_1jrpc_1_1jrpc__work__order__receipt_1_1JRPCWorkOrderReceiptImpl_ad8523ddc94e5f3cd9836f2baf820e843}\label{classavalon__sdk_1_1connector_1_1direct_1_1jrpc_1_1jrpc__work__order__receipt_1_1JRPCWorkOrderReceiptImpl_ad8523ddc94e5f3cd9836f2baf820e843}} 
+\index{avalon\+\_\+sdk\+::connector\+::direct\+::jrpc\+::jrpc\+\_\+work\+\_\+order\+\_\+receipt\+::\+J\+R\+P\+C\+Work\+Order\+Receipt\+Impl@{avalon\+\_\+sdk\+::connector\+::direct\+::jrpc\+::jrpc\+\_\+work\+\_\+order\+\_\+receipt\+::\+J\+R\+P\+C\+Work\+Order\+Receipt\+Impl}!work\+\_\+order\+\_\+receipt\+\_\+update@{work\+\_\+order\+\_\+receipt\+\_\+update}}
+\index{work\+\_\+order\+\_\+receipt\+\_\+update@{work\+\_\+order\+\_\+receipt\+\_\+update}!avalon\+\_\+sdk\+::connector\+::direct\+::jrpc\+::jrpc\+\_\+work\+\_\+order\+\_\+receipt\+::\+J\+R\+P\+C\+Work\+Order\+Receipt\+Impl@{avalon\+\_\+sdk\+::connector\+::direct\+::jrpc\+::jrpc\+\_\+work\+\_\+order\+\_\+receipt\+::\+J\+R\+P\+C\+Work\+Order\+Receipt\+Impl}}
+\subsubsection{\texorpdfstring{work\+\_\+order\+\_\+receipt\+\_\+update()}{work\_order\_receipt\_update()}}
+{\footnotesize\ttfamily def avalon\+\_\+sdk.\+connector.\+direct.\+jrpc.\+jrpc\+\_\+work\+\_\+order\+\_\+receipt.\+J\+R\+P\+C\+Work\+Order\+Receipt\+Impl.\+work\+\_\+order\+\_\+receipt\+\_\+update (\begin{DoxyParamCaption}\item[{}]{self,  }\item[{}]{work\+\_\+order\+\_\+id,  }\item[{}]{updater\+\_\+id,  }\item[{}]{update\+\_\+type,  }\item[{}]{update\+\_\+data,  }\item[{}]{update\+\_\+signature,  }\item[{}]{signature\+\_\+rules,  }\item[{}]{id = {\ttfamily None} }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Update a Work Order Receipt JSON RPC request and submit an
+Avalon listener.
+
+Parameters:
+work_order_id    Work Order ID
+updater_id       Updater ID
+update_type      Updater type
+update_data      Receipt update data
+update_signature Signature of the update
+signature_rules  Defines hashing and signing algorithms;
+         separated by forward slash '/'
+id               Optional JSON RPC request ID
+\end{DoxyVerb}
+ \mbox{\Hypertarget{classavalon__sdk_1_1connector_1_1direct_1_1jrpc_1_1jrpc__work__order__receipt_1_1JRPCWorkOrderReceiptImpl_aaab5946fb57879475620ae202d039654}\label{classavalon__sdk_1_1connector_1_1direct_1_1jrpc_1_1jrpc__work__order__receipt_1_1JRPCWorkOrderReceiptImpl_aaab5946fb57879475620ae202d039654}} 
+\index{avalon\+\_\+sdk\+::connector\+::direct\+::jrpc\+::jrpc\+\_\+work\+\_\+order\+\_\+receipt\+::\+J\+R\+P\+C\+Work\+Order\+Receipt\+Impl@{avalon\+\_\+sdk\+::connector\+::direct\+::jrpc\+::jrpc\+\_\+work\+\_\+order\+\_\+receipt\+::\+J\+R\+P\+C\+Work\+Order\+Receipt\+Impl}!work\+\_\+order\+\_\+receipt\+\_\+update\+\_\+retrieve@{work\+\_\+order\+\_\+receipt\+\_\+update\+\_\+retrieve}}
+\index{work\+\_\+order\+\_\+receipt\+\_\+update\+\_\+retrieve@{work\+\_\+order\+\_\+receipt\+\_\+update\+\_\+retrieve}!avalon\+\_\+sdk\+::connector\+::direct\+::jrpc\+::jrpc\+\_\+work\+\_\+order\+\_\+receipt\+::\+J\+R\+P\+C\+Work\+Order\+Receipt\+Impl@{avalon\+\_\+sdk\+::connector\+::direct\+::jrpc\+::jrpc\+\_\+work\+\_\+order\+\_\+receipt\+::\+J\+R\+P\+C\+Work\+Order\+Receipt\+Impl}}
+\subsubsection{\texorpdfstring{work\+\_\+order\+\_\+receipt\+\_\+update\+\_\+retrieve()}{work\_order\_receipt\_update\_retrieve()}}
+{\footnotesize\ttfamily def avalon\+\_\+sdk.\+connector.\+direct.\+jrpc.\+jrpc\+\_\+work\+\_\+order\+\_\+receipt.\+J\+R\+P\+C\+Work\+Order\+Receipt\+Impl.\+work\+\_\+order\+\_\+receipt\+\_\+update\+\_\+retrieve (\begin{DoxyParamCaption}\item[{}]{self,  }\item[{}]{work\+\_\+order\+\_\+id,  }\item[{}]{updater\+\_\+id,  }\item[{}]{update\+\_\+index,  }\item[{}]{id = {\ttfamily None} }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Retrieve a work order receipt update JSON RPC request and submit to an
+Avalon listener.
+
+Parameters:
+work_order_id Work order ID
+id            Optional Optional JSON RPC request ID
+\end{DoxyVerb}
+ 
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/home/dano/git/avalon/sdk/avalon\+\_\+sdk/connector/direct/jrpc/jrpc\+\_\+work\+\_\+order\+\_\+receipt.\+py\end{DoxyCompactItemize}

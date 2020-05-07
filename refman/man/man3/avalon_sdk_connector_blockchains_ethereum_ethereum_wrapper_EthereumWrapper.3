@@ -1,0 +1,250 @@
+.TH "avalon_sdk.connector.blockchains.ethereum.ethereum_wrapper.EthereumWrapper" 3 "Wed May 6 2020" "Version 0.5.0.dev1" "Hyperledger Avalon" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+avalon_sdk.connector.blockchains.ethereum.ethereum_wrapper.EthereumWrapper
+.SH SYNOPSIS
+.br
+.PP
+.SS "Public Member Functions"
+
+.in +1c
+.ti -1c
+.RI "def \fB__init__\fP (self, config)"
+.br
+.ti -1c
+.RI "def \fBcompile_source_file\fP (self, file_path)"
+.br
+.ti -1c
+.RI "def \fBdeploy_contract\fP (self, contract_interface)"
+.br
+.ti -1c
+.RI "def \fBsign_execute_raw_transaction\fP (self, tx_dict)"
+.br
+.ti -1c
+.RI "def \fBexecute_unsigned_transaction\fP (self, tx_dict)"
+.br
+.ti -1c
+.RI "def \fBexecute_transaction\fP (self, tx_dict)"
+.br
+.ti -1c
+.RI "def \fBget_chain_id\fP (self)"
+.br
+.ti -1c
+.RI "def \fBget_gas_limit\fP (self)"
+.br
+.ti -1c
+.RI "def \fBget_gas_price\fP (self)"
+.br
+.ti -1c
+.RI "def \fBget_account_address\fP (self)"
+.br
+.ti -1c
+.RI "def \fBget_contract_instance\fP (self, contract_file_name, contract_address)"
+.br
+.ti -1c
+.RI "def \fBget_contract_instance_from_json\fP (self, json_file_name, contract_address)"
+.br
+.ti -1c
+.RI "def \fBget_txn_nonce\fP (self)"
+.br
+.ti -1c
+.RI "def \fBget_transaction_params\fP (self)"
+.br
+.ti -1c
+.RI "def \fBget_bytes_from_hex\fP (self, hex_str)"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+
+.PP
+.nf
+Ethereum wrapper class to interact with the Ethereum blockchain to
+deploy compile contract code, deploy contract code,
+and execute contract code.
+
+.fi
+.PP
+ 
+.SH "Member Function Documentation"
+.PP 
+.SS "def avalon_sdk\&.connector\&.blockchains\&.ethereum\&.ethereum_wrapper\&.EthereumWrapper\&.compile_source_file ( self,  file_path)"
+
+.PP
+.nf
+Compile a Solidity contract file and returns contract instance object.
+
+Parameters:
+file_path    Path to Solidity contract file
+
+Returns:
+Solidity contract instance object.
+
+.fi
+.PP
+ 
+.SS "def avalon_sdk\&.connector\&.blockchains\&.ethereum\&.ethereum_wrapper\&.EthereumWrapper\&.deploy_contract ( self,  contract_interface)"
+
+.PP
+.nf
+Deploys a Solidity contract to an Ethereum network identified by
+chain_id.
+
+Parameters:
+contract_interace  Solidity contract interface
+
+Returns:
+Solidity contract address.
+
+.fi
+.PP
+ 
+.SS "def avalon_sdk\&.connector\&.blockchains\&.ethereum\&.ethereum_wrapper\&.EthereumWrapper\&.execute_transaction ( self,  tx_dict)"
+
+.PP
+.nf
+Wrapper function to choose appropriate function to execute a
+transaction based on provider (Ropsten vs other).
+
+Parameters:
+tx_dict     Transaction to execute
+.fi
+.PP
+ 
+.SS "def avalon_sdk\&.connector\&.blockchains\&.ethereum\&.ethereum_wrapper\&.EthereumWrapper\&.execute_unsigned_transaction ( self,  tx_dict)"
+
+.PP
+.nf
+Send a transaction to be executed only with the account address,
+and wait for receipts.
+
+Parameters:
+tx_dict     Unsigned transaction to execute
+
+Returns:
+Transaction receipt on success or None on error.
+
+.fi
+.PP
+ 
+.SS "def avalon_sdk\&.connector\&.blockchains\&.ethereum\&.ethereum_wrapper\&.EthereumWrapper\&.get_account_address ( self)"
+
+.PP
+.nf
+Retrieve account address.
+.fi
+.PP
+ 
+.SS "def avalon_sdk\&.connector\&.blockchains\&.ethereum\&.ethereum_wrapper\&.EthereumWrapper\&.get_bytes_from_hex ( self,  hex_str)"
+
+.PP
+.nf
+Convert a hex string to bytes.
+
+.fi
+.PP
+ 
+.SS "def avalon_sdk\&.connector\&.blockchains\&.ethereum\&.ethereum_wrapper\&.EthereumWrapper\&.get_chain_id ( self)"
+
+.PP
+.nf
+Retrieve chain ID.
+.fi
+.PP
+ 
+.SS "def avalon_sdk\&.connector\&.blockchains\&.ethereum\&.ethereum_wrapper\&.EthereumWrapper\&.get_contract_instance ( self,  contract_file_name,  contract_address)"
+
+.PP
+.nf
+This function returns two contract instances.
+The first is meant for committing transactions or reading from
+a blockchain.
+The second one is specifically meant for event listening.
+
+Parameters:
+contract_file_name  Contract filename
+contract_address    Ethereum contract address
+
+Returns:
+Two contract instances as explained above.
+
+.fi
+.PP
+ 
+.SS "def avalon_sdk\&.connector\&.blockchains\&.ethereum\&.ethereum_wrapper\&.EthereumWrapper\&.get_contract_instance_from_json ( self,  json_file_name,  contract_address)"
+
+.PP
+.nf
+Return two contract instances from a JSON file.
+The first is meant for committing transactions or reading from
+a blockchain.
+The second one is specifically meant for event listening.
+
+Parameters:
+json_file_name    JSON filename
+contract_address  Ethereum contract address
+
+Returns:
+Two contract instances as explained above.
+
+.fi
+.PP
+ 
+.SS "def avalon_sdk\&.connector\&.blockchains\&.ethereum\&.ethereum_wrapper\&.EthereumWrapper\&.get_gas_limit ( self)"
+
+.PP
+.nf
+Retrieve gas limit.
+.fi
+.PP
+ 
+.SS "def avalon_sdk\&.connector\&.blockchains\&.ethereum\&.ethereum_wrapper\&.EthereumWrapper\&.get_gas_price ( self)"
+
+.PP
+.nf
+Retrieve gas price.
+.fi
+.PP
+ 
+.SS "def avalon_sdk\&.connector\&.blockchains\&.ethereum\&.ethereum_wrapper\&.EthereumWrapper\&.get_transaction_params ( self)"
+
+.PP
+.nf
+Construct a dictionary with required parameters
+to submit the transaction.
+Return dict containing chain id, gas, gas limit, and nonce.
+
+.fi
+.PP
+ 
+.SS "def avalon_sdk\&.connector\&.blockchains\&.ethereum\&.ethereum_wrapper\&.EthereumWrapper\&.get_txn_nonce ( self)"
+
+.PP
+.nf
+Return a transaction nonce. Derived from the transaction address.
+
+.fi
+.PP
+ 
+.SS "def avalon_sdk\&.connector\&.blockchains\&.ethereum\&.ethereum_wrapper\&.EthereumWrapper\&.sign_execute_raw_transaction ( self,  tx_dict)"
+
+.PP
+.nf
+Sign the raw transaction with a private key, send it,
+and wait for receipts.
+
+Parameters:
+tx_dict     Raw transaction to sign
+
+
+Returns:
+Transaction receipt on success or None on error.
+
+.fi
+.PP
+ 
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Hyperledger Avalon from the source code\&.

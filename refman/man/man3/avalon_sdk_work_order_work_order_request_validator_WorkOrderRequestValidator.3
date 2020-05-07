@@ -1,0 +1,85 @@
+.TH "avalon_sdk.work_order.work_order_request_validator.WorkOrderRequestValidator" 3 "Wed May 6 2020" "Version 0.5.0.dev1" "Hyperledger Avalon" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+avalon_sdk.work_order.work_order_request_validator.WorkOrderRequestValidator
+.SH SYNOPSIS
+.br
+.PP
+.SS "Public Member Functions"
+
+.in +1c
+.ti -1c
+.RI "def \fB__init__\fP (self)"
+.br
+.ti -1c
+.RI "def \fBvalidate_parameters\fP (self, params)"
+.br
+.ti -1c
+.RI "def \fBvalidate_data_format\fP (self, data)"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+
+.PP
+.nf
+WorkOrderRequestValidator validates work order requests
+for proper parameter fields and valid data formats.
+
+.fi
+.PP
+ 
+.SH "Constructor & Destructor Documentation"
+.PP 
+.SS "def avalon_sdk\&.work_order\&.work_order_request_validator\&.WorkOrderRequestValidator\&.__init__ ( self)"
+
+.PP
+.nf
+Initialize __param_key_map and __value_key_map,
+which are key-value pairs.
+The key is the field name and value is a boolean that
+indicates whether a field is mandatory (True) or optional (False).
+
+.fi
+.PP
+ 
+.SH "Member Function Documentation"
+.PP 
+.SS "def avalon_sdk\&.work_order\&.work_order_request_validator\&.WorkOrderRequestValidator\&.validate_data_format ( self,  data)"
+
+.PP
+.nf
+Validate data format of the params data field (inData or outData).
+
+Parameters:
+data    Data (inData or OutData)
+
+Returns:
+True and empty string on success and
+False and string with error message on failure.
+
+.fi
+.PP
+ 
+.SS "def avalon_sdk\&.work_order\&.work_order_request_validator\&.WorkOrderRequestValidator\&.validate_parameters ( self,  params)"
+
+.PP
+.nf
+Validate params dictionary for existence of
+fields and mandatory fields
+
+Parameters:
+params    Parameter dictionary to validate
+
+Returns:
+True and empty string on success and
+False and string with error message on failure.
+
+.fi
+.PP
+ 
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Hyperledger Avalon from the source code\&.

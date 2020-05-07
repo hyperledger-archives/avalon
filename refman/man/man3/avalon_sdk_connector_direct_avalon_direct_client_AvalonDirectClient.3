@@ -1,0 +1,104 @@
+.TH "avalon_sdk.connector.direct.avalon_direct_client.AvalonDirectClient" 3 "Wed May 6 2020" "Version 0.5.0.dev1" "Hyperledger Avalon" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+avalon_sdk.connector.direct.avalon_direct_client.AvalonDirectClient
+.SH SYNOPSIS
+.br
+.PP
+.SS "Public Member Functions"
+
+.in +1c
+.ti -1c
+.RI "def \fB__init__\fP (self, config_file=None, config=None)"
+.br
+.ti -1c
+.RI "def \fBget_worker_registry_list_instance\fP (self)"
+.br
+.ti -1c
+.RI "def \fBget_worker_registry_instance\fP (self)"
+.br
+.ti -1c
+.RI "def \fBget_work_order_instance\fP (self)"
+.br
+.ti -1c
+.RI "def \fBget_work_order_receipt_instance\fP (self)"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+
+.PP
+.nf
+This is class for the direct JSON RPC API client.
+It is used in the direct model.
+1. Worker registry list interacts with the blockchain; it is optional.
+2. Worker registry interacts with the JSON RPC listener.
+3. Work order interacts with the JSON RPC listener.
+4. Work order receipt interacts with the JSON RPC listener.
+
+.fi
+.PP
+ 
+.SH "Constructor & Destructor Documentation"
+.PP 
+.SS "def avalon_sdk\&.connector\&.direct\&.avalon_direct_client\&.AvalonDirectClient\&.__init__ ( self,  config_file = \fCNone\fP,  config = \fCNone\fP)"
+
+.PP
+.nf
+Parameters:
+config_file Optional configuration file path as a string
+config      Optional dictionary loaded from config_file
+
+Either one of config_file or config needs to be passed.
+If both are passed, then config takes precedence.
+
+.fi
+.PP
+ 
+.SH "Member Function Documentation"
+.PP 
+.SS "def avalon_sdk\&.connector\&.direct\&.avalon_direct_client\&.AvalonDirectClient\&.get_work_order_instance ( self)"
+
+.PP
+.nf
+Return the worker's instance of the work order.
+The work order interacts with the JSON RPC listener.
+
+.fi
+.PP
+ 
+.SS "def avalon_sdk\&.connector\&.direct\&.avalon_direct_client\&.AvalonDirectClient\&.get_work_order_receipt_instance ( self)"
+
+.PP
+.nf
+Return the worker's instance of the work order receipt.
+The work order receipt interacts with the JSON RPC listener.
+
+.fi
+.PP
+ 
+.SS "def avalon_sdk\&.connector\&.direct\&.avalon_direct_client\&.AvalonDirectClient\&.get_worker_registry_instance ( self)"
+
+.PP
+.nf
+Return the worker's instance of the registry.
+The registry interacts with the JSON RPC listener.
+
+.fi
+.PP
+ 
+.SS "def avalon_sdk\&.connector\&.direct\&.avalon_direct_client\&.AvalonDirectClient\&.get_worker_registry_list_instance ( self)"
+
+.PP
+.nf
+Return the worker's instance of the registry list.
+This list is optional and interacts with the blockchain.
+
+.fi
+.PP
+ 
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Hyperledger Avalon from the source code\&.

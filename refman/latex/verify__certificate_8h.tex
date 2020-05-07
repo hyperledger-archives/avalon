@@ -1,0 +1,33 @@
+\hypertarget{verify__certificate_8h}{}\section{/home/dano/git/avalon/common/cpp/crypto/verify\+\_\+certificate.h File Reference}
+\label{verify__certificate_8h}\index{/home/dano/git/avalon/common/cpp/crypto/verify\+\_\+certificate.\+h@{/home/dano/git/avalon/common/cpp/crypto/verify\+\_\+certificate.\+h}}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+bool \hyperlink{verify__certificate_8h_a4fbdfd48da69c795ef86dae3363a8b00}{verify\+\_\+certificate\+\_\+chain} (const char $\ast$cert\+\_\+pem, const char $\ast$ca\+\_\+cert\+\_\+pem)
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Avalon CA certification verification. 
+
+\subsection{Function Documentation}
+\mbox{\Hypertarget{verify__certificate_8h_a4fbdfd48da69c795ef86dae3363a8b00}\label{verify__certificate_8h_a4fbdfd48da69c795ef86dae3363a8b00}} 
+\index{verify\+\_\+certificate.\+h@{verify\+\_\+certificate.\+h}!verify\+\_\+certificate\+\_\+chain@{verify\+\_\+certificate\+\_\+chain}}
+\index{verify\+\_\+certificate\+\_\+chain@{verify\+\_\+certificate\+\_\+chain}!verify\+\_\+certificate.\+h@{verify\+\_\+certificate.\+h}}
+\subsubsection{\texorpdfstring{verify\+\_\+certificate\+\_\+chain()}{verify\_certificate\_chain()}}
+{\footnotesize\ttfamily bool verify\+\_\+certificate\+\_\+chain (\begin{DoxyParamCaption}\item[{const char $\ast$}]{cert\+\_\+pem,  }\item[{const char $\ast$}]{ca\+\_\+cert\+\_\+pem }\end{DoxyParamCaption})}
+
+Verifies certificate against CA certificate.
+
+Verify that cert\+\_\+pem is signed by CA, using CA certificate ca\+\_\+cert\+\_\+pem as a root of trust.
+
+
+\begin{DoxyParams}{Parameters}
+{\em cert\+\_\+pem} & X.\+509 Certificate to verify with B\+E\+G\+IN end B\+L\+O\+C\+KS and new lines \\
+\hline
+{\em ca\+\_\+cert\+\_\+pem} & CA Certificate (usually the I\+AS CA cert) with B\+E\+G\+IN end B\+L\+O\+C\+KS and new lines \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+true on success and false on failure. 
+\end{DoxyReturn}

@@ -1,0 +1,70 @@
+\hypertarget{sig__public__key_8cpp}{}\section{/home/dano/git/avalon/common/cpp/crypto/sig\+\_\+public\+\_\+key.cpp File Reference}
+\label{sig__public__key_8cpp}\index{/home/dano/git/avalon/common/cpp/crypto/sig\+\_\+public\+\_\+key.\+cpp@{/home/dano/git/avalon/common/cpp/crypto/sig\+\_\+public\+\_\+key.\+cpp}}
+{\ttfamily \#include $<$openssl/err.\+h$>$}\newline
+{\ttfamily \#include $<$openssl/pem.\+h$>$}\newline
+{\ttfamily \#include $<$openssl/rand.\+h$>$}\newline
+{\ttfamily \#include $<$openssl/sha.\+h$>$}\newline
+{\ttfamily \#include $<$algorithm$>$}\newline
+{\ttfamily \#include $<$memory$>$}\newline
+{\ttfamily \#include $<$vector$>$}\newline
+{\ttfamily \#include \char`\"{}base64.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}crypto\+\_\+shared.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}error.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}hex\+\_\+string.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}sig.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}sig\+\_\+private\+\_\+key.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}sig\+\_\+public\+\_\+key.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}t\+Sgx\+S\+S\+L\+\_\+api.\+h\char`\"{}}\newline
+Include dependency graph for sig\+\_\+public\+\_\+key.\+cpp\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{sig__public__key_8cpp__incl}
+\end{center}
+\end{figure}
+\subsection*{Typedefs}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{sig__public__key_8cpp_a2a440312fadd20cb03298943b235141b}\label{sig__public__key_8cpp_a2a440312fadd20cb03298943b235141b}} 
+typedef std\+::unique\+\_\+ptr$<$ B\+IO, void($\ast$)(B\+IO $\ast$)$>$ {\bfseries B\+I\+O\+\_\+ptr}
+\item 
+\mbox{\Hypertarget{sig__public__key_8cpp_a7fde640c0067af2e1073ac81e98a70fb}\label{sig__public__key_8cpp_a7fde640c0067af2e1073ac81e98a70fb}} 
+typedef std\+::unique\+\_\+ptr$<$ E\+V\+P\+\_\+\+C\+I\+P\+H\+E\+R\+\_\+\+C\+TX, void($\ast$)(E\+V\+P\+\_\+\+C\+I\+P\+H\+E\+R\+\_\+\+C\+TX $\ast$)$>$ {\bfseries C\+T\+X\+\_\+ptr}
+\item 
+\mbox{\Hypertarget{sig__public__key_8cpp_a65800bacd77b14717f226940805c0259}\label{sig__public__key_8cpp_a65800bacd77b14717f226940805c0259}} 
+typedef std\+::unique\+\_\+ptr$<$ B\+N\+\_\+\+C\+TX, void($\ast$)(B\+N\+\_\+\+C\+TX $\ast$)$>$ {\bfseries B\+N\+\_\+\+C\+T\+X\+\_\+ptr}
+\item 
+\mbox{\Hypertarget{sig__public__key_8cpp_ae6ad7240c30eea25fb77d0b2f75405b1}\label{sig__public__key_8cpp_ae6ad7240c30eea25fb77d0b2f75405b1}} 
+typedef std\+::unique\+\_\+ptr$<$ B\+I\+G\+N\+UM, void($\ast$)(B\+I\+G\+N\+UM $\ast$)$>$ {\bfseries B\+I\+G\+N\+U\+M\+\_\+ptr}
+\item 
+\mbox{\Hypertarget{sig__public__key_8cpp_a027e18d95ad8b69b0a12b0e6121161f4}\label{sig__public__key_8cpp_a027e18d95ad8b69b0a12b0e6121161f4}} 
+typedef std\+::unique\+\_\+ptr$<$ E\+C\+\_\+\+K\+EY, void($\ast$)(E\+C\+\_\+\+K\+EY $\ast$)$>$ {\bfseries E\+C\+\_\+\+K\+E\+Y\+\_\+ptr}
+\item 
+\mbox{\Hypertarget{sig__public__key_8cpp_a76e3788f71391ebaa16c8feadc4a63cf}\label{sig__public__key_8cpp_a76e3788f71391ebaa16c8feadc4a63cf}} 
+typedef std\+::unique\+\_\+ptr$<$ E\+C\+\_\+\+G\+R\+O\+UP, void($\ast$)(E\+C\+\_\+\+G\+R\+O\+UP $\ast$)$>$ {\bfseries E\+C\+\_\+\+G\+R\+O\+U\+P\+\_\+ptr}
+\item 
+\mbox{\Hypertarget{sig__public__key_8cpp_a2dd4525e27477f89f13482d3e3bf5d39}\label{sig__public__key_8cpp_a2dd4525e27477f89f13482d3e3bf5d39}} 
+typedef std\+::unique\+\_\+ptr$<$ E\+C\+\_\+\+P\+O\+I\+NT, void($\ast$)(E\+C\+\_\+\+P\+O\+I\+NT $\ast$)$>$ {\bfseries E\+C\+\_\+\+P\+O\+I\+N\+T\+\_\+ptr}
+\item 
+\mbox{\Hypertarget{sig__public__key_8cpp_a15799b77f0171655e2d8188633da786a}\label{sig__public__key_8cpp_a15799b77f0171655e2d8188633da786a}} 
+typedef std\+::unique\+\_\+ptr$<$ E\+C\+D\+S\+A\+\_\+\+S\+IG, void($\ast$)(E\+C\+D\+S\+A\+\_\+\+S\+IG $\ast$)$>$ {\bfseries E\+C\+D\+S\+A\+\_\+\+S\+I\+G\+\_\+ptr}
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+E\+C\+\_\+\+K\+EY $\ast$ \hyperlink{sig__public__key_8cpp_abe903e5eba0cdff18a82bcda8ef218a4}{deserialize\+E\+C\+D\+S\+A\+Public\+Key} (const std\+::string \&encoded)
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Avalon E\+C\+D\+SA signature public key serialization and verification functions. Used for Secp256k1. 
+
+\subsection{Function Documentation}
+\mbox{\Hypertarget{sig__public__key_8cpp_abe903e5eba0cdff18a82bcda8ef218a4}\label{sig__public__key_8cpp_abe903e5eba0cdff18a82bcda8ef218a4}} 
+\index{sig\+\_\+public\+\_\+key.\+cpp@{sig\+\_\+public\+\_\+key.\+cpp}!deserialize\+E\+C\+D\+S\+A\+Public\+Key@{deserialize\+E\+C\+D\+S\+A\+Public\+Key}}
+\index{deserialize\+E\+C\+D\+S\+A\+Public\+Key@{deserialize\+E\+C\+D\+S\+A\+Public\+Key}!sig\+\_\+public\+\_\+key.\+cpp@{sig\+\_\+public\+\_\+key.\+cpp}}
+\subsubsection{\texorpdfstring{deserialize\+E\+C\+D\+S\+A\+Public\+Key()}{deserializeECDSAPublicKey()}}
+{\footnotesize\ttfamily E\+C\+\_\+\+K\+EY$\ast$ deserialize\+E\+C\+D\+S\+A\+Public\+Key (\begin{DoxyParamCaption}\item[{const std\+::string \&}]{encoded }\end{DoxyParamCaption})}
+
+Utility function\+: deserialize E\+C\+D\+SA Public Key. Throws Runtime\+Error, Value\+Error. 

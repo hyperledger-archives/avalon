@@ -1,0 +1,106 @@
+.TH "avalon_sdk.connector.blockchains.fabric.event_listener.EventListener" 3 "Wed May 6 2020" "Version 0.5.0.dev1" "Hyperledger Avalon" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+avalon_sdk.connector.blockchains.fabric.event_listener.EventListener
+.SH SYNOPSIS
+.br
+.PP
+.PP
+Inherits \fBavalon_sdk\&.connector\&.blockchains\&.fabric\&.base\&.ClientBase\fP\&.
+.SS "Public Member Functions"
+
+.in +1c
+.ti -1c
+.RI "def \fB__init__\fP (self, profile, channel_name, org_name, peer_name, user_name)"
+.br
+.ti -1c
+.RI "def \fBhandler\fP (self)"
+.br
+.ti -1c
+.RI "def \fBhandler\fP (self, handler)"
+.br
+.ti -1c
+.RI "def \fBchaincode\fP (self)"
+.br
+.ti -1c
+.RI "def \fBchaincode\fP (self, chaincode)"
+.br
+.ti -1c
+.RI "def \fBevent\fP (self)"
+.br
+.ti -1c
+.RI "def \fBevent\fP (self, event)"
+.br
+.ti -1c
+.RI "def \fBconfig\fP (self)"
+.br
+.ti -1c
+.RI "def \fBconfig\fP (self, config)"
+.br
+.ti -1c
+.RI "def \fBstart_event_handling\fP (self)"
+.br
+.ti -1c
+.RI "def \fBstop_event_handling\fP (self, seconds=0)"
+.br
+.ti -1c
+.RI "def \fBget_single_event\fP (self)"
+.br
+.in -1c
+.SS "Additional Inherited Members"
+.SH "Detailed Description"
+.PP 
+
+.PP
+.nf
+Utility class to listen to Fabric block chain events.
+
+.fi
+.PP
+ 
+.SH "Member Function Documentation"
+.PP 
+.SS "def avalon_sdk\&.connector\&.blockchains\&.fabric\&.event_listener\&.EventListener\&.config ( self,  config)"
+
+.PP
+.nf
+Open configuration file named config.
+.fi
+.PP
+ 
+.SS "def avalon_sdk\&.connector\&.blockchains\&.fabric\&.event_listener\&.EventListener\&.get_single_event ( self)"
+
+.PP
+.nf
+Start event listener and listen for particular event.
+Once we got the particular event then unregister and
+close the event listenerhub.
+
+.fi
+.PP
+ 
+.SS "def avalon_sdk\&.connector\&.blockchains\&.fabric\&.event_listener\&.EventListener\&.start_event_handling ( self)"
+
+.PP
+.nf
+Start event listener and listen for events forever
+Only way to stop the event listener by calling
+stop_event_listener()
+
+.fi
+.PP
+ 
+.SS "def avalon_sdk\&.connector\&.blockchains\&.fabric\&.event_listener\&.EventListener\&.stop_event_handling ( self,  seconds = \fC0\fP)"
+
+.PP
+.nf
+Stop event listener.
+
+.fi
+.PP
+ 
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Hyperledger Avalon from the source code\&.

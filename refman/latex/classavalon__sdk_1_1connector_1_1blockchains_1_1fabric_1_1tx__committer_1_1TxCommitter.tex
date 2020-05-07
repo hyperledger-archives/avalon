@@ -1,0 +1,77 @@
+\hypertarget{classavalon__sdk_1_1connector_1_1blockchains_1_1fabric_1_1tx__committer_1_1TxCommitter}{}\section{avalon\+\_\+sdk.\+connector.\+blockchains.\+fabric.\+tx\+\_\+committer.\+Tx\+Committer Class Reference}
+\label{classavalon__sdk_1_1connector_1_1blockchains_1_1fabric_1_1tx__committer_1_1TxCommitter}\index{avalon\+\_\+sdk.\+connector.\+blockchains.\+fabric.\+tx\+\_\+committer.\+Tx\+Committer@{avalon\+\_\+sdk.\+connector.\+blockchains.\+fabric.\+tx\+\_\+committer.\+Tx\+Committer}}
+
+
+Inheritance diagram for avalon\+\_\+sdk.\+connector.\+blockchains.\+fabric.\+tx\+\_\+committer.\+Tx\+Committer\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=301pt]{classavalon__sdk_1_1connector_1_1blockchains_1_1fabric_1_1tx__committer_1_1TxCommitter__inherit__graph}
+\end{center}
+\end{figure}
+
+
+Collaboration diagram for avalon\+\_\+sdk.\+connector.\+blockchains.\+fabric.\+tx\+\_\+committer.\+Tx\+Committer\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=301pt]{classavalon__sdk_1_1connector_1_1blockchains_1_1fabric_1_1tx__committer_1_1TxCommitter__coll__graph}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+def \hyperlink{classavalon__sdk_1_1connector_1_1blockchains_1_1fabric_1_1tx__committer_1_1TxCommitter_ab3e1b584e4a3e7b0da792c8cd2c81fed}{cc\+\_\+invoke} (self, args, cc\+\_\+name, fcn, cc\+\_\+version, queryonly=False)
+\item 
+def \hyperlink{classavalon__sdk_1_1connector_1_1blockchains_1_1fabric_1_1tx__committer_1_1TxCommitter_a1e25ebd71d18d1b604d56cff3ac11c0b}{cc\+\_\+query} (self, args, cc\+\_\+name, fcn)
+\end{DoxyCompactItemize}
+\subsection*{Additional Inherited Members}
+
+
+\subsection{Detailed Description}
+\begin{DoxyVerb}Utility class to invoke Fabric chain code and query
+chain code.
+\end{DoxyVerb}
+ 
+
+\subsection{Member Function Documentation}
+\mbox{\Hypertarget{classavalon__sdk_1_1connector_1_1blockchains_1_1fabric_1_1tx__committer_1_1TxCommitter_ab3e1b584e4a3e7b0da792c8cd2c81fed}\label{classavalon__sdk_1_1connector_1_1blockchains_1_1fabric_1_1tx__committer_1_1TxCommitter_ab3e1b584e4a3e7b0da792c8cd2c81fed}} 
+\index{avalon\+\_\+sdk\+::connector\+::blockchains\+::fabric\+::tx\+\_\+committer\+::\+Tx\+Committer@{avalon\+\_\+sdk\+::connector\+::blockchains\+::fabric\+::tx\+\_\+committer\+::\+Tx\+Committer}!cc\+\_\+invoke@{cc\+\_\+invoke}}
+\index{cc\+\_\+invoke@{cc\+\_\+invoke}!avalon\+\_\+sdk\+::connector\+::blockchains\+::fabric\+::tx\+\_\+committer\+::\+Tx\+Committer@{avalon\+\_\+sdk\+::connector\+::blockchains\+::fabric\+::tx\+\_\+committer\+::\+Tx\+Committer}}
+\subsubsection{\texorpdfstring{cc\+\_\+invoke()}{cc\_invoke()}}
+{\footnotesize\ttfamily def avalon\+\_\+sdk.\+connector.\+blockchains.\+fabric.\+tx\+\_\+committer.\+Tx\+Committer.\+cc\+\_\+invoke (\begin{DoxyParamCaption}\item[{}]{self,  }\item[{}]{args,  }\item[{}]{cc\+\_\+name,  }\item[{}]{fcn,  }\item[{}]{cc\+\_\+version,  }\item[{}]{queryonly = {\ttfamily False} }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Invoke a chaincode method.
+
+Parameters:
+args       JSON RPC serialized data used as the
+   sole parameter to invoke the chaincode
+cc_name    chaincode name
+fcn        chaincode function name to be invoked
+cc_version chaincode version to be used
+queryonly  If the invocation does not result in ledger change,
+   queryonly should be set to True.
+   If the invocation does result in ledger change, it should
+   be set to False.
+\end{DoxyVerb}
+ \mbox{\Hypertarget{classavalon__sdk_1_1connector_1_1blockchains_1_1fabric_1_1tx__committer_1_1TxCommitter_a1e25ebd71d18d1b604d56cff3ac11c0b}\label{classavalon__sdk_1_1connector_1_1blockchains_1_1fabric_1_1tx__committer_1_1TxCommitter_a1e25ebd71d18d1b604d56cff3ac11c0b}} 
+\index{avalon\+\_\+sdk\+::connector\+::blockchains\+::fabric\+::tx\+\_\+committer\+::\+Tx\+Committer@{avalon\+\_\+sdk\+::connector\+::blockchains\+::fabric\+::tx\+\_\+committer\+::\+Tx\+Committer}!cc\+\_\+query@{cc\+\_\+query}}
+\index{cc\+\_\+query@{cc\+\_\+query}!avalon\+\_\+sdk\+::connector\+::blockchains\+::fabric\+::tx\+\_\+committer\+::\+Tx\+Committer@{avalon\+\_\+sdk\+::connector\+::blockchains\+::fabric\+::tx\+\_\+committer\+::\+Tx\+Committer}}
+\subsubsection{\texorpdfstring{cc\+\_\+query()}{cc\_query()}}
+{\footnotesize\ttfamily def avalon\+\_\+sdk.\+connector.\+blockchains.\+fabric.\+tx\+\_\+committer.\+Tx\+Committer.\+cc\+\_\+query (\begin{DoxyParamCaption}\item[{}]{self,  }\item[{}]{args,  }\item[{}]{cc\+\_\+name,  }\item[{}]{fcn }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Invoke a chaincode query method. If there is no query method from the
+chaincode, then this will fail.
+
+Parameters:
+args     Array of the strings used as the parameters to query method
+cc_name  Chaincode name
+fcn      Chaincode function name
+\end{DoxyVerb}
+ 
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/home/dano/git/avalon/sdk/avalon\+\_\+sdk/connector/blockchains/fabric/tx\+\_\+committer.\+py\end{DoxyCompactItemize}

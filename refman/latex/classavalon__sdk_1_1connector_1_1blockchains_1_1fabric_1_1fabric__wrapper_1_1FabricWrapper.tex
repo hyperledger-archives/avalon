@@ -1,0 +1,77 @@
+\hypertarget{classavalon__sdk_1_1connector_1_1blockchains_1_1fabric_1_1fabric__wrapper_1_1FabricWrapper}{}\section{avalon\+\_\+sdk.\+connector.\+blockchains.\+fabric.\+fabric\+\_\+wrapper.\+Fabric\+Wrapper Class Reference}
+\label{classavalon__sdk_1_1connector_1_1blockchains_1_1fabric_1_1fabric__wrapper_1_1FabricWrapper}\index{avalon\+\_\+sdk.\+connector.\+blockchains.\+fabric.\+fabric\+\_\+wrapper.\+Fabric\+Wrapper@{avalon\+\_\+sdk.\+connector.\+blockchains.\+fabric.\+fabric\+\_\+wrapper.\+Fabric\+Wrapper}}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+def \hyperlink{classavalon__sdk_1_1connector_1_1blockchains_1_1fabric_1_1fabric__wrapper_1_1FabricWrapper_a616ad715f256cdf8474fbddf9cd10fcb}{\+\_\+\+\_\+init\+\_\+\+\_\+} (self, config)
+\item 
+def \hyperlink{classavalon__sdk_1_1connector_1_1blockchains_1_1fabric_1_1fabric__wrapper_1_1FabricWrapper_a41077495e7368ce960a363f95ec94428}{invoke\+\_\+chaincode} (self, chaincode\+\_\+name, method\+\_\+name, params)
+\item 
+def \hyperlink{classavalon__sdk_1_1connector_1_1blockchains_1_1fabric_1_1fabric__wrapper_1_1FabricWrapper_a69bdaf137351a40465f1b4ab8e506554}{get\+\_\+event\+\_\+handler} (self, event\+\_\+name, chain\+\_\+code, handler\+\_\+func)
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+\begin{DoxyVerb}Fabric wrapper class to interact with Fabric blockchain.
+It provides wrapper functions to invoke and query chain code.
+\end{DoxyVerb}
+ 
+
+\subsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classavalon__sdk_1_1connector_1_1blockchains_1_1fabric_1_1fabric__wrapper_1_1FabricWrapper_a616ad715f256cdf8474fbddf9cd10fcb}\label{classavalon__sdk_1_1connector_1_1blockchains_1_1fabric_1_1fabric__wrapper_1_1FabricWrapper_a616ad715f256cdf8474fbddf9cd10fcb}} 
+\index{avalon\+\_\+sdk\+::connector\+::blockchains\+::fabric\+::fabric\+\_\+wrapper\+::\+Fabric\+Wrapper@{avalon\+\_\+sdk\+::connector\+::blockchains\+::fabric\+::fabric\+\_\+wrapper\+::\+Fabric\+Wrapper}!\+\_\+\+\_\+init\+\_\+\+\_\+@{\+\_\+\+\_\+init\+\_\+\+\_\+}}
+\index{\+\_\+\+\_\+init\+\_\+\+\_\+@{\+\_\+\+\_\+init\+\_\+\+\_\+}!avalon\+\_\+sdk\+::connector\+::blockchains\+::fabric\+::fabric\+\_\+wrapper\+::\+Fabric\+Wrapper@{avalon\+\_\+sdk\+::connector\+::blockchains\+::fabric\+::fabric\+\_\+wrapper\+::\+Fabric\+Wrapper}}
+\subsubsection{\texorpdfstring{\+\_\+\+\_\+init\+\_\+\+\_\+()}{\_\_init\_\_()}}
+{\footnotesize\ttfamily def avalon\+\_\+sdk.\+connector.\+blockchains.\+fabric.\+fabric\+\_\+wrapper.\+Fabric\+Wrapper.\+\_\+\+\_\+init\+\_\+\+\_\+ (\begin{DoxyParamCaption}\item[{}]{self,  }\item[{}]{config }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Constructor to initialize wrapper with required parameter.
+
+Parameters:
+config    Dictionary containing parameters for Fabric.
+  These parameters are read from a .toml file
+\end{DoxyVerb}
+ 
+
+\subsection{Member Function Documentation}
+\mbox{\Hypertarget{classavalon__sdk_1_1connector_1_1blockchains_1_1fabric_1_1fabric__wrapper_1_1FabricWrapper_a69bdaf137351a40465f1b4ab8e506554}\label{classavalon__sdk_1_1connector_1_1blockchains_1_1fabric_1_1fabric__wrapper_1_1FabricWrapper_a69bdaf137351a40465f1b4ab8e506554}} 
+\index{avalon\+\_\+sdk\+::connector\+::blockchains\+::fabric\+::fabric\+\_\+wrapper\+::\+Fabric\+Wrapper@{avalon\+\_\+sdk\+::connector\+::blockchains\+::fabric\+::fabric\+\_\+wrapper\+::\+Fabric\+Wrapper}!get\+\_\+event\+\_\+handler@{get\+\_\+event\+\_\+handler}}
+\index{get\+\_\+event\+\_\+handler@{get\+\_\+event\+\_\+handler}!avalon\+\_\+sdk\+::connector\+::blockchains\+::fabric\+::fabric\+\_\+wrapper\+::\+Fabric\+Wrapper@{avalon\+\_\+sdk\+::connector\+::blockchains\+::fabric\+::fabric\+\_\+wrapper\+::\+Fabric\+Wrapper}}
+\subsubsection{\texorpdfstring{get\+\_\+event\+\_\+handler()}{get\_event\_handler()}}
+{\footnotesize\ttfamily def avalon\+\_\+sdk.\+connector.\+blockchains.\+fabric.\+fabric\+\_\+wrapper.\+Fabric\+Wrapper.\+get\+\_\+event\+\_\+handler (\begin{DoxyParamCaption}\item[{}]{self,  }\item[{}]{event\+\_\+name,  }\item[{}]{chain\+\_\+code,  }\item[{}]{handler\+\_\+func }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Create event handler object.
+
+Parameters:
+event_name   String to identify the event name
+chain_code   Chain code name as string
+handler_func Callback function name
+
+Returns:
+Event object
+\end{DoxyVerb}
+ \mbox{\Hypertarget{classavalon__sdk_1_1connector_1_1blockchains_1_1fabric_1_1fabric__wrapper_1_1FabricWrapper_a41077495e7368ce960a363f95ec94428}\label{classavalon__sdk_1_1connector_1_1blockchains_1_1fabric_1_1fabric__wrapper_1_1FabricWrapper_a41077495e7368ce960a363f95ec94428}} 
+\index{avalon\+\_\+sdk\+::connector\+::blockchains\+::fabric\+::fabric\+\_\+wrapper\+::\+Fabric\+Wrapper@{avalon\+\_\+sdk\+::connector\+::blockchains\+::fabric\+::fabric\+\_\+wrapper\+::\+Fabric\+Wrapper}!invoke\+\_\+chaincode@{invoke\+\_\+chaincode}}
+\index{invoke\+\_\+chaincode@{invoke\+\_\+chaincode}!avalon\+\_\+sdk\+::connector\+::blockchains\+::fabric\+::fabric\+\_\+wrapper\+::\+Fabric\+Wrapper@{avalon\+\_\+sdk\+::connector\+::blockchains\+::fabric\+::fabric\+\_\+wrapper\+::\+Fabric\+Wrapper}}
+\subsubsection{\texorpdfstring{invoke\+\_\+chaincode()}{invoke\_chaincode()}}
+{\footnotesize\ttfamily def avalon\+\_\+sdk.\+connector.\+blockchains.\+fabric.\+fabric\+\_\+wrapper.\+Fabric\+Wrapper.\+invoke\+\_\+chaincode (\begin{DoxyParamCaption}\item[{}]{self,  }\item[{}]{chaincode\+\_\+name,  }\item[{}]{method\+\_\+name,  }\item[{}]{params }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}This is wrapper method to invoke chain code.
+
+Parameters:
+chaincode_name Name of the chain code
+method_name    Chain code method name
+params         List of arguments to method
+
+Returns:
+If the call to chain code query, then it
+returns the payload of the chain code response
+on success or None on error.
+If the call is invoking chain code, then it
+returns ContractResponse.SUCCESS on success
+and ContractResponse.ERROR on failure.
+\end{DoxyVerb}
+ 
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/home/dano/git/avalon/sdk/avalon\+\_\+sdk/connector/blockchains/fabric/fabric\+\_\+wrapper.\+py\end{DoxyCompactItemize}

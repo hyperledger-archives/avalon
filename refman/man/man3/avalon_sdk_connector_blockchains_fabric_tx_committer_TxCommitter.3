@@ -1,0 +1,73 @@
+.TH "avalon_sdk.connector.blockchains.fabric.tx_committer.TxCommitter" 3 "Wed May 6 2020" "Version 0.5.0.dev1" "Hyperledger Avalon" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+avalon_sdk.connector.blockchains.fabric.tx_committer.TxCommitter
+.SH SYNOPSIS
+.br
+.PP
+.PP
+Inherits \fBavalon_sdk\&.connector\&.blockchains\&.fabric\&.base\&.ClientBase\fP\&.
+.SS "Public Member Functions"
+
+.in +1c
+.ti -1c
+.RI "def \fBcc_invoke\fP (self, args, cc_name, fcn, cc_version, queryonly=False)"
+.br
+.ti -1c
+.RI "def \fBcc_query\fP (self, args, cc_name, fcn)"
+.br
+.in -1c
+.SS "Additional Inherited Members"
+.SH "Detailed Description"
+.PP 
+
+.PP
+.nf
+Utility class to invoke Fabric chain code and query
+chain code.
+
+.fi
+.PP
+ 
+.SH "Member Function Documentation"
+.PP 
+.SS "def avalon_sdk\&.connector\&.blockchains\&.fabric\&.tx_committer\&.TxCommitter\&.cc_invoke ( self,  args,  cc_name,  fcn,  cc_version,  queryonly = \fCFalse\fP)"
+
+.PP
+.nf
+Invoke a chaincode method.
+
+Parameters:
+args       JSON RPC serialized data used as the
+   sole parameter to invoke the chaincode
+cc_name    chaincode name
+fcn        chaincode function name to be invoked
+cc_version chaincode version to be used
+queryonly  If the invocation does not result in ledger change,
+   queryonly should be set to True.
+   If the invocation does result in ledger change, it should
+   be set to False.
+
+.fi
+.PP
+ 
+.SS "def avalon_sdk\&.connector\&.blockchains\&.fabric\&.tx_committer\&.TxCommitter\&.cc_query ( self,  args,  cc_name,  fcn)"
+
+.PP
+.nf
+Invoke a chaincode query method. If there is no query method from the
+chaincode, then this will fail.
+
+Parameters:
+args     Array of the strings used as the parameters to query method
+cc_name  Chaincode name
+fcn      Chaincode function name
+
+.fi
+.PP
+ 
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Hyperledger Avalon from the source code\&.

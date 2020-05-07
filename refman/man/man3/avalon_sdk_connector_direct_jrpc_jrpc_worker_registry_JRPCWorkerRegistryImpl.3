@@ -1,0 +1,195 @@
+.TH "avalon_sdk.connector.direct.jrpc.jrpc_worker_registry.JRPCWorkerRegistryImpl" 3 "Wed May 6 2020" "Version 0.5.0.dev1" "Hyperledger Avalon" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+avalon_sdk.connector.direct.jrpc.jrpc_worker_registry.JRPCWorkerRegistryImpl
+.SH SYNOPSIS
+.br
+.PP
+.PP
+Inherits WorkerRegistry\&.
+.SS "Public Member Functions"
+
+.in +1c
+.ti -1c
+.RI "def \fB__init__\fP (self, config)"
+.br
+.ti -1c
+.RI "def \fBworker_retrieve\fP (self, worker_id, id=None)"
+.br
+.ti -1c
+.RI "def \fBworker_lookup\fP (self, worker_type=None, organization_id=None, application_type_id=None, id=None)"
+.br
+.ti -1c
+.RI "def \fBworker_lookup_next\fP (self, lookup_tag, worker_type=None, organization_id=None, application_type_id=None, id=None)"
+.br
+.ti -1c
+.RI "def \fBworker_register\fP (self, worker_id, worker_type, org_id, application_type_ids, details, id=None)"
+.br
+.ti -1c
+.RI "def \fBworker_update\fP (self, worker_id, details, id=None)"
+.br
+.ti -1c
+.RI "def \fBworker_set_status\fP (self, worker_id, status, id=None)"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+
+.PP
+.nf
+This class is to read the worker registry to get the more details
+of worker.
+
+.fi
+.PP
+ 
+.SH "Member Function Documentation"
+.PP 
+.SS "def avalon_sdk\&.connector\&.direct\&.jrpc\&.jrpc_worker_registry\&.JRPCWorkerRegistryImpl\&.worker_lookup ( self,  worker_type = \fCNone\fP,  organization_id = \fCNone\fP,  application_type_id = \fCNone\fP,  id = \fCNone\fP)"
+
+.PP
+.nf
+Worker lookup based on worker type, organization ID,
+and application ID.
+All fields are optional and, if present, condition should match for
+all fields. If none are passed it should return all workers.
+
+Parameters:
+worker_type         Optional characteristic of Workers for which you
+            may wish to search. Currently defined types are:
+            * "TEE-SGX": an Intel SGX Trusted Execution
+              Environment
+            * "MPC": Multi-Party Compute
+            * "ZK": Zero-Knowledge
+organization_id     Optional parameter representing the
+            organization that hosts the Worker,
+            e.g. a bank in the consortium or
+            anonymous entity
+application_type_id Optional application type that has to be supported
+            by the worker
+id                  Optional Optional JSON RPC request ID
+
+
+Returns:
+JRPC response containing number of workers,
+lookup tag, and list of worker IDs.
+
+.fi
+.PP
+ 
+.SS "def avalon_sdk\&.connector\&.direct\&.jrpc\&.jrpc_worker_registry\&.JRPCWorkerRegistryImpl\&.worker_lookup_next ( self,  lookup_tag,  worker_type = \fCNone\fP,  organization_id = \fCNone\fP,  application_type_id = \fCNone\fP,  id = \fCNone\fP)"
+
+.PP
+.nf
+Retrieve subsequent Worker lookup results based on worker type,
+organization ID, and application ID.
+Similar to workerLookUp with additional parameter lookup_tag.
+
+Parameters:
+lookup_tag          Used to lookup subsequent results after calling
+            worker_lookup
+worker_type         Optional characteristic of Workers for which you
+            may wish to search. Currently defined types are:
+            * "TEE-SGX": an Intel SGX Trusted Execution
+              Environment
+            * "MPC": Multi-Party Compute
+            * "ZK": Zero-Knowledge
+organization_id     Optional parameter representing the
+            organization that hosts the Worker,
+            e.g. a bank in the consortium or
+            anonymous entity
+application_type_id Optional application type that has to be supported
+            by the worker
+id                  Optional Optional JSON RPC request ID
+
+Returns:
+JRPC response containing number of workers,
+lookup tag, and list of worker IDs.
+
+.fi
+.PP
+ 
+.SS "def avalon_sdk\&.connector\&.direct\&.jrpc\&.jrpc_worker_registry\&.JRPCWorkerRegistryImpl\&.worker_register ( self,  worker_id,  worker_type,  org_id,  application_type_ids,  details,  id = \fCNone\fP)"
+
+.PP
+.nf
+Adds worker details to registry
+
+Parameters:
+worker_id            Worker ID value derived from the worker's DID
+worker_type          Type of Worker. Currently defined types are:
+             * "TEE-SGX": an Intel SGX Trusted Execution
+               Environment
+             * "MPC": Multi-Party Compute
+             * "ZK": Zero-Knowledge
+org_id               Organization that hosts the Worker,
+             e.g. a bank in the consortium or
+             anonymous entity
+application_type_ids Application types supported by the worker
+id                   Optional JSON RPC request ID
+
+Returns:
+JRPC response with worker registry status.
+
+.fi
+.PP
+ 
+.SS "def avalon_sdk\&.connector\&.direct\&.jrpc\&.jrpc_worker_registry\&.JRPCWorkerRegistryImpl\&.worker_retrieve ( self,  worker_id,  id = \fCNone\fP)"
+
+.PP
+.nf
+Retrieve the worker identified by worker ID.
+
+Parameters:
+worker_id Worker ID value derived from the worker's DID
+id        Optional Optional JSON RPC request ID
+
+Returns:
+JRPC response containing:
+organization ID, application ID, worker status,
+and worker details.
+
+.fi
+.PP
+ 
+.SS "def avalon_sdk\&.connector\&.direct\&.jrpc\&.jrpc_worker_registry\&.JRPCWorkerRegistryImpl\&.worker_set_status ( self,  worker_id,  status,  id = \fCNone\fP)"
+
+.PP
+.nf
+Set the worker status to active, offline,
+decommissioned, or compromised state.
+
+Parameters:
+worker_id  Worker ID value derived from the worker's DID
+status     Worker status value to set
+id         Optional JSON RPC request ID
+
+Returns:
+JRPC response with status.
+
+.fi
+.PP
+ 
+.SS "def avalon_sdk\&.connector\&.direct\&.jrpc\&.jrpc_worker_registry\&.JRPCWorkerRegistryImpl\&.worker_update ( self,  worker_id,  details,  id = \fCNone\fP)"
+
+.PP
+.nf
+Update worker with new information.
+
+Parameters:
+worker_id Worker ID value derived from the worker's DID
+details   Detailed information about the worker in
+  JSON RPC format as defined in
+id        Optional JSON RPC request ID
+
+Returns:
+JRPC response with update status.
+
+.fi
+.PP
+ 
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Hyperledger Avalon from the source code\&.

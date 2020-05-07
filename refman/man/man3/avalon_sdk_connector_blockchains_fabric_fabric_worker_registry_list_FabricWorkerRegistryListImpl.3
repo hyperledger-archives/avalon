@@ -1,0 +1,229 @@
+.TH "avalon_sdk.connector.blockchains.fabric.fabric_worker_registry_list.FabricWorkerRegistryListImpl" 3 "Wed May 6 2020" "Version 0.5.0.dev1" "Hyperledger Avalon" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+avalon_sdk.connector.blockchains.fabric.fabric_worker_registry_list.FabricWorkerRegistryListImpl
+.SH SYNOPSIS
+.br
+.PP
+.PP
+Inherits WorkerRegistryList\&.
+.SS "Public Member Functions"
+
+.in +1c
+.ti -1c
+.RI "def \fB__init__\fP (self, config)"
+.br
+.ti -1c
+.RI "def \fBregistry_lookup\fP (self, app_type_id=None)"
+.br
+.ti -1c
+.RI "def \fBregistry_retrieve\fP (self, org_id)"
+.br
+.ti -1c
+.RI "def \fBregistry_lookup_next\fP (self, app_type_id, lookup_tag)"
+.br
+.ti -1c
+.RI "def \fBregistry_add\fP (self, org_id, uri, sc_addr, app_type_ids)"
+.br
+.ti -1c
+.RI "def \fBregistry_update\fP (self, org_id, uri, sc_addr, app_type_ids)"
+.br
+.ti -1c
+.RI "def \fBregistry_set_status\fP (self, org_id, status)"
+.br
+.in -1c
+.SS "Public Attributes"
+
+.in +1c
+.ti -1c
+.RI "\fBCHAIN_CODE\fP"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+
+.PP
+.nf
+This class provide APIs to read/write registry entries of workers,
+which is stored in the Hyperledger Fabric blockchain.
+
+.fi
+.PP
+ 
+.SH "Constructor & Destructor Documentation"
+.PP 
+.SS "def avalon_sdk\&.connector\&.blockchains\&.fabric\&.fabric_worker_registry_list\&.FabricWorkerRegistryListImpl\&.__init__ ( self,  config)"
+
+.PP
+.nf
+Parameters:
+config    Dictionary containing Fabric-specific parameters.
+
+.fi
+.PP
+ 
+.SH "Member Function Documentation"
+.PP 
+.SS "def avalon_sdk\&.connector\&.blockchains\&.fabric\&.fabric_worker_registry_list\&.FabricWorkerRegistryListImpl\&.registry_add ( self,  org_id,  uri,  sc_addr,  app_type_ids)"
+
+.PP
+.nf
+Add a new registry.
+
+Parameters:
+org_id       bytes[] identifies organization that hosts the
+     registry, e.g. a bank in the consortium or an
+     anonymous entity
+uri          String defining a URI for this registry that
+     supports the Off-Chain Worker Registry
+     JSON RPC API
+sc_addr      bytes[] defines a Fabric chain code name that
+     runs the Worker Registry Smart Contract API
+     smart contract for this registry
+app_type_ids []bytes[] is an optional parameter that defines
+     application types supported by the worker
+     managed by the registry
+
+Returns:
+Transaction receipt on success or None on error.
+
+.fi
+.PP
+ 
+.SS "def avalon_sdk\&.connector\&.blockchains\&.fabric\&.fabric_worker_registry_list\&.FabricWorkerRegistryListImpl\&.registry_lookup ( self,  app_type_id = \fCNone\fP)"
+
+.PP
+.nf
+Registry Lookup identified by application type ID
+
+Parameters:
+app_type_id  Application type ID to lookup in the registry
+
+Returns:
+Tuple containing totalCount, lookupTag, and ids on success:
+totalCount Total number of entries matching a specified lookup
+   criteria. If this number is larger than the size of the
+   ids array, the caller should use the lookupTag to call
+   registry_lookup_next to retrieve the rest of the IDs
+lookupTag  Optional parameter. If it is returned, it means that
+   there are more matching registry IDs that can be
+   retrieved by calling the function registry_lookup_next
+   with this tag as an input parameter.
+ids        Array of the registry organization ids that match the
+   input parameters.
+
+Returns None on error.
+
+.fi
+.PP
+ 
+.SS "def avalon_sdk\&.connector\&.blockchains\&.fabric\&.fabric_worker_registry_list\&.FabricWorkerRegistryListImpl\&.registry_lookup_next ( self,  app_type_id,  lookup_tag)"
+
+.PP
+.nf
+Get additional registry lookup results.
+This function is called to retrieve additional results of the
+Registry lookup initiated by the registry_lookup call.
+
+Parameters:
+app_type_id    Application type ID that has to be
+       supported by the workers retrieved
+lookup_tag     Returned by a previous call to either this function
+       or to registry_lookup
+
+Returns:
+Outputs a tuple on success containing the following:
+total_count    Total number of entries matching the lookup
+       criteria. If this number is larger than the number
+       of IDs returned so far, the caller should use
+       lookup_tag to call registry_lookup_next to
+       retrieve the rest of the IDs
+new_lookup_tag is an optional parameter. If it is returned, it means
+       that there are more matching registry IDs that can be
+       retrieved by calling this function again with this tag
+       as an input parameter
+ids            Array of the registry IDs that match the input
+       parameters
+
+Returns None on error.
+
+.fi
+.PP
+ 
+.SS "def avalon_sdk\&.connector\&.blockchains\&.fabric\&.fabric_worker_registry_list\&.FabricWorkerRegistryListImpl\&.registry_retrieve ( self,  org_id)"
+
+.PP
+.nf
+Retrieve registry information identified by the organization ID.
+
+Parameters:
+org_id                Organization ID to lookup
+
+Returns:
+Tuple containing following on success:
+uri                  String defines a URI for this registry that
+             supports the Off-Chain Worker Registry JSON RPC
+             API. It will be None for the proxy model
+sc_addr              Fabric address for worker registry
+             smart contract address
+application_type_ids List of application ids (array of byte[])
+status               Status of the registry
+
+Returns None on error.
+
+.fi
+.PP
+ 
+.SS "def avalon_sdk\&.connector\&.blockchains\&.fabric\&.fabric_worker_registry_list\&.FabricWorkerRegistryListImpl\&.registry_set_status ( self,  org_id,  status)"
+
+.PP
+.nf
+Set registry status.
+
+Parameters:
+org_id  bytes[] identifies organization that hosts the
+registry, e.g. a bank in the consortium or an
+anonymous entity
+status  Defines the registry status to set.
+The currently defined values are:
+1 - the registry is active
+2 - the registry is temporarily "off-line"
+3 - the registry is decommissioned
+
+Returns:
+Transaction receipt on success or None on error.
+
+.fi
+.PP
+ 
+.SS "def avalon_sdk\&.connector\&.blockchains\&.fabric\&.fabric_worker_registry_list\&.FabricWorkerRegistryListImpl\&.registry_update ( self,  org_id,  uri,  sc_addr,  app_type_ids)"
+
+.PP
+.nf
+Update a registry.
+
+Parameters:
+org_id       bytes[] identifies organization that hosts the
+     registry, e.g. a bank in the consortium or an
+     anonymous entity
+uri          string that defines a URI for this registry that
+     supports the Off-Chain Worker Registry
+     JSON RPC API
+sc_addr      bytes[] defines a Fabric chain code name that
+     runs the Worker Registry Smart Contract API
+     smart contract for this registry
+app_type_ids []bytes[] is an optional parameter that defines
+     application types supported by the worker
+     managed by the registry
+
+Returns:
+Transaction receipt on success or None on error.
+
+.fi
+.PP
+ 
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Hyperledger Avalon from the source code\&.

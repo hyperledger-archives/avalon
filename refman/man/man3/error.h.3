@@ -1,0 +1,74 @@
+.TH "/home/dano/git/avalon/common/cpp/error.h" 3 "Wed May 6 2020" "Version 0.5.0.dev1" "Hyperledger Avalon" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+/home/dano/git/avalon/common/cpp/error.h
+.SH SYNOPSIS
+.br
+.PP
+\fC#include <stdexcept>\fP
+.br
+\fC#include <string>\fP
+.br
+\fC#include 'tcf_error\&.h'\fP
+.br
+
+.SS "Classes"
+
+.in +1c
+.ti -1c
+.RI "class \fBtcf::error::Error\fP"
+.br
+.ti -1c
+.RI "class \fBtcf::error::CryptoError\fP"
+.br
+.ti -1c
+.RI "class \fBtcf::error::MemoryError\fP"
+.br
+.ti -1c
+.RI "class \fBtcf::error::IOError\fP"
+.br
+.ti -1c
+.RI "class \fBtcf::error::RuntimeError\fP"
+.br
+.ti -1c
+.RI "class \fBtcf::error::IndexError\fP"
+.br
+.ti -1c
+.RI "class \fBtcf::error::DivisionByZero\fP"
+.br
+.ti -1c
+.RI "class \fBtcf::error::OverflowError\fP"
+.br
+.ti -1c
+.RI "class \fBtcf::error::ValueError\fP"
+.br
+.ti -1c
+.RI "class \fBtcf::error::SystemError\fP"
+.br
+.ti -1c
+.RI "class \fBtcf::error::SystemBusyError\fP"
+.br
+.ti -1c
+.RI "class \fBtcf::error::WorkloadError\fP"
+.br
+.ti -1c
+.RI "class \fBtcf::error::UnknownError\fP"
+.br
+.in -1c
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "template<typename PointerType > void \fBtcf::error::ThrowIfNull\fP (const PointerType ptr, const char *msg=nullptr)"
+.br
+.ti -1c
+.RI "template<typename except > void \fBtcf::error::ThrowIf\fP (bool condition, const char *msg)"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+Avalon error and exception handling functions\&. Namespace tcf::error 
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Hyperledger Avalon from the source code\&.

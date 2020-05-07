@@ -1,0 +1,231 @@
+\hypertarget{classavalon__sdk_1_1connector_1_1blockchains_1_1ethereum_1_1ethereum__worker__registry_1_1EthereumWorkerRegistryImpl}{}\section{avalon\+\_\+sdk.\+connector.\+blockchains.\+ethereum.\+ethereum\+\_\+worker\+\_\+registry.\+Ethereum\+Worker\+Registry\+Impl Class Reference}
+\label{classavalon__sdk_1_1connector_1_1blockchains_1_1ethereum_1_1ethereum__worker__registry_1_1EthereumWorkerRegistryImpl}\index{avalon\+\_\+sdk.\+connector.\+blockchains.\+ethereum.\+ethereum\+\_\+worker\+\_\+registry.\+Ethereum\+Worker\+Registry\+Impl@{avalon\+\_\+sdk.\+connector.\+blockchains.\+ethereum.\+ethereum\+\_\+worker\+\_\+registry.\+Ethereum\+Worker\+Registry\+Impl}}
+
+
+Inheritance diagram for avalon\+\_\+sdk.\+connector.\+blockchains.\+ethereum.\+ethereum\+\_\+worker\+\_\+registry.\+Ethereum\+Worker\+Registry\+Impl\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=334pt]{classavalon__sdk_1_1connector_1_1blockchains_1_1ethereum_1_1ethereum__worker__registry_1_1Ethere4f82d622da85f612c335f45b9dd4e959}
+\end{center}
+\end{figure}
+
+
+Collaboration diagram for avalon\+\_\+sdk.\+connector.\+blockchains.\+ethereum.\+ethereum\+\_\+worker\+\_\+registry.\+Ethereum\+Worker\+Registry\+Impl\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=334pt]{classavalon__sdk_1_1connector_1_1blockchains_1_1ethereum_1_1ethereum__worker__registry_1_1Ethere270aad7ca887854585e488c849900cc6}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+def \hyperlink{classavalon__sdk_1_1connector_1_1blockchains_1_1ethereum_1_1ethereum__worker__registry_1_1EthereumWorkerRegistryImpl_a79413054b91cb2ac4f4f84f9d71164b9}{\+\_\+\+\_\+init\+\_\+\+\_\+} (self, config)
+\item 
+def \hyperlink{classavalon__sdk_1_1connector_1_1blockchains_1_1ethereum_1_1ethereum__worker__registry_1_1EthereumWorkerRegistryImpl_aabc41cb244ef33226ccaaecb6a84e090}{worker\+\_\+lookup} (self, worker\+\_\+type, org\+\_\+id, application\+\_\+id, id=None)
+\item 
+def \hyperlink{classavalon__sdk_1_1connector_1_1blockchains_1_1ethereum_1_1ethereum__worker__registry_1_1EthereumWorkerRegistryImpl_ab220c1d0eaad1251422eabd0d5e77012}{worker\+\_\+retrieve} (self, worker\+\_\+id, id=None)
+\item 
+def \hyperlink{classavalon__sdk_1_1connector_1_1blockchains_1_1ethereum_1_1ethereum__worker__registry_1_1EthereumWorkerRegistryImpl_a6491ee03885089b8d6fcad548d233c8a}{worker\+\_\+lookup\+\_\+next} (self, worker\+\_\+type, org\+\_\+id, application\+\_\+id, lookup\+\_\+tag)
+\item 
+def \hyperlink{classavalon__sdk_1_1connector_1_1blockchains_1_1ethereum_1_1ethereum__worker__registry_1_1EthereumWorkerRegistryImpl_a2b7e710b8b613e1566918b13f1e85a65}{worker\+\_\+register} (self, worker\+\_\+id, worker\+\_\+type, organization\+\_\+id, application\+\_\+type\+\_\+ids, details)
+\item 
+def \hyperlink{classavalon__sdk_1_1connector_1_1blockchains_1_1ethereum_1_1ethereum__worker__registry_1_1EthereumWorkerRegistryImpl_a24004184828992ce6ad467362bb00ebf}{worker\+\_\+update} (self, worker\+\_\+id, details)
+\item 
+def \hyperlink{classavalon__sdk_1_1connector_1_1blockchains_1_1ethereum_1_1ethereum__worker__registry_1_1EthereumWorkerRegistryImpl_a66cd281d07d4dc1f16fb36e31321acb8}{worker\+\_\+set\+\_\+status} (self, worker\+\_\+id, status)
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+\begin{DoxyVerb}This class is sets and gets worker-related information to and from
+the Ethereum blockchain.
+Detailed method descriptions are available in the WorkerRegistry
+interfaces.
+\end{DoxyVerb}
+ 
+
+\subsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classavalon__sdk_1_1connector_1_1blockchains_1_1ethereum_1_1ethereum__worker__registry_1_1EthereumWorkerRegistryImpl_a79413054b91cb2ac4f4f84f9d71164b9}\label{classavalon__sdk_1_1connector_1_1blockchains_1_1ethereum_1_1ethereum__worker__registry_1_1EthereumWorkerRegistryImpl_a79413054b91cb2ac4f4f84f9d71164b9}} 
+\index{avalon\+\_\+sdk\+::connector\+::blockchains\+::ethereum\+::ethereum\+\_\+worker\+\_\+registry\+::\+Ethereum\+Worker\+Registry\+Impl@{avalon\+\_\+sdk\+::connector\+::blockchains\+::ethereum\+::ethereum\+\_\+worker\+\_\+registry\+::\+Ethereum\+Worker\+Registry\+Impl}!\+\_\+\+\_\+init\+\_\+\+\_\+@{\+\_\+\+\_\+init\+\_\+\+\_\+}}
+\index{\+\_\+\+\_\+init\+\_\+\+\_\+@{\+\_\+\+\_\+init\+\_\+\+\_\+}!avalon\+\_\+sdk\+::connector\+::blockchains\+::ethereum\+::ethereum\+\_\+worker\+\_\+registry\+::\+Ethereum\+Worker\+Registry\+Impl@{avalon\+\_\+sdk\+::connector\+::blockchains\+::ethereum\+::ethereum\+\_\+worker\+\_\+registry\+::\+Ethereum\+Worker\+Registry\+Impl}}
+\subsubsection{\texorpdfstring{\+\_\+\+\_\+init\+\_\+\+\_\+()}{\_\_init\_\_()}}
+{\footnotesize\ttfamily def avalon\+\_\+sdk.\+connector.\+blockchains.\+ethereum.\+ethereum\+\_\+worker\+\_\+registry.\+Ethereum\+Worker\+Registry\+Impl.\+\_\+\+\_\+init\+\_\+\+\_\+ (\begin{DoxyParamCaption}\item[{}]{self,  }\item[{}]{config }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Parameters:
+config    Dictionary containing Ethereum-specific parameters
+\end{DoxyVerb}
+ 
+
+\subsection{Member Function Documentation}
+\mbox{\Hypertarget{classavalon__sdk_1_1connector_1_1blockchains_1_1ethereum_1_1ethereum__worker__registry_1_1EthereumWorkerRegistryImpl_aabc41cb244ef33226ccaaecb6a84e090}\label{classavalon__sdk_1_1connector_1_1blockchains_1_1ethereum_1_1ethereum__worker__registry_1_1EthereumWorkerRegistryImpl_aabc41cb244ef33226ccaaecb6a84e090}} 
+\index{avalon\+\_\+sdk\+::connector\+::blockchains\+::ethereum\+::ethereum\+\_\+worker\+\_\+registry\+::\+Ethereum\+Worker\+Registry\+Impl@{avalon\+\_\+sdk\+::connector\+::blockchains\+::ethereum\+::ethereum\+\_\+worker\+\_\+registry\+::\+Ethereum\+Worker\+Registry\+Impl}!worker\+\_\+lookup@{worker\+\_\+lookup}}
+\index{worker\+\_\+lookup@{worker\+\_\+lookup}!avalon\+\_\+sdk\+::connector\+::blockchains\+::ethereum\+::ethereum\+\_\+worker\+\_\+registry\+::\+Ethereum\+Worker\+Registry\+Impl@{avalon\+\_\+sdk\+::connector\+::blockchains\+::ethereum\+::ethereum\+\_\+worker\+\_\+registry\+::\+Ethereum\+Worker\+Registry\+Impl}}
+\subsubsection{\texorpdfstring{worker\+\_\+lookup()}{worker\_lookup()}}
+{\footnotesize\ttfamily def avalon\+\_\+sdk.\+connector.\+blockchains.\+ethereum.\+ethereum\+\_\+worker\+\_\+registry.\+Ethereum\+Worker\+Registry\+Impl.\+worker\+\_\+lookup (\begin{DoxyParamCaption}\item[{}]{self,  }\item[{}]{worker\+\_\+type,  }\item[{}]{org\+\_\+id,  }\item[{}]{application\+\_\+id,  }\item[{}]{id = {\ttfamily None} }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Lookup a worker identified by worker_type, org_id, and application_id.
+All fields are optional and, if present, condition should match for
+all fields. If none are passed it should return all workers.
+
+If the list is too large to fit into a single response (the maximum
+number of entries in a single response is implementation specific),
+the smart contract should return the first batch of the results
+and provide a lookupTag that can be used by the caller to
+retrieve the next batch by calling worker_lookup_next.
+
+Parameters:
+worker_type    Optional characteristic of workers for which you may
+       wish to search
+org_id         Optional organization ID that can be used to search
+       for one or more workers that belong to this
+       organization
+application_id Optional application type ID that is supported by
+       the worker
+id             Optional JSON RPC request ID
+
+Returns:
+Tuple containing workers count, lookup tag, and list of
+worker IDs:
+total_count Total number of entries matching a specified
+    lookup criteria. If this number is larger than the
+    size of the IDs array, the caller should use
+    lookupTag to call worker_lookup_next to retrieve
+    the rest of the IDs
+lookup_tag  Optional parameter. If it is returned, it means
+    that there are more matching worker IDs, which can then
+    be retrieved by calling function worker_lookup_next
+    with this tag as an input parameter
+ids         Array of the worker IDs that match the input parameters
+
+On error returns None.
+\end{DoxyVerb}
+ \mbox{\Hypertarget{classavalon__sdk_1_1connector_1_1blockchains_1_1ethereum_1_1ethereum__worker__registry_1_1EthereumWorkerRegistryImpl_a6491ee03885089b8d6fcad548d233c8a}\label{classavalon__sdk_1_1connector_1_1blockchains_1_1ethereum_1_1ethereum__worker__registry_1_1EthereumWorkerRegistryImpl_a6491ee03885089b8d6fcad548d233c8a}} 
+\index{avalon\+\_\+sdk\+::connector\+::blockchains\+::ethereum\+::ethereum\+\_\+worker\+\_\+registry\+::\+Ethereum\+Worker\+Registry\+Impl@{avalon\+\_\+sdk\+::connector\+::blockchains\+::ethereum\+::ethereum\+\_\+worker\+\_\+registry\+::\+Ethereum\+Worker\+Registry\+Impl}!worker\+\_\+lookup\+\_\+next@{worker\+\_\+lookup\+\_\+next}}
+\index{worker\+\_\+lookup\+\_\+next@{worker\+\_\+lookup\+\_\+next}!avalon\+\_\+sdk\+::connector\+::blockchains\+::ethereum\+::ethereum\+\_\+worker\+\_\+registry\+::\+Ethereum\+Worker\+Registry\+Impl@{avalon\+\_\+sdk\+::connector\+::blockchains\+::ethereum\+::ethereum\+\_\+worker\+\_\+registry\+::\+Ethereum\+Worker\+Registry\+Impl}}
+\subsubsection{\texorpdfstring{worker\+\_\+lookup\+\_\+next()}{worker\_lookup\_next()}}
+{\footnotesize\ttfamily def avalon\+\_\+sdk.\+connector.\+blockchains.\+ethereum.\+ethereum\+\_\+worker\+\_\+registry.\+Ethereum\+Worker\+Registry\+Impl.\+worker\+\_\+lookup\+\_\+next (\begin{DoxyParamCaption}\item[{}]{self,  }\item[{}]{worker\+\_\+type,  }\item[{}]{org\+\_\+id,  }\item[{}]{application\+\_\+id,  }\item[{}]{lookup\+\_\+tag }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Retrieve additional worker lookup results after calling worker_lookup.
+
+Parameters:
+worker_type         Characteristic of Workers for which you may wish
+            to search
+org_id              Organization ID to which a Worker belongs
+application_id      Optional application type ID that is
+            supported by the worker
+lookup_tag          is returned by a previous call to either this
+            function or to worker_lookup
+id                  Optional Optional JSON RPC request ID
+
+
+Returns:
+Tuple containing the following:
+total_count    Total number of entries matching this lookup
+       criteria.  If this number is larger than the number
+       of IDs returned so far, the caller should use
+       lookupTag to call worker_lookup_next to retrieve
+       the rest of the IDs
+new_lookup_tag Optional parameter. If it is returned, it
+       means that there are more matching worker IDs that
+       can be retrieved by calling this function again with
+       this tag as an input parameter
+ids            Array of the worker IDs that match the input parameters
+
+On error returns None.
+\end{DoxyVerb}
+ \mbox{\Hypertarget{classavalon__sdk_1_1connector_1_1blockchains_1_1ethereum_1_1ethereum__worker__registry_1_1EthereumWorkerRegistryImpl_a2b7e710b8b613e1566918b13f1e85a65}\label{classavalon__sdk_1_1connector_1_1blockchains_1_1ethereum_1_1ethereum__worker__registry_1_1EthereumWorkerRegistryImpl_a2b7e710b8b613e1566918b13f1e85a65}} 
+\index{avalon\+\_\+sdk\+::connector\+::blockchains\+::ethereum\+::ethereum\+\_\+worker\+\_\+registry\+::\+Ethereum\+Worker\+Registry\+Impl@{avalon\+\_\+sdk\+::connector\+::blockchains\+::ethereum\+::ethereum\+\_\+worker\+\_\+registry\+::\+Ethereum\+Worker\+Registry\+Impl}!worker\+\_\+register@{worker\+\_\+register}}
+\index{worker\+\_\+register@{worker\+\_\+register}!avalon\+\_\+sdk\+::connector\+::blockchains\+::ethereum\+::ethereum\+\_\+worker\+\_\+registry\+::\+Ethereum\+Worker\+Registry\+Impl@{avalon\+\_\+sdk\+::connector\+::blockchains\+::ethereum\+::ethereum\+\_\+worker\+\_\+registry\+::\+Ethereum\+Worker\+Registry\+Impl}}
+\subsubsection{\texorpdfstring{worker\+\_\+register()}{worker\_register()}}
+{\footnotesize\ttfamily def avalon\+\_\+sdk.\+connector.\+blockchains.\+ethereum.\+ethereum\+\_\+worker\+\_\+registry.\+Ethereum\+Worker\+Registry\+Impl.\+worker\+\_\+register (\begin{DoxyParamCaption}\item[{}]{self,  }\item[{}]{worker\+\_\+id,  }\item[{}]{worker\+\_\+type,  }\item[{}]{organization\+\_\+id,  }\item[{}]{application\+\_\+type\+\_\+ids,  }\item[{}]{details }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Register a new worker with details of the worker.
+
+Parameters:
+worker_id       Worker ID value. E.g., an Ethereum address or
+        a value derived from the worker's DID
+worker_type     Type of Worker. Currently defined types are:
+        * "TEE-SGX": an Intel SGX Trusted Execution
+          Environment
+        * "MPC": Multi-Party Compute
+        * "ZK": Zero-Knowledge
+organization_id Optional parameter representing the
+        organization that hosts the Worker,
+        e.g. a bank in the consortium or
+        anonymous entity
+application_ids Optional parameter that defines
+        application types supported by the Worker
+details         Detailed information about the worker in
+        JSON RPC format as defined in
+https://entethalliance.github.io/trusted-computing/spec.html
+#common-data-for-all-worker-types
+
+Returns:
+Transaction receipt if registration succeeds.
+None if registration does not succeed.
+\end{DoxyVerb}
+ \mbox{\Hypertarget{classavalon__sdk_1_1connector_1_1blockchains_1_1ethereum_1_1ethereum__worker__registry_1_1EthereumWorkerRegistryImpl_ab220c1d0eaad1251422eabd0d5e77012}\label{classavalon__sdk_1_1connector_1_1blockchains_1_1ethereum_1_1ethereum__worker__registry_1_1EthereumWorkerRegistryImpl_ab220c1d0eaad1251422eabd0d5e77012}} 
+\index{avalon\+\_\+sdk\+::connector\+::blockchains\+::ethereum\+::ethereum\+\_\+worker\+\_\+registry\+::\+Ethereum\+Worker\+Registry\+Impl@{avalon\+\_\+sdk\+::connector\+::blockchains\+::ethereum\+::ethereum\+\_\+worker\+\_\+registry\+::\+Ethereum\+Worker\+Registry\+Impl}!worker\+\_\+retrieve@{worker\+\_\+retrieve}}
+\index{worker\+\_\+retrieve@{worker\+\_\+retrieve}!avalon\+\_\+sdk\+::connector\+::blockchains\+::ethereum\+::ethereum\+\_\+worker\+\_\+registry\+::\+Ethereum\+Worker\+Registry\+Impl@{avalon\+\_\+sdk\+::connector\+::blockchains\+::ethereum\+::ethereum\+\_\+worker\+\_\+registry\+::\+Ethereum\+Worker\+Registry\+Impl}}
+\subsubsection{\texorpdfstring{worker\+\_\+retrieve()}{worker\_retrieve()}}
+{\footnotesize\ttfamily def avalon\+\_\+sdk.\+connector.\+blockchains.\+ethereum.\+ethereum\+\_\+worker\+\_\+registry.\+Ethereum\+Worker\+Registry\+Impl.\+worker\+\_\+retrieve (\begin{DoxyParamCaption}\item[{}]{self,  }\item[{}]{worker\+\_\+id,  }\item[{}]{id = {\ttfamily None} }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Retrieve the worker identified by worker ID.
+
+Parameters:
+worker_id  Worker ID of the registry whose details are requested
+id         Optional JSON RPC request ID
+
+Returns:
+Tuple containing worker status (defined in worker_set_status),
+worker type, organization ID, list of application IDs, and worker
+details (JSON RPC string).
+
+On error returns None.
+\end{DoxyVerb}
+ \mbox{\Hypertarget{classavalon__sdk_1_1connector_1_1blockchains_1_1ethereum_1_1ethereum__worker__registry_1_1EthereumWorkerRegistryImpl_a66cd281d07d4dc1f16fb36e31321acb8}\label{classavalon__sdk_1_1connector_1_1blockchains_1_1ethereum_1_1ethereum__worker__registry_1_1EthereumWorkerRegistryImpl_a66cd281d07d4dc1f16fb36e31321acb8}} 
+\index{avalon\+\_\+sdk\+::connector\+::blockchains\+::ethereum\+::ethereum\+\_\+worker\+\_\+registry\+::\+Ethereum\+Worker\+Registry\+Impl@{avalon\+\_\+sdk\+::connector\+::blockchains\+::ethereum\+::ethereum\+\_\+worker\+\_\+registry\+::\+Ethereum\+Worker\+Registry\+Impl}!worker\+\_\+set\+\_\+status@{worker\+\_\+set\+\_\+status}}
+\index{worker\+\_\+set\+\_\+status@{worker\+\_\+set\+\_\+status}!avalon\+\_\+sdk\+::connector\+::blockchains\+::ethereum\+::ethereum\+\_\+worker\+\_\+registry\+::\+Ethereum\+Worker\+Registry\+Impl@{avalon\+\_\+sdk\+::connector\+::blockchains\+::ethereum\+::ethereum\+\_\+worker\+\_\+registry\+::\+Ethereum\+Worker\+Registry\+Impl}}
+\subsubsection{\texorpdfstring{worker\+\_\+set\+\_\+status()}{worker\_set\_status()}}
+{\footnotesize\ttfamily def avalon\+\_\+sdk.\+connector.\+blockchains.\+ethereum.\+ethereum\+\_\+worker\+\_\+registry.\+Ethereum\+Worker\+Registry\+Impl.\+worker\+\_\+set\+\_\+status (\begin{DoxyParamCaption}\item[{}]{self,  }\item[{}]{worker\+\_\+id,  }\item[{}]{status }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Set the worker status identified by worker ID.
+
+Parameters:
+worker_id Worker ID value. E.g., an Ethereum address or
+  a value derived from the worker's DID
+status    Worker status. The currently defined values are:
+  1 - worker is active
+  2 - worker is temporarily "off-line"
+  3 - worker is decommissioned
+  4 - worker is compromised
+
+Returns:
+Transaction receipt if registration succeeds.
+None if registration does not succeed.
+\end{DoxyVerb}
+ \mbox{\Hypertarget{classavalon__sdk_1_1connector_1_1blockchains_1_1ethereum_1_1ethereum__worker__registry_1_1EthereumWorkerRegistryImpl_a24004184828992ce6ad467362bb00ebf}\label{classavalon__sdk_1_1connector_1_1blockchains_1_1ethereum_1_1ethereum__worker__registry_1_1EthereumWorkerRegistryImpl_a24004184828992ce6ad467362bb00ebf}} 
+\index{avalon\+\_\+sdk\+::connector\+::blockchains\+::ethereum\+::ethereum\+\_\+worker\+\_\+registry\+::\+Ethereum\+Worker\+Registry\+Impl@{avalon\+\_\+sdk\+::connector\+::blockchains\+::ethereum\+::ethereum\+\_\+worker\+\_\+registry\+::\+Ethereum\+Worker\+Registry\+Impl}!worker\+\_\+update@{worker\+\_\+update}}
+\index{worker\+\_\+update@{worker\+\_\+update}!avalon\+\_\+sdk\+::connector\+::blockchains\+::ethereum\+::ethereum\+\_\+worker\+\_\+registry\+::\+Ethereum\+Worker\+Registry\+Impl@{avalon\+\_\+sdk\+::connector\+::blockchains\+::ethereum\+::ethereum\+\_\+worker\+\_\+registry\+::\+Ethereum\+Worker\+Registry\+Impl}}
+\subsubsection{\texorpdfstring{worker\+\_\+update()}{worker\_update()}}
+{\footnotesize\ttfamily def avalon\+\_\+sdk.\+connector.\+blockchains.\+ethereum.\+ethereum\+\_\+worker\+\_\+registry.\+Ethereum\+Worker\+Registry\+Impl.\+worker\+\_\+update (\begin{DoxyParamCaption}\item[{}]{self,  }\item[{}]{worker\+\_\+id,  }\item[{}]{details }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Update a worker with details data.
+
+Parameters:
+worker_id  Worker ID value. E.g., an Ethereum address or
+   a value derived from the worker's DID
+details    Detailed information about the worker in JSON format
+
+Returns:
+Transaction receipt if registration succeeds.
+None if registration does not succeed.
+\end{DoxyVerb}
+ 
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/home/dano/git/avalon/sdk/avalon\+\_\+sdk/connector/blockchains/ethereum/ethereum\+\_\+worker\+\_\+registry.\+py\end{DoxyCompactItemize}

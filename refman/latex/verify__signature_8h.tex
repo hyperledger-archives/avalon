@@ -1,0 +1,39 @@
+\hypertarget{verify__signature_8h}{}\section{/home/dano/git/avalon/common/cpp/crypto/verify\+\_\+signature.h File Reference}
+\label{verify__signature_8h}\index{/home/dano/git/avalon/common/cpp/crypto/verify\+\_\+signature.\+h@{/home/dano/git/avalon/common/cpp/crypto/verify\+\_\+signature.\+h}}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+bool \hyperlink{verify__signature_8h_a054b9ad0fd4352121d28442f790daaff}{verify\+\_\+signature} (const char $\ast$cert\+\_\+pem, const char $\ast$msg, unsigned int msg\+\_\+len, const char $\ast$signature, unsigned int signature\+\_\+len)
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Avalon signature verification. 
+
+\subsection{Function Documentation}
+\mbox{\Hypertarget{verify__signature_8h_a054b9ad0fd4352121d28442f790daaff}\label{verify__signature_8h_a054b9ad0fd4352121d28442f790daaff}} 
+\index{verify\+\_\+signature.\+h@{verify\+\_\+signature.\+h}!verify\+\_\+signature@{verify\+\_\+signature}}
+\index{verify\+\_\+signature@{verify\+\_\+signature}!verify\+\_\+signature.\+h@{verify\+\_\+signature.\+h}}
+\subsubsection{\texorpdfstring{verify\+\_\+signature()}{verify\_signature()}}
+{\footnotesize\ttfamily bool verify\+\_\+signature (\begin{DoxyParamCaption}\item[{const char $\ast$}]{cert\+\_\+pem,  }\item[{const char $\ast$}]{msg,  }\item[{unsigned int}]{msg\+\_\+len,  }\item[{const char $\ast$}]{signature,  }\item[{unsigned int}]{signature\+\_\+len }\end{DoxyParamCaption})}
+
+Verifies signature of the message by extracting public key from certificate.
+
+Verify a signature given a message, signature, and cert. Use S\+H\+A-\/256 to hash the message.
+
+
+\begin{DoxyParams}{Parameters}
+{\em cert\+\_\+pem} & X.\+509 Certificate to verify with B\+E\+G\+IN end B\+L\+O\+C\+KS and new lines \\
+\hline
+{\em msg} & Message to verify \\
+\hline
+{\em msg\+\_\+len} & Length of msg \\
+\hline
+{\em signature} & Signature to verify message, base64 encoded \\
+\hline
+{\em signature\+\_\+len} & Length of signature \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+true on success and false on failure. 
+\end{DoxyReturn}

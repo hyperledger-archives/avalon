@@ -1,0 +1,92 @@
+.TH "/home/dano/git/avalon/common/cpp/crypto/sig_private_key.cpp" 3 "Wed May 6 2020" "Version 0.5.0.dev1" "Hyperledger Avalon" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+/home/dano/git/avalon/common/cpp/crypto/sig_private_key.cpp
+.SH SYNOPSIS
+.br
+.PP
+\fC#include <openssl/err\&.h>\fP
+.br
+\fC#include <openssl/pem\&.h>\fP
+.br
+\fC#include <openssl/rand\&.h>\fP
+.br
+\fC#include <openssl/sha\&.h>\fP
+.br
+\fC#include <openssl/ecdsa\&.h>\fP
+.br
+\fC#include <algorithm>\fP
+.br
+\fC#include <memory>\fP
+.br
+\fC#include <vector>\fP
+.br
+\fC#include 'base64\&.h'\fP
+.br
+\fC#include 'crypto_shared\&.h'\fP
+.br
+\fC#include 'error\&.h'\fP
+.br
+\fC#include 'hex_string\&.h'\fP
+.br
+\fC#include 'sig\&.h'\fP
+.br
+\fC#include 'sig_public_key\&.h'\fP
+.br
+\fC#include 'sig_private_key\&.h'\fP
+.br
+\fC#include 'tSgxSSL_api\&.h'\fP
+.br
+
+.SS "Typedefs"
+
+.in +1c
+.ti -1c
+.RI "typedef std::unique_ptr< BIO, void(*)(BIO *)> \fBBIO_ptr\fP"
+.br
+.ti -1c
+.RI "typedef std::unique_ptr< EVP_CIPHER_CTX, void(*)(EVP_CIPHER_CTX *)> \fBCTX_ptr\fP"
+.br
+.ti -1c
+.RI "typedef std::unique_ptr< BN_CTX, void(*)(BN_CTX *)> \fBBN_CTX_ptr\fP"
+.br
+.ti -1c
+.RI "typedef std::unique_ptr< BIGNUM, void(*)(BIGNUM *)> \fBBIGNUM_ptr\fP"
+.br
+.ti -1c
+.RI "typedef std::unique_ptr< EC_GROUP, void(*)(EC_GROUP *)> \fBEC_GROUP_ptr\fP"
+.br
+.ti -1c
+.RI "typedef std::unique_ptr< EC_POINT, void(*)(EC_POINT *)> \fBEC_POINT_ptr\fP"
+.br
+.ti -1c
+.RI "typedef std::unique_ptr< EC_KEY, void(*)(EC_KEY *)> \fBEC_KEY_ptr\fP"
+.br
+.ti -1c
+.RI "typedef std::unique_ptr< ECDSA_SIG, void(*)(ECDSA_SIG *)> \fBECDSA_SIG_ptr\fP"
+.br
+.in -1c
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "void \fBECDSA_SIG_get0\fP (const ECDSA_SIG *sig, const BIGNUM **ptr_r, const BIGNUM **ptr_s)"
+.br
+.ti -1c
+.RI "int \fBECDSA_SIG_set0\fP (ECDSA_SIG *sig, BIGNUM *r, BIGNUM *s)"
+.br
+.ti -1c
+.RI "EC_KEY * \fBdeserializeECDSAPrivateKey\fP (const std::string &encoded)"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+Avalon ECDSA private key functions: generation, serialization, and signing\&. Used for Secp256k1\&. 
+.SH "Function Documentation"
+.PP 
+.SS "EC_KEY* deserializeECDSAPrivateKey (const std::string & encoded)"
+Utility function: Deserialize ECDSA Private Key\&. Throws RuntimeError, ValueError\&. 
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Hyperledger Avalon from the source code\&.

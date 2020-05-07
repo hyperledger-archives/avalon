@@ -1,0 +1,75 @@
+\hypertarget{classavalon__sdk_1_1work__order__receipt_1_1work__order__receipt_1_1WorkOrderReceiptRequest}{}\section{avalon\+\_\+sdk.\+work\+\_\+order\+\_\+receipt.\+work\+\_\+order\+\_\+receipt.\+Work\+Order\+Receipt\+Request Class Reference}
+\label{classavalon__sdk_1_1work__order__receipt_1_1work__order__receipt_1_1WorkOrderReceiptRequest}\index{avalon\+\_\+sdk.\+work\+\_\+order\+\_\+receipt.\+work\+\_\+order\+\_\+receipt.\+Work\+Order\+Receipt\+Request@{avalon\+\_\+sdk.\+work\+\_\+order\+\_\+receipt.\+work\+\_\+order\+\_\+receipt.\+Work\+Order\+Receipt\+Request}}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classavalon__sdk_1_1work__order__receipt_1_1work__order__receipt_1_1WorkOrderReceiptRequest_a09a9e42a3c65192aa67667e5eb17bc42}\label{classavalon__sdk_1_1work__order__receipt_1_1work__order__receipt_1_1WorkOrderReceiptRequest_a09a9e42a3c65192aa67667e5eb17bc42}} 
+def {\bfseries \+\_\+\+\_\+init\+\_\+\+\_\+} (self)
+\item 
+def \hyperlink{classavalon__sdk_1_1work__order__receipt_1_1work__order__receipt_1_1WorkOrderReceiptRequest_a5fe9d5a3392acb692d857fccf1621b0f}{create\+\_\+receipt} (self, wo\+\_\+request, receipt\+\_\+create\+\_\+status, signing\+\_\+key, nonce=None)
+\item 
+def \hyperlink{classavalon__sdk_1_1work__order__receipt_1_1work__order__receipt_1_1WorkOrderReceiptRequest_a4dfaccb4caa8145a291d9c8d2bc33b34}{update\+\_\+receipt} (self, work\+\_\+order\+\_\+id, update\+\_\+type, update\+\_\+data, signing\+\_\+key)
+\end{DoxyCompactItemize}
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classavalon__sdk_1_1work__order__receipt_1_1work__order__receipt_1_1WorkOrderReceiptRequest_ae4ef2b8af55464f51db2044a3ba77f14}\label{classavalon__sdk_1_1work__order__receipt_1_1work__order__receipt_1_1WorkOrderReceiptRequest_ae4ef2b8af55464f51db2044a3ba77f14}} 
+{\bfseries sig\+\_\+obj}
+\item 
+\mbox{\Hypertarget{classavalon__sdk_1_1work__order__receipt_1_1work__order__receipt_1_1WorkOrderReceiptRequest_a51775e569f1b80c0bde6bff72e69c093}\label{classavalon__sdk_1_1work__order__receipt_1_1work__order__receipt_1_1WorkOrderReceiptRequest_a51775e569f1b80c0bde6bff72e69c093}} 
+{\bfseries S\+I\+G\+N\+I\+N\+G\+\_\+\+A\+L\+G\+O\+R\+I\+T\+HM}
+\item 
+\mbox{\Hypertarget{classavalon__sdk_1_1work__order__receipt_1_1work__order__receipt_1_1WorkOrderReceiptRequest_a0e2f488ef9c59f67a6f5b94f2e13b191}\label{classavalon__sdk_1_1work__order__receipt_1_1work__order__receipt_1_1WorkOrderReceiptRequest_a0e2f488ef9c59f67a6f5b94f2e13b191}} 
+{\bfseries H\+A\+S\+H\+I\+N\+G\+\_\+\+A\+L\+G\+O\+R\+I\+T\+HM}
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+\begin{DoxyVerb}Class to create work order receipt APIs such as
+create, update, retrieve, and lookup.
+\end{DoxyVerb}
+ 
+
+\subsection{Member Function Documentation}
+\mbox{\Hypertarget{classavalon__sdk_1_1work__order__receipt_1_1work__order__receipt_1_1WorkOrderReceiptRequest_a5fe9d5a3392acb692d857fccf1621b0f}\label{classavalon__sdk_1_1work__order__receipt_1_1work__order__receipt_1_1WorkOrderReceiptRequest_a5fe9d5a3392acb692d857fccf1621b0f}} 
+\index{avalon\+\_\+sdk\+::work\+\_\+order\+\_\+receipt\+::work\+\_\+order\+\_\+receipt\+::\+Work\+Order\+Receipt\+Request@{avalon\+\_\+sdk\+::work\+\_\+order\+\_\+receipt\+::work\+\_\+order\+\_\+receipt\+::\+Work\+Order\+Receipt\+Request}!create\+\_\+receipt@{create\+\_\+receipt}}
+\index{create\+\_\+receipt@{create\+\_\+receipt}!avalon\+\_\+sdk\+::work\+\_\+order\+\_\+receipt\+::work\+\_\+order\+\_\+receipt\+::\+Work\+Order\+Receipt\+Request@{avalon\+\_\+sdk\+::work\+\_\+order\+\_\+receipt\+::work\+\_\+order\+\_\+receipt\+::\+Work\+Order\+Receipt\+Request}}
+\subsubsection{\texorpdfstring{create\+\_\+receipt()}{create\_receipt()}}
+{\footnotesize\ttfamily def avalon\+\_\+sdk.\+work\+\_\+order\+\_\+receipt.\+work\+\_\+order\+\_\+receipt.\+Work\+Order\+Receipt\+Request.\+create\+\_\+receipt (\begin{DoxyParamCaption}\item[{}]{self,  }\item[{}]{wo\+\_\+request,  }\item[{}]{receipt\+\_\+create\+\_\+status,  }\item[{}]{signing\+\_\+key,  }\item[{}]{nonce = {\ttfamily None} }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Create a work order receipt corresponding to a workorder ID.
+
+Parameters:
+wo_request            JSON RPC work order request used to create the
+              work order request as defined in EEA spec 6.1.1
+receipt_create_status Receipt creation status
+signing_key           Private key of the signer
+nonce                 Optional random number or monotonic counter
+
+Returns:
+JSON RPC request of type dictionary
+\end{DoxyVerb}
+ \mbox{\Hypertarget{classavalon__sdk_1_1work__order__receipt_1_1work__order__receipt_1_1WorkOrderReceiptRequest_a4dfaccb4caa8145a291d9c8d2bc33b34}\label{classavalon__sdk_1_1work__order__receipt_1_1work__order__receipt_1_1WorkOrderReceiptRequest_a4dfaccb4caa8145a291d9c8d2bc33b34}} 
+\index{avalon\+\_\+sdk\+::work\+\_\+order\+\_\+receipt\+::work\+\_\+order\+\_\+receipt\+::\+Work\+Order\+Receipt\+Request@{avalon\+\_\+sdk\+::work\+\_\+order\+\_\+receipt\+::work\+\_\+order\+\_\+receipt\+::\+Work\+Order\+Receipt\+Request}!update\+\_\+receipt@{update\+\_\+receipt}}
+\index{update\+\_\+receipt@{update\+\_\+receipt}!avalon\+\_\+sdk\+::work\+\_\+order\+\_\+receipt\+::work\+\_\+order\+\_\+receipt\+::\+Work\+Order\+Receipt\+Request@{avalon\+\_\+sdk\+::work\+\_\+order\+\_\+receipt\+::work\+\_\+order\+\_\+receipt\+::\+Work\+Order\+Receipt\+Request}}
+\subsubsection{\texorpdfstring{update\+\_\+receipt()}{update\_receipt()}}
+{\footnotesize\ttfamily def avalon\+\_\+sdk.\+work\+\_\+order\+\_\+receipt.\+work\+\_\+order\+\_\+receipt.\+Work\+Order\+Receipt\+Request.\+update\+\_\+receipt (\begin{DoxyParamCaption}\item[{}]{self,  }\item[{}]{work\+\_\+order\+\_\+id,  }\item[{}]{update\+\_\+type,  }\item[{}]{update\+\_\+data,  }\item[{}]{signing\+\_\+key }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Update the existing work order receipt with
+update_type and update_data.
+
+Parameters:
+work_order_id Work order ID whose receipt
+      needs to be updated
+update_type   Update type. These values correspond to
+      receipt status as defined in EEA Spec 7.1.1
+update_data   Update-specific data that depends on
+      the workOrderStatus
+Returns:
+JSON RPC work order update receipt request of type dictionary
+\end{DoxyVerb}
+ 
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/home/dano/git/avalon/sdk/avalon\+\_\+sdk/work\+\_\+order\+\_\+receipt/work\+\_\+order\+\_\+receipt.\+py\end{DoxyCompactItemize}

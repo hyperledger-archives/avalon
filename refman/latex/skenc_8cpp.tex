@@ -1,0 +1,43 @@
+\hypertarget{skenc_8cpp}{}\section{/home/dano/git/avalon/common/cpp/crypto/skenc.cpp File Reference}
+\label{skenc_8cpp}\index{/home/dano/git/avalon/common/cpp/crypto/skenc.\+cpp@{/home/dano/git/avalon/common/cpp/crypto/skenc.\+cpp}}
+{\ttfamily \#include \char`\"{}skenc.\+h\char`\"{}}\newline
+{\ttfamily \#include $<$openssl/err.\+h$>$}\newline
+{\ttfamily \#include $<$openssl/pem.\+h$>$}\newline
+{\ttfamily \#include $<$openssl/rand.\+h$>$}\newline
+{\ttfamily \#include $<$openssl/sha.\+h$>$}\newline
+{\ttfamily \#include $<$algorithm$>$}\newline
+{\ttfamily \#include $<$memory$>$}\newline
+{\ttfamily \#include $<$vector$>$}\newline
+{\ttfamily \#include \char`\"{}base64.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}crypto\+\_\+shared.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}crypto\+\_\+utils.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}error.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}hex\+\_\+string.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}t\+Sgx\+S\+S\+L\+\_\+api.\+h\char`\"{}}\newline
+Include dependency graph for skenc.\+cpp\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{skenc_8cpp__incl}
+\end{center}
+\end{figure}
+\subsection*{Typedefs}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{skenc_8cpp_a2a440312fadd20cb03298943b235141b}\label{skenc_8cpp_a2a440312fadd20cb03298943b235141b}} 
+typedef std\+::unique\+\_\+ptr$<$ B\+IO, void($\ast$)(B\+IO $\ast$)$>$ {\bfseries B\+I\+O\+\_\+ptr}
+\item 
+\mbox{\Hypertarget{skenc_8cpp_a7fde640c0067af2e1073ac81e98a70fb}\label{skenc_8cpp_a7fde640c0067af2e1073ac81e98a70fb}} 
+typedef std\+::unique\+\_\+ptr$<$ E\+V\+P\+\_\+\+C\+I\+P\+H\+E\+R\+\_\+\+C\+TX, void($\ast$)(E\+V\+P\+\_\+\+C\+I\+P\+H\+E\+R\+\_\+\+C\+TX $\ast$)$>$ {\bfseries C\+T\+X\+\_\+ptr}
+\item 
+\mbox{\Hypertarget{skenc_8cpp_a65800bacd77b14717f226940805c0259}\label{skenc_8cpp_a65800bacd77b14717f226940805c0259}} 
+typedef std\+::unique\+\_\+ptr$<$ B\+N\+\_\+\+C\+TX, void($\ast$)(B\+N\+\_\+\+C\+TX $\ast$)$>$ {\bfseries B\+N\+\_\+\+C\+T\+X\+\_\+ptr}
+\item 
+\mbox{\Hypertarget{skenc_8cpp_ae6ad7240c30eea25fb77d0b2f75405b1}\label{skenc_8cpp_ae6ad7240c30eea25fb77d0b2f75405b1}} 
+typedef std\+::unique\+\_\+ptr$<$ B\+I\+G\+N\+UM, void($\ast$)(B\+I\+G\+N\+UM $\ast$)$>$ {\bfseries B\+I\+G\+N\+U\+M\+\_\+ptr}
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Uses A\+E\+S-\/\+G\+CM 256, which also includes authentication. 

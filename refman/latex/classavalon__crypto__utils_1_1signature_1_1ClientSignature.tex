@@ -1,0 +1,175 @@
+\hypertarget{classavalon__crypto__utils_1_1signature_1_1ClientSignature}{}\section{avalon\+\_\+crypto\+\_\+utils.\+signature.\+Client\+Signature Class Reference}
+\label{classavalon__crypto__utils_1_1signature_1_1ClientSignature}\index{avalon\+\_\+crypto\+\_\+utils.\+signature.\+Client\+Signature@{avalon\+\_\+crypto\+\_\+utils.\+signature.\+Client\+Signature}}
+
+
+Inheritance diagram for avalon\+\_\+crypto\+\_\+utils.\+signature.\+Client\+Signature\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=226pt]{classavalon__crypto__utils_1_1signature_1_1ClientSignature__inherit__graph}
+\end{center}
+\end{figure}
+
+
+Collaboration diagram for avalon\+\_\+crypto\+\_\+utils.\+signature.\+Client\+Signature\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=226pt]{classavalon__crypto__utils_1_1signature_1_1ClientSignature__coll__graph}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classavalon__crypto__utils_1_1signature_1_1ClientSignature_a06315eaf37bfee2701ef6b820f239c61}\label{classavalon__crypto__utils_1_1signature_1_1ClientSignature_a06315eaf37bfee2701ef6b820f239c61}} 
+def {\bfseries \+\_\+\+\_\+init\+\_\+\+\_\+} (self)
+\item 
+def \hyperlink{classavalon__crypto__utils_1_1signature_1_1ClientSignature_af50cc9b76282c533212796bd11bd8f2a}{calculate\+\_\+datahash} (self, data\+\_\+objects)
+\item 
+def \hyperlink{classavalon__crypto__utils_1_1signature_1_1ClientSignature_a3ab018d83dee017cac1091782a96ccd0}{generate\+\_\+signature} (self, hash, private\+\_\+key)
+\item 
+def \hyperlink{classavalon__crypto__utils_1_1signature_1_1ClientSignature_a7b2f9bc1089a8b2ca364483d0dc4733b}{generate\+\_\+client\+\_\+signature} (self, input\+\_\+json\+\_\+str, worker, private\+\_\+key, session\+\_\+key, session\+\_\+iv, encrypted\+\_\+session\+\_\+key, data\+\_\+key=None, data\+\_\+iv=None)
+\item 
+def \hyperlink{classavalon__crypto__utils_1_1signature_1_1ClientSignature_a2d4afec5e477fd662e776d77efff432b}{verify\+\_\+signature} (self, input\+\_\+json, verification\+\_\+key)
+\item 
+def \hyperlink{classavalon__crypto__utils_1_1signature_1_1ClientSignature_aff053b50910de8feb0e5fc112e2d17db}{verify\+\_\+update\+\_\+receipt\+\_\+signature} (self, input\+\_\+json)
+\item 
+def \hyperlink{classavalon__crypto__utils_1_1signature_1_1ClientSignature_a322bfb1cd3cb921595d6d1860904ec43}{verify\+\_\+create\+\_\+receipt\+\_\+signature} (self, input\+\_\+json)
+\item 
+def \hyperlink{classavalon__crypto__utils_1_1signature_1_1ClientSignature_a30a724087019727c3b9418566f246ff2}{calculate\+\_\+request\+\_\+hash} (self, input\+\_\+json)
+\end{DoxyCompactItemize}
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classavalon__crypto__utils_1_1signature_1_1ClientSignature_a3611df6036a50d163ac5f8ef86a1b07a}\label{classavalon__crypto__utils_1_1signature_1_1ClientSignature_a3611df6036a50d163ac5f8ef86a1b07a}} 
+{\bfseries private\+\_\+key}
+\item 
+\mbox{\Hypertarget{classavalon__crypto__utils_1_1signature_1_1ClientSignature_ac135b7cb804566840004c79761753025}\label{classavalon__crypto__utils_1_1signature_1_1ClientSignature_ac135b7cb804566840004c79761753025}} 
+{\bfseries public\+\_\+key}
+\item 
+\mbox{\Hypertarget{classavalon__crypto__utils_1_1signature_1_1ClientSignature_abed3e5fe9564d3ee581a0965458e85aa}\label{classavalon__crypto__utils_1_1signature_1_1ClientSignature_abed3e5fe9564d3ee581a0965458e85aa}} 
+{\bfseries param\+\_\+pool}
+\item 
+\mbox{\Hypertarget{classavalon__crypto__utils_1_1signature_1_1ClientSignature_ae737aa93c61fba91d595dd68a5776441}\label{classavalon__crypto__utils_1_1signature_1_1ClientSignature_ae737aa93c61fba91d595dd68a5776441}} 
+{\bfseries tcs\+\_\+worker}
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+\begin{DoxyVerb}Class to perform hash calculation, signature generation and verification
+\end{DoxyVerb}
+ 
+
+\subsection{Member Function Documentation}
+\mbox{\Hypertarget{classavalon__crypto__utils_1_1signature_1_1ClientSignature_af50cc9b76282c533212796bd11bd8f2a}\label{classavalon__crypto__utils_1_1signature_1_1ClientSignature_af50cc9b76282c533212796bd11bd8f2a}} 
+\index{avalon\+\_\+crypto\+\_\+utils\+::signature\+::\+Client\+Signature@{avalon\+\_\+crypto\+\_\+utils\+::signature\+::\+Client\+Signature}!calculate\+\_\+datahash@{calculate\+\_\+datahash}}
+\index{calculate\+\_\+datahash@{calculate\+\_\+datahash}!avalon\+\_\+crypto\+\_\+utils\+::signature\+::\+Client\+Signature@{avalon\+\_\+crypto\+\_\+utils\+::signature\+::\+Client\+Signature}}
+\subsubsection{\texorpdfstring{calculate\+\_\+datahash()}{calculate\_datahash()}}
+{\footnotesize\ttfamily def avalon\+\_\+crypto\+\_\+utils.\+signature.\+Client\+Signature.\+calculate\+\_\+datahash (\begin{DoxyParamCaption}\item[{}]{self,  }\item[{}]{data\+\_\+objects }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Function to calculate a hash value of the array concatenating dataHash,
+data, encryptedDataEncryptionKey, iv for each item in the
+inData/outData array
+Parameters:
+    - data_objects is each item in inData or outData part of workorder
+      request as per Trusted Compute EEA API 6.1.7
+      Work Order Data Formats
+\end{DoxyVerb}
+ \mbox{\Hypertarget{classavalon__crypto__utils_1_1signature_1_1ClientSignature_a30a724087019727c3b9418566f246ff2}\label{classavalon__crypto__utils_1_1signature_1_1ClientSignature_a30a724087019727c3b9418566f246ff2}} 
+\index{avalon\+\_\+crypto\+\_\+utils\+::signature\+::\+Client\+Signature@{avalon\+\_\+crypto\+\_\+utils\+::signature\+::\+Client\+Signature}!calculate\+\_\+request\+\_\+hash@{calculate\+\_\+request\+\_\+hash}}
+\index{calculate\+\_\+request\+\_\+hash@{calculate\+\_\+request\+\_\+hash}!avalon\+\_\+crypto\+\_\+utils\+::signature\+::\+Client\+Signature@{avalon\+\_\+crypto\+\_\+utils\+::signature\+::\+Client\+Signature}}
+\subsubsection{\texorpdfstring{calculate\+\_\+request\+\_\+hash()}{calculate\_request\_hash()}}
+{\footnotesize\ttfamily def avalon\+\_\+crypto\+\_\+utils.\+signature.\+Client\+Signature.\+calculate\+\_\+request\+\_\+hash (\begin{DoxyParamCaption}\item[{}]{self,  }\item[{}]{input\+\_\+json }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Function to create the work order reuest hash
+as defined in EEA spec 6.1.8.1
+Parameters:
+    - input_json is dictionary contains work order request payload
+      as define EEA spec 6.1.1
+Returns hash of work order request as string
+\end{DoxyVerb}
+ \mbox{\Hypertarget{classavalon__crypto__utils_1_1signature_1_1ClientSignature_a7b2f9bc1089a8b2ca364483d0dc4733b}\label{classavalon__crypto__utils_1_1signature_1_1ClientSignature_a7b2f9bc1089a8b2ca364483d0dc4733b}} 
+\index{avalon\+\_\+crypto\+\_\+utils\+::signature\+::\+Client\+Signature@{avalon\+\_\+crypto\+\_\+utils\+::signature\+::\+Client\+Signature}!generate\+\_\+client\+\_\+signature@{generate\+\_\+client\+\_\+signature}}
+\index{generate\+\_\+client\+\_\+signature@{generate\+\_\+client\+\_\+signature}!avalon\+\_\+crypto\+\_\+utils\+::signature\+::\+Client\+Signature@{avalon\+\_\+crypto\+\_\+utils\+::signature\+::\+Client\+Signature}}
+\subsubsection{\texorpdfstring{generate\+\_\+client\+\_\+signature()}{generate\_client\_signature()}}
+{\footnotesize\ttfamily def avalon\+\_\+crypto\+\_\+utils.\+signature.\+Client\+Signature.\+generate\+\_\+client\+\_\+signature (\begin{DoxyParamCaption}\item[{}]{self,  }\item[{}]{input\+\_\+json\+\_\+str,  }\item[{}]{worker,  }\item[{}]{private\+\_\+key,  }\item[{}]{session\+\_\+key,  }\item[{}]{session\+\_\+iv,  }\item[{}]{encrypted\+\_\+session\+\_\+key,  }\item[{}]{data\+\_\+key = {\ttfamily None},  }\item[{}]{data\+\_\+iv = {\ttfamily None} }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Function to generate client signature
+Parameters:
+    - input_json_str is requester Work Order Request payload in a
+      JSON-RPC based format defined 6.1.1 Work Order Request Payload
+    - worker is a worker object to store all the common details of
+      worker as per Trusted Compute EEA API 8.1
+      Common Data for All Worker Types
+    - private_key is Client private key
+    - session_key is one time session key generated by the participant
+      submitting the work order.
+    - session_iv is an initialization vector if required by the
+      data encryption algorithm (encryptedSessionKey).
+      The default is all zeros.
+    - data_key is a one time key generated by participant used to
+      encrypt work order indata
+    - data_iv is an initialization vector used along with data_key.
+      Default is all zeros.
+    - encrypted_session_key is a encrypted version of session_key.
+Returns a tuple containing signature and status
+\end{DoxyVerb}
+ \mbox{\Hypertarget{classavalon__crypto__utils_1_1signature_1_1ClientSignature_a3ab018d83dee017cac1091782a96ccd0}\label{classavalon__crypto__utils_1_1signature_1_1ClientSignature_a3ab018d83dee017cac1091782a96ccd0}} 
+\index{avalon\+\_\+crypto\+\_\+utils\+::signature\+::\+Client\+Signature@{avalon\+\_\+crypto\+\_\+utils\+::signature\+::\+Client\+Signature}!generate\+\_\+signature@{generate\+\_\+signature}}
+\index{generate\+\_\+signature@{generate\+\_\+signature}!avalon\+\_\+crypto\+\_\+utils\+::signature\+::\+Client\+Signature@{avalon\+\_\+crypto\+\_\+utils\+::signature\+::\+Client\+Signature}}
+\subsubsection{\texorpdfstring{generate\+\_\+signature()}{generate\_signature()}}
+{\footnotesize\ttfamily def avalon\+\_\+crypto\+\_\+utils.\+signature.\+Client\+Signature.\+generate\+\_\+signature (\begin{DoxyParamCaption}\item[{}]{self,  }\item[{}]{hash,  }\item[{}]{private\+\_\+key }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Function to generate signature object
+Parameters:
+    - hash is the combined array of all hashes calculated on the
+      message
+    - private_key is Client private key
+Returns tuple(status, signature)
+\end{DoxyVerb}
+ \mbox{\Hypertarget{classavalon__crypto__utils_1_1signature_1_1ClientSignature_a322bfb1cd3cb921595d6d1860904ec43}\label{classavalon__crypto__utils_1_1signature_1_1ClientSignature_a322bfb1cd3cb921595d6d1860904ec43}} 
+\index{avalon\+\_\+crypto\+\_\+utils\+::signature\+::\+Client\+Signature@{avalon\+\_\+crypto\+\_\+utils\+::signature\+::\+Client\+Signature}!verify\+\_\+create\+\_\+receipt\+\_\+signature@{verify\+\_\+create\+\_\+receipt\+\_\+signature}}
+\index{verify\+\_\+create\+\_\+receipt\+\_\+signature@{verify\+\_\+create\+\_\+receipt\+\_\+signature}!avalon\+\_\+crypto\+\_\+utils\+::signature\+::\+Client\+Signature@{avalon\+\_\+crypto\+\_\+utils\+::signature\+::\+Client\+Signature}}
+\subsubsection{\texorpdfstring{verify\+\_\+create\+\_\+receipt\+\_\+signature()}{verify\_create\_receipt\_signature()}}
+{\footnotesize\ttfamily def avalon\+\_\+crypto\+\_\+utils.\+signature.\+Client\+Signature.\+verify\+\_\+create\+\_\+receipt\+\_\+signature (\begin{DoxyParamCaption}\item[{}]{self,  }\item[{}]{input\+\_\+json }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Function to verify the signature of work order receipt create
+Parameters:
+    - input_json is dictionary contains request payload of
+      WorkOrderReceiptRetrieve API as define EEA spec 7.2.2
+Returns enum type SignatureStatus
+\end{DoxyVerb}
+ \mbox{\Hypertarget{classavalon__crypto__utils_1_1signature_1_1ClientSignature_a2d4afec5e477fd662e776d77efff432b}\label{classavalon__crypto__utils_1_1signature_1_1ClientSignature_a2d4afec5e477fd662e776d77efff432b}} 
+\index{avalon\+\_\+crypto\+\_\+utils\+::signature\+::\+Client\+Signature@{avalon\+\_\+crypto\+\_\+utils\+::signature\+::\+Client\+Signature}!verify\+\_\+signature@{verify\+\_\+signature}}
+\index{verify\+\_\+signature@{verify\+\_\+signature}!avalon\+\_\+crypto\+\_\+utils\+::signature\+::\+Client\+Signature@{avalon\+\_\+crypto\+\_\+utils\+::signature\+::\+Client\+Signature}}
+\subsubsection{\texorpdfstring{verify\+\_\+signature()}{verify\_signature()}}
+{\footnotesize\ttfamily def avalon\+\_\+crypto\+\_\+utils.\+signature.\+Client\+Signature.\+verify\+\_\+signature (\begin{DoxyParamCaption}\item[{}]{self,  }\item[{}]{input\+\_\+json,  }\item[{}]{verification\+\_\+key }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Function to verify the signature received from the enclave
+Parameters:
+    - input_json is dictionary contains payload returned by the
+      Worker Service in response to successful workorder submit request
+      as per Trusted Compute EEA API 6.1.2 Work Order Result Payload
+    - verification_key is ECDSA/SECP256K1 public key used to verify
+      signatures created by the Enclave.
+Returns enum type SignatureStatus
+\end{DoxyVerb}
+ \mbox{\Hypertarget{classavalon__crypto__utils_1_1signature_1_1ClientSignature_aff053b50910de8feb0e5fc112e2d17db}\label{classavalon__crypto__utils_1_1signature_1_1ClientSignature_aff053b50910de8feb0e5fc112e2d17db}} 
+\index{avalon\+\_\+crypto\+\_\+utils\+::signature\+::\+Client\+Signature@{avalon\+\_\+crypto\+\_\+utils\+::signature\+::\+Client\+Signature}!verify\+\_\+update\+\_\+receipt\+\_\+signature@{verify\+\_\+update\+\_\+receipt\+\_\+signature}}
+\index{verify\+\_\+update\+\_\+receipt\+\_\+signature@{verify\+\_\+update\+\_\+receipt\+\_\+signature}!avalon\+\_\+crypto\+\_\+utils\+::signature\+::\+Client\+Signature@{avalon\+\_\+crypto\+\_\+utils\+::signature\+::\+Client\+Signature}}
+\subsubsection{\texorpdfstring{verify\+\_\+update\+\_\+receipt\+\_\+signature()}{verify\_update\_receipt\_signature()}}
+{\footnotesize\ttfamily def avalon\+\_\+crypto\+\_\+utils.\+signature.\+Client\+Signature.\+verify\+\_\+update\+\_\+receipt\+\_\+signature (\begin{DoxyParamCaption}\item[{}]{self,  }\item[{}]{input\+\_\+json }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Function to verify the signature of work order receipt update
+Parameters:
+    - input_json is dictionary contains payload returned by the
+      WorkOrderReceiptUpdateRetrieve API as define EEA spec 7.2.7
+Returns enum type SignatureStatus
+\end{DoxyVerb}
+ 
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/home/dano/git/avalon/common/crypto\+\_\+utils/avalon\+\_\+crypto\+\_\+utils/signature.\+py\end{DoxyCompactItemize}

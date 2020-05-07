@@ -1,0 +1,78 @@
+.TH "tcf::crypto::pkenc::PrivateKey" 3 "Wed May 6 2020" "Version 0.5.0.dev1" "Hyperledger Avalon" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+tcf::crypto::pkenc::PrivateKey
+.SH SYNOPSIS
+.br
+.PP
+.SS "Public Member Functions"
+
+.in +1c
+.ti -1c
+.RI "\fBPrivateKey\fP (const \fBPrivateKey\fP &privateKey)"
+.br
+.ti -1c
+.RI "\fBPrivateKey\fP (\fBPrivateKey\fP &&privateKey)"
+.br
+.ti -1c
+.RI "\fBPrivateKey\fP (const std::string &encoded)"
+.br
+.ti -1c
+.RI "\fB~PrivateKey\fP ()"
+.br
+.ti -1c
+.RI "\fBPrivateKey\fP & \fBoperator=\fP (const \fBPrivateKey\fP &privateKey)"
+.br
+.ti -1c
+.RI "void \fBDeserialize\fP (const std::string &encoded)"
+.br
+.ti -1c
+.RI "void \fBGenerate\fP ()"
+.br
+.ti -1c
+.RI "\fBPublicKey\fP \fBGetPublicKey\fP () const"
+.br
+.ti -1c
+.RI "std::string \fBSerialize\fP () const"
+.br
+.ti -1c
+.RI "\fBByteArray\fP \fBDecryptMessage\fP (const \fBByteArray\fP &ct) const"
+.br
+.in -1c
+.SH "Constructor & Destructor Documentation"
+.PP 
+.SS "tcf::crypto::pkenc::PrivateKey::PrivateKey (const std::string & encoded)"
+Constructor from encoded string\&. Throws RuntimeError, ValueError\&. 
+.SS "tcf::crypto::pkenc::PrivateKey::~PrivateKey ()"
+\fBPrivateKey\fP Destructor\&. 
+.SH "Member Function Documentation"
+.PP 
+.SS "\fBByteArray\fP tcf::crypto::pkenc::PrivateKey::DecryptMessage (const \fBByteArray\fP & ciphertext) const"
+Decrypt message with RSA private key and return plaintext\&. Throws RuntimeError\&.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIciphertext\fP string contains raw binary ciphertext 
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+ByteArray containing raw binary plaintext 
+.RE
+.PP
+
+.SS "void tcf::crypto::pkenc::PrivateKey::Deserialize (const std::string & encoded)"
+Deserialize RSA Private Key\&. Throws RunrimeError, ValueError\&. 
+.SS "void tcf::crypto::pkenc::PrivateKey::Generate ()"
+Generate RSA private key\&. Throws RuntimeError\&. 
+.SS "pcrypto::pkenc::PublicKey tcf::crypto::pkenc::PrivateKey::GetPublicKey () const"
+Get Public encryption from \fBPrivateKey\fP\&. Throws RuntimeError\&. 
+.SS "pcrypto::pkenc::PrivateKey & tcf::crypto::pkenc::PrivateKey::operator= (const \fBPrivateKey\fP & privateKey)"
+Assignment operator = overload\&. Throws RuntimeError\&. 
+.SS "std::string tcf::crypto::pkenc::PrivateKey::Serialize () const"
+Serialize Private Key\&. Throws RunrimeError\&. 
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Hyperledger Avalon from the source code\&.

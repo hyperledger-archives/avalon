@@ -1,0 +1,199 @@
+.TH "avalon_sdk.connector.blockchains.fabric.fabric_work_order.FabricWorkOrderImpl" 3 "Wed May 6 2020" "Version 0.5.0.dev1" "Hyperledger Avalon" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+avalon_sdk.connector.blockchains.fabric.fabric_work_order.FabricWorkOrderImpl
+.SH SYNOPSIS
+.br
+.PP
+.PP
+Inherits WorkOrderProxy\&.
+.SS "Public Member Functions"
+
+.in +1c
+.ti -1c
+.RI "def \fB__init__\fP (self, config)"
+.br
+.ti -1c
+.RI "def \fBwork_order_submit\fP (self, work_order_id, worker_id, requester_id, work_order_request, id=None)"
+.br
+.ti -1c
+.RI "def \fBwork_order_get_result\fP (self, work_order_id, id=None)"
+.br
+.ti -1c
+.RI "def \fBwork_order_complete\fP (self, work_order_id, work_order_response)"
+.br
+.ti -1c
+.RI "def \fBencryption_key_start\fP (self, tag)"
+.br
+.ti -1c
+.RI "def \fBencryption_key_get\fP (self, worker_id, requester_id, last_used_key_nonce=None, tag=None, signature_nonce=None, signature=None)"
+.br
+.ti -1c
+.RI "def \fBencryption_key_set\fP (self, worker_id, encryption_key, encryption_nonce, tag, signature)"
+.br
+.ti -1c
+.RI "def \fBget_work_order_submitted_event_handler\fP (self, handler_func)"
+.br
+.ti -1c
+.RI "def \fBget_work_order_completed_event_handler\fP (self, handler_func)"
+.br
+.in -1c
+.SS "Public Attributes"
+
+.in +1c
+.ti -1c
+.RI "\fBCHAIN_CODE\fP"
+.br
+.ti -1c
+.RI "\fBWORK_ORDER_SUBMITTED_EVENT_NAME\fP"
+.br
+.ti -1c
+.RI "\fBWORK_ORDER_COMPLETED_EVENT_NAME\fP"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+
+.PP
+.nf
+This class provides work order management APIs which interact with the
+Fabric blockchain. Detail method descriptions are
+available in WorkOrder interface.
+
+.fi
+.PP
+ 
+.SH "Constructor & Destructor Documentation"
+.PP 
+.SS "def avalon_sdk\&.connector\&.blockchains\&.fabric\&.fabric_work_order\&.FabricWorkOrderImpl\&.__init__ ( self,  config)"
+
+.PP
+.nf
+Parameters:
+config    Dictionary containing Fabric-specific parameters
+
+.fi
+.PP
+ 
+.SH "Member Function Documentation"
+.PP 
+.SS "def avalon_sdk\&.connector\&.blockchains\&.fabric\&.fabric_work_order\&.FabricWorkOrderImpl\&.encryption_key_get ( self,  worker_id,  requester_id,  last_used_key_nonce = \fCNone\fP,  tag = \fCNone\fP,  signature_nonce = \fCNone\fP,  signature = \fCNone\fP)"
+
+.PP
+.nf
+Get worker's key from Fabric blockchain.
+Not supported for Fabric.
+
+.fi
+.PP
+ 
+.SS "def avalon_sdk\&.connector\&.blockchains\&.fabric\&.fabric_work_order\&.FabricWorkOrderImpl\&.encryption_key_set ( self,  worker_id,  encryption_key,  encryption_nonce,  tag,  signature)"
+
+.PP
+.nf
+Set worker's encryption key.
+Not supported for Fabric.
+
+.fi
+.PP
+ 
+.SS "def avalon_sdk\&.connector\&.blockchains\&.fabric\&.fabric_work_order\&.FabricWorkOrderImpl\&.encryption_key_start ( self,  tag)"
+
+.PP
+.nf
+Initiate setting the encryption key of the worker.
+Not supported for Fabric.
+
+.fi
+.PP
+ 
+.SS "def avalon_sdk\&.connector\&.blockchains\&.fabric\&.fabric_work_order\&.FabricWorkOrderImpl\&.get_work_order_completed_event_handler ( self,  handler_func)"
+
+.PP
+.nf
+Start event handler loop for a workOrderCompleted event.
+
+Parameters:
+handler_func Callback function name as a string
+
+.fi
+.PP
+ 
+.SS "def avalon_sdk\&.connector\&.blockchains\&.fabric\&.fabric_work_order\&.FabricWorkOrderImpl\&.get_work_order_submitted_event_handler ( self,  handler_func)"
+
+.PP
+.nf
+Start event handler loop for a workOrderSubmitted event.
+
+Parameters:
+handler_func  Callback function name as a string
+
+Returns:
+Event handler object.
+
+.fi
+.PP
+ 
+.SS "def avalon_sdk\&.connector\&.blockchains\&.fabric\&.fabric_work_order\&.FabricWorkOrderImpl\&.work_order_complete ( self,  work_order_id,  work_order_response)"
+
+.PP
+.nf
+This function is called by the Worker Service to
+complete a work order successfully or in error.
+This API is for the proxy model.
+
+Parameters:
+work_order_id       Unique ID to identify the work order request
+work_order_response Work order response data in a string
+
+Returns:
+errorCode           0 on success or non-zero on error.
+
+.fi
+.PP
+ 
+.SS "def avalon_sdk\&.connector\&.blockchains\&.fabric\&.fabric_work_order\&.FabricWorkOrderImpl\&.work_order_get_result ( self,  work_order_id,  id = \fCNone\fP)"
+
+.PP
+.nf
+Query blockchain to get work order result.
+
+Parameters:
+work_order_id Work Order ID that was sent in the
+      corresponding work_order_submit request
+id            Optional JSON RPC request ID
+
+Returns:
+Tuple containing work order status, worker id, work order request,
+work order response, and error code.
+None on error.
+
+.fi
+.PP
+ 
+.SS "def avalon_sdk\&.connector\&.blockchains\&.fabric\&.fabric_work_order\&.FabricWorkOrderImpl\&.work_order_submit ( self,  work_order_id,  worker_id,  requester_id,  work_order_request,  id = \fCNone\fP)"
+
+.PP
+.nf
+Submit work order request to the Fabric block chain.
+
+Parameters:
+work_order_id      Unique ID of the work order request
+worker_id          Identifier for the worker
+requester_id       Unique id to identify the requester
+work_order_request JSON RPC string work order request.
+           Complete definition at work_order.py and
+           defined in EEA specification 6.1.1
+id                 Optional JSON RPC request ID
+
+Returns:
+0 on success and non-zero on error.
+
+.fi
+.PP
+ 
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Hyperledger Avalon from the source code\&.

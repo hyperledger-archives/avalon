@@ -1,0 +1,66 @@
+.TH "/home/dano/git/avalon/common/cpp/crypto/skenc.h" 3 "Wed May 6 2020" "Version 0.5.0.dev1" "Hyperledger Avalon" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+/home/dano/git/avalon/common/cpp/crypto/skenc.h
+.SH SYNOPSIS
+.br
+.PP
+\fC#include <string>\fP
+.br
+\fC#include <vector>\fP
+.br
+\fC#include 'types\&.h'\fP
+.br
+
+.SS "Namespaces"
+
+.in +1c
+.ti -1c
+.RI " \fBtcf::crypto::constants\fP"
+.br
+.ti -1c
+.RI " \fBtcf::crypto::skenc\fP"
+.br
+.in -1c
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "\fBByteArray\fP \fBtcf::crypto::skenc::GenerateKey\fP ()"
+.br
+.ti -1c
+.RI "\fBByteArray\fP \fBtcf::crypto::skenc::GenerateIV\fP (const std::string &IVstring=std::string(''))"
+.br
+.ti -1c
+.RI "\fBByteArray\fP \fBtcf::crypto::skenc::EncryptMessage\fP (const \fBByteArray\fP &key, const \fBByteArray\fP &iv, const \fBByteArray\fP &message)"
+.br
+.ti -1c
+.RI "\fBByteArray\fP \fBtcf::crypto::skenc::EncryptMessage\fP (const \fBByteArray\fP &key, const \fBByteArray\fP &message)"
+.br
+.ti -1c
+.RI "\fBByteArray\fP \fBtcf::crypto::skenc::DecryptMessage\fP (const \fBByteArray\fP &key, const \fBByteArray\fP &iv, const \fBByteArray\fP &message)"
+.br
+.ti -1c
+.RI "\fBByteArray\fP \fBtcf::crypto::skenc::DecryptMessage\fP (const \fBByteArray\fP &key, const \fBByteArray\fP &message)"
+.br
+.in -1c
+.SS "Variables"
+
+.in +1c
+.ti -1c
+.RI "const int \fBtcf::crypto::constants::IV_LEN\fP = 12"
+.br
+.ti -1c
+.RI "const int \fBtcf::crypto::constants::SYM_KEY_LEN\fP = 32"
+.br
+.ti -1c
+.RI "const int \fBtcf::crypto::constants::TAG_LEN\fP = 16"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+Avalon secret key encryption\&. Uses AES-GCM 256, which also includes authentication\&. 
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Hyperledger Avalon from the source code\&.

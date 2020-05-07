@@ -1,0 +1,5 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="node2" href="$classavalon__sdk_1_1connector_1_1blockchains_1_1ethereum_1_1ethereum__worker__registry_1_1EthereumWorkerRegistryImpl.html" title="avalon_sdk.connector.blockchains.ethereum.ethereum\l_worker_registry.EthereumWorkerRegistryImpl" alt="" coords="167,5,505,47"/>
+<area shape="rect" id="node3" href="$classavalon__sdk_1_1connector_1_1blockchains_1_1fabric_1_1fabric__worker__registry_1_1FabricWorkerRegistryImpl.html" title="avalon_sdk.connector.blockchains.fabric.fabric\l_worker_registry.FabricWorkerRegistryImpl" alt="" coords="189,71,483,112"/>
+<area shape="rect" id="node4" href="$classavalon__sdk_1_1connector_1_1direct_1_1jrpc_1_1jrpc__worker__registry_1_1JRPCWorkerRegistryImpl.html" title="avalon_sdk.connector.direct.jrpc.jrpc\l_worker_registry.JRPCWorkerRegistryImpl" alt="" coords="199,136,473,177"/>
+</map>

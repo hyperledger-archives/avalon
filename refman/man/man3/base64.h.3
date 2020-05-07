@@ -1,0 +1,59 @@
+.TH "/home/dano/git/avalon/common/cpp/packages/base64/base64.h" 3 "Wed May 6 2020" "Version 0.5.0.dev1" "Hyperledger Avalon" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+/home/dano/git/avalon/common/cpp/packages/base64/base64.h
+.SH SYNOPSIS
+.br
+.PP
+\fC#include <string>\fP
+.br
+\fC#include <vector>\fP
+.br
+
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "std::string \fBbase64_encode\fP (const std::vector< uint8_t > &raw_buffer)"
+.br
+.ti -1c
+.RI "std::vector< uint8_t > \fBbase64_decode\fP (const std::string &encoded_string)"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+Base64 encode and decode functions\&. Used to encode/decode between binary data into a printable character format\&. 
+.SH "Function Documentation"
+.PP 
+.SS "std::vector<uint8_t> base64_decode (const std::string & encoded_string)"
+Decode a base64 encoded printable string into a vector of binary data\&. 0 to 2 '=' padding characters may be appended\&. Decoding stops at first non-base64 character\&.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIencoded_string\fP Printable string containing base64 encoded data\&. No embedded whitespace characters are present\&. 
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+Vector containing decoded binary data 
+.RE
+.PP
+
+.SS "std::string base64_encode (const std::vector< uint8_t > & buf)"
+Encode a vector of binary data to a printable base64 string\&. 0 to 2 '=' padding characters may be appended\&. No headers or whitespace is generated\&.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIbuf\fP Buffer containing binary data to encode 
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+String containing base64 encoded data 
+.RE
+.PP
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Hyperledger Avalon from the source code\&.

@@ -1,0 +1,86 @@
+.TH "tcf::crypto::sig::PublicKey" 3 "Wed May 6 2020" "Version 0.5.0.dev1" "Hyperledger Avalon" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+tcf::crypto::sig::PublicKey
+.SH SYNOPSIS
+.br
+.PP
+.SS "Public Member Functions"
+
+.in +1c
+.ti -1c
+.RI "\fBPublicKey\fP ()"
+.br
+.ti -1c
+.RI "\fBPublicKey\fP (const \fBPublicKey\fP &publicKey)"
+.br
+.ti -1c
+.RI "\fBPublicKey\fP (\fBPublicKey\fP &&publicKey)"
+.br
+.ti -1c
+.RI "\fBPublicKey\fP (const \fBPrivateKey\fP &privateKey)"
+.br
+.ti -1c
+.RI "\fBPublicKey\fP (const std::string &encoded)"
+.br
+.ti -1c
+.RI "\fB~PublicKey\fP ()"
+.br
+.ti -1c
+.RI "\fBPublicKey\fP & \fBoperator=\fP (const \fBPublicKey\fP &publicKey)"
+.br
+.ti -1c
+.RI "void \fBDeserialize\fP (const std::string &encoded)"
+.br
+.ti -1c
+.RI "std::string \fBSerialize\fP () const"
+.br
+.ti -1c
+.RI "std::string \fBSerializeXYToHex\fP () const"
+.br
+.ti -1c
+.RI "void \fBDeserializeXYFromHex\fP (const std::string &hexXY)"
+.br
+.ti -1c
+.RI "int \fBVerifySignature\fP (const \fBByteArray\fP &hashMessage, const \fBByteArray\fP &signature) const"
+.br
+.in -1c
+.SH "Constructor & Destructor Documentation"
+.PP 
+.SS "tcf::crypto::sig::PublicKey::PublicKey ()"
+\fBPublicKey\fP constructor\&. 
+.SS "tcf::crypto::sig::PublicKey::PublicKey (const std::string & encoded)"
+Constructor from encoded string\&. Throws RuntimeError, ValueError\&. 
+.SS "tcf::crypto::sig::PublicKey::~PublicKey ()"
+\fBPublicKey\fP Destructor\&. 
+.SH "Member Function Documentation"
+.PP 
+.SS "void tcf::crypto::sig::PublicKey::Deserialize (const std::string & encoded)"
+Deserialize Digital Signature Public Key\&. Throws RunTime\&. 
+.SS "void tcf::crypto::sig::PublicKey::DeserializeXYFromHex (const std::string & hexXY)"
+Deserialize EC point (X,Y) hex string\&. Throws RuntimeError, ValueError\&. 
+.SS "pcrypto::sig::PublicKey & tcf::crypto::sig::PublicKey::operator= (const \fBPublicKey\fP & publicKey)"
+Assignment operator = overload\&. Throws RuntimeError\&. 
+.SS "std::string tcf::crypto::sig::PublicKey::Serialize () const"
+Serialize Digital Signature Public Key\&. Throws RuntimeError\&. 
+.SS "std::string tcf::crypto::sig::PublicKey::SerializeXYToHex () const"
+Serialize EC point (X,Y) to a hexadecimal string\&. Throws RuntimeError\&. 
+.SS "int tcf::crypto::sig::PublicKey::VerifySignature (const \fBByteArray\fP & hashMessage, const \fBByteArray\fP & signature) const"
+Verifies ECDSA signature of message\&. It's expected that the caller of this function passes a hash value of the original message\&.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIsignature\fP ByteArray contains raw binary signature data 
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+1 if signature is valid, 0 if signature is invalid, and -1 if there is an internal error\&. 
+.RE
+.PP
+
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Hyperledger Avalon from the source code\&.

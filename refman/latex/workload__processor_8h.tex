@@ -1,0 +1,73 @@
+\hypertarget{workload__processor_8h}{}\section{/home/dano/git/avalon/common/sgx\+\_\+workload/workload/workload\+\_\+processor.h File Reference}
+\label{workload__processor_8h}\index{/home/dano/git/avalon/common/sgx\+\_\+workload/workload/workload\+\_\+processor.\+h@{/home/dano/git/avalon/common/sgx\+\_\+workload/workload/workload\+\_\+processor.\+h}}
+{\ttfamily \#include $<$map$>$}\newline
+{\ttfamily \#include $<$string$>$}\newline
+{\ttfamily \#include \char`\"{}work\+\_\+order\+\_\+data.\+h\char`\"{}}\newline
+Include dependency graph for workload\+\_\+processor.\+h\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{workload__processor_8h__incl}
+\end{center}
+\end{figure}
+This graph shows which files directly or indirectly include this file\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=247pt]{workload__processor_8h__dep__incl}
+\end{center}
+\end{figure}
+\subsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+class \hyperlink{classWorkloadProcessor}{Workload\+Processor}
+\end{DoxyCompactItemize}
+\subsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define \hyperlink{workload__processor_8h_ad92854e2422e70954ed7823755040058}{I\+M\+P\+L\+\_\+\+W\+O\+R\+K\+L\+O\+A\+D\+\_\+\+P\+R\+O\+C\+E\+S\+S\+O\+R\+\_\+\+C\+L\+O\+NE}(T\+Y\+PE)~\hyperlink{classWorkloadProcessor}{Workload\+Processor}$\ast$ Clone() const \{ return new T\+Y\+PE($\ast$this); \}
+\item 
+\#define \hyperlink{workload__processor_8h_afd83525c70650defd09ed33992bdf3b1}{R\+E\+G\+I\+S\+T\+E\+R\+\_\+\+W\+O\+R\+K\+L\+O\+A\+D\+\_\+\+P\+R\+O\+C\+E\+S\+S\+OR}(W\+O\+R\+K\+L\+O\+A\+D\+I\+D\+\_\+\+S\+TR,  T\+Y\+PE)
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Defines base class \hyperlink{classWorkloadProcessor}{Workload\+Processor} and other definitions to create an Avalon workload processor. To use, \#include \char`\"{}workload\+\_\+processor.\+h\char`\"{} 
+
+\subsection{Macro Definition Documentation}
+\mbox{\Hypertarget{workload__processor_8h_ad92854e2422e70954ed7823755040058}\label{workload__processor_8h_ad92854e2422e70954ed7823755040058}} 
+\index{workload\+\_\+processor.\+h@{workload\+\_\+processor.\+h}!I\+M\+P\+L\+\_\+\+W\+O\+R\+K\+L\+O\+A\+D\+\_\+\+P\+R\+O\+C\+E\+S\+S\+O\+R\+\_\+\+C\+L\+O\+NE@{I\+M\+P\+L\+\_\+\+W\+O\+R\+K\+L\+O\+A\+D\+\_\+\+P\+R\+O\+C\+E\+S\+S\+O\+R\+\_\+\+C\+L\+O\+NE}}
+\index{I\+M\+P\+L\+\_\+\+W\+O\+R\+K\+L\+O\+A\+D\+\_\+\+P\+R\+O\+C\+E\+S\+S\+O\+R\+\_\+\+C\+L\+O\+NE@{I\+M\+P\+L\+\_\+\+W\+O\+R\+K\+L\+O\+A\+D\+\_\+\+P\+R\+O\+C\+E\+S\+S\+O\+R\+\_\+\+C\+L\+O\+NE}!workload\+\_\+processor.\+h@{workload\+\_\+processor.\+h}}
+\subsubsection{\texorpdfstring{I\+M\+P\+L\+\_\+\+W\+O\+R\+K\+L\+O\+A\+D\+\_\+\+P\+R\+O\+C\+E\+S\+S\+O\+R\+\_\+\+C\+L\+O\+NE}{IMPL\_WORKLOAD\_PROCESSOR\_CLONE}}
+{\footnotesize\ttfamily \#define I\+M\+P\+L\+\_\+\+W\+O\+R\+K\+L\+O\+A\+D\+\_\+\+P\+R\+O\+C\+E\+S\+S\+O\+R\+\_\+\+C\+L\+O\+NE(\begin{DoxyParamCaption}\item[{}]{T\+Y\+PE }\end{DoxyParamCaption})~\hyperlink{classWorkloadProcessor}{Workload\+Processor}$\ast$ Clone() const \{ return new T\+Y\+PE($\ast$this); \}}
+
+This macro clones an instance of class \hyperlink{classWorkloadProcessor}{Workload\+Processor} for an Avalon worker. Example usage in a .h header file\+: \hyperlink{workload__processor_8h_ad92854e2422e70954ed7823755040058}{I\+M\+P\+L\+\_\+\+W\+O\+R\+K\+L\+O\+A\+D\+\_\+\+P\+R\+O\+C\+E\+S\+S\+O\+R\+\_\+\+C\+L\+O\+N\+E(\+Workload)}
+
+
+\begin{DoxyParams}{Parameters}
+{\em T\+Y\+PE} & Name of the Workload class \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{workload__processor_8h_afd83525c70650defd09ed33992bdf3b1}\label{workload__processor_8h_afd83525c70650defd09ed33992bdf3b1}} 
+\index{workload\+\_\+processor.\+h@{workload\+\_\+processor.\+h}!R\+E\+G\+I\+S\+T\+E\+R\+\_\+\+W\+O\+R\+K\+L\+O\+A\+D\+\_\+\+P\+R\+O\+C\+E\+S\+S\+OR@{R\+E\+G\+I\+S\+T\+E\+R\+\_\+\+W\+O\+R\+K\+L\+O\+A\+D\+\_\+\+P\+R\+O\+C\+E\+S\+S\+OR}}
+\index{R\+E\+G\+I\+S\+T\+E\+R\+\_\+\+W\+O\+R\+K\+L\+O\+A\+D\+\_\+\+P\+R\+O\+C\+E\+S\+S\+OR@{R\+E\+G\+I\+S\+T\+E\+R\+\_\+\+W\+O\+R\+K\+L\+O\+A\+D\+\_\+\+P\+R\+O\+C\+E\+S\+S\+OR}!workload\+\_\+processor.\+h@{workload\+\_\+processor.\+h}}
+\subsubsection{\texorpdfstring{R\+E\+G\+I\+S\+T\+E\+R\+\_\+\+W\+O\+R\+K\+L\+O\+A\+D\+\_\+\+P\+R\+O\+C\+E\+S\+S\+OR}{REGISTER\_WORKLOAD\_PROCESSOR}}
+{\footnotesize\ttfamily \#define R\+E\+G\+I\+S\+T\+E\+R\+\_\+\+W\+O\+R\+K\+L\+O\+A\+D\+\_\+\+P\+R\+O\+C\+E\+S\+S\+OR(\begin{DoxyParamCaption}\item[{}]{W\+O\+R\+K\+L\+O\+A\+D\+I\+D\+\_\+\+S\+TR,  }\item[{}]{T\+Y\+PE }\end{DoxyParamCaption})}
+
+{\bfseries Value\+:}
+\begin{DoxyCode}
+\hyperlink{classWorkloadProcessor}{WorkloadProcessor}* TYPE##\_myProcessor = \hyperlink{classWorkloadProcessor_aa8912ff5f8a6037f999d6aa4f59d366f}{\(\backslash\)}
+\hyperlink{classWorkloadProcessor_aa8912ff5f8a6037f999d6aa4f59d366f}{      WorkloadProcessor::RegisterWorkloadProcessor}(
+      WORKLOADID\_STR, \textcolor{keyword}{new} TYPE());
+\end{DoxyCode}
+This macro registers a workload processor for a specific application. It associates a string with a workload. This is the same string that is passed in the work order request J\+S\+ON payload. Example usage in a .cpp source file\+: \hyperlink{workload__processor_8h_afd83525c70650defd09ed33992bdf3b1}{R\+E\+G\+I\+S\+T\+E\+R\+\_\+\+W\+O\+R\+K\+L\+O\+A\+D\+\_\+\+P\+R\+O\+C\+E\+S\+S\+O\+R(workload\+\_\+id\+\_\+string, Workload)}
+
+
+\begin{DoxyParams}{Parameters}
+{\em W\+O\+R\+K\+L\+O\+A\+D\+I\+D\+\_\+\+S\+TR} & A string literal or variable identifying the workload type \\
+\hline
+{\em T\+Y\+PE} & Name of the Workload class \\
+\hline
+\end{DoxyParams}

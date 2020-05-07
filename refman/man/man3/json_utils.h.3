@@ -1,0 +1,33 @@
+.TH "/home/dano/git/avalon/common/cpp/json_utils.h" 3 "Wed May 6 2020" "Version 0.5.0.dev1" "Hyperledger Avalon" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+/home/dano/git/avalon/common/cpp/json_utils.h
+.SH SYNOPSIS
+.br
+.PP
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "const char * \fBGetJsonStr\fP (const \fBJSON_Object\fP *json_object, const char *name, const char *err_msg=NULL)"
+.br
+.ti -1c
+.RI "void \fBJsonSetStr\fP (\fBJSON_Object\fP *json, const char *name, const char *value, const char *err)"
+.br
+.ti -1c
+.RI "void \fBGetByteArray\fP (const \fBJSON_Object\fP *object, const char *name, const char *err_msg, \fBByteArray\fP &dst)"
+.br
+.ti -1c
+.RI "double \fBGetJsonNumber\fP (const \fBJSON_Object\fP *object, const char *name)"
+.br
+.ti -1c
+.RI "void \fBJsonSetNumber\fP (\fBJSON_Object\fP *json, const char *name, double value, const char *err)"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+Avalon JSON utilities\&. 
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Hyperledger Avalon from the source code\&.

@@ -1,0 +1,98 @@
+.TH "/home/dano/git/avalon/common/cpp/types.h" 3 "Wed May 6 2020" "Version 0.5.0.dev1" "Hyperledger Avalon" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+/home/dano/git/avalon/common/cpp/types.h
+.SH SYNOPSIS
+.br
+.PP
+\fC#include <stdint\&.h>\fP
+.br
+\fC#include <string>\fP
+.br
+\fC#include <vector>\fP
+.br
+\fC#include <list>\fP
+.br
+
+.SS "Classes"
+
+.in +1c
+.ti -1c
+.RI "class \fBStringArray\fP"
+.br
+.in -1c
+.SS "Typedefs"
+
+.in +1c
+.ti -1c
+.RI "typedef std::vector< uint8_t > \fBByteArray\fP"
+.br
+.ti -1c
+.RI "typedef std::string \fBBase64EncodedString\fP"
+.br
+.ti -1c
+.RI "typedef std::string \fBHexEncodedString\fP"
+.br
+.in -1c
+.SS "Enumerations"
+
+.in +1c
+.ti -1c
+.RI "enum \fBEnclaveType\fP { \fBSINGLETON_ENCLAVE\fP = 1, \fBKME_ENCLAVE\fP = 2, \fBWPE_ENCLAVE\fP = 3 }"
+.br
+.in -1c
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "std::string \fBByteArrayToString\fP (const \fBByteArray\fP &inArray)"
+.br
+.ti -1c
+.RI "\fBStringArray\fP \fBByteArrayToStringArray\fP (const \fBByteArray\fP &inArray)"
+.br
+.ti -1c
+.RI "\fBBase64EncodedString\fP \fBByteArrayToBase64EncodedString\fP (const \fBByteArray\fP &buf)"
+.br
+.ti -1c
+.RI "\fBByteArray\fP \fBBase64EncodedStringToByteArray\fP (const \fBBase64EncodedString\fP &encoded)"
+.br
+.ti -1c
+.RI "\fBHexEncodedString\fP \fBByteArrayToHexEncodedString\fP (const \fBByteArray\fP &buf)"
+.br
+.ti -1c
+.RI "\fBByteArray\fP \fBHexEncodedStringToByteArray\fP (const \fBHexEncodedString\fP &encoded)"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+Basic storage types used by Avalon\&. Avalon string utilities, including base 64, hex, and byte array conversion\&. 
+.SH "Typedef Documentation"
+.PP 
+.SS "typedef std::string \fBBase64EncodedString\fP"
+Type for printable base64 encoded string\&. May include '=' padding characters\&. No whitespace, header line, or footer line\&. For example, SHlwZXJsZWRnZXI= 
+.SS "typedef std::vector<uint8_t> \fBByteArray\fP"
+Vector type for binary unformatted data\&. 
+.SS "typedef std::string \fBHexEncodedString\fP"
+Type for printable hex encoded string\&. For example, 2D81454D9C59D73867D65C0FCC98143D4B6F1B0BDB7EB04EFED72697F462309C 
+.SH "Enumeration Type Documentation"
+.PP 
+.SS "enum \fBEnclaveType\fP"
+Avalon worker enclave Type (singleton, KME, WPE) 
+.SH "Function Documentation"
+.PP 
+.SS "\fBByteArray\fP Base64EncodedStringToByteArray (const \fBBase64EncodedString\fP & encoded)"
+Simple conversion from Base64EncodedString to ByteArray\&. 
+.SS "\fBBase64EncodedString\fP ByteArrayToBase64EncodedString (const \fBByteArray\fP & buf)"
+Simple conversion from ByteArray to Base64EncodedString\&. 
+.SS "\fBHexEncodedString\fP ByteArrayToHexEncodedString (const \fBByteArray\fP & buf)"
+Simple conversion from ByteArray to HexEncodedString\&. 
+.SS "std::string ByteArrayToString (const \fBByteArray\fP & inArray)"
+Simple conversion from ByteArray to std::string 
+.SS "\fBStringArray\fP ByteArrayToStringArray (const \fBByteArray\fP & inArray)"
+Conversion from ByteArray to \fBStringArray\fP\&. 
+.SS "\fBByteArray\fP HexEncodedStringToByteArray (const \fBHexEncodedString\fP & encoded)"
+Simple conversion from HexEncodedString to ByteArray\&. Throws ValueError\&. 
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Hyperledger Avalon from the source code\&.

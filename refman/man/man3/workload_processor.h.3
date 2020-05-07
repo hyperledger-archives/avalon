@@ -1,0 +1,66 @@
+.TH "/home/dano/git/avalon/common/sgx_workload/workload/workload_processor.h" 3 "Wed May 6 2020" "Version 0.5.0.dev1" "Hyperledger Avalon" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+/home/dano/git/avalon/common/sgx_workload/workload/workload_processor.h
+.SH SYNOPSIS
+.br
+.PP
+\fC#include <map>\fP
+.br
+\fC#include <string>\fP
+.br
+\fC#include 'work_order_data\&.h'\fP
+.br
+
+.SS "Classes"
+
+.in +1c
+.ti -1c
+.RI "class \fBWorkloadProcessor\fP"
+.br
+.in -1c
+.SS "Macros"
+
+.in +1c
+.ti -1c
+.RI "#define \fBIMPL_WORKLOAD_PROCESSOR_CLONE\fP(TYPE)   \fBWorkloadProcessor\fP* Clone() const { return new TYPE(*this); }"
+.br
+.ti -1c
+.RI "#define \fBREGISTER_WORKLOAD_PROCESSOR\fP(WORKLOADID_STR,  TYPE)"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+Defines base class \fBWorkloadProcessor\fP and other definitions to create an Avalon workload processor\&. To use, #include 'workload_processor\&.h' 
+.SH "Macro Definition Documentation"
+.PP 
+.SS "#define IMPL_WORKLOAD_PROCESSOR_CLONE(TYPE)   \fBWorkloadProcessor\fP* Clone() const { return new TYPE(*this); }"
+This macro clones an instance of class \fBWorkloadProcessor\fP for an Avalon worker\&. Example usage in a \&.h header file: \fBIMPL_WORKLOAD_PROCESSOR_CLONE(Workload)\fP
+.PP
+\fBParameters:\fP
+.RS 4
+\fITYPE\fP Name of the Workload class 
+.RE
+.PP
+
+.SS "#define REGISTER_WORKLOAD_PROCESSOR(WORKLOADID_STR, TYPE)"
+\fBValue:\fP
+.PP
+.nf
+WorkloadProcessor* TYPE##_myProcessor = \\
+      WorkloadProcessor::RegisterWorkloadProcessor(WORKLOADID_STR, new TYPE());
+.fi
+This macro registers a workload processor for a specific application\&. It associates a string with a workload\&. This is the same string that is passed in the work order request JSON payload\&. Example usage in a \&.cpp source file: \fBREGISTER_WORKLOAD_PROCESSOR(workload_id_string, Workload)\fP
+.PP
+\fBParameters:\fP
+.RS 4
+\fIWORKLOADID_STR\fP A string literal or variable identifying the workload type 
+.br
+\fITYPE\fP Name of the Workload class 
+.RE
+.PP
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Hyperledger Avalon from the source code\&.

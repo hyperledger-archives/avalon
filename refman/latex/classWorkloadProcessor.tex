@@ -1,0 +1,107 @@
+\hypertarget{classWorkloadProcessor}{}\section{Workload\+Processor Class Reference}
+\label{classWorkloadProcessor}\index{Workload\+Processor@{Workload\+Processor}}
+
+
+{\ttfamily \#include $<$workload\+\_\+processor.\+h$>$}
+
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+virtual \hyperlink{classWorkloadProcessor}{Workload\+Processor} $\ast$ \hyperlink{classWorkloadProcessor_a2fd0e60c485994a16aa52c938be576e2}{Clone} () const =0
+\item 
+virtual void \hyperlink{classWorkloadProcessor_a62cdfb1a67991496856a32a33c1845fb}{Process\+Work\+Order} (std\+::string workload\+\_\+id, const \hyperlink{types_8h_a35da937e2331acce98d47f44892f4a76}{Byte\+Array} \&requester\+\_\+id, const \hyperlink{types_8h_a35da937e2331acce98d47f44892f4a76}{Byte\+Array} \&worker\+\_\+id, const \hyperlink{types_8h_a35da937e2331acce98d47f44892f4a76}{Byte\+Array} \&work\+\_\+order\+\_\+id, const std\+::vector$<$ \hyperlink{classtcf_1_1WorkOrderData}{tcf\+::\+Work\+Order\+Data} $>$ \&in\+\_\+work\+\_\+order\+\_\+data, std\+::vector$<$ \hyperlink{classtcf_1_1WorkOrderData}{tcf\+::\+Work\+Order\+Data} $>$ \&out\+\_\+work\+\_\+order\+\_\+data)=0
+\end{DoxyCompactItemize}
+\subsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+static \hyperlink{classWorkloadProcessor}{Workload\+Processor} $\ast$ \hyperlink{classWorkloadProcessor_aa0d3463d5ecf81ad6a7da65a417b1eaa}{Create\+Workload\+Processor} (std\+::string workload\+\_\+id)
+\item 
+static \hyperlink{classWorkloadProcessor}{Workload\+Processor} $\ast$ \hyperlink{classWorkloadProcessor_aa8912ff5f8a6037f999d6aa4f59d366f}{Register\+Workload\+Processor} (std\+::string workload\+\_\+id, \hyperlink{classWorkloadProcessor}{Workload\+Processor} $\ast$processor)
+\end{DoxyCompactItemize}
+\subsection*{Static Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+static std\+::map$<$ std\+::string, \hyperlink{classWorkloadProcessor}{Workload\+Processor} $\ast$ $>$ \hyperlink{classWorkloadProcessor_a7d27005403d3bead28be816490ddf6a2}{workload\+\_\+processor\+\_\+table}
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Class to register, create, and process a workload. 
+
+\subsection{Member Function Documentation}
+\mbox{\Hypertarget{classWorkloadProcessor_a2fd0e60c485994a16aa52c938be576e2}\label{classWorkloadProcessor_a2fd0e60c485994a16aa52c938be576e2}} 
+\index{Workload\+Processor@{Workload\+Processor}!Clone@{Clone}}
+\index{Clone@{Clone}!Workload\+Processor@{Workload\+Processor}}
+\subsubsection{\texorpdfstring{Clone()}{Clone()}}
+{\footnotesize\ttfamily virtual \hyperlink{classWorkloadProcessor}{Workload\+Processor}$\ast$ Workload\+Processor\+::\+Clone (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [pure virtual]}}
+
+Clone a \hyperlink{classWorkloadProcessor}{Workload\+Processor} \mbox{\Hypertarget{classWorkloadProcessor_aa0d3463d5ecf81ad6a7da65a417b1eaa}\label{classWorkloadProcessor_aa0d3463d5ecf81ad6a7da65a417b1eaa}} 
+\index{Workload\+Processor@{Workload\+Processor}!Create\+Workload\+Processor@{Create\+Workload\+Processor}}
+\index{Create\+Workload\+Processor@{Create\+Workload\+Processor}!Workload\+Processor@{Workload\+Processor}}
+\subsubsection{\texorpdfstring{Create\+Workload\+Processor()}{CreateWorkloadProcessor()}}
+{\footnotesize\ttfamily \hyperlink{classWorkloadProcessor}{Workload\+Processor} $\ast$ Workload\+Processor\+::\+Create\+Workload\+Processor (\begin{DoxyParamCaption}\item[{std\+::string}]{workload\+\_\+id }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+Create a \hyperlink{classWorkloadProcessor}{Workload\+Processor}
+
+
+\begin{DoxyParams}{Parameters}
+{\em workload\+\_\+id} & Workload identifier \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Pointer to \hyperlink{classWorkloadProcessor}{Workload\+Processor} 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classWorkloadProcessor_a62cdfb1a67991496856a32a33c1845fb}\label{classWorkloadProcessor_a62cdfb1a67991496856a32a33c1845fb}} 
+\index{Workload\+Processor@{Workload\+Processor}!Process\+Work\+Order@{Process\+Work\+Order}}
+\index{Process\+Work\+Order@{Process\+Work\+Order}!Workload\+Processor@{Workload\+Processor}}
+\subsubsection{\texorpdfstring{Process\+Work\+Order()}{ProcessWorkOrder()}}
+{\footnotesize\ttfamily virtual void Workload\+Processor\+::\+Process\+Work\+Order (\begin{DoxyParamCaption}\item[{std\+::string}]{workload\+\_\+id,  }\item[{const \hyperlink{types_8h_a35da937e2331acce98d47f44892f4a76}{Byte\+Array} \&}]{requester\+\_\+id,  }\item[{const \hyperlink{types_8h_a35da937e2331acce98d47f44892f4a76}{Byte\+Array} \&}]{worker\+\_\+id,  }\item[{const \hyperlink{types_8h_a35da937e2331acce98d47f44892f4a76}{Byte\+Array} \&}]{work\+\_\+order\+\_\+id,  }\item[{const std\+::vector$<$ \hyperlink{classtcf_1_1WorkOrderData}{tcf\+::\+Work\+Order\+Data} $>$ \&}]{in\+\_\+work\+\_\+order\+\_\+data,  }\item[{std\+::vector$<$ \hyperlink{classtcf_1_1WorkOrderData}{tcf\+::\+Work\+Order\+Data} $>$ \&}]{out\+\_\+work\+\_\+order\+\_\+data }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [pure virtual]}}
+
+Process the workload.
+
+
+\begin{DoxyParams}{Parameters}
+{\em workload\+\_\+id} & Workload identifier string \\
+\hline
+{\em requester\+\_\+id} & Requester ID to identify who submitted work order \\
+\hline
+{\em worker\+\_\+id} & Worker ID, a unique string identifying this type of work order processor \\
+\hline
+{\em work\+\_\+order\+\_\+id} & Unique work order ID for this type of work order processor \\
+\hline
+{\em in\+\_\+work\+\_\+order\+\_\+data} & Work order data input submitted to the work order processor \\
+\hline
+{\em out\+\_\+work\+\_\+order\+\_\+data} & Work order data returned by the work order processor \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classWorkloadProcessor_aa8912ff5f8a6037f999d6aa4f59d366f}\label{classWorkloadProcessor_aa8912ff5f8a6037f999d6aa4f59d366f}} 
+\index{Workload\+Processor@{Workload\+Processor}!Register\+Workload\+Processor@{Register\+Workload\+Processor}}
+\index{Register\+Workload\+Processor@{Register\+Workload\+Processor}!Workload\+Processor@{Workload\+Processor}}
+\subsubsection{\texorpdfstring{Register\+Workload\+Processor()}{RegisterWorkloadProcessor()}}
+{\footnotesize\ttfamily \hyperlink{classWorkloadProcessor}{Workload\+Processor} $\ast$ Workload\+Processor\+::\+Register\+Workload\+Processor (\begin{DoxyParamCaption}\item[{std\+::string}]{workload\+\_\+id,  }\item[{\hyperlink{classWorkloadProcessor}{Workload\+Processor} $\ast$}]{processor }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+Register a \hyperlink{classWorkloadProcessor}{Workload\+Processor}. Used by the workloads to register themselves
+
+
+\begin{DoxyParams}{Parameters}
+{\em workload\+\_\+id} & Workload identifier \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Pointer to \hyperlink{classWorkloadProcessor}{Workload\+Processor} 
+\end{DoxyReturn}
+
+
+\subsection{Member Data Documentation}
+\mbox{\Hypertarget{classWorkloadProcessor_a7d27005403d3bead28be816490ddf6a2}\label{classWorkloadProcessor_a7d27005403d3bead28be816490ddf6a2}} 
+\index{Workload\+Processor@{Workload\+Processor}!workload\+\_\+processor\+\_\+table@{workload\+\_\+processor\+\_\+table}}
+\index{workload\+\_\+processor\+\_\+table@{workload\+\_\+processor\+\_\+table}!Workload\+Processor@{Workload\+Processor}}
+\subsubsection{\texorpdfstring{workload\+\_\+processor\+\_\+table}{workload\_processor\_table}}
+{\footnotesize\ttfamily std\+::map$<$ std\+::string, \hyperlink{classWorkloadProcessor}{Workload\+Processor} $\ast$ $>$ Workload\+Processor\+::workload\+\_\+processor\+\_\+table\hspace{0.3cm}{\ttfamily [static]}}
+
+Mapping between workload id and \hyperlink{classWorkloadProcessor}{Workload\+Processor}. 
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+/home/dano/git/avalon/common/sgx\+\_\+workload/workload/\hyperlink{workload__processor_8h}{workload\+\_\+processor.\+h}\item 
+/home/dano/git/avalon/common/sgx\+\_\+workload/workload/\hyperlink{workload__processor_8cpp}{workload\+\_\+processor.\+cpp}\end{DoxyCompactItemize}

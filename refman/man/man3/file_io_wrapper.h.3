@@ -1,0 +1,76 @@
+.TH "/home/dano/git/avalon/common/sgx_workload/iohandler/file_io_wrapper.h" 3 "Wed May 6 2020" "Version 0.5.0.dev1" "Hyperledger Avalon" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+/home/dano/git/avalon/common/sgx_workload/iohandler/file_io_wrapper.h
+.SH SYNOPSIS
+.br
+.PP
+\fC#include <string>\fP
+.br
+
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "std::string \fBRead\fP (std::string file_name)"
+.br
+.ti -1c
+.RI "uint32_t \fBWrite\fP (std::string file_name, std::string data)"
+.br
+.ti -1c
+.RI "uint32_t \fBDelete\fP (std::string file_name)"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+C++ non-class wrapper definitions for Avalon Inside-Out File I/O\&. To use, #include 'file_io_wrapper\&.h' 
+.SH "Function Documentation"
+.PP 
+.SS "uint32_t Delete (std::string file_name)"
+Delete a file named file_name\&. Return the integer status (0 is success, non-0 is failure)\&.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIfile_name\fP Name of the file to delete 
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+Status of operation (0 on success, non-0 on failure) 
+.RE
+.PP
+
+.SS "std::string Read (std::string file_name)"
+Read a file named file_name and return the contents in a string\&. Return an empty string ('') on failure\&.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIfile_name\fP Name of the file to be read 
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+String containing file contents 
+.RE
+.PP
+
+.SS "uint32_t Write (std::string file_name, std::string data)"
+Write the contents of string data to a file named file_name\&. Return the integer status (0 is success, non-0 is failure)\&.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIfile_name\fP Name of the file to write 
+.br
+\fIdata\fP Contents of file to write 
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+Status of operation (0 on success, non-0 on failure) 
+.RE
+.PP
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Hyperledger Avalon from the source code\&.

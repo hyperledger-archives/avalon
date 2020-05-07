@@ -1,0 +1,132 @@
+\hypertarget{types_8h}{}\section{/home/dano/git/avalon/common/cpp/types.h File Reference}
+\label{types_8h}\index{/home/dano/git/avalon/common/cpp/types.\+h@{/home/dano/git/avalon/common/cpp/types.\+h}}
+{\ttfamily \#include $<$stdint.\+h$>$}\newline
+{\ttfamily \#include $<$string$>$}\newline
+{\ttfamily \#include $<$vector$>$}\newline
+{\ttfamily \#include $<$list$>$}\newline
+Include dependency graph for types.\+h\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=298pt]{types_8h__incl}
+\end{center}
+\end{figure}
+This graph shows which files directly or indirectly include this file\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{types_8h__dep__incl}
+\end{center}
+\end{figure}
+\subsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+class \hyperlink{classStringArray}{String\+Array}
+\end{DoxyCompactItemize}
+\subsection*{Typedefs}
+\begin{DoxyCompactItemize}
+\item 
+typedef std\+::vector$<$ uint8\+\_\+t $>$ \hyperlink{types_8h_a35da937e2331acce98d47f44892f4a76}{Byte\+Array}
+\item 
+typedef std\+::string \hyperlink{types_8h_afb58b05103180e3d86a61e706df355ef}{Base64\+Encoded\+String}
+\item 
+typedef std\+::string \hyperlink{types_8h_a570efb2a11324042261b5478c6e5c866}{Hex\+Encoded\+String}
+\end{DoxyCompactItemize}
+\subsection*{Enumerations}
+\begin{DoxyCompactItemize}
+\item 
+enum \hyperlink{types_8h_a92704130155612cfd69d7f31f7564fb5}{Enclave\+Type} \{ {\bfseries S\+I\+N\+G\+L\+E\+T\+O\+N\+\_\+\+E\+N\+C\+L\+A\+VE} = 1, 
+{\bfseries K\+M\+E\+\_\+\+E\+N\+C\+L\+A\+VE} = 2, 
+{\bfseries W\+P\+E\+\_\+\+E\+N\+C\+L\+A\+VE} = 3
+ \}
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+std\+::string \hyperlink{types_8h_aa8672c277e7ca299e9270de593c211ed}{Byte\+Array\+To\+String} (const \hyperlink{types_8h_a35da937e2331acce98d47f44892f4a76}{Byte\+Array} \&in\+Array)
+\item 
+\hyperlink{classStringArray}{String\+Array} \hyperlink{types_8h_acdfbe9a632817136907bd79474fcf782}{Byte\+Array\+To\+String\+Array} (const \hyperlink{types_8h_a35da937e2331acce98d47f44892f4a76}{Byte\+Array} \&in\+Array)
+\item 
+\hyperlink{types_8h_afb58b05103180e3d86a61e706df355ef}{Base64\+Encoded\+String} \hyperlink{types_8h_af62acc63ae43708b7a8e5a278369b5a3}{Byte\+Array\+To\+Base64\+Encoded\+String} (const \hyperlink{types_8h_a35da937e2331acce98d47f44892f4a76}{Byte\+Array} \&buf)
+\item 
+\hyperlink{types_8h_a35da937e2331acce98d47f44892f4a76}{Byte\+Array} \hyperlink{types_8h_a964845aff0af6850394f7414ead821af}{Base64\+Encoded\+String\+To\+Byte\+Array} (const \hyperlink{types_8h_afb58b05103180e3d86a61e706df355ef}{Base64\+Encoded\+String} \&encoded)
+\item 
+\hyperlink{types_8h_a570efb2a11324042261b5478c6e5c866}{Hex\+Encoded\+String} \hyperlink{types_8h_a06d5469edbaa5ef64aa7bb0a8ea0ef47}{Byte\+Array\+To\+Hex\+Encoded\+String} (const \hyperlink{types_8h_a35da937e2331acce98d47f44892f4a76}{Byte\+Array} \&buf)
+\item 
+\hyperlink{types_8h_a35da937e2331acce98d47f44892f4a76}{Byte\+Array} \hyperlink{types_8h_a6210596dae7e20fbba67ad15197f3cf9}{Hex\+Encoded\+String\+To\+Byte\+Array} (const \hyperlink{types_8h_a570efb2a11324042261b5478c6e5c866}{Hex\+Encoded\+String} \&encoded)
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Basic storage types used by Avalon. Avalon string utilities, including base 64, hex, and byte array conversion. 
+
+\subsection{Typedef Documentation}
+\mbox{\Hypertarget{types_8h_afb58b05103180e3d86a61e706df355ef}\label{types_8h_afb58b05103180e3d86a61e706df355ef}} 
+\index{types.\+h@{types.\+h}!Base64\+Encoded\+String@{Base64\+Encoded\+String}}
+\index{Base64\+Encoded\+String@{Base64\+Encoded\+String}!types.\+h@{types.\+h}}
+\subsubsection{\texorpdfstring{Base64\+Encoded\+String}{Base64EncodedString}}
+{\footnotesize\ttfamily typedef std\+::string \hyperlink{types_8h_afb58b05103180e3d86a61e706df355ef}{Base64\+Encoded\+String}}
+
+Type for printable base64 encoded string. May include \textquotesingle{}=\textquotesingle{} padding characters. No whitespace, header line, or footer line. For example, S\+Hlw\+Z\+X\+Js\+Z\+W\+Rn\+Z\+XI= \mbox{\Hypertarget{types_8h_a35da937e2331acce98d47f44892f4a76}\label{types_8h_a35da937e2331acce98d47f44892f4a76}} 
+\index{types.\+h@{types.\+h}!Byte\+Array@{Byte\+Array}}
+\index{Byte\+Array@{Byte\+Array}!types.\+h@{types.\+h}}
+\subsubsection{\texorpdfstring{Byte\+Array}{ByteArray}}
+{\footnotesize\ttfamily typedef std\+::vector$<$uint8\+\_\+t$>$ \hyperlink{types_8h_a35da937e2331acce98d47f44892f4a76}{Byte\+Array}}
+
+Vector type for binary unformatted data. \mbox{\Hypertarget{types_8h_a570efb2a11324042261b5478c6e5c866}\label{types_8h_a570efb2a11324042261b5478c6e5c866}} 
+\index{types.\+h@{types.\+h}!Hex\+Encoded\+String@{Hex\+Encoded\+String}}
+\index{Hex\+Encoded\+String@{Hex\+Encoded\+String}!types.\+h@{types.\+h}}
+\subsubsection{\texorpdfstring{Hex\+Encoded\+String}{HexEncodedString}}
+{\footnotesize\ttfamily typedef std\+::string \hyperlink{types_8h_a570efb2a11324042261b5478c6e5c866}{Hex\+Encoded\+String}}
+
+Type for printable hex encoded string. For example, 2\+D81454\+D9\+C59\+D73867\+D65\+C0\+F\+C\+C98143\+D4\+B6\+F1\+B0\+B\+D\+B7\+E\+B04\+E\+F\+E\+D72697\+F462309C 
+
+\subsection{Enumeration Type Documentation}
+\mbox{\Hypertarget{types_8h_a92704130155612cfd69d7f31f7564fb5}\label{types_8h_a92704130155612cfd69d7f31f7564fb5}} 
+\index{types.\+h@{types.\+h}!Enclave\+Type@{Enclave\+Type}}
+\index{Enclave\+Type@{Enclave\+Type}!types.\+h@{types.\+h}}
+\subsubsection{\texorpdfstring{Enclave\+Type}{EnclaveType}}
+{\footnotesize\ttfamily enum \hyperlink{types_8h_a92704130155612cfd69d7f31f7564fb5}{Enclave\+Type}}
+
+Avalon worker enclave Type (singleton, K\+ME, W\+PE) 
+
+\subsection{Function Documentation}
+\mbox{\Hypertarget{types_8h_a964845aff0af6850394f7414ead821af}\label{types_8h_a964845aff0af6850394f7414ead821af}} 
+\index{types.\+h@{types.\+h}!Base64\+Encoded\+String\+To\+Byte\+Array@{Base64\+Encoded\+String\+To\+Byte\+Array}}
+\index{Base64\+Encoded\+String\+To\+Byte\+Array@{Base64\+Encoded\+String\+To\+Byte\+Array}!types.\+h@{types.\+h}}
+\subsubsection{\texorpdfstring{Base64\+Encoded\+String\+To\+Byte\+Array()}{Base64EncodedStringToByteArray()}}
+{\footnotesize\ttfamily \hyperlink{types_8h_a35da937e2331acce98d47f44892f4a76}{Byte\+Array} Base64\+Encoded\+String\+To\+Byte\+Array (\begin{DoxyParamCaption}\item[{const \hyperlink{types_8h_afb58b05103180e3d86a61e706df355ef}{Base64\+Encoded\+String} \&}]{encoded }\end{DoxyParamCaption})}
+
+Simple conversion from Base64\+Encoded\+String to Byte\+Array. \mbox{\Hypertarget{types_8h_af62acc63ae43708b7a8e5a278369b5a3}\label{types_8h_af62acc63ae43708b7a8e5a278369b5a3}} 
+\index{types.\+h@{types.\+h}!Byte\+Array\+To\+Base64\+Encoded\+String@{Byte\+Array\+To\+Base64\+Encoded\+String}}
+\index{Byte\+Array\+To\+Base64\+Encoded\+String@{Byte\+Array\+To\+Base64\+Encoded\+String}!types.\+h@{types.\+h}}
+\subsubsection{\texorpdfstring{Byte\+Array\+To\+Base64\+Encoded\+String()}{ByteArrayToBase64EncodedString()}}
+{\footnotesize\ttfamily \hyperlink{types_8h_afb58b05103180e3d86a61e706df355ef}{Base64\+Encoded\+String} Byte\+Array\+To\+Base64\+Encoded\+String (\begin{DoxyParamCaption}\item[{const \hyperlink{types_8h_a35da937e2331acce98d47f44892f4a76}{Byte\+Array} \&}]{buf }\end{DoxyParamCaption})}
+
+Simple conversion from Byte\+Array to Base64\+Encoded\+String. \mbox{\Hypertarget{types_8h_a06d5469edbaa5ef64aa7bb0a8ea0ef47}\label{types_8h_a06d5469edbaa5ef64aa7bb0a8ea0ef47}} 
+\index{types.\+h@{types.\+h}!Byte\+Array\+To\+Hex\+Encoded\+String@{Byte\+Array\+To\+Hex\+Encoded\+String}}
+\index{Byte\+Array\+To\+Hex\+Encoded\+String@{Byte\+Array\+To\+Hex\+Encoded\+String}!types.\+h@{types.\+h}}
+\subsubsection{\texorpdfstring{Byte\+Array\+To\+Hex\+Encoded\+String()}{ByteArrayToHexEncodedString()}}
+{\footnotesize\ttfamily \hyperlink{types_8h_a570efb2a11324042261b5478c6e5c866}{Hex\+Encoded\+String} Byte\+Array\+To\+Hex\+Encoded\+String (\begin{DoxyParamCaption}\item[{const \hyperlink{types_8h_a35da937e2331acce98d47f44892f4a76}{Byte\+Array} \&}]{buf }\end{DoxyParamCaption})}
+
+Simple conversion from Byte\+Array to Hex\+Encoded\+String. \mbox{\Hypertarget{types_8h_aa8672c277e7ca299e9270de593c211ed}\label{types_8h_aa8672c277e7ca299e9270de593c211ed}} 
+\index{types.\+h@{types.\+h}!Byte\+Array\+To\+String@{Byte\+Array\+To\+String}}
+\index{Byte\+Array\+To\+String@{Byte\+Array\+To\+String}!types.\+h@{types.\+h}}
+\subsubsection{\texorpdfstring{Byte\+Array\+To\+String()}{ByteArrayToString()}}
+{\footnotesize\ttfamily std\+::string Byte\+Array\+To\+String (\begin{DoxyParamCaption}\item[{const \hyperlink{types_8h_a35da937e2331acce98d47f44892f4a76}{Byte\+Array} \&}]{in\+Array }\end{DoxyParamCaption})}
+
+Simple conversion from Byte\+Array to std\+::string \mbox{\Hypertarget{types_8h_acdfbe9a632817136907bd79474fcf782}\label{types_8h_acdfbe9a632817136907bd79474fcf782}} 
+\index{types.\+h@{types.\+h}!Byte\+Array\+To\+String\+Array@{Byte\+Array\+To\+String\+Array}}
+\index{Byte\+Array\+To\+String\+Array@{Byte\+Array\+To\+String\+Array}!types.\+h@{types.\+h}}
+\subsubsection{\texorpdfstring{Byte\+Array\+To\+String\+Array()}{ByteArrayToStringArray()}}
+{\footnotesize\ttfamily \hyperlink{classStringArray}{String\+Array} Byte\+Array\+To\+String\+Array (\begin{DoxyParamCaption}\item[{const \hyperlink{types_8h_a35da937e2331acce98d47f44892f4a76}{Byte\+Array} \&}]{in\+Array }\end{DoxyParamCaption})}
+
+Conversion from Byte\+Array to \hyperlink{classStringArray}{String\+Array}. \mbox{\Hypertarget{types_8h_a6210596dae7e20fbba67ad15197f3cf9}\label{types_8h_a6210596dae7e20fbba67ad15197f3cf9}} 
+\index{types.\+h@{types.\+h}!Hex\+Encoded\+String\+To\+Byte\+Array@{Hex\+Encoded\+String\+To\+Byte\+Array}}
+\index{Hex\+Encoded\+String\+To\+Byte\+Array@{Hex\+Encoded\+String\+To\+Byte\+Array}!types.\+h@{types.\+h}}
+\subsubsection{\texorpdfstring{Hex\+Encoded\+String\+To\+Byte\+Array()}{HexEncodedStringToByteArray()}}
+{\footnotesize\ttfamily \hyperlink{types_8h_a35da937e2331acce98d47f44892f4a76}{Byte\+Array} Hex\+Encoded\+String\+To\+Byte\+Array (\begin{DoxyParamCaption}\item[{const \hyperlink{types_8h_a570efb2a11324042261b5478c6e5c866}{Hex\+Encoded\+String} \&}]{encoded }\end{DoxyParamCaption})}
+
+Simple conversion from Hex\+Encoded\+String to Byte\+Array. Throws Value\+Error. 

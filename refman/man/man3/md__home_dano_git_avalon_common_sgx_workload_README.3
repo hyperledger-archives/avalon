@@ -1,0 +1,25 @@
+.TH "md__home_dano_git_avalon_common_sgx_workload_README" 3 "Wed May 6 2020" "Version 0.5.0.dev1" "Hyperledger Avalon" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+md__home_dano_git_avalon_common_sgx_workload_READMEREADME 
+ \- 
+.SS "Purpose of Common "
+.PP
+The common directory contains source code shared by trusted (Intel SGX Enclave) code and different workloads(Example workloads)\&.
+.PP
+.SS "Dependencies: "
+.PP
+.IP "1." 4
+SGX SDK https://software.intel.com/en-us/sgx-sdk/download
+.IP "2." 4
+SGX OpenSSL library built from OpenSSL 1\&.1 https://github.com/intel/intel-sgx-ssl
+.PP
+.PP
+.SS "Source Directories "
+.PP
+Dir Content 
+.PP
+ \fCsgx/iohandler/\fP *\&.cpp,*\&.h files are custom iohandlers which help workloads to execute IO operations from the Intel SGX enclave
+.PP
+\fCsgx/workload/\fP work_order_data\&.cpp,\fBwork_order_data\&.h\fP files are wrapper files for work order data \fBworkload_processor\&.cpp\fP, \fBworkload_processor\&.h\fP are workload processor which overrides function exposed by work order interface and also facilitates auto registration of workloads 

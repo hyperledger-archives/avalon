@@ -1,0 +1,63 @@
+.TH "tcf::crypto::constants" 3 "Wed May 6 2020" "Version 0.5.0.dev1" "Hyperledger Avalon" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+tcf::crypto::constants
+.SH SYNOPSIS
+.br
+.PP
+.SS "Variables"
+
+.in +1c
+.ti -1c
+.RI "const int \fBERR_BUF_LEN\fP = 130"
+.br
+.ti -1c
+.RI "const int \fBRSA_KEY_SIZE\fP = 2048"
+.br
+.ti -1c
+.RI "const int \fBRSA_PADDING_SIZE\fP = 41"
+.br
+.ti -1c
+.RI "const int \fBRSA_PADDING_SCHEME\fP = RSA_PKCS1_OAEP_PADDING"
+.br
+.ti -1c
+.RI "constexpr int \fBRSA_PLAINTEXT_LEN\fP"
+.br
+.ti -1c
+.RI "const int \fBCURVE\fP = NID_secp256k1"
+.br
+.ti -1c
+.RI "const int \fBMAX_SIG_SIZE\fP = 72"
+.br
+.ti -1c
+.RI "const int \fBIV_LEN\fP = 12"
+.br
+.ti -1c
+.RI "const int \fBSYM_KEY_LEN\fP = 32"
+.br
+.ti -1c
+.RI "const int \fBTAG_LEN\fP = 16"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+AES-GCM 256 for authenticated encryption\&. 
+.SH "Variable Documentation"
+.PP 
+.SS "const int tcf::crypto::constants::IV_LEN = 12"
+AES-GCM IV length (96 bits) 
+.SS "constexpr int tcf::crypto::constants::RSA_PLAINTEXT_LEN"
+\fBInitial value:\fP
+.PP
+.nf
+=
+            ((RSA_KEY_SIZE - RSA_PADDING_SIZE) >> 3)
+.fi
+.SS "const int tcf::crypto::constants::SYM_KEY_LEN = 32"
+AES-GCM Key length (256 bits) 
+.SS "const int tcf::crypto::constants::TAG_LEN = 16"
+AES-GCM TAG length (128 bits) 
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Hyperledger Avalon from the source code\&.

@@ -1,0 +1,76 @@
+.TH "tcf::crypto::pkenc::PublicKey" 3 "Wed May 6 2020" "Version 0.5.0.dev1" "Hyperledger Avalon" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+tcf::crypto::pkenc::PublicKey
+.SH SYNOPSIS
+.br
+.PP
+.SS "Public Member Functions"
+
+.in +1c
+.ti -1c
+.RI "\fBPublicKey\fP ()"
+.br
+.ti -1c
+.RI "\fBPublicKey\fP (const \fBPublicKey\fP &publicKey)"
+.br
+.ti -1c
+.RI "\fBPublicKey\fP (\fBPublicKey\fP &&publicKey)"
+.br
+.ti -1c
+.RI "\fBPublicKey\fP (const \fBPrivateKey\fP &privateKey)"
+.br
+.ti -1c
+.RI "\fBPublicKey\fP (const std::string &encoded)"
+.br
+.ti -1c
+.RI "\fB~PublicKey\fP ()"
+.br
+.ti -1c
+.RI "\fBPublicKey\fP & \fBoperator=\fP (const \fBPublicKey\fP &publicKey)"
+.br
+.ti -1c
+.RI "void \fBDeserialize\fP (const std::string &encoded)"
+.br
+.ti -1c
+.RI "std::string \fBSerialize\fP () const"
+.br
+.ti -1c
+.RI "\fBByteArray\fP \fBEncryptMessage\fP (const \fBByteArray\fP &message) const"
+.br
+.in -1c
+.SH "Constructor & Destructor Documentation"
+.PP 
+.SS "tcf::crypto::pkenc::PublicKey::PublicKey ()"
+\fBPublicKey\fP constructor\&. 
+.SS "tcf::crypto::pkenc::PublicKey::PublicKey (const std::string & encoded)"
+Constructor from encoded string\&. Throws RuntimeError, ValueError\&. 
+.SS "tcf::crypto::pkenc::PublicKey::~PublicKey ()"
+\fBPublicKey\fP destructor\&. 
+.SH "Member Function Documentation"
+.PP 
+.SS "void tcf::crypto::pkenc::PublicKey::Deserialize (const std::string & encoded)"
+Deserialize Public Key\&. Throws RuntimeError, ValueError\&. 
+.SS "\fBByteArray\fP tcf::crypto::pkenc::PublicKey::EncryptMessage (const \fBByteArray\fP & message) const"
+Encrypt message with RSA public key and return ciphertext\&. Throws RuntimeError\&.
+.PP
+\fBParameters:\fP
+.RS 4
+\fImessage\fP ByteArray containing raw binary plaintext 
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+ByteArray containing raw binary ciphertext 
+.RE
+.PP
+
+.SS "pcrypto::pkenc::PublicKey & tcf::crypto::pkenc::PublicKey::operator= (const \fBPublicKey\fP & publicKey)"
+Assignment operator = overload\&. Throws RuntimeError\&. 
+.SS "std::string tcf::crypto::pkenc::PublicKey::Serialize () const"
+Serialize Public Key\&. Throws RuntimeError\&. 
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Hyperledger Avalon from the source code\&.

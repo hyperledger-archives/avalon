@@ -1,0 +1,67 @@
+\hypertarget{hex__string_8h}{}\section{/home/dano/git/avalon/common/cpp/hex\+\_\+string.h File Reference}
+\label{hex__string_8h}\index{/home/dano/git/avalon/common/cpp/hex\+\_\+string.\+h@{/home/dano/git/avalon/common/cpp/hex\+\_\+string.\+h}}
+{\ttfamily \#include $<$stdint.\+h$>$}\newline
+{\ttfamily \#include $<$string$>$}\newline
+{\ttfamily \#include $<$vector$>$}\newline
+Include dependency graph for hex\+\_\+string.\+h\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=251pt]{hex__string_8h__incl}
+\end{center}
+\end{figure}
+This graph shows which files directly or indirectly include this file\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{hex__string_8h__dep__incl}
+\end{center}
+\end{figure}
+\subsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define \hyperlink{hex__string_8h_a8846009ec7d3028f7f8b84cc5d9fbead}{H\+E\+X\+\_\+\+S\+T\+R\+I\+N\+G\+\_\+\+S\+I\+ZE}(x)~(static\+\_\+cast$<$size\+\_\+t$>$(((x) $\ast$ 2)))
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+std\+::vector$<$ uint8\+\_\+t $>$ {\bfseries tcf\+::\+Hex\+String\+To\+Binary} (const std\+::string \&in\+Hex\+String)
+\item 
+\mbox{\Hypertarget{hex__string_8cpp_acbb20405a6434fe17da98b7a9b798120}\label{hex__string_8cpp_acbb20405a6434fe17da98b7a9b798120}} 
+void {\bfseries tcf\+::\+Hex\+String\+To\+Binary} (uint8\+\_\+t $\ast$out\+Binary\+Data, size\+\_\+t in\+Binary\+Data\+Length, const std\+::string \&in\+Hex\+String)
+\item 
+std\+::string {\bfseries tcf\+::\+Binary\+To\+Hex\+String} (const std\+::vector$<$ uint8\+\_\+t $>$ \&in\+Binary\+Data)
+\item 
+\mbox{\Hypertarget{hex__string_8cpp_a339d6f4029385c42648a76531f0fe037}\label{hex__string_8cpp_a339d6f4029385c42648a76531f0fe037}} 
+std\+::string {\bfseries tcf\+::\+Binary\+To\+Hex\+String} (const uint8\+\_\+t $\ast$in\+Binary\+Data, size\+\_\+t in\+Binary\+Data\+Length)
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Avalon hexadecimal string conversion functions. 
+
+\subsection{Macro Definition Documentation}
+\mbox{\Hypertarget{hex__string_8h_a8846009ec7d3028f7f8b84cc5d9fbead}\label{hex__string_8h_a8846009ec7d3028f7f8b84cc5d9fbead}} 
+\index{hex\+\_\+string.\+h@{hex\+\_\+string.\+h}!H\+E\+X\+\_\+\+S\+T\+R\+I\+N\+G\+\_\+\+S\+I\+ZE@{H\+E\+X\+\_\+\+S\+T\+R\+I\+N\+G\+\_\+\+S\+I\+ZE}}
+\index{H\+E\+X\+\_\+\+S\+T\+R\+I\+N\+G\+\_\+\+S\+I\+ZE@{H\+E\+X\+\_\+\+S\+T\+R\+I\+N\+G\+\_\+\+S\+I\+ZE}!hex\+\_\+string.\+h@{hex\+\_\+string.\+h}}
+\subsubsection{\texorpdfstring{H\+E\+X\+\_\+\+S\+T\+R\+I\+N\+G\+\_\+\+S\+I\+ZE}{HEX\_STRING\_SIZE}}
+{\footnotesize\ttfamily \#define H\+E\+X\+\_\+\+S\+T\+R\+I\+N\+G\+\_\+\+S\+I\+ZE(\begin{DoxyParamCaption}\item[{}]{x }\end{DoxyParamCaption})~(static\+\_\+cast$<$size\+\_\+t$>$(((x) $\ast$ 2)))}
+
+This macro calculates the length of the actual data portion of the hex-\/string encoding of a buffer with x bytes P\+L\+US the additional byte needed for the string terminator. 
+
+\subsection{Function Documentation}
+\mbox{\Hypertarget{hex__string_8cpp_file_a7d16d95e7f9fd2ca509c47cf67081343}\label{hex__string_8cpp_file_a7d16d95e7f9fd2ca509c47cf67081343}} 
+\index{hex\+\_\+string.\+h@{hex\+\_\+string.\+h}!Binary\+To\+Hex\+String@{Binary\+To\+Hex\+String}}
+\index{Binary\+To\+Hex\+String@{Binary\+To\+Hex\+String}!hex\+\_\+string.\+h@{hex\+\_\+string.\+h}}
+\subsubsection{\texorpdfstring{Binary\+To\+Hex\+String()}{BinaryToHexString()}}
+{\footnotesize\ttfamily std\+::string tcf\+::\+Binary\+To\+Hex\+String (\begin{DoxyParamCaption}\item[{const std\+::vector$<$ uint8\+\_\+t $>$ \&}]{in\+Binary\+Data }\end{DoxyParamCaption})}
+
+Convert an array of bytes (represented as either a std\+::vector of bytes or a raw array) to a hex string. \mbox{\Hypertarget{hex__string_8cpp_file_a11798a48e1489595235878a86b515cdc}\label{hex__string_8cpp_file_a11798a48e1489595235878a86b515cdc}} 
+\index{hex\+\_\+string.\+h@{hex\+\_\+string.\+h}!Hex\+String\+To\+Binary@{Hex\+String\+To\+Binary}}
+\index{Hex\+String\+To\+Binary@{Hex\+String\+To\+Binary}!hex\+\_\+string.\+h@{hex\+\_\+string.\+h}}
+\subsubsection{\texorpdfstring{Hex\+String\+To\+Binary()}{HexStringToBinary()}}
+{\footnotesize\ttfamily std\+::vector$<$ uint8\+\_\+t $>$ tcf\+::\+Hex\+String\+To\+Binary (\begin{DoxyParamCaption}\item[{const std\+::string \&}]{in\+Hex\+String }\end{DoxyParamCaption})}
+
+Convert a hex string (i.\+e., a string of characters with values between \textquotesingle{}0\textquotesingle{}-\/\textquotesingle{}9\textquotesingle{}, \textquotesingle{}A\textquotesingle{}-\/\textquotesingle{}F\textquotesingle{}) to an array of bytes. 

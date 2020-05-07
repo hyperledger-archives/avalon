@@ -1,0 +1,47 @@
+.TH "/home/dano/git/avalon/common/cpp/tcf_error.h" 3 "Wed May 6 2020" "Version 0.5.0.dev1" "Hyperledger Avalon" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+/home/dano/git/avalon/common/cpp/tcf_error.h
+.SH SYNOPSIS
+.br
+.PP
+\fC#include <stdlib\&.h>\fP
+.br
+
+.SS "Typedefs"
+
+.in +1c
+.ti -1c
+.RI "typedef void(* \fBtcf_log_t\fP) (tcf_log_level_t, const char *message)"
+.br
+.in -1c
+.SS "Enumerations"
+
+.in +1c
+.ti -1c
+.RI "enum \fBtcf_err_t\fP { \fBTCF_SUCCESS\fP = 0, \fBTCF_ERR_UNKNOWN\fP = -1, \fBTCF_ERR_MEMORY\fP = -2, \fBTCF_ERR_IO\fP = -3, \fBTCF_ERR_RUNTIME\fP = -4, \fBTCF_ERR_INDEX\fP = -5, \fBTCF_ERR_DIVIDE_BY_ZERO\fP = -6, \fBTCF_ERR_OVERFLOW\fP = -7, \fBTCF_ERR_VALUE\fP = -8, \fBTCF_ERR_SYSTEM\fP = -9, \fBTCF_ERR_SYSTEM_BUSY\fP = -10, \fBTCF_ERR_CRYPTO\fP = -11, \fBTCF_ERR_INVALID_WORKLOAD\fP = -12 }"
+.br
+.ti -1c
+.RI "enum \fBtcf_log_level_t\fP { \fBTCF_LOG_DEBUG\fP = 0, \fBTCF_LOG_INFO\fP = 1, \fBTCF_LOG_WARNING\fP = 2, \fBTCF_LOG_ERROR\fP = 3, \fBTCF_LOG_CRITICAL\fP = 4 }"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+Avalon logging levels and error codes\&. 
+.SH "Enumeration Type Documentation"
+.PP 
+.SS "enum \fBtcf_err_t\fP"
+
+.PP
+\fBEnumerator\fP
+.in +1c
+.TP
+\fB\fITCF_ERR_SYSTEM_BUSY \fP\fP
+Indicates that the system is busy and the operation may be retried again\&. If retries fail this should be converted to a TCF_ERR_SYSTEM for reporting\&. 
+.TP
+\fB\fITCF_ERR_INVALID_WORKLOAD \fP\fP
+Invalid workload ID 
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Hyperledger Avalon from the source code\&.

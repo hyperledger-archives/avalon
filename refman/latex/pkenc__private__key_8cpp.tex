@@ -1,0 +1,61 @@
+\hypertarget{pkenc__private__key_8cpp}{}\section{/home/dano/git/avalon/common/cpp/crypto/pkenc\+\_\+private\+\_\+key.cpp File Reference}
+\label{pkenc__private__key_8cpp}\index{/home/dano/git/avalon/common/cpp/crypto/pkenc\+\_\+private\+\_\+key.\+cpp@{/home/dano/git/avalon/common/cpp/crypto/pkenc\+\_\+private\+\_\+key.\+cpp}}
+{\ttfamily \#include \char`\"{}pkenc\+\_\+private\+\_\+key.\+h\char`\"{}}\newline
+{\ttfamily \#include $<$openssl/err.\+h$>$}\newline
+{\ttfamily \#include $<$openssl/pem.\+h$>$}\newline
+{\ttfamily \#include $<$openssl/rand.\+h$>$}\newline
+{\ttfamily \#include $<$openssl/sha.\+h$>$}\newline
+{\ttfamily \#include $<$algorithm$>$}\newline
+{\ttfamily \#include $<$memory$>$}\newline
+{\ttfamily \#include $<$vector$>$}\newline
+{\ttfamily \#include \char`\"{}base64.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}crypto\+\_\+shared.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}error.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}hex\+\_\+string.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}pkenc.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}pkenc\+\_\+public\+\_\+key.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}t\+Sgx\+S\+S\+L\+\_\+api.\+h\char`\"{}}\newline
+Include dependency graph for pkenc\+\_\+private\+\_\+key.\+cpp\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{pkenc__private__key_8cpp__incl}
+\end{center}
+\end{figure}
+\subsection*{Typedefs}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{pkenc__private__key_8cpp_a2a440312fadd20cb03298943b235141b}\label{pkenc__private__key_8cpp_a2a440312fadd20cb03298943b235141b}} 
+typedef std\+::unique\+\_\+ptr$<$ B\+IO, void($\ast$)(B\+IO $\ast$)$>$ {\bfseries B\+I\+O\+\_\+ptr}
+\item 
+\mbox{\Hypertarget{pkenc__private__key_8cpp_a7fde640c0067af2e1073ac81e98a70fb}\label{pkenc__private__key_8cpp_a7fde640c0067af2e1073ac81e98a70fb}} 
+typedef std\+::unique\+\_\+ptr$<$ E\+V\+P\+\_\+\+C\+I\+P\+H\+E\+R\+\_\+\+C\+TX, void($\ast$)(E\+V\+P\+\_\+\+C\+I\+P\+H\+E\+R\+\_\+\+C\+TX $\ast$)$>$ {\bfseries C\+T\+X\+\_\+ptr}
+\item 
+\mbox{\Hypertarget{pkenc__private__key_8cpp_a65800bacd77b14717f226940805c0259}\label{pkenc__private__key_8cpp_a65800bacd77b14717f226940805c0259}} 
+typedef std\+::unique\+\_\+ptr$<$ B\+N\+\_\+\+C\+TX, void($\ast$)(B\+N\+\_\+\+C\+TX $\ast$)$>$ {\bfseries B\+N\+\_\+\+C\+T\+X\+\_\+ptr}
+\item 
+\mbox{\Hypertarget{pkenc__private__key_8cpp_ae6ad7240c30eea25fb77d0b2f75405b1}\label{pkenc__private__key_8cpp_ae6ad7240c30eea25fb77d0b2f75405b1}} 
+typedef std\+::unique\+\_\+ptr$<$ B\+I\+G\+N\+UM, void($\ast$)(B\+I\+G\+N\+UM $\ast$)$>$ {\bfseries B\+I\+G\+N\+U\+M\+\_\+ptr}
+\item 
+\mbox{\Hypertarget{pkenc__private__key_8cpp_af3ccf89c1ca91b5d7740e920e182f904}\label{pkenc__private__key_8cpp_af3ccf89c1ca91b5d7740e920e182f904}} 
+typedef std\+::unique\+\_\+ptr$<$ R\+SA, void($\ast$)(R\+SA $\ast$)$>$ {\bfseries R\+S\+A\+\_\+ptr}
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+R\+SA $\ast$ \hyperlink{pkenc__private__key_8cpp_a380a60c69dab40b3b09e352c391b0650}{deserialize\+R\+S\+A\+Private\+Key} (const std\+::string \&encoded)
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Avalon R\+SA public key generation, serialization, and decryption functions. 
+
+\subsection{Function Documentation}
+\mbox{\Hypertarget{pkenc__private__key_8cpp_a380a60c69dab40b3b09e352c391b0650}\label{pkenc__private__key_8cpp_a380a60c69dab40b3b09e352c391b0650}} 
+\index{pkenc\+\_\+private\+\_\+key.\+cpp@{pkenc\+\_\+private\+\_\+key.\+cpp}!deserialize\+R\+S\+A\+Private\+Key@{deserialize\+R\+S\+A\+Private\+Key}}
+\index{deserialize\+R\+S\+A\+Private\+Key@{deserialize\+R\+S\+A\+Private\+Key}!pkenc\+\_\+private\+\_\+key.\+cpp@{pkenc\+\_\+private\+\_\+key.\+cpp}}
+\subsubsection{\texorpdfstring{deserialize\+R\+S\+A\+Private\+Key()}{deserializeRSAPrivateKey()}}
+{\footnotesize\ttfamily R\+SA$\ast$ deserialize\+R\+S\+A\+Private\+Key (\begin{DoxyParamCaption}\item[{const std\+::string \&}]{encoded }\end{DoxyParamCaption})}
+
+Utility function\+: deserialize R\+SA Private Key. Throws Runtime\+Error, Value\+Error. 

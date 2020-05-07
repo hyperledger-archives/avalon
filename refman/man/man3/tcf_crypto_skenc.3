@@ -1,0 +1,50 @@
+.TH "tcf::crypto::skenc" 3 "Wed May 6 2020" "Version 0.5.0.dev1" "Hyperledger Avalon" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+tcf::crypto::skenc
+.SH SYNOPSIS
+.br
+.PP
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "\fBByteArray\fP \fBGenerateKey\fP ()"
+.br
+.ti -1c
+.RI "\fBByteArray\fP \fBGenerateIV\fP (const std::string &IVstring=std::string(''))"
+.br
+.ti -1c
+.RI "\fBByteArray\fP \fBEncryptMessage\fP (const \fBByteArray\fP &key, const \fBByteArray\fP &iv, const \fBByteArray\fP &message)"
+.br
+.ti -1c
+.RI "\fBByteArray\fP \fBEncryptMessage\fP (const \fBByteArray\fP &key, const \fBByteArray\fP &message)"
+.br
+.ti -1c
+.RI "\fBByteArray\fP \fBDecryptMessage\fP (const \fBByteArray\fP &key, const \fBByteArray\fP &iv, const \fBByteArray\fP &message)"
+.br
+.ti -1c
+.RI "\fBByteArray\fP \fBDecryptMessage\fP (const \fBByteArray\fP &key, const \fBByteArray\fP &message)"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+Authenticated encryption\&. 
+.SH "Function Documentation"
+.PP 
+.SS "\fBByteArray\fP tcf::crypto::skenc::DecryptMessage (const \fBByteArray\fP & key, const \fBByteArray\fP & iv, const \fBByteArray\fP & message)"
+Throws RuntimeError, ValueError, CryptoError (message authentication failure)\&. 
+.SS "\fBByteArray\fP tcf::crypto::skenc::DecryptMessage (const \fBByteArray\fP & key, const \fBByteArray\fP & message)"
+Throws RuntimeError, ValueError, CryptoError (message authentication failure)\&. Expects IV prepended to message ciphertext\&. 
+.SS "\fBByteArray\fP tcf::crypto::skenc::EncryptMessage (const \fBByteArray\fP & key, const \fBByteArray\fP & iv, const \fBByteArray\fP & message)"
+Throws RuntimeError, ValueError\&. 
+.SS "\fBByteArray\fP tcf::crypto::skenc::EncryptMessage (const \fBByteArray\fP & key, const \fBByteArray\fP & message)"
+Uses random IV prepended the returned ciphertext\&. Throws RuntimeError, ValueError\&. 
+.SS "\fBByteArray\fP tcf::crypto::skenc::GenerateIV (const std::string & IVstring = \fCstd::string('')\fP)"
+Throws RuntimeError\&. 
+.SS "\fBByteArray\fP tcf::crypto::skenc::GenerateKey ()"
+ByteArray here is used to encapsulate raw binary data and does not apply/assume any encoding\&. Throws RuntimeError\&. 
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Hyperledger Avalon from the source code\&.

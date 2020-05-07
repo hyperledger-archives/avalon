@@ -1,0 +1,47 @@
+.TH "/home/dano/git/avalon/common/cpp/crypto/verify_signature.h" 3 "Wed May 6 2020" "Version 0.5.0.dev1" "Hyperledger Avalon" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+/home/dano/git/avalon/common/cpp/crypto/verify_signature.h
+.SH SYNOPSIS
+.br
+.PP
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "bool \fBverify_signature\fP (const char *cert_pem, const char *msg, unsigned int msg_len, const char *signature, unsigned int signature_len)"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+Avalon signature verification\&. 
+.SH "Function Documentation"
+.PP 
+.SS "bool verify_signature (const char * cert_pem, const char * msg, unsigned int msg_len, const char * signature, unsigned int signature_len)"
+Verifies signature of the message by extracting public key from certificate\&.
+.PP
+Verify a signature given a message, signature, and cert\&. Use SHA-256 to hash the message\&.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIcert_pem\fP X\&.509 Certificate to verify with BEGIN end BLOCKS and new lines 
+.br
+\fImsg\fP Message to verify 
+.br
+\fImsg_len\fP Length of msg 
+.br
+\fIsignature\fP Signature to verify message, base64 encoded 
+.br
+\fIsignature_len\fP Length of signature 
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+true on success and false on failure\&. 
+.RE
+.PP
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Hyperledger Avalon from the source code\&.

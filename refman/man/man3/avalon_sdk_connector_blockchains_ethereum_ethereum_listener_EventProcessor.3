@@ -1,0 +1,117 @@
+.TH "avalon_sdk.connector.blockchains.ethereum.ethereum_listener.EventProcessor" 3 "Wed May 6 2020" "Version 0.5.0.dev1" "Hyperledger Avalon" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+avalon_sdk.connector.blockchains.ethereum.ethereum_listener.EventProcessor
+.SH SYNOPSIS
+.br
+.PP
+.SS "Public Member Functions"
+
+.in +1c
+.ti -1c
+.RI "def \fB__init__\fP (self, config)"
+.br
+.ti -1c
+.RI "def \fBlistener\fP (self, event_filter)"
+.br
+.ti -1c
+.RI "def \fBhandler\fP (self, callback, kargs, kwargs)"
+.br
+.ti -1c
+.RI "def \fBsync_handler\fP (self, check_event_callback=None, kargs, kwargs)"
+.br
+.ti -1c
+.RI "def \fBstart\fP (self, event_filter, callback, kargs, kwargs)"
+.br
+.ti -1c
+.RI "def \fBget_event_synchronously\fP (self, event_filter, callback, kargs, kwargs)"
+.br
+.ti -1c
+.RI "def \fBstop\fP (self)"
+.br
+.in -1c
+.SS "Public Attributes"
+
+.in +1c
+.ti -1c
+.RI "\fBqueue\fP"
+.br
+.ti -1c
+.RI "\fBlisteners\fP"
+.br
+.ti -1c
+.RI "\fBhandlers\fP"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+
+.PP
+.nf
+This class provides an event processor to capture events
+then send these events to event listeners.
+
+.fi
+.PP
+ 
+.SH "Member Function Documentation"
+.PP 
+.SS "def avalon_sdk\&.connector\&.blockchains\&.ethereum\&.ethereum_listener\&.EventProcessor\&.get_event_synchronously ( self,  event_filter,  callback,  kargs,  kwargs)"
+
+.PP
+.nf
+Get a single event synchronously using the event_filter
+provided.
+
+Returns an event received for the event_filter used.
+
+.fi
+.PP
+ 
+.SS "def avalon_sdk\&.connector\&.blockchains\&.ethereum\&.ethereum_listener\&.EventProcessor\&.handler ( self,  callback,  kargs,  kwargs)"
+
+.PP
+.nf
+Start event handler to handle events.
+.fi
+.PP
+ 
+.SS "def avalon_sdk\&.connector\&.blockchains\&.ethereum\&.ethereum_listener\&.EventProcessor\&.listener ( self,  event_filter)"
+
+.PP
+.nf
+Listen to new events since the last poll on this filter.
+Although this method uses events, it is not fully asynchronous.
+
+.fi
+.PP
+ 
+.SS "def avalon_sdk\&.connector\&.blockchains\&.ethereum\&.ethereum_listener\&.EventProcessor\&.start ( self,  event_filter,  callback,  kargs,  kwargs)"
+
+.PP
+.nf
+Start event processor in an infinite loop.
+.fi
+.PP
+ 
+.SS "def avalon_sdk\&.connector\&.blockchains\&.ethereum\&.ethereum_listener\&.EventProcessor\&.stop ( self)"
+
+.PP
+.nf
+Stop the event processor that was started with start().
+.fi
+.PP
+ 
+.SS "def avalon_sdk\&.connector\&.blockchains\&.ethereum\&.ethereum_listener\&.EventProcessor\&.sync_handler ( self,  check_event_callback = \fCNone\fP,  kargs,  kwargs)"
+
+.PP
+.nf
+Start a synchronous event handler to handle an event.
+.fi
+.PP
+ 
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Hyperledger Avalon from the source code\&.

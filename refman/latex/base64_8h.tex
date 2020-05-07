@@ -1,0 +1,65 @@
+\hypertarget{base64_8h}{}\section{/home/dano/git/avalon/common/cpp/packages/base64/base64.h File Reference}
+\label{base64_8h}\index{/home/dano/git/avalon/common/cpp/packages/base64/base64.\+h@{/home/dano/git/avalon/common/cpp/packages/base64/base64.\+h}}
+{\ttfamily \#include $<$string$>$}\newline
+{\ttfamily \#include $<$vector$>$}\newline
+Include dependency graph for base64.\+h\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=201pt]{base64_8h__incl}
+\end{center}
+\end{figure}
+This graph shows which files directly or indirectly include this file\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{base64_8h__dep__incl}
+\end{center}
+\end{figure}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+std\+::string \hyperlink{base64_8h_a1fbe4f2559670807558c4e74beaf7719}{base64\+\_\+encode} (const std\+::vector$<$ uint8\+\_\+t $>$ \&raw\+\_\+buffer)
+\item 
+std\+::vector$<$ uint8\+\_\+t $>$ \hyperlink{base64_8h_a0ab8410d4cb2ed6dcf131c18eecbdfa5}{base64\+\_\+decode} (const std\+::string \&encoded\+\_\+string)
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Base64 encode and decode functions. Used to encode/decode between binary data into a printable character format. 
+
+\subsection{Function Documentation}
+\mbox{\Hypertarget{base64_8h_a0ab8410d4cb2ed6dcf131c18eecbdfa5}\label{base64_8h_a0ab8410d4cb2ed6dcf131c18eecbdfa5}} 
+\index{base64.\+h@{base64.\+h}!base64\+\_\+decode@{base64\+\_\+decode}}
+\index{base64\+\_\+decode@{base64\+\_\+decode}!base64.\+h@{base64.\+h}}
+\subsubsection{\texorpdfstring{base64\+\_\+decode()}{base64\_decode()}}
+{\footnotesize\ttfamily std\+::vector$<$uint8\+\_\+t$>$ base64\+\_\+decode (\begin{DoxyParamCaption}\item[{const std\+::string \&}]{encoded\+\_\+string }\end{DoxyParamCaption})}
+
+Decode a base64 encoded printable string into a vector of binary data. 0 to 2 \textquotesingle{}=\textquotesingle{} padding characters may be appended. Decoding stops at first non-\/base64 character.
+
+
+\begin{DoxyParams}{Parameters}
+{\em encoded\+\_\+string} & Printable string containing base64 encoded data. No embedded whitespace characters are present. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Vector containing decoded binary data 
+\end{DoxyReturn}
+\mbox{\Hypertarget{base64_8h_a1fbe4f2559670807558c4e74beaf7719}\label{base64_8h_a1fbe4f2559670807558c4e74beaf7719}} 
+\index{base64.\+h@{base64.\+h}!base64\+\_\+encode@{base64\+\_\+encode}}
+\index{base64\+\_\+encode@{base64\+\_\+encode}!base64.\+h@{base64.\+h}}
+\subsubsection{\texorpdfstring{base64\+\_\+encode()}{base64\_encode()}}
+{\footnotesize\ttfamily std\+::string base64\+\_\+encode (\begin{DoxyParamCaption}\item[{const std\+::vector$<$ uint8\+\_\+t $>$ \&}]{buf }\end{DoxyParamCaption})}
+
+Encode a vector of binary data to a printable base64 string. 0 to 2 \textquotesingle{}=\textquotesingle{} padding characters may be appended. No headers or whitespace is generated.
+
+
+\begin{DoxyParams}{Parameters}
+{\em buf} & Buffer containing binary data to encode \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+String containing base64 encoded data 
+\end{DoxyReturn}

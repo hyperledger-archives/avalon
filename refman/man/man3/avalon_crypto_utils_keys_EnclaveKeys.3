@@ -1,0 +1,54 @@
+.TH "avalon_crypto_utils.keys.EnclaveKeys" 3 "Wed May 6 2020" "Version 0.5.0.dev1" "Hyperledger Avalon" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+avalon_crypto_utils.keys.EnclaveKeys
+.SH SYNOPSIS
+.br
+.PP
+.PP
+Inherits object\&.
+.SS "Public Member Functions"
+
+.in +1c
+.ti -1c
+.RI "def \fB__init__\fP (self, verifying_key, encryption_key)"
+.br
+.ti -1c
+.RI "def \fBidentity\fP (self)"
+.br
+.ti -1c
+.RI "def \fBhashed_identity\fP (self)"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+
+.PP
+.nf
+Wrapper for managing the enclave's keys, the verifying_key is an
+ECDSA public key used to verify enclave signatures, the
+encryption_key is an RSA public key for encrypting message to the
+enclave.
+
+.fi
+.PP
+ 
+.SH "Constructor & Destructor Documentation"
+.PP 
+.SS "def avalon_crypto_utils\&.keys\&.EnclaveKeys\&.__init__ ( self,  verifying_key,  encryption_key)"
+
+.PP
+.nf
+Initialize the object
+
+:param verifying_key: PEM encoded ECDSA verifying key
+:param encryption_key: PEM encoded RSA encryption key
+
+.fi
+.PP
+ 
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Hyperledger Avalon from the source code\&.

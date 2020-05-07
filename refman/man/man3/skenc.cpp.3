@@ -1,0 +1,59 @@
+.TH "/home/dano/git/avalon/common/cpp/crypto/skenc.cpp" 3 "Wed May 6 2020" "Version 0.5.0.dev1" "Hyperledger Avalon" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+/home/dano/git/avalon/common/cpp/crypto/skenc.cpp
+.SH SYNOPSIS
+.br
+.PP
+\fC#include 'skenc\&.h'\fP
+.br
+\fC#include <openssl/err\&.h>\fP
+.br
+\fC#include <openssl/pem\&.h>\fP
+.br
+\fC#include <openssl/rand\&.h>\fP
+.br
+\fC#include <openssl/sha\&.h>\fP
+.br
+\fC#include <algorithm>\fP
+.br
+\fC#include <memory>\fP
+.br
+\fC#include <vector>\fP
+.br
+\fC#include 'base64\&.h'\fP
+.br
+\fC#include 'crypto_shared\&.h'\fP
+.br
+\fC#include 'crypto_utils\&.h'\fP
+.br
+\fC#include 'error\&.h'\fP
+.br
+\fC#include 'hex_string\&.h'\fP
+.br
+\fC#include 'tSgxSSL_api\&.h'\fP
+.br
+
+.SS "Typedefs"
+
+.in +1c
+.ti -1c
+.RI "typedef std::unique_ptr< BIO, void(*)(BIO *)> \fBBIO_ptr\fP"
+.br
+.ti -1c
+.RI "typedef std::unique_ptr< EVP_CIPHER_CTX, void(*)(EVP_CIPHER_CTX *)> \fBCTX_ptr\fP"
+.br
+.ti -1c
+.RI "typedef std::unique_ptr< BN_CTX, void(*)(BN_CTX *)> \fBBN_CTX_ptr\fP"
+.br
+.ti -1c
+.RI "typedef std::unique_ptr< BIGNUM, void(*)(BIGNUM *)> \fBBIGNUM_ptr\fP"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+Uses AES-GCM 256, which also includes authentication\&. 
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Hyperledger Avalon from the source code\&.

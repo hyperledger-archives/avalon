@@ -1,0 +1,221 @@
+\hypertarget{classavalon__sdk_1_1connector_1_1interfaces_1_1worker__registry_1_1WorkerRegistry}{}\section{avalon\+\_\+sdk.\+connector.\+interfaces.\+worker\+\_\+registry.\+Worker\+Registry Class Reference}
+\label{classavalon__sdk_1_1connector_1_1interfaces_1_1worker__registry_1_1WorkerRegistry}\index{avalon\+\_\+sdk.\+connector.\+interfaces.\+worker\+\_\+registry.\+Worker\+Registry@{avalon\+\_\+sdk.\+connector.\+interfaces.\+worker\+\_\+registry.\+Worker\+Registry}}
+
+
+Inheritance diagram for avalon\+\_\+sdk.\+connector.\+interfaces.\+worker\+\_\+registry.\+Worker\+Registry\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=270pt]{classavalon__sdk_1_1connector_1_1interfaces_1_1worker__registry_1_1WorkerRegistry__inherit__graph}
+\end{center}
+\end{figure}
+
+
+Collaboration diagram for avalon\+\_\+sdk.\+connector.\+interfaces.\+worker\+\_\+registry.\+Worker\+Registry\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=270pt]{classavalon__sdk_1_1connector_1_1interfaces_1_1worker__registry_1_1WorkerRegistry__coll__graph}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classavalon__sdk_1_1connector_1_1interfaces_1_1worker__registry_1_1WorkerRegistry_ae756eb61dbb8c57d2cbd4eca778516be}\label{classavalon__sdk_1_1connector_1_1interfaces_1_1worker__registry_1_1WorkerRegistry_ae756eb61dbb8c57d2cbd4eca778516be}} 
+def {\bfseries \+\_\+\+\_\+init\+\_\+\+\_\+} (self)
+\item 
+def \hyperlink{classavalon__sdk_1_1connector_1_1interfaces_1_1worker__registry_1_1WorkerRegistry_a2798a353672a2c5b154b3e856d00af02}{worker\+\_\+retrieve} (self, worker\+\_\+id, id=None)
+\item 
+def \hyperlink{classavalon__sdk_1_1connector_1_1interfaces_1_1worker__registry_1_1WorkerRegistry_a4fecd9bcfee5bbb95655549fb080016d}{worker\+\_\+lookup} (self, worker\+\_\+type, organization\+\_\+id, application\+\_\+type\+\_\+id, id=None)
+\item 
+def \hyperlink{classavalon__sdk_1_1connector_1_1interfaces_1_1worker__registry_1_1WorkerRegistry_ad488bae810e46e1222aa90db25b9aa18}{worker\+\_\+lookup\+\_\+next} (self, worker\+\_\+type, organization\+\_\+id, application\+\_\+type\+\_\+id, lookup\+\_\+tag, id=None)
+\item 
+def \hyperlink{classavalon__sdk_1_1connector_1_1interfaces_1_1worker__registry_1_1WorkerRegistry_a801481926e5dc9fc36ce7ec5a8166629}{worker\+\_\+register} (self, worker\+\_\+id, worker\+\_\+type, organization\+\_\+id, application\+\_\+type\+\_\+ids, details, id=None)
+\item 
+def \hyperlink{classavalon__sdk_1_1connector_1_1interfaces_1_1worker__registry_1_1WorkerRegistry_af19b8ace10ce24494c6525a594fdbc57}{worker\+\_\+update} (self, worker\+\_\+id, details, id=None)
+\item 
+def \hyperlink{classavalon__sdk_1_1connector_1_1interfaces_1_1worker__registry_1_1WorkerRegistry_aeb047c0d5a9f4bacc7ce51b81f883b27}{worker\+\_\+set\+\_\+status} (self, worker\+\_\+id, status, id=None)
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+\begin{DoxyVerb}This class is an abstract base class containing abstract APIs
+which can be called from client to manage workers.
+\end{DoxyVerb}
+ 
+
+\subsection{Member Function Documentation}
+\mbox{\Hypertarget{classavalon__sdk_1_1connector_1_1interfaces_1_1worker__registry_1_1WorkerRegistry_a4fecd9bcfee5bbb95655549fb080016d}\label{classavalon__sdk_1_1connector_1_1interfaces_1_1worker__registry_1_1WorkerRegistry_a4fecd9bcfee5bbb95655549fb080016d}} 
+\index{avalon\+\_\+sdk\+::connector\+::interfaces\+::worker\+\_\+registry\+::\+Worker\+Registry@{avalon\+\_\+sdk\+::connector\+::interfaces\+::worker\+\_\+registry\+::\+Worker\+Registry}!worker\+\_\+lookup@{worker\+\_\+lookup}}
+\index{worker\+\_\+lookup@{worker\+\_\+lookup}!avalon\+\_\+sdk\+::connector\+::interfaces\+::worker\+\_\+registry\+::\+Worker\+Registry@{avalon\+\_\+sdk\+::connector\+::interfaces\+::worker\+\_\+registry\+::\+Worker\+Registry}}
+\subsubsection{\texorpdfstring{worker\+\_\+lookup()}{worker\_lookup()}}
+{\footnotesize\ttfamily def avalon\+\_\+sdk.\+connector.\+interfaces.\+worker\+\_\+registry.\+Worker\+Registry.\+worker\+\_\+lookup (\begin{DoxyParamCaption}\item[{}]{self,  }\item[{}]{worker\+\_\+type,  }\item[{}]{organization\+\_\+id,  }\item[{}]{application\+\_\+type\+\_\+id,  }\item[{}]{id = {\ttfamily None} }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Lookup a worker identified worker_type, organization, and
+application_id.
+All fields are optional and, if present, condition should match for
+all fields. If none are passed it should return all workers.
+
+If the list is too large to fit into a single response (the maximum
+number of entries in a single response is implementation specific),
+the smart contract should return the first batch of the results
+and provide a lookupTag that can be used by the caller to
+retrieve the next batch by calling worker_lookup_next.
+
+Parameters:
+worker_type     Optional characteristic of workers for which you may
+        wish to search
+organization_id Optional organization ID that can be used to search
+        for one or more workers that belong to this
+        organization
+application_id  Optional application type ID that is supported by
+        the worker
+id              Optional JSON RPC request ID
+
+Returns:
+Tuple containing workers count, lookup tag, and list of
+worker IDs:
+total_count Total number of entries matching a specified
+    lookup criteria. If this number is larger than the
+    size of the IDs array, the caller should use
+    lookupTag to call worker_lookup_next to retrieve
+    the rest of the IDs
+lookup_tag  Optional parameter. If it is returned, it means
+    that there are more matching worker IDs, which can then
+    be retrieved by calling function worker_lookup_next
+    with this tag as an input parameter
+ids         Array of the worker IDs that match the input parameters
+
+On error returns None.
+\end{DoxyVerb}
+ \mbox{\Hypertarget{classavalon__sdk_1_1connector_1_1interfaces_1_1worker__registry_1_1WorkerRegistry_ad488bae810e46e1222aa90db25b9aa18}\label{classavalon__sdk_1_1connector_1_1interfaces_1_1worker__registry_1_1WorkerRegistry_ad488bae810e46e1222aa90db25b9aa18}} 
+\index{avalon\+\_\+sdk\+::connector\+::interfaces\+::worker\+\_\+registry\+::\+Worker\+Registry@{avalon\+\_\+sdk\+::connector\+::interfaces\+::worker\+\_\+registry\+::\+Worker\+Registry}!worker\+\_\+lookup\+\_\+next@{worker\+\_\+lookup\+\_\+next}}
+\index{worker\+\_\+lookup\+\_\+next@{worker\+\_\+lookup\+\_\+next}!avalon\+\_\+sdk\+::connector\+::interfaces\+::worker\+\_\+registry\+::\+Worker\+Registry@{avalon\+\_\+sdk\+::connector\+::interfaces\+::worker\+\_\+registry\+::\+Worker\+Registry}}
+\subsubsection{\texorpdfstring{worker\+\_\+lookup\+\_\+next()}{worker\_lookup\_next()}}
+{\footnotesize\ttfamily def avalon\+\_\+sdk.\+connector.\+interfaces.\+worker\+\_\+registry.\+Worker\+Registry.\+worker\+\_\+lookup\+\_\+next (\begin{DoxyParamCaption}\item[{}]{self,  }\item[{}]{worker\+\_\+type,  }\item[{}]{organization\+\_\+id,  }\item[{}]{application\+\_\+type\+\_\+id,  }\item[{}]{lookup\+\_\+tag,  }\item[{}]{id = {\ttfamily None} }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Retrieve additional worker lookup results after calling worker_lookup.
+
+Parameters:
+worker_type         Characteristic of Workers for which you may wish
+            to search.
+organization_id     Organization ID to which a Worker belongs
+application_id      Optional application type ID that is
+            supported by the worker
+lookup_tag          is returned by a previous call to either this
+            function or to worker_lookup
+id                  Optional Optional JSON RPC request ID
+
+
+Returns:
+Tuple containing the following:
+total_count    Total number of entries matching this lookup
+       criteria.  If this number is larger than the number
+       of IDs returned so far, the caller should use
+       lookupTag to call worker_lookup_next to retrieve
+       the rest of the IDs
+new_lookup_tag Optional parameter. If it is returned, it
+       means that there are more matching worker IDs that
+       can be retrieved by calling this function again with
+       this tag as an input parameter
+ids            Array of the worker IDs that match the input parameters
+
+On error returns None.
+\end{DoxyVerb}
+ \mbox{\Hypertarget{classavalon__sdk_1_1connector_1_1interfaces_1_1worker__registry_1_1WorkerRegistry_a801481926e5dc9fc36ce7ec5a8166629}\label{classavalon__sdk_1_1connector_1_1interfaces_1_1worker__registry_1_1WorkerRegistry_a801481926e5dc9fc36ce7ec5a8166629}} 
+\index{avalon\+\_\+sdk\+::connector\+::interfaces\+::worker\+\_\+registry\+::\+Worker\+Registry@{avalon\+\_\+sdk\+::connector\+::interfaces\+::worker\+\_\+registry\+::\+Worker\+Registry}!worker\+\_\+register@{worker\+\_\+register}}
+\index{worker\+\_\+register@{worker\+\_\+register}!avalon\+\_\+sdk\+::connector\+::interfaces\+::worker\+\_\+registry\+::\+Worker\+Registry@{avalon\+\_\+sdk\+::connector\+::interfaces\+::worker\+\_\+registry\+::\+Worker\+Registry}}
+\subsubsection{\texorpdfstring{worker\+\_\+register()}{worker\_register()}}
+{\footnotesize\ttfamily def avalon\+\_\+sdk.\+connector.\+interfaces.\+worker\+\_\+registry.\+Worker\+Registry.\+worker\+\_\+register (\begin{DoxyParamCaption}\item[{}]{self,  }\item[{}]{worker\+\_\+id,  }\item[{}]{worker\+\_\+type,  }\item[{}]{organization\+\_\+id,  }\item[{}]{application\+\_\+type\+\_\+ids,  }\item[{}]{details,  }\item[{}]{id = {\ttfamily None} }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Register a new worker with details of the worker.
+
+Parameters:
+worker_id       Worker ID value. E.g., a Fabric address
+        or Ethereum DID
+worker_type     Type of Worker. Currently defined types are:
+        * "TEE-SGX": an Intel SGX Trusted Execution
+          Environment
+        * "MPC": Multi-Party Compute
+        * "ZK": Zero-Knowledge
+organization_id Optional parameter representing the
+        organization that hosts the Worker,
+        e.g. a bank in the consortium or
+        anonymous entity
+application_ids Optional parameter that defines
+        application types supported by the Worker
+details         Detailed information about the worker in
+        JSON RPC format as defined in
+https://entethalliance.github.io/trusted-computing/spec.html
+#common-data-for-all-worker-types
+id              Optional Optional JSON RPC request ID
+
+Returns:
+ContractResponse.SUCCESS on success or
+ContractResponse.ERROR on error.
+\end{DoxyVerb}
+ \mbox{\Hypertarget{classavalon__sdk_1_1connector_1_1interfaces_1_1worker__registry_1_1WorkerRegistry_a2798a353672a2c5b154b3e856d00af02}\label{classavalon__sdk_1_1connector_1_1interfaces_1_1worker__registry_1_1WorkerRegistry_a2798a353672a2c5b154b3e856d00af02}} 
+\index{avalon\+\_\+sdk\+::connector\+::interfaces\+::worker\+\_\+registry\+::\+Worker\+Registry@{avalon\+\_\+sdk\+::connector\+::interfaces\+::worker\+\_\+registry\+::\+Worker\+Registry}!worker\+\_\+retrieve@{worker\+\_\+retrieve}}
+\index{worker\+\_\+retrieve@{worker\+\_\+retrieve}!avalon\+\_\+sdk\+::connector\+::interfaces\+::worker\+\_\+registry\+::\+Worker\+Registry@{avalon\+\_\+sdk\+::connector\+::interfaces\+::worker\+\_\+registry\+::\+Worker\+Registry}}
+\subsubsection{\texorpdfstring{worker\+\_\+retrieve()}{worker\_retrieve()}}
+{\footnotesize\ttfamily def avalon\+\_\+sdk.\+connector.\+interfaces.\+worker\+\_\+registry.\+Worker\+Registry.\+worker\+\_\+retrieve (\begin{DoxyParamCaption}\item[{}]{self,  }\item[{}]{worker\+\_\+id,  }\item[{}]{id = {\ttfamily None} }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Retrieve worker identified by worker ID.
+
+Parameters:
+worker_id  Worker ID of the registry whose details are requested
+id         Optional JSON RPC request ID
+
+Returns:
+Tuple containing worker status (defined in worker_set_status),
+worker type, organization ID, list of application IDs, and worker
+details (JSON RPC string).
+
+On error returns None.
+\end{DoxyVerb}
+ \mbox{\Hypertarget{classavalon__sdk_1_1connector_1_1interfaces_1_1worker__registry_1_1WorkerRegistry_aeb047c0d5a9f4bacc7ce51b81f883b27}\label{classavalon__sdk_1_1connector_1_1interfaces_1_1worker__registry_1_1WorkerRegistry_aeb047c0d5a9f4bacc7ce51b81f883b27}} 
+\index{avalon\+\_\+sdk\+::connector\+::interfaces\+::worker\+\_\+registry\+::\+Worker\+Registry@{avalon\+\_\+sdk\+::connector\+::interfaces\+::worker\+\_\+registry\+::\+Worker\+Registry}!worker\+\_\+set\+\_\+status@{worker\+\_\+set\+\_\+status}}
+\index{worker\+\_\+set\+\_\+status@{worker\+\_\+set\+\_\+status}!avalon\+\_\+sdk\+::connector\+::interfaces\+::worker\+\_\+registry\+::\+Worker\+Registry@{avalon\+\_\+sdk\+::connector\+::interfaces\+::worker\+\_\+registry\+::\+Worker\+Registry}}
+\subsubsection{\texorpdfstring{worker\+\_\+set\+\_\+status()}{worker\_set\_status()}}
+{\footnotesize\ttfamily def avalon\+\_\+sdk.\+connector.\+interfaces.\+worker\+\_\+registry.\+Worker\+Registry.\+worker\+\_\+set\+\_\+status (\begin{DoxyParamCaption}\item[{}]{self,  }\item[{}]{worker\+\_\+id,  }\item[{}]{status,  }\item[{}]{id = {\ttfamily None} }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Set the registry status identified by worker ID
+
+Parameters:
+worker_id Worker ID value. E.g., a Fabric address
+  or Ethereum DID
+status    Worker status. The currently defined values are:
+  1 - worker is active
+  2 - worker is temporarily "off-line"
+  3 - worker is decommissioned
+  4 - worker is compromised
+id        Optional Optional JSON RPC request ID
+
+Returns:
+ContractResponse.SUCCESS on success
+or ContractResponse.ERROR on error.
+\end{DoxyVerb}
+ \mbox{\Hypertarget{classavalon__sdk_1_1connector_1_1interfaces_1_1worker__registry_1_1WorkerRegistry_af19b8ace10ce24494c6525a594fdbc57}\label{classavalon__sdk_1_1connector_1_1interfaces_1_1worker__registry_1_1WorkerRegistry_af19b8ace10ce24494c6525a594fdbc57}} 
+\index{avalon\+\_\+sdk\+::connector\+::interfaces\+::worker\+\_\+registry\+::\+Worker\+Registry@{avalon\+\_\+sdk\+::connector\+::interfaces\+::worker\+\_\+registry\+::\+Worker\+Registry}!worker\+\_\+update@{worker\+\_\+update}}
+\index{worker\+\_\+update@{worker\+\_\+update}!avalon\+\_\+sdk\+::connector\+::interfaces\+::worker\+\_\+registry\+::\+Worker\+Registry@{avalon\+\_\+sdk\+::connector\+::interfaces\+::worker\+\_\+registry\+::\+Worker\+Registry}}
+\subsubsection{\texorpdfstring{worker\+\_\+update()}{worker\_update()}}
+{\footnotesize\ttfamily def avalon\+\_\+sdk.\+connector.\+interfaces.\+worker\+\_\+registry.\+Worker\+Registry.\+worker\+\_\+update (\begin{DoxyParamCaption}\item[{}]{self,  }\item[{}]{worker\+\_\+id,  }\item[{}]{details,  }\item[{}]{id = {\ttfamily None} }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Update a worker with details data.
+
+Parameters:
+worker_id  Worker ID
+details    Detailed information about the worker in JSON format
+id         Optional Optional JSON RPC request ID
+
+Returns:
+ContractResponse.SUCCESS on success
+or ContractResponse.ERROR on error.
+\end{DoxyVerb}
+ 
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/home/dano/git/avalon/sdk/avalon\+\_\+sdk/connector/interfaces/worker\+\_\+registry.\+py\end{DoxyCompactItemize}

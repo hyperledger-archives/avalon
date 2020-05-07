@@ -1,0 +1,73 @@
+.TH "tcf::crypto::sig::PrivateKey" 3 "Wed May 6 2020" "Version 0.5.0.dev1" "Hyperledger Avalon" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+tcf::crypto::sig::PrivateKey
+.SH SYNOPSIS
+.br
+.PP
+.SS "Public Member Functions"
+
+.in +1c
+.ti -1c
+.RI "\fBPrivateKey\fP (const \fBPrivateKey\fP &privateKey)"
+.br
+.ti -1c
+.RI "\fBPrivateKey\fP (\fBPrivateKey\fP &&privateKey)"
+.br
+.ti -1c
+.RI "\fBPrivateKey\fP (const std::string &encoded)"
+.br
+.ti -1c
+.RI "\fB~PrivateKey\fP ()"
+.br
+.ti -1c
+.RI "\fBPrivateKey\fP & \fBoperator=\fP (const \fBPrivateKey\fP &privateKey)"
+.br
+.ti -1c
+.RI "void \fBDeserialize\fP (const std::string &encoded)"
+.br
+.ti -1c
+.RI "void \fBGenerate\fP ()"
+.br
+.ti -1c
+.RI "\fBPublicKey\fP \fBGetPublicKey\fP () const"
+.br
+.ti -1c
+.RI "std::string \fBSerialize\fP () const"
+.br
+.ti -1c
+.RI "\fBByteArray\fP \fBSignMessage\fP (const \fBByteArray\fP &hashMessage) const"
+.br
+.in -1c
+.SH "Constructor & Destructor Documentation"
+.PP 
+.SS "tcf::crypto::sig::PrivateKey::PrivateKey (const std::string & encoded)"
+Constructor from encoded string\&. Throws RuntimeError, ValueError\&. 
+.SS "tcf::crypto::sig::PrivateKey::~PrivateKey ()"
+\fBPrivateKey\fP Destructor\&. 
+.SH "Member Function Documentation"
+.PP 
+.SS "void tcf::crypto::sig::PrivateKey::Deserialize (const std::string & encoded)"
+Deserialize ECDSA Private Key\&. Throws RuntimeError, ValueError\&. 
+.SS "void tcf::crypto::sig::PrivateKey::Generate ()"
+Generate ECDSA private key\&. Throws RuntimeError\&. 
+.SS "pcrypto::sig::PublicKey tcf::crypto::sig::PrivateKey::GetPublicKey () const"
+Derive Digital Signature public key from private key\&. Throws RuntimeError\&. 
+.SS "pcrypto::sig::PrivateKey & tcf::crypto::sig::PrivateKey::operator= (const \fBPrivateKey\fP & privateKey)"
+Assignment operator = overload\&. Throws RuntimeError\&. 
+.SS "std::string tcf::crypto::sig::PrivateKey::Serialize () const"
+Serialize ECDSA \fBPrivateKey\fP\&. Throws RuntimeError\&. 
+.SS "\fBByteArray\fP tcf::crypto::sig::PrivateKey::SignMessage (const \fBByteArray\fP & hashMessage) const"
+Signs hashMessage\&.data() with ECDSA privkey\&. It's expected that caller of this function passes the hash value of the original message to this function for signing\&. Throws RuntimeError\&. 
+.PP
+\fBReturns:\fP
+.RS 4
+ByteArray containing raw binary signature data 
+.RE
+.PP
+
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Hyperledger Avalon from the source code\&.

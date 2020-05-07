@@ -1,0 +1,64 @@
+\hypertarget{classavalon__sdk_1_1work__order__receipt_1_1work__order__receipt_1_1ReceiptCreateStatus}{}\section{avalon\+\_\+sdk.\+work\+\_\+order\+\_\+receipt.\+work\+\_\+order\+\_\+receipt.\+Receipt\+Create\+Status Class Reference}
+\label{classavalon__sdk_1_1work__order__receipt_1_1work__order__receipt_1_1ReceiptCreateStatus}\index{avalon\+\_\+sdk.\+work\+\_\+order\+\_\+receipt.\+work\+\_\+order\+\_\+receipt.\+Receipt\+Create\+Status@{avalon\+\_\+sdk.\+work\+\_\+order\+\_\+receipt.\+work\+\_\+order\+\_\+receipt.\+Receipt\+Create\+Status}}
+
+
+Inheritance diagram for avalon\+\_\+sdk.\+work\+\_\+order\+\_\+receipt.\+work\+\_\+order\+\_\+receipt.\+Receipt\+Create\+Status\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=220pt]{classavalon__sdk_1_1work__order__receipt_1_1work__order__receipt_1_1ReceiptCreateStatus__inherit__graph}
+\end{center}
+\end{figure}
+
+
+Collaboration diagram for avalon\+\_\+sdk.\+work\+\_\+order\+\_\+receipt.\+work\+\_\+order\+\_\+receipt.\+Receipt\+Create\+Status\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=220pt]{classavalon__sdk_1_1work__order__receipt_1_1work__order__receipt_1_1ReceiptCreateStatus__coll__graph}
+\end{center}
+\end{figure}
+\subsection*{Static Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classavalon__sdk_1_1work__order__receipt_1_1work__order__receipt_1_1ReceiptCreateStatus_a872e3cd0fb00ed2c5d49050ab94d51ab}\label{classavalon__sdk_1_1work__order__receipt_1_1work__order__receipt_1_1ReceiptCreateStatus_a872e3cd0fb00ed2c5d49050ab94d51ab}} 
+int {\bfseries P\+E\+N\+D\+I\+NG} = 0
+\item 
+\mbox{\Hypertarget{classavalon__sdk_1_1work__order__receipt_1_1work__order__receipt_1_1ReceiptCreateStatus_a00fe885585893cba7b39d666b5d570c0}\label{classavalon__sdk_1_1work__order__receipt_1_1work__order__receipt_1_1ReceiptCreateStatus_a00fe885585893cba7b39d666b5d570c0}} 
+int {\bfseries C\+O\+M\+P\+L\+E\+T\+ED} = 1
+\item 
+\mbox{\Hypertarget{classavalon__sdk_1_1work__order__receipt_1_1work__order__receipt_1_1ReceiptCreateStatus_a67ddc537ab9f568fc4927c4e8e39574e}\label{classavalon__sdk_1_1work__order__receipt_1_1work__order__receipt_1_1ReceiptCreateStatus_a67ddc537ab9f568fc4927c4e8e39574e}} 
+int {\bfseries P\+R\+O\+C\+E\+S\+S\+ED} = 2
+\item 
+\mbox{\Hypertarget{classavalon__sdk_1_1work__order__receipt_1_1work__order__receipt_1_1ReceiptCreateStatus_a43ddbd25c1476511bcff44c40409dd72}\label{classavalon__sdk_1_1work__order__receipt_1_1work__order__receipt_1_1ReceiptCreateStatus_a43ddbd25c1476511bcff44c40409dd72}} 
+int {\bfseries F\+A\+I\+L\+ED} = 3
+\item 
+\mbox{\Hypertarget{classavalon__sdk_1_1work__order__receipt_1_1work__order__receipt_1_1ReceiptCreateStatus_a11520d38be233799e1cf40b07a7b23bf}\label{classavalon__sdk_1_1work__order__receipt_1_1work__order__receipt_1_1ReceiptCreateStatus_a11520d38be233799e1cf40b07a7b23bf}} 
+int {\bfseries R\+E\+J\+E\+C\+T\+ED} = 4
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+\begin{DoxyVerb}Receipt creation status values:
+0 - PENDING. The work order is waiting to be processed by the worker
+1 - COMPLETED. The worker processed the Work Order and no more worker
+    updates are expected
+2 - PROCESSED. The worker processed the Work Order, but additional worker
+    updates are expected, e.g. oracle notifications
+3 - FAILED. The Work Order processing failed, e.g. by the worker service
+    because of an invalid workerId
+4 - REJECTED. The Work Order is rejected by the smart contract,
+    e.g. invalid workerServiceId
+5 to 254 - reserved
+255 - indicates any status
+>255 - application-specific values
+
+Defined in EEA spec 7.1.
+\end{DoxyVerb}
+ 
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/home/dano/git/avalon/sdk/avalon\+\_\+sdk/work\+\_\+order\+\_\+receipt/work\+\_\+order\+\_\+receipt.\+py\end{DoxyCompactItemize}

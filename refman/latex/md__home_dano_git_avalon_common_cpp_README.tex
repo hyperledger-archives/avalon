@@ -1,0 +1,28 @@
+\subsection*{Purpose of Common }
+
+The common directory contains source code shared by untrusted and trusted (Intel S\+GX Enclave) code.
+
+\subsection*{Dependencies\+: }
+
+
+\begin{DoxyEnumerate}
+\item Open\+S\+SL 1.\+1 \href{https://www.openssl.org/}{\tt https\+://www.\+openssl.\+org/}
+\item Intel S\+GX Open\+S\+SL library built from Open\+S\+SL 1.\+1 \href{https://github.com/intel/intel-sgx-ssl}{\tt https\+://github.\+com/intel/intel-\/sgx-\/ssl}
+\item Intel S\+GX S\+DK \href{https://software.intel.com/en-us/sgx-sdk/download}{\tt https\+://software.\+intel.\+com/en-\/us/sgx-\/sdk/download}
+\end{DoxyEnumerate}
+
+\subsection*{Source Directories }
+
+Dir Content 
+
+ {\ttfamily crypto/} $\ast$.cpp,$\ast$.h for Open\+S\+SL based crypto functions. For more information, see crypto/\+R\+E\+A\+D\+ME.md
+
+{\ttfamily .} $\ast$.cpp,$\ast$.h error handling and common types
+
+{\ttfamily packages/base64/} $\ast$.cpp,$\ast$.h of Renee Nyffinger base64 encoding/decoding
+
+{\ttfamily packages/parson/} $\ast$.cpp,$\ast$.h of Parson J\+S\+ON encoding/decoding
+
+\subsection*{Python Wrapper }
+
+The Python S\+W\+IG wrapper exports the functions and classes defined in \hyperlink{crypto_8h_source}{crypto.\+h}, \hyperlink{tcf__error_8h}{tcf\+\_\+error.\+h} and \hyperlink{types_8h}{types.\+h}. Several classes and functions are renamed. Check {\ttfamily common/python/crypto\+\_\+utils/crypto/crypto.\+i} for details. 

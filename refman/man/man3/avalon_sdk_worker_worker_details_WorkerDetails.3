@@ -1,0 +1,105 @@
+.TH "avalon_sdk.worker.worker_details.WorkerDetails" 3 "Wed May 6 2020" "Version 0.5.0.dev1" "Hyperledger Avalon" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+avalon_sdk.worker.worker_details.WorkerDetails
+.SH SYNOPSIS
+.br
+.PP
+.PP
+Inherited by \fBavalon_sdk\&.worker\&.worker_details\&.SGXWorkerDetails\fP\&.
+.SS "Public Member Functions"
+
+.in +1c
+.ti -1c
+.RI "def \fB__init__\fP (self)"
+.br
+.ti -1c
+.RI "def \fBvalidate_worker_details\fP (self, details)"
+.br
+.in -1c
+.SS "Public Attributes"
+
+.in +1c
+.ti -1c
+.RI "\fBwork_order_sync_uri\fP"
+.br
+.ti -1c
+.RI "\fBwork_order_async_uri\fP"
+.br
+.ti -1c
+.RI "\fBwork_order_pull_uri\fP"
+.br
+.ti -1c
+.RI "\fBwork_order_notify_ri\fP"
+.br
+.ti -1c
+.RI "\fBreceipt_invocation_uri\fP"
+.br
+.ti -1c
+.RI "\fBwork_oder_invocation_address\fP"
+.br
+.ti -1c
+.RI "\fBreceipt_invocation_address\fP"
+.br
+.ti -1c
+.RI "\fBfrom_address\fP"
+.br
+.ti -1c
+.RI "\fBhashing_algorithm\fP"
+.br
+.ti -1c
+.RI "\fBsigning_algorithm\fP"
+.br
+.ti -1c
+.RI "\fBkey_encryption_algorithm\fP"
+.br
+.ti -1c
+.RI "\fBdata_encryption_algorithm\fP"
+.br
+.ti -1c
+.RI "\fBwork_order_payload_formats\fP"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+
+.PP
+.nf
+Class to store the worker details
+
+.fi
+.PP
+ 
+.SH "Constructor & Destructor Documentation"
+.PP 
+.SS "def avalon_sdk\&.worker\&.worker_details\&.WorkerDetails\&.__init__ ( self)"
+
+.PP
+.nf
+Set the member variables of this class with default
+values as per the EEA Spec.
+
+.fi
+.PP
+ 
+.SH "Member Function Documentation"
+.PP 
+.SS "def avalon_sdk\&.worker\&.worker_details\&.WorkerDetails\&.validate_worker_details ( self,  details)"
+
+.PP
+.nf
+Validate the details field of a worker.
+
+Parameters:
+    Details is json formatted string
+Returns:
+    None on success and error string on failure
+
+.fi
+.PP
+ 
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Hyperledger Avalon from the source code\&.

@@ -1,0 +1,84 @@
+\hypertarget{file__io__wrapper_8h}{}\section{/home/dano/git/avalon/common/sgx\+\_\+workload/iohandler/file\+\_\+io\+\_\+wrapper.h File Reference}
+\label{file__io__wrapper_8h}\index{/home/dano/git/avalon/common/sgx\+\_\+workload/iohandler/file\+\_\+io\+\_\+wrapper.\+h@{/home/dano/git/avalon/common/sgx\+\_\+workload/iohandler/file\+\_\+io\+\_\+wrapper.\+h}}
+{\ttfamily \#include $<$string$>$}\newline
+Include dependency graph for file\+\_\+io\+\_\+wrapper.\+h\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=215pt]{file__io__wrapper_8h__incl}
+\end{center}
+\end{figure}
+This graph shows which files directly or indirectly include this file\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=226pt]{file__io__wrapper_8h__dep__incl}
+\end{center}
+\end{figure}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+std\+::string \hyperlink{file__io__wrapper_8h_a48495cb06bb0b1cb96aea7b68a16db1c}{Read} (std\+::string file\+\_\+name)
+\item 
+uint32\+\_\+t \hyperlink{file__io__wrapper_8h_acc42f25a47d864f68739d3681d8dfaa0}{Write} (std\+::string file\+\_\+name, std\+::string data)
+\item 
+uint32\+\_\+t \hyperlink{file__io__wrapper_8h_a7ef203501265104b1bcef62ba37081c5}{Delete} (std\+::string file\+\_\+name)
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+C++ non-\/class wrapper definitions for Avalon Inside-\/\+Out File I/O. To use, \#include \char`\"{}file\+\_\+io\+\_\+wrapper.\+h\char`\"{} 
+
+\subsection{Function Documentation}
+\mbox{\Hypertarget{file__io__wrapper_8h_a7ef203501265104b1bcef62ba37081c5}\label{file__io__wrapper_8h_a7ef203501265104b1bcef62ba37081c5}} 
+\index{file\+\_\+io\+\_\+wrapper.\+h@{file\+\_\+io\+\_\+wrapper.\+h}!Delete@{Delete}}
+\index{Delete@{Delete}!file\+\_\+io\+\_\+wrapper.\+h@{file\+\_\+io\+\_\+wrapper.\+h}}
+\subsubsection{\texorpdfstring{Delete()}{Delete()}}
+{\footnotesize\ttfamily uint32\+\_\+t Delete (\begin{DoxyParamCaption}\item[{std\+::string}]{file\+\_\+name }\end{DoxyParamCaption})}
+
+Delete a file named file\+\_\+name. Return the integer status (0 is success, non-\/0 is failure).
+
+
+\begin{DoxyParams}{Parameters}
+{\em file\+\_\+name} & Name of the file to delete \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Status of operation (0 on success, non-\/0 on failure) 
+\end{DoxyReturn}
+\mbox{\Hypertarget{file__io__wrapper_8h_a48495cb06bb0b1cb96aea7b68a16db1c}\label{file__io__wrapper_8h_a48495cb06bb0b1cb96aea7b68a16db1c}} 
+\index{file\+\_\+io\+\_\+wrapper.\+h@{file\+\_\+io\+\_\+wrapper.\+h}!Read@{Read}}
+\index{Read@{Read}!file\+\_\+io\+\_\+wrapper.\+h@{file\+\_\+io\+\_\+wrapper.\+h}}
+\subsubsection{\texorpdfstring{Read()}{Read()}}
+{\footnotesize\ttfamily std\+::string Read (\begin{DoxyParamCaption}\item[{std\+::string}]{file\+\_\+name }\end{DoxyParamCaption})}
+
+Read a file named file\+\_\+name and return the contents in a string. Return an empty string (\char`\"{}\char`\"{}) on failure.
+
+
+\begin{DoxyParams}{Parameters}
+{\em file\+\_\+name} & Name of the file to be read \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+String containing file contents 
+\end{DoxyReturn}
+\mbox{\Hypertarget{file__io__wrapper_8h_acc42f25a47d864f68739d3681d8dfaa0}\label{file__io__wrapper_8h_acc42f25a47d864f68739d3681d8dfaa0}} 
+\index{file\+\_\+io\+\_\+wrapper.\+h@{file\+\_\+io\+\_\+wrapper.\+h}!Write@{Write}}
+\index{Write@{Write}!file\+\_\+io\+\_\+wrapper.\+h@{file\+\_\+io\+\_\+wrapper.\+h}}
+\subsubsection{\texorpdfstring{Write()}{Write()}}
+{\footnotesize\ttfamily uint32\+\_\+t Write (\begin{DoxyParamCaption}\item[{std\+::string}]{file\+\_\+name,  }\item[{std\+::string}]{data }\end{DoxyParamCaption})}
+
+Write the contents of string data to a file named file\+\_\+name. Return the integer status (0 is success, non-\/0 is failure).
+
+
+\begin{DoxyParams}{Parameters}
+{\em file\+\_\+name} & Name of the file to write \\
+\hline
+{\em data} & Contents of file to write \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Status of operation (0 on success, non-\/0 on failure) 
+\end{DoxyReturn}

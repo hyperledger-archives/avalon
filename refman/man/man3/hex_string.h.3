@@ -1,0 +1,54 @@
+.TH "/home/dano/git/avalon/common/cpp/hex_string.h" 3 "Wed May 6 2020" "Version 0.5.0.dev1" "Hyperledger Avalon" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+/home/dano/git/avalon/common/cpp/hex_string.h
+.SH SYNOPSIS
+.br
+.PP
+\fC#include <stdint\&.h>\fP
+.br
+\fC#include <string>\fP
+.br
+\fC#include <vector>\fP
+.br
+
+.SS "Macros"
+
+.in +1c
+.ti -1c
+.RI "#define \fBHEX_STRING_SIZE\fP(x)   (static_cast<size_t>(((x) * 2)))"
+.br
+.in -1c
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "std::vector< uint8_t > \fBtcf::HexStringToBinary\fP (const std::string &inHexString)"
+.br
+.ti -1c
+.RI "void \fBtcf::HexStringToBinary\fP (uint8_t *outBinaryData, size_t inBinaryDataLength, const std::string &inHexString)"
+.br
+.ti -1c
+.RI "std::string \fBtcf::BinaryToHexString\fP (const std::vector< uint8_t > &inBinaryData)"
+.br
+.ti -1c
+.RI "std::string \fBtcf::BinaryToHexString\fP (const uint8_t *inBinaryData, size_t inBinaryDataLength)"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+Avalon hexadecimal string conversion functions\&. 
+.SH "Macro Definition Documentation"
+.PP 
+.SS "#define HEX_STRING_SIZE(x)   (static_cast<size_t>(((x) * 2)))"
+This macro calculates the length of the actual data portion of the hex-string encoding of a buffer with x bytes PLUS the additional byte needed for the string terminator\&. 
+.SH "Function Documentation"
+.PP 
+.SS "std::string tcf::BinaryToHexString (const std::vector< uint8_t > & inBinaryData)"
+Convert an array of bytes (represented as either a std::vector of bytes or a raw array) to a hex string\&. 
+.SS "std::vector< uint8_t > tcf::HexStringToBinary (const std::string & inHexString)"
+Convert a hex string (i\&.e\&., a string of characters with values between '0'-'9', 'A'-'F') to an array of bytes\&. 
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Hyperledger Avalon from the source code\&.

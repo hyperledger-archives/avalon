@@ -1,0 +1,19 @@
+\subsection*{Purpose of Common }
+
+The common directory contains source code shared by trusted (Intel S\+GX Enclave) code and different workloads(\+Example workloads).
+
+\subsection*{Dependencies\+: }
+
+
+\begin{DoxyEnumerate}
+\item S\+GX S\+DK \href{https://software.intel.com/en-us/sgx-sdk/download}{\tt https\+://software.\+intel.\+com/en-\/us/sgx-\/sdk/download}
+\item S\+GX Open\+S\+SL library built from Open\+S\+SL 1.\+1 \href{https://github.com/intel/intel-sgx-ssl}{\tt https\+://github.\+com/intel/intel-\/sgx-\/ssl}
+\end{DoxyEnumerate}
+
+\subsection*{Source Directories }
+
+Dir Content 
+
+ {\ttfamily sgx/iohandler/} $\ast$.cpp,$\ast$.h files are custom iohandlers which help workloads to execute IO operations from the Intel S\+GX enclave
+
+{\ttfamily sgx/workload/} work\+\_\+order\+\_\+data.\+cpp,\hyperlink{work__order__data_8h}{work\+\_\+order\+\_\+data.\+h} files are wrapper files for work order data \hyperlink{workload__processor_8cpp}{workload\+\_\+processor.\+cpp}, \hyperlink{workload__processor_8h}{workload\+\_\+processor.\+h} are workload processor which overrides function exposed by work order interface and also facilitates auto registration of workloads 

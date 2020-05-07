@@ -1,0 +1,92 @@
+.TH "avalon_sdk.worker.worker_details.SGXWorkerDetails" 3 "Wed May 6 2020" "Version 0.5.0.dev1" "Hyperledger Avalon" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+avalon_sdk.worker.worker_details.SGXWorkerDetails
+.SH SYNOPSIS
+.br
+.PP
+.PP
+Inherits \fBavalon_sdk\&.worker\&.worker_details\&.WorkerDetails\fP\&.
+.SS "Public Member Functions"
+
+.in +1c
+.ti -1c
+.RI "def \fB__init__\fP (self)"
+.br
+.ti -1c
+.RI "def \fBload_worker\fP (self, worker_data)"
+.br
+.in -1c
+.SS "Public Attributes"
+
+.in +1c
+.ti -1c
+.RI "\fBverification_key\fP"
+.br
+.ti -1c
+.RI "\fBextended_measurements\fP"
+.br
+.ti -1c
+.RI "\fBproof_data_type\fP"
+.br
+.ti -1c
+.RI "\fBproof_data\fP"
+.br
+.ti -1c
+.RI "\fBencryption_key\fP"
+.br
+.ti -1c
+.RI "\fBencryption_key_nonce\fP"
+.br
+.ti -1c
+.RI "\fBencryption_key_signature\fP"
+.br
+.ti -1c
+.RI "\fBenclave_certificate\fP"
+.br
+.ti -1c
+.RI "\fBworker_id\fP"
+.br
+.ti -1c
+.RI "\fBhashing_algorithm\fP"
+.br
+.ti -1c
+.RI "\fBsigning_algorithm\fP"
+.br
+.ti -1c
+.RI "\fBkey_encryption_algorithm\fP"
+.br
+.ti -1c
+.RI "\fBdata_encryption_algorithm\fP"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+
+.PP
+.nf
+Contains Intel SGX TEE worker type data.
+
+.fi
+.PP
+ 
+.SH "Member Function Documentation"
+.PP 
+.SS "def avalon_sdk\&.worker\&.worker_details\&.SGXWorkerDetails\&.load_worker ( self,  worker_data)"
+
+.PP
+.nf
+Load member variables of this class
+based on worker-retrieved details.
+
+Parameters:
+    worker_data Worker Data to load into the class
+
+.fi
+.PP
+ 
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Hyperledger Avalon from the source code\&.

@@ -1,0 +1,220 @@
+\hypertarget{classFileIoExecutor}{}\section{File\+Io\+Executor Class Reference}
+\label{classFileIoExecutor}\index{File\+Io\+Executor@{File\+Io\+Executor}}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classFileIoExecutor_aa6cb0dfebb0c8c2c3b868939ffdbd940}\label{classFileIoExecutor_aa6cb0dfebb0c8c2c3b868939ffdbd940}} 
+void {\bfseries Set\+Io\+Handler\+Id} (uint32\+\_\+t handler\+\_\+id)
+\item 
+\mbox{\Hypertarget{classFileIoExecutor_a65a2dc7df4a3865b1763e7cec974d50a}\label{classFileIoExecutor_a65a2dc7df4a3865b1763e7cec974d50a}} 
+void {\bfseries Set\+File\+Name} (std\+::string file\+\_\+name)
+\item 
+uint32\+\_\+t \hyperlink{classFileIoExecutor_a364a598bf9a247e102b67e52e2a45da1}{Get\+Io\+Handler\+Id} (const char $\ast$handler\+Name)
+\item 
+size\+\_\+t \hyperlink{classFileIoExecutor_a8ca473e3e64e7e2a20d41247fdedd76a}{Get\+Max\+File\+Size} ()
+\item 
+size\+\_\+t \hyperlink{classFileIoExecutor_aed7849bb739d14cb2cd4d011d5fb1828}{Get\+Max\+Io\+Result\+Size} ()
+\item 
+uint32\+\_\+t \hyperlink{classFileIoExecutor_a36cbe68b508f084de8f76a88797ce670}{File\+Open} (uint8\+\_\+t $\ast$result, size\+\_\+t result\+\_\+size)
+\item 
+uint32\+\_\+t \hyperlink{classFileIoExecutor_aebfb27eafb883fd43b4829011b7b451d}{File\+Close} (uint8\+\_\+t $\ast$result, size\+\_\+t result\+\_\+size)
+\item 
+uint32\+\_\+t \hyperlink{classFileIoExecutor_ab0b3510df933d83fff527ad3385e6c35}{File\+Read} (uint8\+\_\+t $\ast$result, size\+\_\+t result\+\_\+size, uint8\+\_\+t $\ast$out\+\_\+buf, size\+\_\+t out\+\_\+buf\+\_\+size)
+\item 
+uint32\+\_\+t \hyperlink{classFileIoExecutor_a961b3eb58f78085045a4631d148188a6}{File\+Write} (uint8\+\_\+t $\ast$result, size\+\_\+t result\+\_\+size, const uint8\+\_\+t $\ast$in\+\_\+buf, size\+\_\+t in\+\_\+buf\+\_\+size)
+\item 
+uint32\+\_\+t \hyperlink{classFileIoExecutor_a7fae38b5e3c5b824983d4768edda94a6}{File\+Tell} (uint8\+\_\+t $\ast$result, size\+\_\+t result\+\_\+size, uint8\+\_\+t $\ast$out\+\_\+buf, size\+\_\+t out\+\_\+buf\+\_\+size)
+\item 
+uint32\+\_\+t \hyperlink{classFileIoExecutor_af27e670b49606c8ddba1f5172a26ce94}{File\+Seek} (size\+\_\+t position, uint8\+\_\+t $\ast$result, size\+\_\+t result\+\_\+size)
+\item 
+uint32\+\_\+t \hyperlink{classFileIoExecutor_a78b681e94e8a568bb8981ce6eb1fac62}{File\+Delete} (uint8\+\_\+t $\ast$result, size\+\_\+t result\+\_\+size)
+\end{DoxyCompactItemize}
+
+
+\subsection{Member Function Documentation}
+\mbox{\Hypertarget{classFileIoExecutor_aebfb27eafb883fd43b4829011b7b451d}\label{classFileIoExecutor_aebfb27eafb883fd43b4829011b7b451d}} 
+\index{File\+Io\+Executor@{File\+Io\+Executor}!File\+Close@{File\+Close}}
+\index{File\+Close@{File\+Close}!File\+Io\+Executor@{File\+Io\+Executor}}
+\subsubsection{\texorpdfstring{File\+Close()}{FileClose()}}
+{\footnotesize\ttfamily uint32\+\_\+t File\+Io\+Executor\+::\+File\+Close (\begin{DoxyParamCaption}\item[{uint8\+\_\+t $\ast$}]{result,  }\item[{size\+\_\+t}]{result\+\_\+size }\end{DoxyParamCaption})}
+
+Closes given file and updates status in the result buffer.
+
+
+\begin{DoxyParams}{Parameters}
+{\em result} & Status of file close operation (0 is success, non-\/0 is failure) \\
+\hline
+{\em result\+\_\+size} & Maximum size of the result buffer in bytes \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Status of operation (0 on success, non-\/0 on failure) 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classFileIoExecutor_a78b681e94e8a568bb8981ce6eb1fac62}\label{classFileIoExecutor_a78b681e94e8a568bb8981ce6eb1fac62}} 
+\index{File\+Io\+Executor@{File\+Io\+Executor}!File\+Delete@{File\+Delete}}
+\index{File\+Delete@{File\+Delete}!File\+Io\+Executor@{File\+Io\+Executor}}
+\subsubsection{\texorpdfstring{File\+Delete()}{FileDelete()}}
+{\footnotesize\ttfamily uint32\+\_\+t File\+Io\+Executor\+::\+File\+Delete (\begin{DoxyParamCaption}\item[{uint8\+\_\+t $\ast$}]{result,  }\item[{size\+\_\+t}]{result\+\_\+size }\end{DoxyParamCaption})}
+
+Deletes the file whose name is stored in the \hyperlink{classFileIoExecutor}{File\+Io\+Executor} instance.
+
+
+\begin{DoxyParams}{Parameters}
+{\em result} & Status of file delete operation (0 is success, non-\/0 is failure) \\
+\hline
+{\em result\+\_\+size} & Maximum size of the result buffer in bytes \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Status of operation (0 on success, non-\/0 on failure) 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classFileIoExecutor_a36cbe68b508f084de8f76a88797ce670}\label{classFileIoExecutor_a36cbe68b508f084de8f76a88797ce670}} 
+\index{File\+Io\+Executor@{File\+Io\+Executor}!File\+Open@{File\+Open}}
+\index{File\+Open@{File\+Open}!File\+Io\+Executor@{File\+Io\+Executor}}
+\subsubsection{\texorpdfstring{File\+Open()}{FileOpen()}}
+{\footnotesize\ttfamily uint32\+\_\+t File\+Io\+Executor\+::\+File\+Open (\begin{DoxyParamCaption}\item[{uint8\+\_\+t $\ast$}]{result,  }\item[{size\+\_\+t}]{result\+\_\+size }\end{DoxyParamCaption})}
+
+Opens given file and updates status in the result buffer.
+
+
+\begin{DoxyParams}{Parameters}
+{\em result} & Status of file open operation (0 is success, non-\/0 is failure) \\
+\hline
+{\em result\+\_\+size} & Maximum size of the result buffer in bytes \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Status of operation (0 on success, non-\/0 on failure) 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classFileIoExecutor_ab0b3510df933d83fff527ad3385e6c35}\label{classFileIoExecutor_ab0b3510df933d83fff527ad3385e6c35}} 
+\index{File\+Io\+Executor@{File\+Io\+Executor}!File\+Read@{File\+Read}}
+\index{File\+Read@{File\+Read}!File\+Io\+Executor@{File\+Io\+Executor}}
+\subsubsection{\texorpdfstring{File\+Read()}{FileRead()}}
+{\footnotesize\ttfamily uint32\+\_\+t File\+Io\+Executor\+::\+File\+Read (\begin{DoxyParamCaption}\item[{uint8\+\_\+t $\ast$}]{result,  }\item[{size\+\_\+t}]{result\+\_\+size,  }\item[{uint8\+\_\+t $\ast$}]{out\+\_\+buf,  }\item[{size\+\_\+t}]{out\+\_\+buf\+\_\+size }\end{DoxyParamCaption})}
+
+Reads given file, stores content in out buffer and updates status in result buffer.
+
+
+\begin{DoxyParams}{Parameters}
+{\em result} & Status of file read operation (0 is success, non-\/0 is failure) \\
+\hline
+{\em result\+\_\+size} & Maximum size of the result buffer in bytes \\
+\hline
+{\em out\+\_\+buf} & Buffer to hold file content \\
+\hline
+{\em out\+\_\+buf\+\_\+size} & Maximum size of out\+\_\+buf to contain the file contents in bytes \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Status of operation (0 on success, non-\/0 on failure) 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classFileIoExecutor_af27e670b49606c8ddba1f5172a26ce94}\label{classFileIoExecutor_af27e670b49606c8ddba1f5172a26ce94}} 
+\index{File\+Io\+Executor@{File\+Io\+Executor}!File\+Seek@{File\+Seek}}
+\index{File\+Seek@{File\+Seek}!File\+Io\+Executor@{File\+Io\+Executor}}
+\subsubsection{\texorpdfstring{File\+Seek()}{FileSeek()}}
+{\footnotesize\ttfamily uint32\+\_\+t File\+Io\+Executor\+::\+File\+Seek (\begin{DoxyParamCaption}\item[{size\+\_\+t}]{position,  }\item[{uint8\+\_\+t $\ast$}]{result,  }\item[{size\+\_\+t}]{result\+\_\+size }\end{DoxyParamCaption})}
+
+Moves the file position the file to the given position and updates the status in result buffer.
+
+
+\begin{DoxyParams}{Parameters}
+{\em position} & Byte offset of new file position \\
+\hline
+{\em result} & Status of file seek operation (0 is success, non-\/0 is failure) \\
+\hline
+{\em result\+\_\+size} & Maximum size of the result buffer in bytes \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Status of operation (0 on success, non-\/0 on failure) 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classFileIoExecutor_a7fae38b5e3c5b824983d4768edda94a6}\label{classFileIoExecutor_a7fae38b5e3c5b824983d4768edda94a6}} 
+\index{File\+Io\+Executor@{File\+Io\+Executor}!File\+Tell@{File\+Tell}}
+\index{File\+Tell@{File\+Tell}!File\+Io\+Executor@{File\+Io\+Executor}}
+\subsubsection{\texorpdfstring{File\+Tell()}{FileTell()}}
+{\footnotesize\ttfamily uint32\+\_\+t File\+Io\+Executor\+::\+File\+Tell (\begin{DoxyParamCaption}\item[{uint8\+\_\+t $\ast$}]{result,  }\item[{size\+\_\+t}]{result\+\_\+size,  }\item[{uint8\+\_\+t $\ast$}]{out\+\_\+buf,  }\item[{size\+\_\+t}]{out\+\_\+buf\+\_\+size }\end{DoxyParamCaption})}
+
+Gets the current position of the file, stores it in buffer out\+\_\+buf, and updates status in result buffer.
+
+
+\begin{DoxyParams}{Parameters}
+{\em result} & status of file tell operation (0 is success, non-\/0 is failure) \\
+\hline
+{\em result\+\_\+size} & Maximum size of the result buffer in bytes \\
+\hline
+{\em out\+\_\+buf} & Buffer to hold file position \\
+\hline
+{\em out\+\_\+buf\+\_\+size} & Maximum size of out\+\_\+buf to contain the file position in bytes \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Status of operation (0 on success, non-\/0 on failure) 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classFileIoExecutor_a961b3eb58f78085045a4631d148188a6}\label{classFileIoExecutor_a961b3eb58f78085045a4631d148188a6}} 
+\index{File\+Io\+Executor@{File\+Io\+Executor}!File\+Write@{File\+Write}}
+\index{File\+Write@{File\+Write}!File\+Io\+Executor@{File\+Io\+Executor}}
+\subsubsection{\texorpdfstring{File\+Write()}{FileWrite()}}
+{\footnotesize\ttfamily uint32\+\_\+t File\+Io\+Executor\+::\+File\+Write (\begin{DoxyParamCaption}\item[{uint8\+\_\+t $\ast$}]{result,  }\item[{size\+\_\+t}]{result\+\_\+size,  }\item[{const uint8\+\_\+t $\ast$}]{in\+\_\+buf,  }\item[{size\+\_\+t}]{in\+\_\+buf\+\_\+size }\end{DoxyParamCaption})}
+
+Writes given file with content in input buffer and updates status in result buffer.
+
+
+\begin{DoxyParams}{Parameters}
+{\em result} & Status of file write operation (0 is success, non-\/0 is failure) \\
+\hline
+{\em result\+\_\+size} & Maximum size of the result buffer in bytes \\
+\hline
+{\em in\+\_\+buf} & Buffer with content to be written to the file \\
+\hline
+{\em in\+\_\+buf\+\_\+size} & Maximum size of in\+\_\+buf to write to the file in bytes \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Status of operation (0 on success, non-\/0 on failure) 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classFileIoExecutor_a364a598bf9a247e102b67e52e2a45da1}\label{classFileIoExecutor_a364a598bf9a247e102b67e52e2a45da1}} 
+\index{File\+Io\+Executor@{File\+Io\+Executor}!Get\+Io\+Handler\+Id@{Get\+Io\+Handler\+Id}}
+\index{Get\+Io\+Handler\+Id@{Get\+Io\+Handler\+Id}!File\+Io\+Executor@{File\+Io\+Executor}}
+\subsubsection{\texorpdfstring{Get\+Io\+Handler\+Id()}{GetIoHandlerId()}}
+{\footnotesize\ttfamily uint32\+\_\+t File\+Io\+Executor\+::\+Get\+Io\+Handler\+Id (\begin{DoxyParamCaption}\item[{const char $\ast$}]{handler\+\_\+name }\end{DoxyParamCaption})}
+
+Get the I/O handler ID corresponding to Io\+Handler handler\+\_\+name.
+
+
+\begin{DoxyParams}{Parameters}
+{\em handler\+Name} & Name of handler \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+I/O handler ID. That is, 1 for handler \char`\"{}tcf-\/base-\/file-\/io\char`\"{} 
+
+0 on error 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classFileIoExecutor_a8ca473e3e64e7e2a20d41247fdedd76a}\label{classFileIoExecutor_a8ca473e3e64e7e2a20d41247fdedd76a}} 
+\index{File\+Io\+Executor@{File\+Io\+Executor}!Get\+Max\+File\+Size@{Get\+Max\+File\+Size}}
+\index{Get\+Max\+File\+Size@{Get\+Max\+File\+Size}!File\+Io\+Executor@{File\+Io\+Executor}}
+\subsubsection{\texorpdfstring{Get\+Max\+File\+Size()}{GetMaxFileSize()}}
+{\footnotesize\ttfamily size\+\_\+t File\+Io\+Executor\+::\+Get\+Max\+File\+Size (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+Get the maximum size of the buffer used for file I/O.
+
+\begin{DoxyReturn}{Returns}
+Maximum buffer size in bytes 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classFileIoExecutor_aed7849bb739d14cb2cd4d011d5fb1828}\label{classFileIoExecutor_aed7849bb739d14cb2cd4d011d5fb1828}} 
+\index{File\+Io\+Executor@{File\+Io\+Executor}!Get\+Max\+Io\+Result\+Size@{Get\+Max\+Io\+Result\+Size}}
+\index{Get\+Max\+Io\+Result\+Size@{Get\+Max\+Io\+Result\+Size}!File\+Io\+Executor@{File\+Io\+Executor}}
+\subsubsection{\texorpdfstring{Get\+Max\+Io\+Result\+Size()}{GetMaxIoResultSize()}}
+{\footnotesize\ttfamily size\+\_\+t File\+Io\+Executor\+::\+Get\+Max\+Io\+Result\+Size (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+Get the maximum size of the result buffer used to store the I/O status.
+
+\begin{DoxyReturn}{Returns}
+Maximum result buffer size in bytes 
+\end{DoxyReturn}
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+/home/dano/git/avalon/common/sgx\+\_\+workload/iohandler/\hyperlink{file__io_8h}{file\+\_\+io.\+h}\item 
+/home/dano/git/avalon/common/sgx\+\_\+workload/iohandler/\hyperlink{file__io_8cpp}{file\+\_\+io.\+cpp}\end{DoxyCompactItemize}

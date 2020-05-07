@@ -1,0 +1,79 @@
+.TH "avalon_sdk.connector.interfaces.work_order_proxy.WorkOrderProxy" 3 "Wed May 6 2020" "Version 0.5.0.dev1" "Hyperledger Avalon" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+avalon_sdk.connector.interfaces.work_order_proxy.WorkOrderProxy
+.SH SYNOPSIS
+.br
+.PP
+.PP
+Inherits \fBavalon_sdk\&.connector\&.interfaces\&.work_order\&.WorkOrder\fP\&.
+.SS "Public Member Functions"
+
+.in +1c
+.ti -1c
+.RI "def \fB__init__\fP (self)"
+.br
+.ti -1c
+.RI "def \fBencryption_key_start\fP (self, tag, id=None)"
+.br
+.ti -1c
+.RI "def \fBwork_order_complete\fP (self, work_order_id, work_order_response)"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+
+.PP
+.nf
+This class is an abstract base class that contains
+abstract APIs to manage work orders.
+This interface is going to be used by proxy model.
+
+.fi
+.PP
+ 
+.SH "Member Function Documentation"
+.PP 
+.SS "def avalon_sdk\&.connector\&.interfaces\&.work_order_proxy\&.WorkOrderProxy\&.encryption_key_start ( self,  tag,  id = \fCNone\fP)"
+
+.PP
+.nf
+Inform the Worker that it should start
+encryption key generation for this requester.
+This API is for the proxy model.
+
+Parameters:
+tag       is an optional parameter.
+  If it is zero, the transaction sender's address
+  is used as a tag
+id        Optional JSON RPC request ID
+
+Returns:
+0 on success, otherwise an error code.
+
+.fi
+.PP
+ 
+.SS "def avalon_sdk\&.connector\&.interfaces\&.work_order_proxy\&.WorkOrderProxy\&.work_order_complete ( self,  work_order_id,  work_order_response)"
+
+.PP
+.nf
+This function is called by the Worker Service to
+complete a Work Order successfully or in error.
+This API is for the proxy model.
+
+Parameters:
+work_order_id       Unique ID to identify the work order request
+work_order_response Work order response data in a string
+
+Returns:
+errorCode           0 on success or non-zero on error.
+
+.fi
+.PP
+ 
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Hyperledger Avalon from the source code\&.

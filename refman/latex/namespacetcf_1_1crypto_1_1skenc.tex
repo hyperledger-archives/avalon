@@ -1,0 +1,60 @@
+\hypertarget{namespacetcf_1_1crypto_1_1skenc}{}\section{tcf\+:\+:crypto\+:\+:skenc Namespace Reference}
+\label{namespacetcf_1_1crypto_1_1skenc}\index{tcf\+::crypto\+::skenc@{tcf\+::crypto\+::skenc}}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{types_8h_a35da937e2331acce98d47f44892f4a76}{Byte\+Array} \hyperlink{namespacetcf_1_1crypto_1_1skenc_a3ef58796a0884661acd1b4655a9ca431}{Generate\+Key} ()
+\item 
+\hyperlink{types_8h_a35da937e2331acce98d47f44892f4a76}{Byte\+Array} \hyperlink{namespacetcf_1_1crypto_1_1skenc_a1e0203bf47c30fa78db18d32e7b8ec64}{Generate\+IV} (const std\+::string \&I\+Vstring=std\+::string(\char`\"{}\char`\"{}))
+\item 
+\hyperlink{types_8h_a35da937e2331acce98d47f44892f4a76}{Byte\+Array} \hyperlink{namespacetcf_1_1crypto_1_1skenc_a12c94c127224bfa602b80205ff93bae6}{Encrypt\+Message} (const \hyperlink{types_8h_a35da937e2331acce98d47f44892f4a76}{Byte\+Array} \&key, const \hyperlink{types_8h_a35da937e2331acce98d47f44892f4a76}{Byte\+Array} \&iv, const \hyperlink{types_8h_a35da937e2331acce98d47f44892f4a76}{Byte\+Array} \&message)
+\item 
+\hyperlink{types_8h_a35da937e2331acce98d47f44892f4a76}{Byte\+Array} \hyperlink{namespacetcf_1_1crypto_1_1skenc_a1672f183497e16c33daf8453eb2b5b4a}{Encrypt\+Message} (const \hyperlink{types_8h_a35da937e2331acce98d47f44892f4a76}{Byte\+Array} \&key, const \hyperlink{types_8h_a35da937e2331acce98d47f44892f4a76}{Byte\+Array} \&message)
+\item 
+\hyperlink{types_8h_a35da937e2331acce98d47f44892f4a76}{Byte\+Array} \hyperlink{namespacetcf_1_1crypto_1_1skenc_a8720d05eba1eda7246905c6a68f0996c}{Decrypt\+Message} (const \hyperlink{types_8h_a35da937e2331acce98d47f44892f4a76}{Byte\+Array} \&key, const \hyperlink{types_8h_a35da937e2331acce98d47f44892f4a76}{Byte\+Array} \&iv, const \hyperlink{types_8h_a35da937e2331acce98d47f44892f4a76}{Byte\+Array} \&message)
+\item 
+\hyperlink{types_8h_a35da937e2331acce98d47f44892f4a76}{Byte\+Array} \hyperlink{namespacetcf_1_1crypto_1_1skenc_a6a9b2c3b9b5d1f2d140bcac790132739}{Decrypt\+Message} (const \hyperlink{types_8h_a35da937e2331acce98d47f44892f4a76}{Byte\+Array} \&key, const \hyperlink{types_8h_a35da937e2331acce98d47f44892f4a76}{Byte\+Array} \&message)
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Authenticated encryption. 
+
+\subsection{Function Documentation}
+\mbox{\Hypertarget{namespacetcf_1_1crypto_1_1skenc_a8720d05eba1eda7246905c6a68f0996c}\label{namespacetcf_1_1crypto_1_1skenc_a8720d05eba1eda7246905c6a68f0996c}} 
+\index{tcf\+::crypto\+::skenc@{tcf\+::crypto\+::skenc}!Decrypt\+Message@{Decrypt\+Message}}
+\index{Decrypt\+Message@{Decrypt\+Message}!tcf\+::crypto\+::skenc@{tcf\+::crypto\+::skenc}}
+\subsubsection{\texorpdfstring{Decrypt\+Message()}{DecryptMessage()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily \hyperlink{types_8h_a35da937e2331acce98d47f44892f4a76}{Byte\+Array} tcf\+::crypto\+::skenc\+::\+Decrypt\+Message (\begin{DoxyParamCaption}\item[{const \hyperlink{types_8h_a35da937e2331acce98d47f44892f4a76}{Byte\+Array} \&}]{key,  }\item[{const \hyperlink{types_8h_a35da937e2331acce98d47f44892f4a76}{Byte\+Array} \&}]{iv,  }\item[{const \hyperlink{types_8h_a35da937e2331acce98d47f44892f4a76}{Byte\+Array} \&}]{message }\end{DoxyParamCaption})}
+
+Throws Runtime\+Error, Value\+Error, Crypto\+Error (message authentication failure). \mbox{\Hypertarget{namespacetcf_1_1crypto_1_1skenc_a6a9b2c3b9b5d1f2d140bcac790132739}\label{namespacetcf_1_1crypto_1_1skenc_a6a9b2c3b9b5d1f2d140bcac790132739}} 
+\index{tcf\+::crypto\+::skenc@{tcf\+::crypto\+::skenc}!Decrypt\+Message@{Decrypt\+Message}}
+\index{Decrypt\+Message@{Decrypt\+Message}!tcf\+::crypto\+::skenc@{tcf\+::crypto\+::skenc}}
+\subsubsection{\texorpdfstring{Decrypt\+Message()}{DecryptMessage()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily \hyperlink{types_8h_a35da937e2331acce98d47f44892f4a76}{Byte\+Array} tcf\+::crypto\+::skenc\+::\+Decrypt\+Message (\begin{DoxyParamCaption}\item[{const \hyperlink{types_8h_a35da937e2331acce98d47f44892f4a76}{Byte\+Array} \&}]{key,  }\item[{const \hyperlink{types_8h_a35da937e2331acce98d47f44892f4a76}{Byte\+Array} \&}]{message }\end{DoxyParamCaption})}
+
+Throws Runtime\+Error, Value\+Error, Crypto\+Error (message authentication failure). Expects IV prepended to message ciphertext. \mbox{\Hypertarget{namespacetcf_1_1crypto_1_1skenc_a12c94c127224bfa602b80205ff93bae6}\label{namespacetcf_1_1crypto_1_1skenc_a12c94c127224bfa602b80205ff93bae6}} 
+\index{tcf\+::crypto\+::skenc@{tcf\+::crypto\+::skenc}!Encrypt\+Message@{Encrypt\+Message}}
+\index{Encrypt\+Message@{Encrypt\+Message}!tcf\+::crypto\+::skenc@{tcf\+::crypto\+::skenc}}
+\subsubsection{\texorpdfstring{Encrypt\+Message()}{EncryptMessage()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily \hyperlink{types_8h_a35da937e2331acce98d47f44892f4a76}{Byte\+Array} tcf\+::crypto\+::skenc\+::\+Encrypt\+Message (\begin{DoxyParamCaption}\item[{const \hyperlink{types_8h_a35da937e2331acce98d47f44892f4a76}{Byte\+Array} \&}]{key,  }\item[{const \hyperlink{types_8h_a35da937e2331acce98d47f44892f4a76}{Byte\+Array} \&}]{iv,  }\item[{const \hyperlink{types_8h_a35da937e2331acce98d47f44892f4a76}{Byte\+Array} \&}]{message }\end{DoxyParamCaption})}
+
+Throws Runtime\+Error, Value\+Error. \mbox{\Hypertarget{namespacetcf_1_1crypto_1_1skenc_a1672f183497e16c33daf8453eb2b5b4a}\label{namespacetcf_1_1crypto_1_1skenc_a1672f183497e16c33daf8453eb2b5b4a}} 
+\index{tcf\+::crypto\+::skenc@{tcf\+::crypto\+::skenc}!Encrypt\+Message@{Encrypt\+Message}}
+\index{Encrypt\+Message@{Encrypt\+Message}!tcf\+::crypto\+::skenc@{tcf\+::crypto\+::skenc}}
+\subsubsection{\texorpdfstring{Encrypt\+Message()}{EncryptMessage()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily \hyperlink{types_8h_a35da937e2331acce98d47f44892f4a76}{Byte\+Array} tcf\+::crypto\+::skenc\+::\+Encrypt\+Message (\begin{DoxyParamCaption}\item[{const \hyperlink{types_8h_a35da937e2331acce98d47f44892f4a76}{Byte\+Array} \&}]{key,  }\item[{const \hyperlink{types_8h_a35da937e2331acce98d47f44892f4a76}{Byte\+Array} \&}]{message }\end{DoxyParamCaption})}
+
+Uses random IV prepended the returned ciphertext. Throws Runtime\+Error, Value\+Error. \mbox{\Hypertarget{namespacetcf_1_1crypto_1_1skenc_a1e0203bf47c30fa78db18d32e7b8ec64}\label{namespacetcf_1_1crypto_1_1skenc_a1e0203bf47c30fa78db18d32e7b8ec64}} 
+\index{tcf\+::crypto\+::skenc@{tcf\+::crypto\+::skenc}!Generate\+IV@{Generate\+IV}}
+\index{Generate\+IV@{Generate\+IV}!tcf\+::crypto\+::skenc@{tcf\+::crypto\+::skenc}}
+\subsubsection{\texorpdfstring{Generate\+I\+V()}{GenerateIV()}}
+{\footnotesize\ttfamily \hyperlink{types_8h_a35da937e2331acce98d47f44892f4a76}{Byte\+Array} tcf\+::crypto\+::skenc\+::\+Generate\+IV (\begin{DoxyParamCaption}\item[{const std\+::string \&}]{I\+Vstring = {\ttfamily std\+:\+:string(\char`\"{}\char`\"{})} }\end{DoxyParamCaption})}
+
+Throws Runtime\+Error. \mbox{\Hypertarget{namespacetcf_1_1crypto_1_1skenc_a3ef58796a0884661acd1b4655a9ca431}\label{namespacetcf_1_1crypto_1_1skenc_a3ef58796a0884661acd1b4655a9ca431}} 
+\index{tcf\+::crypto\+::skenc@{tcf\+::crypto\+::skenc}!Generate\+Key@{Generate\+Key}}
+\index{Generate\+Key@{Generate\+Key}!tcf\+::crypto\+::skenc@{tcf\+::crypto\+::skenc}}
+\subsubsection{\texorpdfstring{Generate\+Key()}{GenerateKey()}}
+{\footnotesize\ttfamily \hyperlink{types_8h_a35da937e2331acce98d47f44892f4a76}{Byte\+Array} tcf\+::crypto\+::skenc\+::\+Generate\+Key (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+Byte\+Array here is used to encapsulate raw binary data and does not apply/assume any encoding. Throws Runtime\+Error. 

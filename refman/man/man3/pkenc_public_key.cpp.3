@@ -1,0 +1,75 @@
+.TH "/home/dano/git/avalon/common/cpp/crypto/pkenc_public_key.cpp" 3 "Wed May 6 2020" "Version 0.5.0.dev1" "Hyperledger Avalon" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+/home/dano/git/avalon/common/cpp/crypto/pkenc_public_key.cpp
+.SH SYNOPSIS
+.br
+.PP
+\fC#include 'pkenc_public_key\&.h'\fP
+.br
+\fC#include <openssl/err\&.h>\fP
+.br
+\fC#include <openssl/pem\&.h>\fP
+.br
+\fC#include <openssl/rand\&.h>\fP
+.br
+\fC#include <openssl/sha\&.h>\fP
+.br
+\fC#include <algorithm>\fP
+.br
+\fC#include <memory>\fP
+.br
+\fC#include <vector>\fP
+.br
+\fC#include 'base64\&.h'\fP
+.br
+\fC#include 'crypto_shared\&.h'\fP
+.br
+\fC#include 'error\&.h'\fP
+.br
+\fC#include 'hex_string\&.h'\fP
+.br
+\fC#include 'pkenc\&.h'\fP
+.br
+\fC#include 'pkenc_private_key\&.h'\fP
+.br
+\fC#include 'tSgxSSL_api\&.h'\fP
+.br
+
+.SS "Typedefs"
+
+.in +1c
+.ti -1c
+.RI "typedef std::unique_ptr< BIO, void(*)(BIO *)> \fBBIO_ptr\fP"
+.br
+.ti -1c
+.RI "typedef std::unique_ptr< EVP_CIPHER_CTX, void(*)(EVP_CIPHER_CTX *)> \fBCTX_ptr\fP"
+.br
+.ti -1c
+.RI "typedef std::unique_ptr< BN_CTX, void(*)(BN_CTX *)> \fBBN_CTX_ptr\fP"
+.br
+.ti -1c
+.RI "typedef std::unique_ptr< BIGNUM, void(*)(BIGNUM *)> \fBBIGNUM_ptr\fP"
+.br
+.ti -1c
+.RI "typedef std::unique_ptr< RSA, void(*)(RSA *)> \fBRSA_ptr\fP"
+.br
+.in -1c
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "RSA * \fBdeserializeRSAPublicKey\fP (const std::string &encoded)"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+Avalon RSA public key generation, serialization, and encryption functions\&. 
+.SH "Function Documentation"
+.PP 
+.SS "RSA* deserializeRSAPublicKey (const std::string & encoded)"
+Utility function: deserialize RSA Public Key\&. Throws RuntimeError, ValueError\&. 
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Hyperledger Avalon from the source code\&.

@@ -1,0 +1,104 @@
+.TH "test_ethereum_work_order_impl.TestEthereumWorkOrderProxyImpl" 3 "Wed May 6 2020" "Version 0.5.0.dev1" "Hyperledger Avalon" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+test_ethereum_work_order_impl.TestEthereumWorkOrderProxyImpl
+.SH SYNOPSIS
+.br
+.PP
+.PP
+Inherits TestCase\&.
+.SS "Public Member Functions"
+
+.in +1c
+.ti -1c
+.RI "def \fB__init__\fP (self, config_file)"
+.br
+.ti -1c
+.RI "def \fBtest_work_order_submit_positive\fP (self)"
+.br
+.ti -1c
+.RI "def \fBtest_work_order_submit_mismatch\fP (self)"
+.br
+.ti -1c
+.RI "def \fBtest_work_order_get_result\fP (self)"
+.br
+.ti -1c
+.RI "def \fBtest_work_order_complete\fP (self)"
+.br
+.ti -1c
+.RI "def \fBtest_work_order_complete_error\fP (self)"
+.br
+.ti -1c
+.RI "def \fBtest_is_wo_id_in_event_positive\fP (self)"
+.br
+.ti -1c
+.RI "def \fBtest_is_wo_id_in_event_wo_id_not_matched\fP (self)"
+.br
+.ti -1c
+.RI "def \fBtest_is_wo_id_in_event_error_result\fP (self)"
+.br
+.ti -1c
+.RI "def \fBtest_is_wo_id_in_event_no_wo_id\fP (self)"
+.br
+.ti -1c
+.RI "def \fBtest_is_valid_work_order_json\fP (self)"
+.br
+.in -1c
+.SH "Member Function Documentation"
+.PP 
+.SS "def test_ethereum_work_order_impl\&.TestEthereumWorkOrderProxyImpl\&.test_is_wo_id_in_event_error_result ( self)"
+
+.PP
+.nf
+This case mocks an event and verifies the wo_id_in_event function
+for a positive result. The event has an error response from
+work order execution.
+
+.fi
+.PP
+ 
+.SS "def test_ethereum_work_order_impl\&.TestEthereumWorkOrderProxyImpl\&.test_is_wo_id_in_event_positive ( self)"
+
+.PP
+.nf
+This case mocks an event and verifies the wo_id_in_event function
+for a positive result.
+
+.fi
+.PP
+ 
+.SS "def test_ethereum_work_order_impl\&.TestEthereumWorkOrderProxyImpl\&.test_is_wo_id_in_event_wo_id_not_matched ( self)"
+
+.PP
+.nf
+This case mocks an event and verifies the wo_id_in_event function
+for a negative result. The wo_id does not match.
+
+.fi
+.PP
+ 
+.SS "def test_ethereum_work_order_impl\&.TestEthereumWorkOrderProxyImpl\&.test_work_order_complete ( self)"
+
+.PP
+.nf
+This function verifies if work order complete function
+succeeds when the in work order execution is done.
+
+.fi
+.PP
+ 
+.SS "def test_ethereum_work_order_impl\&.TestEthereumWorkOrderProxyImpl\&.test_work_order_complete_error ( self)"
+
+.PP
+.nf
+This function verifies if work order complete function
+succeeds when there is an error in work order execution.
+
+.fi
+.PP
+ 
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Hyperledger Avalon from the source code\&.
