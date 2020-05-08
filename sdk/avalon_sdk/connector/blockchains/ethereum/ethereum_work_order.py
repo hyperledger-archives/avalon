@@ -163,7 +163,7 @@ class EthereumWorkOrderProxyImpl(WorkOrderProxy):
                 return SUCCESS
             except Exception as e:
                 logging.error(
-                    "Execption occurred when trying to execute "
+                    "Exception occurred when trying to execute "
                     + "workOrderComplete transaction on chain "+str(e))
                 return ERROR
         else:

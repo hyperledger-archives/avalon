@@ -67,7 +67,7 @@ class TCSWorkOrderHandlerSync(TCSWorkOrderHandler):
         """
         Function to process work order request
         Parameters:
-            - params is variable-length arugment list containing work request
+            - params is variable-length argument list containing work request
               as defined in EEA spec 6.1.1
         Returns jrpc response as defined in EEA spec 6.1.3
         """
@@ -154,7 +154,7 @@ class TCSWorkOrderHandlerSync(TCSWorkOrderHandler):
                 raise JSONRPCDispatchException(
                     WorkOrderStatus.UNKNOWN_ERROR,
                     "Failed to connect with enclave-manager socket: " + er)
-            # Work order is processed. Fetch result from wo-respose table
+            # Work order is processed. Fetch result from wo-response table
             value = self.kv_helper.get("wo-responses", wo_id)
             if value:
                 response = json.loads(value)

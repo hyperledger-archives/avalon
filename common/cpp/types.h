@@ -91,5 +91,5 @@ ByteArray Base64EncodedStringToByteArray(const Base64EncodedString& encoded);
 HexEncodedString ByteArrayToHexEncodedString(const ByteArray& buf);
 
 // Simple conversion from HexEncodedString to ByteArray.
-// Throws ValuenError
+// Throws ValueError
 ByteArray HexEncodedStringToByteArray(const HexEncodedString& encoded);

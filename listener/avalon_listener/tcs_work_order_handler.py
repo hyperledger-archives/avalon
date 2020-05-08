@@ -107,7 +107,7 @@ class TCSWorkOrderHandler:
         This API corresponds to Trusted Compute EEA API 6.1.4
         Work Order Pull Request Payload
         Parameters:
-            - params is variable-length arugment list containing work request
+            - params is variable-length argument list containing work request
               as defined in EEA spec 6.1.4
         Returns jrpc response as defined in EEA spec 6.1.2
         """
@@ -176,7 +176,7 @@ class TCSWorkOrderHandler:
         """
         Function to process work order request
         Parameters:
-            - params is variable-length arugment list containing work request
+            - params is variable-length argument list containing work request
               as defined in EEA spec 6.1.1
         Returns jrpc response as defined in EEA spec 6.1.3
         """

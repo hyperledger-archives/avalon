@@ -23,7 +23,7 @@ organization = "Hyperledger"
 json_rpc_uri = "http://localhost:1947"
 
 # Block chain type, it identifies which blockchain to use.
-# Currently supportred types are: fabric or ethereum
+# Currently supported types are: fabric or ethereum
 [blockchain]
 type = "ethereum"
 

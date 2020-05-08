@@ -80,7 +80,7 @@ class TestEthereumWorkOrderProxyImpl(unittest.TestCase):
                                                    worker_id,
                                                    requester_id,
                                                    json.dumps(wo_req))
-        self.assertEqual(result, 1, "Work order sumbissoin should fail")
+        self.assertEqual(result, 1, "Work order submission should fail")
 
     def test_work_order_get_result(self):
         pass
