@@ -20,7 +20,7 @@ import random
 import json
 import logging
 
-from avalon_sdk.http_client.http_jrpc_client import HttpJrpcClient
+from http_client.http_jrpc_client import HttpJrpcClient
 import avalon_crypto_utils.crypto.crypto as crypto
 import avalon_crypto_utils.signature as signature
 import avalon_sdk.worker.worker_details as worker

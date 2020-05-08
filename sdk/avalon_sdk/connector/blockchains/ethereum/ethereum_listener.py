@@ -17,7 +17,6 @@ import logging
 from utility.hex_utils import is_valid_hex_str
 from avalon_sdk.connector.blockchains.ethereum.ethereum_wrapper \
     import get_keccak_for_text
-from avalon_sdk.http_client.http_jrpc_client import HttpJrpcClient
 
 logging.basicConfig(
     format='%(asctime)s - %(levelname)s - %(message)s', level=logging.INFO)
@@ -31,7 +30,6 @@ class BlockchainInterface:
     def __init__(self, config):
         # TODO: store list of contracts?
         self._config = config
-        self._uri_client = HttpJrpcClient(config["ethereum"]["event_provider"])
 
     def newListener(self, contract, event, fromBlock='latest'):
         """Create a filter to get events from latest block by default."""
@@ -46,7 +44,6 @@ class EventProcessor:
 
     def __init__(self, config):
         self._config = config
-        self._uri_client = HttpJrpcClient(config["ethereum"]["event_provider"])
         self._wo_completed_hash = get_keccak_for_text(
             "workOrderCompleted(bytes32,bytes32,uint256,string,"
             + "uint256,bytes4)")

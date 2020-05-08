@@ -16,7 +16,7 @@ import json
 import time
 import logging
 from utility.hex_utils import is_valid_hex_str
-from avalon_sdk.http_client.http_jrpc_client import HttpJrpcClient
+from http_client.http_jrpc_client import HttpJrpcClient
 from avalon_sdk.connector.interfaces.work_order import WorkOrder
 from error_code.error_status import WorkOrderStatus, JRPCErrorCodes
 
