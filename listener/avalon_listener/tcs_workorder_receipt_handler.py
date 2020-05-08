@@ -65,7 +65,7 @@ class TCSWorkOrderReceiptHandler:
         """
         Function to process work order request
         Parameters:
-            - params is variable-length arugment list containing work request
+            - params is variable-length argument list containing work request
             as defined in EEA spec 7.2.2
         Returns jrpc response as defined in 4.1
         """
@@ -169,7 +169,7 @@ class TCSWorkOrderReceiptHandler:
         """
         Function to process update work order request
         Parameters:
-            - params is variable-length arugment list containing work request
+            - params is variable-length argument list containing work request
               as defined in EEA spec 7.2.3
         Returns jrpc response as defined in 4.1
         """
@@ -342,7 +342,7 @@ class TCSWorkOrderReceiptHandler:
         """
         Function to look the set of work order receipts available
         Parameters:
-            - params is variable-length arugment list containing work request
+            - params is variable-length argument list containing work request
               as defined in EEA spec 7.2.8
         Returns jrpc response as defined EEA spec 7.2.9
         """
@@ -355,7 +355,7 @@ class TCSWorkOrderReceiptHandler:
         """
         Function to look the set of work order receipt newly added
         Parameters:
-            - params is variable-length arugment list containing work request
+            - params is variable-length argument list containing work request
               as defined in EEA spec 7.2.10
         Returns jrpc response as defined EEA spec 7.2.9
         """
@@ -368,7 +368,7 @@ class TCSWorkOrderReceiptHandler:
         """
         Function to retrieve the details of worker
         Parameters:
-            - params is variable-length arugment list containing work order
+            - params is variable-length argument list containing work order
             receipt request request as defined in EEA spec 7.2.4
         Returns jrpc response as defined in 7.2.5
         """
@@ -403,7 +403,7 @@ class TCSWorkOrderReceiptHandler:
         """
         Function to retrieve the update to work order receipt
         Parameters:
-            - params is variable-length arugment list containing work order
+            - params is variable-length argument list containing work order
             update retrieve request as defined in EEA spec 7.2.6
         Returns:
             Jrpc response as defined in EEA spec 7.2.7

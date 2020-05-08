@@ -205,8 +205,8 @@ def _create_work_order_params(worker_id, workload_id, in_data,
 
 def _create_work_order_receipt(wo_receipt, wo_params,
                                client_private_key, jrpc_req_id):
-    # Create work order receipt object using WorkOrderReceiptRequest class
-    # This fuction will send WorkOrderReceiptCreate json rpc request
+    # Create a work order receipt object using WorkOrderReceiptRequest class.
+    # This function will send a WorkOrderReceiptCreate JSON RPC request.
     wo_request = json.loads(wo_params.to_jrpc_string(jrpc_req_id))
     wo_receipt_request_obj = WorkOrderReceiptRequest()
     wo_create_receipt = wo_receipt_request_obj.create_receipt(

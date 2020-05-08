@@ -160,8 +160,8 @@ class EthereumConnector:
                 worker = self._worker_registry\
                     .worker_retrieve(wid, random.randint(0, 100000))
                 worker_status_onchain = worker["result"]["status"]
-                # If worker is not already decommissoined, mark it decommission
-                # as it is no longer available in the kv storage
+                # If worker is not already decommissioned, mark it
+                # decommissioned as it is no longer available in the kv storage
                 if worker_status_onchain != WorkerStatus.DECOMMISSIONED.value:
                     self._worker_registry.worker_set_status(
                         worker_id, WorkerStatus.DECOMMISSIONED)
