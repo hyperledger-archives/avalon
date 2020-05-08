@@ -60,7 +60,7 @@ To build Hyperledger Avalon, follow instructions in the [build document](BUILD.m
 
 ## Documentation
 
-See [docs](docs) for Hyperledger Avalon Documentation.
+[Hyperledger Avalon Documentation](https://hyperledger.github.io/avalon/)
 
 ## Contributing
 
