@@ -162,6 +162,13 @@ cd build
 try cmake ..
 try make "-j$NUM_CORES"
 
+yell --------------- COMMON CPP TESTS ---------------
+cd $TCF_HOME/common/cpp/tests || error_exit "Failed to change to the directory"
+
+mkdir -p build
+try make "-j$NUM_CORES"
+try make test "-j$NUM_CORES"
+
 yell --------------- TRUSTED WORKER MANAGER COMMON ---------------
 cd $TCF_HOME/tc/sgx/trusted_worker_manager/common || error_exit "Failed to change to the directory"
 
