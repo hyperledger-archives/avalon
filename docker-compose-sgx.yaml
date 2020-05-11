@@ -39,11 +39,11 @@ services:
     entrypoint: bash -c "tail -f /dev/null"
     stop_signal: SIGKILL
     depends_on:
-      - avalon-sgx-enclave-manager
+      - avalon-enclave-manager
       - avalon-listener
 
-  avalon-sgx-enclave-manager:
-    container_name: avalon-sgx-enclave-manager
+  avalon-enclave-manager:
+    container_name: avalon-enclave-manager
     image: avalon-sgx-enclave-manager-dev
     build:
       context: .
@@ -58,6 +58,9 @@ services:
       - http_proxy
       - https_proxy
       - no_proxy
+    expose:
+      # ZMQ socket port.
+      - 5555
     volumes:
       # Map aesm service on host to docker, required only in HW mode.
       - /var/run/aesmd/aesm.socket:/var/run/aesmd/aesm.socket
@@ -110,6 +113,8 @@ services:
       - no_proxy
     expose:
       - 1947
+      # ZMQ socket port.
+      - 5555
     command: |
       bash -c "
         avalon_listener --bind http://avalon-listener:1947 --lmdb_url http://avalon-lmdb:9090
