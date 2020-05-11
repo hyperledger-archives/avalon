@@ -126,8 +126,8 @@ class KeyManagementEnclaveManager(EnclaveManager):
 
         rpc_methods = [
             self._GetUniqueVerificationKey,
-            self._RegisterWorkorderProcessor,
-            self._PreporocessWorkorder
+            self._RegisterWorkOrderProcessor,
+            self._PreProcessWorkOrder
         ]
         kme_listener = KMEListener(rpc_methods)
         kme_listener.start(host_name, port)
@@ -135,21 +135,21 @@ class KeyManagementEnclaveManager(EnclaveManager):
 
 # -----------------------------------------------------------------
 
-    def _GetUniqueVerificationKey(self, **parms):
+    def _GetUniqueVerificationKey(self, **params):
         """
         """
         pass
 
 # -----------------------------------------------------------------
 
-    def _RegisterWorkOrderProcessor(self, **parms):
+    def _RegisterWorkOrderProcessor(self, **params):
         """
         """
         pass
 
 # -----------------------------------------------------------------
 
-    def _PrePorocessWorkOrder(self, **parms):
+    def _PreProcessWorkOrder(self, **params):
         """
         """
         pass
