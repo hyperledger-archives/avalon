@@ -24,7 +24,6 @@
 
 #include <stdexcept>
 #include <stdio.h>
-#include <openssl/evp.h> // OpenSSL_add_all_digests()
 
 #include "error.h"       // tcf::error
 #include "pkenc_private_key.h"
@@ -40,10 +39,6 @@ main(void)
     std::string msgStr("Hyperledger Avalon");
     ByteArray msg;
     msg.insert(msg.end(), msgStr.data(), msgStr.data() + msgStr.size());
-
-#if OPENSSL_API_COMPAT < 0x10100000L
-    OpenSSL_add_all_digests();
-#endif
 
     printf("Test RSA key management functions.\n");
     try {

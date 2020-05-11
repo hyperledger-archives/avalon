@@ -24,7 +24,6 @@
 
 #include <string.h>
 #include <stdio.h>
-#include <openssl/evp.h>
 
 #include "error.h"       // tcf::error
 #include "skenc.h"
@@ -41,10 +40,6 @@ main(void)
     ByteArray msg;
     msg.insert(msg.end(), msgStr.data(), msgStr.data() + msgStr.size());
     std::string msgStr2("Confidential Computing");
-
-#if OPENSSL_API_COMPAT < 0x10100000L
-    OpenSSL_add_all_digests();
-#endif
 
     printf("Test symmetric encryption functions\n");
 
