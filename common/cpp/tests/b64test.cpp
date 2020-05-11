@@ -25,7 +25,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <openssl/evp.h> // EVP_*codeBlock()
+#include <openssl/evp.h> // EVP_DecodeBlock()
 #include "types.h"       // ByteArray
 #include "utils.h"       // ByteArrayToStr()
 #include "base64.h"      // base64_*code()

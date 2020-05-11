@@ -27,7 +27,6 @@
 
 #include <stdexcept>
 #include <stdio.h>
-#include <openssl/evp.h> // OpenSSL_add_all_digests()
 
 #include "crypto_utils.h"
 #include "error.h"       // tcf::error
@@ -52,10 +51,6 @@ main(void)
         {"", "47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU="},
         {NULL, NULL}
     };
-
-#if OPENSSL_API_COMPAT < 0x10100000L
-    OpenSSL_add_all_digests();
-#endif
 
     printf("Random number test: RandomBitString()\n");
     try {

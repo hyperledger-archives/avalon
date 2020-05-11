@@ -26,7 +26,6 @@
 #include <stdio.h>
 #include <openssl/evp.h>
 #if OPENSSL_API_COMPAT < 0x10100000L
-#include <openssl/ecdsa.h>
 #include <openssl/bn.h>
 #endif
 
@@ -37,6 +36,11 @@
 #if OPENSSL_API_COMPAT < 0x10100000L
 // For backwards compatibility with older versions of OpenSSL.
 // Needed for sig_private_key.cpp.
+
+typedef struct ECDSA_SIG_st {
+    BIGNUM *r;
+    BIGNUM *s;
+} ECDSA_SIG;
 
 // Get the R and S bignumber values of an ECDSA signature.
 void ECDSA_SIG_get0(const ECDSA_SIG *sig, const BIGNUM **ptr_r,
