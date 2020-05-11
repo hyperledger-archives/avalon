@@ -15,7 +15,7 @@
 # limitations under the License.
 
 KV_STORAGE="kv_storage"
-ENCLAVE_MANAGER="${TCF_HOME}/enclave_manager/avalon_enclave_manager/singleton/enclave_manager.py"
+ENCLAVE_MANAGER="${TCF_HOME}/enclave_manager/avalon_enclave_manager/singleton/singleton_enclave_manager.py"
 LISTENER="avalon_listener"
 VERSION="$(cat ${TCF_HOME}/VERSION)"
 # Default values

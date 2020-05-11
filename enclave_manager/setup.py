@@ -119,6 +119,6 @@ setup(name='avalon_enclave_manager',
       data_files = [],
       entry_points = {
         'console_scripts':
-        ['enclave_manager = avalon_enclave_manager.singleton.enclave_manager:main']
+        ['enclave_manager = avalon_enclave_manager.singleton.singleton_enclave_manager:main']
           }
 )
