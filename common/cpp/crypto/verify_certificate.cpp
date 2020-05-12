@@ -27,11 +27,11 @@
  * Verify that cert_pem is signed by CA,
  * using CA certificate ca_cert_pem as a root of trust.
  *
- * @param cert_pem X.509 Certificate to verify
- *                 with BEGIN end BLOCKS and new lines
+ * @param cert_pem    X.509 Certificate to verify
+ *                    with BEGIN and END lines and new lines
  * @param ca_cert_pem CA Certificate (usually the IAS CA cert)
- *                    with BEGIN end BLOCKS and new lines
- * @returns true on success and false on failure.
+ *                    with BEGIN and END lines and new lines
+ * @returns true on success and false on failure
  */
 bool verify_certificate_chain(const char* cert_pem,
                               const char* ca_cert_pem)

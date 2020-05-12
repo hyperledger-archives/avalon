@@ -61,6 +61,8 @@ namespace Error = tcf::error;
 /**
  * Utility function: deserialize RSA Private Key.
  * Throws RuntimeError, ValueError.
+ *
+ * @param encoded Serialized RSA private key to deserialize
  */
 RSA* deserializeRSAPrivateKey(const std::string& encoded) {
     BIO_ptr bio(BIO_new_mem_buf(encoded.c_str(), -1), BIO_free_all);
@@ -83,6 +85,8 @@ RSA* deserializeRSAPrivateKey(const std::string& encoded) {
 /**
  * Constructor from encoded string.
  * Throws RuntimeError, ValueError.
+ *
+ * @param encoded serialized RSA private key
  */
 pcrypto::pkenc::PrivateKey::PrivateKey(const std::string& encoded) {
     private_key_ = deserializeRSAPrivateKey(encoded);
@@ -150,7 +154,10 @@ pcrypto::pkenc::PrivateKey& pcrypto::pkenc::PrivateKey::operator=(
 
 /**
  * Deserialize RSA Private Key.
+ * Implemented using deserializeRSAPrivateKey().
  * Throws RunrimeError, ValueError.
+ *
+ * @param encoded Serialized RSA private key to deserialize
  */
 void pcrypto::pkenc::PrivateKey::Deserialize(const std::string& encoded) {
     RSA* key = deserializeRSAPrivateKey(encoded);
@@ -206,7 +213,7 @@ void pcrypto::pkenc::PrivateKey::Generate() {
 
 
 /**
- * Serialize Private Key.
+ * Serialize a RSA private key.
  * Throws RunrimeError.
  */
 std::string pcrypto::pkenc::PrivateKey::Serialize() const {
