@@ -13,16 +13,8 @@
  * limitations under the License.
  */
 
-#include <string.h>
-#include <assert.h>
-#include <openssl/err.h>
-#include <openssl/rand.h>
+#include <sys/random.h>
 #include <openssl/sha.h>
-#include <openssl/x509v3.h>
-#include <openssl/pem.h>
-#include <algorithm>
-#include <memory>
-#include <vector>
 
 #include "base64.h"  // Simple base64 enc/dec routines
 #include "crypto_shared.h"
@@ -52,12 +44,13 @@ namespace Error = tcf::error;
 
 /**
  * Generate a cryptographically strong random bit string.
+ * Implemented with getrandom() GRND_NONBLOCK.
  * Throws: RuntimeError.
  */
 ByteArray pcrypto::RandomBitString(size_t length) {
     char err[constants::ERR_BUF_LEN];
     ByteArray buf(length);
-    int res = 0;
+    ssize_t   res = 0;
 
     if (length < 1) {
         std::string msg("Crypto Error (RandomBitString): "
@@ -65,14 +58,14 @@ ByteArray pcrypto::RandomBitString(size_t length) {
         throw Error::ValueError(msg);
     }
 
-    res = RAND_bytes(buf.data(), length);
-
-    if (res != 1) {
-        std::string msg("Crypto Error (RandomBitString): ");
-        ERR_load_crypto_strings();
-        ERR_error_string(ERR_get_error(), err);
-        msg += err;
-        throw Error::RuntimeError(msg);
+    // Get random bytes until buffer is full
+    for (ssize_t i = length; i > 0; i =- res) {
+        res = getrandom(&buf.data()[length - i], i, GRND_NONBLOCK);
+        if (res == -1) {
+            std::string msg(
+                "Crypto Error (RandomBitString): getrandom() failed");
+            throw Error::RuntimeError(msg);
+        }
     }
 
     return buf;

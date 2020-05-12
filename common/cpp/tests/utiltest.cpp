@@ -32,6 +32,7 @@
 #include "error.h"       // tcf::error
 #include "crypto.h"
 #include "base64.h"      // base64_*code()
+#include "utils.h"       // ByteArrayToHexEncodedString()
 
 
 int
@@ -55,7 +56,8 @@ main(void)
     printf("Random number test: RandomBitString()\n");
     try {
         rand = tcf::crypto::RandomBitString(rand_length);
-        printf("RandomBitString generation PASSED.\n");
+        std::string rand_s = ByteArrayToHexEncodedString(rand);
+        printf("RandomBitString generation PASSED:\n%s\n", rand_s.c_str());
     } catch (const std::exception& e) {
         printf("RandomBitString generation FAILED:\n%s\n", e.what());
         ++count;
