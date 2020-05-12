@@ -29,7 +29,8 @@
 
 
 /**
- * Simple conversion from ByteArray to std::string
+ * Simple conversion from ByteArray to std::string.
+ * This is not a printable string--useByteArrayToHexEncodedString() for that.
  */
 std::string ByteArrayToString(const ByteArray& inArray) {
     std::string outString;
@@ -54,6 +55,7 @@ StringArray ByteArrayToStringArray(const ByteArray& inArray) {
 
 /**
  * Simple conversion from ByteArray to Base64EncodedString.
+ * Implemented by calling base64_encode().
  */
 Base64EncodedString ByteArrayToBase64EncodedString(const ByteArray& buf) {
     return base64_encode(buf);
@@ -62,6 +64,7 @@ Base64EncodedString ByteArrayToBase64EncodedString(const ByteArray& buf) {
 
 /**
  * Simple conversion from Base64EncodedString to ByteArray.
+ * Implemented by calling base64_decode().
  */
 ByteArray Base64EncodedStringToByteArray(const Base64EncodedString& encoded) {
     return base64_decode(encoded);
@@ -70,6 +73,8 @@ ByteArray Base64EncodedStringToByteArray(const Base64EncodedString& encoded) {
 
 /**
  * Simple conversion from ByteArray to HexEncodedString.
+ * This is a printable hexadecimal string of the contents of buf.
+ * Implemented by calling BinaryToHexString().
  */
 HexEncodedString ByteArrayToHexEncodedString(const ByteArray& buf) {
     return tcf::BinaryToHexString(buf);
@@ -78,7 +83,10 @@ HexEncodedString ByteArrayToHexEncodedString(const ByteArray& buf) {
 
 /**
  * Simple conversion from HexEncodedString to ByteArray.
+ * Convert a hex string (i.e., a string of characters with values
+ * between '0'-'9', 'A'-'F') to an array of bytes.
  * Throws ValueError.
+ * Implemented by calling HexStringToBinary().
  */
 ByteArray HexEncodedStringToByteArray(const HexEncodedString& encoded) {
     return tcf::HexStringToBinary(encoded);

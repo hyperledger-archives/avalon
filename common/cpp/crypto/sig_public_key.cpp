@@ -65,6 +65,9 @@ namespace Error = tcf::error;
 /**
  * Utility function: deserialize ECDSA Public Key.
  * Throws RuntimeError, ValueError.
+ *
+ * @param encoded Serialized ECDSA public key to deserialize
+ * @returns deserialized ECDSA public key
  */
 EC_KEY* deserializeECDSAPublicKey(const std::string& encoded) {
     BIO_ptr bio(BIO_new_mem_buf(encoded.c_str(), -1), BIO_free_all);
@@ -95,6 +98,9 @@ pcrypto::sig::PublicKey::PublicKey() {
 
 /**
  * Constructor from PrivateKey.
+ *
+ * @param privateKey encoded ECDSA private key string
+ *                   created by PrivateKey::Generate()
  */
 pcrypto::sig::PublicKey::PublicKey(const pcrypto::sig::PrivateKey& privateKey) {
     EC_KEY_ptr public_key(EC_KEY_new(), EC_KEY_free);
@@ -160,6 +166,8 @@ pcrypto::sig::PublicKey::PublicKey(const pcrypto::sig::PrivateKey& privateKey) {
 /**
  * Constructor from encoded string.
  * Throws RuntimeError, ValueError.
+ *
+ * @param encoded serialized public key
  */
 pcrypto::sig::PublicKey::PublicKey(const std::string& encoded) {
     public_key_ = deserializeECDSAPublicKey(encoded);
@@ -169,6 +177,8 @@ pcrypto::sig::PublicKey::PublicKey(const std::string& encoded) {
 /**
  * Copy constructor.
  * Throws RuntimeError.
+ *
+ * @param publicKey Public key to copy
  */
 pcrypto::sig::PublicKey::PublicKey(const pcrypto::sig::PublicKey& publicKey) {
     public_key_ = EC_KEY_dup(publicKey.public_key_);
@@ -183,6 +193,8 @@ pcrypto::sig::PublicKey::PublicKey(const pcrypto::sig::PublicKey& publicKey) {
 /**
  * Move constructor.
  * Throws RuntimeError.
+ *
+ * @param publicKey Public key to move
  */
 pcrypto::sig::PublicKey::PublicKey(pcrypto::sig::PublicKey&& publicKey) {
     public_key_ = publicKey.public_key_;
@@ -207,6 +219,8 @@ pcrypto::sig::PublicKey::~PublicKey() {
 /**
  * Assignment operator = overload.
  * Throws RuntimeError.
+ *
+ * @param publicKey Public key to assign
  */
 pcrypto::sig::PublicKey& pcrypto::sig::PublicKey::operator=(
     const pcrypto::sig::PublicKey& publicKey) {
@@ -226,7 +240,10 @@ pcrypto::sig::PublicKey& pcrypto::sig::PublicKey::operator=(
 
 /**
  * Deserialize Digital Signature Public Key.
+ * Implemented with deserializeECDSAPublicKey().
  * Throws RunTime.
+ *
+ * @param encoded Serialized ECDSA public key to deserialize
  */
 void pcrypto::sig::PublicKey::Deserialize(const std::string& encoded) {
     EC_KEY* key = deserializeECDSAPublicKey(encoded);
@@ -239,6 +256,8 @@ void pcrypto::sig::PublicKey::Deserialize(const std::string& encoded) {
 /**
  * Deserialize EC point (X,Y) hex string.
  * Throws RuntimeError, ValueError.
+ *
+ * @param hexXY EC point (X,Y) represented as a hex string
  */
 void pcrypto::sig::PublicKey::DeserializeXYFromHex(const std::string& hexXY) {
     EC_KEY_ptr public_key(EC_KEY_new(), EC_KEY_free);

@@ -60,6 +60,8 @@ namespace Error = tcf::error;
 /**
  * Utility function: deserialize RSA Public Key.
  * Throws RuntimeError, ValueError.
+ *
+ * @param encoded Serialized RSA public key to deserialize
  */
 RSA* deserializeRSAPublicKey(const std::string& encoded) {
     BIO_ptr bio(BIO_new_mem_buf(encoded.c_str(), -1), BIO_free_all);
@@ -90,6 +92,7 @@ pcrypto::pkenc::PublicKey::PublicKey() {
 
 /**
  * PublicKey constructor from PrivateKey.
+ * Extracts the public key portion from a RSA key pair.
  */
 pcrypto::pkenc::PublicKey::PublicKey(
         const pcrypto::pkenc::PrivateKey& privateKey) {
@@ -104,7 +107,10 @@ pcrypto::pkenc::PublicKey::PublicKey(
 
 /**
  * Constructor from encoded string.
+ * Implemented with deserializeRSAPublicKey().
  * Throws RuntimeError, ValueError.
+ *
+ * @param encoded serialized RSA public key
  */
 pcrypto::pkenc::PublicKey::PublicKey(const std::string& encoded) {
     public_key_ = deserializeRSAPublicKey(encoded);
@@ -172,7 +178,10 @@ pcrypto::pkenc::PublicKey& pcrypto::pkenc::PublicKey::operator=(
 
 /**
  * Deserialize Public Key.
+ * Implemented with deserializeRSAPublicKey().
  * Throws RuntimeError, ValueError.
+ *
+ * @param encoded Serialized RSA public key to deserialize
  */
 void pcrypto::pkenc::PublicKey::Deserialize(const std::string& encoded) {
     RSA* key = deserializeRSAPublicKey(encoded);
@@ -183,7 +192,7 @@ void pcrypto::pkenc::PublicKey::Deserialize(const std::string& encoded) {
 
 
 /**
- * Serialize Public Key.
+ * Serialize a RSA public key.
  * Throws RuntimeError.
  */
 std::string pcrypto::pkenc::PublicKey::Serialize() const {
