@@ -16,27 +16,26 @@ import os
 import json
 import time
 import random
+import logging
 
 from ssl import SSLError
 from requests.exceptions import Timeout
 from requests.exceptions import HTTPError
 import avalon_crypto_utils.keys as keys
 import avalon_enclave_manager.ias_client as ias_client
-import avalon_enclave_manager.avalon_enclave_singleton as enclave
+import avalon_enclave_manager.kme.kme_enclave as enclave
+from avalon_enclave_manager.base_enclave_info import BaseEnclaveInfo
 
-import logging
 logger = logging.getLogger(__name__)
 
 TCF_HOME = os.environ.get("TCF_HOME", "../../../")
 SIG_RL_UPDATE_PERIOD = 8 * 60 * 60  # in seconds every 8 hours
 
 
-class EnclaveInfo():
+class KeyManagementEnclaveInfo(BaseEnclaveInfo):
     """
-    Class to initialize enclave, signup enclave and hold
-    data obtained post signup - nonce, sealed_data,
-    verification_key, encryption_key, encryption_key_signature
-    proof_data, enclave_id.
+    Abstract base class to initialize enclave, signup enclave and hold
+    data obtained post signup.
     """
 
     _ias = None

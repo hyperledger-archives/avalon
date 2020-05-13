@@ -16,7 +16,7 @@ import json
 import logging
 
 import avalon_crypto_utils.crypto.crypto as crypto
-import avalon_enclave_manager.avalon_enclave_singleton as enclave
+import avalon_enclave_manager.singleton.singleton_enclave as enclave
 
 logger = logging.getLogger(__name__)
 

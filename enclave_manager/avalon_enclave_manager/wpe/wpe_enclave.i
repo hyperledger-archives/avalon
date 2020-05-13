@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-%module avalon_enclave_kme
+%module wpe_enclave
 
 %include <std_vector.i>
 %include <std_map.i>
@@ -82,7 +82,7 @@ namespace std {
 %{
 #include "swig_utils.h"
 #include "signup_info.h"
-#include "signup_info_kme.h"
+#include "signup_info_wpe.h"
 %}
 
 %{
@@ -90,7 +90,7 @@ namespace std {
 %}
 
 %include "signup_info.h"
-%include "signup_info_kme.h"
+%include "signup_info_wpe.h"
 %include "enclave_info.h"
 %include "work_order_wrap.h"
 %include "tcf_enclave.h"
