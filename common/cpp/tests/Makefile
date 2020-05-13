@@ -12,10 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-CPPFLAGS= -D_UNTRUSTED_
+CPPFLAGS= -D_UNTRUSTED_ -DCRYPTOLIB_OPENSSL
 CPPFLAGS+= -I..  -I../crypto -I../packages/base64
 LDFLAGS=-lcrypto
-UTILTESTOBJS= build/crypto_utils.o build/skenc.o build/types.o \
+
+# To use Mbed TLS instead of the default OpenSSL, define CRYPTOLIB_MBEDTLS=1
+# For example: CRYPTOLIB_MBEDTLS=1 make
+ifdef CRYPTOLIB_MBEDTLS
+	CPPFLAGS+= -DCRYPTOLIB_MBEDTLS
+	LDFLAGS+=-lmbedcrypto
+endif
+
+UTILTESTOBJS= build/crypto_utils.o build/crypto_utils_encrypt.o \
+		build/skenc.o build/types.o \
 		build/hex_string.o build/utils.o build/base64.o
 
 build/%: build/%.o

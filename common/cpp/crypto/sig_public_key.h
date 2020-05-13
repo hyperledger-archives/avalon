@@ -16,7 +16,7 @@
 /**
  * @file
  * Avalon ECDSA signature public key serialization and verification functions.
- * Used for Secp256k1.
+ * ECDSA used for Secp256k1 elliptical curves.
  */
 
 #pragma once

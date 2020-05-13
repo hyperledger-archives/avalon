@@ -20,9 +20,8 @@
 #include <openssl/pem.h>
 #include <openssl/evp.h>
 
+#include "crypto_shared.h"
 #include "verify_signature.h"
-#include "c11_support.h"
-#include "crypto_utils.h"
 
 
 /*
