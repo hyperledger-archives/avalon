@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-%module avalon_enclave_singleton
+%module singleton_enclave
 
 %include <std_vector.i>
 %include <std_map.i>

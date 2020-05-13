@@ -25,7 +25,7 @@ import hashlib
 import zmq
 
 import avalon_enclave_manager.sgx_work_order_request as work_order_request
-import avalon_enclave_manager.avalon_enclave_info as enclave_info
+import avalon_enclave_manager.singleton.singleton_enclave_info as enclave_info
 import avalon_crypto_utils.crypto_utility as crypto_utils
 from avalon_enclave_manager.base_enclave_manager import EnclaveManager
 from avalon_enclave_manager.worker_kv_delegate import WorkerKVDelegate
