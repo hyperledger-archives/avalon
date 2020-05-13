@@ -35,7 +35,7 @@ Cryptographic Primitives Used
 | Asymmetric encryption    | RSA-OAEP        | 3072    | (1) |
 | Authenticated encryption | AES-GCM         | 256     | 96b IV, 128b tag |
 | Digest                   | SHA-256         | 256     | (2) |
-| Digest                   | KECCACK         | 256     | (2) Differs from SHA-3 |
+| Digest                   | KECCAK          | 256     | (2) Differs from SHA-3 |
 
 (1) Not post-quantum crypto (PQ) resistant
 

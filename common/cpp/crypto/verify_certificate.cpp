@@ -20,8 +20,9 @@
 #include <openssl/pem.h>
 #include <openssl/evp.h>
 
+#include "crypto_shared.h"
 #include "verify_certificate.h"
-#include "c11_support.h"
+
 
 /**
  * Verify that cert_pem is signed by CA,

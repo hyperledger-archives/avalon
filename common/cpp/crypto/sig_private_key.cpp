@@ -19,32 +19,16 @@
  * Used for Secp256k1.
  */
 
-#include <openssl/err.h>
 #include <openssl/pem.h>
-#include <openssl/rand.h>
-#include <openssl/sha.h>
 #include <openssl/ecdsa.h>
+#include <memory>    // std::unique_ptr
 
-#include <algorithm>
-#include <memory>
-#include <vector>
-
-#include "base64.h"  //simple base64 enc/dec routines
 #include "crypto_shared.h"
 #include "error.h"
 #include "hex_string.h"
 #include "sig.h"
 #include "sig_public_key.h"
 #include "sig_private_key.h"
-
-/***Conditional compile untrusted/trusted***/
-#if _UNTRUSTED_
-#include <openssl/crypto.h>
-#include <stdio.h>
-#else
-#include "tSgxSSL_api.h"
-#endif
-/***END Conditional compile untrusted/trusted***/
 
 namespace pcrypto = tcf::crypto;
 namespace constants = tcf::crypto::constants;

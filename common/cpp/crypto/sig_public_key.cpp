@@ -16,33 +16,18 @@
 /**
  * @file
  * Avalon ECDSA signature public key serialization and verification functions.
- * Used for Secp256k1.
+ * Used for Secp256k1 elliptical curves.
  */
 
-#include <openssl/err.h>
 #include <openssl/pem.h>
-#include <openssl/rand.h>
-#include <openssl/sha.h>
-#include <algorithm>
-#include <memory>
-#include <vector>
+#include <memory>    // std::unique_ptr
 
-#include "base64.h"  // simple base64 enc/dec routines
 #include "crypto_shared.h"
 #include "error.h"
 #include "hex_string.h"
 #include "sig.h"
 #include "sig_private_key.h"
 #include "sig_public_key.h"
-
-/***Conditional compile untrusted/trusted***/
-#if _UNTRUSTED_
-#include <openssl/crypto.h>
-#include <stdio.h>
-#else
-#include "tSgxSSL_api.h"
-#endif
-/***END Conditional compile untrusted/trusted***/
 
 namespace pcrypto = tcf::crypto;
 namespace constants = tcf::crypto::constants;
@@ -267,7 +252,7 @@ void pcrypto::sig::PublicKey::DeserializeXYFromHex(const std::string& hexXY) {
         throw Error::RuntimeError(msg);
     }
 
-    EC_GROUP_ptr ec_group(EC_GROUP_new_by_curve_name(constants::CURVE),
+    EC_GROUP_ptr ec_group(EC_GROUP_new_by_curve_name(NID_secp256k1),
          EC_GROUP_clear_free);
     if (!ec_group) {
         std::string msg("Crypto Error (sig::DeserializeXYFromHex): "

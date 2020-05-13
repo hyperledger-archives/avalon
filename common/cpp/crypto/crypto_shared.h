@@ -13,10 +13,29 @@
  * limitations under the License.
  */
 
+// Private header file with common constant definitions
+// to implement crypto functions. Not for use by non-crypto consumers.
+// Must be included by *.cpp files in this directory before other header files
+// in this directory.
+
 #pragma once
+
+#if !defined(CRYPTOLIB_OPENSSL) && !defined(CRYPTOLIB_MBEDTLS)
+#define CRYPTOLIB_OPENSSL // default
+#endif
+
+#ifdef CRYPTOLIB_OPENSSL
+#include <openssl/obj_mac.h> // NID_*
+#include <openssl/rsa.h>
+#endif
+
 namespace tcf {
 namespace crypto {
     namespace constants {
+        // OpenSSL: Secp256k1 elliptical curve cryptography
+        const int CURVE = NID_secp256k1;
+        // OpenSSL: OAEP padding or better should always be used for RSA
+        const int RSA_PADDING_SCHEME = RSA_PKCS1_OAEP_PADDING;
         // OpenSSL Error string buffer size
         const int ERR_BUF_LEN = 130;
     }  // namespace constants

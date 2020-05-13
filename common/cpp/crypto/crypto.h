@@ -13,9 +13,16 @@
  * limitations under the License.
  */
 
+/**
+ * @file
+ * Avalon Crypto Utility header files.
+ * Common header files for Avalon crypto functions.
+ * These are for hasing, random numbers, signing, verification,
+ * secret key encryption, and public key encryption.
+ */
+
+
 #pragma once
-#include <openssl/sha.h>
-#include "crypto_shared.h"
 #include "crypto_utils.h"
 #include "pkenc.h"
 #include "pkenc_private_key.h"
@@ -24,4 +31,3 @@
 #include "sig_private_key.h"
 #include "sig_public_key.h"
 #include "skenc.h"
-

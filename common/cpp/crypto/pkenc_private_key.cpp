@@ -18,30 +18,16 @@
  * Avalon RSA public key generation, serialization, and decryption functions.
  */
 
-#include "pkenc_private_key.h"
 #include <openssl/err.h>
 #include <openssl/pem.h>
-#include <openssl/rand.h>
-#include <openssl/sha.h>
-#include <algorithm>
-#include <memory>
-#include <vector>
-#include "base64.h"  //simple base64 enc/dec routines
+#include <memory>    // std::unique_ptr
+
 #include "crypto_shared.h"
 #include "error.h"
 #include "hex_string.h"
 #include "pkenc.h"
 #include "pkenc_public_key.h"
 #include "pkenc_private_key.h"
-
-/***Conditional compile untrusted/trusted***/
-#if _UNTRUSTED_
-#include <openssl/crypto.h>
-#include <stdio.h>
-#else
-#include "tSgxSSL_api.h"
-#endif
-/***END Conditional compile untrusted/trusted***/
 
 namespace pcrypto = tcf::crypto;
 namespace constants = tcf::crypto::constants;
@@ -251,6 +237,7 @@ std::string pcrypto::pkenc::PrivateKey::Serialize() const {
 
 /**
  * Decrypt message with RSA private key and return plaintext.
+ * Uses PKCS1 OAEP padding.
  * Throws RuntimeError.
  *
  * @param ciphertext string contains raw binary ciphertext

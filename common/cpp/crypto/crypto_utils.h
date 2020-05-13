@@ -28,6 +28,11 @@
 namespace tcf {
 namespace crypto {
     /** SHA256 hashing. */
+    namespace constants {
+        /** SHA-256 digest length in bytes (256 bits) */
+        const int DIGEST_LENGTH = 32;
+    }  // namespace constants
+
     ByteArray ComputeMessageHash(const ByteArray& message);
 
     /** Generate a cryptographically strong random bitstring. */
