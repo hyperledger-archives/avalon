@@ -23,7 +23,7 @@
 
 #include "crypto.h"
 #include "utils.h"
-#include "base64.h"
+#include "hex_string.h"
 
 // JSON format for private data:
 // {
@@ -122,7 +122,8 @@ public:
         std::string b64_pub_encr_key = public_encryption_key_.Serialize();
         ByteArray encr_key_sig_bytes = \
             private_signing_key_.SignMessage(StrToByteArray(b64_pub_encr_key));
-        encryption_key_signature_ = base64_encode(encr_key_sig_bytes);
+        encryption_key_signature_ = \
+            ByteArrayToHexEncodedString(encr_key_sig_bytes);
     }
 
     size_t get_sealed_data_size(void) const {
