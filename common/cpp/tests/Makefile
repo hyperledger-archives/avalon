@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-CPPFLAGS= -D_UNTRUSTED_ -DCRYPTOLIB_OPENSSL
+CPPFLAGS= -D_UNTRUSTED_
 CPPFLAGS+= -I..  -I../crypto -I../packages/base64
 LDFLAGS=-lcrypto
 
@@ -22,11 +22,15 @@ ifdef CRYPTOLIB_MBEDTLS
 	CPPFLAGS+= -DCRYPTOLIB_MBEDTLS
 	LDFLAGS+=-lmbedcrypto
 endif
+ifdef CRYPTOLIB_OPENSSL
+	CPPFLAGS+= -DCRYPTOLIB_OPENSSL
+endif
 
 UTILTESTOBJS= build/crypto_utils.o build/crypto_utils_encrypt.o \
 		build/skenc.o build/types.o \
 		build/hex_string.o build/utils.o build/base64.o
 
+# First matching pattern build rule found is used
 build/%: build/%.o
 	g++ -o $@ $^ $(LDFLAGS)
 
@@ -36,10 +40,40 @@ build/%.o: %.cpp
 build/%.o: ../%.cpp
 	g++ -o $@ $(CPPFLAGS) -c $^
 
-build/%.o: ../crypto/%.cpp
+build/%.o: ../packages/base64/%.cpp
+	g++ -o $@ $(CPPFLAGS) -c $^
+
+# Library-specific source has precedence over generic source in ../crypto/
+
+UTILTESTOBJS= build/crypto_utils.o build/crypto_utils_encrypt.o \
+		build/skenc.o build/types.o \
+		build/hex_string.o build/utils.o build/base64.o
+
+# First matching pattern build rule found is used
+build/%: build/%.o
+	g++ -o $@ $^ $(LDFLAGS)
+
+build/%.o: %.cpp
+	g++ -o $@ $(CPPFLAGS) -c $^
+
+build/%.o: ../%.cpp
 	g++ -o $@ $(CPPFLAGS) -c $^
 
 build/%.o: ../packages/base64/%.cpp
+	g++ -o $@ $(CPPFLAGS) -c $^
+
+# Library-specific source has precedence over generic source in ../crypto/
+ifdef CRYPTOLIB_OPENSSL
+build/%.o: ../crypto/openssl/%.cpp
+	g++ -o $@ $(CPPFLAGS) -c $^
+endif
+
+ifdef CRYPTOLIB_MBEDTLS
+build/%.o: ../crypto/mbedtls/%.cpp
+	g++ -o $@ $(CPPFLAGS) -c $^
+endif
+
+build/%.o: ../crypto/%.cpp
 	g++ -o $@ $(CPPFLAGS) -c $^
 
 
