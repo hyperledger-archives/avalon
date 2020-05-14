@@ -45,6 +45,19 @@ class KeyManagementEnclaveManager(EnclaveManager):
 
 # -------------------------------------------------------------------------
 
+    def _create_signup_data(self):
+        """
+        Create KME signup data.
+
+        Returns :
+            signup_data - Relevant signup data to be used for requests to the
+                          enclave
+        """
+        return enclave_info.\
+            KeyManagementEnclaveInfo(self._config.get("EnclaveModule"))
+
+# -------------------------------------------------------------------------
+
     def _manager_on_boot(self):
         """
         Executes Boot flow of enclave manager

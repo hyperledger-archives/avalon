@@ -69,6 +69,19 @@ class SingletonEnclaveManager(EnclaveManager):
 
 # -------------------------------------------------------------------------
 
+    def _create_signup_data(self):
+        """
+        Create Singleton enclave signup data.
+
+        Returns :
+            signup_data - Relevant signup data to be used for requests to the
+                          enclave
+        """
+        return enclave_info.\
+            SingletonEnclaveInfo(self._config.get("EnclaveModule"))
+
+# -------------------------------------------------------------------------
+
     def _process_work_order_sync(self, process_wo_id):
         """
         Process the work-order of the specified work-order id

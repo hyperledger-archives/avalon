@@ -21,7 +21,6 @@ import sys
 import zmq
 from abc import ABC, abstractmethod
 
-import avalon_enclave_manager.avalon_enclave_info as enclave_info
 from database import connector
 from avalon_enclave_manager.worker_kv_delegate import WorkerKVDelegate
 from avalon_enclave_manager.work_order_kv_delegate import WorkOrderKVDelegate
@@ -137,13 +136,26 @@ class EnclaveManager(ABC):
         """
         try:
             logger.info("Initialize enclave and create signup data")
-            signup_data = enclave_info.\
-                EnclaveInfo(self._config.get("EnclaveModule"))
+            signup_data = self._create_signup_data()
             extended_measurements = signup_data.get_extended_measurements()
         except Exception as e:
             logger.exception("failed to initialize/signup enclave; %s", str(e))
             sys.exit(-1)
         return signup_data, extended_measurements
+
+    # -----------------------------------------------------------------
+
+    @abstractmethod
+    def _create_signup_data(self):
+        """
+        Create enclave specific signup data. This function is
+        meant to be implemented by derived classes.
+
+        Returns :
+            signup_data - Relevant signup data to be used for requests to the
+                          enclave
+        """
+        pass
 
     # -----------------------------------------------------------------
 

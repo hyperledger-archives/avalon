@@ -43,14 +43,33 @@ class WorkOrderProcessorEnclaveManager(EnclaveManager):
     """
 
     def __init__(self, config):
-        self._wpe_requester = WPERequester(config)
+        super().__init__(config)
+
+
+# -------------------------------------------------------------------------
+
+    def _create_signup_data(self):
+        """
+        Create WPE signup data.
+
+        Returns :
+            signup_data - Relevant signup data to be used for requests to the
+                          enclave
+        """
+        # Instantiate enclaveinfo & initialize enclave in the process
+        signup_data = enclave_info.WorkOrderProcessingEnclaveInfo(
+            self._config.get("EnclaveModule"))
+        self._wpe_requester = WPERequester(self._config)
 
         # @TODO nonce to be generated using g_GenerateNonce()
         nonce = None
         unique_verification_key = self._wpe_requester\
             .get_unique_verification_key(nonce)
-        config["unique_verification_key"] = unique_verification_key
-        super().__init__(config)
+
+        # singup enclave
+        signup_data.create_enclave_signup_data(unique_verification_key)
+        # return signup data
+        return signup_data
 
 # -------------------------------------------------------------------------
 
@@ -58,6 +77,7 @@ class WorkOrderProcessorEnclaveManager(EnclaveManager):
         """
         Executes Boot flow of enclave manager
         """
+
         if self._wpe_requester.register_wo_processor(self.proof_data):
             logger.info("WPE registration successful")
         else:
