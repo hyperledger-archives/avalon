@@ -1,4 +1,4 @@
-/* Copyright 2018 Intel Corporation
+/* Copyright 2018-2020 Intel Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,20 +17,20 @@
  * @file
  * Avalon Crypto Utilities:
  * hashing, base 64 conversion, random number generation.
- * Implemented using OpenSSL.
+ * Implemented using Mbed TLS.
  */
 
-#include <openssl/err.h>
-#include <openssl/rand.h>
-#include <openssl/sha.h>
+#include <mbedtls/entropy.h>
+#include <mbedtls/ctr_drbg.h>
+#include <mbedtls/sha256.h>
 
 #include "crypto_shared.h"
 #include "crypto_utils.h"
 #include "error.h"
 #include "tcf_error.h"
 
-#ifndef CRYPTOLIB_OPENSSL
-#error "CRYPTOLIB_OPENSSL must be defined to compile source with OpenSSL."
+#ifndef CRYPTOLIB_MBEDTLS
+#error "CRYPTOLIB_MBEDTLS must be defined to compile source with Mbed TLS."
 #endif
 
 namespace pcrypto = tcf::crypto;
@@ -48,7 +48,7 @@ namespace Error = tcf::error;
  * @returns byte array with binary random bits
  */
 ByteArray pcrypto::RandomBitString(size_t length) {
-    char err[constants::ERR_BUF_LEN];
+    static mbedtls_ctr_drbg_context ctr_drbg;
     ByteArray buf(length);
     int res = 0;
 
@@ -58,13 +58,31 @@ ByteArray pcrypto::RandomBitString(size_t length) {
         throw Error::ValueError(msg);
     }
 
-    res = RAND_bytes(buf.data(), length);
+    // One-time initialization
+    static bool init = false;
+    if (!init) {
+        static const unsigned char *custom =
+            (const unsigned char *)"Hyperledger Avalon";
+        mbedtls_entropy_context  entropy;
 
-    if (res != 1) {
-        std::string msg("Crypto Error (RandomBitString): ");
-        ERR_load_crypto_strings();
-        ERR_error_string(ERR_get_error(), err);
-        msg += err;
+        mbedtls_entropy_init(&entropy);
+        mbedtls_ctr_drbg_init(&ctr_drbg);
+
+        res = mbedtls_ctr_drbg_seed(&ctr_drbg, mbedtls_entropy_func,
+            &entropy, custom, sizeof (custom));
+        if (res != 0) {
+            std::string msg("Crypto Error (RandomBitString): "
+                "mbedtls_ctr_drbg_seed() failed");
+            throw Error::RuntimeError(msg);
+        }
+        init = true;
+    }
+
+    // Generate randomness
+    res = mbedtls_ctr_drbg_random(&ctr_drbg, buf.data(), length);
+    if (res != 0) {
+        std::string msg("Crypto Error (RandomBitString): "
+            "mbedtls_ctr_drbg_random() failed");
         throw Error::RuntimeError(msg);
     }
 
@@ -83,6 +101,7 @@ ByteArray pcrypto::RandomBitString(size_t length) {
 ByteArray pcrypto::ComputeMessageHash(const ByteArray& message) {
     ByteArray hash(constants::DIGEST_LENGTH);
 
-    SHA256((const unsigned char*)message.data(), message.size(), hash.data());
+    mbedtls_sha256_ret((const unsigned char*)message.data(), message.size(),
+        hash.data(), 0);
     return hash;
 }  // pcrypto::ComputeMessageHash
