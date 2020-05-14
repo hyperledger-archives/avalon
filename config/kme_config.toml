@@ -41,6 +41,10 @@ ias_api_key = "112233445566778899aabbccddeeff00"
 enclave_library = ""
 enclave_library_path = ""
 
+num_of_enclaves = "1"
+# MRENCLAVE for WPE that will be allowed to register with this KME
+wpe_mrenclave = ""
+
 [KMEListener]
 # URL of KMEListener where a Work order processor can send requests meant for
 # the Key Management Enclave(KME).
@@ -53,10 +57,6 @@ remote_url = "http://localhost:9090"
 # -------------------------------------------------------------
 # TCS Worker configuration details
 # -------------------------------------------------------------
-
-[WPEConfig]
-# MRENCLAVE for WPE that will be allowed to register with this KME
-wpe_mrenclave = ""
 
 [WorkerConfig]
 ProofDataType = "TEE-SGX-IAS"

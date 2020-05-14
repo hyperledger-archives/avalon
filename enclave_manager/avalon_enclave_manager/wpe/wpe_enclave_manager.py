@@ -62,11 +62,11 @@ class WorkOrderProcessorEnclaveManager(EnclaveManager):
         self._wpe_requester = WPERequester(self._config)
 
         # @TODO nonce to be generated using g_GenerateNonce()
-        nonce = None
+        verification_key_nonce = None
         unique_verification_key = self._wpe_requester\
-            .get_unique_verification_key(nonce)
+            .get_unique_verification_key(verification_key_nonce)
 
-        # singup enclave
+        # signup enclave
         signup_data.create_enclave_signup_data(unique_verification_key)
         # return signup data
         return signup_data
