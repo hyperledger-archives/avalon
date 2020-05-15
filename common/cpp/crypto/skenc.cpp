@@ -126,14 +126,14 @@ ByteArray pcrypto::skenc::EncryptMessage(
     }
 
     if (EVP_EncryptInit_ex(context.get(), EVP_aes_256_gcm(),
-            NULL, NULL, NULL) != 1) {
+            nullptr, nullptr, nullptr) != 1) {
         std::string msg(
             "Crypto Error (EncryptMessage): OpenSSL could not "
             "initialize EVP_CIPHER_CTX with AES-GCM");
         throw Error::RuntimeError(msg);
     }
 
-    if (EVP_EncryptInit_ex(context.get(), NULL, NULL,
+    if (EVP_EncryptInit_ex(context.get(), nullptr, nullptr,
             (const unsigned char*)key.data(),
             (const unsigned char*)iv.data()) != 1) {
         std::string msg(
@@ -257,7 +257,7 @@ ByteArray pcrypto::skenc::DecryptMessage(
     }
 
     if (!EVP_DecryptInit_ex(context.get(), EVP_aes_256_gcm(),
-            NULL, NULL, NULL)) {
+            nullptr, nullptr, nullptr)) {
         std::string msg(
             "Crypto Error (DecryptMessage): OpenSSL could not "
             "initialize EVP_CIPHER_CTX with "
@@ -265,7 +265,7 @@ ByteArray pcrypto::skenc::DecryptMessage(
         throw Error::RuntimeError(msg);
     }
 
-    if (!EVP_DecryptInit_ex(context.get(), NULL, NULL,
+    if (!EVP_DecryptInit_ex(context.get(), nullptr, nullptr,
             (const unsigned char*)key.data(),
             (const unsigned char*)iv.data())) {
         std::string msg(
@@ -353,14 +353,14 @@ ByteArray pcrypto::skenc::DecryptMessage(const ByteArray& key,
     }
 
     if (!EVP_DecryptInit_ex(context.get(), EVP_aes_256_gcm(),
-            NULL, NULL, NULL)) {
+            nullptr, nullptr, nullptr)) {
         std::string msg(
             "Crypto Error (DecryptMessage): OpenSSL could not "
             "initialize EVP_CIPHER_CTX with AES-GCM");
         throw Error::RuntimeError(msg);
     }
 
-    if (!EVP_DecryptInit_ex(context.get(), NULL, NULL,
+    if (!EVP_DecryptInit_ex(context.get(), nullptr, nullptr,
             (const unsigned char*)key.data(),
             (const unsigned char*)message.data())) {
         std::string msg(

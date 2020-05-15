@@ -58,7 +58,8 @@ RSA* deserializeRSAPrivateKey(const std::string& encoded) {
         throw Error::RuntimeError(msg);
     }
 
-    RSA* private_key = PEM_read_bio_RSAPrivateKey(bio.get(), NULL, NULL, NULL);
+    RSA* private_key = PEM_read_bio_RSAPrivateKey(bio.get(),
+        nullptr, nullptr, nullptr);
     if (!private_key) {
         std::string msg("Crypto Error (deserializeRSAPrivateKey): "
             "Could not deserialize private RSA key");
@@ -184,7 +185,7 @@ void pcrypto::pkenc::PrivateKey::Generate() {
         throw Error::RuntimeError(msg);
     }
     if (!RSA_generate_key_ex(private_key.get(), constants::RSA_KEY_SIZE,
-            exp.get(), NULL)) {
+            exp.get(), nullptr)) {
         std::string msg("Crypto  Error (pkenc::PrivateKey()): "
             "Could not generate RSA key");
         throw Error::RuntimeError(msg);
@@ -215,7 +216,7 @@ std::string pcrypto::pkenc::PrivateKey::Serialize() const {
     }
 
     int res = PEM_write_bio_RSAPrivateKey(bio.get(), private_key_,
-        NULL, NULL, 0, 0, NULL);
+        nullptr, nullptr, 0, 0, nullptr);
     if (!res) {
         std::string msg("Crypto Error (Serialize): Could not write to BIO\n");
         throw Error::RuntimeError(msg);

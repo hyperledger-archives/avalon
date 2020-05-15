@@ -45,15 +45,15 @@ typedef struct ECDSA_SIG_st {
 // Get the R and S bignumber values of an ECDSA signature.
 void ECDSA_SIG_get0(const ECDSA_SIG *sig, const BIGNUM **ptr_r,
         const BIGNUM **ptr_s) {
-    if (ptr_r != NULL)
+    if (ptr_r != nullptr)
         *ptr_r = sig->r;
-    if (ptr_s != NULL)
+    if (ptr_s != nullptr)
         *ptr_s = sig->s;
 }
 
 // Set the R and S bignumber values of an ECDSA signature.
 int ECDSA_SIG_set0(ECDSA_SIG *sig, BIGNUM *r, BIGNUM *s) {
-    if (r == NULL || s == NULL)
+    if (r == nullptr || s == nullptr)
         return 0;
 
     BN_clear_free(sig->r);

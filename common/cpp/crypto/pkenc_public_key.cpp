@@ -58,7 +58,8 @@ RSA* deserializeRSAPublicKey(const std::string& encoded) {
         throw Error::RuntimeError(msg);
     }
 
-    RSA* public_key = PEM_read_bio_RSAPublicKey(bio.get(), NULL, NULL, NULL);
+    RSA* public_key = PEM_read_bio_RSAPublicKey(bio.get(),
+        nullptr, nullptr, nullptr);
     if (!public_key) {
         std::string msg(
             "Crypto Error (deserializeRSAPublicKey): Could not "

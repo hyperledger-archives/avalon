@@ -22,7 +22,7 @@
 
 const char* GetJsonStr(const JSON_Object* json_object,
                        const char* name,
-                       const char* err_msg = NULL);
+                       const char* err_msg = nullptr);
 
 void JsonSetStr(JSON_Object* json, const char* name, const char* value,
     const char* err);

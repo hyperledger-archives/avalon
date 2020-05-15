@@ -69,7 +69,7 @@ EC_KEY* deserializeECDSAPrivateKey(const std::string& encoded) {
     }
 
     EC_KEY* private_key = PEM_read_bio_ECPrivateKey(bio.get(),
-        NULL, NULL, NULL);
+        nullptr, nullptr, nullptr);
     if (!private_key) {
         std::string msg(
             "Crypto Error (deserializeECDSAPrivateKey): Could not "
@@ -241,7 +241,8 @@ std::string pcrypto::sig::PrivateKey::Serialize() const {
         throw Error::RuntimeError(msg);
     }
 
-    PEM_write_bio_ECPrivateKey(bio.get(), private_key_, NULL, NULL, 0, 0, NULL);
+    PEM_write_bio_ECPrivateKey(bio.get(), private_key_,
+        nullptr, nullptr, 0, 0, nullptr);
 
     int keylen = BIO_pending(bio.get());
 
@@ -311,7 +312,7 @@ ByteArray pcrypto::sig::PrivateKey::SignMessage(
     }
 
     int res = EC_GROUP_get_order(EC_KEY_get0_group(private_key_), ord.get(),
-        NULL);
+        nullptr);
     if (!res) {
         std::string msg("Crypto Error (SignMessage): Could not get order");
         throw Error::RuntimeError(msg);
