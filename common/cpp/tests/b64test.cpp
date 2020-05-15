@@ -88,21 +88,21 @@ main(void)
         {"H", "SA==", 1},
         {"", "", 0},
         {rsa_2048_signature_decoded, rsa_2048_signature, 256},
-        {NULL, NULL}
+        {nullptr, nullptr}
     };
     static b64_test_type negative_test_cases[] = {
-        {NULL, "`~!@#$%^&*()-_|':;?>,,.\\", 0},
-        {NULL, "===", 0},
-        {NULL, "==", 0},
-        {NULL, "=", 0},
-        {NULL, NULL, 0}
+        {nullptr, "`~!@#$%^&*()-_|':;?>,,.\\", 0},
+        {nullptr, "===", 0},
+        {nullptr, "==", 0},
+        {nullptr, "=", 0},
+        {nullptr, nullptr, 0}
     };
     char buffer[256 + 3];
     int  rc, count = 0;
     ByteArray v;
     std::string out_str;
 
-    for (b64_test_type *tp = b64_test_cases; tp->encoded != NULL; ++tp) {
+    for (b64_test_type *tp = b64_test_cases; tp->encoded != nullptr; ++tp) {
         // Test OpenSSL decode
         memset(buffer, 0, sizeof (buffer));
         rc = EVP_DecodeBlock((unsigned char *)buffer,
@@ -163,7 +163,7 @@ main(void)
     }
 
     // Negative tests
-    for (b64_test_type *ntp = negative_test_cases; ntp->encoded != NULL;
+    for (b64_test_type *ntp = negative_test_cases; ntp->encoded != nullptr;
             ++ntp) {
         // Test OpenSSL decode
         rc = EVP_DecodeBlock((unsigned char *)buffer,

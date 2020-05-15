@@ -37,21 +37,21 @@
 bool verify_certificate_chain(const char* cert_pem,
                               const char* ca_cert_pem)
 {
-    if (cert_pem == NULL || ca_cert_pem == NULL) // sanity check
+    if (cert_pem == nullptr || ca_cert_pem == nullptr) // sanity check
         return false;
 
     BIO* crt_bio = BIO_new_mem_buf((void*)cert_pem, -1);
-    X509* crt = PEM_read_bio_X509(crt_bio, NULL, 0, NULL);
-    assert(crt != NULL);
+    X509* crt = PEM_read_bio_X509(crt_bio, nullptr, 0, nullptr);
+    assert(crt != nullptr);
 
     BIO* cacrt_bio = BIO_new_mem_buf((void*)ca_cert_pem, -1);
-    X509* cacrt = PEM_read_bio_X509(cacrt_bio, NULL, 0, NULL);
-    assert(cacrt != NULL);
+    X509* cacrt = PEM_read_bio_X509(cacrt_bio, nullptr, 0, nullptr);
+    assert(cacrt != nullptr);
 
     X509_STORE* s = X509_STORE_new();
     X509_STORE_add_cert(s, cacrt);
     X509_STORE_CTX* ctx = X509_STORE_CTX_new();
-    X509_STORE_CTX_init(ctx, s, crt, NULL);
+    X509_STORE_CTX_init(ctx, s, crt, nullptr);
     int rc = X509_verify_cert(ctx);
 
     X509_STORE_CTX_free(ctx);

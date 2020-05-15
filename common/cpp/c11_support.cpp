@@ -40,15 +40,15 @@ int memcpy_s(void *dest, size_t sizeInBytes, const void *src, size_t count) {
         return 0;
     }
 
-    if (dest == NULL) {
+    if (dest == nullptr) {
         return EINVAL;
     }
 
-    if (src == NULL || sizeInBytes < count) {
+    if (src == nullptr || sizeInBytes < count) {
         /* zero the destination buffer */
         memset(dest, 0, sizeInBytes);
 
-        if (src == NULL) {
+        if (src == nullptr) {
             return EINVAL;
         }
 
@@ -62,11 +62,11 @@ int memcpy_s(void *dest, size_t sizeInBytes, const void *src, size_t count) {
 }
 
 int strncpy_s(char *dest, size_t sizeInBytes, const char *src, size_t count) {
-    if (count == 0 && dest == NULL && sizeInBytes == 0) {
+    if (count == 0 && dest == nullptr && sizeInBytes == 0) {
         return 0;
     }
 
-    if (dest == NULL || sizeInBytes <= 0) {
+    if (dest == nullptr || sizeInBytes <= 0) {
         return EINVAL;
     }
 
@@ -75,7 +75,7 @@ int strncpy_s(char *dest, size_t sizeInBytes, const char *src, size_t count) {
         return 0;
     }
 
-    if (src == NULL) {
+    if (src == nullptr) {
         *dest = 0;
         return EINVAL;
     }
@@ -88,7 +88,7 @@ int strncpy_s(char *dest, size_t sizeInBytes, const char *src, size_t count) {
     } else {
         while ((*p++ = *src++) != 0 && --availableSize > 0 && --count > 0) {}
         if (count == 0) {
-            p = NULL;
+            p = nullptr;
         }
     }
 
@@ -104,7 +104,7 @@ int strncpy_s(char *dest, size_t sizeInBytes, const char *src, size_t count) {
 }
 
 int strnlen_s(const char *str, size_t sizeInBytes) {
-    if (str == NULL) {
+    if (str == nullptr) {
         return 0;
     }
 

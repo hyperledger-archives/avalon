@@ -50,7 +50,7 @@ main(void)
     static hash_test_type hash_test_cases[] = {
         {"Hyperledger Avalon", "22hKjT4z7yvB8D3Ros2/QykiYzXwkJIfJO89Df5xOtQ="},
         {"", "47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU="},
-        {NULL, NULL}
+        {nullptr, nullptr}
     };
 
     printf("Random number test: RandomBitString()\n");
@@ -75,7 +75,7 @@ main(void)
         ++count;
     }
 
-    for (hash_test_type *tp = hash_test_cases; tp->encoded != NULL; ++tp) {
+    for (hash_test_type *tp = hash_test_cases; tp->encoded != nullptr; ++tp) {
         printf("Hash SHA-256 test: ComputeMessageHash()\n");
         std::string msgStr(tp->plain);
         ByteArray msg;

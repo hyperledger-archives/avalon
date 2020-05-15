@@ -39,7 +39,7 @@
 static unsigned int
 base64_decoded_length(const char *encoded, unsigned int encoded_len)
 {
-    if (encoded == NULL || encoded_len == 0) {
+    if (encoded == nullptr || encoded_len == 0) {
         return 0;
     }
 
@@ -75,7 +75,7 @@ bool verify_signature(const char* cert_pem,
     int ret;
 
     // Sanity checks
-    if (cert_pem == NULL || signature == NULL)
+    if (cert_pem == nullptr || signature == nullptr)
         return false;
     unsigned int decoded_len = base64_decoded_length(signature, signature_len);
     if (decoded_len > max_decoded_len)
@@ -83,14 +83,14 @@ bool verify_signature(const char* cert_pem,
 
     BIO* crt_bio = BIO_new_mem_buf((void*)cert_pem, -1);
 
-    X509* crt = PEM_read_bio_X509(crt_bio, NULL, 0, NULL);
-    assert(crt != NULL);
+    X509* crt = PEM_read_bio_X509(crt_bio, nullptr, 0, nullptr);
+    assert(crt != nullptr);
 
     EVP_PKEY* key = X509_get_pubkey(crt);
-    assert(key != NULL);
+    assert(key != nullptr);
 
     EVP_MD_CTX* ctx = EVP_MD_CTX_create();
-    ret = EVP_VerifyInit_ex(ctx, EVP_sha256(), NULL);
+    ret = EVP_VerifyInit_ex(ctx, EVP_sha256(), nullptr);
     assert(ret == 1);
 
     ret = EVP_VerifyUpdate(ctx, msg, msg_len);

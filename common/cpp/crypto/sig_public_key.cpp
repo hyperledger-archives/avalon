@@ -62,7 +62,8 @@ EC_KEY* deserializeECDSAPublicKey(const std::string& encoded) {
         throw Error::RuntimeError(msg);
     }
 
-    EC_KEY* public_key = PEM_read_bio_EC_PUBKEY(bio.get(), NULL, NULL, NULL);
+    EC_KEY* public_key = PEM_read_bio_EC_PUBKEY(bio.get(),
+        nullptr, nullptr, nullptr);
     if (!public_key) {
         std::string msg(
             "Crypto Error (deserializeECDSAPublicKey): Could not "
@@ -126,7 +127,7 @@ pcrypto::sig::PublicKey::PublicKey(const pcrypto::sig::PrivateKey& privateKey) {
 
     if (!EC_POINT_mul(ec_group.get(), p.get(),
             EC_KEY_get0_private_key(privateKey.private_key_),
-            NULL, NULL, context.get())) {
+            nullptr, nullptr, context.get())) {
         std::string msg(
             "Crypto Error (sig::PublicKey()): Could not compute EC_POINT_mul");
         throw Error::RuntimeError(msg);
@@ -268,7 +269,7 @@ void pcrypto::sig::PublicKey::DeserializeXYFromHex(const std::string& hexXY) {
     }
 
     EC_POINT_ptr p(EC_POINT_hex2point(
-        ec_group.get(), hexXY.data(), NULL, NULL), EC_POINT_free);
+        ec_group.get(), hexXY.data(), nullptr, nullptr), EC_POINT_free);
     if (!p) {
         std::string msg("Crypto Error (sig::DeserializeXYFromHex): "
             "Could not create new EC_POINT");
@@ -351,7 +352,7 @@ std::string pcrypto::sig::PublicKey::SerializeXYToHex() const {
 
     cstring = EC_POINT_point2hex(EC_KEY_get0_group(public_key_),
         EC_KEY_get0_public_key(public_key_), POINT_CONVERSION_UNCOMPRESSED,
-        NULL);
+        nullptr);
     if (!cstring) {
         std::string msg("Crypto Error (SerializeXYToHex): "
             "Could not serialize EC public key");
@@ -376,7 +377,7 @@ int pcrypto::sig::PublicKey::VerifySignature(
     // Decode signature B64 -> DER -> ECDSA_SIG
     const unsigned char* der_SIG = (const unsigned char*)signature.data();
     ECDSA_SIG_ptr sig(
-        d2i_ECDSA_SIG(NULL, (const unsigned char**)(&der_SIG),
+        d2i_ECDSA_SIG(nullptr, (const unsigned char**)(&der_SIG),
             signature.size()), ECDSA_SIG_free);
     if (!sig) {
         return -1;
