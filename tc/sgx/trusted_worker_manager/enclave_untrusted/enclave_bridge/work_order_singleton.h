@@ -1,4 +1,4 @@
-/* Copyright 2018 Intel Corporation
+/* Copyright 2020 Intel Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,17 +15,17 @@
 
 #pragma once
 
-#include "tcf_error.h"
-#include "types.h"
-
 #include <string>
 #include <stdlib.h>
 
-class WorkOrderHandlerBase {
+#include "work_order.h"
+
+class WorkOrderHandlerSingleton : public WorkOrderHandlerBase{
 public:
-    static tcf_err_t GetSerializedResponse(
-        const uint32_t inResponseIdentifier,
-        const size_t inSerializedResponseSize,
-        Base64EncodedString& outSerializedResponse,
+    tcf_err_t HandleWorkOrderRequest(
+        const Base64EncodedString& inSerializedRequest,
+        uint32_t& outResponseIdentifier,
+        size_t& outSerializedResponseSize,
         int enclaveIndex);
-};
+
+};  // WorkOrderHandlerSingleton
