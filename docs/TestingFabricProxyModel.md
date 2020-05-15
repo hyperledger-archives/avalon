@@ -5,64 +5,94 @@ https://creativecommons.org/licenses/by/4.0/
 
 # Testing Hyperledger Avalon Proxy Model with Hyperledger Fabric
 
-1.  Install ``curl``, ``docker`` and ``docker-compose``.
-    See [PREREQUISITES](../PREREQUISITES.md#docker) for instructions for Docker.
+Hyperledger Fabric is an enterprise, private, permissioned blockchain network.
+To run Fabric with Hyperledger Avalon, follow these steps:
 
-2.  If the host machine is behind any network firewall/proxy, you need to
-    define the following parameters in your `/etc/environment` file:
-    ```
-    http_proxy=<http-proxy-url>:<port>
-    https_proxy=<https-proxy-url>:<port>
-    ```
-    
-    By default minifab creates 3 orderers, 2 peers with 2 organisations. The
-    no_proxy for this setup is as follows (all on one line):
-    ```
-    no_proxy=localhost,127.0.0.1,orderer3.example.com,orderer2.example.com,
-             orderer1.example.com,peer2.org1.example.com,peer1.org1.example.com,
-             peer2.org0.example.com,peer1.org0.example.com
-    ```
-    
-    If you modify the number of orderers, peers, or organisations, please update
-    the `no_proxy` list accordingly.
+1. Set the environment variable ``TCF_HOME`` to the Avalon root directory.
+   ```bash
+   cd /path/to/your/avalon
+   export TCF_HOME=$PWD
+   ```
 
-3.  Start the Fabric network with 2 organizations, 4 peers and 3 orderers
-    using the `start_fabric.sh` script.
-    ```bash
-    cd $TCF_HOME
-    ./scripts/start_fabric.sh -u
+2. Install ``curl``, ``docker`` and ``docker-compose``.
+   See [PREREQUISITES](../PREREQUISITES.md#docker) for instructions for Docker.
+
+3. Proxy configuration (optional).
+   If the host machine is behind any network firewall/proxy, you need to
+   define the following parameters in your `/etc/environment` file:
+   ```
+   http_proxy=<http-proxy-url>:<port>
+   https_proxy=<https-proxy-url>:<port>
+   ```
+
+   By default minifab creates 3 orderers, 2 peers with 2 organisations.
+   The `no_proxy` for this setup is as follows (all on one line):
+
+   ```
+   no_proxy=localhost,127.0.0.1,orderer3.example.com,orderer2.example.com,
+            orderer1.example.com,peer2.org1.example.com,peer1.org1.example.com,
+            peer2.org0.example.com,peer1.org0.example.com
+   ```
+
+   If you modify the number of orderers, peers, or organisations,
+   please update the `no_proxy` list accordingly.
+
+4. Start the Fabric network with 2 organizations, 4 peers and 3 orderers
+   using the `start_fabric.sh` script.
+   ```bash
+   cd $TCF_HOME
+   ./scripts/start_fabric.sh -u
     ```
-    Starting Fabric Docker containers will take some time.
-    Once it is up and running, type
-    `docker ps`
-    and check for Fabric Docker containers named
-    `peer-*`, `orderer-*`, and `dev-*`
+   Starting Fabric Docker containers will take some time.
+   Once it is up and running, type
+   `docker ps`
+   and check for Fabric Docker containers named
+   `peer-*`, `orderer-*`, and `dev-*`
 
-4.  Start the Avalon Docker containers
+5. Start the Avalon Docker containers
 
-    ```bash
-    docker-compose -f docker-compose-fabric.yaml up --build
-    ```
+   ```bash
+   docker-compose -f docker-compose-fabric.yaml up --build
+   ```
 
-    Once the Fabric containers are up and running we can start and stop Avalon
-    containers any number of times without restarting the Fabric containers.
-    To save time, omit the ``--build`` parameter after running the first time
-    so it will not rebuild Avalon.
+   Once the Fabric containers are up and running we can start and stop Avalon
+   containers any number of times without restarting the Fabric containers.
+   To save time, omit the ``--build`` parameter after running the first time
+   so it will not rebuild Avalon.
 
-5.  Go to the `avalon-shell` container to run `fabric_generic_client.py`:
-    ```bash
-    docker exec -it  avalon-shell bash
+6. Go to the `avalon-shell` container to run `fabric_generic_client.py`:
+   ```bash
+   docker exec -it  avalon-shell bash
 
-    cd examples/apps/generic_client/
-    ./fabric_generic_client.py -b fabric --workload_id "echo-result" --in_data "Hello"
-    ```
+   cd examples/apps/generic_client/
+   ./fabric_generic_client.py -b fabric --workload_id "echo-result" --in_data "Hello"
+   ```
 
-6. To stop the Fabric network run this command:
-    ```bash
-    ./scripts/start_fabric.sh -d
-    ```
+7. To stop the Fabric network run this command:
+   ```bash
+   ./scripts/start_fabric.sh -d
+   ```
 
 ## <a name="troubleshooting"></a>Troubleshooting
+- To cleanup and start over (after a mistake or to try another version),
+  follow these steps:
+
+  1. Cleanup Docker Fabric service containers and the work directory
+     ```bash
+     ./scripts/start_fabric.sh -c
+     ```
+     This runs `~/mywork/minifab cleanup` and
+     removes directory `~/mywork/vars`
+  2. Verify Fabric Docker service containers are down with `docker ps -a`
+  3. To remove containers that exited but are not removed, type:
+     ```bash
+     docker rm $(docker ps -aq -f status=exited)
+     ```
+  4. Remove the Fabric work directory and minifab:
+     `rm -rf ~/mywork`
+  5. Optional. To remove the Avalon directory type:
+     `cd; rm -rf $TCF_HOME`
+
 - If you see the message
 
   ```
@@ -88,4 +118,5 @@ https://creativecommons.org/licenses/by/4.0/
   ```
 
   Group `docker` should appear in the output.
-  The Docker `hello-world` container should download and run without error.
+  The Docker `hello-world` container should download, run without error,
+  and print the message `Hello from Docker!`.

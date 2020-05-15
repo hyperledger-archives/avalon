@@ -32,6 +32,10 @@ https://creativecommons.org/licenses/by/4.0/
 ## Tutorial
 * [Workload Application Tutorial](./workload-tutorial/)
 * [Example Applications](../examples/apps/)
+* Avalon Proxy Model Demos with:
+  * [Avalon Proxy model with Ganache and Ethereum](./GanacheProxyModel.md)
+  * [Avalon Proxy model with Besu and Ethereum](./BesuProxyModel.md)
+  * [Avalon Proxy model with Hyperledger Fabric](./TestingFabricProxyModel.md)
 
 ## Source Code
 * [Avalon source code repository, https://github.com/hyperledger/avalon](
@@ -50,7 +54,7 @@ create worker order requestors (clients) and processors.
 
 The Avalon SDK Reference Manual is generated with Doxygen.
 To generate the Reference Manual using this repository, type the following:
-```
+```bash
 cd $TCF_HOME/docs # this directory
 sudo apt-get update
 sudo apt-get install -y make doxygen texlive-full graphviz
