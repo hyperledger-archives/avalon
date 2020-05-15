@@ -23,6 +23,10 @@
 #include "crypto_shared.h"
 #include "verify_certificate.h"
 
+#ifndef CRYPTOLIB_OPENSSL
+#error "CRYPTOLIB_OPENSSL must be defined to compile source with OpenSSL."
+#endif
+
 
 /**
  * Verify that cert_pem is signed by CA,
