@@ -18,12 +18,14 @@ LDFLAGS=-lcrypto
 
 # To use Mbed TLS instead of the default OpenSSL, define CRYPTOLIB_MBEDTLS=1
 # For example: CRYPTOLIB_MBEDTLS=1 make
-ifdef CRYPTOLIB_MBEDTLS
-	CPPFLAGS+= -DCRYPTOLIB_MBEDTLS
-	LDFLAGS+=-lmbedcrypto
-endif
 ifdef CRYPTOLIB_OPENSSL
 	CPPFLAGS+= -DCRYPTOLIB_OPENSSL
+	#LDFLAGS+=  -lcrypto
+else
+ifdef CRYPTOLIB_MBEDTLS
+	CPPFLAGS+= -DCRYPTOLIB_MBEDTLS
+	LDFLAGS+=  -lmbedcrypto -lmbedx509
+endif
 endif
 
 UTILTESTOBJS= build/crypto_utils.o build/crypto_utils_encrypt.o \
@@ -83,27 +85,29 @@ all: build build/b64test build/certtest build/secrettest \
 build:
 	mkdir -p $@
 
-build/b64test: build/b64test.o build/base64.o build/utils.o
+build/b64test: build build/b64test.o build/base64.o build/utils.o
 	g++ -o $@ $@.o         build/base64.o build/utils.o $(LDFLAGS)
 
-build/certtest: build/certtest.o build/verify_certificate.o
+build/certtest: build build/certtest.o build/verify_certificate.o
 	g++ -o $@ $@.o           build/verify_certificate.o $(LDFLAGS)
 
-build/pktest: build/pktest.o build/pkenc_private_key.o build/pkenc_public_key.o
+build/pktest: build build/pktest.o build/pkenc_private_key.o \
+		build/pkenc_public_key.o
 	g++ -o $@ $@.o build/pkenc_private_key.o build/pkenc_public_key.o \
  		$(LDFLAGS)
 
-build/signtest: build/signtest.o build/sig_private_key.o build/sig_public_key.o
+build/signtest: build build/signtest.o \
+		build/sig_private_key.o build/sig_public_key.o
 	g++ -o $@ $@.o build/sig_private_key.o build/sig_public_key.o \
 		$(LDFLAGS)
 
-build/secrettest: build/secrettest.o $(UTILTESTOBJS)
+build/secrettest: build build/secrettest.o $(UTILTESTOBJS)
 	g++ -o $@ $@.o $(UTILTESTOBJS) $(LDFLAGS)
 
-build/verifytest: build/verifytest.o build/verify_signature.o
+build/verifytest: build build/verifytest.o build/verify_signature.o
 	g++ -o $@ $@.o build/verify_signature.o $(LDFLAGS)
 
-build/utiltest: build/utiltest.o $(UTILTESTOBJS)
+build/utiltest: build build/utiltest.o $(UTILTESTOBJS)
 	g++ -o $@ $@.o $(UTILTESTOBJS) $(LDFLAGS)
 
 test:

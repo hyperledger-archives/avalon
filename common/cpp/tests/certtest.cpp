@@ -36,7 +36,9 @@
 
 #include <stdio.h>
 #include "verify_certificate.h"
+#ifdef CRYPTOLIB_OPENSSL
 #include <openssl/evp.h>
+#endif
 
 // Test X.509 certificates
 // To dump, type: openssl x509 -noout -text <mycertfilename.pem
@@ -257,8 +259,10 @@ main(void)
     bool is_ok;
     int  count = 0;
 
+#ifdef CRYPTOLIB_OPENSSL
 #if OPENSSL_API_COMPAT < 0x10100000L
     OpenSSL_add_all_digests();
+#endif
 #endif
 
     printf("Verify CA test . . . ");
@@ -287,7 +291,7 @@ main(void)
 
     printf("Verify cert negative test . . . ");
     is_ok = verify_certificate_chain(test_cert, test_cert2);
-    printf("%d %s\n", (int)is_ok, is_ok ? "FAILED" : "PASSED");
+    printf("%d %s\n", (int)!is_ok, is_ok ? "FAILED" : "PASSED");
     if (is_ok) // should not succeed; success is failure for this test
         ++count;
 
