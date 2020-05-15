@@ -15,19 +15,17 @@
 
 #include <stdlib.h>
 #include <string>
-#include <map>
 
 #include "error.h"
 #include "tcf_error.h"
 #include "swig_utils.h"
 #include "types.h"
 
-#include "work_order.h"
+#include "work_order_singleton.h"
 
 #include "base.h"
 #include "work_order_wrap.h"
 
-// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 std::string HandleWorkOrderRequest(
     const std::string& serialized_request) {
     tcf_err_t presult;
@@ -38,7 +36,8 @@ std::string HandleWorkOrderRequest(
     tcf::enclave_queue::ReadyEnclave readyEnclave = \
         tcf::enclave_api::base::GetReadyEnclave();
 
-    presult = tcf::enclave_api::workorder::HandleWorkOrderRequest(
+    WorkOrderHandlerSingleton wo_handle;
+    presult = wo_handle.HandleWorkOrderRequest(
         serialized_request,
         response_identifier,
         response_size,
@@ -46,7 +45,7 @@ std::string HandleWorkOrderRequest(
     ThrowTCFError(presult);
 
     Base64EncodedString response;
-    presult = tcf::enclave_api::workorder::GetSerializedResponse(
+    presult = WorkOrderHandlerBase::GetSerializedResponse(
         response_identifier,
         response_size,
         response,

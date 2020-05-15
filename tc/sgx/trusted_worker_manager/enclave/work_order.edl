@@ -15,8 +15,6 @@
 
 enclave {
     include "sgx_trts.h"
-    include "sgx_tseal.h"
-    include "sgx_tcrypto.h"
 
     trusted {
         // inSerializedRequest is a binary encoding of the encrypted request
@@ -27,7 +25,8 @@ enclave {
             [out] size_t* outSerializedResponseSize
             );
 
-        // outSerializedResponse is a base64 encoding of a JSON object encrypted with the AES session key
+        // outSerializedResponse is a base64 encoding of a JSON object
+        // encrypted with the AES session key
         public tcf_err_t ecall_GetSerializedResponse(
             [out, size = inSerializedResponseSize] uint8_t* outSerializedResponse,
             size_t inSerializedResponseSize

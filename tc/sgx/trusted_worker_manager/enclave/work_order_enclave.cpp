@@ -16,31 +16,19 @@
 #include "enclave_t.h"
 
 #include <string>
-#include <vector>
 
 #include <sgx_trts.h>
-#include <sgx_tseal.h>
-#include <sgx_utils.h>
-#include "sgx_thread.h"
 #include<mbusafecrt.h>
 
 #include "error.h"
-#include "packages/base64/base64.h"
 #include "tcf_error.h"
-#include "timer.h"
-#include "types.h"
-#include "zero.h"
 
 #include "enclave_utils.h"
-
 #include "base_enclave.h"
-#include "work_order_enclave.h"
 #include "enclave_data.h"
-#include "signup_enclave.h"
-
 #include "work_order_processor.h"
 
-ByteArray last_result;
+ByteArray last_serialized_response;
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 tcf_err_t ecall_HandleWorkOrderRequest(const uint8_t* inSerializedRequest,
@@ -62,10 +50,10 @@ tcf_err_t ecall_HandleWorkOrderRequest(const uint8_t* inSerializedRequest,
 
         tcf::WorkOrderProcessor wo_processor;
         std::string wo_string(request.begin(), request.end());
-        last_result = wo_processor.Process(enclaveData, wo_string);
+        last_serialized_response = wo_processor.Process(enclaveData, wo_string);
 
         // Save the response and return the size of the buffer required for it
-        (*outSerializedResponseSize) = last_result.size();
+        (*outSerializedResponseSize) = last_serialized_response.size();
     } catch (tcf::error::Error& e) {
         SAFE_LOG(TCF_LOG_ERROR,
             "Error in worker enclave (ecall_HandleWorkOrderRequest): %04X -- %s",
@@ -90,14 +78,14 @@ tcf_err_t ecall_GetSerializedResponse(uint8_t* outSerializedResponse,
         tcf::error::ThrowIfNull(outSerializedResponse,
             "Serialized response pointer is NULL");
         tcf::error::ThrowIf<tcf::error::ValueError>(
-            inSerializedResponseSize < last_result.size(),
+            inSerializedResponseSize < last_serialized_response.size(),
             "Not enough space for the response");
 
         // Unseal the enclave persistent data
         EnclaveData* enclaveData = EnclaveData::getInstance();
 
         memcpy_s(outSerializedResponse, inSerializedResponseSize,
-            last_result.data(), last_result.size());
+            last_serialized_response.data(), last_serialized_response.size());
     } catch (tcf::error::Error& e) {
         SAFE_LOG(TCF_LOG_ERROR,
             "Error in worker enclave(ecall_GetSerializedResponse): %04X -- %s",

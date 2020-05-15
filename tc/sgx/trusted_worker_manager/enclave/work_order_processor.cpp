@@ -37,6 +37,13 @@
 #include "workload_processor.h"
 
 namespace tcf {
+
+    WorkOrderProcessor::~WorkOrderProcessor() {
+        // Sanitize class members storing secrets
+        worker_encryption_key.clear();
+        session_key.clear();
+    }
+
     void WorkOrderProcessor::ParseJsonInput(EnclaveData* enclaveData, std::string json_str) {
         // Parse the work order request
         JsonValue parsed(json_parse_string(json_str.c_str()));

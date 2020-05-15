@@ -1,4 +1,4 @@
-/* Copyright 2018 Intel Corporation
+/* Copyright 2020 Intel Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,25 +15,26 @@
 
 #include "enclave_u.h"
 
-#include "tcf_error.h"
-#include "error.h"
 #include "avalon_sgx_error.h"
 #include "log.h"
 #include "types.h"
 
 #include "enclave.h"
 #include "base.h"
-#include "work_order.h"
+#include "work_order_singleton.h"
 
-tcf_err_t WorkOrderHandlerBase::GetSerializedResponse(
-    const uint32_t inResponseIdentifier,
-    const size_t inSerializedResponseSize,
-    Base64EncodedString& outSerializedResponse,
+// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+tcf_err_t WorkOrderHandlerSingleton::HandleWorkOrderRequest(
+    const Base64EncodedString& inSerializedRequest,
+    uint32_t& outResponseIdentifier,
+    size_t& outSerializedResponseSize,
     int enclaveIndex) {
     tcf_err_t result = TCF_SUCCESS;
 
     try {
-        ByteArray serialized_response(inSerializedResponseSize);
+        size_t response_size = 0;
+        ByteArray serialized_request = \
+            Base64EncodedStringToByteArray(inSerializedRequest);
 
         // xxxxx Call the enclave
 
@@ -42,26 +43,27 @@ tcf_err_t WorkOrderHandlerBase::GetSerializedResponse(
 
         tcf_err_t presult = TCF_SUCCESS;
         sgx_status_t sresult =
-
             g_Enclave[enclaveIndex].CallSgx(
                 [
                     enclaveid,
                     &presult,
-                    &serialized_response
+                    serialized_request,
+                    &response_size
                 ]
                 () {
-                    sgx_status_t sresult_inner = ecall_GetSerializedResponse(
+                    sgx_status_t sresult_inner = ecall_HandleWorkOrderRequest(
                         enclaveid,
                         &presult,
-                        serialized_response.data(),
-                        serialized_response.size());
+                        serialized_request.data(),
+                        serialized_request.size(),
+                        &response_size);
                     return tcf::error::ConvertErrorStatus(sresult_inner, presult);
                 });
         tcf::error::ThrowSgxError(sresult,
-            "Intel SGX enclave call failed (GetSerializedResponse)");
+            "Intel SGX enclave call failed (ecall_HandleWorkOrderRequest)");
         g_Enclave[enclaveIndex].ThrowTCFError(presult);
 
-        outSerializedResponse = ByteArrayToBase64EncodedString(serialized_response);
+        outSerializedResponseSize = response_size;
     } catch (tcf::error::Error& e) {
         tcf::enclave_api::base::SetLastError(e.what());
         result = e.error_code();
@@ -74,4 +76,4 @@ tcf_err_t WorkOrderHandlerBase::GetSerializedResponse(
     }
 
     return result;
-}
+}  // 

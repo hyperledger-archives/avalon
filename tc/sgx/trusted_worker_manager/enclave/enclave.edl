@@ -20,7 +20,7 @@ enclave {
     from "signup.edl" import *;
     from "signup_kme.edl" import *;
     from "signup_wpe.edl" import *;
-    from "workload.edl" import *;
+    from "work_order.edl" import *;
     from "iohandler.edl" import *;
 };
 
