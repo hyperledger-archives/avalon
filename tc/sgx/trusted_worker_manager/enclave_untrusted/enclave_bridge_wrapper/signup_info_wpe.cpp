@@ -29,6 +29,17 @@ SignupInfo* SignupInfoWPE::DeserializeSignupInfo(
     return signup_info;
 }  // SignupInfoWPE::DeserializeSignupInfo
 
+// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+std::string SignupInfoWPE::GenerateNonce(size_t nonce_size) {
+    tcf_err_t presult;
+
+    std::string nonce;
+    SignupDataWPE signup_data_wpe;
+    presult = signup_data_wpe.GenerateNonce(nonce, nonce_size);
+    ThrowTCFError(presult);
+
+    return nonce;
+}  // SignupInfoWPE::GenerateNonce
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 std::map<std::string, std::string> SignupInfoWPE::CreateEnclaveData(

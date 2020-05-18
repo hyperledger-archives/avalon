@@ -27,11 +27,6 @@ enclave {
             [out] size_t* pPublicEnclaveDataSize
             );
 
-        public tcf_err_t ecall_CreateEnclaveData(
-            [out] size_t* outPublicEnclaveDataSize,
-            [out] size_t* outSealedEnclaveDataSize
-            );
-
         public tcf_err_t ecall_CreateSignupData(
             [in] const sgx_target_info_t* inTargetInfo,
             [out, size=inAllocatedPublicEnclaveDataSize] char* outPublicEnclaveData,

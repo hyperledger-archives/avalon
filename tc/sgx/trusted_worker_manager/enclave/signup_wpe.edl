@@ -18,6 +18,10 @@ enclave {
     include "tcf_error.h"
 
     trusted {
+        public tcf_err_t ecall_GenerateNonce(
+           [out, size=in_nonce_size] uint8_t* out_nonce,
+           size_t in_nonce_size
+        );
         public tcf_err_t ecall_CreateSignupDataWPE(
             [in] const sgx_target_info_t* inTargetInfo,
             [in] const uint8_t* inExtData,

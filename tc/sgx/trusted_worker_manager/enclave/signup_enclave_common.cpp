@@ -29,6 +29,20 @@
 EnclaveData* EnclaveData::instance = 0;
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+tcf_err_t CreateEnclaveData() {
+    tcf_err_t result = TCF_SUCCESS;
+    try {
+        // Initialize Enclave data
+        EnclaveData* enclaveData = EnclaveData::getInstance();
+    } catch (...) {
+        SAFE_LOG(TCF_LOG_ERROR,
+            "Unknown error in while creating enclave data");
+        result = TCF_ERR_UNKNOWN;
+    }
+    return result;
+}
+
+// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 tcf_err_t ecall_CalculateSealedEnclaveDataSize(size_t* pSealedEnclaveDataSize) {
     tcf_err_t result = TCF_SUCCESS;
 
@@ -74,40 +88,6 @@ tcf_err_t ecall_CalculatePublicEnclaveDataSize(size_t* pPublicEnclaveDataSize) {
 
     return result;
 }  // ecall_CalculatePublicEnclaveDataSize
-
-// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-tcf_err_t ecall_CreateEnclaveData(size_t* outPublicEnclaveDataSize,
-    size_t* outSealedEnclaveDataSize) {
-    tcf_err_t result = TCF_SUCCESS;
-    try {
-        tcf::error::ThrowIfNull(outPublicEnclaveDataSize,
-            "Public data size pointer is NULL");
-        tcf::error::ThrowIfNull(outSealedEnclaveDataSize,
-            "Sealed data size pointer is NULL");
-
-        (*outPublicEnclaveDataSize) = 0;
-        (*outSealedEnclaveDataSize) = 0;
-
-        // Create the enclave data
-        EnclaveData* enclaveData = EnclaveData::getInstance();
-
-        // Pass back the actual size of the enclave data
-        (*outPublicEnclaveDataSize) = enclaveData->get_public_data_size();
-        (*outSealedEnclaveDataSize) = enclaveData->get_sealed_data_size();
-    } catch (tcf::error::Error& e) {
-        SAFE_LOG(TCF_LOG_ERROR,
-            "Error in Avalon enclave(ecall_CreateEnclaveData): %04X -- %s",
-            e.error_code(), e.what());
-        ocall_SetErrorMessage(e.what());
-        result = e.error_code();
-    } catch (...) {
-        SAFE_LOG(TCF_LOG_ERROR,
-            "Unknown error in Avalon enclave(ecall_CreateEnclaveData)");
-        result = TCF_ERR_UNKNOWN;
-    }
-
-    return result;
-}  // ecall_CreateEnclaveData
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 tcf_err_t ecall_UnsealEnclaveData(char* outPublicEnclaveData,
