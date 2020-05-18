@@ -5,10 +5,14 @@ https://creativecommons.org/licenses/by/4.0/
 
 # Local Environment for Testing Hyperledger Avalon with Hyperledger Besu
 
-This is a self-contained environment based on docker and deployed with docker-compose, to test Avalon components with a Hyperledger Besu target blockchain. The set up can be used with both direct mode and proxy mode, with both HTTP and Websocket endpoints enabled.
+This is a self-contained environment based on Docker and deployed with
+docker-compose to test Avalon components with a Hyperledger Besu target
+blockchain.
+The set up can be used with both direct mode and proxy mode,
+with both HTTP and Websocket endpoints enabled.
 
 For a demonstration that runs Besu and Avalon, see
-[TestingFabricProxyModel.md](../../../BesuProxyModel.md)
+[TestingBesuProxyModel.rst](../../../TestingBesuProxyModel.rst)
 
 ## Setup and Launch
 
@@ -16,6 +20,7 @@ For a demonstration that runs Besu and Avalon, see
 
 To set up the local environment in order to run Avalon tests,
 you need the following:
+
 * [Docker](https://docs.docker.com/engine/install/ubuntu/) and
   [docker-compose](https://docs.docker.com/compose/install/#install-compose)
 * node.js and npm

@@ -10,7 +10,7 @@ with a Hyperledger Fabric blockchain.
 The set up supports Avalon's proxy model.
 
 For a demonstration that runs Fabric and Avalon, see
-[TestingFabricProxyModel.md](../../TestingFabricProxyModel.md)
+[TestingFabricProxyModel.rst](../../TestingFabricProxyModel.rst)
 
 ## Setup and Launch
 

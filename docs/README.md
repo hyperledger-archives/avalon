@@ -33,9 +33,9 @@ https://creativecommons.org/licenses/by/4.0/
 * [Workload Application Tutorial](./workload-tutorial/)
 * [Example Applications](../examples/apps/)
 * Avalon Proxy Model Demos with:
-  * [Avalon Proxy model with Ganache and Ethereum](./GanacheProxyModel.md)
-  * [Avalon Proxy model with Besu and Ethereum](./BesuProxyModel.md)
-  * [Avalon Proxy model with Hyperledger Fabric](./TestingFabricProxyModel.md)
+  * [Avalon Proxy model with Ganache and Ethereum](./TestingGanacheProxyModel.rst)
+  * [Avalon Proxy model with Besu and Ethereum](./TestingBesuProxyModel.rst)
+  * [Avalon Proxy model with Hyperledger Fabric](./TestingFabricProxyModel.rst)
 
 ## Source Code
 * [Avalon source code repository, https://github.com/hyperledger/avalon](
