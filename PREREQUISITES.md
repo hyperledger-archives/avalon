@@ -289,10 +289,10 @@ For example, to install OpenSSL v1.1.1d on an Ubuntu system:
 
 ```bash
 cd /var/tmp
-wget 'http://http.us.debian.org/debian/pool/main/o/openssl/libssl1.1_1.1.1d-2_amd64.deb'
-wget 'http://http.us.debian.org/debian/pool/main/o/openssl/libssl-dev_1.1.1d-2_amd64.deb'
-sudo dpkg -i libssl1.1_1.1.1d-2_amd64.deb
-sudo dpkg -i libssl-dev_1.1.1d-2_amd64.deb
+wget 'http://http.us.debian.org/debian/pool/main/o/openssl/libssl1.1_1.1.1d-0+deb10u3_amd64.deb'
+wget 'http://http.us.debian.org/debian/pool/main/o/openssl/libssl-dev_1.1.1d-0+deb10u3_amd64.deb'
+sudo dpkg -i libssl1.1_1.1.1d-0+deb10u3_amd64.deb
+sudo dpkg -i libssl-dev_1.1.1d-0+deb10u3_amd64.deb
 sudo apt-get install -f
 ```
 
@@ -357,7 +357,7 @@ problems.
   cd ~/sgxssl
   ```
 
-- Download a specific version of the Intel SGX SSL git repository. 
+- Download a specific version of the Intel SGX SSL git repository.
   Use Intel SGX SSL tag "lin_2.5_1.1.1d", which corresponds to
   OpenSSL version 1.1.1d
 
