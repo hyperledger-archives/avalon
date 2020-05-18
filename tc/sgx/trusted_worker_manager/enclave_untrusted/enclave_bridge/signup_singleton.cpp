@@ -35,31 +35,13 @@ tcf_err_t SignupDataSingleton::CreateEnclaveData(
         tcf_err_t presult = TCF_SUCCESS;
         sgx_status_t sresult;
 
-        size_t computed_public_enclave_data_size = 0;
-        size_t computed_sealed_enclave_data_size = 0;
-
         // Get the enclave id for passing into the ecall
         sgx_enclave_id_t enclaveid = g_Enclave[0].GetEnclaveId();
 
-        // Create enclave signature key and encryption key pair
-        sresult = g_Enclave[0].CallSgx(
-            [enclaveid,
-             &presult,
-             &computed_public_enclave_data_size,
-             &computed_sealed_enclave_data_size] () {
-                sgx_status_t ret = ecall_CreateEnclaveData(
-                    enclaveid,
-                    &presult,
-                    &computed_public_enclave_data_size,
-                    &computed_sealed_enclave_data_size);
-                return tcf::error::ConvertErrorStatus(ret, presult);
-            });
-        tcf::error::ThrowSgxError(sresult,
-            "SGX enclave call failed (ecall_CreateEnclaveData), failed to create signup data");
-        g_Enclave[0].ThrowTCFError(presult);
-
-        outPublicEnclaveData.resize(computed_public_enclave_data_size);
-        ByteArray sealed_enclave_data_buffer(computed_sealed_enclave_data_size);
+        outPublicEnclaveData.resize(
+            SignupData::CalculatePublicEnclaveDataSize());
+        ByteArray sealed_enclave_data_buffer(
+            SignupData::CalculateSealedEnclaveDataSize());
 
         // We need target info in order to create signup data report
         sgx_target_info_t target_info = { 0 };

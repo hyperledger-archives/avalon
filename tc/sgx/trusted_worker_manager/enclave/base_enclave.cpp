@@ -33,6 +33,7 @@
 #include "zero.h"
 
 #include "base_enclave.h"
+#include "signup_enclave_common.h"
 #include "enclave_utils.h"
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -48,6 +49,8 @@ tcf_err_t ecall_Initialize() {
     // since it can break confidentiality of workorder execution.
     SAFE_LOG(TCF_LOG_CRITICAL, "enclave initialized with debugging turned on");
 
+    // Initialize Enclave data
+    result = CreateEnclaveData();
     return result;
 }  // ecall_Initialize
 

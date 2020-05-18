@@ -22,6 +22,8 @@
 
 class SignupDataWPE : public SignupData {
 public:
+    tcf_err_t GenerateNonce(std::string& out_nonce, size_t out_nonce_size);
+
     tcf_err_t CreateEnclaveData(
         const std::string& inExtData,
         const std::string& inExtDataSignature,

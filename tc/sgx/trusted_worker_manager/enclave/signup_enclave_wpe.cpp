@@ -29,6 +29,7 @@
 #include "zero.h"
 #include "jsonvalue.h"
 #include "parson.h"
+#include "hex_string.h"
 
 #include "enclave_data.h"
 #include "enclave_utils.h"
@@ -43,6 +44,34 @@ static void CreateReportDataWPE(const uint8_t* ext_data,
 static void CreateSignupReportDataWPE(const uint8_t* ext_data,
     EnclaveData* enclave_data,
     sgx_report_data_t* report_data);
+
+// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+tcf_err_t ecall_GenerateNonce(uint8_t* out_nonce, size_t in_nonce_size) {
+    tcf_err_t result = TCF_SUCCESS;
+    tcf::error::ThrowIf<tcf::error::ValueError>(in_nonce_size <= 0,
+        "Nonce size should be positive value");
+    try {
+        ByteArray nonce_bytes = tcf::crypto::RandomBitString(in_nonce_size);
+        // Convert nonce to hex string and persist in the EnclaveData
+        EnclaveData* enclaveData = EnclaveData::getInstance();
+        std::string nonce_hex = ByteArrayToHexEncodedString(nonce_bytes);
+        enclaveData->set_nonce(nonce_hex);
+        out_nonce = (uint8_t*) nonce_hex.c_str();
+    } catch (tcf::error::ValueError& e) {
+        Log(TCF_LOG_ERROR, "error::RandomNonce - %d - %s",
+            e.error_code(), e.what());
+        return TCF_ERR_CRYPTO;
+    } catch (tcf::error::Error& e) {
+        Log(TCF_LOG_ERROR, "error::RandomNonce - %d - %s\n",
+            e.error_code(), e.what());
+        return TCF_ERR_CRYPTO;
+    } catch (...) {
+        Log(TCF_LOG_ERROR, "error::RandomNonce - unknown internal error");
+        return TCF_ERR_CRYPTO;
+    }
+
+    return result;
+}  // ecall_GenerateNonce
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 tcf_err_t ecall_CreateSignupDataWPE(const sgx_target_info_t* inTargetInfo,

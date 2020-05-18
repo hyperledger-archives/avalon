@@ -71,6 +71,7 @@ protected:
     std::string encryption_key_signature_;
 
     std::string extended_data_;
+    std::string nonce_;
 
     std::string serialized_private_data_;
     std::string serialized_public_data_;
@@ -101,6 +102,14 @@ public:
 
     void set_extended_data(std::string in_ex_data) {
         extended_data_ = in_ex_data;
+    }
+
+    void set_nonce(std::string nonce) {
+        nonce_ = nonce;
+    }
+
+    std::string get_nonce() {
+        return nonce_;
     }
     std::string get_serialized_signing_key(void) const { return public_signing_key_.Serialize(); }
 

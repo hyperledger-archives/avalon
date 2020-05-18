@@ -22,6 +22,8 @@ public:
 
     SignupInfoWPE() {}
 
+    std::string GenerateNonce(size_t nonce_size);
+
     std::map<std::string, std::string> CreateEnclaveData(
         const std::string& in_ext_data,
         const std::string& in_ext_data_signature,

@@ -17,12 +17,11 @@
 #include <string.h>
 #include "tcf_error.h"
 
+tcf_err_t CreateEnclaveData();
+
 tcf_err_t ecall_CalculateSealedEnclaveDataSize(size_t* pSealedEnclaveDataSize);
 
 tcf_err_t ecall_CalculatePublicEnclaveDataSize(size_t* pPublicEnclaveDataSize);
-
-tcf_err_t ecall_CreateEnclaveData(size_t* outPublicEnclaveDataSize,
-    size_t* outSealedEnclaveDataSize);
 
 tcf_err_t ecall_UnsealEnclaveData(char* outPublicEnclaveData,
     size_t inAllocatedPublicEnclaveDataSize);
