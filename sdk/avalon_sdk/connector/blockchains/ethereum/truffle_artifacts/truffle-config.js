@@ -55,7 +55,7 @@ module.exports = {
             gasPrice: 0
        },
        avalon_besu_docker: {     // Meant for Hyperledger Besu network when contract deployed from same network
-            host: "rpc.node1.avalon.local",  // Host address of local Besu node used in https://github.com/hyperledger/avalon/blob/master/docs/BesuProxyModel.md
+            host: "rpc.node1.avalon.local",  // Host address of local Besu node used in https://github.com/hyperledger/avalon/blob/master/docs/TestingBesuProxyModel.rst
             network_id: "*",
             port: 8555,
             gas: 4500000,
