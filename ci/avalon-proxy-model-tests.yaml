@@ -73,15 +73,15 @@ services:
     depends_on:
       - avalon-lmdb
 
-  avalon-blockchain-connector:
-    image: avalon-blockchain-connector:${ISOLATION_ID}
+  avalon-fabric-connector:
+    image: avalon-fabric-connector:${ISOLATION_ID}
     environment:
       - http_proxy
       - https_proxy
       - no_proxy
     command: |
       bash -c "
-        avalon_blockchain_connector -b fabric -u http://avalon-listener:1947
+        avalon_fabric_connector -u http://avalon-listener:1947
         tail -f /dev/null
         "
     volumes:

@@ -25,11 +25,11 @@ services:
         - https_proxy
         - no_proxy
 
-  avalon-blockchain-connector:
-    image: avalon-blockchain-connector:${ISOLATION_ID}
+  avalon-fabric-connector:
+    image: avalon-fabric-connector:${ISOLATION_ID}
     build:
       context: ..
-      dockerfile: ./blockchain_connector/Dockerfile
+      dockerfile: ./blockchain_connector/docker/Dockerfile-fabric
       args:
         - http_proxy
         - https_proxy

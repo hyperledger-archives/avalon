@@ -16,21 +16,21 @@ import os
 import sys
 import json
 import argparse
-import config.config as pconfig
-
-from avalon_blockchain_connector.ethereum.ethereum_connector \
-    import EthereumConnector
-from avalon_blockchain_connector.fabric.fabric_connector \
-    import FabricConnector
-
 import logging
+import nest_asyncio
+
+import config.config as pconfig
+from fabric_connector.fabric_connector \
+    import FabricConnector
+from avalon_sdk.connector.blockchains.fabric.fabric_worker_registry \
+    import FabricWorkerRegistryImpl
+from avalon_sdk.connector.blockchains.fabric.fabric_work_order \
+    import FabricWorkOrderImpl
 
 # -----------------------------------------------------------------
 # -----------------------------------------------------------------
 
-FABRIC = 'fabric'
-ETHEREUM = 'ethereum'
-TCFHOME = os.environ.get("TCF_HOME", "../../")
+TCF_HOME = os.environ.get("TCF_HOME", "../../")
 
 logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(message)s", level=logging.INFO)
@@ -44,7 +44,7 @@ def _parse_config_file(config_file):
     if config_file:
         conf_files = [config_file]
     else:
-        conf_files = [TCFHOME +
+        conf_files = [TCF_HOME +
                       "/sdk/avalon_sdk/tcf_connector.toml"]
     conf_paths = ["."]
     try:
@@ -65,12 +65,8 @@ def main(args=None):
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "-c", "--config",
-        help="The config file containing the Ethereum contract information",
+        help="The config file containing the Fabric network information",
         type=str)
-    parser.add_argument(
-        '-b', '--blockchain', help='The target blockchain to use as proxy',
-        choices={ETHEREUM, FABRIC},
-        type=str, required=True)
     parser.add_argument(
         "-u", "--uri",
         help="Direct API listener endpoint",
@@ -91,21 +87,14 @@ def main(args=None):
     if uri:
         config["tcf"]["json_rpc_uri"] = uri
 
-    proxy_blockchain = options.blockchain
-    if proxy_blockchain:
-        logging.info("Blockchain to be used as proxy : {}"
-                     .format(proxy_blockchain))
-        if proxy_blockchain == ETHEREUM:
-            logging.info("About to start Ethereum connector service")
-            eth_connector_svc = EthereumConnector(config)
-            eth_connector_svc.start()
-        else:
-            logging.info("About to start Fabric connector service")
-            fabric_connector_svc = FabricConnector(uri)
-            fabric_connector_svc.start()
-    else:
-        logging.error("Could not parse command line arguments")
-    sys.exit(-1)
+    fabric_worker = FabricWorkerRegistryImpl(config)
+    fabric_work_order = FabricWorkOrderImpl(config)
+
+    nest_asyncio.apply()
+    fabric_connector_svc = FabricConnector(
+        config, None,
+        fabric_worker, fabric_work_order, None)
+    fabric_connector_svc.start()
 
 # -----------------------------------------------------------------
 # -----------------------------------------------------------------

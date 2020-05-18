@@ -24,12 +24,12 @@ services:
       - ~/mywork/vars/keyfiles:/keyfiles
       - ~/mywork/vars/profiles/mychannel_network_for_pysdk.json:/project/avalon/sdk/avalon_sdk/connector/blockchains/fabric/network.json
 
-  avalon-blockchain-connector:
-    container_name: avalon-blockchain-connector
-    image: avalon-blockchain-connector-dev
+  avalon-fabric-connector:
+    container_name: avalon-fabric-connector
+    image: avalon-fabric-connector-dev
     build:
       context: .
-      dockerfile: ./blockchain_connector/Dockerfile
+      dockerfile: ./blockchain_connector/docker/Dockerfile-fabric
       args:
         - http_proxy
         - https_proxy
@@ -40,7 +40,7 @@ services:
       - no_proxy
     command: |
       bash -c "
-        avalon_blockchain_connector -b fabric -u http://avalon-listener:1947
+        avalon_fabric_connector -u http://avalon-listener:1947
         tail -f /dev/null
         "
     volumes:

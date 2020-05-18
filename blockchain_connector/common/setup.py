@@ -26,16 +26,15 @@ if os.sys.version_info[0] < 3:
     sys.exit(1)
 
 
-setup(name='avalon_blockchain_connector',
+setup(name='connector_common',
       version=subprocess.check_output(
-        ['../bin/get_version']).decode('utf-8').strip(),
-      description='Avalon Blockchain Connector',
+        ['../../bin/get_version']).decode('utf-8').strip(),
+      description='Common Connector',
       author='Hyperledger Avalon',
       url='https://github.com/hyperledger/avalon',
       packages=find_packages(),
       install_requires=[
       ],
       entry_points={
-        'console_scripts':
-          ['avalon_blockchain_connector = avalon_blockchain_connector.connector_service:main']
       })
+
