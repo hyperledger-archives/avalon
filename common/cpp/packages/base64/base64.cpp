@@ -6,6 +6,7 @@
    Version: 1.01.00
 
    Copyright (C) 2004-2017 René Nyffenegger
+   Copyright 2020 Intel Corporation
 
    This source code is provided 'as-is', without any express or implied
    warranty. In no event will the author be held liable for any damages
@@ -37,12 +38,21 @@
 
 /*
  * The original source code has been modified to be used with
- * Hyperledger Avalon.
+ * Hyperledger Avalon. Added function base64_decoded_length().
  */
 
 
 #include <ctype.h>
 #include "base64.h"
+
+/*
+ * Used to adjust the decoded length of a base64 string.
+ * Check if the base64 string is padded at the end with '='
+ * and adjust the output length.
+ */
+#define ADJUST_DECODE_LENGTH(in, in_len) \
+    ((((in)[(in_len) - 1] == '=') ? -1 : 0) + \
+     (((in)[(in_len) - 2] == '=') ? -1 : 0))
 
 static const std::string base64_chars =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -171,4 +181,27 @@ std::vector<uint8_t> base64_decode(const std::string& encoded_string) {
     }
 
     return ret;
+}
+
+
+/**
+ * Calculate the length of a base 64 encoded string after decoding.
+ *
+ * @param encoded_string Printable string containing base64 encoded data.
+ *                       No embedded whitespace characters are present
+ * @param encoded_length Length of encoded_string
+ * @returns Length of encoded_string after decoding
+ */
+unsigned int base64_decoded_length(const char *encoded_string,
+    unsigned int encoded_len)
+{
+    if (encoded_string == nullptr || encoded_len == 0) {
+        return 0;
+    }
+
+    unsigned int len = (encoded_len / 4) * 3;
+
+    if (encoded_len > 3)
+        len += ADJUST_DECODE_LENGTH(encoded_string, encoded_len);
+    return (len);
 }

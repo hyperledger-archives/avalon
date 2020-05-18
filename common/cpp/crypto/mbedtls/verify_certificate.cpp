@@ -21,7 +21,7 @@
 // Mbed TLS library sanity test
 #if !defined(MBEDTLS_RSA_C) || !defined(MBEDTLS_X509_CRT_PARSE_C) || \
     !defined(MBEDTLS_FS_IO) || !defined(MBEDTLS_X509_CRL_PARSE_C)
-#error "All of MBEDTLS_{RSA_C,X509_CRT_PARSE_C,_IO,X509_CRL_PARSE_C undefined."
+#error "One of MBEDTLS_{RSA_C,X509_CRT_PARSE_C,_IO,X509_CRL_PARSE_C undefined."
 #endif
 
 #ifndef CRYPTOLIB_MBEDTLS
