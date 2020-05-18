@@ -17,7 +17,8 @@ import json
 from os import environ
 
 from utility.hex_utils import is_valid_hex_str
-
+from avalon_sdk.connector.blockchains.common.contract_response \
+    import ContractResponse
 from avalon_sdk.worker.worker_details import WorkerStatus, WorkerType
 from avalon_sdk.connector.blockchains.ethereum.ethereum_wrapper \
     import EthereumWrapper
@@ -248,11 +249,14 @@ class EthereumWorkerRegistryImpl(WorkerRegistry):
                 self.__eth_client.get_transaction_params())
             txn_receipt = self.__eth_client.execute_transaction(
                 txn_dict)
-            return txn_receipt
+            if txn_receipt['status'] == 1:
+                return ContractResponse.SUCCESS
+            else:
+                return ContractResponse.ERROR
         else:
             logging.error(
                 "worker registry contract instance is not initialized")
-            return None
+            return ContractResponse.ERROR
 
     def worker_update(self, worker_id, details):
         """
@@ -287,11 +291,14 @@ class EthereumWorkerRegistryImpl(WorkerRegistry):
                 worker_id, details)\
                 .buildTransaction(self.__eth_client.get_transaction_params())
             txn_receipt = self.__eth_client.execute_transaction(txn_dict)
-            return txn_receipt
+            if txn_receipt['status'] == 1:
+                return ContractResponse.SUCCESS
+            else:
+                return ContractResponse.ERROR
         else:
             logging.error(
                 "worker registry contract instance is not initialized")
-            return None
+            return ContractResponse.ERROR
 
     def worker_set_status(self, worker_id, status):
         """
@@ -323,11 +330,14 @@ class EthereumWorkerRegistryImpl(WorkerRegistry):
                 worker_id, status.value)\
                 .buildTransaction(self.__eth_client.get_transaction_params())
             txn_receipt = self.__eth_client.execute_transaction(txn_dict)
-            return txn_receipt
+            if txn_receipt['status'] == 1:
+                return ContractResponse.SUCCESS
+            else:
+                return ContractResponse.ERROR
         else:
             logging.error(
                 "worker registry contract instance is not initialized")
-            return None
+            return ContractResponse.ERROR
 
     def _is_valid_json(self, json_string):
         try:

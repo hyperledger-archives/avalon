@@ -18,7 +18,8 @@ import logging
 from os import environ
 
 from utility.hex_utils import is_valid_hex_str
-
+from avalon_sdk.connector.blockchains.common.contract_response \
+    import ContractResponse
 from avalon_sdk.worker.worker_details import WorkerStatus, WorkerType
 from avalon_sdk.connector.blockchains.ethereum.ethereum_wrapper \
     import EthereumWrapper
@@ -128,7 +129,10 @@ class EthereumWorkOrderProxyImpl(WorkOrderProxy):
             )
             try:
                 txn_receipt = self.__eth_client.execute_transaction(txn_dict)
-                return SUCCESS
+                if txn_receipt['status'] == 1:
+                    return ContractResponse.SUCCESS
+                else:
+                    return ContractResponse.ERROR
             except Exception as e:
                 logging.error(
                     "Exception occurred when trying to execute "
@@ -137,7 +141,7 @@ class EthereumWorkOrderProxyImpl(WorkOrderProxy):
         else:
             logging.error(
                 "Work order contract instance is not initialized")
-            return ERROR
+            return ContractResponse.ERROR
 
     def work_order_complete(self, work_order_id, work_order_response):
         """
@@ -160,12 +164,15 @@ class EthereumWorkOrderProxyImpl(WorkOrderProxy):
             )
             try:
                 txn_receipt = self.__eth_client.execute_transaction(txn_dict)
-                return SUCCESS
+                if txn_receipt['status'] == 1:
+                    return ContractResponse.SUCCESS
+                else:
+                    return ContractResponse.ERROR
             except Exception as e:
                 logging.error(
                     "Exception occurred when trying to execute "
                     + "workOrderComplete transaction on chain "+str(e))
-                return ERROR
+                return ContractResponse.ERROR
         else:
             logging.error(
                 "Work order contract instance is not initialized")

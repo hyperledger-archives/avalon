@@ -31,12 +31,10 @@ RUN apt-get update \
 # Make Python3 default
 RUN ln -sf /usr/bin/python3 /usr/bin/python
 
-
 # -------------=== python build ===-------------
 
 #Build python intermediate docker image
 FROM ubuntu:bionic as python_image
-
 
 # Add necessary packages
 RUN apt-get update \
@@ -208,33 +206,26 @@ RUN pip3 install --upgrade setuptools json-rpc web3 py-solc-x nose2
 # Install specific version of solc to support versions <0.6.0
 RUN python3 -m solcx.install v0.5.15
 
-RUN pip3 install nest_asyncio
-
-WORKDIR /project/avalon/blockchain_connector
-
 COPY VERSION /project/avalon/
 COPY ./bin /project/avalon/bin
 COPY ./blockchain_connector /project/avalon/blockchain_connector
 
-# Copy Python build artifacts
-COPY --from=common_python_image /project/avalon/common/python/dist/*.whl dist/
-COPY --from=avalon_sdk_image /project/avalon/sdk/dist/*.whl dist/
-
-# Install fabric python sdk
-RUN pip3 install virtualenv \
-   && pip3 install git+https://github.com/hyperledger/fabric-sdk-py.git
+# install blockchain connector common module
+WORKDIR /project/avalon/blockchain_connector/common
+RUN echo "Building python common connector\n" \
+ && make
 
 # install blockchain connector module
-RUN cd /project/avalon/blockchain_connector \
-   && make
-
+WORKDIR /project/avalon/blockchain_connector/ethereum/
+RUN echo "Building ethereum connector\n" \
+ && make
 
 # Build final image and install modules
 FROM base_image as final_image
 
 ENV TCF_HOME=/project/avalon
 
-WORKDIR /project/avalon/blockchain_connector
+WORKDIR /project/avalon/blockchain_connector/ethereum/
 
 COPY --from=build_image /usr/local/ /usr/local
 COPY --from=build_image /root/.solcx /root/.solcx
@@ -242,10 +233,9 @@ COPY --from=build_image /root/.solcx /root/.solcx
 COPY --from=common_python_image /project/avalon/common/python/dist/*.whl dist/
 COPY --from=avalon_sdk_image /project/avalon/sdk/dist/*.whl dist/
 COPY --from=common_crypto_utils_image /project/avalon/common/crypto_utils/dist/*.whl dist/
-COPY --from=build_image /project/avalon/blockchain_connector/dist/*.whl dist/
+COPY --from=build_image /project/avalon/blockchain_connector/ethereum/dist/*.whl dist/
+COPY --from=build_image /project/avalon/blockchain_connector/common/dist/*.whl dist/
 COPY ./sdk/avalon_sdk/tcf_connector.toml /project/avalon/sdk/avalon_sdk/
-# methods.json has valid contract api names and their arguments
-COPY ./sdk/avalon_sdk/connector/blockchains/fabric/methods.json /project/avalon/sdk/avalon_sdk/connector/blockchains/fabric/
 
 # Installing wheel file requires python3-pip package.
 # python3-pip package will increase size of final docker image.
@@ -253,7 +243,8 @@ COPY ./sdk/avalon_sdk/connector/blockchains/fabric/methods.json /project/avalon/
 RUN apt-get update \
  && apt-get install -y -q python3-pip \
  && echo "Install Common Python, SDK & Blockchain_connector packages\n" \
- && pip3 install dist/*.whl coverage \
+ && pip3 install dist/*.whl \
+ && pip3 install pycryptodomex ecdsa \
  && echo "Remove unused packages from image\n" \
  && apt-get autoremove --purge -y -q python3-pip \
  && apt-get clean \

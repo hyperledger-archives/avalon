@@ -46,6 +46,8 @@ from avalon_sdk.connector.blockchains.ethereum.ethereum_worker_registry \
     import EthereumWorkerRegistryImpl
 from avalon_sdk.connector.blockchains.ethereum.ethereum_work_order \
     import EthereumWorkOrderProxyImpl
+from avalon_sdk.connector.blockchains.common.contract_response \
+    import ContractResponse
 
 
 # Remove duplicate loggers
@@ -504,15 +506,15 @@ def Main(args=None):
         id=jrpc_req_id
     )
     logger.info("Work order submit response : {}\n ".format(
-        json.dumps(response, indent=4)
-    ))
+        response)
+    )
 
     if blockchain is None:
         if "error" in response and response["error"]["code"] != \
                 WorkOrderStatus.PENDING:
             sys.exit(1)
     else:
-        if response != 0:
+        if response != ContractResponse.SUCCESS:
             sys.exit(1)
 
     # Create receipt

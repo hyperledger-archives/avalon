@@ -15,12 +15,12 @@
 version: '3.5'
 
 services:
-  avalon-blockchain-connector:
-    container_name: avalon-blockchain-connector-eth
-    image: avalon-blockchain-connector-eth-dev
+  avalon-ethereum-connector:
+    container_name: avalon-ethereum-connector
+    image: avalon-ethereum-connector-dev
     build:
       context: .
-      dockerfile: ./blockchain_connector/Dockerfile
+      dockerfile: blockchain_connector/docker/Dockerfile-ethereum
       args:
         - http_proxy
         - https_proxy
@@ -31,7 +31,7 @@ services:
       - no_proxy
     command: |
       bash -c "
-        avalon_blockchain_connector -b ethereum -u http://avalon-listener:1947
+        avalon_ethereum_connector -b ethereum -u http://avalon-listener:1947
         tail -f /dev/null
         "
     volumes:
