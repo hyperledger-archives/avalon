@@ -143,6 +143,24 @@ How to I resolve a build error for Avalon?
   or the
   `chat channel <https://chat.hyperledger.org/channel/avalon>`_
 
+How do I fix this error installing Avalon on Azure ACC with Intel SGX: "/dev/isgx": no such file or directory
+--------------------------------------------------------------------------------------------------------------------------------------
+Azure Confidential Computing (ACC) installs the ``/dev/sgx`` driver
+on their cloud instances with Intel SGX.
+Avalon uses ``/dev/isgx`` instead.
+So if you use Avalon with Intel SGX hardware mode enabled
+on ACC without ``/dev/isgx`` installed you get this error:
+
+   .. code:: none
+
+       ERROR: for avalon-sgx-enclave-manager  Cannot start service
+       avalon-sgx-enclave-manager: error gathering device information while
+       adding custom device "/dev/isgx": no such file or directory
+
+The fix is to remove ``/dev/sgx`` then install ``/dev/isgx``
+For instructions on how to do tis, see "Intel SGX in Hardware Mode" at
+https://github.com/hyperledger/avalon/blob/master/PREREQUISITES.md#sgx
+
 
 Software Development
 ====================
