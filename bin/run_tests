@@ -27,6 +27,7 @@ PATH=$PROJECT_DIR/bin:$PATH
 # Arguments to trigger the tests
 DIRECT_MODEL_TESTS=0
 PROXY_MODEL_TESTS=0
+DIRECT_MODEL_SGX_TESTS=0
 
 main() {
 
@@ -34,10 +35,12 @@ main() {
         run_docker_test ./ci/avalon-direct-model-tests.yaml
     elif [ "$PROXY_MODEL_TESTS" == "1" ]; then
         run_docker_test ./ci/avalon-proxy-model-tests.yaml
+    elif [ "$DIRECT_MODEL_SGX_TESTS" == "1" ]; then
+	run_docker_test ./ci/avalon-direct-model-sgx-tests.yaml
     fi
 }
 
-while getopts "dph" opt; do
+while getopts "dpsh" opt; do
     case $opt in
         d)
             DIRECT_MODEL_TESTS=1
@@ -45,10 +48,14 @@ while getopts "dph" opt; do
         p)
             PROXY_MODEL_TESTS=1
             ;;
+	s)
+            DIRECT_MODEL_SGX_TESTS=1
+            ;;
         h)
             echo "Usage: run_tests script to trigger tests for direct/proxy model"
             echo "    run_tests -d       To run direct model tests."
             echo "    run_tests -p       To run proxy model tests."
+            echo "    run_tests -s       To run direct model tests in SGX H/W mode."
             exit 0
             ;;
         \?)
