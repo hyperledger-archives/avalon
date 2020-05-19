@@ -19,6 +19,7 @@ services:
       - './besu/node1:/var/lib/besu'
     networks:
       local_net:
+        ipv4_address: '172.13.0.2'
 
   #
   # ethsigner1 is the signing wallet associated to node1, and provides an RPC endpoint for web3 APIs
@@ -38,6 +39,7 @@ services:
       - node1.avalon.local
     networks:
       local_net:
+        ipv4_address: '172.13.0.3'
 
   #
   # node2 is the second of the two-node ethereum private network based on Hyperledger Besu
@@ -58,6 +60,7 @@ services:
       - './besu/node2:/var/lib/besu'
     networks:
       local_net:
+        ipv4_address: '172.13.0.4'
 
   #
   # ethsigner2 is a 2nd signing wallet associated to node1, and provides an RPC endpoint for web3 APIs
@@ -77,9 +80,11 @@ services:
       - node2.avalon.local
     networks:
       local_net:
+        ipv4_address: '172.13.0.5'
 
 networks:
   local_net:
+    name: besu_local_net
     driver: bridge
     ipam:
       driver: default
