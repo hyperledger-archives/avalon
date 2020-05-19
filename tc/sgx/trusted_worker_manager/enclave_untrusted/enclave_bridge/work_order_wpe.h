@@ -13,15 +13,21 @@
  * limitations under the License.
  */
 
-enclave {
-    from "sgx_tstdc.edl" import *;
-    from "sgx_tsgxssl.edl" import *;
-    from "base.edl" import *;
-    from "signup.edl" import *;
-    from "signup_kme.edl" import *;
-    from "signup_wpe.edl" import *;
-    from "work_order.edl" import *;
-    from "work_order_wpe.edl" import *;
-    from "iohandler.edl" import *;
-};
+#pragma once
 
+
+#include <string>
+#include <stdlib.h>
+
+#include "work_order.h"
+
+class WorkOrderHandlerWPE : public WorkOrderHandlerBase {
+public:
+    tcf_err_t HandleWorkOrderRequest(
+        const Base64EncodedString& inSerializedRequest,
+        const std::string inWorkOrderExtData,
+        uint32_t& outResponseIdentifier,
+        size_t& outSerializedResponseSize,
+        int enclaveIndex);
+
+};  // WorkOrderHandlerWPE
