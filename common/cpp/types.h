@@ -27,16 +27,6 @@
 #include <vector>
 #include <list>
 
-/** Avalon worker enclave Type (singleton, KME, WPE) */
-enum EnclaveType {
-    // SINGLETON_ENCLAVE does both Key management and workload processing
-    SINGLETON_ENCLAVE = 1,
-    // KME_ENCLAVE is responsible for secure key management
-    KME_ENCLAVE = 2,
-    // WPE_ENCLAVE is responsible for workload management
-    WPE_ENCLAVE = 3
-};
-
 /** Vector type for binary unformatted data. */
 typedef std::vector<uint8_t> ByteArray;
 

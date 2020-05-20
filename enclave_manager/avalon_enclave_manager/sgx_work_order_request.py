@@ -24,9 +24,11 @@ logger = logging.getLogger(__name__)
 # -----------------------------------------------------------------
 class SgxWorkOrderRequest(object):
 
-    def __init__(self, enclave_service, work_order):
+    def __init__(self, enclave_service, work_order,
+                 enclave_type=enclave.SINGLETON_ENCLAVE):
         self.enclave_service = enclave_service
         self.work_order = work_order
+        self.enclave_type = enclave_type
 
     # Execute work order in Intel SGX worker enclave
     def execute(self):
@@ -34,8 +36,10 @@ class SgxWorkOrderRequest(object):
         encrypted_request = crypto.byte_array_to_base64(serialized_byte_array)
 
         try:
-            encoded_encrypted_response = \
-                enclave.HandleWorkOrderRequest(encrypted_request)
+            # Work order extended data is not used in Singleton,
+            # hence passing empty value
+            encoded_encrypted_response = enclave.HandleWorkOrderRequest(
+                encrypted_request, "", self.enclave_type)
             assert encoded_encrypted_response
         except Exception as err:
             logger.exception('workorder request invocation failed: %s',

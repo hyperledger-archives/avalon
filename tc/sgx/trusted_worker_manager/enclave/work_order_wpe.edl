@@ -1,4 +1,4 @@
-/* Copyright 2018 Intel Corporation
+/* Copyright 2020 Intel Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ enclave {
     trusted {
         // inSerializedRequest is a binary encoding of the encrypted request
         // outSerializedResponseSize is the computed size of the response
-        public tcf_err_t ecall_HandleWorkOrderRequest(
+        public tcf_err_t ecall_HandleWorkOrderRequestWPE(
             [in, size=inSerializedRequestSize] const uint8_t* inSerializedRequest,
             size_t inSerializedRequestSize,
             [in, size=inWorkOrderExtDataSize] const uint8_t* inWorkOrderExtData,
@@ -29,7 +29,7 @@ enclave {
 
         // outSerializedResponse is a base64 encoding of a JSON object
         // encrypted with the AES session key
-        public tcf_err_t ecall_GetSerializedResponse(
+        public tcf_err_t ecall_GetSerializedResponseWPE(
             [out, size = inSerializedResponseSize] uint8_t* outSerializedResponse,
             size_t inSerializedResponseSize
             );
@@ -39,3 +39,4 @@ enclave {
     };
 
 };
+

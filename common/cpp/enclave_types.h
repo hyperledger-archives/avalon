@@ -13,20 +13,13 @@
  * limitations under the License.
  */
 
-#pragma once
+/** Avalon worker enclave Type (singleton, KME, WPE) */
+enum EnclaveType {
+    /** SINGLETON_ENCLAVE does both Key management and workload processing */
+    SINGLETON_ENCLAVE = 1,
+    /** KME_ENCLAVE is responsible for secure key management */
+    KME_ENCLAVE = 2,
+    /** WPE_ENCLAVE is responsible for workload management */
+    WPE_ENCLAVE = 3
+};
 
-#include <string>
-#include <stdlib.h>
-
-#include "work_order.h"
-
-class WorkOrderHandlerKME : public WorkOrderHandlerBase {
-public:
-    tcf_err_t HandleWorkOrderRequest(
-        const Base64EncodedString& inSerializedRequest,
-        const std::string inWorkOrderExtData,
-        uint32_t& outResponseIdentifier,
-        size_t& outSerializedResponseSize,
-        int enclaveIndex);
-
-};  // WorkOrderHandlerKME

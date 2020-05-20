@@ -34,6 +34,9 @@ enclave_bridge_wrapper_path = os.path.join(tcf_root_dir,
 enclave_bridge_path = os.path.join(tcf_root_dir,
         'tc/sgx/trusted_worker_manager/enclave_untrusted/enclave_bridge')
 
+# Defaults to path '/opt/intel/sgxsdk' if SGX_SDK env variable is not passed
+sgx_sdk = os.environ.get('SGX_SDK', '/opt/intel/sgxsdk')
+
 ## -----------------------------------------------------------------
 ## Set up the enclave
 ## -----------------------------------------------------------------
@@ -56,8 +59,10 @@ include_dirs = [
     enclave_bridge_wrapper_path,
     enclave_bridge_path,
     os.path.join(tcf_root_dir, 'common/cpp'),
+    os.path.join(tcf_root_dir, 'tc/sgx/trusted_worker_manager/common'),
     os.path.join(tcf_root_dir, 'common/cpp/crypto'),
-    os.path.join(tcf_root_dir, 'common/cpp/packages/base64')
+    os.path.join(tcf_root_dir, 'common/cpp/packages/base64'),
+    os.path.join(sgx_sdk, 'include')
 ]
 
 library_dirs = [
@@ -82,7 +87,6 @@ enclave_module_files = [
     # move *_wpe.cpp to WPE enclave manager
     os.path.join(enclave_bridge_wrapper_path, 'signup_info_kme.cpp'),
     os.path.join(enclave_bridge_wrapper_path, 'signup_info_wpe.cpp'),
-    os.path.join(enclave_bridge_wrapper_path, 'work_order_wrap_kme.cpp'),
 ]
 
 enclave_module = Extension(
