@@ -20,14 +20,26 @@
 #include "tcf_error.h"
 #include "swig_utils.h"
 #include "types.h"
+#include "enclave_types.h"
 
-#include "work_order_singleton.h"
+#include "work_order.h"
 
 #include "base.h"
 #include "work_order_wrap.h"
 
+/*
+ * Handles json serialized work order requests and returns serialized
+ * work order response.
+ *
+ * @param serialized_request - JSON serialized work order request
+ * @param ext_wo_data - Extended work order data
+ * @param enclave_type - Type of Enclave.
+ * @ returns JSON serialized response
+*/
 std::string HandleWorkOrderRequest(
-    const std::string& serialized_request) {
+    const std::string& serialized_request,
+    const std::string& ext_wo_data,
+    EnclaveType enclave_type) {
     tcf_err_t presult;
 
     uint32_t response_identifier;
@@ -36,16 +48,17 @@ std::string HandleWorkOrderRequest(
     tcf::enclave_queue::ReadyEnclave readyEnclave = \
         tcf::enclave_api::base::GetReadyEnclave();
 
-    WorkOrderHandlerSingleton wo_handle;
+    WorkOrderHandler wo_handle(enclave_type);
     presult = wo_handle.HandleWorkOrderRequest(
         serialized_request,
+        ext_wo_data,
         response_identifier,
         response_size,
         readyEnclave.getIndex());
     ThrowTCFError(presult);
 
     Base64EncodedString response;
-    presult = WorkOrderHandlerBase::GetSerializedResponse(
+    presult = wo_handle.GetSerializedResponse(
         response_identifier,
         response_size,
         response,

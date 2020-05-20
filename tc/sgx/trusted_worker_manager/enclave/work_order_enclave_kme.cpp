@@ -53,8 +53,7 @@ tcf_err_t ecall_HandleWorkOrderRequestKME(const uint8_t* inSerializedRequest,
 
         tcf::WorkOrderProcessor wo_processor;
 
-        // Persist Extended work order data and size in
-        // WorkOrderProcessor instance
+        // Persist Extended work order data in WorkOrderProcessor instance
         if (inWorkOrderExtDataSize > 0) {
             wo_processor.ext_work_order_data = \
                 std::string((const char*) inWorkOrderExtData);
