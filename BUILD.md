@@ -120,21 +120,31 @@ The steps below will set up a Python virtual environment to run Avalon.
    `$TCF_HOME/config/singleton_enclave_config.toml` with the actual hexadecimal values
    (the IAS key may be either your Primary key or Secondary key):
 
-   ```bash
+   ```
    spid = '<spid obtained from portal>'
    ias_api_key = '<ias subscription key obtained from portal>'
    ```
 
-6. If you are behind a corporate proxy, then in file
+6. If you are not behind a corporate proxy (the usual case),
+   then skip this step and go to the next step.
+
+   If you are behind a corporate proxy, then in file
    `$TCF_HOME/config/tcs_config.toml` uncomment and update the
    `https_proxy` line:
 
-   ```bash
+   ```
    #https_proxy = "http://your-proxy:your-port/"
    ```
 
-   If you are not behind a corporate proxy (the usual case),
-   then leave this line commented out.
+   If you are behind a proxy and also using Intel SGX hardware
+   (`SGX_MODE=HW`), add the following to your `/etc/aesmd.conf` file
+   and update the `aesm proxy` line:
+
+   ```
+   proxy type = manual
+   aesm proxy = http://your-proxy:your-port/
+   ```
+
 
 7. Create a Python virtual environment:
 
