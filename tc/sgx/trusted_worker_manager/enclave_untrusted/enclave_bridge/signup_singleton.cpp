@@ -38,8 +38,9 @@ tcf_err_t SignupDataSingleton::CreateEnclaveData(
         // Get the enclave id for passing into the ecall
         sgx_enclave_id_t enclaveid = g_Enclave[0].GetEnclaveId();
 
+        // +1 for null character which is not included in std::string length()
         outPublicEnclaveData.resize(
-            SignupData::CalculatePublicEnclaveDataSize());
+            SignupData::CalculatePublicEnclaveDataSize() + 1);
         ByteArray sealed_enclave_data_buffer(
             SignupData::CalculateSealedEnclaveDataSize());
 

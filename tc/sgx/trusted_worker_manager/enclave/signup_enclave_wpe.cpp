@@ -120,6 +120,10 @@ tcf_err_t ecall_CreateSignupDataWPE(const sgx_target_info_t* inTargetInfo,
         sgx_status_t ret = sgx_create_report(
             inTargetInfo, &reportData, outEnclaveReport);
         tcf::error::ThrowSgxError(ret, "Failed to create enclave report");
+        // Give the caller a copy of the signing and encryption keys
+        strncpy_s(outPublicEnclaveData, inAllocatedPublicEnclaveDataSize,
+            enclaveData->get_public_data().c_str(),
+            enclaveData->get_public_data_size());
 
     } catch (tcf::error::Error& e) {
         SAFE_LOG(TCF_LOG_ERROR,

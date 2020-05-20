@@ -83,6 +83,7 @@ namespace std {
 #include "swig_utils.h"
 #include "signup_info.h"
 #include "signup_info_kme.h"
+#include "work_order_wrap_kme.h"
 %}
 
 %{

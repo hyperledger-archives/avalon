@@ -113,8 +113,7 @@ tcf_err_t ecall_CreateSignupData(const sgx_target_info_t* inTargetInfo,
         tcf::error::ThrowSgxError(ret, "Failed to seal signup data");
 
         // Give the caller a copy of the signing and encryption keys
-        // inAllocatedPublicEnclaveDataSize + 1 is to consider NULL character
-        strncpy_s(outPublicEnclaveData, inAllocatedPublicEnclaveDataSize+1,
+        strncpy_s(outPublicEnclaveData, inAllocatedPublicEnclaveDataSize,
             enclaveData->get_public_data().c_str(),
             enclaveData->get_public_data_size());
     } catch (tcf::error::Error& e) {

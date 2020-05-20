@@ -41,8 +41,9 @@ tcf_err_t SignupDataKME::CreateEnclaveData(
         // Get the enclave id for passing into the ecall
         sgx_enclave_id_t enclaveid = g_Enclave[0].GetEnclaveId();
 
+        // +1 for null character which is not included in std::string length()
         outPublicEnclaveData.resize(
-            SignupData::CalculatePublicEnclaveDataSize());
+            SignupData::CalculatePublicEnclaveDataSize() + 1);
         ByteArray sealed_enclave_data_buffer(
             SignupData::CalculateSealedEnclaveDataSize());
     
@@ -63,11 +64,12 @@ tcf_err_t SignupDataKME::CreateEnclaveData(
         // and call into the enclave to create the signup data
         sgx_report_t enclave_report = { 0 };
 
+        ByteArray ext_data = HexEncodedStringToByteArray(inExtData);
         sresult = g_Enclave[0].CallSgx(
             [enclaveid,
              &presult,
              target_info,
-             inExtData,
+             ext_data,
              inExtDataSignature,
              &outPublicEnclaveData,
              &sealed_enclave_data_buffer,
@@ -76,8 +78,8 @@ tcf_err_t SignupDataKME::CreateEnclaveData(
                     enclaveid,
                     &presult,
                     &target_info,
-                    (const uint8_t*) inExtData.c_str(),
-                    inExtData.length(),
+                    ext_data.data(),
+                    ext_data.size(),
                     (const uint8_t*) inExtDataSignature.c_str(),
                     inExtDataSignature.length(),
                     outPublicEnclaveData.data(),
