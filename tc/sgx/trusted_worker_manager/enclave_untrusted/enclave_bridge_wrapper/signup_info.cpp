@@ -34,7 +34,6 @@ tcf_err_t SignupInfo::DeserializeSignupInfo(
     try {
         const char* pvalue = nullptr;
 
-        // Parse the incoming wait certificate
         JsonValue parsed(json_parse_string(serialized_signup_info.c_str()));
         tcf::error::ThrowIfNull(parsed.value,
             "failed to parse serialized signup info; badly formed JSON");
@@ -105,7 +104,6 @@ tcf_err_t SignupInfo::DeserializePublicEnclaveData(
     try {
         const char* pvalue = nullptr;
 
-        // Parse the incoming wait certificate
         JsonValue parsed(json_parse_string(public_enclave_data.c_str()));
         tcf::error::ThrowIfNull(parsed.value,
             "failed to parse the public enclave data, badly formed JSON");
