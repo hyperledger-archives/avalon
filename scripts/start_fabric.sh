@@ -145,7 +145,8 @@ elif [ $START_FABRIC == 1 ]; then
     # If already fabric network up and running skip start again.
     if [[ ! $(docker ps --format '{{.Names}}' |grep "peer*") ]]; then
         # Start the fabric containers peers, orderers, cas
-        minifab up -i $FABRIC_VERSION
+	# "-e true" argument maps fabric container ports to host ports
+        minifab up -i $FABRIC_VERSION -e true
         # Create network profile file for avalon to use
         # profile file is generated in $WORK_DIR/vars/profiles/
         minifab profilegen

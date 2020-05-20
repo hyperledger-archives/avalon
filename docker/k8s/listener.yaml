@@ -26,7 +26,12 @@ metadata:
   name: avalon-listener
 spec:
   ports:
-  - port: 1947
+  - name: "1947"
+    port: 1947
     targetPort: 1947
+  - name: "5555"
+    protocol: TCP
+    port: 5555
+    targetPort: 5555
   selector:
     app: avalon-listener

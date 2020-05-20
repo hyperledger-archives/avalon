@@ -54,7 +54,7 @@ in SGX-SIM and SGX-HW mode.
     ```
 
     > The above command would run the 
-    > [propose_requests.sh](../../scripts/propose_requests.sh) as a Kubernetes job
+    > [propose_requests.sh](propose_requests.sh) as a Kubernetes job
 
 3. Check the request handling logs (the request should be done in several 
    minutes after the proposal)

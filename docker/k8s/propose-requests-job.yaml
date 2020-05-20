@@ -14,4 +14,4 @@ spec:
         image: avalon-shell-dev:latest
         imagePullPolicy: Never
         command: ["/bin/bash"]
-        args: ["/project/avalon/scripts/propose_requests.sh"]
+        args: ["/project/avalon/docker/k8s/propose_requests.sh"]
