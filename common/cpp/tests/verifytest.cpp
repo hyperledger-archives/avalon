@@ -33,7 +33,11 @@
 
 #include <string.h>
 #include <stdio.h>
+
+#include "crypto_shared.h" // Sets default CRYPTOLIB_* value
+#ifdef CRYPTOLIB_OPENSSL
 #include <openssl/evp.h>
+#endif
 #include "verify_signature.h"
 
 // Test X.509 certificate
@@ -113,6 +117,8 @@ static const char test_cert2[] =
     "-----END CERTIFICATE-----\n";
 
 static const char message[] = "Hyperledger Avalon";
+    // SHA256: db684a8d3e33ef2bc1f03dd1a2cdbf4329226335f090921f24ef3d0dfe713ad4
+
 static const char signature[] =
      // 512 byte, 4096 bit signature, b64 encoded in 684 bytes + NUL
     "AZzpz4BONyIclWHcOgm+GQ/dav5fyuXxl3vKXIZTXNLZX/dfVeGUQm5FBucrDLFy"
@@ -195,8 +201,10 @@ main(void)
     bool is_ok;
     int  count = 0;
 
+#ifdef CRYPTOLIB_OPENSSL
 #if OPENSSL_API_COMPAT < 0x10100000L
     OpenSSL_add_all_digests();
+#endif
 #endif
 
     printf("Verify RSA signature test . . . ");

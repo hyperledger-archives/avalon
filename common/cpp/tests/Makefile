@@ -104,8 +104,10 @@ build/signtest: build build/signtest.o \
 build/secrettest: build build/secrettest.o $(UTILTESTOBJS)
 	g++ -o $@ $@.o $(UTILTESTOBJS) $(LDFLAGS)
 
-build/verifytest: build build/verifytest.o build/verify_signature.o
-	g++ -o $@ $@.o build/verify_signature.o $(LDFLAGS)
+# $(UTILTESTOBJS) needed for Mbed TLS, not OpenSSL
+build/verifytest: build build/verifytest.o build/verify_signature.o \
+		$(UTILTESTOBJS)
+	g++ -o $@ $@.o build/verify_signature.o $(UTILTESTOBJS) $(LDFLAGS)
 
 build/utiltest: build build/utiltest.o $(UTILTESTOBJS)
 	g++ -o $@ $@.o $(UTILTESTOBJS) $(LDFLAGS)
