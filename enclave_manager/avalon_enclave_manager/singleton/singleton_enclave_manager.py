@@ -43,6 +43,7 @@ class SingletonEnclaveManager(EnclaveManager):
     def __init__(self, config):
 
         super().__init__(config)
+        self.proof_data_type = config.get("WorkerConfig")["ProofDataType"]
 
 # -------------------------------------------------------------------------
 
@@ -238,7 +239,7 @@ class SingletonEnclaveManager(EnclaveManager):
         wo_response = dict()
         try:
             wo_request = work_order_request.SgxWorkOrderRequest(
-                self.enclave_data,
+                self._config,
                 input_json_str)
             wo_response = wo_request.execute()
 

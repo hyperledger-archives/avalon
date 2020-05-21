@@ -75,6 +75,8 @@ class WorkOrderProcessorEnclaveInfo(BaseEnclaveInfo):
                 self.proof_data = enclave_data.proof_data
             self.enclave_keys = \
                 keys.EnclaveKeys(self.verifying_key, self.encryption_key)
+            # No sealed data is present for WPE
+            self.sealed_data = ""
         except AttributeError as attr:
             raise Exception("missing enclave initialization parameter; {}"
                             .format(str(attr)))
@@ -100,13 +102,14 @@ class WorkOrderProcessorEnclaveInfo(BaseEnclaveInfo):
         # Now, let the enclave create the signup data
 
         signup_cpp_obj = enclave.SignupInfoWPE()
-        signup_data = signup_cpp_obj.CreateEnclaveData(ex_data, None, None)
+        # @TODO : Passing in_ext_data_signature & in_kme_attestation as
+        # empty string "" as of now
+        signup_data = signup_cpp_obj.CreateEnclaveData(ex_data, "", "")
         if signup_data is None:
             return None
 
         signup_info = self._get_signup_info(
             signup_data, signup_cpp_obj, ias_nonce)
-
         # Now we can finally serialize the signup info and create a
         # corresponding signup info object.
         signup_info_obj = signup_cpp_obj.DeserializeSignupInfo(
