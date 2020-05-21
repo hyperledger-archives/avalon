@@ -34,8 +34,7 @@ find_python_packages() {
         | git check-ignore --stdin --non-matching --verbose \
         | grep ^:: \
         | sed -e 's/^::\s//' \
-        | grep -v /setup.py$ \
-        | grep -v /setup_tests.py$ \
+        | grep -v /setup.*py$ \
         | grep -v _pb2\.py$
 }
 

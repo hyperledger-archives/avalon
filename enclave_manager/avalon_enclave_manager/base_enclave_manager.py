@@ -55,7 +55,6 @@ class EnclaveManager(ABC):
         self.encryption_key_signature = signup_data.encryption_key_signature
         self.enclave_id = signup_data.enclave_id
         self.extended_measurements = measurements
-        self.proof_data_type = config.get("WorkerConfig")["ProofDataType"]
         self.proof_data = signup_data.proof_data
 
 # -------------------------------------------------------------------------

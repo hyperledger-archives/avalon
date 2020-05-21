@@ -38,17 +38,24 @@ ias_url = "https://api.trustedservices.intel.com/sgx/dev"
 ias_api_key = "112233445566778899aabbccddeeff00"
 
 # TEE enclave library to use.
-enclave_library = ""
-enclave_library_path = ""
+enclave_library = "libtcf-enclave.signed.so"
+enclave_library_path = "tc/sgx/trusted_worker_manager/enclave/build/lib/"
 
 num_of_enclaves = "1"
 # MRENCLAVE for WPE that will be allowed to register with this KME
-wpe_mrenclave = ""
+# @TODO : Instead of hardcoding, read from a file (not part of codebase but generated
+#        using tool) as below where MRENCLAVE is saved.
+# This file is generated during WPE Enclave build
+# wpe_mrenclave_read_from_file = wpe_mr_enclave.txt
+wpe_mrenclave = "CFF2E89D19A02886C653FD77B5D8314414D9C486155013CC0505671B894D053F"
+
+# The type of enclave viz - KME/WPE/SWE
+enclave_type = "KME"
 
 [KMEListener]
 # URL of KMEListener where a Work order processor can send requests meant for
 # the Key Management Enclave(KME).
-bind = "http://localhost:1948" 
+bind = "http://avalon-kme:1948"
 
 [KvStorage]
 # the remote version is of higher priority if enabled
@@ -67,6 +74,12 @@ WorkOrderSyncUri = ""
 WorkOrderAsyncUri = ""
 WorkOrderPullUri = ""
 WorkOrderNotifyUri = ""
+# Deployed address of Work order invocation smart contract used in proxy model
+WorkOrderInvocationAddress = ""
+# Work Order Receipt smart contract used in proxy model
+ReceiptInvocationAddress = ""
+# Ethereum Address used by the worker to submit transactions
+FromAddress = ""
 # Replace ApplicationTypeId and OrganizationId with real hexadecimal values
 ApplicationTypeId = "11aa22bb33cc44dd"
 OrganizationId = "aabbcc1234ddeeff"

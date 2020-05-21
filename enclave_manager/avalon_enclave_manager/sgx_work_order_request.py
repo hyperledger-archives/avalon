@@ -14,9 +14,9 @@
 import os
 import json
 import logging
+import importlib
 
 import avalon_crypto_utils.crypto.crypto as crypto
-import avalon_enclave_manager.singleton.singleton_enclave as enclave
 
 logger = logging.getLogger(__name__)
 
@@ -24,11 +24,25 @@ logger = logging.getLogger(__name__)
 # -----------------------------------------------------------------
 class SgxWorkOrderRequest(object):
 
-    def __init__(self, enclave_service, work_order,
-                 enclave_type=enclave.SINGLETON_ENCLAVE):
-        self.enclave_service = enclave_service
+    def __init__(self, config, work_order, ext_data=""):
+        enclave_type = config.get("enclave_type")
+        logger.info("Processing work order request for enclave_type : %s",
+                    enclave_type)
+        self.enclave = None
+        if enclave_type == "KME":
+            self.enclave = importlib.import_module(
+                "avalon_enclave_manager.kme.kme_enclave")
+            self.enclave_type = self.enclave.KME_ENCLAVE
+        elif enclave_type == "WPE":
+            self.enclave = importlib.import_module(
+                "avalon_enclave_manager.wpe.wpe_enclave")
+            self.enclave_type = self.enclave.WPE_ENCLAVE
+        else:
+            self.enclave = importlib.import_module(
+                "avalon_enclave_manager.singleton.singleton_enclave")
+            self.enclave_type = self.enclave.SINGLETON_ENCLAVE
         self.work_order = work_order
-        self.enclave_type = enclave_type
+        self.ext_data = ext_data
 
     # Execute work order in Intel SGX worker enclave
     def execute(self):
@@ -36,10 +50,8 @@ class SgxWorkOrderRequest(object):
         encrypted_request = crypto.byte_array_to_base64(serialized_byte_array)
 
         try:
-            # Work order extended data is not used in Singleton,
-            # hence passing empty value
-            encoded_encrypted_response = enclave.HandleWorkOrderRequest(
-                encrypted_request, "", self.enclave_type)
+            encoded_encrypted_response = self.enclave.HandleWorkOrderRequest(
+                encrypted_request, self.ext_data, self.enclave_type)
             assert encoded_encrypted_response
         except Exception as err:
             logger.exception('workorder request invocation failed: %s',

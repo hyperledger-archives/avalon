@@ -112,8 +112,10 @@ class KeyManagementEnclaveInfo(BaseEnclaveInfo):
         # Now, let the enclave create the signup data
 
         signup_cpp_obj = enclave.SignupInfoKME()
+
+        # @TODO : Passing in_ext_data_signature as empty string "" as of now
         signup_data = signup_cpp_obj.CreateEnclaveData(
-            config["wpe_mrenclave"], None)
+            config['wpe_mrenclave'], "")
         if signup_data is None:
             return None
 

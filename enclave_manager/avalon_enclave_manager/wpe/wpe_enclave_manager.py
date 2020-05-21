@@ -25,12 +25,12 @@ import hashlib
 import zmq
 
 import avalon_enclave_manager.sgx_work_order_request as work_order_request
-import avalon_enclave_manager.avalon_enclave_info as enclave_info
+import avalon_enclave_manager.wpe.wpe_enclave_info as enclave_info
 import avalon_crypto_utils.crypto_utility as crypto_utils
 from avalon_enclave_manager.base_enclave_manager import EnclaveManager
 from avalon_enclave_manager.worker_kv_delegate import WorkerKVDelegate
 from avalon_enclave_manager.work_order_kv_delegate import WorkOrderKVDelegate
-from avalon_enclave_manager.wpe_requester import WPERequester
+from avalon_enclave_manager.wpe.wpe_requester import WPERequester
 from error_code.error_status import ReceiptCreateStatus, WorkOrderStatus
 
 logger = logging.getLogger(__name__)
@@ -57,7 +57,7 @@ class WorkOrderProcessorEnclaveManager(EnclaveManager):
                           enclave
         """
         # Instantiate enclaveinfo & initialize enclave in the process
-        signup_data = enclave_info.WorkOrderProcessingEnclaveInfo(
+        signup_data = enclave_info.WorkOrderProcessorEnclaveInfo(
             self._config.get("EnclaveModule"))
         self._wpe_requester = WPERequester(self._config)
 
@@ -246,7 +246,7 @@ class WorkOrderProcessorEnclaveManager(EnclaveManager):
             # @TODO : Make use of key info obtained as part of preprocessing
             #         work order. Pass on the key_info as inWorkorderExData.
             wo_request = work_order_request.SgxWorkOrderRequest(
-                self.enclave_data,
+                self._config.get("EnclaveModule"),
                 input_json_str)
             wo_response = wo_request.execute()
 
