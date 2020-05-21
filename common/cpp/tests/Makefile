@@ -28,27 +28,10 @@ ifdef CRYPTOLIB_MBEDTLS
 endif
 endif
 
+PROGS= build build/b64test build/certtest build/secrettest \
+	build/signtest build/verifytest build/pktest build/utiltest
 UTILTESTOBJS= build/crypto_utils.o build/crypto_utils_encrypt.o \
-		build/skenc.o build/types.o \
-		build/hex_string.o build/utils.o build/base64.o
-
-# First matching pattern build rule found is used
-build/%: build/%.o
-	g++ -o $@ $^ $(LDFLAGS)
-
-build/%.o: %.cpp
-	g++ -o $@ $(CPPFLAGS) -c $^
-
-build/%.o: ../%.cpp
-	g++ -o $@ $(CPPFLAGS) -c $^
-
-build/%.o: ../packages/base64/%.cpp
-	g++ -o $@ $(CPPFLAGS) -c $^
-
-# Library-specific source has precedence over generic source in ../crypto/
-
-UTILTESTOBJS= build/crypto_utils.o build/crypto_utils_encrypt.o \
-		build/skenc.o build/types.o \
+		build/skenc_common.o build/skenc.o build/types.o \
 		build/hex_string.o build/utils.o build/base64.o
 
 # First matching pattern build rule found is used
@@ -79,8 +62,7 @@ build/%.o: ../crypto/%.cpp
 	g++ -o $@ $(CPPFLAGS) -c $^
 
 
-all: build build/b64test build/certtest build/secrettest \
-	build/signtest build/verifytest build/pktest build/utiltest
+all: $(PROGS)
 
 build:
 	mkdir -p $@
@@ -122,6 +104,7 @@ test:
 	cd build; ./utiltest
 
 clean:
+	$(RM) -rf $(PROGS) *.o
 	$(RM) -rf build
 
 .PHONY: all test clean

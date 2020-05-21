@@ -41,8 +41,8 @@ namespace crypto {
     /** Authenticated encryption. */
     namespace skenc {
         /**
-         * ByteArray here is used to encapsulate raw binary data and does not
-         * apply/assume any encoding.
+         * ByteArray here is used to encapsulate raw binary data and
+         * does not apply or assume any encoding.
          * Throws RuntimeError.
          */
         ByteArray GenerateKey();
@@ -65,6 +65,13 @@ namespace crypto {
         ByteArray DecryptMessage(
             const ByteArray& key, const ByteArray& iv,
             const ByteArray& message);
+        /**
+         * Throws RuntimeError, ValueError,
+         * CryptoError (message authentication failure).
+         */
+        ByteArray DecryptMessage(
+            const ByteArray& key, const char iv[constants::IV_LEN],
+            const char *message, size_t message_len);
         /**
          * Throws RuntimeError, ValueError,
          * CryptoError (message authentication failure).
