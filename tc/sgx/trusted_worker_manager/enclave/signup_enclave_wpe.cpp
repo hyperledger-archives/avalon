@@ -56,7 +56,9 @@ tcf_err_t ecall_GenerateNonce(uint8_t* out_nonce, size_t in_nonce_size) {
         EnclaveData* enclaveData = EnclaveData::getInstance();
         std::string nonce_hex = ByteArrayToHexEncodedString(nonce_bytes);
         enclaveData->set_nonce(nonce_hex);
-        out_nonce = (uint8_t*) nonce_hex.c_str();
+
+        strncpy_s((char*)out_nonce, in_nonce_size,
+            nonce_hex.c_str(), nonce_hex.length());
     } catch (tcf::error::ValueError& e) {
         Log(TCF_LOG_ERROR, "error::RandomNonce - %d - %s",
             e.error_code(), e.what());
