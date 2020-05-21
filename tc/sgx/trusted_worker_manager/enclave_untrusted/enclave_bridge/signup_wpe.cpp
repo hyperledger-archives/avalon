@@ -39,7 +39,8 @@ tcf_err_t SignupDataWPE::GenerateNonce(
         sgx_enclave_id_t enclaveid = g_Enclave[0].GetEnclaveId();
 
         ByteArray nonce = {};
-        nonce.resize(in_nonce_size);
+        // +1 for null character for std::string
+        nonce.resize(in_nonce_size + 1);
 
         // Create nonce and convert to hex
         sresult = g_Enclave[0].CallSgx(
