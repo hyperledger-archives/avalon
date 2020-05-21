@@ -35,10 +35,13 @@
  */
 
 #include <stdio.h>
-#include "verify_certificate.h"
+
+#include "crypto_shared.h" // Sets default CRYPTOLIB_* value
 #ifdef CRYPTOLIB_OPENSSL
 #include <openssl/evp.h>
 #endif
+#include "verify_certificate.h"
+
 
 // Test X.509 certificates
 // To dump, type: openssl x509 -noout -text <mycertfilename.pem

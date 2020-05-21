@@ -25,7 +25,11 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+
+#include "crypto_shared.h" // Sets default CRYPTOLIB_* value
+#ifdef CRYPTOLIB_OPENSSL
 #include <openssl/evp.h> // EVP_DecodeBlock()
+#endif
 #include "types.h"       // ByteArray
 #include "utils.h"       // ByteArrayToStr()
 #include "base64.h"      // base64_*code()
@@ -103,6 +107,7 @@ main(void)
     std::string out_str;
 
     for (b64_test_type *tp = b64_test_cases; tp->encoded != nullptr; ++tp) {
+#ifdef CRYPTOLIB_OPENSSL
         // Test OpenSSL decode
         memset(buffer, 0, sizeof (buffer));
         rc = EVP_DecodeBlock((unsigned char *)buffer,
@@ -124,6 +129,7 @@ main(void)
                     strlen(tp->encoded), rc);
             }
         }
+#endif
 
         // Test Avalon C++ decode
         v = base64_decode(std::string(tp->encoded));
@@ -165,6 +171,7 @@ main(void)
     // Negative tests
     for (b64_test_type *ntp = negative_test_cases; ntp->encoded != nullptr;
             ++ntp) {
+#ifdef CRYPTOLIB_OPENSSL
         // Test OpenSSL decode
         rc = EVP_DecodeBlock((unsigned char *)buffer,
             (unsigned char *)ntp->encoded, strlen(ntp->encoded));
@@ -174,6 +181,7 @@ main(void)
             printf("Negative test EVP_DecodeBlock(%s) FAILED\n", ntp->encoded);
             ++count;
         }
+#endif
 
         // Test Avalon C++ decode
         v = base64_decode(std::string(ntp->encoded));

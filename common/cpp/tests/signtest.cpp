@@ -24,15 +24,21 @@
 
 #include <string.h>
 #include <stdio.h>
+
+#include "crypto_shared.h" // Sets default CRYPTOLIB_* value
+
+#ifdef CRYPTOLIB_OPENSSL
 #include <openssl/evp.h>
 #if OPENSSL_API_COMPAT < 0x10100000L
 #include <openssl/bn.h>
+#endif
 #endif
 
 #include "error.h"       // tcf::error
 #include "sig_private_key.h"
 #include "sig_public_key.h"
 
+#ifdef CRYPTOLIB_OPENSSL
 #if OPENSSL_API_COMPAT < 0x10100000L
 // For backwards compatibility with older versions of OpenSSL.
 // Needed for sig_private_key.cpp.
@@ -62,6 +68,7 @@ int ECDSA_SIG_set0(ECDSA_SIG *sig, BIGNUM *r, BIGNUM *s) {
     sig->s = s;
     return 1;
 }
+#endif
 #endif
 
 int

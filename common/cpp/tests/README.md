@@ -1,7 +1,7 @@
-<!---
+<!--
 Licensed under Creative Commons Attribution 4.0 International License
 https://creativecommons.org/licenses/by/4.0/
---->
+-->
 
 Unit Tests
 ----------
@@ -31,13 +31,13 @@ To remove generated binaries type `make clean` .
 
 Example
 -------
-```                                                           
+```
  $ make
 mkdir -p build
 g++ -o build/b64test.o -D_UNTRUSTED_ -I..  -I../crypto -I../packages/base64 -c b64test.cpp
 . . .
 g++ -o build/utiltest build/utiltest.o build/crypto_utils.o build/skenc.o build/types.o build/hex_string.o build/utils.o build/base64.o -lcrypto
-$ make test 
+$ make test
 cd build; ./b64test
 /home/dano/git/avalon/common/cpp/tests/build
 EVP_DecodeBlock PASSED: SHlwZXJsZWRnZXIgQXZhbG9u --> Hyperledger Avalon
@@ -52,4 +52,4 @@ PASSED: EncryptData()/DecryptData()
 Crypto utility tests PASSED
 $ make clean
 rm -f -rf build
-```  
+```
