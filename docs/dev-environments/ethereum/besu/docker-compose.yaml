@@ -58,6 +58,8 @@ services:
       - 23002:8546
     volumes:
       - './besu/node2:/var/lib/besu'
+    depends_on:
+      - node1.avalon.local
     networks:
       local_net:
         ipv4_address: '172.13.0.4'
