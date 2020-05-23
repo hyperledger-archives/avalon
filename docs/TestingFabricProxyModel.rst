@@ -57,7 +57,7 @@ To run Fabric with Hyperledger Avalon, follow these steps:
 
    .. code:: sh
 
-       docker-compose -f docker-compose-fabric.yaml up --build
+       docker-compose -f docker-compose.yaml -f docker-compose-fabric.yaml up --build
 
    Once the Fabric containers are up and running we can start and stop Avalon
    containers any number of times without restarting the Fabric containers.
