@@ -251,7 +251,8 @@ class WorkOrderProcessorEnclaveManager(EnclaveManager):
             #         work order. Pass on the key_info as inWorkorderExData.
             wo_request = work_order_request.SgxWorkOrderRequest(
                 self._config.get("EnclaveModule"),
-                input_json_str)
+                input_json_str,
+                wo_key_info)
             wo_response = wo_request.execute()
 
             try:
