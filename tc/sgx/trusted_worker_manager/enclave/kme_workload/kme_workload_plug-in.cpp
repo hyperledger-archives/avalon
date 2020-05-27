@@ -13,9 +13,15 @@
 * limitations under the License.
 */
 
-
-#include <map>
 #include "kme_workload_plug-in.h"
+#include "enclave_data.h"
+#include "error.h"
+#include "parson.h"
+#include "jsonvalue.h"
+#include "utils.h"
+#include "signup_enclave_util.h"
+
+using namespace tcf::error;
 
 REGISTER_WORKLOAD_PROCESSOR("kme",KEY_MANAGEMENT_ENCLAVE,KMEWorkloadProcessor);
 
@@ -27,11 +33,20 @@ REGISTER_WORKLOAD_PROCESSOR("kme",KEY_MANAGEMENT_ENCLAVE,KMEWorkloadProcessor);
  *  @param out_work_order_data - vector of work order outdata
  *  @param ext_wo_info_kme - Instance of KMEs extended work order implementation
 */
+
+WPEInfo::WPEInfo() {
+    workorder_count = 0;
+    signing_key = {};
+}
+
+WPEInfo::WPEInfo(const ByteArray& _sk) {
+    workorder_count = 0;
+    signing_key = _sk;
+}
+
 void KMEWorkloadProcessor::GetUniqueId(
     const std::vector<tcf::WorkOrderData>& in_work_order_data,
-    std::vector<tcf::WorkOrderData>& out_work_order_data,
-    ExtWorkOrderInfoKME* ext_wo_info_kme) {
-
+    std::vector<tcf::WorkOrderData>& out_work_order_data) {
     ByteArray signing_key = {};
     ByteArray verification_key_hex = {};
     ByteArray verification_key_signature_hex = {};
@@ -41,12 +56,20 @@ void KMEWorkloadProcessor::GetUniqueId(
         ExtWorkOrderInfo::KeyType_SECP256K1, nonce_hex, signing_key,
         verification_key_hex, verification_key_signature_hex);
 
-    SetStatus(err, out_work_order_data);
+    this->SetStatus(err, out_work_order_data);
 
     if (!err) {
-        sig_key_map[verification_key_hex] = signing_key;
-        AddOutput(1, verification_key_hex, out_work_order_data);
-        AddOutput(2, verification_key_signature_hex, out_work_order_data);
+        /* Compute hash of verification key and use it as key.
+        WPE attestation report contains hash value of this key
+        and same report is verified during registration. */
+        std::string v_key_str = ByteArrayToString(verification_key_hex);
+        uint8_t v_key_hash[SGX_HASH_SIZE] = {0};
+        ComputeSHA256Hash(v_key_str, v_key_hash);
+        ByteArray v_key_bytes(std::begin(v_key_hash), std::end(v_key_hash));
+        this->sig_key_map[v_key_bytes] = signing_key;
+        this->AddOutput(1, verification_key_hex, out_work_order_data);
+        this->AddOutput(2, verification_key_signature_hex,
+            out_work_order_data);
     }
 }  // KMEWorkloadProcessor::GetUniqueId
 
@@ -59,10 +82,91 @@ void KMEWorkloadProcessor::GetUniqueId(
 */
 void KMEWorkloadProcessor::Register(
     const std::vector<tcf::WorkOrderData>& in_work_order_data,
-    std::vector<tcf::WorkOrderData>& out_work_order_data,
-    ExtWorkOrderInfoKME* ext_wo_info_kme) {
+    std::vector<tcf::WorkOrderData>& out_work_order_data) {
+    // If in_work_order_data is empty
+    if (in_work_order_data.size() == 0) {
+        this->SetStatus((int)ERR_WPE_REG_FAILED,
+            out_work_order_data);
+        ThrowIf<ValueError>(true, "Registration request is empty");
+    }
+    /* Registration request is serialized json string
+      {
+       "attestation_data": <attestation_report>
+      }
+    */
+    ByteArray reg_request = in_work_order_data[0].decrypted_data;
 
-    // To be implemented
+    std::string reg_data_string = ByteArrayToString(reg_request);
+    /// Parse the registration request
+    JsonValue reg_data_string_parsed(json_parse_string(
+        reg_data_string.c_str()));
+    if (reg_data_string_parsed.value == nullptr) {
+        this->SetStatus((int)ERR_WPE_REG_FAILED,
+            out_work_order_data);
+        ThrowIf<ValueError>(true,
+            "Failed to parse the WPE registration request");
+    }
+    JSON_Object* reg_data_json_object = \
+        json_value_get_object(reg_data_string_parsed);
+    if (reg_data_json_object == nullptr) {
+        this->SetStatus((int)ERR_WPE_REG_FAILED,
+            out_work_order_data);
+        ThrowIf<ValueError>(true,
+            "Invalid registration request, expecting valid json object");
+    }
+
+    const char* s_value = nullptr;
+    
+    s_value = json_object_dotget_string(
+        reg_data_json_object, "attestation_data");
+    if (s_value == nullptr) {
+        this->SetStatus((int)ERR_WPE_REG_FAILED,
+            out_work_order_data);
+        ThrowIf<ValueError>(true, "Invalid attestation data");
+    }
+
+    std::string attestation_data_str(s_value);
+    ByteArray attestation_data(attestation_data_str.begin(),
+        attestation_data_str.end());
+
+    ByteArray e_key = {};
+    ByteArray verification_key_hash = {};
+    ByteArray mr_enclave = {};
+    ByteArray mr_signer = {};
+    int err = this->ext_wo_info_kme->VerifyAttestation(
+        attestation_data, mr_enclave, mr_signer,
+        verification_key_hash, e_key);
+    if (err != 0) {
+        this->SetStatus(err, out_work_order_data);
+        ThrowIf<ValueError>(true, "WPE attestation verification failed");
+    }
+    auto search = this->sig_key_map.find(verification_key_hash);
+    if (search != this->sig_key_map.end()) {
+        /// Compare MRENCLAVE value
+        EnclaveData* enclaveData = EnclaveData::getInstance();
+        std::string ext_data(enclaveData->get_extended_data());
+        std::string mr_enclave_str = ByteArrayToString(mr_enclave);
+        if (ext_data.compare(mr_enclave_str) != 0) {
+            this->SetStatus((int)ERR_MRENCLAVE_NOT_MATCH,
+                out_work_order_data);
+            ThrowIf<ValueError>(true, "WPE MRENCLAVE value didn't match");
+        }
+        // TODO: MRSIGNER value check
+
+        /// Add the WPE to the sig_key_map
+        this->wpe_enc_key_map[e_key] = WPEInfo(
+            this->sig_key_map[verification_key_hash]);
+
+        /// Remove the entry to avoid replace attack
+        this->sig_key_map.erase(verification_key_hash);
+    }
+    else {
+        this->SetStatus((int)ERR_WPE_NOT_FOUND,
+            out_work_order_data);
+        ThrowIf<ValueError>(true, "WPE verification key not found");
+    }
+    this->SetStatus((int)ERR_WPE_REG_SUCCESS,
+        out_work_order_data);
 }  // KMEWorkloadProcessor::Register
 
 
@@ -76,8 +180,7 @@ void KMEWorkloadProcessor::Register(
 */
 void KMEWorkloadProcessor::PreprocessWorkorder(
     const std::vector<tcf::WorkOrderData>& in_work_order_data,
-    std::vector<tcf::WorkOrderData>& out_work_order_data,
-    ExtWorkOrderInfoKME* ext_wo_info_kme) {
+    std::vector<tcf::WorkOrderData>& out_work_order_data) {
 
     // To be implemented
 }  // KMEWorkloadProcessor::PreprocessWorkorder
@@ -109,7 +212,7 @@ void KMEWorkloadProcessor::AddOutput(int index, ByteArray& data,
  *  @param result - Result of workload execution
  *  @param out_work_order_data - vector of work order outdata
 */
-void KMEWorkloadProcessor::SetStatus(int result,
+void KMEWorkloadProcessor::SetStatus(const int result,
     std::vector<tcf::WorkOrderData>& out_work_order_data) {
 
     std::string result_str = std::to_string(result);
@@ -141,14 +244,11 @@ void KMEWorkloadProcessor::ProcessWorkOrder(
     const std::vector<tcf::WorkOrderData>& in_work_order_data,
     std::vector<tcf::WorkOrderData>& out_work_order_data) {
 
-    ExtWorkOrderInfoKME* ext_wo_info_kme = \
-        (ExtWorkOrderInfoKME*) ext_work_order_info;
-
     if (workload_id == "kme-uid") {
-        GetUniqueId(in_work_order_data, out_work_order_data, ext_wo_info_kme);
+        GetUniqueId(in_work_order_data, out_work_order_data);
     } else if (workload_id == "kme-reg") {
-        Register(in_work_order_data, out_work_order_data, ext_wo_info_kme);
+        Register(in_work_order_data, out_work_order_data);
     } else {
-        PreprocessWorkorder(in_work_order_data, out_work_order_data, ext_wo_info_kme);
+        PreprocessWorkorder(in_work_order_data, out_work_order_data);
     }
 }  // KMEWorkloadProcessor::ProcessWorkOrder

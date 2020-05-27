@@ -22,28 +22,27 @@
 #include "workload_processor.h"
 #include "ext_work_order_info_kme.h"
 
-#define KME_WO_COUNT_UNLIMITTED   0
-#define KME_MAX_WO_COUNT          KME_WO_COUNT_UNLIMITTED
+#define KME_WO_COUNT_UNLIMITED   0
+#define KME_MAX_WO_COUNT          KME_WO_COUNT_UNLIMITED
 
-
-class KMEWorkloadProcessor: public WorkloadProcessor {
-
-public:
-    // contains registered WPE info
-    struct WPEInfo {
+// contains registered WPE info
+    typedef struct WPEInfo {
         // number of preprocessed workorders for this WPE
         uint64_t workorder_count;
         // private signing key associated with this WPE
         ByteArray signing_key;
 
-        WPEInfo(ByteArray& _sk) {
-            workorder_count = 0;
-            signing_key = _sk;
-        }
-    };
+        WPEInfo();
+        WPEInfo(const ByteArray& _sk);
+    }WPEInfo;
+
+class KMEWorkloadProcessor: public WorkloadProcessor {
+
+public:
 
     KMEWorkloadProcessor(uint64_t max_wo_count = KME_MAX_WO_COUNT) {
        max_wo_count_ = max_wo_count;
+       ext_wo_info_kme = new ExtWorkOrderInfoKME();
     }
 
     virtual ~KMEWorkloadProcessor(void) {}
@@ -52,18 +51,15 @@ public:
 
     void GetUniqueId(
         const std::vector<tcf::WorkOrderData>& in_work_order_data,
-        std::vector<tcf::WorkOrderData>& out_work_order_data,
-        ExtWorkOrderInfoKME* ext_wo_info_kme);
+        std::vector<tcf::WorkOrderData>& out_work_order_data);
 
     void Register(
         const std::vector<tcf::WorkOrderData>& in_work_order_data,
-        std::vector<tcf::WorkOrderData>& out_work_order_data,
-        ExtWorkOrderInfoKME* ext_wo_info_kme);
+        std::vector<tcf::WorkOrderData>& out_work_order_data);
 
     void PreprocessWorkorder(
         const std::vector<tcf::WorkOrderData>& in_work_order_data,
-        std::vector<tcf::WorkOrderData>& out_work_order_data,
-        ExtWorkOrderInfoKME* ext_wo_info_kme);
+        std::vector<tcf::WorkOrderData>& out_work_order_data);
 
     void ProcessWorkOrder(
         std::string workload_id,
@@ -77,9 +73,10 @@ private:
     static void AddOutput(int index, ByteArray& data,
         std::vector<tcf::WorkOrderData>& out_work_order_data);
 
-    static void SetStatus(int result,
+    static void SetStatus(const int result,
         std::vector<tcf::WorkOrderData>& out_work_order_data);
 
+    ExtWorkOrderInfoKME* ext_wo_info_kme;
     std::map<ByteArray, ByteArray> sig_key_map;
     std::map<ByteArray, WPEInfo> wpe_enc_key_map;
 
