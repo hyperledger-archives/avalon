@@ -94,7 +94,7 @@ To run Ganache with Hyperledger Avalon, follow these steps:
    .. code:: sh
 
        cd $TCF_HOME
-       docker-compose -f docker-compose-eth-ganache.yaml up -d --build
+       docker-compose -f docker-compose.yaml -f docker-compose-eth-ganache.yaml up -d --build
 
 6. Go to the ``avalon-shell`` container to run ``eth_generic_client.py``:
 

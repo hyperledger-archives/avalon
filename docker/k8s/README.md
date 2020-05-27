@@ -17,7 +17,7 @@ in SGX-SIM and SGX-HW mode.
 - To enable Intel SGX HW mode, follow the instructions in
   [PREREQUISITES.md](../../PREREQUISITES.md#intel-sgx-in-hardware-mode)
 - To use Intel SGX HW mode, build docker image using below command
-  `docker-compose -f docker-compose-sgx.yaml build`
+  `docker-compose -f docker-compose.yaml -f docker-compose-sgx.yaml build`
 
 ## Running Avalon with Kubernetes
 

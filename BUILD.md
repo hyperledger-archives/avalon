@@ -59,12 +59,12 @@ Follow the instructions below to execute a Docker-based build and execution.
    1. Refer to Intel SGX in Hardware-mode section in
       [PREREQUISITES document](PREREQUISITES.md) to install Intel SGX
       pre-requisites and to configure IAS keys.
-   2. Run `sudo docker-compose -f docker-compose-sgx.yaml up --build`
+   2. Run `sudo docker-compose -f docker-compose.yaml -f docker-compose-sgx.yaml up --build`
    3. For subsequent runs on the same workspace, if you changed a
       source or configuration file, run the above command again
    4. For subsequent runs on the same workspace, if you did not make any
       changes, startup and build time can be reduced by running:
-      `MAKECLEAN=0 sudo -E docker-compose -f docker-compose-sgx.yaml up`
+      `MAKECLEAN=0 sudo -E docker-compose -f docker-compose.yaml -f docker-compose-sgx.yaml up`
 3. On a successful run, you should see the message `BUILD SUCCESS`
    followed by a repetitive message `Enclave manager sleeping for 10 secs`
 4. Open a Docker container shell using following command
