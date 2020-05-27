@@ -19,9 +19,17 @@ if("${SGX_SDK} " STREQUAL " ")
     SET(SGX_SDK "/opt/intel/sgxsdk")
 endif()
 
+SET(SGX_SSL "$ENV{SGX_SSL}")
+if("${SGX_SSL} " STREQUAL " ")
+    SET(SGX_SSL "/opt/intel/sgxssl")
+    message(STATUS "Setting default SGX_SSL=${SGX_SSL}")
+endif()
+
+SET(SGX_SSL_INCLUDE "${SGX_SSL}/include")
+
 SET(TCF_TOP_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../../../../")
 
-# Generates static libary for Key Management Enclave workload
+# Generates static library for Key Management Enclave workload
 ################################################################################
 
 FILE(GLOB PROJECT_HEADERS "*.h")
@@ -29,8 +37,11 @@ FILE(GLOB PROJECT_SOURCES "*.cpp")
 
 SET(GENERIC_CXX_FLAGS ${DEBUG_FLAGS} "-Wall" "-fPIC" "-Wno-write-strings" "-std=c++11")
 SET(GENERIC_PRIVATE_INCLUDE_DIRS "." "${TCF_TOP_DIR}/common/cpp"
-    "${TCF_TOP_DIR}/common/sgx_workload/workload")
-SET(GENERIC_PUBLIC_INCLUDE_DIRS "${SGX_SDK}/include")
+    "${TCF_TOP_DIR}/common/cpp/crypto"
+    "${TCF_TOP_DIR}/common/cpp/packages/parson"
+    "${TCF_TOP_DIR}/common/sgx_workload/workload"
+    "${TCF_TOP_DIR}/tc/sgx/trusted_worker_manager/enclave")
+SET(GENERIC_PUBLIC_INCLUDE_DIRS "${SGX_SDK}/include" "${SGX_SSL_INCLUDE}")
 
 SET(KME_WORKLOAD_STATIC_NAME kme_workload)
 PROJECT(${KME_WORKLOAD_STATIC_NAME} CXX)

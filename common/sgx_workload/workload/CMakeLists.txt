@@ -26,6 +26,8 @@ SOURCE_GROUP("Source" FILES ${PROJECT_HEADERS} ${PROJECT_SOURCES})
 
 SET(GENERIC_PRIVATE_INCLUDE_DIRS "." "${TCF_TOP_DIR}/common/cpp"
     "${TCF_TOP_DIR}/common/cpp/crypto"
+    "${TCF_TOP_DIR}/common/cpp/verify_ias_report"
+    "${TCF_TOP_DIR}/common/cpp/packages/parson"
     "${TCF_TOP_DIR}/tc/sgx/trusted_worker_manager/enclave")
 SET(GENERIC_CXX_FLAGS ${DEBUG_FLAGS} "-Wall" "-fPIC" "-Wno-write-strings" "-std=c++11")
 

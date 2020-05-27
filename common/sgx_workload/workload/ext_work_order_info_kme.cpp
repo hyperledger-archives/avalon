@@ -18,6 +18,9 @@
 #include "types.h"
 #include"error.h"
 
+#include "jsonvalue.h"
+#include "parson.h"
+
 #include "enclave_utils.h"
 #include "ext_work_order_info_kme.h"
 
@@ -69,15 +72,6 @@ int ExtWorkOrderInfoKME::GenerateSigningKey(
 
     return result;
 }  // ExtWorkOrderInfoKME::GenerateSigningKey
-
-int ExtWorkOrderInfoKME::VerifyAttestaionWpe(
-    const ByteArray& attestation_data, const ByteArray& hex_id,
-    ByteArray& mrenclave, ByteArray& mrsigner,
-    ByteArray& encryption_public_key, ByteArray& verification_key_hex) {
-
-    // To be implemented
-    return 0;
-}  // ExtWorkOrderInfoKME::VerifyAttestaionWpe
 
 int ExtWorkOrderInfoKME::CreateWorkorderKeyInfo(const ByteArray& wpe_key,
     const ByteArray& kme_skey, ByteArray& json_key_data) {

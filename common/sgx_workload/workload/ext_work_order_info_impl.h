@@ -21,6 +21,11 @@
 #include "types.h"
 #include "ext_work_order_info.h"
 
+enum VerificationStatus {
+    VERIFICATION_SUCCESS = 0, /// WPE registration success status
+    VERIFICATION_FAILED = 1, /// WPE registration failure status
+};
+
 // ExtWorkOrderInfoImpl class implements ExtWorkOrderInfo interface
 class ExtWorkOrderInfoImpl : public ExtWorkOrderInfo {
 public:
@@ -58,4 +63,5 @@ public:
 
 };  // ExtWorkOrderInfoImpl
 #endif
+
 

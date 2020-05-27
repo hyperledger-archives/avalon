@@ -17,6 +17,15 @@
 
 #include "ext_work_order_info_impl.h"
 
+enum KmeRegistrationStatus {
+    ERR_WPE_REG_SUCCESS = 0, /// WPE registration success status
+    ERR_WPE_REG_FAILED = 1, /// WPE registration failure status
+    ERR_WPE_NOT_FOUND = 2, /// WPE not found (If WPE won't call GetUniqueId)
+    ERR_MRENCLAVE_NOT_MATCH = 3, /// WPE MRENCLAVE value not matched
+    ERR_MRSIGNER_NOT_MATCH = 4, /// WPE MRSIGNER value not matched
+    ERR_WPE_VERIFICATION_FAILED = 5 /// WPE attestation report verification failed
+};
+
 class ExtWorkOrderInfoKME : public ExtWorkOrderInfoImpl {
 public:
 
@@ -41,31 +50,6 @@ public:
         ByteArray& signing_key,
         ByteArray& verification_key_hex,
         ByteArray& verification_key_signature_hex);
-
-    /* This function is called by the KME workload to verify
-       attestation info for the associated WPE.
-
-    Parameters:
-        attestation_data - attestation data of enclave to verify
-        hex_id - id of the remote enclave as hex string
-                 It must match REPORTDATA[32, 63] in attestation_data
-        mrenclave [OUT] - MRENCLAVE value from the attestation_data
-                          on success or not used
-        mrsigner [OUT] - MRSIGNER value from the attestation_data
-                         on success or not used
-        encryption_public_key [OUT] - public encryption key from the
-                      attestation_data on success or not used
-        verification_key [OUT] - public verification key from
-                      attestation_data on success or not used
-    Returns:
-        zero on success or an error code otherwise
-    */
-    int VerifyAttestaionWpe(const ByteArray& attestation_data,
-        const ByteArray& hex_id,
-        ByteArray& mrenclave,
-        ByteArray& mrsigner,
-        ByteArray& encryption_public_key,
-        ByteArray& verification_key);
 
     /*
       Creates workorder key data to be returned to the WPE in json format

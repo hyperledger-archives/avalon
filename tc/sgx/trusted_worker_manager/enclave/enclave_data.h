@@ -111,6 +111,11 @@ public:
     std::string get_nonce() {
         return nonce_;
     }
+
+    std::string get_extended_data() {
+        return extended_data_;
+    }
+
     std::string get_serialized_signing_key(void) const { return public_signing_key_.Serialize(); }
 
     std::string get_serialized_encryption_key(void) const {
