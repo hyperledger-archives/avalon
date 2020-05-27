@@ -271,7 +271,7 @@ class EnclaveManager(ABC):
             "--logfile",
             help="Name of the log file, __screen__ for standard output",
             type=str)
-        parser.add_argument("--loglevel", help="Logging leve", type=str)
+        parser.add_argument("--loglevel", help="Logging level", type=str)
         parser.add_argument(
             "--lmdb_url",
             help="DB url to connect to lmdb", type=str)

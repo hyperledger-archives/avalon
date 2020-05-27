@@ -38,7 +38,8 @@ class WPERequester():
         Parameters :
             @param config - dict of config read
         """
-        self._uri_client = HttpJrpcClient(config["KMEListener"]["bind"])
+        self._uri_client = HttpJrpcClient(
+            config["KMEListener"]["kme_listener_url"])
 
     def get_unique_verification_key(self, nonce):
         """
@@ -83,19 +84,22 @@ class WPERequester():
                          .format(response))
             return None
 
-    def preprocess_work_order(self, wo_request):
+    def preprocess_work_order(self, wo_request, encryption_key):
         """
         Request to preprocess a work order
 
         Parameters :
-            @param wo_request - The original work order request and
-                                inWorkOrderExData
+            @param wo_request - The original work order request
+            @param encryption_key - WPE's public encryption key
         Returns :
             @returns result - Result from KME that includes the workorder
                               key info. None, in case of failure.
         """
         json_rpc_request = self._get_request_json("PreProcessWorkOrder")
-        json_rpc_request["params"] = {"wo_request": wo_request}
+        json_rpc_request["params"] = {
+            "wo_request": wo_request,
+            "encryption_key": encryption_key
+        }
         response = self._post_and_get_result(json_rpc_request)
 
         if "result" in response:
@@ -131,8 +135,8 @@ class WPERequester():
             @returns response - Response received from the KME
         """
         json_request_str = json.dumps(json_rpc_request)
-        logger.debug("Request json %s", json_request_str)
+        logger.info("Request json %s", json_request_str)
         response = self._uri_client._postmsg(json_request_str)
-        logger.debug("Response from listener %s", response)
+        logger.info("Response from listener %s", response)
 
         return response
