@@ -157,7 +157,7 @@ main(void)
         ++count;
     }
 
-    ctAES[0]++;
+    ctAES[0]++; // tamper with cryptotext to force decryption to fail
     try {
         ptAES = tcf::crypto::skenc::DecryptMessage(key, iv, ctAES);
         printf(

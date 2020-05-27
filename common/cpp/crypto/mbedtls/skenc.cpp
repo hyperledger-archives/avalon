@@ -1,4 +1,4 @@
-/* Copyright 2018 Intel Corporation
+/* Copyright 2018-2020 Intel Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,30 +18,23 @@
  * Secret key (symmetric) encryption.
  * Uses AES-GCM 256, which also includes authentication.
  *
- * Lower-level functions implemented using OpenSSL.
- * See also skenc_common.cpp for OpenSSL-independent code.
+ * Lower-level functions implemented using MBed TLS.
+ * See also skenc_common.cpp for MBed TLS-independent code.
  */
 
-#include <memory>    // std::unique_ptr
-#include <openssl/evp.h>
+#include <string.h>  // memcmp()
+#include <mbedtls/gcm.h>
 
 #include "crypto_shared.h"
 #include "error.h"
 #include "skenc.h"
 
-#ifndef CRYPTOLIB_OPENSSL
-#error "CRYPTOLIB_OPENSSL must be defined to compile source with OpenSSL."
+#ifndef CRYPTOLIB_MBEDTLS
+#error "CRYPTOLIB_MBEDTLS must be defined to compile source with Mbed TLS."
 #endif
 
 namespace pcrypto = tcf::crypto;
-
-// Typedefs for memory management
-// Specify type and destroy function type for unique_ptrs
-typedef std::unique_ptr<EVP_CIPHER_CTX, void (*)(EVP_CIPHER_CTX*)> CTX_ptr;
-
-// Error handling
-namespace Error = tcf::error;
-
+namespace Error = tcf::error; // Error handling
 namespace constants = tcf::crypto::constants;
 
 
@@ -63,13 +56,14 @@ namespace constants = tcf::crypto::constants;
  */
 ByteArray pcrypto::skenc::EncryptMessage(
         const ByteArray& key, const ByteArray& iv, const ByteArray& message) {
-    unsigned char tag[constants::TAG_LEN];
-    int len;
-    int ct_len;
-    int pt_len = message.size();
+    mbedtls_gcm_context aes_gcm;
+    int rc;
+    size_t pt_len = message.size();
     unsigned char* pt = (unsigned char*)message.data();
-    int ct_buf_len = pt_len + constants::BLOCK_LENGTH;
+    size_t ct_buf_len = pt_len + constants::BLOCK_LENGTH;
     ByteArray ct(ct_buf_len);
+    const size_t ct_len = pt_len + constants::TAG_LEN;
+    unsigned char tag[constants::TAG_LEN];
 
     // Sanity checks
     if (key.size() != constants::SYM_KEY_LEN) {
@@ -90,62 +84,52 @@ ByteArray pcrypto::skenc::EncryptMessage(
         throw Error::ValueError(msg);
     }
 
-    // Initialize encryption
-    CTX_ptr context(EVP_CIPHER_CTX_new(), EVP_CIPHER_CTX_free);
-    if (!context) {
+    // Initialize encryption.
+    // MBedTLS expects key length is in bits and IV length in bytes.
+    mbedtls_gcm_init(&aes_gcm);
+    rc = mbedtls_gcm_setkey(&aes_gcm, MBEDTLS_CIPHER_ID_AES,
+        (const unsigned char*)key.data(), key.size() * 8);
+    if (rc != 0) {
+        mbedtls_gcm_free(&aes_gcm);
         std::string msg(
-            "Crypto Error (EncryptMessage): OpenSSL could not create "
-            "new EVP_CIPHER_CTX");
+            "Crypto Error (EncryptMessage): MBed TLS could not set AES key");
         throw Error::RuntimeError(msg);
     }
 
-    if (EVP_EncryptInit_ex(context.get(), EVP_aes_256_gcm(),
-            nullptr, nullptr, nullptr) != 1) {
+    rc= mbedtls_gcm_starts(&aes_gcm, MBEDTLS_GCM_ENCRYPT,
+        (const unsigned char*)iv.data(), constants::IV_LEN, nullptr, 0);
+    if (rc != 0) {
+        mbedtls_gcm_free(&aes_gcm);
         std::string msg(
-            "Crypto Error (EncryptMessage): OpenSSL could not "
-            "initialize EVP_CIPHER_CTX with AES-GCM");
-        throw Error::RuntimeError(msg);
-    }
-
-    // Set Key and IV
-    if (EVP_EncryptInit_ex(context.get(), nullptr, nullptr,
-            (const unsigned char*)key.data(),
-            (const unsigned char*)iv.data()) != 1) {
-        std::string msg(
-            "Crypto Error (EncryptMessage): OpenSSL could not "
-            "initialize AES-GCM key and IV");
+            "Crypto Error (EncryptMessage): MBed TLS could not set AES GCM IV");
         throw Error::RuntimeError(msg);
     }
 
     // Encrypt message (with no IV prepended)
-    if (EVP_EncryptUpdate(context.get(), ct.data(), &len, pt, pt_len) != 1) {
+    rc = mbedtls_gcm_update(&aes_gcm, pt_len, pt, ct.data());
+    if (rc != 0) {
+        mbedtls_gcm_free(&aes_gcm);
         std::string msg(
-            "Crypto Error (EncryptMessage): OpenSSL could not update "
+            "Crypto Error (EncryptMessage): MBed TLS could not update "
             "AES-GCM encryption");
         throw Error::RuntimeError(msg);
     }
-    ct_len = len;
-
-    // Get encrypted text, if any, still buffered (when len != 0 mod blocksize)
-    if (EVP_EncryptFinal_ex(context.get(), ct.data() + len, &len) != 1) {
-        std::string msg(
-            "Crypto Error (EncryptMessage): OpenSSL could not finalize "
-            "AES-GCM encryption");
-        throw Error::RuntimeError(msg);
-    }
-    ct_len += len;
 
     // Generate message's auth tag
-    if (EVP_CIPHER_CTX_ctrl(context.get(), EVP_CTRL_GCM_GET_TAG,
-            constants::TAG_LEN, tag) != 1) {
-        std::string msg(
-            "Crypto Error (EncryptMessage): OpenSSL could not get AES-GCM TAG");
+    rc = mbedtls_gcm_finish(&aes_gcm, tag, constants::TAG_LEN);
+    if (rc != 0) {
+        mbedtls_gcm_free(&aes_gcm);
+        std::string msg("Crypto Error (EncryptMessage): "
+            "MBed TLS could not get AES-GCM TAG");
         throw Error::RuntimeError(msg);
     }
 
     // Build and return encrypted output string with auth tag appended
-    ct.resize(ct_len);
+    ct.resize(ct_len - constants::TAG_LEN);
     ct.insert(ct.end(), tag, tag + constants::TAG_LEN);
+
+    // Cleanup and return
+    mbedtls_gcm_free(&aes_gcm);
 
     return ct;
 }  // pcrypto::skenc::EncryptMessage
@@ -176,9 +160,13 @@ ByteArray pcrypto::skenc::EncryptMessage(
 ByteArray pcrypto::skenc::DecryptMessage(
         const ByteArray& key, const char iv[constants::IV_LEN],
         const char *message, size_t message_len) {
+    mbedtls_gcm_context aes_gcm;
+    // Both plaintext and cryptotext length (excluding auth tag length)
+    const size_t len = message_len - constants::TAG_LEN;
     ByteArray pt(message_len);
-    int len, pt_len;
-    int res;
+    const unsigned char *tag_expected = (unsigned char *)message + len;
+    unsigned char tag_generated[constants::TAG_LEN];
+    int rc;
 
     // Sanity checks
     if (key.size() != constants::SYM_KEY_LEN) {
@@ -194,64 +182,59 @@ ByteArray pcrypto::skenc::DecryptMessage(
         throw Error::ValueError(msg);
     }
 
-    // Initialize decryption
-    CTX_ptr context(EVP_CIPHER_CTX_new(), EVP_CIPHER_CTX_free);
-    if (!context) {
+    // Initialize decryption.
+    // MBedTLS expects key length is in bits and IV length in bytes.
+    mbedtls_gcm_init(&aes_gcm);
+    rc = mbedtls_gcm_setkey(&aes_gcm, MBEDTLS_CIPHER_ID_AES,
+        (const unsigned char*)key.data(), key.size() * 8);
+    if (rc != 0) {
+        mbedtls_gcm_free(&aes_gcm);
         std::string msg(
-            "Crypto Error (DecryptMessage): OpenSSL could not create "
-            "new EVP_CIPHER_CTX");
+            "Crypto Error (DecryptMessage): MBed TLS could not set AES key");
         throw Error::RuntimeError(msg);
     }
 
-    if (!EVP_DecryptInit_ex(context.get(), EVP_aes_256_gcm(),
-            nullptr, nullptr, nullptr)) {
+    rc= mbedtls_gcm_starts(&aes_gcm, MBEDTLS_GCM_DECRYPT,
+        (const unsigned char*)iv, constants::IV_LEN, nullptr, 0);
+    if (rc != 0) {
+        mbedtls_gcm_free(&aes_gcm);
         std::string msg(
-            "Crypto Error (DecryptMessage): OpenSSL could not "
-            "initialize EVP_CIPHER_CTX with AES-GCM");
-        throw Error::RuntimeError(msg);
-    }
-
-    if (!EVP_DecryptInit_ex(context.get(), nullptr, nullptr,
-            (const unsigned char*)key.data(),
-            (const unsigned char*)iv)) {
-        std::string msg(
-            "Crypto Error (DecryptMessage): OpenSSL could not "
-            "initialize AES-GCM key and IV");
+            "Crypto Error (DecryptMessage): MBed TLS could not set AES GCM IV");
         throw Error::RuntimeError(msg);
     }
 
     // Decrypt message (IV is separate; omit appended auth tag)
-    if (!EVP_DecryptUpdate(context.get(), pt.data(), &len,
-            (const unsigned char *)message,
-            message_len - constants::TAG_LEN)) {
+    rc = mbedtls_gcm_update(&aes_gcm, len, (const unsigned char *)message,
+        (unsigned char *)pt.data());
+    if (rc != 0) {
+        mbedtls_gcm_free(&aes_gcm);
         std::string msg(
-            "Crypto Error (DecryptMessage): OpenSSL could not decrypt "
-            "with AES-GCM");
-        throw Error::RuntimeError(msg);
-    }
-    pt_len = len;
-
-    // Extract the auth tag appended to the message
-    if (!EVP_CIPHER_CTX_ctrl(context.get(), EVP_CTRL_GCM_SET_TAG,
-            constants::TAG_LEN,
-            (unsigned char *)message + message_len - constants::TAG_LEN)) {
-        std::string msg(
-            "Crypto Error (DecryptMessage): OpenSSL could not get AES-GCM TAG");
+            "Crypto Error (DecryptMessage): MBed TLS could not update "
+            "AES-GCM decryption");
         throw Error::RuntimeError(msg);
     }
 
-    // Get decrypted text, if any, still buffered (when len != 0 mod blocksize)
-    res = EVP_DecryptFinal_ex(context.get(), pt.data() + len, &len);
-    if (res < 1) {
+    // Generate the auth tag from decrypting the message
+    rc = mbedtls_gcm_finish(&aes_gcm, tag_generated, constants::TAG_LEN);
+    if (rc != 0) {
+        mbedtls_gcm_free(&aes_gcm);
+        std::string msg("Crypto Error (DecryptMessage): "
+            "MBed TLS could not get AES-GCM TAG");
+        throw Error::RuntimeError(msg);
+    }
+
+    // Compare expected tag from the input cipher text with the generated tag
+    rc = memcmp(tag_expected, tag_generated, constants::TAG_LEN);
+    if (rc != 0) {
+        mbedtls_gcm_free(&aes_gcm);
         std::string msg(
             "Crypto Error (DecryptMessage): AES_GCM authentication "
             "failed, plaintext is not trustworthy");
         throw Error::CryptoError(msg);
-    } else {
-        pt_len += len;
     }
 
     // Build and return decrypted output string
-    pt.resize(pt_len);
+    pt.resize(len);
+
     return pt;
 }  // pcrypto::skenc::DecryptMessage
