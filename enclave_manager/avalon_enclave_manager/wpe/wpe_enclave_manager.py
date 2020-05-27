@@ -246,7 +246,7 @@ class WorkOrderProcessorEnclaveManager(EnclaveManager):
         wo_response = dict()
         try:
             wo_key_info = self._wpe_requester\
-                .preprocess_work_order(input_json_str)
+                .preprocess_work_order(input_json_str, self.encryption_key)
             # @TODO : Make use of key info obtained as part of preprocessing
             #         work order. Pass on the key_info as inWorkorderExData.
             wo_request = work_order_request.SgxWorkOrderRequest(
@@ -384,6 +384,9 @@ def main(args=None):
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", help="configuration file", nargs="+")
     parser.add_argument("--config-dir", help="configuration folder", nargs="+")
+    parser.add_argument("--kme_listener_url",
+                        help="KME listener url for requests to KME",
+                        type=str)
     (options, remainder) = parser.parse_known_args(args)
 
     if options.config:
@@ -398,6 +401,9 @@ def main(args=None):
     except pconfig.ConfigurationException as e:
         logger.error(str(e))
         sys.exit(-1)
+
+    if options.kme_listener_url:
+        config["KMEListener"]["kme_listener_url"] = options.kme_listener_url
 
     plogger.setup_loggers(config.get("Logging", {}))
     sys.stdout = plogger.stream_to_logger(

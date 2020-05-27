@@ -78,4 +78,4 @@ enclave_type = "WPE"
 [KMEListener]
 # URL of KMEListener where a Work order processor can send requests meant for
 # the Key Management Enclave(KME)  
-bind = "http://avalon-kme:1948"
+kme_listener_url = "http://localhost:1948"

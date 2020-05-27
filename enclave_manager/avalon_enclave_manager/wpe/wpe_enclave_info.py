@@ -76,7 +76,7 @@ class WorkOrderProcessorEnclaveInfo(BaseEnclaveInfo):
             self.enclave_keys = \
                 keys.EnclaveKeys(self.verifying_key, self.encryption_key)
             # No sealed data is present for WPE
-            self.sealed_data = ""
+            self.sealed_data = None
         except AttributeError as attr:
             raise Exception("missing enclave initialization parameter; {}"
                             .format(str(attr)))
