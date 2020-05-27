@@ -30,6 +30,8 @@ namespace tcf {
 namespace crypto {
     /** AES-GCM 256 for authenticated encryption. */
     namespace constants {
+        /** AES-GCM block length (128 bits) */
+        const int BLOCK_LENGTH = 12;
         /** AES-GCM IV length (96 bits) */
         const int IV_LEN = 12;
         /** AES-GCM Key length (256 bits) */
