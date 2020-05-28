@@ -16,6 +16,7 @@
 /**
  * @file
  * Avalon RSA public key generation, serialization, and encryption functions.
+ * Serialization reads and writes keys in PEM format strings.
  */
 
 #pragma once
@@ -45,14 +46,19 @@ namespace crypto {
             // throws RuntimeError
             PublicKey(const PrivateKey& privateKey);
             // Deserializing constructor.
-            // throws RuntimeError, ValueError
+            // Reads RSA public key PEM format string.
+            // (with "BEGIN RSA PUBLIC KEY" or "BEGIN PUBLIC KEY").
+            // Throws RuntimeError, ValueError.
             PublicKey(const std::string& encoded);
             ~PublicKey();
             // throws RuntimeError
             PublicKey& operator=(const PublicKey& publicKey);
-            // throws RuntimeError, ValueError
+            // Reads RSA public key PEM format string
+            // Throws RuntimeError, ValueError.
             void Deserialize(const std::string& encoded);
-            // throws RuntimeError
+            // Creates RSA public key PEM format string
+            // (with "BEGIN PUBLIC KEY").
+            // Throws RuntimeError.
             std::string Serialize() const;
             // Encrypt message.data() and return ciphertext.
             // throws RuntimeError

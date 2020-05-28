@@ -23,10 +23,12 @@
 namespace tcf {
 namespace crypto {
     namespace constants {
-         // Use RSA-3072 for long-term security,
-         // with OAEP padding and SHA-256 digest.
-         // The 2048 byte buffer allows for future key sizes <= RSA-16384.
-         // RSA is not quantum resistant.
+         /**
+          * Use RSA-3072 for long-term security,
+          * with OAEP padding and SHA-256 digest.
+          * The 2048 byte buffer allows for future key sizes <= RSA-16384.
+          * RSA is not quantum resistant.
+          */
         const int RSA_KEY_SIZE = 2048;
         const int RSA_PADDING_SIZE = 41;
 
