@@ -20,6 +20,18 @@
  * Test case from /tc/sgx/trusted_worker_manager/tests/testCrypto.cpp
  * and from upstream common/tests/testCrypto.cpp in
  * https://github.com/hyperledger-labs/private-data-objects
+ *
+ */
+
+/*
+ * # Script to generate test RSA keys
+ * # Create private key
+ * openssl genrsa -out avalon.key 4096
+ * # Extract public key from private key
+ * # Form: BEGIN RSA PUBLIC KEY
+ * openssl rsa -in avalon.key -pubout >avalon.key.public
+ * # Form: BEGIN PUBLIC KEY
+ * openssl rsa -in avalon.key -RSAPublicKey_out >avalon.key.rsa.public
  */
 
 #include <stdexcept>
@@ -29,6 +41,94 @@
 #include "pkenc_private_key.h"
 #include "pkenc_public_key.h"
 
+// Test keys
+static const char rsa_private_key[] =
+    "-----BEGIN RSA PRIVATE KEY-----\n"
+    "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\n"
+    "-----END RSA PRIVATE KEY-----\n";
+
+static const char rsa_public_key[] =
+    "-----BEGIN RSA PUBLIC KEY-----\n"
+    "MIICCgKCAgEAviXPKQtoVclvf18iWD1cm6xiNei4pl+m6EpMb9RM2S++/iC1ex7i\n"
+    "rJWjamFiWsVfh8xsFhByq/suH1vvGWnHoPGrCNNfTjlt6r9mCKHbVMbZ0eTW2TVG\n"
+    "JqfdJHWqAd6CVQB0RPdN4nXJ/zzr4/j70wm7vCqEtsIFo6yJsqX5ac8AFUb9rO/O\n"
+    "XlVG9a076Jwqm7Lzod3SVX0FTC2LDI6I/CK0blOX4gAPS/8jfpZYPHFQbXERCo0P\n"
+    "wgXXJZJ2EWXDlhVIFYgfKiFITlXljIoM8xp1HC9F+LhsKwK0GUVfU7D7kYEVNmV7\n"
+    "dWHsQPWbae2BPSmR/w8tSDQDsDeffgOf/OxXUsqWdi83EKqe/xsCkaseujjvKxtk\n"
+    "wm/MzMhZMb36piyfBoHUjUqwSgh23jEKD7NjawxG/zuji1+w8a6qt9P4uXzc44jI\n"
+    "G4stYcoD+/UF6Jh6teWMnWyYLfcTf2EcgEwdXQbJCl8z1p2N5eVHPZSh7lVD0euO\n"
+    "IhhJRVwNWHVnoR4GALIgLOkqECV3RSjZgTVuC8crfJBUt+zOpiXUv8DaD+kVdAdD\n"
+    "dZlgHBW2K9gcivXDegAz84WPbhDrQ3CMM9SJ22B99CR1eG/ez/wzY0GiAZOCIB31\n"
+    "IWk34Ehc8tTKjm8fVnXWvYJnXKxACnYd3isoueUA1x01+U0HDnY5ZR0CAwEAAQ==\n"
+    "-----END RSA PUBLIC KEY-----\n";
+
+static const char public_key[] =
+    // Same as rsa_public_key above with the additional prefix
+    // specifying the rsaEncryption OID
+    // (in base 64, IjANBgkqhkiG9w0BAQEFAAOCAg8AMIICC ).
+    "-----BEGIN PUBLIC KEY-----\n"
+    "MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAviXPKQtoVclvf18iWD1c\n"
+    "m6xiNei4pl+m6EpMb9RM2S++/iC1ex7irJWjamFiWsVfh8xsFhByq/suH1vvGWnH\n"
+    "oPGrCNNfTjlt6r9mCKHbVMbZ0eTW2TVGJqfdJHWqAd6CVQB0RPdN4nXJ/zzr4/j7\n"
+    "0wm7vCqEtsIFo6yJsqX5ac8AFUb9rO/OXlVG9a076Jwqm7Lzod3SVX0FTC2LDI6I\n"
+    "/CK0blOX4gAPS/8jfpZYPHFQbXERCo0PwgXXJZJ2EWXDlhVIFYgfKiFITlXljIoM\n"
+    "8xp1HC9F+LhsKwK0GUVfU7D7kYEVNmV7dWHsQPWbae2BPSmR/w8tSDQDsDeffgOf\n"
+    "/OxXUsqWdi83EKqe/xsCkaseujjvKxtkwm/MzMhZMb36piyfBoHUjUqwSgh23jEK\n"
+    "D7NjawxG/zuji1+w8a6qt9P4uXzc44jIG4stYcoD+/UF6Jh6teWMnWyYLfcTf2Ec\n"
+    "gEwdXQbJCl8z1p2N5eVHPZSh7lVD0euOIhhJRVwNWHVnoR4GALIgLOkqECV3RSjZ\n"
+    "gTVuC8crfJBUt+zOpiXUv8DaD+kVdAdDdZlgHBW2K9gcivXDegAz84WPbhDrQ3CM\n"
+    "M9SJ22B99CR1eG/ez/wzY0GiAZOCIB31IWk34Ehc8tTKjm8fVnXWvYJnXKxACnYd\n"
+    "3isoueUA1x01+U0HDnY5ZR0CAwEAAQ==\n"
+    "-----END PUBLIC KEY-----\n"
+    ;
 
 int
 main(void)
@@ -77,6 +177,7 @@ main(void)
     std::string rprivateKeyStr;
     try {
         rprivateKeyStr = rprivateKey.Serialize();
+        printf("Serialized private key:\n%s", rprivateKeyStr.c_str());
         printf("RSA private key serialize test PASSED\n");
     } catch (const tcf::error::RuntimeError& e) {
         printf("RSA private key serialize test FAILED\n%s\n", e.what());
@@ -86,6 +187,7 @@ main(void)
     std::string rpublicKeyStr;
     try {
         rpublicKeyStr = rpublicKey.Serialize();
+        printf("Serialized public key:\n%s", rpublicKeyStr.c_str());
         printf("RSA public key serialize test PASSED\n");
     } catch (const tcf::error::RuntimeError& e) {
         printf("RSA public key serialize test FAILED\n%s\n", e.what());
@@ -138,6 +240,36 @@ main(void)
         ++count;
     }
 
+    printf("Test deserializing pre-existing PEM format RSA keys\n");
+    tcf::crypto::pkenc::PrivateKey static_rprivate_key;
+    try {
+        static_rprivate_key.Deserialize(rsa_private_key);
+        printf("RSA static RSA PRIVATE KEY deserialize test PASSED\n");
+    } catch (const std::exception& e) {
+        printf("RSA static RSA PRIVATE KEY deserialize test FAILED\n%s\n",
+            e.what());
+        ++count;
+    }
+
+    tcf::crypto::pkenc::PublicKey static_rsa_public_key;
+    try {
+        static_rsa_public_key.Deserialize(rsa_public_key);
+        printf("RSA static RSA PUBLIC KEY deserialize test PASSED\n");
+    } catch (const std::exception& e) {
+        printf("RSA static RSA PUBLIC KEY deserialize test FAILED\n%s\n",
+            e.what());
+        ++count;
+    }
+
+    tcf::crypto::pkenc::PublicKey  static_public_key;
+    try {
+        static_public_key.Deserialize(public_key);
+        printf("RSA static PUBLIC KEY deserialize test PASSED\n");
+    } catch (const std::exception& e) {
+        printf("RSA static PUBLIC KEY deserialize test FAILED\n%s\n",
+            e.what());
+        ++count;
+    }
 
     printf("Test RSA encryption/decryption\n");
     ByteArray ct;

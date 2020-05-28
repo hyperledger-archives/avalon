@@ -16,6 +16,7 @@
 /**
  * @file
  * Avalon RSA public key generation, serialization, and decryption functions.
+ * Serialization reads and writes keys in PEM format strings.
  */
 
 #include <openssl/err.h>
@@ -46,13 +47,16 @@ namespace Error = tcf::error;
 
 /**
  * Utility function: deserialize RSA Private Key.
+ * That is, convert the key from a PEM format string
+ * (with "BEGIN RSA PRIVATE KEY").
+ *
  * Throws RuntimeError, ValueError.
  *
- * @param encoded Serialized RSA private key to deserialize
+ * @param PEM encoded Serialized RSA private key to deserialize
  */
 RSA* deserializeRSAPrivateKey(const std::string& encoded) {
     BIO_ptr bio(BIO_new_mem_buf(encoded.c_str(), -1), BIO_free_all);
-    if (!bio) {
+    if (bio == nullptr) {
         std::string msg(
             "Crypto Error (deserializeRSAPrivateKey): Could not create BIO");
         throw Error::RuntimeError(msg);
@@ -60,7 +64,7 @@ RSA* deserializeRSAPrivateKey(const std::string& encoded) {
 
     RSA* private_key = PEM_read_bio_RSAPrivateKey(bio.get(),
         nullptr, nullptr, nullptr);
-    if (!private_key) {
+    if (private_key == nullptr) {
         std::string msg("Crypto Error (deserializeRSAPrivateKey): "
             "Could not deserialize private RSA key");
         throw Error::ValueError(msg);
@@ -73,7 +77,7 @@ RSA* deserializeRSAPrivateKey(const std::string& encoded) {
  * Constructor from encoded string.
  * Throws RuntimeError, ValueError.
  *
- * @param encoded serialized RSA private key
+ * @param PEM encoded serialized RSA private key
  */
 pcrypto::pkenc::PrivateKey::PrivateKey(const std::string& encoded) {
     private_key_ = deserializeRSAPrivateKey(encoded);
@@ -87,7 +91,7 @@ pcrypto::pkenc::PrivateKey::PrivateKey(const std::string& encoded) {
 pcrypto::pkenc::PrivateKey::PrivateKey(
         const pcrypto::pkenc::PrivateKey& privateKey) {
     private_key_ = RSAPrivateKey_dup(privateKey.private_key_);
-    if (!private_key_) {
+    if (private_key_ == nullptr) {
         std::string msg("Crypto Error (pkenc::PrivateKey() copy): "
             "Could not copy public key");
         throw Error::RuntimeError(msg);
@@ -102,7 +106,7 @@ pcrypto::pkenc::PrivateKey::PrivateKey(
 pcrypto::pkenc::PrivateKey::PrivateKey(pcrypto::pkenc::PrivateKey&& privateKey) {
     private_key_ = privateKey.private_key_;
     privateKey.private_key_ = nullptr;
-    if (!private_key_) {
+    if (private_key_ == nullptr) {
         std::string msg("Crypto Error (pkenc::PrivateKey() move): "
             "Cannot move null private key");
         throw Error::RuntimeError(msg);
@@ -114,7 +118,7 @@ pcrypto::pkenc::PrivateKey::PrivateKey(pcrypto::pkenc::PrivateKey&& privateKey) 
  * PrivateKey Destructor.
  */
 pcrypto::pkenc::PrivateKey::~PrivateKey() {
-    if (private_key_)
+    if (private_key_ != nullptr)
         RSA_free(private_key_);
 }  // pcrypto::pkenc::Private::~PrivateKey
 
@@ -127,10 +131,10 @@ pcrypto::pkenc::PrivateKey& pcrypto::pkenc::PrivateKey::operator=(
     const pcrypto::pkenc::PrivateKey& privateKey) {
     if (this == &privateKey)
         return *this;
-    if (private_key_)
+    if (private_key_ != nullptr)
         RSA_free(private_key_);
     private_key_ = RSAPrivateKey_dup(privateKey.private_key_);
-    if (!private_key_) {
+    if (private_key_ == nullptr) {
         std::string msg("Crypto Error (pkenc::PrivateKey::operator =): "
             "Could not copy private key");
         throw Error::RuntimeError(msg);
@@ -141,14 +145,17 @@ pcrypto::pkenc::PrivateKey& pcrypto::pkenc::PrivateKey::operator=(
 
 /**
  * Deserialize RSA Private Key.
- * Implemented using deserializeRSAPrivateKey().
- * Throws RunrimeError, ValueError.
+ * That is, convert the key from a PEM format string
+ * (with "BEGIN RSA PRIVATE KEY").
  *
- * @param encoded Serialized RSA private key to deserialize
+ * Implemented using deserializeRSAPrivateKey().
+ * Throws RuntimeError, ValueError.
+ *
+ * @param PEM encoded Serialized RSA private key to deserialize
  */
 void pcrypto::pkenc::PrivateKey::Deserialize(const std::string& encoded) {
     RSA* key = deserializeRSAPrivateKey(encoded);
-    if (private_key_)
+    if (private_key_ != nullptr)
         RSA_free(private_key_);
     private_key_ = key;
 }  // pcrypto::pkenc::PrivateKey::Deserialize
@@ -166,7 +173,7 @@ void pcrypto::pkenc::PrivateKey::Generate() {
     BIGNUM_ptr exp(BN_new(), BN_free);
     private_key_ = nullptr;
 
-    if (!exp) {
+    if (exp == NULL) {
         std::string msg("Crypto  Error (pkenc::PrivateKey()): "
             "Could not create BIGNUM for RSA exponent");
         throw Error::RuntimeError(msg);
@@ -179,7 +186,7 @@ void pcrypto::pkenc::PrivateKey::Generate() {
     }
 
     RSA_ptr private_key(RSA_new(), RSA_free);
-    if (!private_key) {
+    if (private_key == nullptr) {
         std::string msg("Crypto  Error (pkenc::PrivateKey()): "
             "Could not create new RSA key");
         throw Error::RuntimeError(msg);
@@ -201,7 +208,9 @@ void pcrypto::pkenc::PrivateKey::Generate() {
 
 /**
  * Serialize a RSA private key.
- * Throws RunrimeError.
+ * That is convert the key to a PEM format string
+ * (with "BEGIN RSA PRIVATE KEY").
+ * Throws RuntimeError.
  */
 std::string pcrypto::pkenc::PrivateKey::Serialize() const {
     if (private_key_ == nullptr) {
@@ -210,23 +219,27 @@ std::string pcrypto::pkenc::PrivateKey::Serialize() const {
         throw Error::RuntimeError(msg);
     }
     BIO_ptr bio(BIO_new(BIO_s_mem()), BIO_free_all);
-    if (!bio) {
+    if (bio == nullptr) {
         std::string msg("Crypto Error (Serialize): Could not create BIO\n");
         throw Error::RuntimeError(msg);
     }
 
+    // This writes a RSA private key PEM string of the form
+    // "BEGIN RSA PRIVATE KEY"
     int res = PEM_write_bio_RSAPrivateKey(bio.get(), private_key_,
         nullptr, nullptr, 0, 0, nullptr);
-    if (!res) {
-        std::string msg("Crypto Error (Serialize): Could not write to BIO\n");
+    if (res == 0) {
+        std::string msg(
+            "Crypto Error (Serialize): Could not write private key\n");
         throw Error::RuntimeError(msg);
     }
     int keylen = BIO_pending(bio.get());
     ByteArray pem_str(keylen + 1);
 
     res = BIO_read(bio.get(), pem_str.data(), keylen);
-    if (!res) {
-        std::string msg("Crypto Error (Serialize): Could not read BIO\n");
+    if (res == 0) {
+        std::string msg(
+            "Crypto Error (Serialize): Could not read private key\n");
         throw Error::RuntimeError(msg);
     }
     pem_str[keylen] = '\0';

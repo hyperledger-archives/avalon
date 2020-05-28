@@ -16,6 +16,7 @@
 /**
  * @file
  * Avalon RSA public key generation, serialization, and encryption functions.
+ * Serialization reads and writes keys in PEM format strings.
  */
 
 #include <openssl/err.h>
@@ -46,25 +47,43 @@ namespace Error = tcf::error;
 
 /**
  * Utility function: deserialize RSA Public Key.
+ * That is, convert the key from a PEM format string
+ * (with either "BEGIN RSA PUBLIC KEY" or "BEGIN PUBLIC KEY").
+ *
  * Throws RuntimeError, ValueError.
  *
- * @param encoded Serialized RSA public key to deserialize
+ * @param PEM encoded Serialized RSA public key to deserialize
  */
 RSA* deserializeRSAPublicKey(const std::string& encoded) {
+    RSA * public_key;
+
     BIO_ptr bio(BIO_new_mem_buf(encoded.c_str(), -1), BIO_free_all);
-    if (!bio) {
+    if (bio == nullptr) {
         std::string msg(
             "Crypto Error (deserializeRSAPublicKey): Could not create BIO");
         throw Error::RuntimeError(msg);
     }
 
-    RSA* public_key = PEM_read_bio_RSAPublicKey(bio.get(),
+    // Reads RSA public key PEM string.
+    // First attempt read of PEM with BEGIN PUBLIC KEY
+    public_key = PEM_read_bio_RSA_PUBKEY(bio.get(),
         nullptr, nullptr, nullptr);
-    if (!public_key) {
-        std::string msg(
-            "Crypto Error (deserializeRSAPublicKey): Could not "
-            "deserialize public RSA key");
-        throw Error::ValueError(msg);
+    if (public_key == nullptr) {
+        // If that fails, next attempt to read PEM with BEGIN RSA PUBLIC KEY
+        BIO_ptr bio2(BIO_new_mem_buf(encoded.c_str(), -1), BIO_free_all);
+        if (bio == nullptr) {
+            std::string msg("Crypto Error (deserializeRSAPublicKey): "
+                "Could not create BIO");
+            throw Error::RuntimeError(msg);
+        }
+        public_key = PEM_read_bio_RSAPublicKey(bio2.get(),
+            nullptr, nullptr, nullptr);
+        if (public_key == nullptr) {
+            std::string msg(
+                "Crypto Error (deserializeRSAPublicKey): Could not "
+                "deserialize public RSA key");
+            throw Error::ValueError(msg);
+        }
     }
     return public_key;
 }  // deserializeRSAPublicKey
@@ -85,7 +104,7 @@ pcrypto::pkenc::PublicKey::PublicKey() {
 pcrypto::pkenc::PublicKey::PublicKey(
         const pcrypto::pkenc::PrivateKey& privateKey) {
     public_key_ = RSAPublicKey_dup(privateKey.private_key_);
-    if (!public_key_) {
+    if (public_key_ == nullptr) {
         std::string msg("Crypto  Error (pkenc::PublicKey()): "
             "Could not duplicate RSA public key");
         throw Error::RuntimeError(msg);
@@ -94,11 +113,14 @@ pcrypto::pkenc::PublicKey::PublicKey(
 
 
 /**
- * Constructor from encoded string.
+ * Constructor from a PEM encoded string.
+ * That is, convert the key from a PEM format string
+ * (with either "BEGIN RSA PUBLIC KEY" or "BEGIN PUBLIC KEY").
+ *
  * Implemented with deserializeRSAPublicKey().
  * Throws RuntimeError, ValueError.
  *
- * @param encoded serialized RSA public key
+ * @param PEM encoded serialized RSA public key
  */
 pcrypto::pkenc::PublicKey::PublicKey(const std::string& encoded) {
     public_key_ = deserializeRSAPublicKey(encoded);
@@ -109,7 +131,7 @@ pcrypto::pkenc::PublicKey::PublicKey(const std::string& encoded) {
  * PublicKey destructor.
  */
 pcrypto::pkenc::PublicKey::~PublicKey() {
-    if (public_key_)
+    if (public_key_ != nullptr)
         RSA_free(public_key_);
 }  // pcrypto::pkenc::Public::~PublicKey
 
@@ -121,7 +143,7 @@ pcrypto::pkenc::PublicKey::~PublicKey() {
 pcrypto::pkenc::PublicKey::PublicKey(
         const pcrypto::pkenc::PublicKey& publicKey) {
     public_key_ = RSAPublicKey_dup(publicKey.public_key_);
-    if (!public_key_) {
+    if (public_key_ == nullptr) {
         std::string msg("Crypto Error (pkenc::PublicKey() copy): "
             "Could not copy public key");
         throw Error::RuntimeError(msg);
@@ -136,7 +158,7 @@ pcrypto::pkenc::PublicKey::PublicKey(
 pcrypto::pkenc::PublicKey::PublicKey(pcrypto::pkenc::PublicKey&& publicKey) {
     public_key_ = publicKey.public_key_;
     publicKey.public_key_ = nullptr;
-    if (!public_key_) {
+    if (public_key_ == nullptr) {
         std::string msg("Crypto Error (pkenc::PublicKey() move): "
             "Cannot move null public key");
         throw Error::RuntimeError(msg);
@@ -152,10 +174,10 @@ pcrypto::pkenc::PublicKey& pcrypto::pkenc::PublicKey::operator=(
     const pcrypto::pkenc::PublicKey& publicKey) {
     if (this == &publicKey)
         return *this;
-    if (public_key_)
+    if (public_key_ != nullptr)
         RSA_free(public_key_);
     public_key_ = RSAPublicKey_dup(publicKey.public_key_);
-    if (!public_key_) {
+    if (public_key_ == nullptr) {
         std::string msg("Crypto Error (pkenc::PublicKey::operator =): "
             "Could not copy public key");
         throw Error::RuntimeError(msg);
@@ -166,14 +188,17 @@ pcrypto::pkenc::PublicKey& pcrypto::pkenc::PublicKey::operator=(
 
 /**
  * Deserialize Public Key.
+ * That is, convert the key from a PEM format string
+ * (with either "BEGIN RSA PUBLIC KEY" or "BEGIN PUBLIC KEY").
+ *
  * Implemented with deserializeRSAPublicKey().
  * Throws RuntimeError, ValueError.
  *
- * @param encoded Serialized RSA public key to deserialize
+ * @param PEM encoded Serialized RSA public key to deserialize
  */
 void pcrypto::pkenc::PublicKey::Deserialize(const std::string& encoded) {
     RSA* key = deserializeRSAPublicKey(encoded);
-    if (public_key_)
+    if (public_key_ != nullptr)
         RSA_free(public_key_);
     public_key_ = key;
 }  // pcrypto::pkenc::PublicKey::Deserialize
@@ -181,6 +206,8 @@ void pcrypto::pkenc::PublicKey::Deserialize(const std::string& encoded) {
 
 /**
  * Serialize a RSA public key.
+ * That is, convert the key to a PEM format string
+ * (with "BEGIN PUBLIC KEY").
  * Throws RuntimeError.
  */
 std::string pcrypto::pkenc::PublicKey::Serialize() const {
@@ -191,14 +218,15 @@ std::string pcrypto::pkenc::PublicKey::Serialize() const {
     }
 
     BIO_ptr bio(BIO_new(BIO_s_mem()), BIO_free_all);
-    if (!bio) {
+    if (bio == nullptr) {
         std::string msg("Crypto Error (Serialize): Could not create BIO");
         throw Error::RuntimeError(msg);
     }
 
-    int res = PEM_write_bio_RSAPublicKey(bio.get(), public_key_);
-    if (!res) {
-        std::string msg("Crypto Error (Serialize): Could not write to BIO");
+    // This writes a RSA public key PEM string of the form "BEGIN PUBLIC KEY"
+    int res = PEM_write_bio_RSA_PUBKEY(bio.get(), public_key_);
+    if (res == 0) {
+        std::string msg("Crypto Error (Serialize): Could not write public key");
         throw Error::RuntimeError(msg);
     }
 
@@ -206,7 +234,7 @@ std::string pcrypto::pkenc::PublicKey::Serialize() const {
     ByteArray pem_str(keylen + 1);
 
     res = BIO_read(bio.get(), pem_str.data(), keylen);
-    if (!res) {
+    if (res == 0) {
         std::string msg("Crypto Error (Serialize): Could not red BIO");
         throw Error::RuntimeError(msg);
     }
