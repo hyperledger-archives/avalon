@@ -29,7 +29,7 @@ from avalon_enclave_manager.worker_kv_delegate import WorkerKVDelegate
 from avalon_enclave_manager.work_order_kv_delegate import WorkOrderKVDelegate
 from listener.base_jrpc_listener import parse_bind_url
 from avalon_enclave_manager.kme.kme_listener \
-    import KMEListener, construct_wo_req
+    import KMEListener, construct_wo_req, verify_res_signature
 
 logger = logging.getLogger(__name__)
 
@@ -79,25 +79,28 @@ class KeyManagementEnclaveManager(EnclaveManager):
         self._wo_kv_delegate.cleanup_work_orders()
 
 # -------------------------------------------------------------------------
-
-    def _execute_work_order(self, input_json_str, indent=4):
+    def _execute_work_order(self, input_json_str, ext_data=""):
         """
         Submits request to KME and retrieves the response
 
         Parameters :
-            input_json_str - A JSON formatted str of the request to execute
+            @param input_json_str - A JSON formatted str of the request
+            @param ext_data - Extended data to pass to trusted code
         Returns :
-            json_response - A JSON formatted str of the response received from
-                            the enclave
+            @returns json_response - A JSON formatted str of the response
+                                     received from the enclave
         """
         try:
+            logger.info("Request sent to KME %s", input_json_str)
             wo_request = work_order_request.SgxWorkOrderRequest(
-                self._config,
-                input_json_str)
+                self._config["EnclaveModule"],
+                input_json_str,
+                ext_data
+            )
             wo_response = wo_request.execute()
-
             try:
-                json_response = json.dumps(wo_response, indent=indent)
+                json_response = json.dumps(wo_response, indent=4)
+                logger.info("Response from KME %s", json_response)
             except Exception as err:
                 logger.error("ERROR: Failed to serialize JSON; %s", str(err))
 
@@ -156,12 +159,31 @@ class KeyManagementEnclaveManager(EnclaveManager):
         workload_id = "kme-uid"
         verification_key_nonce = params["nonce"]
         in_data = json.dumps({"nonce": verification_key_nonce})
-        wo_req = construct_wo_req(in_data, workload_id, self.encryption_key)
 
-        # @TODO : Trusted implementation to be integrated
-        # wo_response = self._execute_work_order(json.dumps(wo_req))
+        # Create session key and iv to sign work order request
+        session_key = crypto_utils.generate_key()
+        session_iv = crypto_utils.generate_iv()
 
-        return ""
+        wo_req = construct_wo_req(in_data, workload_id, self.encryption_key,
+                                  session_key, session_iv)
+
+        wo_response = self._execute_work_order(json.dumps(wo_req), "")
+        wo_response_json = json.loads(wo_response)
+
+        if "result" not in wo_response_json:
+            logger.error("Could not get UniqueVerificationKey")
+            return wo_response_json
+        if verify_res_signature(wo_response_json['result'],
+                                self.verifying_key):
+            decrypted_res = crypto_utils.decrypted_response(
+                wo_response_json['result'], session_key, session_iv)
+            logger.info("Decrypted response: {}".format(decrypted_res))
+            # Response contains an array of results. In this case, the
+            # array has single element and the data field is of interest.
+            # The data contains result,verification_key and
+            # verification_key_signature delimited by ' '.
+            return decrypted_res[0]['data']
+        return wo_response_json
 
 # -----------------------------------------------------------------
 
@@ -171,7 +193,11 @@ class KeyManagementEnclaveManager(EnclaveManager):
         workload_id = "kme-reg"
         attestation_report = params["attestation_report"]
         in_data = json.dumps({"attestation_report": attestation_report})
-        wo_req = construct_wo_req(in_data, workload_id, self.encryption_key)
+        # Create session key and iv to sign work order request
+        session_key = crypto_utils.generate_key()
+        session_iv = crypto_utils.generate_iv()
+        wo_req = construct_wo_req(in_data, workload_id, self.encryption_key,
+                                  session_key, session_iv)
 
         # @TODO : Trusted implementation to be integrated
         # wo_response = self._execute_work_order(json.dumps(wo_req))
@@ -187,7 +213,7 @@ class KeyManagementEnclaveManager(EnclaveManager):
         encryption_key = params["encryption_key"]
 
         # @TODO : Trusted implementation to be integrated
-        # wo_response = self._execute_work_order(wo_req, encryption_key)
+        # wo_response = self._execute_work_order(wo_request, encryption_key)
 
         return ""
 

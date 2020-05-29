@@ -22,6 +22,7 @@
 #include "parson.h"
 #include "types.h"
 #include "work_order_data_handler.h"
+#include "enclave_types.h"
 
 namespace tcf {
         class WorkOrderProcessor {
@@ -31,6 +32,7 @@ namespace tcf {
             ByteArray CreateErrorResponse(int err_code, const char* err_message);
             ByteArray Process(EnclaveData* enclaveData, std::string json_str);
             std::string ext_work_order_data;
+            EnclaveType enclave_type = SINGLETON_ENCLAVE;
 
         private:
                 void ParseJsonInput(EnclaveData* enclaveData, std::string json_str);
