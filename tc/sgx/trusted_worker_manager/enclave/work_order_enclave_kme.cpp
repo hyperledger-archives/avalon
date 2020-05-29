@@ -59,6 +59,9 @@ tcf_err_t ecall_HandleWorkOrderRequestKME(const uint8_t* inSerializedRequest,
                 std::string((const char*) inWorkOrderExtData);
         }
 
+        // Persist enclave type info in WorkOrderProcessor instance
+        wo_processor.enclave_type = KME_ENCLAVE;
+
         std::string wo_string(request.begin(), request.end());
         last_serialized_response_kme = wo_processor.Process(
             enclaveData, wo_string);

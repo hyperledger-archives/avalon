@@ -16,6 +16,7 @@
 
 #include <map>
 #include "kme_workload_plug-in.h"
+#include "utils.h"
 
 REGISTER_WORKLOAD_PROCESSOR("kme",KEY_MANAGEMENT_ENCLAVE,KMEWorkloadProcessor);
 
@@ -41,12 +42,19 @@ void KMEWorkloadProcessor::GetUniqueId(
         ExtWorkOrderInfo::KeyType_SECP256K1, nonce_hex, signing_key,
         verification_key_hex, verification_key_signature_hex);
 
-    SetStatus(err, out_work_order_data);
-
     if (!err) {
         sig_key_map[verification_key_hex] = signing_key;
-        AddOutput(1, verification_key_hex, out_work_order_data);
-        AddOutput(2, verification_key_signature_hex, out_work_order_data);
+
+        std::string result_str = std::to_string(err);
+        // Concatenate status, verification_key and verification_key_signature
+        // delimited by " "
+        ByteArray out_data_bytes = StrToByteArray( result_str
+                                   + " "
+                                   + ByteArrayToStr(verification_key_hex)
+                                   + " "
+                                   + ByteArrayToStr(verification_key_signature_hex));
+
+        AddOutput(0, out_data_bytes, out_work_order_data);
     }
 }  // KMEWorkloadProcessor::GetUniqueId
 

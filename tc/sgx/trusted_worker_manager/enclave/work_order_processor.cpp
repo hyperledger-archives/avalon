@@ -265,8 +265,17 @@ namespace tcf {
             // Convert workload_id from hex string to string
             ByteArray workload_bytes = HexStringToBinary(workload_id);
             std::string workload_type(workload_bytes.begin(), workload_bytes.end());
-            WorkloadProcessor *processor = 
-                WorkloadProcessor::CreateWorkloadProcessor(workload_type);
+            WorkloadProcessor *processor;
+            // Creating workload processor for "kme" enclave type. The type of
+            // workload is checked in kme_workload_plugin in case of KME and
+            // processed accordingly.
+            if (this->enclave_type == KME_ENCLAVE){
+                processor = WorkloadProcessor::CreateWorkloadProcessor("kme");
+            }
+            else {
+                processor = WorkloadProcessor::CreateWorkloadProcessor(workload_type);
+            }
+
             tcf::error::ThrowIf<tcf::error::WorkloadError>(
                 processor == nullptr, "Invalid workload id");
             processor->ProcessWorkOrder(
