@@ -63,7 +63,16 @@ namespace Error = tcf::error;
  * @returns Allocated RSA context containing key information.
  *          Must be RSA_free()'ed.
  */
-RSA* pcrypto::pkenc::PrivateKey::deserializeRSAPrivateKey(const std::string& encoded) {
+void *pcrypto::pkenc::PrivateKey::deserializeRSAPrivateKey(
+        const std::string& encoded) {
+    // Sanity check
+    if (encoded.size() == 0) {
+        std::string msg(
+            "Crypto Error (pkenc::PrivateKey::deserializeRSAPrivateKey(): "
+            "RSA private key PEM string is empty");
+        throw Error::ValueError(msg);
+    }
+
     BIO_ptr bio(BIO_new_mem_buf(encoded.c_str(), -1), BIO_free_all);
     if (bio == nullptr) {
         std::string msg(
@@ -88,7 +97,7 @@ RSA* pcrypto::pkenc::PrivateKey::deserializeRSAPrivateKey(const std::string& enc
  */
 pcrypto::pkenc::PrivateKey::PrivateKey(
         const pcrypto::pkenc::PrivateKey& privateKey) {
-    private_key_ = RSAPrivateKey_dup(privateKey.private_key_);
+    private_key_ = (void *)RSAPrivateKey_dup((RSA *)privateKey.private_key_);
     if (private_key_ == nullptr) {
         std::string msg("Crypto Error (pkenc::PrivateKey() copy): "
             "Could not copy private key");
@@ -102,7 +111,7 @@ pcrypto::pkenc::PrivateKey::PrivateKey(
  */
 pcrypto::pkenc::PrivateKey::~PrivateKey() {
     if (private_key_ != nullptr) {
-        RSA_free(private_key_);
+        RSA_free((RSA *)private_key_);
         private_key_ = nullptr;
     }
 }  // pcrypto::pkenc::Private::~PrivateKey
@@ -118,9 +127,9 @@ pcrypto::pkenc::PrivateKey& pcrypto::pkenc::PrivateKey::operator=(
         return *this;
 
     if (private_key_ != nullptr)
-        RSA_free(private_key_);
+        RSA_free((RSA *)private_key_);
 
-    private_key_ = RSAPrivateKey_dup(privateKey.private_key_);
+    private_key_ = (void *)RSAPrivateKey_dup((RSA *)privateKey.private_key_);
     if (private_key_ == nullptr) {
         std::string msg("Crypto Error (pkenc::PrivateKey::operator =): "
             "Could not copy private key");
@@ -142,11 +151,11 @@ pcrypto::pkenc::PrivateKey& pcrypto::pkenc::PrivateKey::operator=(
  * @param PEM encoded Serialized RSA private key to deserialize
  */
 void pcrypto::pkenc::PrivateKey::Deserialize(const std::string& encoded) {
-    RSA* key = deserializeRSAPrivateKey(encoded);
+    RSA *key = (RSA *)deserializeRSAPrivateKey(encoded);
     if (private_key_ != nullptr)
-        RSA_free(private_key_);
+        RSA_free((RSA *)private_key_);
 
-    private_key_ = key;
+    private_key_ = (void *)key;
 }  // pcrypto::pkenc::PrivateKey::Deserialize
 
 
@@ -155,8 +164,8 @@ void pcrypto::pkenc::PrivateKey::Deserialize(const std::string& encoded) {
  * Throws RuntimeError.
  */
 void pcrypto::pkenc::PrivateKey::Generate() {
-    if (private_key_) {
-        RSA_free(private_key_);
+    if (private_key_ != nullptr) {
+        RSA_free((RSA *)private_key_);
         private_key_ = nullptr;
     }
 
@@ -164,7 +173,7 @@ void pcrypto::pkenc::PrivateKey::Generate() {
     BIGNUM_ptr exp(BN_new(), BN_free);
     private_key_ = nullptr;
 
-    if (exp == NULL) {
+    if (exp == nullptr) {
         std::string msg("Crypto  Error (pkenc::PrivateKey::Generate()): "
             "Could not create BIGNUM for RSA exponent");
         throw Error::RuntimeError(msg);
@@ -188,8 +197,8 @@ void pcrypto::pkenc::PrivateKey::Generate() {
             "Could not generate RSA key");
         throw Error::RuntimeError(msg);
     }
-    private_key_ = RSAPrivateKey_dup(private_key.get());
-    if (!private_key_) {
+    private_key_ = (void *)RSAPrivateKey_dup(private_key.get());
+    if (private_key_ == nullptr) {
         std::string msg("Crypto  Error (pkenc::PrivateKey::Generate()): "
             "Could not dup RSA private key");
         throw Error::RuntimeError(msg);
@@ -217,7 +226,7 @@ std::string pcrypto::pkenc::PrivateKey::Serialize() const {
 
     // This writes a RSA private key PEM string of the form
     // "BEGIN RSA PRIVATE KEY"
-    int res = PEM_write_bio_RSAPrivateKey(bio.get(), private_key_,
+    int res = PEM_write_bio_RSAPrivateKey(bio.get(), (RSA *)private_key_,
         nullptr, nullptr, 0, 0, nullptr);
     if (res == 0) {
         std::string msg(
@@ -253,16 +262,22 @@ ByteArray pcrypto::pkenc::PrivateKey::DecryptMessage(
     char err[constants::ERR_BUF_LEN];
     int ptext_len;
 
+    // Sanity checks
+    if (ciphertext.size() == 0) {
+        std::string msg(
+            "Crypto Error (DecryptMessage): RSA ciphertext cannot be empty");
+        throw Error::ValueError(msg);
+    }
     if (ciphertext.size() != (constants::RSA_KEY_SIZE >> 3)) {
         std::string msg(
             "Crypto Error (DecryptMessage): RSA ciphertext size is invalid");
         throw Error::ValueError(msg);
     }
 
-    ByteArray ptext(RSA_size(private_key_));
+    ByteArray ptext(RSA_size((RSA *)private_key_));
 
     ptext_len = RSA_private_decrypt(ciphertext.size(), ciphertext.data(),
-        ptext.data(), private_key_, constants::RSA_PADDING_SCHEME);
+        ptext.data(), (RSA *)private_key_, constants::RSA_PADDING_SCHEME);
 
     if (ptext_len == -1) {
         std::string msg(

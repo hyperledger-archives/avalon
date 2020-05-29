@@ -63,13 +63,23 @@ namespace Error = tcf::error;
  * @returns Allocated RSA context containing key information.
  *          Must be RSA_free()'ed.
  */
-RSA* pcrypto::pkenc::PublicKey::deserializeRSAPublicKey(const std::string& encoded) {
+void *pcrypto::pkenc::PublicKey::deserializeRSAPublicKey(
+        const std::string& encoded) {
     RSA *public_key;
+
+    // Sanity check
+    if (encoded.size() == 0) {
+        std::string msg(
+            "Crypto Error (pkenc::PublicKey::deserializeRSAPublicKey(): "
+            "RSA public key PEM string is empty");
+        throw Error::ValueError(msg);
+    }
 
     BIO_ptr bio(BIO_new_mem_buf(encoded.c_str(), -1), BIO_free_all);
     if (bio == nullptr) {
         std::string msg(
-            "Crypto Error (deserializeRSAPublicKey): Could not create BIO");
+            "Crypto Error (pkenc::PublicKey::deserializeRSAPublicKey): "
+            "Could not create BIO");
         throw Error::RuntimeError(msg);
     }
 
@@ -81,7 +91,8 @@ RSA* pcrypto::pkenc::PublicKey::deserializeRSAPublicKey(const std::string& encod
         // If that fails, next attempt to read PEM with BEGIN RSA PUBLIC KEY
         BIO_ptr bio2(BIO_new_mem_buf(encoded.c_str(), -1), BIO_free_all);
         if (bio == nullptr) {
-            std::string msg("Crypto Error (deserializeRSAPublicKey): "
+            std::string msg(
+                "Crypto Error (pkenc::PublicKey::deserializeRSAPublicKey): "
                 "Could not create BIO");
             throw Error::RuntimeError(msg);
         }
@@ -89,22 +100,24 @@ RSA* pcrypto::pkenc::PublicKey::deserializeRSAPublicKey(const std::string& encod
             nullptr, nullptr, nullptr);
         if (public_key == nullptr) {
             std::string msg(
-                "Crypto Error (deserializeRSAPublicKey): Could not "
-                "deserialize public RSA key");
+                "Crypto Error (pkenc::PublicKey::deserializeRSAPublicKey): "
+                "Could not deserialize public RSA key");
             throw Error::ValueError(msg);
         }
     }
     return public_key;
-}  // deserializeRSAPublicKey
+}  // pcrypto::pkenc::PublicKey::deserializeRSAPublicKey
 
 
 /**
  * PublicKey constructor from PrivateKey.
  * Extracts the public key portion from a RSA key pair.
+ *
+ * @param privateKey Private key from which to derive a public key
  */
 pcrypto::pkenc::PublicKey::PublicKey(
         const pcrypto::pkenc::PrivateKey& privateKey) {
-    public_key_ = RSAPublicKey_dup(privateKey.private_key_);
+    public_key_ = (void *)RSAPublicKey_dup((RSA *)privateKey.private_key_);
     if (public_key_ == nullptr) {
         std::string msg("Crypto  Error (pkenc::PublicKey()): "
             "Could not duplicate RSA public key");
@@ -113,27 +126,13 @@ pcrypto::pkenc::PublicKey::PublicKey(
 }  // pcrypto::pkenc::PublicKey::PublicKey
 
 
-/**
- * Constructor from a PEM encoded string.
- * That is, convert the key from a PEM format string
- * (with either "BEGIN RSA PUBLIC KEY" or "BEGIN PUBLIC KEY").
- *
- * Implemented with deserializeRSAPublicKey().
- * Throws RuntimeError, ValueError.
- *
- * @param PEM encoded serialized RSA public key
- */
-pcrypto::pkenc::PublicKey::PublicKey(const std::string& encoded) {
-    public_key_ = deserializeRSAPublicKey(encoded);
-}  // pcrypto::pkenc::PublicKey::PublicKey
-
 
 /**
  * PublicKey destructor.
  */
 pcrypto::pkenc::PublicKey::~PublicKey() {
     if (public_key_ != nullptr) {
-        RSA_free(public_key_);
+        RSA_free((RSA *)public_key_);
         public_key_ = nullptr;
     }
 }  // pcrypto::pkenc::Public::~PublicKey
@@ -145,7 +144,7 @@ pcrypto::pkenc::PublicKey::~PublicKey() {
  */
 pcrypto::pkenc::PublicKey::PublicKey(
         const pcrypto::pkenc::PublicKey& publicKey) {
-    public_key_ = RSAPublicKey_dup(publicKey.public_key_);
+    public_key_ = (void *)RSAPublicKey_dup((RSA *)publicKey.public_key_);
     if (public_key_ == nullptr) {
         std::string msg("Crypto Error (pkenc::PublicKey() copy): "
             "Could not copy public key");
@@ -163,8 +162,8 @@ pcrypto::pkenc::PublicKey& pcrypto::pkenc::PublicKey::operator=(
     if (this == &publicKey)
         return *this;
     if (public_key_ != nullptr)
-        RSA_free(public_key_);
-    public_key_ = RSAPublicKey_dup(publicKey.public_key_);
+        RSA_free((RSA *)public_key_);
+    public_key_ = (void *)RSAPublicKey_dup((RSA *)publicKey.public_key_);
     if (public_key_ == nullptr) {
         std::string msg("Crypto Error (pkenc::PublicKey::operator =): "
             "Could not copy public key");
@@ -185,10 +184,10 @@ pcrypto::pkenc::PublicKey& pcrypto::pkenc::PublicKey::operator=(
  * @param PEM encoded Serialized RSA public key to deserialize
  */
 void pcrypto::pkenc::PublicKey::Deserialize(const std::string& encoded) {
-    RSA* key = deserializeRSAPublicKey(encoded);
+    RSA* key = (RSA *)deserializeRSAPublicKey(encoded);
     if (public_key_ != nullptr)
-        RSA_free(public_key_);
-    public_key_ = key;
+        RSA_free((RSA *)public_key_);
+    public_key_ = (void *)key;
 }  // pcrypto::pkenc::PublicKey::Deserialize
 
 
@@ -201,20 +200,23 @@ void pcrypto::pkenc::PublicKey::Deserialize(const std::string& encoded) {
 std::string pcrypto::pkenc::PublicKey::Serialize() const {
     if (public_key_ == nullptr) {
         std::string msg(
-            "Crypto Error (Serialize): PublicKey is not initialized");
+            "Crypto Error (pkenc::PublicKey::Serialize): "
+            "PublicKey is not initialized");
         throw Error::RuntimeError(msg);
     }
 
     BIO_ptr bio(BIO_new(BIO_s_mem()), BIO_free_all);
     if (bio == nullptr) {
-        std::string msg("Crypto Error (Serialize): Could not create BIO");
+        std::string msg("Crypto Error (pkenc::PublicKey::Serialize): "
+            "Could not create BIO");
         throw Error::RuntimeError(msg);
     }
 
     // This writes a RSA public key PEM string of the form "BEGIN PUBLIC KEY"
-    int res = PEM_write_bio_RSA_PUBKEY(bio.get(), public_key_);
+    int res = PEM_write_bio_RSA_PUBKEY(bio.get(), (RSA *)public_key_);
     if (res == 0) {
-        std::string msg("Crypto Error (Serialize): Could not write public key");
+        std::string msg("Crypto Error (pkenc::PublicKey::Serialize): "
+            "Could not write public key");
         throw Error::RuntimeError(msg);
     }
 
@@ -223,7 +225,8 @@ std::string pcrypto::pkenc::PublicKey::Serialize() const {
 
     res = BIO_read(bio.get(), pem_str.data(), keylen);
     if (res == 0) {
-        std::string msg("Crypto Error (Serialize): Could not red BIO");
+        std::string msg("Crypto Error (pkenc::PublicKey::Serialize): "
+            "Could not read BIO");
         throw Error::RuntimeError(msg);
     }
 
@@ -246,24 +249,26 @@ ByteArray pcrypto::pkenc::PublicKey::EncryptMessage(const ByteArray& message)
     char err[constants::ERR_BUF_LEN];
     int ctext_len;
 
+    // Sanity checks
     if (message.size() == 0) {
         std::string msg(
-            "Crypto Error (EncryptMessage): RSA plaintext cannot be empty");
-        throw Error::RuntimeError(msg);
+            "Crypto Error (pkenc::PublicKey::EncryptMessage): "
+            "RSA plaintext cannot be empty");
+        throw Error::ValueError(msg);
     }
-
     if (message.size() > constants::RSA_PLAINTEXT_LEN) {
         std::string msg(
-            "Crypto Error (EncryptMessage): RSA plaintext size is too large");
-        throw Error::RuntimeError(msg);
+            "Crypto Error (pkenc::PublicKey::EncryptMessage): "
+            "RSA plaintext size is too large");
+        throw Error::ValueError(msg);
     }
 
-    ByteArray ctext(RSA_size(public_key_));
+    ByteArray ctext(RSA_size((RSA *)public_key_));
     ctext_len = RSA_public_encrypt(message.size(), message.data(),
-        ctext.data(), public_key_, constants::RSA_PADDING_SCHEME);
+        ctext.data(), (RSA *)public_key_, constants::RSA_PADDING_SCHEME);
 
     if (ctext_len == -1) {
-        std::string msg("Crypto Error (EncryptMessage): "
+        std::string msg("Crypto Error (pkenc::PublicKey::EncryptMessage): "
             "RSA encryption internal error.\n");
         ERR_load_crypto_strings();
         ERR_error_string(ERR_get_error(), err);

@@ -142,12 +142,13 @@ main(void)
 
     printf("Test RSA key management functions.\n");
     try {
+        printf("Test PrivateKey constructors.\n");
         // Default constructor
         tcf::crypto::pkenc::PrivateKey privateKey_t;
         privateKey_t.Generate();
+
         // PublicKey constructor from PrivateKey
         tcf::crypto::pkenc::PublicKey publicKey_t(privateKey_t);
-
         publicKey_t = privateKey_t.GetPublicKey();
 
         // Copy constructors
@@ -170,6 +171,7 @@ main(void)
     // Default constructor
     tcf::crypto::pkenc::PrivateKey rprivateKey;
     rprivateKey.Generate();
+
     // PublicKey constructor from PrivateKey
     tcf::crypto::pkenc::PublicKey rpublicKey(rprivateKey);
 

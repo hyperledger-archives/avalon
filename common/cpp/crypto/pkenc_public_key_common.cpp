@@ -42,6 +42,21 @@ pcrypto::pkenc::PublicKey::PublicKey() {
 
 
 /**
+ * Constructor from a PEM encoded string.
+ * That is, convert the key from a PEM format string
+ * (begins with either "BEGIN RSA PUBLIC KEY" or "BEGIN PUBLIC KEY").
+ *
+ * Implemented with deserializeRSAPublicKey().
+ * Throws RuntimeError, ValueError.
+ *
+ * @param PEM encoded serialized RSA public key
+ */
+pcrypto::pkenc::PublicKey::PublicKey(const std::string& encoded) {
+    public_key_ = deserializeRSAPublicKey(encoded);
+}  // pcrypto::pkenc::PublicKey::PublicKey
+
+
+/**
  * Move constructor.
  * Throws RuntimeError.
  */

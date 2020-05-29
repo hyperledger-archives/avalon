@@ -36,8 +36,11 @@ namespace Error = tcf::error; // Error handling.
 
 /**
  * Constructor from PEM encoded string.
- * Throws RuntimeError, ValueError.
+ * That is, convert the key from a PEM format string
+ * (begins with "BEGIN RSA PRIVATE KEY").
  *
+ * Implemented with deserializeRSAPrivateKey().
+ * Throws RuntimeError, ValueError.
  * @param PEM encoded serialized RSA private key
  */
 pcrypto::pkenc::PrivateKey::PrivateKey(const std::string& encoded) {
