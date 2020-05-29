@@ -16,15 +16,19 @@
 #include <sgx_utils.h>
 #include <sgx_quote.h>
 #include "enclave_data.h"
+#include <string>
+
 #include "crypto.h"
 #include "utils.h"
 #include "types.h"
 #include "error.h"
 
-#include "jsonvalue.h"
-#include "parson.h"
 #include "verify-report.h"
 #include "signup_enclave_util.h"
+#include "parson.h"
+#include "jsonvalue.h"
+#include "json_utils.h"
+#include "enclave_data.h"
 
 #include "enclave_utils.h"
 #include "ext_work_order_info_kme.h"
@@ -97,7 +101,7 @@ int ExtWorkOrderInfoKME::VerifyAttestationWpe(
     JSON_Object* proof_object = \
         json_value_get_object(att_data_string_parsed);
     if (proof_object == nullptr) {
-	ThrowIf<ValueError>(true, "Creating proof data json object failed");
+	ThrowIf<ValueError>(true, "Get proof data json object failed");
         return VERIFICATION_FAILED;
     }
 
@@ -131,7 +135,7 @@ int ExtWorkOrderInfoKME::VerifyAttestationWpe(
         json_value_get_object(verification_report_parsed);
     if (verification_report_object == nullptr) {
 	ThrowIf<ValueError>(true,
-	    "Creating verification report json object failed");
+	    "Get verification report json object failed");
         return VERIFICATION_FAILED;
     }
 
@@ -193,7 +197,7 @@ int ExtWorkOrderInfoKME::VerifyAttestationWpe(
     sgx_basename_t mr_basename_from_report = *(&quote_body->basename);
     sgx_measurement_t mr_signer_from_report = *(&report_body->mr_signer);
 
-    /// Convert uint8_t array to ByteArray(vector<uint8_1>)
+    /// Convert uint8_t array to ByteArray(vector<uint8_t>)
     ByteArray mr_enclave_bytes(std::begin(mr_enclave_from_report.m),
         std::end(mr_enclave_from_report.m));
     ByteArray mr_signer_bytes(std::begin(mr_signer_from_report.m),
@@ -217,12 +221,99 @@ int ExtWorkOrderInfoKME::VerifyAttestationWpe(
 }  // ExtWorkOrderInfoKME::VerifyAttestationWpe
 
 
-int ExtWorkOrderInfoKME::CreateWorkorderKeyInfo(const ByteArray& wpe_key,
-    const ByteArray& kme_skey, ByteArray& json_key_data) {
+int ExtWorkOrderInfoKME::CreateWorkOrderKeyInfo(
+    const ByteArray& wpe_encryption_key,
+    const ByteArray& kme_signing_key,
+    ByteArray& work_order_key_data) {
 
-    // To be implemented
-    return 0;
-}  // ExtWorkOrderInfoKME::CreateWorkorderKeyInfo
+    tcf_err_t result = TCF_SUCCESS;
+
+    tcf::crypto::sig::PrivateKey private_sig_key;
+    tcf::crypto::sig::PublicKey public_sig_key;
+    try {
+        WorkOrderKeyInfo wo_key_info;
+        wo_key_info.in_data_keys = this->in_work_order_keys;
+        wo_key_info.out_data_keys =  this->out_work_order_keys;
+
+        // generate symmetric key
+        wo_key_info.sym_key = tcf::crypto::skenc::GenerateKey();
+
+        // encrypted_wo_key is the encrypted version of session key
+        // generated client using symmetric key generated above
+        wo_key_info.encrypted_wo_key = tcf::crypto::skenc::EncryptMessage(
+            wo_key_info.sym_key, this->work_order_sym_key);
+
+        // Generate work order signing key pair to sign work order response
+        // and encrypt the signing key using symmetric key generated above
+        private_sig_key.Generate();
+        public_sig_key = private_sig_key.GetPublicKey();
+
+        ByteArray signing_key = StrToByteArray(private_sig_key.Serialize());
+        wo_key_info.verification_key = StrToByteArray(
+            public_sig_key.Serialize());
+
+        // Generate signature on verification key and nonce
+        std::string concat_str = \
+            public_sig_key.Serialize() + this->wo_requester_nonce;
+
+        // Sign hash of concatenated verification key signature and
+        // requester nonce using worker's private key.
+        // Verification key signature is verified at client
+        // by using worker's public verification key
+        EnclaveData* enclave_data = EnclaveData::getInstance();
+        ByteArray verify_key_sig_hash = \
+            tcf::crypto::ComputeMessageHash(StrToByteArray(concat_str));
+        wo_key_info.verification_key_signature = \
+            enclave_data->sign_message(verify_key_sig_hash);
+
+        // encrypt the signing key using symmetric key
+        wo_key_info.encrypted_signing_key = \
+            tcf::crypto::skenc::EncryptMessage(
+                wo_key_info.sym_key, signing_key);
+
+        // encrypt the symmetric key using WPE asymmetric public encryption key
+        tcf::crypto::pkenc::PublicKey public_enc_key(
+            ByteArrayToStr(wpe_encryption_key));
+        wo_key_info.encrypted_sym_key = \
+            public_enc_key.EncryptMessage(wo_key_info.sym_key);
+
+        // Encrypt plain keys in in_data and out_data using symmetric key
+        int count = this->in_work_order_keys.size();
+        wo_key_info.in_data_keys.resize(count);
+        for (int i=0; i<count; i++) {
+            wo_key_info.in_data_keys[i].decrypted_data = \
+                tcf::crypto::skenc::EncryptMessage(wo_key_info.sym_key,
+                    wo_key_info.in_data_keys[i].decrypted_data);
+        }
+
+        count = this->out_work_order_keys.size();
+        wo_key_info.out_data_keys.resize(count);
+        for (int i=0; i<count; i++) {
+            wo_key_info.out_data_keys[i].decrypted_data = \
+                tcf::crypto::skenc::EncryptMessage(wo_key_info.sym_key,
+                    wo_key_info.out_data_keys[i].decrypted_data);
+        }
+
+        // Calculate signure of hash of all the encrypted values in this
+        // work order key info JSON using KME's signing key
+        ByteArray wo_key_info_hash = {};
+        CalculateWorkOrderKeyInfoHash(wo_key_info, wo_key_info_hash);
+
+        tcf::crypto::sig::PrivateKey kme_priv_key(
+            ByteArrayToStr(kme_signing_key));
+        wo_key_info.signature = kme_priv_key.SignMessage(wo_key_info_hash);
+
+        // Generate WorkOrderKeyInfo JSON doc
+        work_order_key_data = CreateJsonWorkOrderKeys(wo_key_info);
+    } catch (tcf::error::CryptoError& e) {
+        Log(TCF_LOG_ERROR,
+            "Caught Exception while creating work order key info: %s, %s",
+            e.error_code(), e.what());
+        result = TCF_ERR_CRYPTO;
+    }
+
+    return result;
+}  // ExtWorkOrderInfoKME::CreateWorkOrderKeyInfo
 
 bool ExtWorkOrderInfoKME::CheckAttestationSelf(
     const ByteArray& attestation_data, ByteArray& mrenclave,
@@ -232,3 +323,156 @@ bool ExtWorkOrderInfoKME::CheckAttestationSelf(
     // To be implemented
     return 0;
 }  // ExtWorkOrderInfoKME::CheckAttestationSelf
+
+/*
+ * Calculates hash on the encrypted keys, input-data-keys and output-data-keys
+ * @param wo_key_info - Instance of WorkOrderKeyInfo
+ * @param wo_key_info_hash [OUT] - Computed hash value
+*/
+void ExtWorkOrderInfoKME::CalculateWorkOrderKeyInfoHash(
+    WorkOrderKeyInfo wo_key_info, ByteArray& wo_key_info_hash) {
+
+    std::string concat_str = \
+        ByteArrayToBase64EncodedString(wo_key_info.encrypted_sym_key) +
+        ByteArrayToBase64EncodedString(wo_key_info.encrypted_wo_key) +
+        ByteArrayToBase64EncodedString(wo_key_info.encrypted_signing_key);
+
+    std::string hash1_str = ByteArrayToBase64EncodedString(
+        tcf::crypto::ComputeMessageHash(StrToByteArray(concat_str)));
+
+    // sort input-data-keys and output-data-keys based on indices
+    std::sort(wo_key_info.in_data_keys.begin(), wo_key_info.in_data_keys.end(),
+        [](tcf::WorkOrderData x, tcf::WorkOrderData y) {
+            return x.index < y.index;});
+
+    std::sort(wo_key_info.out_data_keys.begin(), wo_key_info.out_data_keys.end(),
+        [](tcf::WorkOrderData x, tcf::WorkOrderData y) {
+            return x.index < y.index;});
+
+    std::string in_data_hash_str;
+    for (auto d: wo_key_info.in_data_keys) {
+        in_data_hash_str += ByteArrayToBase64EncodedString(
+            tcf::crypto::ComputeMessageHash(d.decrypted_data));
+    }
+
+    std::string out_data_hash_str;
+    for (auto d: wo_key_info.out_data_keys) {
+        out_data_hash_str += ByteArrayToBase64EncodedString(
+            tcf::crypto::ComputeMessageHash(d.decrypted_data));
+    }
+    std::string final_hash_str = \
+        hash1_str + in_data_hash_str + out_data_hash_str;
+    wo_key_info_hash = tcf::crypto::ComputeMessageHash(
+        StrToByteArray(final_hash_str));
+}  // ExtWorkOrderInfoKME::CalculateWorkOrderKeyInfoHash
+
+/*
+ * Creates JSON document of encryption keys, signing keys
+ * and data encryption keys
+ *
+ * @param wo_key_info - Instance of WorkOrderKeyInfo
+*/
+ByteArray ExtWorkOrderInfoKME::CreateJsonWorkOrderKeys(
+    WorkOrderKeyInfo wo_key_info) {
+
+    JSON_Status jret;
+    // Create the response structure
+    JsonValue wo_key_info_val(json_value_init_object());
+    tcf::error::ThrowIf<tcf::error::RuntimeError>(
+        !wo_key_info_val.value, "Failed to create the work order key info object");
+
+    JSON_Object* wo_key_info_obj = json_value_get_object(wo_key_info_val);
+    tcf::error::ThrowIfNull(wo_key_info_obj,
+        "Failed to retrieve of work order info object");
+
+    JsonSetStr(wo_key_info_obj, "signature",
+        wo_key_info.GetSignature().c_str(),
+        "failed to serialize signature");
+    JsonSetStr(wo_key_info_obj, "encrypted-sym-key",
+        wo_key_info.GetEncryptedSymmetricKey().c_str(),
+        "failed to serialize encrypted symmetric key");
+    JsonSetStr(wo_key_info_obj, "encrypted-wo-key",
+        wo_key_info.GetEncryptedWorkOrderKey().c_str(),
+        "failed to serialize encrypted work order key");
+    JsonSetStr(wo_key_info_obj, "encrypted-wo-signing-key",
+        wo_key_info.GetEncryptedSigningKey().c_str(),
+        "failed to serialize encrypted work order signing key");
+    JsonSetStr(wo_key_info_obj, "wo-verification-key",
+        wo_key_info.GetVerificationKey().c_str(),
+        "failed to serialize work order verification key");
+    JsonSetStr(wo_key_info_obj, "wo-verification-key-sig",
+        wo_key_info.GetVerificationKeySignature().c_str(),
+        "failed to serialize work order verification key signature");
+
+    // construct input-data-keys and output-data-keys
+    jret = json_object_set_value(wo_key_info_obj,
+        "input-data-keys", json_value_init_array());
+    tcf::error::ThrowIf<tcf::error::RuntimeError>(
+        jret != JSONSuccess, "failed to set input-data-keys array");
+    JSON_Array* in_data_keys_arr = json_object_get_array(
+        wo_key_info_obj, "input-data-keys");
+    tcf::error::ThrowIfNull(in_data_keys_arr,
+        "failed to get input-data-keys array");
+
+   JSON_Value* key_item_value;
+   JSON_Object* key_item_object;
+    for (auto wo_key: wo_key_info.in_data_keys) {
+        key_item_value = json_value_init_object();
+        tcf::error::ThrowIfNull(key_item_value,
+            "failed to create a key item value");
+
+        key_item_object = json_value_get_object(key_item_value);
+        tcf::error::ThrowIfNull(key_item_object,
+            "failed to create a key item object");
+
+        JsonSetNumber(key_item_object, "index", wo_key.index,
+            "failed to serialize index of input-work-order-key");
+        JsonSetStr(key_item_object, "encrypted-data-key",
+            ByteArrayToBase64EncodedString(wo_key.decrypted_data).c_str(),
+            "failed to serialize key of input-work-order-key");
+        jret = json_array_append_value(in_data_keys_arr, key_item_value);
+        tcf::error::ThrowIf<tcf::error::RuntimeError>(jret != JSONSuccess,
+            "failed to add key item to the in-data-keys array");
+    }
+
+    jret = json_object_set_value(wo_key_info_obj,
+        "output-data-keys", json_value_init_array());
+    tcf::error::ThrowIf<tcf::error::RuntimeError>(
+        jret != JSONSuccess, "failed to set output-data-keys array");
+    JSON_Array* out_data_keys_arr = json_object_get_array(
+        wo_key_info_obj, "output-data-keys");
+    tcf::error::ThrowIfNull(out_data_keys_arr,
+        "failed to get output-data-keys array");
+
+    for (auto wo_key: wo_key_info.out_data_keys) {
+        key_item_value = json_value_init_object();
+        tcf::error::ThrowIfNull(key_item_value,
+            "failed to create a key item value");
+
+        key_item_object = json_value_get_object(key_item_value);
+        tcf::error::ThrowIfNull(key_item_object,
+            "failed to create a key item object");
+        JsonSetNumber(key_item_object, "index", wo_key.index,
+            "failed to serialize index of output-work-order-key");
+        JsonSetStr(key_item_object, "encrypted-data-key",
+            ByteArrayToBase64EncodedString(wo_key.decrypted_data).c_str(),
+            "failed to serialize key of output-work-order-key");
+        jret = json_array_append_value(out_data_keys_arr, key_item_value);
+        tcf::error::ThrowIf<tcf::error::RuntimeError>(jret != JSONSuccess,
+            "failed to add key item to the output-data-keys array");
+    }
+
+    // Serialize the resulting json
+    size_t serialized_size = json_serialization_size(wo_key_info_val);
+    ByteArray serialized_wo_key_info;
+    serialized_wo_key_info.resize(serialized_size);
+
+    jret = json_serialize_to_buffer(wo_key_info_val,
+        reinterpret_cast<char*>(&serialized_wo_key_info[0]),
+        serialized_wo_key_info.size());
+    tcf::error::ThrowIf<tcf::error::RuntimeError>(
+        jret != JSONSuccess, "work order key info serialization failed");
+
+    return serialized_wo_key_info;
+}  // ExtWorkOrderInfoKME::CreateJsonWorkOrderKeys
+
