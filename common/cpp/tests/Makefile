@@ -73,12 +73,14 @@ build/b64test: build build/b64test.o build/base64.o build/utils.o
 build/certtest: build build/certtest.o build/verify_certificate.o
 	g++ -o $@ $@.o           build/verify_certificate.o $(LDFLAGS)
 
+# $(UTILTESTOBJS) needed for Mbed TLS, not OpenSSL
 build/pktest: build build/pktest.o \
 		build/pkenc_private_key.o build/pkenc_private_key_common.o \
-		build/pkenc_public_key.o build/pkenc_public_key_common.o
+		build/pkenc_public_key.o build/pkenc_public_key_common.o \
+		$(UTILTESTOBJS)
 	g++ -o $@ $@.o build/pkenc_private_key.o build/pkenc_private_key_common.o \
 		build/pkenc_public_key.o build/pkenc_public_key_common.o \
- 		$(LDFLAGS)
+		$(UTILTESTOBJS) $(LDFLAGS)
 
 build/signtest: build build/signtest.o \
 		build/sig_private_key.o build/sig_public_key.o

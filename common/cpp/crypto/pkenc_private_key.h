@@ -24,11 +24,6 @@
 #include <vector>
 #include "types.h"
 
-#include "crypto_shared.h"
-#if defined(CRYPTOLIB_OPENSSL)
-#include <openssl/rsa.h>
-#endif
-
 namespace tcf {
 namespace crypto {
     // Public Key encryption functions
@@ -70,8 +65,9 @@ namespace crypto {
             ByteArray DecryptMessage(const ByteArray& ct) const;
 
         private:
-            RSA* private_key_;
-            RSA* deserializeRSAPrivateKey(const std::string& encoded);
+            // void * is an opaque pointer to implementation-dependent context
+            void *private_key_;
+            void *deserializeRSAPrivateKey(const std::string& encoded);
         };
     }  // namespace pkenc
 }  // namespace crypto

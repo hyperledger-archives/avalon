@@ -33,7 +33,7 @@ namespace crypto {
         /** Padding required, in bits, for OAEP padding. */
         const int RSA_PADDING_SIZE = 41;
         /**
-         * Maxinum amount, in bytes, of plain text that can
+         * Maximum amount, in bytes, of plain text that can
          * be encrypted with RSA. For longer lengths
          * use symmetric encryption or a larger key size.
          */

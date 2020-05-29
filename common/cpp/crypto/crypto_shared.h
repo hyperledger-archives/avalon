@@ -27,23 +27,22 @@
 #define CRYPTOLIB_OPENSSL // default
 #endif
 
-// These headers will be OpenSSL only when MBed TLS is implemented for RSA
-//#ifdef CRYPTOLIB_OPENSSL
+#ifdef CRYPTOLIB_OPENSSL
 #include <openssl/obj_mac.h> // NID_*
 #include <openssl/rsa.h>
-//#endif
+#endif
 
 namespace tcf {
 namespace crypto {
     namespace constants {
-//#ifdef CRYPTOLIB_OPENSSL
+#ifdef CRYPTOLIB_OPENSSL
         // OpenSSL: Secp256k1 elliptical curve cryptography
         const int CURVE = NID_secp256k1;
         // OpenSSL: OAEP padding or better should always be used for RSA
         const int RSA_PADDING_SCHEME = RSA_PKCS1_OAEP_PADDING;
         // OpenSSL Error string buffer size
         const int ERR_BUF_LEN = 130;
-//#endif
+#endif
     }  // namespace constants
 }  // namespace crypto
 }  // namespace tcf
