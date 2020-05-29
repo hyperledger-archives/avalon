@@ -32,8 +32,8 @@ namespace tcf {
 	class WorkOrderData {
 	public:
 
-                WorkOrderData();
-                explicit WorkOrderData(int in_index, ByteArray data);
+        WorkOrderData();
+        explicit WorkOrderData(int in_index, ByteArray data);
 		int index;
 		// Initialize here to suppress Klocwork initialization error
 		ByteArray decrypted_data = {};

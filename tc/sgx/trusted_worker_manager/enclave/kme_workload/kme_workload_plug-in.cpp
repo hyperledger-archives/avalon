@@ -13,19 +13,20 @@
 * limitations under the License.
 */
 
-#include <string.h>
+#include "utils.h"
 #include "kme_workload_plug-in.h"
 #include "enclave_data.h"
 #include "error.h"
 #include "parson.h"
 #include "jsonvalue.h"
 #include "json_utils.h"
-#include "utils.h"
 #include "signup_enclave_util.h"
+#include "enclave_utils.h"
 
 using namespace tcf::error;
 
 REGISTER_WORKLOAD_PROCESSOR("kme",KEY_MANAGEMENT_ENCLAVE,KMEWorkloadProcessor);
+
 
 /*
  *  Generates verification key, verification key signature and
@@ -36,8 +37,8 @@ REGISTER_WORKLOAD_PROCESSOR("kme",KEY_MANAGEMENT_ENCLAVE,KMEWorkloadProcessor);
  *  @param ext_wo_info_kme - Instance of KMEs extended work order implementation
 */
 
-/* Map of key: Hex of public key of unique ID verification key and
- * value: private key of unique ID verification key */
+/* Map of key: Hex of public verification key or unique ID
+ * value: private key corresponding to unique ID or verification key */
 std::map<ByteArray, ByteArray> KMEWorkloadProcessor::sig_key_map;
 /* Map of key: WPE encryption public key and value: private
  * key of unique ID verification key
@@ -58,13 +59,18 @@ WPEInfo::WPEInfo(const ByteArray& _sk) {
 
 void KMEWorkloadProcessor::GetUniqueId(
     const std::vector<tcf::WorkOrderData>& in_work_order_data,
-    std::vector<tcf::WorkOrderData>& out_work_order_data,
-    ExtWorkOrderInfoKME* ext_wo_info_kme) {
+    std::vector<tcf::WorkOrderData>& out_work_order_data) {
 
     ByteArray signing_key = {};
     ByteArray verification_key_hex = {};
     ByteArray verification_key_signature_hex = {};
     ByteArray nonce_hex = in_work_order_data[0].decrypted_data;
+
+    ExtWorkOrderInfoKME* ext_wo_info_kme = \
+        dynamic_cast<ExtWorkOrderInfoKME*>(ext_work_order_info);
+    tcf::error::ThrowIf<tcf::error::WorkloadError>(
+        (ext_wo_info_kme == nullptr),
+        "ExtWorkOrderInfoKME instance is not initialized");
 
     int err = ext_wo_info_kme->GenerateSigningKey(
         ExtWorkOrderInfo::KeyType_SECP256K1, nonce_hex, signing_key,
@@ -91,12 +97,10 @@ void KMEWorkloadProcessor::GetUniqueId(
  *
  *  @param in_work_order_data - vector of work order indata
  *  @param out_work_order_data - vector of work order outdata
- *  @param ext_wo_info_kme - Instance of KMEs extended work order implementation
 */
 void KMEWorkloadProcessor::Register(
     const std::vector<tcf::WorkOrderData>& in_work_order_data,
-    std::vector<tcf::WorkOrderData>& out_work_order_data,
-    ExtWorkOrderInfoKME* ext_wo_info_kme) {
+    std::vector<tcf::WorkOrderData>& out_work_order_data) {
     // If in_work_order_data is empty
     if (in_work_order_data.size() == 0) {
         this->SetStatus((int)ERR_WPE_REG_FAILED,
@@ -159,6 +163,13 @@ void KMEWorkloadProcessor::Register(
     ByteArray verification_key_hash = {};
     ByteArray mr_enclave = {};
     ByteArray mr_signer = {};
+
+    ExtWorkOrderInfoKME* ext_wo_info_kme = \
+        dynamic_cast<ExtWorkOrderInfoKME*>(ext_work_order_info);
+    tcf::error::ThrowIf<tcf::error::WorkloadError>(
+        (ext_wo_info_kme == nullptr),
+        "ExtWorkOrderInfoKME instance is not initialized");
+
     // Not simulator mode
     if (!this->isSgxSimulator()) {
         int err = ext_wo_info_kme->VerifyAttestationWpe(
@@ -227,7 +238,7 @@ void KMEWorkloadProcessor::Register(
         sig_key_map.erase(unique_id_bytes);
     }
     else {
-        this->SetStatus((int)ERR_WPE_NOT_FOUND,
+        this->SetStatus((int)ERR_WPE_KEY_NOT_FOUND,
             out_work_order_data);
         ThrowIf<ValueError>(true, "WPE verification key not found");
     }
@@ -242,14 +253,50 @@ void KMEWorkloadProcessor::Register(
  *
  *  @param in_work_order_data - vector of work order indata
  *  @param out_work_order_data - vector of work order outdata
- *  @param ext_wo_info_kme - Instance of KMEs extended work order implementation
 */
 void KMEWorkloadProcessor::PreprocessWorkorder(
     const std::vector<tcf::WorkOrderData>& in_work_order_data,
-    std::vector<tcf::WorkOrderData>& out_work_order_data,
-    ExtWorkOrderInfoKME* ext_wo_info_kme) {
+    std::vector<tcf::WorkOrderData>& out_work_order_data) {
 
-    // To be implemented
+    ExtWorkOrderInfoKME* ext_wo_info_kme = \
+        dynamic_cast<ExtWorkOrderInfoKME*>(ext_work_order_info);
+    tcf::error::ThrowIf<tcf::error::WorkloadError>(
+        (ext_wo_info_kme == nullptr),
+        "ExtWorkOrderInfoKME instance is not initialized");
+
+    // Get WPE encryption key from in data
+    ByteArray wpe_encrypt_key = \
+        StrToByteArray(ext_wo_info_kme->GetExtWorkOrderData().c_str());
+
+    auto search_enc_key = wpe_enc_key_map.find(wpe_encrypt_key);
+    if (search_enc_key != wpe_enc_key_map.end()) {
+        WPEInfo wpe_info = wpe_enc_key_map[wpe_encrypt_key];
+        ByteArray wo_key_data = {};
+
+        int status = ext_wo_info_kme->CreateWorkOrderKeyInfo(
+            wpe_encrypt_key, wpe_info.signing_key, wo_key_data);
+
+        if (!status) {
+            // skip the key map update if number of allowed work orders
+            // for pre-processing is unlimited
+            if (max_wo_count_ != KME_WO_COUNT_UNLIMITED) {
+                wpe_info.workorder_count++;
+                if (wpe_info.workorder_count >= max_wo_count_) {
+                    // remove the encryption key from the map because
+                    // number of pre-processed work orders reached max limit
+                    wpe_enc_key_map.erase(wpe_encrypt_key);
+                    SetStatus(ERR_WPE_MAX_WO_COUNT_REACHED,
+                        out_work_order_data);
+                    return;
+                } else {
+                    wpe_enc_key_map[wpe_encrypt_key] = wpe_info;
+                }
+            }
+            AddOutput(0, wo_key_data, out_work_order_data);
+        } else {
+            SetStatus(ERR_WPE_KEY_NOT_FOUND, out_work_order_data);
+        }
+    }
 }  // KMEWorkloadProcessor::PreprocessWorkorder
 
 /*
@@ -310,16 +357,14 @@ void KMEWorkloadProcessor::ProcessWorkOrder(
     const ByteArray& work_order_id,
     const std::vector<tcf::WorkOrderData>& in_work_order_data,
     std::vector<tcf::WorkOrderData>& out_work_order_data) {
-    ExtWorkOrderInfoKME* ext_wo_info_kme = \	
-        (ExtWorkOrderInfoKME*) ext_work_order_info; 
 
     if (workload_id == "kme-uid") {
-        GetUniqueId(in_work_order_data, out_work_order_data, ext_wo_info_kme);
+        GetUniqueId(in_work_order_data, out_work_order_data);
     } else if (workload_id == "kme-reg") {
-        Register(in_work_order_data, out_work_order_data, ext_wo_info_kme);
+        Register(in_work_order_data, out_work_order_data);
     } else {
-        PreprocessWorkorder(in_work_order_data, out_work_order_data,
-            ext_wo_info_kme);
+        PreprocessWorkorder(
+            in_work_order_data, out_work_order_data);
     }
 }  // KMEWorkloadProcessor::ProcessWorkOrder
 
@@ -334,3 +379,4 @@ int KMEWorkloadProcessor::isSgxSimulator() {
     return 0;
 #endif  // defined(SGX_SIMULATOR)
 }
+

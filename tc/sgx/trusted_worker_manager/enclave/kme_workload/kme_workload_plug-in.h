@@ -1,4 +1,4 @@
-/* Copyright 2018 Intel Corporation
+/* Copyright 2020 Intel Corporation
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -50,18 +50,15 @@ public:
 
     void GetUniqueId(
         const std::vector<tcf::WorkOrderData>& in_work_order_data,
-        std::vector<tcf::WorkOrderData>& out_work_order_data,
-	ExtWorkOrderInfoKME* ext_wo_info_kme);
+        std::vector<tcf::WorkOrderData>& out_work_order_data);
 
     void Register(
         const std::vector<tcf::WorkOrderData>& in_work_order_data,
-        std::vector<tcf::WorkOrderData>& out_work_order_data,
-	ExtWorkOrderInfoKME* ext_wo_info_kme);
+        std::vector<tcf::WorkOrderData>& out_work_order_data);
 
     void PreprocessWorkorder(
         const std::vector<tcf::WorkOrderData>& in_work_order_data,
-        std::vector<tcf::WorkOrderData>& out_work_order_data,
-	ExtWorkOrderInfoKME* ext_wo_info_kme);
+        std::vector<tcf::WorkOrderData>& out_work_order_data);
 
     void ProcessWorkOrder(
         std::string workload_id,
@@ -69,17 +66,17 @@ public:
         const ByteArray& worker_id,
         const ByteArray& work_order_id,
         const std::vector<tcf::WorkOrderData>& in_work_order_data,
-        std::vector<tcf::WorkOrderData>& out_work_order_data);
+        std::vector<tcf::WorkOrderData>& out_work_order_data) override;
 
 private:
     int isSgxSimulator();
+
     static void AddOutput(int index, ByteArray& data,
         std::vector<tcf::WorkOrderData>& out_work_order_data);
 
     static void SetStatus(const int result,
         std::vector<tcf::WorkOrderData>& out_work_order_data);
 
-    ExtWorkOrderInfoKME* ext_wo_info_kme;
     /* Need static maps since we need to persist the maps across the
      * multiple KME workload processor instances for different workload ids.
      */

@@ -94,6 +94,7 @@ public:
      * @param out_work_order_data Work order data returned by the
      *                            work order processor
      */
+
     virtual void ProcessWorkOrder(
         std::string workload_id,
         const ByteArray& requester_id,

@@ -37,7 +37,6 @@
 #include "workload_processor.h"
 
 namespace tcf {
-
     WorkOrderProcessor::~WorkOrderProcessor() {
         // Sanitize class members storing secrets
         worker_encryption_key.clear();
@@ -164,12 +163,17 @@ namespace tcf {
             "Unsupported payload format found in the input");
 
         // Decrypt Encryption key
-        ByteArray encrypted_session_key_bytes = HexStringToBinary(encrypted_session_key);
-        session_key = enclaveData->decrypt_message(encrypted_session_key_bytes);
+        ByteArray encrypted_session_key_bytes = \
+            HexStringToBinary(encrypted_session_key);
+        session_key = enclaveData->decrypt_message(
+            encrypted_session_key_bytes);
+
         ByteArray session_key_iv_bytes = HexStringToBinary(session_key_iv);
-        JSON_Array* data_array = json_object_get_array(params_object, "inData");
+        JSON_Array* data_array = json_object_get_array(
+            params_object, "inData");
         size_t count = json_array_get_count(data_array);
-        tcf::error::ThrowIf<tcf::error::ValueError>(count == 0, "Indata is empty");
+        tcf::error::ThrowIf<tcf::error::ValueError>(count == 0,
+            "Indata is empty");
 
         size_t i;
         for (i = 0; i < count; i++) {
@@ -247,11 +251,12 @@ namespace tcf {
         return serialized_response;
     }
 
-    std::vector<tcf::WorkOrderData> WorkOrderProcessor::ExecuteWorkOrder() {
+    std::vector<tcf::WorkOrderData> WorkOrderProcessor::ExecuteWorkOrder(
+        EnclaveData* enclave_data) {
+
         std::vector<tcf::WorkOrderData> in_wo_data;
         std::vector<tcf::WorkOrderData> out_wo_data;
         if (data_items_in.size() > 0) {
-            // data_items_in vector is sorted based out of index
             for (auto d : data_items_in) {
                 in_wo_data.emplace_back(d.workorder_data.index,
                                         d.workorder_data.decrypted_data);
@@ -265,26 +270,18 @@ namespace tcf {
             // Convert workload_id from hex string to string
             ByteArray workload_bytes = HexStringToBinary(workload_id);
             std::string workload_type(workload_bytes.begin(), workload_bytes.end());
-            WorkloadProcessor *processor;
-            // Creating workload processor for "kme" enclave type. The type of
-            // workload is checked in kme_workload_plugin in case of KME and
-            // processed accordingly.
-            if (this->enclave_type == KME_ENCLAVE){
-                processor = WorkloadProcessor::CreateWorkloadProcessor("kme");
-            }
-            else {
-                processor = WorkloadProcessor::CreateWorkloadProcessor(workload_type);
-            }
 
+            WorkloadProcessor *processor = \
+                WorkloadProcessor::CreateWorkloadProcessor(workload_type);
             tcf::error::ThrowIf<tcf::error::WorkloadError>(
                 processor == nullptr, "Invalid workload id");
             processor->ProcessWorkOrder(
-                        workload_type,
-                        StrToByteArray(requester_id),
-                        StrToByteArray(worker_id),
-                        StrToByteArray(work_order_id),
-                        in_wo_data,
-                        out_wo_data);
+                    workload_type,
+                    StrToByteArray(requester_id),
+                    StrToByteArray(worker_id),
+                    StrToByteArray(work_order_id),
+                    in_wo_data,
+                    out_wo_data);
             return out_wo_data;
         }
         throw tcf::error::RuntimeError("Work order inData not found");
@@ -493,7 +490,7 @@ namespace tcf {
                 tcf::error::ThrowIf<tcf::error::ValueError>(VerifyRequesterSignature()!= true,
                     "Signature verification of client request failed. Request is tampered.");
             }
-            std::vector<tcf::WorkOrderData> wo_data = ExecuteWorkOrder();
+            std::vector<tcf::WorkOrderData> wo_data = ExecuteWorkOrder(enclaveData);
             size_t i = 0;
             size_t out_data_size = data_items_out.size();
             ByteArray hash = ResponseHashCalculate(wo_data);
@@ -505,7 +502,7 @@ namespace tcf {
             return CreateErrorResponse(e.error_code(), e.what());
         } catch (...) {
             return CreateErrorResponse(TCF_ERR_UNKNOWN, "unknown internal error");
-        }
-    }
+        }  // WorkOrderProcessor::Process
+    }  // WorkOrderProcessor
 }  // namespace tcf
 

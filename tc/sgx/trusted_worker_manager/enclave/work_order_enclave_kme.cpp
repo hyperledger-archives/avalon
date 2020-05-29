@@ -27,7 +27,7 @@
 #include "enclave_utils.h"
 #include "base_enclave.h"
 #include "enclave_data.h"
-#include "work_order_processor.h"
+#include "work_order_processor_kme.h"
 
 ByteArray last_serialized_response_kme;
 
@@ -51,17 +51,15 @@ tcf_err_t ecall_HandleWorkOrderRequestKME(const uint8_t* inSerializedRequest,
         ByteArray request(inSerializedRequest,
             inSerializedRequest + inSerializedRequestSize);
 
-        // Persist enclave type info in WorkOrderProcessor instance
-        tcf::WorkOrderProcessor wo_processor(KME_ENCLAVE);
+        // Create KME work order processor
+        tcf::WorkOrderProcessorKME wo_processor;
 
-        // Persist Extended work order data in WorkOrderProcessor instance
+        // Persist Extended work order data in WorkOrderProcessor instance.
+	// extended work order data contains WPE's public encryption key
         if (inWorkOrderExtDataSize > 0) {
             wo_processor.ext_work_order_data = \
                 std::string((const char*) inWorkOrderExtData);
         }
-
-        // Persist enclave type info in WorkOrderProcessor instance
-        wo_processor.enclave_type = KME_ENCLAVE;
 
         std::string wo_string(request.begin(), request.end());
         last_serialized_response_kme = wo_processor.Process(

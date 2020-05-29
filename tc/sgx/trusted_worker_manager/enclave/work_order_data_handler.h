@@ -78,6 +78,10 @@ namespace tcf {
             tcf::WorkOrderData workorder_data;
             std::string concat_string;
 
+            ByteArray GetDataEncryptionKey() {
+                return this->data_encryption_key;
+            }
+
         private:
             // iv is used for calculating hash during signature verification
             // and signature computation
