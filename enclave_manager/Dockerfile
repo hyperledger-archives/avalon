@@ -132,7 +132,7 @@ RUN echo "Building Avalon SDK\n" \
 
 
 
-#Build Avalon Listener intermediate docker image
+#Build Avalon Enclave Manager docker image
 FROM base_image as build_image
 
 RUN apt-get update \
@@ -155,6 +155,7 @@ RUN apt-get update \
     xxd \
     unzip \
     ocamlbuild \
+    python3-twisted \
     python3-pip \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
@@ -220,12 +221,13 @@ COPY --from=common_python_image /project/avalon/common/python/dist/*.whl dist/
 COPY --from=avalon_sdk_image /project/avalon/sdk/dist/*.whl dist/
 
 RUN echo "Install common/python and sdk packages\n" \
- && pip3 install dist/*.whl pyzmq
+ && pip3 install dist/*.whl json-rpc pyzmq
 
 
 ARG SGX_MODE
 ARG MAKECLEAN
 ARG TCF_DEBUG_BUILD
+ARG ENCLAVE_TYPE
 
 # Environment setup
 ENV TCF_HOME=/project/avalon

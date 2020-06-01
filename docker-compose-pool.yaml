@@ -1,4 +1,4 @@
-# Copyright 2019 Intel Corporation
+# Copyright 2019-2020 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -40,12 +40,12 @@ services:
       bash -c "tail -f /dev/null"
     stop_signal: SIGKILL
     depends_on:
-      - avalon-enclave-manager
+      - avalon-kme
       - avalon-listener
 
-  avalon-enclave-manager:
-    container_name: avalon-enclave-manager
-    image: avalon-enclave-manager-dev
+  avalon-kme:
+    container_name: avalon-kme
+    image: avalon-enclave-manager-kme-dev
     build:
       context: .
       dockerfile: ./enclave_manager/Dockerfile
@@ -53,13 +53,15 @@ services:
         - http_proxy
         - https_proxy
         - no_proxy
-        - ENCLAVE_TYPE=singleton
+        - ENCLAVE_TYPE=kme
     environment:
       - http_proxy
       - https_proxy
       - no_proxy
     expose:
-      # ZMQ socket port. 
+      # KME listener port
+      - 1948
+      # ZMQ socket port.
       - 5555
     command: |
       bash -c "
@@ -69,6 +71,34 @@ services:
     depends_on:
       - avalon-lmdb
       - avalon-listener
+
+  avalon-enclave-manager:
+    container_name: avalon-wpe
+    image: avalon-enclave-manager-wpe-dev
+    build:
+      context: .
+      dockerfile: ./enclave_manager/Dockerfile
+      args:
+        - http_proxy
+        - https_proxy
+        - no_proxy
+        - ENCLAVE_TYPE=wpe
+    environment:
+      - http_proxy
+      - https_proxy
+      - no_proxy
+    expose:
+      # ZMQ socket port.
+      - 5555
+    command: |
+      bash -c "
+        enclave_manager --lmdb_url http://avalon-lmdb:9090 --kme_listener_url http://avalon-kme:1948
+        tail -f /dev/null
+      "
+    depends_on:
+      - avalon-lmdb
+      - avalon-listener
+      - avalon-kme
 
   avalon-lmdb:
     container_name: avalon-lmdb
