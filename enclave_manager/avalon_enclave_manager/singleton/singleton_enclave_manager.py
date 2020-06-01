@@ -225,7 +225,7 @@ class SingletonEnclaveManager(EnclaveManager):
 
 # -------------------------------------------------------------------------
 
-    def _execute_work_order(self, input_json_str, indent=4):
+    def _execute_work_order(self, input_json_str):
         """
         Submits workorder request to Worker enclave and retrieves the response
 
@@ -244,7 +244,7 @@ class SingletonEnclaveManager(EnclaveManager):
             wo_response = wo_request.execute()
 
             try:
-                json_response = json.dumps(wo_response, indent=indent)
+                json_response = json.dumps(wo_response, indent=4)
             except Exception as err:
                 wo_response["Response"] = dict()
                 logger.error("ERROR: Failed to serialize JSON; %s", str(err))
