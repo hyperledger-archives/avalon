@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright 2018 Intel Corporation
+# Copyright 2018-2020 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -77,20 +77,16 @@ libraries = [
 ]
 
 enclave_module_files = [
-    "avalon_enclave_manager/singleton/singleton_enclave.i",
+    "avalon_enclave_manager/kme/kme_enclave.i",
     os.path.join(enclave_bridge_wrapper_path, 'swig_utils.cpp'),
     os.path.join(enclave_bridge_wrapper_path, 'work_order_wrap.cpp'),
     os.path.join(enclave_bridge_wrapper_path, 'enclave_info.cpp'),
     os.path.join(enclave_bridge_wrapper_path, 'signup_info.cpp'),
-    os.path.join(enclave_bridge_wrapper_path, 'signup_info_singleton.cpp'),
-    # TODO: Move *_kme.cpp to KME enclave manager and
-    # move *_wpe.cpp to WPE enclave manager
-    os.path.join(enclave_bridge_wrapper_path, 'signup_info_kme.cpp'),
-    os.path.join(enclave_bridge_wrapper_path, 'signup_info_wpe.cpp'),
+    os.path.join(enclave_bridge_wrapper_path, 'signup_info_kme.cpp')
 ]
 
 enclave_module = Extension(
-    'avalon_enclave_manager.singleton._singleton_enclave',
+    'avalon_enclave_manager.kme._kme_enclave',
     enclave_module_files,
     swig_opts = ['-c++', '-threads'] + ['-I%s' % i for i in include_dirs],
     extra_compile_args = compile_args,
@@ -109,9 +105,9 @@ enclave_module = Extension(
 version = subprocess.check_output(
     os.path.join(tcf_root_dir, 'bin/get_version')).decode('ascii').strip()
 
-setup(name='avalon_enclave_manager',
+setup(name='kme_enclave_manager',
       version = version,
-      description = 'Avalon Intel SGX Enclave Manager',
+      description = 'Avalon Intel SGX KME Enclave Manager',
       author = 'Hyperledger Avalon',
       url = 'https://github.com/hyperledger/avalon',
       packages = find_packages(),
@@ -124,6 +120,6 @@ setup(name='avalon_enclave_manager',
       data_files = [],
       entry_points = {
         'console_scripts':
-        ['enclave_manager = avalon_enclave_manager.singleton.singleton_enclave_manager:main']
+        ['enclave_manager = avalon_enclave_manager.kme.kme_enclave_manager:main']
           }
 )

@@ -14,21 +14,22 @@
 
 # Set SGX_MODE default (which can be overridden with an environment variable):
 SGX_MODE?=SIM
+ENCLAVE_TYPE?=singleton
 
 PY_VERSION=${shell python3 --version | sed 's/Python \(3\.[0-9]\).*/\1/' | tr -d .}
 MOD_VERSION=${shell ../bin/get_version}
 
-WHEEL_FILE=dist/avalon_enclave_manager-${MOD_VERSION}-cp${PY_VERSION}-cp${PY_VERSION}m-linux_x86_64.whl
+WHEEL_FILE=dist/${ENCLAVE_TYPE}_enclave_manager-${MOD_VERSION}-cp${PY_VERSION}-cp${PY_VERSION}m-linux_x86_64.whl
 
 all : $(WHEEL_FILE)
 
 $(WHEEL_FILE) : build_ext
 	@echo Build Distribution
-	python3 setup.py bdist_wheel
+	python3 setup_${ENCLAVE_TYPE}.py bdist_wheel
 
 build_ext :
 	@echo Build build_ext
-	python3 setup.py build_ext
+	python3 setup_${ENCLAVE_TYPE}.py build_ext
 
 build :
 	mkdir $@
