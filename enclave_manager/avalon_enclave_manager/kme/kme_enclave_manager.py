@@ -21,15 +21,14 @@ import os
 import sys
 import hashlib
 
+import avalon_crypto_utils.crypto_utility as crypto_utils
 import avalon_enclave_manager.sgx_work_order_request as work_order_request
 import avalon_enclave_manager.kme.kme_enclave_info as enclave_info
-import avalon_crypto_utils.crypto_utility as crypto_utils
 from avalon_enclave_manager.base_enclave_manager import EnclaveManager
 from avalon_enclave_manager.worker_kv_delegate import WorkerKVDelegate
 from avalon_enclave_manager.work_order_kv_delegate import WorkOrderKVDelegate
 from listener.base_jrpc_listener import parse_bind_url
-from avalon_enclave_manager.kme.kme_listener \
-    import KMEListener, construct_wo_req, verify_res_signature
+from avalon_enclave_manager.kme.kme_listener import KMEListener
 
 logger = logging.getLogger(__name__)
 
@@ -91,7 +90,7 @@ class KeyManagementEnclaveManager(EnclaveManager):
                                      received from the enclave
         """
         try:
-            logger.info("Request sent to KME %s", input_json_str)
+            logger.info("Request sent to enclave %s", input_json_str)
             wo_request = work_order_request.SgxWorkOrderRequest(
                 self._config["EnclaveModule"],
                 input_json_str,
@@ -100,7 +99,7 @@ class KeyManagementEnclaveManager(EnclaveManager):
             wo_response = wo_request.execute()
             try:
                 json_response = json.dumps(wo_response, indent=4)
-                logger.info("Response from KME %s", json_response)
+                logger.info("Response from enclave %s", json_response)
             except Exception as err:
                 logger.error("ERROR: Failed to serialize JSON; %s", str(err))
 
@@ -156,51 +155,25 @@ class KeyManagementEnclaveManager(EnclaveManager):
     def GetUniqueVerificationKey(self, **params):
         """
         """
-        workload_id = "kme-uid"
-        verification_key_nonce = params["nonce"]
-        in_data = json.dumps({"nonce": verification_key_nonce})
-
-        # Create session key and iv to sign work order request
-        session_key = crypto_utils.generate_key()
-        session_iv = crypto_utils.generate_iv()
-
-        wo_req = construct_wo_req(in_data, workload_id, self.encryption_key,
-                                  session_key, session_iv)
-
-        wo_response = self._execute_work_order(json.dumps(wo_req), "")
+        wo_request = params["wo_request"]
+        wo_response = self._execute_work_order(json.dumps(wo_request), "")
         wo_response_json = json.loads(wo_response)
 
-        if "result" not in wo_response_json:
+        if "result" in wo_response_json:
+            return wo_response_json["result"]
+        else:
             logger.error("Could not get UniqueVerificationKey")
             return wo_response_json
-        if verify_res_signature(wo_response_json['result'],
-                                self.verifying_key):
-            decrypted_res = crypto_utils.decrypted_response(
-                wo_response_json['result'], session_key, session_iv)
-            logger.info("Decrypted response: {}".format(decrypted_res))
-            # Response contains an array of results. In this case, the
-            # array has single element and the data field is of interest.
-            # The data contains result,verification_key and
-            # verification_key_signature delimited by ' '.
-            return decrypted_res[0]['data']
-        return wo_response_json
 
 # -----------------------------------------------------------------
 
     def RegisterWorkOrderProcessor(self, **params):
         """
         """
-        workload_id = "kme-reg"
-        attestation_report = params["attestation_report"]
-        in_data = json.dumps({"attestation_report": attestation_report})
-        # Create session key and iv to sign work order request
-        session_key = crypto_utils.generate_key()
-        session_iv = crypto_utils.generate_iv()
-        wo_req = construct_wo_req(in_data, workload_id, self.encryption_key,
-                                  session_key, session_iv)
+        wo_request = params["wo_request"]
 
         # @TODO : Trusted implementation to be integrated
-        # wo_response = self._execute_work_order(json.dumps(wo_req))
+        # wo_response = self._execute_work_order(json.dumps(wo_request))
 
         return ""
 

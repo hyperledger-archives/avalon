@@ -39,10 +39,10 @@ class EnclaveManager(ABC):
         super().__init__()
 
         self._config = config
-        signup_data, measurements = self._setup_enclave()
         self._kv_helper = self._connect_to_kv_store()
         self._worker_kv_delegate = WorkerKVDelegate(self._kv_helper)
         self._wo_kv_delegate = WorkOrderKVDelegate(self._kv_helper)
+        signup_data, measurements = self._setup_enclave()
         self.enclave_data = signup_data
         self.sealed_data = signup_data.sealed_data
         self.verifying_key = signup_data.verifying_key
@@ -73,7 +73,7 @@ class EnclaveManager(ABC):
 # -------------------------------------------------------------------------
 
     @abstractmethod
-    def _execute_work_order(self, input_json_str, indent=4):
+    def _execute_work_order(self, input_json_str):
         """
         Submits the incoming request to corresponding enclave for execution.
 
