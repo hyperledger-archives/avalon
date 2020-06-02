@@ -194,6 +194,15 @@ main(void)
         ++count;
     }
 
+    // Must begin with BEGIN PUBLIC KEY (not BEGIN RSA PUBLIC KEY) line
+    std::string public_key_hdr("-----BEGIN PUBLIC KEY-----");
+    if (rpublicKeyStr.compare(0, public_key_hdr.size(), public_key_hdr) == 0) {
+        printf("BEGIN PUBLIC KEY header line test PASSED\n");
+    } else {
+        printf("BEGIN PUBLIC KEY header line test FAILED\n");
+        ++count;
+    }
+
     printf("Test key deserialize functions.\n");
     tcf::crypto::pkenc::PrivateKey rprivateKey1;
     rprivateKey1.Generate();

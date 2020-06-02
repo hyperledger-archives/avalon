@@ -15,8 +15,11 @@
 
 /**
  * @file
- * Avalon RSA public key generation, serialization, and decryption functions.
+ * Avalon RSA private key generation, serialization, and decryption functions.
  * Serialization reads and writes keys in PEM format strings.
+ *
+ * Lower-level functions implemented using OpenSSL.
+ * See also pkenc_private_key_common.cpp for OpenSSL-independent code.
  */
 
 #include <openssl/err.h>
@@ -29,6 +32,10 @@
 #include "pkenc.h"
 #include "pkenc_public_key.h"
 #include "pkenc_private_key.h"
+
+#ifndef CRYPTOLIB_OPENSSL
+#error "CRYPTOLIB_OPENSSL must be defined to compile source with OpenSSL."
+#endif
 
 namespace pcrypto = tcf::crypto;
 namespace constants = tcf::crypto::constants;
@@ -52,9 +59,11 @@ namespace Error = tcf::error;
  *
  * Throws RuntimeError, ValueError.
  *
- * @param PEM encoded Serialized RSA private key to deserialize
+ * @param encoded  PEM encoded Serialized RSA private key to deserialize
+ * @returns Allocated RSA context containing key information.
+ *          Must be RSA_free()'ed.
  */
-RSA* deserializeRSAPrivateKey(const std::string& encoded) {
+RSA* pcrypto::pkenc::PrivateKey::deserializeRSAPrivateKey(const std::string& encoded) {
     BIO_ptr bio(BIO_new_mem_buf(encoded.c_str(), -1), BIO_free_all);
     if (bio == nullptr) {
         std::string msg(
@@ -74,17 +83,6 @@ RSA* deserializeRSAPrivateKey(const std::string& encoded) {
 
 
 /**
- * Constructor from encoded string.
- * Throws RuntimeError, ValueError.
- *
- * @param PEM encoded serialized RSA private key
- */
-pcrypto::pkenc::PrivateKey::PrivateKey(const std::string& encoded) {
-    private_key_ = deserializeRSAPrivateKey(encoded);
-}  // pcrypto::pkenc::PrivateKey::PrivateKey
-
-
-/**
  * Copy constructor.
  * Throws RuntimeError.
  */
@@ -93,33 +91,20 @@ pcrypto::pkenc::PrivateKey::PrivateKey(
     private_key_ = RSAPrivateKey_dup(privateKey.private_key_);
     if (private_key_ == nullptr) {
         std::string msg("Crypto Error (pkenc::PrivateKey() copy): "
-            "Could not copy public key");
+            "Could not copy private key");
         throw Error::RuntimeError(msg);
     }
 }  // pcrypto::pkenc::PrivateKey::PrivateKey (copy constructor)
 
 
 /**
- * Move constructor.
- * Throws RuntimeError.
- */
-pcrypto::pkenc::PrivateKey::PrivateKey(pcrypto::pkenc::PrivateKey&& privateKey) {
-    private_key_ = privateKey.private_key_;
-    privateKey.private_key_ = nullptr;
-    if (private_key_ == nullptr) {
-        std::string msg("Crypto Error (pkenc::PrivateKey() move): "
-            "Cannot move null private key");
-        throw Error::RuntimeError(msg);
-    }
-}  // pcrypto::pkenc::PrivateKey::PrivateKey (move constructor)
-
-
-/**
  * PrivateKey Destructor.
  */
 pcrypto::pkenc::PrivateKey::~PrivateKey() {
-    if (private_key_ != nullptr)
+    if (private_key_ != nullptr) {
         RSA_free(private_key_);
+        private_key_ = nullptr;
+    }
 }  // pcrypto::pkenc::Private::~PrivateKey
 
 
@@ -128,17 +113,20 @@ pcrypto::pkenc::PrivateKey::~PrivateKey() {
  * Throws RuntimeError.
  */
 pcrypto::pkenc::PrivateKey& pcrypto::pkenc::PrivateKey::operator=(
-    const pcrypto::pkenc::PrivateKey& privateKey) {
+        const pcrypto::pkenc::PrivateKey& privateKey) {
     if (this == &privateKey)
         return *this;
+
     if (private_key_ != nullptr)
         RSA_free(private_key_);
+
     private_key_ = RSAPrivateKey_dup(privateKey.private_key_);
     if (private_key_ == nullptr) {
         std::string msg("Crypto Error (pkenc::PrivateKey::operator =): "
             "Could not copy private key");
         throw Error::RuntimeError(msg);
     }
+
     return *this;
 }  // pcrypto::pkenc::PrivateKey::operator =
 
@@ -157,6 +145,7 @@ void pcrypto::pkenc::PrivateKey::Deserialize(const std::string& encoded) {
     RSA* key = deserializeRSAPrivateKey(encoded);
     if (private_key_ != nullptr)
         RSA_free(private_key_);
+
     private_key_ = key;
 }  // pcrypto::pkenc::PrivateKey::Deserialize
 
@@ -166,40 +155,42 @@ void pcrypto::pkenc::PrivateKey::Deserialize(const std::string& encoded) {
  * Throws RuntimeError.
  */
 void pcrypto::pkenc::PrivateKey::Generate() {
-    if (private_key_)
+    if (private_key_) {
         RSA_free(private_key_);
+        private_key_ = nullptr;
+    }
 
     unsigned long e = RSA_F4;
     BIGNUM_ptr exp(BN_new(), BN_free);
     private_key_ = nullptr;
 
     if (exp == NULL) {
-        std::string msg("Crypto  Error (pkenc::PrivateKey()): "
+        std::string msg("Crypto  Error (pkenc::PrivateKey::Generate()): "
             "Could not create BIGNUM for RSA exponent");
         throw Error::RuntimeError(msg);
     }
 
     if (!BN_set_word(exp.get(), e)) {
-        std::string msg("Crypto  Error (pkenc::PrivateKey()): "
+        std::string msg("Crypto  Error (pkenc::PrivateKey::Generate()): "
             "Could not set RSA exponent");
         throw Error::RuntimeError(msg);
     }
 
     RSA_ptr private_key(RSA_new(), RSA_free);
     if (private_key == nullptr) {
-        std::string msg("Crypto  Error (pkenc::PrivateKey()): "
+        std::string msg("Crypto  Error (pkenc::PrivateKey::Generate()): "
             "Could not create new RSA key");
         throw Error::RuntimeError(msg);
     }
     if (!RSA_generate_key_ex(private_key.get(), constants::RSA_KEY_SIZE,
             exp.get(), nullptr)) {
-        std::string msg("Crypto  Error (pkenc::PrivateKey()): "
+        std::string msg("Crypto  Error (pkenc::PrivateKey::Generate()): "
             "Could not generate RSA key");
         throw Error::RuntimeError(msg);
     }
     private_key_ = RSAPrivateKey_dup(private_key.get());
     if (!private_key_) {
-        std::string msg("Crypto  Error (pkenc::PrivateKey()): "
+        std::string msg("Crypto  Error (pkenc::PrivateKey::Generate()): "
             "Could not dup RSA private key");
         throw Error::RuntimeError(msg);
     }
@@ -284,13 +275,3 @@ ByteArray pcrypto::pkenc::PrivateKey::DecryptMessage(
     ptext.resize(ptext_len);
     return ptext;
 }  // pcrypto::pkenc::PrivateKey::DecryptMessage
-
-
-/**
- * Get Public encryption from PrivateKey.
- * Throws RuntimeError.
- */
-pcrypto::pkenc::PublicKey pcrypto::pkenc::PrivateKey::GetPublicKey() const {
-    PublicKey publicKey(*this);
-    return publicKey;
-}  // pcrypto::pkenc::GetPublicKey
