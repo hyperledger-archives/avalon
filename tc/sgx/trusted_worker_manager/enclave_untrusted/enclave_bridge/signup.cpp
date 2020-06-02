@@ -13,7 +13,18 @@
  * limitations under the License.
  */
 
-#include "enclave_u.h"
+
+#ifdef EXE_SINGLETON
+    #include "enclave_singleton_u.h"
+#endif
+
+#ifdef EXE_KME
+    #include "enclave_kme_u.h"
+#endif
+
+#ifdef EXE_WPE
+    #include "enclave_wpe_u.h"
+#endif
 
 #include <stdio.h>
 #include <algorithm>

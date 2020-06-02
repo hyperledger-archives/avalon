@@ -13,7 +13,18 @@
  * limitations under the License.
  */
 
-#include "enclave_t.h"
+
+#ifdef EXE_SINGLETON
+    #include "enclave_singleton_t.h"
+#endif
+
+#ifdef EXE_KME
+    #include "enclave_kme_t.h"
+#endif
+
+#ifdef EXE_WPE
+    #include "enclave_wpe_t.h"
+#endif
 
 #include <stdlib.h>
 
@@ -23,14 +34,15 @@
 #include <sgx_key.h>
 #include <sgx_tcrypto.h>
 #include <sgx_trts.h>
-#include <sgx_utils.h>  // sgx_get_key, sgx_create_report
 
+#include <sgx_utils.h>  // sgx_get_key, sgx_create_report
 #include "auto_handle_sgx.h"
 
 #include "error.h"
 #include "avalon_sgx_error.h"
 #include "tcf_error.h"
 #include "zero.h"
+
 
 #include "base_enclave.h"
 #include "signup_enclave_common.h"

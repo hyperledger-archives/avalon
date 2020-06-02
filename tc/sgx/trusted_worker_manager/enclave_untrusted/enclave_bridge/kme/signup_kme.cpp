@@ -13,72 +13,25 @@
  * limitations under the License.
  */
 
-#include "enclave_u.h"
+
+#include "enclave_kme_u.h"
 
 #include "error.h"
 #include "avalon_sgx_error.h"
 #include "log.h"
 #include "tcf_error.h"
 #include "types.h"
-#include "utils.h"
 
+#include "signup_kme.h"
 #include "enclave.h"
 #include "base.h"
-#include "signup_wpe.h"
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-tcf_err_t SignupDataWPE::GenerateNonce(
-    std::string& out_nonce, size_t in_nonce_size) {
-
-    tcf_err_t result = TCF_SUCCESS;
-    try {
-        tcf_err_t presult = TCF_SUCCESS;
-        sgx_status_t sresult;
-
-        // Get the enclave id for passing into the ecall
-        sgx_enclave_id_t enclaveid = g_Enclave[0].GetEnclaveId();
-
-        ByteArray nonce = {};
-        // +1 for null character for std::string
-        nonce.resize(in_nonce_size + 1);
-
-        // Create nonce and convert to hex
-        sresult = g_Enclave[0].CallSgx(
-            [enclaveid,
-                &presult,
-                &nonce] () {
-                sgx_status_t ret = ecall_GenerateNonce(
-                    enclaveid,
-                    &presult,
-                    (uint8_t*) nonce.data(),
-                    nonce.size());
-                return tcf::error::ConvertErrorStatus(ret, presult);
-            });
-        tcf::error::ThrowSgxError(sresult,
-            "SGX enclave call failed (ecall_GenerateNonce)");
-        g_Enclave[0].ThrowTCFError(presult);
-
-        out_nonce = ByteArrayToStr(nonce);
-    } catch (tcf::error::Error& e) {
-        tcf::enclave_api::base::SetLastError(e.what());
-        result = e.error_code();
-    } catch (std::exception& e) {
-        tcf::enclave_api::base::SetLastError(e.what());
-        result = TCF_ERR_UNKNOWN;
-    } catch (...) {
-        tcf::enclave_api::base::SetLastError(
-            "Unexpected exception in GenerateNonce");
-        result = TCF_ERR_UNKNOWN;
-    }
-    return result;
-}  // SignupDataWPE::GenerateNonce
-
-// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-tcf_err_t SignupDataWPE::CreateEnclaveData(
+tcf_err_t SignupDataKME::CreateEnclaveData(
     const std::string& inExtData,
     const std::string& inExtDataSignature,
-    const std::string& inKmeAttestation,
     StringArray& outPublicEnclaveData,
+    Base64EncodedString& outSealedEnclaveData,
     Base64EncodedString& outEnclaveQuote) {
     tcf_err_t result = TCF_SUCCESS;
 
@@ -92,6 +45,8 @@ tcf_err_t SignupDataWPE::CreateEnclaveData(
         // +1 for null character which is not included in std::string length()
         outPublicEnclaveData.resize(
             SignupData::CalculatePublicEnclaveDataSize() + 1);
+        ByteArray sealed_enclave_data_buffer(
+            SignupData::CalculateSealedEnclaveDataSize());
     
         // We need target info in order to create signup data report
         sgx_target_info_t target_info = { 0 };
@@ -110,34 +65,37 @@ tcf_err_t SignupDataWPE::CreateEnclaveData(
         // and call into the enclave to create the signup data
         sgx_report_t enclave_report = { 0 };
 
+        ByteArray ext_data = HexEncodedStringToByteArray(inExtData);
         sresult = g_Enclave[0].CallSgx(
             [enclaveid,
              &presult,
              target_info,
-             inExtData,
+             ext_data,
              inExtDataSignature,
-             inKmeAttestation,
              &outPublicEnclaveData,
+             &sealed_enclave_data_buffer,
              &enclave_report ] () {
-                sgx_status_t ret = ecall_CreateSignupDataWPE(
+                sgx_status_t ret = ecall_CreateSignupDataKME(
                     enclaveid,
                     &presult,
                     &target_info,
-                    (const uint8_t*) inExtData.c_str(),
-                    inExtData.length(),
+                    ext_data.data(),
+                    ext_data.size(),
                     (const uint8_t*) inExtDataSignature.c_str(),
                     inExtDataSignature.length(),
-                    (const uint8_t*)inKmeAttestation.c_str(),
-                    inKmeAttestation.length(),
                     outPublicEnclaveData.data(),
                     outPublicEnclaveData.size(),
+                    sealed_enclave_data_buffer.data(),
+                    sealed_enclave_data_buffer.size(),
                     &enclave_report);
                 return tcf::error::ConvertErrorStatus(ret, presult);
             });
         tcf::error::ThrowSgxError(sresult,
-            "Intel SGX enclave call failed (CreateEnclaveDataWPE);"
+            "Intel SGX enclave call failed (ecall_CreateSignupDataKME);"
             " failed to create signup data");
         g_Enclave[0].ThrowTCFError(presult);
+        outSealedEnclaveData = \
+            ByteArrayToBase64EncodedString(sealed_enclave_data_buffer);
 
         // Take the report generated and create a quote for it, encode it
         size_t quote_size = tcf::enclave_api::base::GetEnclaveQuoteSize();
@@ -152,15 +110,59 @@ tcf_err_t SignupDataWPE::CreateEnclaveData(
         result = TCF_ERR_UNKNOWN;
     } catch (...) {
         tcf::enclave_api::base::SetLastError(
-            "Unexpected exception in (CreateEnclaveDataWPE)");
+            "Unexpected exception in (CreateEnclaveDataKME)");
         result = TCF_ERR_UNKNOWN;
     }
 
     return result;
-}  // SignupDataWPE::CreateEnclaveData
+}  // SignupDataKME::CreateEnclaveData
+
+// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+tcf_err_t SignupDataKME::UnsealEnclaveData(
+    StringArray& outPublicEnclaveData) {
+    tcf_err_t result = TCF_SUCCESS;
+
+    try {
+        outPublicEnclaveData.resize(
+            SignupData::CalculatePublicEnclaveDataSize());
+
+        // xxxxx call the enclave
+        sgx_enclave_id_t enclaveid = g_Enclave[0].GetEnclaveId();
+
+        tcf_err_t presult = TCF_SUCCESS;
+        sgx_status_t sresult = g_Enclave[0].CallSgx(
+            [ enclaveid,
+              &presult,
+              &outPublicEnclaveData] () {
+                sgx_status_t sresult =
+                ecall_UnsealEnclaveData(
+                    enclaveid,
+                    &presult,
+                    outPublicEnclaveData.data(),
+                    outPublicEnclaveData.size());
+                return tcf::error::ConvertErrorStatus(sresult, presult);
+            });
+
+        tcf::error::ThrowSgxError(sresult,
+            "Intel SGX enclave call failed (ecall_UnsealSignupData)");
+        g_Enclave[0].ThrowTCFError(presult);
+
+    } catch (tcf::error::Error& e) {
+        tcf::enclave_api::base::SetLastError(e.what());
+        result = e.error_code();
+    } catch (std::exception& e) {
+        tcf::enclave_api::base::SetLastError(e.what());
+        result = TCF_ERR_UNKNOWN;
+    } catch (...) {
+        tcf::enclave_api::base::SetLastError("Unexpected exception");
+        result = TCF_ERR_UNKNOWN;
+    }
+
+    return result;
+}  // SignupDataKME::UnsealSignupData
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-tcf_err_t SignupDataWPE::VerifyEnclaveInfo(
+tcf_err_t SignupDataKME::VerifyEnclaveInfo(
     const std::string& enclaveInfo,
     const std::string& mr_enclave,
     const std::string& ext_data) {
@@ -177,7 +179,7 @@ tcf_err_t SignupDataWPE::VerifyEnclaveInfo(
               mr_enclave,
               ext_data ] () {
               sgx_status_t sresult =
-              ecall_VerifyEnclaveInfoWPE(
+              ecall_VerifyEnclaveInfoKME(
                              enclaveid,
                              &presult,
                              enclaveInfo.c_str(),
@@ -187,7 +189,7 @@ tcf_err_t SignupDataWPE::VerifyEnclaveInfo(
     });
 
         tcf::error::ThrowSgxError(sresult,
-            "Intel SGX enclave call failed (ecall_VerifyEnclaveInfoWPE)");
+            "Intel SGX enclave call failed (ecall_VerifyEnclaveInfo)");
         g_Enclave[0].ThrowTCFError(presult);
 
     } catch (tcf::error::Error& e) {
@@ -201,4 +203,4 @@ tcf_err_t SignupDataWPE::VerifyEnclaveInfo(
         result = TCF_ERR_UNKNOWN;
     }
     return result;
-}  // SignupDataWPE::VerifyEnclaveInfo
+}  // SignupDataKME::VerifyEnclaveInfo

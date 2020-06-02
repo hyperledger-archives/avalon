@@ -13,10 +13,21 @@
 * limitations under the License.
 */
 
+#ifdef EXE_SINGLETON
+    #include "enclave_singleton_t.h"
+#endif
+
+#ifdef EXE_KME
+    #include "enclave_kme_t.h"
+#endif
+
+#ifdef EXE_WPE
+    #include "enclave_wpe_t.h"
+#endif
+
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "enclave_t.h"
 #include "tcf_error.h"
 #include "error.h"
 #include "iohandler_enclave.h"

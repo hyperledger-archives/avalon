@@ -13,7 +13,6 @@
 # limitations under the License.
 
 CMAKE_MINIMUM_REQUIRED(VERSION 3.2 FATAL_ERROR)
-
 PROJECT(avalon-enclave-bridge C CXX)
 
 LIST(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
@@ -102,7 +101,6 @@ ENDFUNCTION()
 
 FILE(GLOB PROJECT_HEADERS *.h)
 FILE(GLOB PROJECT_SOURCES *.cpp)
-FILE(GLOB PROJECT_EDL ${TCF_CORE_DIR}/trusted_worker_manager/enclave/enclave.edl)
 SOURCE_GROUP("Source" FILES ${PROJECT_HEADERS} ${PROJECT_SOURCES}) 
 
 INCLUDE_DIRECTORIES(${SGX_INCLUDE})
@@ -111,9 +109,6 @@ INCLUDE_DIRECTORIES(${TCF_CORE_DIR}/trusted_worker_manager/common)
 INCLUDE_DIRECTORIES(${TCF_TOP_DIR}/common/cpp/crypto)
 INCLUDE_DIRECTORIES(${TCF_TOP_DIR}/common/cpp/packages/base64)
 
-SGX_EDGE_UNTRUSTED(${PROJECT_EDL} PROJECT_EDGE_SOURCES)
-
-SOURCE_GROUP("Generated" FILES ${PROJECT_EDGE_SOURCES})
 
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -m64")
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2")
@@ -130,22 +125,106 @@ SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} \
 -Wl,-L,${TCF_CORE_DIR}/trusted_worker_manager/common/build")
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-# Compile targets
+# Compile targets singleton
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
-ADD_LIBRARY(${PROJECT_NAME} SHARED ${PROJECT_HEADERS} ${PROJECT_SOURCES} ${PROJECT_EDGE_SOURCES})
+SET(EXE_TYPE "$ENV{ENCLAVE_TYPE}")
 
-# If we are using Linux, then find the libraries to get the absolute
-# path and add them that way and DO NOT add the linker path using
-# LINK_DIRECTORIES as it will add the -rpath option to the linker and this is
-# bad as when installing the SDK the version of libsgx_uae_service.so in the SDK
-# lib64 directory is different than the one in /usr/lib
-FOREACH(lib ${SGX_LIBS_UNTRUSTED})
-    FIND_LIBRARY(ABS-${lib} NAMES ${lib} PATHS "$ENV{SGX_SDK}/lib64" "$ENV{SGX_SSL}/lib64")
-    SET(ABSOLUTE_SGX_LIBS_UNTRUSTED ${ABSOLUTE_SGX_LIBS_UNTRUSTED} ${ABS-${lib}})
-ENDFOREACH(lib)
-TARGET_LINK_LIBRARIES( ${PROJECT_NAME} PRIVATE ${ABSOLUTE_SGX_LIBS_UNTRUSTED})
+if("${EXE_TYPE}" STREQUAL "singleton")
+    ADD_DEFINITIONS(-DEXE_SINGLETON=1)
+    OPTION(EXE_SINGLETON "Singleton mode enabled" TRUE)
+    message(STATUS "Singleton mode enabled")
 
-TARGET_LINK_LIBRARIES(${PROJECT_NAME} PRIVATE -luavalon-common -luavalon-crypto
--luavalon-base64 -luavalon-sgx-common -lpthread)
+    PROJECT(avalon-enclave-bridge-singleton C CXX)
+    FILE(GLOB SINGLETON "${CMAKE_CURRENT_SOURCE_DIR}/singleton/*")
+    FILE(GLOB PROJECT_EDL "${TCF_CORE_DIR}/trusted_worker_manager/enclave/singleton/enclave_singleton.edl" )
 
+    SGX_EDGE_UNTRUSTED(${PROJECT_EDL} PROJECT_EDGE_SOURCES)
+    SOURCE_GROUP("Generated" FILES ${PROJECT_EDGE_SOURCES})
+
+    ADD_LIBRARY(${PROJECT_NAME} SHARED ${PROJECT_HEADERS} ${PROJECT_SOURCES} ${PROJECT_EDGE_SOURCES} ${SINGLETON})
+    TARGET_INCLUDE_DIRECTORIES( ${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+    # If we are using Linux, then find the libraries to get the absolute
+    # path and add them that way and DO NOT add the linker path using
+    # LINK_DIRECTORIES as it will add the -rpath option to the linker and this is
+    # bad as when installing the SDK the version of libsgx_uae_service.so in the SDK
+    # lib64 directory is different than the one in /usr/lib
+
+    FOREACH(lib ${SGX_LIBS_UNTRUSTED})
+        FIND_LIBRARY(ABS-${lib} NAMES ${lib} PATHS "$ENV{SGX_SDK}/lib64" "$ENV{SGX_SSL}/lib64")
+        SET(ABSOLUTE_SGX_LIBS_UNTRUSTED ${ABSOLUTE_SGX_LIBS_UNTRUSTED} ${ABS-${lib}})
+    ENDFOREACH(lib)
+
+    TARGET_LINK_LIBRARIES( ${PROJECT_NAME} PRIVATE ${ABSOLUTE_SGX_LIBS_UNTRUSTED})
+    TARGET_LINK_LIBRARIES(${PROJECT_NAME} PRIVATE -luavalon-common -luavalon-crypto
+    -luavalon-base64 -luavalon-sgx-common -lpthread)
+endif()
+
+# XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+# Compile targets KME
+# XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+if("${EXE_TYPE}" STREQUAL "kme")
+    ADD_DEFINITIONS(-DEXE_KME=1)
+    OPTION(EXE_KME "KME mode enabled" TRUE)
+    message(STATUS "KME mode enabled")
+
+    PROJECT(avalon-enclave-bridge-kme C CXX)
+    FILE(GLOB KME "${CMAKE_CURRENT_SOURCE_DIR}/kme/*")
+    FILE(GLOB PROJECT_EDL "${TCF_CORE_DIR}/trusted_worker_manager/enclave/kme/enclave_kme.edl" )
+
+    SGX_EDGE_UNTRUSTED(${PROJECT_EDL} PROJECT_EDGE_SOURCES)
+    SOURCE_GROUP("Generated" FILES ${PROJECT_EDGE_SOURCES})
+
+    ADD_LIBRARY(${PROJECT_NAME} SHARED ${PROJECT_HEADERS} ${PROJECT_SOURCES} ${PROJECT_EDGE_SOURCES} ${KME})
+    TARGET_INCLUDE_DIRECTORIES( ${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+    # If we are using Linux, then find the libraries to get the absolute
+    # path and add them that way and DO NOT add the linker path using
+    # LINK_DIRECTORIES as it will add the -rpath option to the linker and this is
+    # bad as when installing the SDK the version of libsgx_uae_service.so in the SDK
+    # lib64 directory is different than the one in /usr/lib
+
+    FOREACH(lib ${SGX_LIBS_UNTRUSTED})
+        FIND_LIBRARY(ABS-${lib} NAMES ${lib} PATHS "$ENV{SGX_SDK}/lib64" "$ENV{SGX_SSL}/lib64")
+        SET(ABSOLUTE_SGX_LIBS_UNTRUSTED ${ABSOLUTE_SGX_LIBS_UNTRUSTED} ${ABS-${lib}})
+    ENDFOREACH(lib)
+
+    TARGET_LINK_LIBRARIES( ${PROJECT_NAME} PRIVATE ${ABSOLUTE_SGX_LIBS_UNTRUSTED})
+    TARGET_LINK_LIBRARIES(${PROJECT_NAME} PRIVATE -luavalon-common -luavalon-crypto
+    -luavalon-base64 -luavalon-sgx-common -lpthread)
+
+endif()
+
+# XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+# Compile targets WPE
+# XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+if("${EXE_TYPE}" STREQUAL "wpe")
+    ADD_DEFINITIONS(-DEXE_WPE=1)
+    OPTION(EXE_WPE "WPE mode enabled" TRUE)
+    message(STATUS "WPE mode enabled")
+
+    PROJECT(avalon-enclave-bridge-wpe C CXX)
+    FILE(GLOB WPE "${CMAKE_CURRENT_SOURCE_DIR}/wpe/*")
+    FILE(GLOB PROJECT_EDL "${TCF_CORE_DIR}/trusted_worker_manager/enclave/wpe/enclave_wpe.edl" )
+
+    SGX_EDGE_UNTRUSTED(${PROJECT_EDL} PROJECT_EDGE_SOURCES)
+    SOURCE_GROUP("Generated" FILES ${PROJECT_EDGE_SOURCES})
+
+    ADD_LIBRARY(${PROJECT_NAME} SHARED ${PROJECT_HEADERS} ${PROJECT_SOURCES} ${PROJECT_EDGE_SOURCES} ${WPE})
+    TARGET_INCLUDE_DIRECTORIES( ${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+    # If we are using Linux, then find the libraries to get the absolute
+    # path and add them that way and DO NOT add the linker path using
+    # LINK_DIRECTORIES as it will add the -rpath option to the linker and this is
+    # bad as when installing the SDK the version of libsgx_uae_service.so in the SDK
+    # lib64 directory is different than the one in /usr/lib
+    FOREACH(lib ${SGX_LIBS_UNTRUSTED})
+        FIND_LIBRARY(ABS-${lib} NAMES ${lib} PATHS "$ENV{SGX_SDK}/lib64" "$ENV{SGX_SSL}/lib64")
+        SET(ABSOLUTE_SGX_LIBS_UNTRUSTED ${ABSOLUTE_SGX_LIBS_UNTRUSTED} ${ABS-${lib}})
+    ENDFOREACH(lib)
+    TARGET_LINK_LIBRARIES( ${PROJECT_NAME} PRIVATE ${ABSOLUTE_SGX_LIBS_UNTRUSTED})
+
+    TARGET_LINK_LIBRARIES(${PROJECT_NAME} PRIVATE -luavalon-common -luavalon-crypto
+    -luavalon-base64 -luavalon-sgx-common -lpthread)
+
+endif()

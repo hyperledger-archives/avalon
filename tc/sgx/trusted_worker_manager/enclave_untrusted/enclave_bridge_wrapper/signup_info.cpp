@@ -23,8 +23,19 @@
 #include "types.h"
 
 #include "base.h"
-#include "signup_singleton.h"
 #include "signup_info.h"
+
+#ifdef EXE_SINGLETON
+    #include "signup_singleton.h"
+#endif
+
+#ifdef EXE_KME
+    #include "signup_kme.h"
+#endif
+
+#ifdef EXE_WPE
+    #include "signup_wpe.h"
+#endif
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 tcf_err_t SignupInfo::DeserializeSignupInfo(

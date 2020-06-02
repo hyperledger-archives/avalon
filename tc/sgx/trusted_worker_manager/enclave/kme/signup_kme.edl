@@ -15,27 +15,37 @@
 
 enclave {
     include "sgx_trts.h"
+    include "sgx_tseal.h"
     include "tcf_error.h"
 
     trusted {
-        public tcf_err_t ecall_GenerateNonce(
-           [out, size=in_nonce_size] uint8_t* out_nonce,
-           size_t in_nonce_size
-        );
-        public tcf_err_t ecall_CreateSignupDataWPE(
+        public tcf_err_t ecall_CalculateSealedEnclaveDataSize(
+            [out] size_t* pSealedEnclaveDataSize
+            );
+
+        public tcf_err_t ecall_CalculatePublicEnclaveDataSize(
+            [out] size_t* pPublicEnclaveDataSize
+            );
+
+        public tcf_err_t ecall_UnsealEnclaveData(
+            [out, size=inAllocatedPublicEnclaveDataSize] char* outPublicEnclaveData,
+            size_t inAllocatedPublicEnclaveDataSize
+            );
+
+        public tcf_err_t ecall_CreateSignupDataKME(
             [in] const sgx_target_info_t* inTargetInfo,
             [in] const uint8_t* inExtData,
             size_t inExtDataSize,
             [in] const uint8_t* inExtDataSignature,
             size_t inExtDataSignatureSize,
-            [in] const uint8_t* inKmeAttestation,
-            size_t inKmeAttestationSize,
             [out, size=inAllocatedPublicEnclaveDataSize] char* outPublicEnclaveData,
             size_t inAllocatedPublicEnclaveDataSize,
+            [out, size=inAllocatedSealedEnclaveDataSize] uint8_t* outSealedEnclaveData,
+            size_t inAllocatedSealedEnclaveDataSize,
             [out] sgx_report_t* outEnclaveReport
         );
 
-        public tcf_err_t ecall_VerifyEnclaveInfoWPE(
+        public tcf_err_t ecall_VerifyEnclaveInfoKME(
             [in, string] const char* inEnclaveInfo,
             [in, string] const char* mr_enclave,
             [in] const uint8_t* ext_data

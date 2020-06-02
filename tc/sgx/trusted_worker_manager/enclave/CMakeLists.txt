@@ -1,4 +1,4 @@
-# Copyright 2018 Intel Corporation
+# Copyright 2020 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,7 +14,6 @@
 
 CMAKE_MINIMUM_REQUIRED(VERSION 3.2 FATAL_ERROR)
 PROJECT(libtcf-enclave  CXX)
-
 LIST(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 SET (EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin)
@@ -129,12 +128,8 @@ ENDFUNCTION()
 
 FILE(GLOB PROJECT_HEADERS *.h)
 FILE(GLOB PROJECT_SOURCES *.cpp *.c)
-FILE(GLOB PROJECT_EDL enclave.edl)
 FILE(GLOB PROJECT_CONFIG *.xml)
-SOURCE_GROUP("Source" FILES ${PROJECT_HEADERS} ${PROJECT_SOURCES} ${PROJECT_EDL})
-
-SET (LIBTCF_ENCLAVE_EDL ${PROJECT_EDL})
-SET (LIBTCF_ENCLAVE_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR})
+SOURCE_GROUP("Source" FILES ${PROJECT_HEADERS} ${PROJECT_SOURCES} ${PROJECT_CONFIG})
 
 INCLUDE_DIRECTORIES(${SGX_INCLUDE})
 INCLUDE_DIRECTORIES(/opt/intel/sgxsdk/include /opt/intel/sgxssl/include)
@@ -146,10 +141,6 @@ INCLUDE_DIRECTORIES(${TCF_TOP_DIR}/common/cpp/packages/base64)
 INCLUDE_DIRECTORIES(${TCF_TOP_DIR}/common/cpp/packages/parson)
 INCLUDE_DIRECTORIES(${TCF_TOP_DIR}/common/sgx_workload/workload)
 LINK_DIRECTORIES()
-
-SGX_EDGE_TRUSTED(${PROJECT_EDL} PROJECT_EDGE_SOURCES)
-
-SOURCE_GROUP("Generated" FILES ${PROJECT_EDGE_SOURCES})
 
 # These compiler and linker flags for g++/gcc were derived from the make
 # files provided with the Intel SGX sample enclave.
@@ -214,47 +205,141 @@ SET(CMAKE_C_STANDARD_LIBRARIES "")
 SET(CMAKE_CXX_STANDARD_LIBRARIES "")
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-# Compile targets
+# Compile targets singleton
+# XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+SET(EXE_TYPE "$ENV{ENCLAVE_TYPE}")
+
+if("${EXE_TYPE}" STREQUAL "singleton")
+    ADD_DEFINITIONS(-DEXE_SINGLETON=1)
+    OPTION(EXE_SINGLETON "Singleton mode enabled" TRUE)
+    message(STATUS "Singleton mode enabled")
+    SET(CMAKE_SHARED_LIBRARY_PREFIX "")
+    PROJECT(libtcf-enclave-singleton C CXX)
+
+    FILE(GLOB SINGLETON "${CMAKE_CURRENT_SOURCE_DIR}/singleton/*")
+    FILE(GLOB PROJECT_EDL "${TCF_CORE_DIR}/trusted_worker_manager/enclave/singleton/enclave_singleton.edl" )
+
+    SGX_EDGE_TRUSTED(${PROJECT_EDL} PROJECT_EDGE_SOURCES)
+    SOURCE_GROUP("Generated" FILES ${PROJECT_EDGE_SOURCES})
+    SET (LIBTCF_ENCLAVE_EDL ${PROJECT_EDL})
+
+    ADD_LIBRARY(${PROJECT_NAME} SHARED  ${PROJECT_HEADERS} ${PROJECT_SOURCES} ${PROJECT_EDGE_SOURCES} ${PROJECT_EDL} ${SINGLETON})
+    SGX_SIGN_ENCLAVE(${PROJECT_NAME} ${TCF_ENCLAVE_CODE_SIGN_PEM} ${PROJECT_CONFIG})
+
+    TARGET_LINK_LIBRARIES(${PROJECT_NAME} -Wl,--whole-archive -lsgx_tsgxssl -Wl,--no-whole-archive)
+    TARGET_LINK_LIBRARIES(${PROJECT_NAME} -Wl,--whole-archive -l${TRTS_LIBRARY_NAME} -Wl,--no-whole-archive)
+
+    TARGET_LINK_LIBRARIES(${PROJECT_NAME} -Wl,--whole-archive -lcommon_sgx_workload -lcommon_sgx_iohandler -Wl,--no-whole-archive)
+
+    # Add echo workload
+    TARGET_LINK_LIBRARIES(${PROJECT_NAME} -Wl,--whole-archive -lecho_wo -Wl,--no-whole-archive)
+    # Add heart disease eval workload
+    TARGET_LINK_LIBRARIES(${PROJECT_NAME} -Wl,--whole-archive -lheart_disease_eval -Wl,--no-whole-archive)
+    # Add example inside out workload
+    TARGET_LINK_LIBRARIES(${PROJECT_NAME} -Wl,--whole-archive -linside_out_eval -Wl,--no-whole-archive)
+    # Add simple wallet workload
+    TARGET_LINK_LIBRARIES(${PROJECT_NAME} -Wl,--whole-archive -lsimple_wallet -Wl,--no-whole-archive)
+    TARGET_LINK_LIBRARIES(${PROJECT_NAME} -Wl,--start-group  -ltavalon-common -ltavalon-base64 -ltavalon-parson -ltavalon-crypto 
+        -ltavalon-verify-ias-report -ltavalon-sgx-common -lsgx_tsgxssl_crypto -lsgx_tstdc 
+        -lsgx_tcxx -lsgx_tcrypto  -l${SERVICE_LIBRARY_NAME} -Wl,--end-group)
+
+    TARGET_INCLUDE_DIRECTORIES( ${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR} ${SGX_ENCLAVE_INCLUDE} ${SGX_INCLUDE})
+    TARGET_INCLUDE_DIRECTORIES(${PROJECT_NAME} PRIVATE ${TCF_TOP_DIR}/examples/apps)
+
+    ADD_CUSTOM_COMMAND(
+        TARGET ${PROJECT_NAME}
+        POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E make_directory "${DEPS_DIR}/bin"
+        COMMAND ${CMAKE_COMMAND} -E copy "${SIGNED_ENCLAVE}" "${DEPS_DIR}/bin"
+    )
+
+endif()
+# XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+# Compile targets for KME
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 # CMake likes to prepend "lib" to project name when creating library...since we
 # already have lib in the project name, liblibtcf-enclave is stupid.  Stop
 # CMake from doing it.
-SET(CMAKE_SHARED_LIBRARY_PREFIX "")
-PROJECT(libtcf-enclave C CXX)
+if("${EXE_TYPE}" STREQUAL "kme")
+    ADD_DEFINITIONS(-DEXE_KME=1)
+    OPTION(EXE_KME "KME mode enabled" TRUE)
+    message(STATUS "KME mode enabled")
+    SET(CMAKE_SHARED_LIBRARY_PREFIX "")
+    PROJECT(libtcf-enclave-kme C CXX)
 
-ADD_LIBRARY(${PROJECT_NAME} SHARED  ${PROJECT_HEADERS} ${PROJECT_SOURCES} ${PROJECT_EDGE_SOURCES} ${PROJECT_EDL})
-SGX_SIGN_ENCLAVE(${PROJECT_NAME} ${TCF_ENCLAVE_CODE_SIGN_PEM} ${PROJECT_CONFIG})
+    FILE(GLOB KME "${CMAKE_CURRENT_SOURCE_DIR}/kme/*")
+    FILE(GLOB PROJECT_EDL "${TCF_CORE_DIR}/trusted_worker_manager/enclave/kme/enclave_kme.edl" )
 
-TARGET_LINK_LIBRARIES(${PROJECT_NAME} -Wl,--whole-archive -lsgx_tsgxssl -Wl,--no-whole-archive)
-TARGET_LINK_LIBRARIES(${PROJECT_NAME} -Wl,--whole-archive -l${TRTS_LIBRARY_NAME} -Wl,--no-whole-archive)
+    SGX_EDGE_TRUSTED(${PROJECT_EDL} PROJECT_EDGE_SOURCES)
+    SOURCE_GROUP("Generated" FILES ${PROJECT_EDGE_SOURCES})
+    SET (LIBTCF_ENCLAVE_EDL ${PROJECT_EDL})
 
-TARGET_LINK_LIBRARIES(${PROJECT_NAME} -Wl,--whole-archive -lcommon_sgx_workload -lcommon_sgx_iohandler -Wl,--no-whole-archive)
+    ADD_LIBRARY(${PROJECT_NAME} SHARED  ${PROJECT_HEADERS} ${PROJECT_SOURCES} ${PROJECT_EDGE_SOURCES} ${PROJECT_EDL} ${KME})
+    SGX_SIGN_ENCLAVE(${PROJECT_NAME} ${TCF_ENCLAVE_CODE_SIGN_PEM} ${PROJECT_CONFIG})
 
-# Add KME workload
-TARGET_LINK_LIBRARIES(${PROJECT_NAME} -Wl,--whole-archive -lkme_workload -Wl,--no-whole-archive)
-# Add echo workload
-TARGET_LINK_LIBRARIES(${PROJECT_NAME} -Wl,--whole-archive -lecho_wo -Wl,--no-whole-archive)
-# Add heart disease eval workload
-TARGET_LINK_LIBRARIES(${PROJECT_NAME} -Wl,--whole-archive -lheart_disease_eval -Wl,--no-whole-archive)
-# Add example inside out workload
-TARGET_LINK_LIBRARIES(${PROJECT_NAME} -Wl,--whole-archive -linside_out_eval -Wl,--no-whole-archive)
-# Add simple wallet workload
-TARGET_LINK_LIBRARIES(${PROJECT_NAME} -Wl,--whole-archive -lsimple_wallet -Wl,--no-whole-archive)
+    TARGET_LINK_LIBRARIES(${PROJECT_NAME} -Wl,--whole-archive -lsgx_tsgxssl -Wl,--no-whole-archive)
+    TARGET_LINK_LIBRARIES(${PROJECT_NAME} -Wl,--whole-archive -l${TRTS_LIBRARY_NAME} -Wl,--no-whole-archive)
+    # Add KME workload
+    TARGET_LINK_LIBRARIES(${PROJECT_NAME} -Wl,--whole-archive -lkme_workload -Wl,--no-whole-archive)
+    TARGET_LINK_LIBRARIES(${PROJECT_NAME} -Wl,--whole-archive -lcommon_sgx_workload -lcommon_sgx_iohandler -Wl,--no-whole-archive)
+    TARGET_LINK_LIBRARIES(${PROJECT_NAME} -Wl,--start-group  -ltavalon-common -ltavalon-base64 -ltavalon-parson
+            -ltavalon-crypto -ltavalon-verify-ias-report -ltavalon-sgx-common -lsgx_tsgxssl_crypto -lsgx_tstdc
+            -lsgx_tcxx -lsgx_tcrypto  -l${SERVICE_LIBRARY_NAME} -Wl,--end-group)
 
-TARGET_LINK_LIBRARIES(${PROJECT_NAME} -Wl,--start-group  -ltavalon-common -ltavalon-base64 -ltavalon-parson -ltavalon-crypto -ltavalon-verify-ias-report -ltavalon-sgx-common -lsgx_tsgxssl_crypto -lsgx_tstdc -lsgx_tcxx -lsgx_tcrypto  -l${SERVICE_LIBRARY_NAME} -Wl,--end-group)
+    TARGET_INCLUDE_DIRECTORIES( ${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR} ${SGX_ENCLAVE_INCLUDE} ${SGX_INCLUDE})
 
-TARGET_INCLUDE_DIRECTORIES( ${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR} ${SGX_ENCLAVE_INCLUDE} ${SGX_INCLUDE})
-TARGET_INCLUDE_DIRECTORIES(${PROJECT_NAME} PRIVATE ${TCF_TOP_DIR}/examples/apps)
+    ADD_CUSTOM_COMMAND(
+        TARGET ${PROJECT_NAME}
+        POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E make_directory "${DEPS_DIR}/bin"
+        COMMAND ${CMAKE_COMMAND} -E copy "${SIGNED_ENCLAVE}" "${DEPS_DIR}/bin"
+    )
+endif()
+# # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+# # Compile targets for wpe
+# # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
-ADD_CUSTOM_COMMAND(
-    TARGET ${PROJECT_NAME}
-    POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E make_directory "${DEPS_DIR}/bin"
-    COMMAND ${CMAKE_COMMAND} -E copy "${SIGNED_ENCLAVE}" "${DEPS_DIR}/bin"
-)
+if("${EXE_TYPE}" STREQUAL "wpe")
+    ADD_DEFINITIONS(-DEXE_WPE=1)
+    OPTION(EXE_WPE "WPE mode enabled" TRUE)
+    message(STATUS "WPE mode enabled")
+    SET(CMAKE_SHARED_LIBRARY_PREFIX "")
+    PROJECT(libtcf-enclave-wpe C CXX)
+    FILE(GLOB WPE "${CMAKE_CURRENT_SOURCE_DIR}/wpe/*")
+    FILE(GLOB PROJECT_EDL "${TCF_CORE_DIR}/trusted_worker_manager/enclave/wpe/enclave_wpe.edl" )
 
-# To add a new workload, uncomment the following lines and change
-# $WORKLOAD_STATIC_NAME$ to the appropriate name (such as hello_world):
-#SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,-L,${TCF_TOP_DIR}/examples/apps/build/$WORKLOAD_STATIC_NAME$/workload")
-#TARGET_LINK_LIBRARIES(${PROJECT_NAME} -Wl,--whole-archive -l$WORKLOAD_STATIC_NAME$ -Wl,--no-whole-archive)
+    SGX_EDGE_TRUSTED(${PROJECT_EDL} PROJECT_EDGE_SOURCES)
+    SOURCE_GROUP("Generated" FILES ${PROJECT_EDGE_SOURCES})
+    SET (LIBTCF_ENCLAVE_EDL ${PROJECT_EDL})
+
+    ADD_LIBRARY(${PROJECT_NAME} SHARED  ${PROJECT_HEADERS} ${PROJECT_SOURCES} ${PROJECT_EDGE_SOURCES} ${PROJECT_EDL} ${WPE})
+    SGX_SIGN_ENCLAVE(${PROJECT_NAME} ${TCF_ENCLAVE_CODE_SIGN_PEM} ${PROJECT_CONFIG})
+
+    TARGET_LINK_LIBRARIES(${PROJECT_NAME} -Wl,--whole-archive -lsgx_tsgxssl -Wl,--no-whole-archive)
+    TARGET_LINK_LIBRARIES(${PROJECT_NAME} -Wl,--whole-archive -l${TRTS_LIBRARY_NAME} -Wl,--no-whole-archive)
+
+    TARGET_LINK_LIBRARIES(${PROJECT_NAME} -Wl,--whole-archive -lcommon_sgx_workload -lcommon_sgx_iohandler -Wl,--no-whole-archive)
+
+    # Add echo workload
+    TARGET_LINK_LIBRARIES(${PROJECT_NAME} -Wl,--whole-archive -lecho_wo -Wl,--no-whole-archive)
+    # Add heart disease eval workload
+    TARGET_LINK_LIBRARIES(${PROJECT_NAME} -Wl,--whole-archive -lheart_disease_eval -Wl,--no-whole-archive)
+    # Add example inside out workload
+    TARGET_LINK_LIBRARIES(${PROJECT_NAME} -Wl,--whole-archive -linside_out_eval -Wl,--no-whole-archive)
+    # Add simple wallet workload
+    TARGET_LINK_LIBRARIES(${PROJECT_NAME} -Wl,--whole-archive -lsimple_wallet -Wl,--no-whole-archive)
+    TARGET_LINK_LIBRARIES(${PROJECT_NAME} -Wl,--start-group  -ltavalon-common -ltavalon-base64 -ltavalon-parson -ltavalon-crypto -ltavalon-verify-ias-report -ltavalon-sgx-common -lsgx_tsgxssl_crypto -lsgx_tstdc -lsgx_tcxx -lsgx_tcrypto  -l${SERVICE_LIBRARY_NAME} -Wl,--end-group)
+
+    TARGET_INCLUDE_DIRECTORIES( ${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR} ${SGX_ENCLAVE_INCLUDE} ${SGX_INCLUDE})
+    TARGET_INCLUDE_DIRECTORIES(${PROJECT_NAME} PRIVATE ${TCF_TOP_DIR}/examples/apps)
+
+    ADD_CUSTOM_COMMAND(
+        TARGET ${PROJECT_NAME}
+        POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E make_directory "${DEPS_DIR}/bin"
+        COMMAND ${CMAKE_COMMAND} -E copy "${SIGNED_ENCLAVE}" "${DEPS_DIR}/bin"
+    )
+
+endif()

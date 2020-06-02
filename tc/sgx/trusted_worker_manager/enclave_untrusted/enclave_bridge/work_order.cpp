@@ -13,7 +13,18 @@
  * limitations under the License.
  */
 
-#include "enclave_u.h"
+
+#ifdef EXE_SINGLETON
+    #include "enclave_singleton_u.h"
+#endif
+
+#ifdef EXE_KME
+    #include "enclave_kme_u.h"
+#endif
+
+#ifdef EXE_WPE
+    #include "enclave_wpe_u.h"
+#endif
 
 #include "tcf_error.h"
 #include "error.h"
@@ -27,16 +38,26 @@
 
 WorkOrderHandler::WorkOrderHandler(EnclaveType enclave_type) {
     // Initialize function pointers
+#ifdef EXE_SINGLETON
     if (enclave_type == SINGLETON_ENCLAVE) {
         ecall_handle_wo_request = ecall_HandleWorkOrderRequest;
         ecall_get_serialized_response = ecall_GetSerializedResponse;
-    } else if (enclave_type == KME_ENCLAVE) {
+    }
+#endif
+
+#ifdef EXE_KME
+    if (enclave_type == KME_ENCLAVE) {
          ecall_handle_wo_request = ecall_HandleWorkOrderRequestKME;
          ecall_get_serialized_response = ecall_GetSerializedResponseKME;
-    } else if (enclave_type == WPE_ENCLAVE) {
+    }
+#endif
+ 
+#ifdef EXE_WPE
+    if (enclave_type == WPE_ENCLAVE) {
         ecall_handle_wo_request = ecall_HandleWorkOrderRequestWPE;
         ecall_get_serialized_response = ecall_GetSerializedResponseWPE;
     }
+#endif
 }
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX

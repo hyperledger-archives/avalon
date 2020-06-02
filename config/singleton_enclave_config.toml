@@ -65,7 +65,7 @@ ias_url = "https://api.trustedservices.intel.com/sgx/dev"
 ias_api_key = "112233445566778899aabbccddeeff00"
 
 # TEE enclave library to use.
-enclave_library = "libtcf-enclave.signed.so"
+enclave_library = "libtcf-enclave-singleton.signed.so"
 enclave_library_path = "tc/sgx/trusted_worker_manager/enclave/build/lib/"
 
 # The type of enclave viz - KME/WPE/SWE

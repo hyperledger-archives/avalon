@@ -14,10 +14,9 @@
  */
 
 enclave {
-    from "sgx_tstdc.edl" import *;
-    from "sgx_tsgxssl.edl" import *;
-    from "../base.edl" import *;
-    from "../iohandler.edl" import *;
-
+    from "signup_wpe.edl" import *;
+    from "work_order_wpe.edl" import *;
+    from "../enclave.edl" import *;
 };
+
 

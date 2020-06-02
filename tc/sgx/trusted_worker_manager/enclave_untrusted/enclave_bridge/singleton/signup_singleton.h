@@ -22,6 +22,7 @@
 #include "types.h"
 #include "signup.h"
 
+
 class SignupDataSingleton : public SignupData {
 public:
     tcf_err_t CreateEnclaveData(

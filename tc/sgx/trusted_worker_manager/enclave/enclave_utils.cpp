@@ -13,7 +13,17 @@
  * limitations under the License.
  */
 
-#include "enclave_t.h"
+#ifdef EXE_SINGLETON
+    #include "enclave_singleton_t.h"
+#endif
+
+#ifdef EXE_KME
+    #include "enclave_kme_t.h"
+#endif
+
+#ifdef EXE_WPE
+    #include "enclave_wpe_t.h"
+#endif
 
 #include <stdarg.h>
 #include <stdio.h>

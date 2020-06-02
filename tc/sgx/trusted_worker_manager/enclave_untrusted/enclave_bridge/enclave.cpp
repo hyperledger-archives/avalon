@@ -13,6 +13,18 @@
  * limitations under the License.
  */
 
+#ifdef EXE_SINGLETON
+    #include "enclave_singleton_u.h"
+#endif
+
+#ifdef EXE_KME
+    #include "enclave_kme_u.h"
+#endif
+
+#ifdef EXE_WPE
+    #include "enclave_wpe_u.h"
+#endif
+
 #include <linux/limits.h>
 #include <unistd.h>
 
@@ -22,7 +34,6 @@
 #include <pthread.h>
 
 #include <sgx_uae_service.h>
-#include "enclave_u.h"
 #include "sgx_support.h"
 
 #include "log.h"

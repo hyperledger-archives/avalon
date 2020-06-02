@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "enclave_t.h"
+#include "enclave_singleton_t.h"
 
 #include <string>
 

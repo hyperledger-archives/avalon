@@ -1,4 +1,4 @@
-/* Copyright 2018 Intel Corporation
+/* Copyright 2020 Intel Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,20 +13,14 @@
  * limitations under the License.
  */
 
-#include "enclave_t.h"
+#include "enclave_kme_t.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include <algorithm>
-#include <cctype>
-#include <iterator>
-
-#include <sgx_key.h>
-#include <sgx_tcrypto.h>
-#include <sgx_trts.h>
-#include <sgx_utils.h>  // sgx_get_key, sgx_create_report
+#include <sgx_tseal.h>
+#include <sgx_utils.h>
 #include <sgx_quote.h>
 
 #include "crypto.h"
@@ -37,27 +31,27 @@
 #include "jsonvalue.h"
 #include "parson.h"
 
-#include "auto_handle_sgx.h"
-
-#include "base_enclave.h"
 #include "enclave_data.h"
 #include "enclave_utils.h"
-#include "verify-report.h"
 #include "signup_enclave_util.h"
+#include "verify-report.h"
 
+#define KME_SIGNUP_EXT_DATA_SIZE 32
 
-// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-// XX Declaration of static helper functions                         XX
-// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-
-static void CreateSignupReportData(EnclaveData* enclave_data,
+static void CreateReportDataKME(std::string& enclave_signing_key,
+    const uint8_t* ext_data,
     sgx_report_data_t* report_data);
 
-static void CreateReportData(std::string& enclave_signing_key,
+static void CreateSignupReportDataKME(const uint8_t* ext_data,
+    EnclaveData* enclave_data,
     sgx_report_data_t* report_data);
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-tcf_err_t ecall_CreateSignupData(const sgx_target_info_t* inTargetInfo,
+tcf_err_t ecall_CreateSignupDataKME(const sgx_target_info_t* inTargetInfo,
+    const uint8_t* inExtData,
+    size_t inExtDataSize,
+    const uint8_t* inExtDataSignature,
+    size_t inExtDataSignatureSize,
     char* outPublicEnclaveData,
     size_t inAllocatedPublicEnclaveDataSize,
     uint8_t* outSealedEnclaveData,
@@ -67,6 +61,10 @@ tcf_err_t ecall_CreateSignupData(const sgx_target_info_t* inTargetInfo,
 
     try {
         tcf::error::ThrowIfNull(inTargetInfo, "Target info pointer is NULL");
+        tcf::error::ThrowIfNull(inExtData, "Extended data is NULL");
+        tcf::error::ThrowIf<tcf::error::ValueError>(
+            inExtDataSize != KME_SIGNUP_EXT_DATA_SIZE,
+            "Extended data size should be 32 bytes");
 
         tcf::error::ThrowIfNull(outPublicEnclaveData,
             "Public enclave data pointer is NULL");
@@ -80,6 +78,7 @@ tcf_err_t ecall_CreateSignupData(const sgx_target_info_t* inTargetInfo,
 
         // Get instance of enclave data
         EnclaveData* enclaveData = EnclaveData::getInstance();
+        enclaveData->set_extended_data((const char*) inExtData);
 
         tcf::error::ThrowIf<tcf::error::ValueError>(
             inAllocatedPublicEnclaveDataSize < enclaveData->get_public_data_size(),
@@ -91,7 +90,7 @@ tcf_err_t ecall_CreateSignupData(const sgx_target_info_t* inTargetInfo,
 
         // Create the report data we want embedded in the enclave report.
         sgx_report_data_t reportData = {0};
-        CreateSignupReportData(enclaveData, &reportData);
+        CreateSignupReportDataKME(inExtData, enclaveData, &reportData);
 
         sgx_status_t ret = sgx_create_report(
             inTargetInfo, &reportData, outEnclaveReport);
@@ -118,55 +117,22 @@ tcf_err_t ecall_CreateSignupData(const sgx_target_info_t* inTargetInfo,
             enclaveData->get_public_data_size());
     } catch (tcf::error::Error& e) {
         SAFE_LOG(TCF_LOG_ERROR,
-            "Error in Avalon enclave(ecall_CreateSignupData): %04X -- %s",
+            "Error in Avalon enclave(ecall_CreateSignupDataKME): %04X -- %s",
             e.error_code(), e.what());
         ocall_SetErrorMessage(e.what());
         result = e.error_code();
     } catch (...) {
         SAFE_LOG(TCF_LOG_ERROR,
-            "Unknown error in Avalon enclave(ecall_CreateSignupData)");
+            "Unknown error in Avalon enclave(ecall_CreateSignupDataKME)");
         result = TCF_ERR_UNKNOWN;
     }
 
     return result;
-}  // ecall_CreateSignupData
-
-// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-// XX Helper functions                                      XX
-// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-
-// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-void CreateSignupReportData(EnclaveData* enclave_data,
-    sgx_report_data_t* report_data) {
-
-    // We will put the following in the report data
-    // SINGLETON_ENCLAVE: REPORT_DATA[0:31] - SHA256(PUB SIG KEY)
-    //                    REPORT_DATA[32:63] - Not used
-    
-    // WARNING - WARNING - WARNING - WARNING - WARNING - WARNING - WARNING
-    //
-    // If anything in this code changes the way in which the actual enclave
-    // report data is represented, the corresponding code that verifies
-    // the report data has to be change accordingly.
-    //
-    // WARNING - WARNING - WARNING - WARNING - WARNING - WARNING - WARNING
-
-    std::string enclave_signing_key = \
-        enclave_data->get_serialized_signing_key();
-
-    // NOTE - we are putting the hash directly into the report
-    // data structure because it is (64 bytes) larger than the SHA256
-    // hash (32 bytes) but we zero it out first to ensure that it is
-    // padded with known data.
-
-    Zero(report_data, sizeof(*report_data));
-    ComputeSHA256Hash(enclave_signing_key, report_data->d);
-    
-}  // CreateSignupReportData
+}  // ecall_CreateSignupDataKME
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-tcf_err_t ecall_VerifyEnclaveInfo(const char* enclave_info,
-    const char* mr_enclave) {
+tcf_err_t ecall_VerifyEnclaveInfoKME(const char* enclave_info,
+    const char* mr_enclave, const uint8_t* ext_data) {
 
     tcf_err_t result = TCF_SUCCESS;
 
@@ -266,7 +232,7 @@ tcf_err_t ecall_VerifyEnclaveInfo(const char* enclave_info,
     sgx_basename_t mr_basename_from_report = *(&quote_body->basename);
 
     ByteArray mr_enclave_bytes = HexEncodedStringToByteArray(mr_enclave);
-    //CHECK MR_ENCLAVE
+    // CHECK MR_ENCLAVE
     tcf::error::ThrowIf<tcf::error::ValueError>(
         memcmp(mr_enclave_from_report.m, mr_enclave_bytes.data(),
             SGX_HASH_SIZE)  != 0, "Invalid MR_ENCLAVE");
@@ -274,7 +240,7 @@ tcf_err_t ecall_VerifyEnclaveInfo(const char* enclave_info,
     // Verify Report Data by comparing hash of report data in
     // Verification Report with computed report data
     sgx_report_data_t computed_report_data = {0};
-    CreateReportData(enclave_id, &computed_report_data);
+    CreateReportDataKME(enclave_id, ext_data, &computed_report_data);
 
     //Compare computedReportData with expectedReportData
     tcf::error::ThrowIf<tcf::error::ValueError>(
@@ -284,13 +250,13 @@ tcf_err_t ecall_VerifyEnclaveInfo(const char* enclave_info,
     return result;
 }  // ecall_VerifyEnclaveInfo
 
-// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-void CreateReportData(std::string& enclave_signing_key,
-    sgx_report_data_t* report_data)
-{
+void CreateReportDataKME(std::string& enclave_signing_key,
+    const uint8_t* ext_data, sgx_report_data_t* report_data) {
+
     // We will put the following in the report data
-    // SINGLETON_ENCLAVE: REPORT_DATA[0:31] - SHA256(PUB SIG KEY)
-    //
+    // WPE_ENCLAVE:  REPORT_DATA[0:31] - PUB ENC KEY
+    //               REPORT_DATA[32:63] - EXT DATA where EXT_DATA contains
+    //               verification key generated by KME
 
     // NOTE - we are putting the hash directly into the report
     // data structure because it is (64 bytes) larger than the SHA256
@@ -298,6 +264,51 @@ void CreateReportData(std::string& enclave_signing_key,
     // padded with known data.
 
     Zero(report_data, sizeof(*report_data));
-    ComputeSHA256Hash(enclave_signing_key, report_data->d);
-    
+
+    uint8_t sig_key_hash[SGX_HASH_SIZE] = {0};
+    ComputeSHA256Hash(enclave_signing_key, sig_key_hash);
+
+    // Concatenate hash of public signing key and extended data
+    strncpy((char*)report_data->d,
+        (const char*) sig_key_hash, SGX_HASH_SIZE);
+    strncat((char*)report_data->d,
+        (const char*) ext_data, SGX_HASH_SIZE);
 }  // CreateReportData
+
+
+// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+void CreateSignupReportDataKME(const uint8_t* ext_data,
+    EnclaveData* enclave_data, sgx_report_data_t* report_data) {
+
+    // We will put the following in the report data
+    // WPE_ENCLAVE:  REPORT_DATA[0:31] - PUB SIGNING KEY
+    //               REPORT_DATA[32:63] - EXT DATA where EXT_DATA contains
+    //               MRENCLAVE value of associated WPE
+
+    // WARNING - WARNING - WARNING - WARNING - WARNING - WARNING - WARNING
+    //
+    // If anything in this code changes the way in which the actual enclave
+    // report data is represented, the corresponding code that verifies
+    // the report data has to be change accordingly.
+    //
+    // WARNING - WARNING - WARNING - WARNING - WARNING - WARNING - WARNING
+
+    std::string enclave_signing_key = \
+        enclave_data->get_serialized_signing_key();
+
+    // NOTE - we are putting the hash directly into the report
+    // data structure because it is (64 bytes) larger than the SHA256
+    // hash (32 bytes) but we zero it out first to ensure that it is
+    // padded with known data.
+
+    Zero(report_data, sizeof(*report_data));
+
+    uint8_t sig_key_hash[SGX_HASH_SIZE] = {0};
+    ComputeSHA256Hash(enclave_signing_key, sig_key_hash);
+
+    // Concatenate hash of public signing key and extended data
+    strncpy((char*)report_data->d,
+        (const char*) sig_key_hash, SGX_HASH_SIZE);
+    strncat((char*)report_data->d,
+        (const char*) ext_data, SGX_HASH_SIZE);
+}  // CreateSignupReportData
