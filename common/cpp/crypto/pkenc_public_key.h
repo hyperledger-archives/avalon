@@ -15,15 +15,19 @@
 
 /**
  * @file
- * Avalon RSA public key generation, serialization, and encryption functions.
+ * Avalon RSA public key serialization and encryption functions.
  * Serialization reads and writes keys in PEM format strings.
  */
 
 #pragma once
-#include <openssl/rsa.h>
 #include <string>
 #include <vector>
 #include "types.h"
+
+#include "crypto_shared.h"
+#if defined(CRYPTOLIB_OPENSSL)
+#include <openssl/rsa.h>
+#endif
 
 namespace tcf {
 namespace crypto {
@@ -66,6 +70,7 @@ namespace crypto {
 
         private:
             RSA* public_key_;
+            RSA* deserializeRSAPublicKey(const std::string& encoded);
         };
     }  // namespace pkenc
 }  // namespace crypto

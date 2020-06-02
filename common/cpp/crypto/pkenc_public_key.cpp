@@ -15,8 +15,11 @@
 
 /**
  * @file
- * Avalon RSA public key generation, serialization, and encryption functions.
+ * Avalon RSA public key serialization and encryption functions.
  * Serialization reads and writes keys in PEM format strings.
+ *
+ * Lower-level functions implemented using OpenSSL.
+ * See also pkenc_public_key_common.cpp for OpenSSL-independent code.
  */
 
 #include <openssl/err.h>
@@ -29,6 +32,10 @@
 #include "pkenc.h"
 #include "pkenc_private_key.h"
 #include "pkenc_public_key.h"
+
+#ifndef CRYPTOLIB_OPENSSL
+#error "CRYPTOLIB_OPENSSL must be defined to compile source with OpenSSL."
+#endif
 
 namespace pcrypto = tcf::crypto;
 namespace constants = tcf::crypto::constants;
@@ -52,10 +59,12 @@ namespace Error = tcf::error;
  *
  * Throws RuntimeError, ValueError.
  *
- * @param PEM encoded Serialized RSA public key to deserialize
+ * @param encoded  PEM encoded Serialized RSA public key to deserialize
+ * @returns Allocated RSA context containing key information.
+ *          Must be RSA_free()'ed.
  */
-RSA* deserializeRSAPublicKey(const std::string& encoded) {
-    RSA * public_key;
+RSA* pcrypto::pkenc::PublicKey::deserializeRSAPublicKey(const std::string& encoded) {
+    RSA *public_key;
 
     BIO_ptr bio(BIO_new_mem_buf(encoded.c_str(), -1), BIO_free_all);
     if (bio == nullptr) {
@@ -87,14 +96,6 @@ RSA* deserializeRSAPublicKey(const std::string& encoded) {
     }
     return public_key;
 }  // deserializeRSAPublicKey
-
-
-/**
- * PublicKey constructor.
- */
-pcrypto::pkenc::PublicKey::PublicKey() {
-    public_key_ = nullptr;
-}  // pcrypto::sig::PublicKey::PublicKey
 
 
 /**
@@ -131,8 +132,10 @@ pcrypto::pkenc::PublicKey::PublicKey(const std::string& encoded) {
  * PublicKey destructor.
  */
 pcrypto::pkenc::PublicKey::~PublicKey() {
-    if (public_key_ != nullptr)
+    if (public_key_ != nullptr) {
         RSA_free(public_key_);
+        public_key_ = nullptr;
+    }
 }  // pcrypto::pkenc::Public::~PublicKey
 
 
@@ -152,26 +155,11 @@ pcrypto::pkenc::PublicKey::PublicKey(
 
 
 /**
- * Move constructor.
- * Throws RuntimeError.
- */
-pcrypto::pkenc::PublicKey::PublicKey(pcrypto::pkenc::PublicKey&& publicKey) {
-    public_key_ = publicKey.public_key_;
-    publicKey.public_key_ = nullptr;
-    if (public_key_ == nullptr) {
-        std::string msg("Crypto Error (pkenc::PublicKey() move): "
-            "Cannot move null public key");
-        throw Error::RuntimeError(msg);
-    }
-}  // pcrypto::pkenc::PublicKey::PublicKey (move constructor)
-
-
-/**
  * Assignment operator = overload.
  * Throws RuntimeError.
  */
 pcrypto::pkenc::PublicKey& pcrypto::pkenc::PublicKey::operator=(
-    const pcrypto::pkenc::PublicKey& publicKey) {
+        const pcrypto::pkenc::PublicKey& publicKey) {
     if (this == &publicKey)
         return *this;
     if (public_key_ != nullptr)
