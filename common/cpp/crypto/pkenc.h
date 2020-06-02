@@ -24,14 +24,19 @@ namespace tcf {
 namespace crypto {
     namespace constants {
          /**
+          * RSA key size, in bits.
           * Use RSA-3072 for long-term security,
           * with OAEP padding and SHA-256 digest.
-          * The 2048 byte buffer allows for future key sizes <= RSA-16384.
           * RSA is not quantum resistant.
           */
-        const int RSA_KEY_SIZE = 2048;
+        const int RSA_KEY_SIZE = 3072;
+        /** Padding required, in bits, for OAEP padding. */
         const int RSA_PADDING_SIZE = 41;
-
+        /**
+         * Maxinum amount, in bytes, of plain text that can
+         * be encrypted with RSA. For longer lengths
+         * use symmetric encryption or a larger key size.
+         */
         constexpr int RSA_PLAINTEXT_LEN =
             ((RSA_KEY_SIZE - RSA_PADDING_SIZE) >> 3);
     }  // namespace constants
