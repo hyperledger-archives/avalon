@@ -60,7 +60,9 @@ class WorkOrderProcessorEnclaveManager(EnclaveManager):
         signup_data = enclave_info.WorkOrderProcessorEnclaveInfo(
             self._config.get("EnclaveModule"))
         self._wpe_requester = WPERequester(self._config)
-        self._worker = self._worker_kv_delegate.get_worker()
+        # Hex string read from config which is 64 characters long
+        worker_id = self._worker_id
+        self._worker = self._worker_kv_delegate.get_worker_by_id(worker_id)
 
         signup_cpp_obj = enclave.SignupInfoWPE()
         # Generate a nonce in trusted code

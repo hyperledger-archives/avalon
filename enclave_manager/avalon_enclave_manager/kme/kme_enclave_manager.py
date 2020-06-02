@@ -16,12 +16,11 @@
 
 import argparse
 import json
+import random
 import logging
 import os
 import sys
-import hashlib
 
-import avalon_crypto_utils.crypto_utility as crypto_utils
 import avalon_enclave_manager.sgx_work_order_request as work_order_request
 import avalon_enclave_manager.kme.kme_enclave_info as enclave_info
 from avalon_enclave_manager.base_enclave_manager import EnclaveManager
@@ -67,11 +66,8 @@ class KeyManagementEnclaveManager(EnclaveManager):
 
         # Add a new worker
         worker_info = EnclaveManager.create_json_worker(self, self._config)
-        worker_id = crypto_utils.strip_begin_end_public_key(self.enclave_id) \
-            .encode("UTF-8")
-        # Calculate sha256 of worker id to get 32 bytes. The TC spec proxy
-        # model contracts expect byte32. Then take a hexdigest for hex str.
-        worker_id = hashlib.sha256(worker_id).hexdigest()
+        # Hex string read from config which is 64 characters long
+        worker_id = self._worker_id
         self._worker_kv_delegate.add_new_worker(worker_id, worker_info)
 
         # Cleanup wo-processing" table
@@ -155,7 +151,8 @@ class KeyManagementEnclaveManager(EnclaveManager):
     def GetUniqueVerificationKey(self, **params):
         """
         """
-        wo_request = params["wo_request"]
+        wo_request = self._get_request_json("GetUniqueVerificationKey")
+        wo_request["params"] = params
         wo_response = self._execute_work_order(json.dumps(wo_request), "")
         wo_response_json = json.loads(wo_response)
 
@@ -170,12 +167,16 @@ class KeyManagementEnclaveManager(EnclaveManager):
     def RegisterWorkOrderProcessor(self, **params):
         """
         """
-        wo_request = params["wo_request"]
+        wo_request = self._get_request_json("RegisterWorkOrderProcessor")
+        wo_request["params"] = params
+        wo_response = self._execute_work_order(json.dumps(wo_request), "")
+        wo_response_json = json.loads(wo_response)
 
-        # @TODO : Trusted implementation to be integrated
-        # wo_response = self._execute_work_order(json.dumps(wo_request))
-
-        return ""
+        if "result" in wo_response_json:
+            return wo_response_json["result"]
+        else:
+            logger.error("Could not register WPE")
+            return wo_response_json
 
 # -----------------------------------------------------------------
 
@@ -189,6 +190,23 @@ class KeyManagementEnclaveManager(EnclaveManager):
         # wo_response = self._execute_work_order(wo_request, encryption_key)
 
         return ""
+
+# -----------------------------------------------------------------
+
+    def _get_request_json(self, method):
+        """
+        Helper method to synthesize jrpc request JSON
+
+        Parameters :
+            @param method - JRPC method to be set in the method field
+        Returns :
+            @returns A dict representing the basic request JSON
+        """
+        return {
+            "jsonrpc": "2.0",
+            "method": method,
+            "id": random.randint(0, 100000)
+        }
 
 # -----------------------------------------------------------------
 

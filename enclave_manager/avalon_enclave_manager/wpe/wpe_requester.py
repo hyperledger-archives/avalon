@@ -61,7 +61,6 @@ class WPERequester():
                               included in REPORTDATA by the WPE. None, in case
                               of failure.
         """
-
         workload_id = "kme-uid"
         in_data = json.dumps({"nonce": verification_key_nonce})
 
@@ -71,10 +70,9 @@ class WPERequester():
 
         wo_req = self._construct_wo_req(
             in_data, workload_id, encryption_key, session_key, session_iv)
+        wo_req["method"] = "GetUniqueVerificationKey"
 
-        json_rpc_request = self._get_request_json("GetUniqueVerificationKey")
-        json_rpc_request["params"] = {"wo_request": wo_req}
-        response = self._post_and_get_result(json_rpc_request)
+        response = self._post_and_get_result(wo_req)
 
         if "result" in response:
             wo_response_json = response["result"]
@@ -85,6 +83,7 @@ class WPERequester():
                 # array has single element and the data field is of interest.
                 # The data contains result,verification_key and
                 # verification_key_signature delimited by ' '.
+                # @TODO : Update to use multiple out_data fields.
                 return decrypted_res[0]['data']
             return None
         else:
@@ -113,12 +112,11 @@ class WPERequester():
         session_key = crypto_utils.generate_key()
         session_iv = crypto_utils.generate_iv()
 
-        wo_request = self._construct_wo_req(
+        wo_req = self._construct_wo_req(
             in_data, workload_id, encryption_key, session_key, session_iv)
+        wo_req["method"] = "RegisterWorkOrderProcessor"
 
-        json_rpc_request = self._get_request_json("RegisterWorkOrderProcessor")
-        json_rpc_request["params"] = {"wo_request": wo_request}
-        response = self._post_and_get_result(json_rpc_request)
+        response = self._post_and_get_result(wo_req)
 
         if "result" in response:
             wo_response_json = response["result"]
@@ -193,24 +191,8 @@ class WPERequester():
 
         return {
             "jsonrpc": "2.0",
-            "method": workload_id,
             "id": random.randint(0, 100000),
             "params": json.loads(wo_params.to_string())
-        }
-
-    def _get_request_json(self, method):
-        """
-        Helper method to synthesize jrpc request JSON
-
-        Parameters :
-            @param method - JRPC method to be set in the method field
-        Returns :
-            @returns A dict representing the basic request JSON
-        """
-        return {
-            "jsonrpc": "2.0",
-            "method": method,
-            "id": random.randint(0, 100000)
         }
 
     def _verify_res_signature(self, work_order_res, worker_verification_key):

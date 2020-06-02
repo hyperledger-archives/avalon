@@ -73,17 +73,15 @@ class WorkerKVDelegate:
 
         return self._kv_helper.set("workers", worker_id, worker_info)
 
-    def get_worker(self):
+    def get_worker_by_id(self, worker_id):
         """
         Get worker instance from database
-
+        Parameters :
+            @param worker_id - Id of worker to be retrieved
         Returns :
             @returns worker_obj - A worker retrieved from kv storage
         """
-        workers_list = self._kv_helper.lookup("workers")
-        # @TODO : Getting the only worker available as of now. Logic to get
-        # appropriate worker needs to be implemented.
-        json_dict = json.loads(self._kv_helper.get("workers", workers_list[0]))
+        json_dict = json.loads(self._kv_helper.get("workers", worker_id))
         worker_obj = worker_details.SGXWorkerDetails()
         worker_obj.load_worker(json_dict['details'])
 

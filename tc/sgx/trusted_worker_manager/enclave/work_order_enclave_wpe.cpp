@@ -53,14 +53,12 @@ tcf_err_t ecall_HandleWorkOrderRequestWPE(const uint8_t* inSerializedRequest,
         ByteArray request(inSerializedRequest,
             inSerializedRequest + inSerializedRequestSize);
 
-        tcf::WorkOrderProcessor wo_processor;
+        // Persist enclave type info in WorkOrderProcessor instance
+        tcf::WorkOrderProcessor wo_processor(WPE_ENCLAVE);
 
         // Persist Extended work order data in WorkOrderProcessor instance
         wo_processor.ext_work_order_data = \
             std::string((const char*) inWorkOrderExtData);
-
-        // Persist enclave type info in WorkOrderProcessor instance
-        wo_processor.enclave_type = WPE_ENCLAVE;
 
         std::string wo_string(request.begin(), request.end());
         last_serialized_response_wpe = wo_processor.Process(

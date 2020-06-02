@@ -66,6 +66,8 @@ remote_url = "http://localhost:9090"
 # -------------------------------------------------------------
 
 [WorkerConfig]
+# Id of worker in plain text
+worker_id = "kme-worker-1"
 ProofDataType = "TEE-SGX-IAS"
 
 # The Following URIs are used in direct model to submit work orders in
