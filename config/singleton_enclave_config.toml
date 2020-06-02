@@ -76,6 +76,8 @@ enclave_type = "SWE"
 # -------------------------------------------------------------
 
 [WorkerConfig]
+# Id of worker in plain text
+worker_id = "singleton-worker-1"
 ProofDataType = "TEE-SGX-IAS"
 
 # The Following URIs are used in direct model to submit work orders in

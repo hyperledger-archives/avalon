@@ -21,7 +21,6 @@ import os
 import sys
 import time
 import random
-import hashlib
 import zmq
 
 import avalon_enclave_manager.sgx_work_order_request as work_order_request
@@ -58,11 +57,8 @@ class SingletonEnclaveManager(EnclaveManager):
 
         # Add a new worker
         worker_info = EnclaveManager.create_json_worker(self, self._config)
-        worker_id = crypto_utils.strip_begin_end_public_key(self.enclave_id) \
-            .encode("UTF-8")
-        # Calculate sha256 of worker id to get 32 bytes. The TC spec proxy
-        # model contracts expect byte32. Then take a hexdigest for hex str.
-        worker_id = hashlib.sha256(worker_id).hexdigest()
+        # Hex string read from config which is 64 characters long
+        worker_id = self._worker_id
         self._worker_kv_delegate.add_new_worker(worker_id, worker_info)
 
         # Cleanup wo-processing" table

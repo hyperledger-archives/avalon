@@ -55,7 +55,7 @@ tcf_err_t ecall_HandleWorkOrderRequest(const uint8_t* inSerializedRequest,
         ByteArray request(inSerializedRequest,
             inSerializedRequest + inSerializedRequestSize);
 
-        tcf::WorkOrderProcessor wo_processor;
+        tcf::WorkOrderProcessor wo_processor(SINGLETON_ENCLAVE);
 
         // work order extended data will not be used in singleton worker,
         // hence store empty value
