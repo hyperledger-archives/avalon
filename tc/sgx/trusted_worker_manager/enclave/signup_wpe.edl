@@ -24,11 +24,11 @@ enclave {
         );
         public tcf_err_t ecall_CreateSignupDataWPE(
             [in] const sgx_target_info_t* inTargetInfo,
-            [in] const uint8_t* inExtData,
+            [in, size=inExtDataSize] const uint8_t* inExtData,
             size_t inExtDataSize,
-            [in] const uint8_t* inExtDataSignature,
+            [in, size=inExtDataSignatureSize] const uint8_t* inExtDataSignature,
             size_t inExtDataSignatureSize,
-            [in] const uint8_t* inKmeAttestation,
+            [in, size=inKmeAttestationSize] const uint8_t* inKmeAttestation,
             size_t inKmeAttestationSize,
             [out, size=inAllocatedPublicEnclaveDataSize] char* outPublicEnclaveData,
             size_t inAllocatedPublicEnclaveDataSize,
@@ -37,8 +37,9 @@ enclave {
 
         public tcf_err_t ecall_VerifyEnclaveInfoWPE(
             [in, string] const char* inEnclaveInfo,
-            [in, string] const char* mr_enclave,
-            [in] const uint8_t* ext_data
+            [in, string] const char* mrEnclave,
+            [in, size=inExtDataSize] const uint8_t* inExtData,
+            size_t inExtDataSize
         );
     };
 };

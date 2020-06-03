@@ -60,6 +60,7 @@ tcf_err_t ecall_CreateSignupDataKME(const sgx_target_info_t* inTargetInfo,
     tcf_err_t result = TCF_SUCCESS;
 
     try {
+	Log(TCF_LOG_INFO, "Trusted code ecall_CreateSignupDataKME \n");
         tcf::error::ThrowIfNull(inTargetInfo, "Target info pointer is NULL");
         tcf::error::ThrowIfNull(inExtData, "Extended data is NULL");
         tcf::error::ThrowIf<tcf::error::ValueError>(
@@ -78,8 +79,13 @@ tcf_err_t ecall_CreateSignupDataKME(const sgx_target_info_t* inTargetInfo,
 
         // Get instance of enclave data
         EnclaveData* enclaveData = EnclaveData::getInstance();
-        enclaveData->set_extended_data((const char*) inExtData);
+	//Log(TCF_LOG_INFO, "Before Trusted code MRenclave value %s\n",
+	//		(const char*)inExtData);
+	ByteArray ext_data_bytes(inExtData, inExtData+inExtDataSize); 
+        enclaveData->set_extended_data(ext_data_bytes);
 
+	Log(TCF_LOG_INFO, "Trusted code MRenclave value %s\n",
+	    ByteArrayToHexEncodedString(enclaveData->get_extended_data()).c_str());
         tcf::error::ThrowIf<tcf::error::ValueError>(
             inAllocatedPublicEnclaveDataSize < enclaveData->get_public_data_size(),
             "Public enclave data buffer size is too small");
@@ -132,10 +138,15 @@ tcf_err_t ecall_CreateSignupDataKME(const sgx_target_info_t* inTargetInfo,
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 tcf_err_t ecall_VerifyEnclaveInfoKME(const char* enclave_info,
-    const char* mr_enclave, const uint8_t* ext_data) {
+    const char* mr_enclave, const uint8_t* ext_data, size_t ext_data_size) {
+    tcf::error::ThrowIfNull(ext_data, "Extended data is NULL");
+    tcf::error::ThrowIf<tcf::error::ValueError>(
+        ext_data_size != KME_SIGNUP_EXT_DATA_SIZE,
+        "Extended data size should be 32 bytes");
 
     tcf_err_t result = TCF_SUCCESS;
 
+    Log(TCF_LOG_INFO,"1111111111");
     // Parse the enclave_info
     JsonValue enclave_info_parsed(json_parse_string(enclave_info));
     tcf::error::ThrowIfNull(enclave_info_parsed.value,
@@ -150,10 +161,12 @@ tcf_err_t ecall_VerifyEnclaveInfoKME(const char* enclave_info,
     svalue = json_object_dotget_string(enclave_info_object, "verifying_key");
     tcf::error::ThrowIfNull(svalue, "Invalid verifying_key");
     std::string enclave_id(svalue);
+    Log(TCF_LOG_INFO,"2222222222");
 
     svalue = json_object_dotget_string(enclave_info_object, "encryption_key");
     tcf::error::ThrowIfNull(svalue, "Invalid encryption_key");
     std::string enclave_encrypt_key(svalue);
+    Log(TCF_LOG_INFO,"a2222222222");
 
     // Parse proof data
     svalue = json_object_dotget_string(enclave_info_object, "proof_data");
@@ -163,6 +176,7 @@ tcf_err_t ecall_VerifyEnclaveInfoKME(const char* enclave_info,
         "Failed to parse the proofData, badly formed JSON");
     JSON_Object* proof_object = json_value_get_object(proof_data_parsed);
     tcf::error::ThrowIfNull(proof_object, "Invalid proof, expecting object");
+    Log(TCF_LOG_INFO,"b2222222222");
 
     svalue = json_object_dotget_string(proof_object, "ias_report_signature");
     tcf::error::ThrowIfNull(svalue, "Invalid proof_signature");
@@ -172,6 +186,7 @@ tcf_err_t ecall_VerifyEnclaveInfoKME(const char* enclave_info,
     svalue = json_object_dotget_string(proof_object, "verification_report");
     tcf::error::ThrowIfNull(svalue, "Invalid proof_verification_report");
     const std::string verification_report(svalue);
+    Log(TCF_LOG_INFO,"c2222222222");
 
     JsonValue verification_report_parsed(
         json_parse_string(verification_report.c_str()));
@@ -192,6 +207,7 @@ tcf_err_t ecall_VerifyEnclaveInfoKME(const char* enclave_info,
         verification_report_object, "epidPseudonym");
     tcf::error::ThrowIfNull(svalue, "Invalid epid_pseudonym");
     const std::string epid_pseudonym(svalue);
+    Log(TCF_LOG_INFO,"d222222222");
 
     // Verify verification report signature
     // Verify good quote, but group-of-date is not considered ok
@@ -201,7 +217,7 @@ tcf_err_t ecall_VerifyEnclaveInfoKME(const char* enclave_info,
         r!=true, "Invalid Enclave Quote:  group-of-date NOT OKAY");
 
     const char* ias_report_cert = json_object_dotget_string(
-        proof_object, "ias_report_signing_certificate");
+        proof_object,"ias_report_signing_certificate");
 
     std::vector<char> verification_report_vec(
         verification_report.begin(), verification_report.end());
@@ -214,6 +230,7 @@ tcf_err_t ecall_VerifyEnclaveInfoKME(const char* enclave_info,
     char* proof_signature_arr = &proof_signature_vec[0];
 
     //verify IAS signature
+    Log(TCF_LOG_INFO,"e2222222222");
     r = verify_ias_report_signature(ias_report_cert,
                                     verification_report_arr,
                                     strlen(verification_report_arr),
@@ -221,6 +238,7 @@ tcf_err_t ecall_VerifyEnclaveInfoKME(const char* enclave_info,
                                     strlen(proof_signature_arr));
     tcf::error::ThrowIf<tcf::error::ValueError>(
     r!=true, "Invalid verificationReport; Invalid Signature");
+    Log(TCF_LOG_INFO,"f2222222222");
 
     // Extract ReportData and MR_ENCLAVE from isvEnclaveQuoteBody
     // present in Verification Report
@@ -237,16 +255,21 @@ tcf_err_t ecall_VerifyEnclaveInfoKME(const char* enclave_info,
         memcmp(mr_enclave_from_report.m, mr_enclave_bytes.data(),
             SGX_HASH_SIZE)  != 0, "Invalid MR_ENCLAVE");
 
+    Log(TCF_LOG_INFO,"g2222222222");
     // Verify Report Data by comparing hash of report data in
     // Verification Report with computed report data
     sgx_report_data_t computed_report_data = {0};
     CreateReportDataKME(enclave_id, ext_data, &computed_report_data);
+    Log(TCF_LOG_INFO,"h2222222222");
+    Log(TCF_LOG_INFO,"computed report data %s\n expected report data %s",
+		    (char* )computed_report_data.d, (char* )expected_report_data.d);
 
     //Compare computedReportData with expectedReportData
     tcf::error::ThrowIf<tcf::error::ValueError>(
         memcmp(computed_report_data.d, expected_report_data.d,
         SGX_REPORT_DATA_SIZE)  != 0,
         "Invalid Report data: computedReportData does not match expectedReportData");
+    Log(TCF_LOG_INFO,"i2222222222");
     return result;
 }  // ecall_VerifyEnclaveInfo
 
@@ -265,6 +288,8 @@ void CreateReportDataKME(std::string& enclave_signing_key,
 
     Zero(report_data, sizeof(*report_data));
 
+    Log(TCF_LOG_INFO,"CreateReportDataKME ext_data %s\n signing key %s\n",
+		    (const char* )ext_data, enclave_signing_key.c_str());
     uint8_t sig_key_hash[SGX_HASH_SIZE] = {0};
     ComputeSHA256Hash(enclave_signing_key, sig_key_hash);
 
@@ -273,6 +298,7 @@ void CreateReportDataKME(std::string& enclave_signing_key,
         (const char*) sig_key_hash, SGX_HASH_SIZE);
     strncat((char*)report_data->d,
         (const char*) ext_data, SGX_HASH_SIZE);
+    Log(TCF_LOG_INFO,"CreateReportDataKME end\n");
 }  // CreateReportData
 
 
@@ -296,6 +322,8 @@ void CreateSignupReportDataKME(const uint8_t* ext_data,
     std::string enclave_signing_key = \
         enclave_data->get_serialized_signing_key();
 
+    Log(TCF_LOG_INFO,"CreateSignupReportDataKME ext_data %s\n signing key %s\n",
+		    (const char* )ext_data, enclave_signing_key.c_str());
     // NOTE - we are putting the hash directly into the report
     // data structure because it is (64 bytes) larger than the SHA256
     // hash (32 bytes) but we zero it out first to ensure that it is

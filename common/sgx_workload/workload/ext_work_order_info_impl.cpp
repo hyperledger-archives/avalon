@@ -18,10 +18,15 @@
 
 #include "ext_work_order_info_impl.h"
 #include "enclave_data.h"
+#include "error.h"
 #include "parson.h"
 #include "jsonvalue.h"
 #include "utils.h"
 #include "verify-report.h"
+#include "enclave_utils.h"
+#include "signup_enclave_util.h"
+
+using namespace tcf::error;
 
 ExtWorkOrderInfoImpl::ExtWorkOrderInfoImpl() {}
 
@@ -39,26 +44,33 @@ int ExtWorkOrderInfoImpl::VerifyAttestation(const ByteArray& attestation_data,
     /// Verify attestation report
     VerificationStatus result = VERIFICATION_SUCCESS;
     std::string att_data_string = ByteArrayToString(attestation_data);
+    Log(TCF_LOG_INFO,"\n\n\n VerifyAttestation attestion_data %s\n\n\n", att_data_string);
     /// Parse the att_string
     JsonValue att_data_string_parsed(json_parse_string(
         att_data_string.c_str()));
     if (att_data_string_parsed.value == nullptr) {
+	ThrowIf<ValueError>(true, "Parsing attestion data failed");
         return VERIFICATION_FAILED;
     }
     JSON_Object* att_data_json_object = \
         json_value_get_object(att_data_string_parsed);
     if (att_data_json_object == nullptr) {
+	ThrowIf<ValueError>(true, "Creating json object failed");
         return VERIFICATION_FAILED;
     }
 
     const char* s_value = nullptr;
     s_value = json_object_dotget_string(att_data_json_object, "verifying_key");
     if (s_value == nullptr) {
+	ThrowIf<ValueError>(true,
+			"Extracting verifying_key from report failed");
         return VERIFICATION_FAILED;
     }
-
+    
     s_value = json_object_dotget_string(att_data_json_object, "encryption_key");
     if (s_value == nullptr) {
+	ThrowIf<ValueError>(true,
+			"Extracting encryption_key from report failed");
         return VERIFICATION_FAILED;
     }
     std::string e_key(s_value);
@@ -69,15 +81,19 @@ int ExtWorkOrderInfoImpl::VerifyAttestation(const ByteArray& attestation_data,
     std::string proof_data(s_value);
     JsonValue proof_data_parsed(json_parse_string(proof_data.c_str()));
     if (proof_data_parsed == nullptr) {
+	ThrowIf<ValueError>(true, "Extracting proof_data from report failed");
         return VERIFICATION_FAILED;
     }
     JSON_Object* proof_object = json_value_get_object(proof_data_parsed);
     if (proof_object == nullptr) {
+	ThrowIf<ValueError>(true, "Parsing proof_data json failed");
         return VERIFICATION_FAILED;
     }
 
     s_value = json_object_dotget_string(proof_object, "ias_report_signature");
     if (s_value == nullptr) {
+	ThrowIf<ValueError>(true,
+			"Extracting ias_report_signature from proof_data failed");
         return VERIFICATION_FAILED;
     }
     const std::string proof_signature(s_value);
@@ -85,6 +101,8 @@ int ExtWorkOrderInfoImpl::VerifyAttestation(const ByteArray& attestation_data,
     /// Parse verification report
     s_value = json_object_dotget_string(proof_object, "verification_report");
     if (s_value == nullptr) {
+	ThrowIf<ValueError>(true,
+			"Extracting verification_report from proof_data failed");
         return VERIFICATION_FAILED;
     }
     const std::string verification_report(s_value);
@@ -92,18 +110,22 @@ int ExtWorkOrderInfoImpl::VerifyAttestation(const ByteArray& attestation_data,
     JsonValue verification_report_parsed(
         json_parse_string(verification_report.c_str()));
     if (verification_report_parsed.value == nullptr) {
+	ThrowIf<ValueError>(true, "Parsing verification report failed");
         return VERIFICATION_FAILED;
     }
 
     JSON_Object* verification_report_object = \
         json_value_get_object(verification_report_parsed);
     if (verification_report_object == nullptr) {
+	ThrowIf<ValueError>(true,
+			"Creating verification report json object failed");
         return VERIFICATION_FAILED;
     }
 
     s_value = json_object_dotget_string(verification_report_object,
         "isvEnclaveQuoteBody");
     if (s_value == nullptr) {
+	ThrowIf<ValueError>(true, "Extracting isvEnclaveQuoteBody failed");
         return VERIFICATION_FAILED;
     }
     const std::string enclave_quote_body(s_value);
@@ -111,6 +133,7 @@ int ExtWorkOrderInfoImpl::VerifyAttestation(const ByteArray& attestation_data,
     s_value = json_object_dotget_string(
         verification_report_object, "epidPseudonym");
     if (s_value == nullptr) {
+	ThrowIf<ValueError>(true, "Extracting epidPseudonym failed");
         return VERIFICATION_FAILED;
     }
     const std::string epid_pseudonym(s_value);
@@ -120,6 +143,7 @@ int ExtWorkOrderInfoImpl::VerifyAttestation(const ByteArray& attestation_data,
     bool r = verify_enclave_quote_status(verification_report.c_str(),
         verification_report.length(), 1);
     if (r != true) {
+	ThrowIf<ValueError>(true, "Verifying enclave quote failed");
         return VERIFICATION_FAILED;
     }
     const char* ias_report_cert = json_object_dotget_string(
@@ -142,6 +166,7 @@ int ExtWorkOrderInfoImpl::VerifyAttestation(const ByteArray& attestation_data,
                                     proof_signature_arr,
                                     strlen(proof_signature_arr));
     if (r != true) {
+	ThrowIf<ValueError>(true, "Verifying ias report signature failed");
         return VERIFICATION_FAILED;
     }
 
@@ -162,15 +187,14 @@ int ExtWorkOrderInfoImpl::VerifyAttestation(const ByteArray& attestation_data,
         std::end(mr_signer_from_report.m));
     mr_enclave = mr_enclave_bytes;
     mr_signer = mr_signer_bytes;
+    Log(TCF_LOG_INFO,"\n\n\n MRENCLAVE %s\n\n\n",
+		    ByteArrayToStr(mr_enclave_bytes).c_str());
 
-    /* extract unique verification key from report data[32:63] */
     uint8_t v_key_hash[SGX_HASH_SIZE] = {0};
     strncpy((char* )v_key_hash,
         (const char* )expected_report_data.d + SGX_HASH_SIZE,
         SGX_HASH_SIZE);
-    ByteArray v_key_hash_bytes(std::begin(v_key_hash),
-        std::end(v_key_hash));
-    verification_key_hash = v_key_hash_bytes;
+    verification_key_hash = StrToByteArray((char*)v_key_hash);
 
     return result;
 

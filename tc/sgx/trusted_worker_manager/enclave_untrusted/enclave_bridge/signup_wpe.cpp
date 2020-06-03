@@ -110,12 +110,14 @@ tcf_err_t SignupDataWPE::CreateEnclaveData(
         // and call into the enclave to create the signup data
         sgx_report_t enclave_report = { 0 };
 
+	ByteArray ext_data_bytes = StrToByteArray(inExtData);
+	ByteArray ext_data_sig_bytes = StrToByteArray(inExtDataSignature);
         sresult = g_Enclave[0].CallSgx(
             [enclaveid,
              &presult,
              target_info,
-             inExtData,
-             inExtDataSignature,
+             ext_data_bytes,
+             ext_data_sig_bytes,
              inKmeAttestation,
              &outPublicEnclaveData,
              &enclave_report ] () {
@@ -123,10 +125,10 @@ tcf_err_t SignupDataWPE::CreateEnclaveData(
                     enclaveid,
                     &presult,
                     &target_info,
-                    (const uint8_t*) inExtData.c_str(),
-                    inExtData.length(),
-                    (const uint8_t*) inExtDataSignature.c_str(),
-                    inExtDataSignature.length(),
+                    ext_data_bytes.data(),
+                    ext_data_bytes.size(),
+                    ext_data_sig_bytes.data(),
+                    ext_data_sig_bytes.size(),
                     (const uint8_t*)inKmeAttestation.c_str(),
                     inKmeAttestation.length(),
                     outPublicEnclaveData.data(),
@@ -170,19 +172,21 @@ tcf_err_t SignupDataWPE::VerifyEnclaveInfo(
         sgx_enclave_id_t enclaveid = g_Enclave[0].GetEnclaveId();
         tcf_err_t presult = TCF_SUCCESS;
 
+	ByteArray ext_data_bytes = StrToByteArray(ext_data);
         sgx_status_t sresult = g_Enclave[0].CallSgx(
             [ enclaveid,
               &presult,
               enclaveInfo,
               mr_enclave,
-              ext_data ] () {
+              ext_data_bytes ] () {
               sgx_status_t sresult =
               ecall_VerifyEnclaveInfoWPE(
                              enclaveid,
                              &presult,
                              enclaveInfo.c_str(),
                              mr_enclave.c_str(),
-                             (const uint8_t*) ext_data.c_str());
+                             ext_data_bytes.data(),
+			     ext_data_bytes.size());
           return tcf::error::ConvertErrorStatus(sresult, presult);
     });
 

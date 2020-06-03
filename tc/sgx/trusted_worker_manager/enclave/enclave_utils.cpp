@@ -41,9 +41,9 @@ void Log(int level, const char* fmt, ...) {
     va_start(ap, fmt);
     vsnprintf_s(buf, BUFSIZ, fmt, ap);
     va_end(ap);
-#ifdef TCF_DEBUG_BUILD
+//#ifdef TCF_DEBUG_BUILD
     ocall_Log(level, buf);
-#endif
+//#endif
 }  // Log
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX

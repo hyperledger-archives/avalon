@@ -77,8 +77,8 @@ private:
         std::vector<tcf::WorkOrderData>& out_work_order_data);
 
     ExtWorkOrderInfoKME* ext_wo_info_kme;
-    std::map<ByteArray, ByteArray> sig_key_map;
-    std::map<ByteArray, WPEInfo> wpe_enc_key_map;
+    static std::map<ByteArray, ByteArray> sig_key_map;
+    static std::map<ByteArray, WPEInfo> wpe_enc_key_map;
 
     uint64_t max_wo_count_;
 };  // KMEWorkloadProcessor
