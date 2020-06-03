@@ -70,7 +70,7 @@ protected:
     tcf::crypto::pkenc::PrivateKey private_encryption_key_;
     std::string encryption_key_signature_;
 
-    std::string extended_data_;
+    ByteArray extended_data_;
     std::string nonce_;
 
     std::string serialized_private_data_;
@@ -100,7 +100,7 @@ public:
         return public_signing_key_.VerifySignature(message, signature);
     }
 
-    void set_extended_data(std::string in_ex_data) {
+    void set_extended_data(const ByteArray& in_ex_data) {
         extended_data_ = in_ex_data;
     }
 
@@ -112,7 +112,7 @@ public:
         return nonce_;
     }
 
-    std::string get_extended_data() {
+    ByteArray get_extended_data() {
         return extended_data_;
     }
 

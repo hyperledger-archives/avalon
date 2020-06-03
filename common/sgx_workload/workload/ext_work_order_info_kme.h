@@ -23,7 +23,8 @@ enum KmeRegistrationStatus {
     ERR_WPE_NOT_FOUND = 2, /// WPE not found (If WPE won't call GetUniqueId)
     ERR_MRENCLAVE_NOT_MATCH = 3, /// WPE MRENCLAVE value not matched
     ERR_MRSIGNER_NOT_MATCH = 4, /// WPE MRSIGNER value not matched
-    ERR_WPE_VERIFICATION_FAILED = 5 /// WPE attestation report verification failed
+    ERR_WPE_VERIFICATION_FAILED = 5, /// WPE attestation report verification failed
+    ERR_UNIQUE_ID_NOT_MATCH = 6 /// WPE unique id didn't match
 };
 
 class ExtWorkOrderInfoKME : public ExtWorkOrderInfoImpl {
