@@ -103,7 +103,6 @@ class ClientSignature(object):
         """
 
         indata_objects = input_json_params['inData']
-        indata_objects.sort(key=lambda x: x['index'])
         input_json_params['inData'] = indata_objects
         logger.info("Encrypting Workorder Data")
 
@@ -178,6 +177,8 @@ class ClientSignature(object):
         """
 
         hash_str = ""
+        # Sort the data items based on index field before calculating data hash
+        data_objects.sort(key=lambda x: x['index'])
         for item in data_objects:
             datahash = "".encode('UTF-8')
             e_key = "".encode('UTF-8')
@@ -293,7 +294,6 @@ class ClientSignature(object):
         hash_string_3 = ""
         if 'outData' in input_json_params:
             data_objects = input_json_params['outData']
-            data_objects.sort(key=lambda x: x['index'])
             hash_string_3 = self.calculate_datahash(data_objects)
 
         concat_string = hash_string_1 + hash_string_2 + hash_string_3
@@ -343,7 +343,6 @@ class ClientSignature(object):
         hash_string_1 = self.__calculate_hash_on_concatenated_string(
             input_json_params, nonce)
         data_objects = input_json_params['outData']
-        data_objects.sort(key=lambda x: x['index'])
         hash_string_2 = self.calculate_datahash(data_objects)
         concat_string = hash_string_1 + hash_string_2
         concat_hash = bytes(concat_string, 'UTF-8')
