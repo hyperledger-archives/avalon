@@ -183,13 +183,17 @@ class KeyManagementEnclaveManager(EnclaveManager):
     def PreProcessWorkOrder(self, **params):
         """
         """
-        wo_request = params["wo_request"]
-        encryption_key = params["encryption_key"]
+        wo_request = self._get_request_json("PreProcessWorkOrder")
+        wo_request["params"] = params
+        wo_response = self._execute_work_order(json.dumps(wo_request), "")
+        wo_response_json = json.loads(wo_response)
 
-        # @TODO : Trusted implementation to be integrated
-        # wo_response = self._execute_work_order(wo_request, encryption_key)
+        if "result" in wo_response_json:
+            return wo_response_json["result"]
+        else:
+            logger.error("Could not preprocess work order at KME")
+            return wo_response_json
 
-        return ""
 
 # -----------------------------------------------------------------
 
