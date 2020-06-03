@@ -42,6 +42,20 @@ def is_valid_hex_str(hex_str):
         return False
 
 
+def mrenclave_hex_string(enclave_metadata_file):
+    """
+    Function to extract the MREnclave value from a file
+    Parameter
+        - enclave_metadata_file is a file
+    Returns MRENCALVE value converted to hex string
+    """
+    with open(enclave_metadata_file, "r") as file:
+        hexlist = file.read().rstrip('\r\n ').split(' ')
+        hexbytes = bytes([int(x, 0) for x in hexlist])
+        hexstring = hexbytes.hex()
+    return hexstring
+
+
 def byte_array_to_hex_str(in_byte_array):
     '''
     Converts tuple of bytes to hex string
