@@ -36,7 +36,7 @@ SET(COMMON_CXX_FLAGS ${DEBUG_FLAGS} "-m64" "-fvisibility=hidden" "-fpie" "-fPIC"
 SET(UNTRUSTED_LIB_NAME uavalon-common)
 PROJECT(${UNTRUSTED_LIB_NAME} CXX)
 
-pkg_check_modules (OPENSSL REQUIRED openssl>=1.1.1d)
+pkg_check_modules (OPENSSL REQUIRED openssl>=1.1.1f)
 
 ADD_LIBRARY(${UNTRUSTED_LIB_NAME} STATIC ${PROJECT_HEADERS} ${PROJECT_SOURCES})
 

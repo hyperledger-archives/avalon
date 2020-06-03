@@ -45,7 +45,7 @@ activation script (e.g. `source /opt/intel/sgxsdk/environment`)
 - If you build your own OpenSSL (not the usual case),
   `PKG_CONFIG_PATH` and `LD_LIBRARY_PATH` also contain the the path to
   [OpenSSL](#openssl) package config files and libraries, respectively.
-  You need to do this when pre-built OpenSSL version 1.1.1d or later
+  You need to do this when pre-built OpenSSL version 1.1.1f or later
   packages are not available for your system
 
 - `SGX_MODE`
@@ -274,25 +274,25 @@ Verify `SGX_MODE` is not set, or is set to `SIM`, with `echo $SGX_MODE` .
 **The OpenSSL steps apply only to standalone builds.**
 
 OpenSSL is a popular cryptography library. This project requires OpenSSL
-version 1.1.1d or later.
+version 1.1.1f or later.
 
 Many Linux distributions have an older version of OpenSSL installed by default.
 If your version of OpenSSL is too old, follow these steps to compile a newer
-version from source. If you already have a newer version, 1.1.1d or later,
+version from source. If you already have a newer version, 1.1.1f or later,
 you can skip this.
 
 If using a Debian-based Linux distribution (Ubuntu, Mint, etc.) the recommended
 path is to download and install pre-built OpenSSL packages for your system.
 Check for available versions
 [here](http://http.us.debian.org/debian/pool/main/o/openssl/).
-For example, to install OpenSSL v1.1.1d on an Ubuntu system:
+For example, to install OpenSSL v1.1.1f on an Ubuntu system:
 
 ```bash
 cd /var/tmp
-wget 'http://http.us.debian.org/debian/pool/main/o/openssl/libssl1.1_1.1.1d-0+deb10u3_amd64.deb'
-wget 'http://http.us.debian.org/debian/pool/main/o/openssl/libssl-dev_1.1.1d-0+deb10u3_amd64.deb'
-sudo dpkg -i libssl1.1_1.1.1d-0+deb10u3_amd64.deb
-sudo dpkg -i libssl-dev_1.1.1d-0+deb10u3_amd64.deb
+wget 'http://http.us.debian.org/debian/pool/main/o/openssl/libssl1.1_1.1.1g-1_amd64.deb'
+wget 'http://http.us.debian.org/debian/pool/main/o/openssl/libssl-dev_1.1.1g-1_amd64.deb'
+sudo dpkg -i libssl1.1_1.1.1g-1_amd64.deb
+sudo dpkg -i libssl-dev_1.1.1g-1_amd64.deb
 sudo apt-get install -f
 ```
 
@@ -307,16 +307,18 @@ These steps detail installing OpenSSL to the `~/openssl/install` directory.
 ```bash
 mkdir -p ~/openssl/install
 cd ~/openssl
-wget https://www.openssl.org/source/old/1.1.1/openssl-1.1.1d.tar.gz
-tar -xzf openssl-1.1.1d.tar.gz
-cd openssl-1.1.1d/
-./Configure --prefix=$PWD/../install
-./config --prefix=$PWD/../install
-make
+wget https://www.openssl.org/source/old/1.1.1/openssl-1.1.1f.tar.gz
+tar -xzf openssl-1.1.1f.tar.gz
+cd openssl-1.1.1f/
+./config
 make test
 make install
 cd ../..
+sudo ln -s /usr/local/bin/openssl /usr/bin/openssl
+sudo ldconfig
+openssl version
 ```
+If the above succeeds, your output should be as follows: "OpenSSL 1.1.1f  31 Mar 2020"
 
 If the above succeeds, define/extend the `PKG_CONFIG_PATH` environment variable
 accordingly, e.g.,
@@ -357,12 +359,12 @@ problems.
   cd ~/sgxssl
   ```
 
-- Download a specific version of the Intel SGX SSL git repository.
-  Use Intel SGX SSL tag "lin_2.5_1.1.1d", which corresponds to
-  OpenSSL version 1.1.1d
+- Download a specific version of the Intel SGX SSL git repository. 
+  Use Intel SGX SSL tag "support_openssl_1_1_1", which corresponds to
+  OpenSSL version 1.1.1f
 
   ```bash
-  git clone -b lin_2.5_1.1.1d 'https://github.com/intel/intel-sgx-ssl.git'
+  git clone -b support_openssl_1_1_1 'https://github.com/intel/intel-sgx-ssl.git'
   ```
 
 - Download the OpenSSL source package for your version of OpenSSL.
@@ -370,7 +372,7 @@ problems.
 
   ```bash
   cd intel-sgx-ssl/openssl_source
-  wget 'https://www.openssl.org/source/old/1.1.1/openssl-1.1.1d.tar.gz'
+  wget 'https://www.openssl.org/source/old/1.1.1/openssl-1.1.1f.tar.gz'
   cd ..
   ```
 
@@ -397,7 +399,7 @@ problems.
 # <a name="troubleshooting"></a>Troubleshooting Installation
 - Verify your [environment variables](#environment) are set correctly and the
   paths exist
-
+- Verify you are not using Openssl 1.1.1d version. Openssl1.1.1d lib has technical issues.
 - If you get the error:
   `./test_app/TestApp: error while loading shared libraries: libprotobuf.so.9:
    cannot open shared object file: No such file or directory`
