@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+
 #include "enclave_t.h"
 
 #include <stdio.h>
@@ -36,7 +37,7 @@
 #include "signup_enclave_util.h"
 #include "verify-report.h"
 
-static void CreateReportDataWPE(const uint8_t* ext_data,
+static void CreateReportDataWPE(const char* ext_data,
     std::string& enclave_encrypt_key,
     sgx_report_data_t* report_data);
 
@@ -88,27 +89,19 @@ tcf_err_t ecall_CreateSignupDataWPE(const sgx_target_info_t* inTargetInfo,
     tcf_err_t result = TCF_SUCCESS;
 
     try {
-	Log(TCF_LOG_ERROR, "ecall_CreateSignupDataWPE:: %s size %d", (char *)inExtData,
-			inExtDataSize);
         tcf::error::ThrowIfNull(inTargetInfo, "Target info pointer is NULL");
-    Log(TCF_LOG_ERROR, "ecall_CreateSignupDataWPE after checks");
         tcf::error::ThrowIfNull(inExtData, "Extended data is NULL");
-    Log(TCF_LOG_ERROR, "ecall_CreateSignupDataWPE 1111after checks");
 	tcf::error::ThrowIf<tcf::error::ValueError>(
 	    inExtDataSize == 0,
 	    "Extended data size shouldn't be zero");
-    Log(TCF_LOG_ERROR, "ecall_CreateSignupDataWPE 22222after checks");
         // Disable this check for now, will enable it once we have
 	// proper value in inExtDataSig
         /* tcf::error::ThrowIfNull(inExtDataSig,
             "Extended data signature input is NULL");*/
-    Log(TCF_LOG_ERROR, "ecall_CreateSignupDataWPE 333333after checks");
         tcf::error::ThrowIfNull(outPublicEnclaveData,
             "Public enclave data pointer is NULL");
-    Log(TCF_LOG_ERROR, "ecall_CreateSignupDataWPE 44444after checks");
         tcf::error::ThrowIfNull(outEnclaveReport,
             "Intel SGX report pointer is NULL");
-    Log(TCF_LOG_ERROR, "ecall_CreateSignupDataWPE 5555555after checks");
 
         Zero(outPublicEnclaveData, inAllocatedPublicEnclaveDataSize);
 
@@ -126,7 +119,6 @@ tcf_err_t ecall_CreateSignupDataWPE(const sgx_target_info_t* inTargetInfo,
         tcf::error::ThrowIf<tcf::error::ValueError>(
             inAllocatedPublicEnclaveDataSize < enclaveData->get_public_data_size(),
             "Public enclave data buffer size is too small");
-    Log(TCF_LOG_ERROR, "ecall_CreateSignupDataWPE page size check");
 
         // Create the report data we want embedded in the enclave report.
         sgx_report_data_t reportData = {0};
@@ -182,13 +174,10 @@ void CreateSignupReportDataWPE(const uint8_t* ext_data,
 
     Zero(report_data, sizeof(*report_data));
 
-	
-    Log(TCF_LOG_ERROR, "CreateSignupReportDataWPE before hash");
     uint8_t enc_key_hash[SGX_HASH_SIZE] = {0};
     uint8_t ext_data_hash[SGX_HASH_SIZE] = {0};
     ComputeSHA256Hash(enclave_encrypt_key, enc_key_hash);
     ComputeSHA256Hash((const char*) ext_data, ext_data_hash);
-    Log(TCF_LOG_ERROR, "CreateSignupReportDataWPE after hash");
 
     // Concatenate hash of public encryption key and hash of extended data
     strncpy((char*)report_data->d,
@@ -199,13 +188,8 @@ void CreateSignupReportDataWPE(const uint8_t* ext_data,
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 tcf_err_t ecall_VerifyEnclaveInfoWPE(const char* enclave_info,
-    const char* mr_enclave, const uint8_t* ext_data, size_t ext_data_size) {
-    Log(TCF_LOG_ERROR, "ecall_VerifyEnclaveInfoWPE:: %s size %d", (char *)ext_data,
-			ext_data_size);
+    const char* mr_enclave, const char* ext_data) {
     tcf::error::ThrowIfNull(ext_data, "Extended data is NULL");
-    tcf::error::ThrowIf<tcf::error::ValueError>(
-        ext_data_size == 0,
-        "Extended data size shouldn't be zero"); 
 
     tcf_err_t result = TCF_SUCCESS;
 
@@ -325,7 +309,7 @@ tcf_err_t ecall_VerifyEnclaveInfoWPE(const char* enclave_info,
 }  // ecall_VerifyEnclaveInfoWPE
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-void CreateReportDataWPE(const uint8_t* ext_data,
+void CreateReportDataWPE(const char* ext_data,
     std::string& enclave_encrypt_key,
     sgx_report_data_t* report_data) {
     // We will put the following in the report data
@@ -343,7 +327,7 @@ void CreateReportDataWPE(const uint8_t* ext_data,
     uint8_t enc_key_hash[SGX_HASH_SIZE] = {0};
     uint8_t ext_data_hash[SGX_HASH_SIZE] = {0};
     ComputeSHA256Hash(enclave_encrypt_key, enc_key_hash);
-    ComputeSHA256Hash((const char*) ext_data, ext_data_hash);
+    ComputeSHA256Hash(ext_data, ext_data_hash);
 
     // Concatenate hash of public encryption key and hash of extended data
     strncpy((char*)report_data->d,

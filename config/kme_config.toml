@@ -47,7 +47,7 @@ num_of_enclaves = "1"
 #        using tool) as below where MRENCLAVE is saved.
 # This file is generated during WPE Enclave build
 # wpe_mrenclave_read_from_file = wpe_mr_enclave.txt
-wpe_mrenclave = "CFF2E89D19A02886C653FD77B5D8314414D9C486155013CC0505671B894D053F"
+wpe_mrenclave = "729B98A754CBBDE2C307E2563E467D8A965E9345A17B2A32E5EF4F083B07F8DE"
 
 # The type of enclave viz - KME/WPE/SWE
 enclave_type = "KME"

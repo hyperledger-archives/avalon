@@ -38,8 +38,7 @@ enclave {
         public tcf_err_t ecall_VerifyEnclaveInfoWPE(
             [in, string] const char* inEnclaveInfo,
             [in, string] const char* mrEnclave,
-            [in, size=inExtDataSize] const uint8_t* inExtData,
-            size_t inExtDataSize
+            [in, string] const char* inExtData
         );
     };
 };

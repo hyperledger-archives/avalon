@@ -39,8 +39,10 @@ class KeyManagementEnclaveInfo(BaseEnclaveInfo):
 
         # Initialize the keys that can be used later to
         # register the enclave
+        self._config = config
         enclave._SetLogger(logger)
-        super().__init__(enclave.is_sgx_simulator())
+        super(KeyManagementEnclaveInfo, self).__init__(
+            enclave.is_sgx_simulator())
 
         self._initialize_enclave(config)
         enclave_info = self._create_enclave_signup_data(config)
@@ -116,6 +118,7 @@ class KeyManagementEnclaveInfo(BaseEnclaveInfo):
         # @TODO : Passing in_ext_data_signature as empty string "" as of now
         signup_data = signup_cpp_obj.CreateEnclaveData(
             config['wpe_mrenclave'], "")
+        logger.info("WPE MRenclave value {}".format(config['wpe_mrenclave']))
         if signup_data is None:
             return None
 
@@ -159,7 +162,9 @@ class KeyManagementEnclaveInfo(BaseEnclaveInfo):
             @returns 0 - If verification passed
                      1 - Otherwise
         """
-        return signup_cpp_obj.VerifyEnclaveInfoKME(enclave_info, mr_enclave)
+        return signup_cpp_obj.VerifyEnclaveInfo(enclave_info,
+                                                mr_enclave,
+                                                self._config["wpe_mrenclave"])
 
     # ----------------------------------------------------------------
     def _init_enclave_with(self, signed_enclave, config):

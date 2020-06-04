@@ -28,7 +28,7 @@ bind = "http://localhost:1947"
 max_work_order_count = 10
 # ZMQ configurations the listener would connect to
 # Same as the url and port of enclave manager socket
-zmq_url = "tcp://avalon-wpe:"
+zmq_url = "tcp://avalon-enclave-manager:"
 zmq_port = '5555'
 
 # ------------------------------------------------------------------

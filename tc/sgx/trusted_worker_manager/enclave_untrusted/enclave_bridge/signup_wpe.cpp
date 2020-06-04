@@ -172,21 +172,20 @@ tcf_err_t SignupDataWPE::VerifyEnclaveInfo(
         sgx_enclave_id_t enclaveid = g_Enclave[0].GetEnclaveId();
         tcf_err_t presult = TCF_SUCCESS;
 
-	ByteArray ext_data_bytes = StrToByteArray(ext_data);
+	//ByteArray ext_data_bytes = StrToByteArray(ext_data);
         sgx_status_t sresult = g_Enclave[0].CallSgx(
             [ enclaveid,
               &presult,
               enclaveInfo,
               mr_enclave,
-              ext_data_bytes ] () {
+              ext_data ] () {
               sgx_status_t sresult =
               ecall_VerifyEnclaveInfoWPE(
                              enclaveid,
                              &presult,
                              enclaveInfo.c_str(),
                              mr_enclave.c_str(),
-                             ext_data_bytes.data(),
-			     ext_data_bytes.size());
+                             ext_data.c_str());
           return tcf::error::ConvertErrorStatus(sresult, presult);
     });
 

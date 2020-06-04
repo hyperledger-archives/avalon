@@ -24,6 +24,30 @@ HeartDiseaseEvalLogic::HeartDiseaseEvalLogic() {}
 
 HeartDiseaseEvalLogic::~HeartDiseaseEvalLogic() {}
 
+template<typename Out>
+void split(const std::string &str, char delim, Out result) {
+        std::size_t current, previous = 0;
+
+        current = str.find(delim);
+        while (current != std::string::npos) {
+                std::string item = str.substr(previous, current - previous);
+                if (item.compare("") != 0)
+                        *(result++) = item;
+                previous = current + 1;
+                current = str.find(delim, previous);
+        }
+
+        std::string item = str.substr(previous, current - previous);
+        if (item.compare("") != 0)
+                *(result++) = item;
+}
+
+std::vector<std::string> split(const std::string &s, char delim) {
+    std::vector<std::string> elems;
+    split(s, delim, std::back_inserter(elems));
+    return elems;
+}
+
 // Compute a percentage near optimum (<=opt is 100%, >=max is 0%)
 double HeartDiseaseEvalLogic::model_A(double max, double opt, double data) {
     double score = 0.0;
