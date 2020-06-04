@@ -1,4 +1,4 @@
-# Copyright 2019 Intel Corporation
+# Copyright 2020 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,6 +11,18 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+# ------------------------------------------------------------------------------
 
-ISOLATION_ID=latest
-INSTALL_TYPE=-local
+FROM ubuntu:bionic
+
+RUN apt update \
+ && apt install -y -q python3 python3-pip \
+ && apt-get clean
+
+WORKDIR /project
+
+COPY --from=avalon-listener-dev:latest /project/avalon/listener/dist/*.whl dist/
+COPY --from=avalon-enclave-manager-dev:latest /project/avalon/enclave_manager/dist/*.whl dist/
+COPY --from=avalon-lmdb-dev:latest /project/avalon/shared_kv_storage/dist/*.whl dist/
+
+RUN pip3 install dist/*.whl

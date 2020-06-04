@@ -1,0 +1,43 @@
+# Copyright 2020 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+version: '3.5'
+
+services:
+  avalon-coverage:
+    container_name: avalon-coverage
+    image: avalon-coverage-dev
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+      args:
+        - http_proxy
+        - https_proxy
+        - no_proxy
+    environment:
+      - http_proxy
+      - https_proxy
+      - no_proxy
+    volumes:
+      - ./cov-file:/project/coverage
+      - ./report:/project/report
+    command: |
+      bash -c "
+        cd /project
+        cp -rf coverage/.coverage* .
+        coverage combine
+        coverage html --include=/usr/local/lib/python3.6/dist-packages/avalon*,/usr/local/lib/python3.6/dist-packages/database*,/usr/local/lib/python3.6/dist-packages/http_client*,/usr/local/lib/python3.6/dist-packages/listener*,/usr/local/lib/python3.6/dist-packages/kv_storage*,/usr/local/lib/python3.6/dist-packages/config*,/usr/local/lib/python3.6/dist-packages/utility* -d report
+        tail -f /dev/null
+      "
+    stop_signal: SIGKILL

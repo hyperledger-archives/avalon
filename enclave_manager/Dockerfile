@@ -221,7 +221,7 @@ COPY --from=common_python_image /project/avalon/common/python/dist/*.whl dist/
 COPY --from=avalon_sdk_image /project/avalon/sdk/dist/*.whl dist/
 
 RUN echo "Install common/python and sdk packages\n" \
- && pip3 install dist/*.whl json-rpc pyzmq
+ && pip3 install dist/*.whl json-rpc pyzmq coverage
 
 
 ARG SGX_MODE
