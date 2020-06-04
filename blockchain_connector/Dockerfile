@@ -253,7 +253,7 @@ COPY ./sdk/avalon_sdk/connector/blockchains/fabric/methods.json /project/avalon/
 RUN apt-get update \
  && apt-get install -y -q python3-pip \
  && echo "Install Common Python, SDK & Blockchain_connector packages\n" \
- && pip3 install dist/*.whl \
+ && pip3 install dist/*.whl coverage \
  && echo "Remove unused packages from image\n" \
  && apt-get autoremove --purge -y -q python3-pip \
  && apt-get clean \
