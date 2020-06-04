@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <stdio.h>
 #include "enclave_u.h"
 
 #include "error.h"
@@ -38,7 +37,6 @@ tcf_err_t SignupDataKME::CreateEnclaveData(
         tcf_err_t presult = TCF_SUCCESS;
         sgx_status_t sresult;
 
-	printf("SignupDataKME::CreateEnclaveData\n");
         // Get the enclave id for passing into the ecall
         sgx_enclave_id_t enclaveid = g_Enclave[0].GetEnclaveId();
 

@@ -41,7 +41,7 @@ class WorkOrderProcessorEnclaveManager(EnclaveManager):
     """
 
     def __init__(self, config):
-        super().__init__(config)
+        super(WorkOrderProcessorEnclaveManager, self).__init__(config)
 
 # -------------------------------------------------------------------------
 
@@ -67,10 +67,11 @@ class WorkOrderProcessorEnclaveManager(EnclaveManager):
             verification_key_nonce)
         # Received response contains result,verification_key and
         # verification_key_signature delimited by ' '
-        unique_verification_key = response.split(' ')[1]
+        self._unique_verification_key = response.split(' ')[1]
         # signup enclave
-        signup_data.create_enclave_signup_data(unique_verification_key)
+        signup_data.create_enclave_signup_data(self._unique_verification_key)
         # return signup data
+        logger.info("WPE signup data {}".format(signup_data.proof_data))
         return signup_data
 
 # -------------------------------------------------------------------------
@@ -79,8 +80,10 @@ class WorkOrderProcessorEnclaveManager(EnclaveManager):
         """
         Executes Boot flow of enclave manager
         """
-
-        if self._wpe_requester.register_wo_processor(self.proof_data):
+        if self._wpe_requester\
+            .register_wo_processor(self._unique_verification_key,
+                                   self.encryption_key,
+                                   self.proof_data):
             logger.info("WPE registration successful")
         else:
             logger.error("WPE registration failed. Cannot proceed further.")

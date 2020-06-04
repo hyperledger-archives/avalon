@@ -113,19 +113,28 @@ class WPERequester():
                          .format(response))
             return None
 
-    def register_wo_processor(self, attestation_report):
+    def register_wo_processor(self, unique_verification_id,
+                              encryption_key,
+                              proof_data):
         """
         Request to register this WPE with the KME
 
         Parameters :
-            @param attestation_report - The IAS attestation report/DCAP quote
+            @param unique_verification_id - Unique verifying key received from
+            KME.
+            @param encryption_key - encryption key of WPE
+            @param proof_data - The IAS attestation report/DCAP quote
         Returns :
             @returns status - The status of the registration.
                               True, for success. None, in case of errors.
         """
-
         workload_id = "kme-reg"
-        in_data = [json.dumps({"attestation_report": attestation_report})]
+        registration_params = {
+            "unique_id": unique_verification_id,
+            "proof_data": proof_data,
+            "wpe_encryption_key": encryption_key
+        }
+        in_data = [json.dumps(registration_params)]
 
         # Create session key and iv to sign work order request
         session_key = crypto_utils.generate_key()
@@ -143,7 +152,10 @@ class WPERequester():
                                           self._worker.verification_key):
                 decrypted_res = crypto_utils.decrypted_response(
                     wo_response_json, session_key, session_iv)
-                return decrypted_res
+                # Response contains an array of results. In this case, the
+                # array has single element and the data field is of interest.
+                # It is integer with status of registration.
+                return decrypted_res[0]['data']
             return None
         else:
             logger.error("Could not register this WPE with the KME : {}"

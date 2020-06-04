@@ -43,6 +43,7 @@ class WorkOrderProcessorEnclaveInfo(BaseEnclaveInfo):
         enclave._SetLogger(logger)
         super().__init__(enclave.is_sgx_simulator())
         self._initialize_enclave(config)
+        self._ext_data = None
 
     # -------------------------------------------------------
 
@@ -56,13 +57,13 @@ class WorkOrderProcessorEnclaveInfo(BaseEnclaveInfo):
         Returns :
             @returns enclave_info - A dictionary of enclave data
         """
-
+        self._ext_data = ex_data
         ias_nonce = '{0:032X}'.format(random.getrandbits(128))
         try:
             enclave_data = self._create_signup_info(ias_nonce, ex_data)
         except Exception as err:
             raise Exception('failed to create enclave signup data; {}'
-                            .format(str(err)))
+                            .format(err))
         try:
             self.ias_nonce = ias_nonce
             self.verifying_key = enclave_data.verifying_key
@@ -144,7 +145,9 @@ class WorkOrderProcessorEnclaveInfo(BaseEnclaveInfo):
             @returns 0 - If verification passed
                      1 - Otherwise
         """
-        return signup_cpp_obj.VerifyEnclaveInfoWPE(enclave_info, mr_enclave)
+        return signup_cpp_obj.VerifyEnclaveInfo(enclave_info,
+                                                mr_enclave,
+                                                self._ext_data)
 
     # ----------------------------------------------------------------
 
