@@ -86,7 +86,17 @@ stop_avalon_components()
     exit
 }
 
-while getopts "l:styh" OPTCHAR ; do
+stop_avalon_components_forcefully()
+{
+    ps -ef | grep bin/$LISTENER | grep -v grep | awk '{print $2}' | xargs -r kill -9 ;
+    ps -ef | grep bin/$KV_STORAGE | grep -v grep | awk '{print $2}' | xargs -r kill -9;
+    ps -ef | grep $ENCLAVE_MANAGER | grep -v grep | awk '{print $2}' | xargs -r kill -9;
+    ps -ef | grep defunct | grep -v grep | cut -b8-20 | xargs -r kill -9
+    echo "Hyperledger Avalon forcefully terminated"
+    exit
+}
+
+while getopts "l:styhf" OPTCHAR ; do
     case $OPTCHAR in
         s )
             START_STOP_AVALON_SERVICES=1
@@ -101,15 +111,19 @@ while getopts "l:styh" OPTCHAR ; do
         t )
             stop_avalon_components
             ;;
+        f )
+            stop_avalon_components_forcefully
+            ;;
         \?|h )
             BN=$(basename $0)
             echo "$BN: Start or Stop Hyperledger Avalon" 1>&2
             echo "Usage: $BN [-l|-s|-t|-y|-h|-?]" 1>&2
             echo "Where:" 1>&2
             echo "   -l       LMDB server URL. Default is $LMDB_URL" 1>&2
-            echo "   -t       terminate the program" 1>&2
+            echo "   -t       terminate the program gracefully" 1>&2
             echo "   -y       do not prompt to end program" 1>&2
             echo "   -s       also start or stop KV storage component" 1>&2
+            echo "   -f       forcefully kill avalon" 1>&2
             echo "   -? or -h print usage information" 1>&2
             echo "Examples:" 1>&2
             echo "   $BN -s" 1>&2
