@@ -289,7 +289,8 @@ Module names can be found [here](bin/run_lint#L205) in the codebase.
   1. `sudo rm $TCF_HOME/config/Kv*`
   2. `$TCF_HOME/scripts/tcs_startup.sh -t -s`
   3. You can re-run the test now
-
+  4. If some error still occurs then run : `$TCF_HOME/scripts/tcs_startup.sh -f`. This forcefully terminate Avalon. 
+ 
 - If you get build errors rerunning `make`, try `sudo make clean` first
 
 - If you see the message `No package 'openssl' found`, you do not have
