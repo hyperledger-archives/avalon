@@ -1,4 +1,4 @@
-# Copyright 2019-2020 Intel Corporation
+# Copyright 2020 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,33 +15,6 @@
 version: '3.5'
 
 services:
-  avalon-shell:
-    container_name: avalon-shell
-    image: avalon-shell-dev
-    build:
-      context: .
-      dockerfile: ./docker/Dockerfile
-      args:
-        - DISPLAY=${DISPLAY:-}
-        - XAUTHORITY=~/.Xauthority
-        - http_proxy
-        - https_proxy
-        - no_proxy
-    environment:
-      - DISPLAY
-      - http_proxy
-      - https_proxy
-      - no_proxy
-    volumes:
-      # Below volume mappings are required for DISPLAY settings by heart disease GUI client
-      - /tmp/.X11-unix:/tmp/.X11-unix
-      - ~/.Xauthority:/root/.Xauthority
-    command: |
-      bash -c "tail -f /dev/null"
-    stop_signal: SIGKILL
-    depends_on:
-      - avalon-kme
-      - avalon-listener
 
   avalon-kme:
     container_name: avalon-kme
@@ -100,52 +73,3 @@ services:
       - avalon-listener
       - avalon-kme
 
-  avalon-lmdb:
-    container_name: avalon-lmdb
-    image: avalon-lmdb-dev
-    build:
-      context: .
-      dockerfile: ./shared_kv_storage/Dockerfile
-      args:
-        - http_proxy
-        - https_proxy
-        - no_proxy
-    environment:
-      - http_proxy
-      - https_proxy
-      - no_proxy
-    expose:
-      # Port is where lmdb server will listen for http request.
-      # Port should be same as in bind parameter or lmdb_config.toml
-      - 9090
-    command: |
-      bash -c "
-        kv_storage --bind http://avalon-lmdb:9090
-        tail -f /dev/null
-      "
-
-  avalon-listener:
-    container_name: avalon-listener
-    image: avalon-listener-dev
-    build:
-      context: .
-      dockerfile: ./listener/Dockerfile
-      args:
-        - http_proxy
-        - https_proxy
-        - no_proxy
-    environment:
-      - http_proxy
-      - https_proxy
-      - no_proxy
-    expose:
-      - 1947
-      # ZMQ socket port.
-      - 5555
-    command: |
-      bash -c "
-        avalon_listener --bind http://avalon-listener:1947 --lmdb_url http://avalon-lmdb:9090
-        tail -f /dev/null
-        "
-    depends_on:
-      - avalon-lmdb

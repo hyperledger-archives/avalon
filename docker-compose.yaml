@@ -59,7 +59,7 @@ services:
       - https_proxy
       - no_proxy
     expose:
-      # ZMQ socket port. 
+      # ZMQ socket port.
       - 5555
     command: |
       bash -c "

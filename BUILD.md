@@ -48,27 +48,57 @@ Follow the instructions below to execute a Docker-based build and execution.
    `avalon` source repository.
 
    **Intel SGX Simulator mode (for hosts without Intel SGX)**:
-   1. Run `sudo docker-compose up --build`
+   1. To run in Singleton mode (the same worker handles both keys and workloads):
+      ```bash
+      sudo docker-compose up --build
+      ```
+      To start a worker pool (with one Key Management Enclave and one Work order Processing Enclave):
+      ```bash
+      sudo docker-compose -f docker-compose.yaml -f docker-compose-pool.yaml up --build
+      ```
    2. For subsequent runs on the same workspace, if you changed a
       source or configuration file, run the above command again
    3. For subsequent runs on the same workspace, if you did not make any
       changes, startup and build time can be reduced by running:
-      `MAKECLEAN=0 sudo -E docker-compose up`
+      ```bash
+      MAKECLEAN=0 sudo -E docker-compose up
+      ```
+      For worker pool, run:
+      ```bash
+      MAKECLEAN=0 sudo docker-compose -f docker-compose.yaml -f docker-compose-pool.yaml up
+      ```
 
    **SGX Hardware mode (for hosts with Intel SGX)**:
    1. Refer to Intel SGX in Hardware-mode section in
       [PREREQUISITES document](PREREQUISITES.md) to install Intel SGX
       pre-requisites and to configure IAS keys.
-   2. Run `sudo docker-compose -f docker-compose.yaml -f docker-compose-sgx.yaml up --build`
+   2. Run:
+      ```bash
+      sudo docker-compose -f docker-compose.yaml -f docker-compose-sgx.yaml up --build
+      ```
+      For worker pool, run:
+      ```bash
+      sudo docker-compose -f docker-compose.yaml -f docker-compose-pool.yaml \
+      -f docker-compose-pool-sgx.yaml up --build
+      ```
    3. For subsequent runs on the same workspace, if you changed a
       source or configuration file, run the above command again
    4. For subsequent runs on the same workspace, if you did not make any
       changes, startup and build time can be reduced by running:
-      `MAKECLEAN=0 sudo -E docker-compose -f docker-compose.yaml -f docker-compose-sgx.yaml up`
+      ```bash
+      MAKECLEAN=0 sudo -E docker-compose -f docker-compose.yaml -f docker-compose-sgx.yaml up
+      ```
+      For worker pool, run:
+      ```bash
+      MAKECLEAN=0 sudo docker-compose -f docker-compose.yaml -f docker-compose-pool.yaml \
+      -f docker-compose-pool-sgx.yaml up
+      ```
 3. On a successful run, you should see the message `BUILD SUCCESS`
    followed by a repetitive message `Enclave manager sleeping for 10 secs`
 4. Open a Docker container shell using following command
-   `sudo docker exec -it avalon-shell bash`
+   ```bash
+   sudo docker exec -it avalon-shell bash
+   ```
 5. To execute test cases refer to [Testing](#testing) section below
 6. To exit the Avalon program, press `Ctrl-c`
 
