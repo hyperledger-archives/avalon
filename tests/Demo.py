@@ -100,7 +100,8 @@ def local_main(config):
                     # response and update the worker id information for
                     # further json requests.
                     if "result" in response and \
-                            "ids" in response["result"].keys():
+                            "ids" in response["result"].keys() and \
+                            len(response["result"]["ids"]) > 0:
                         input_json_final = json.loads(input_json_str1)
                         worker_id = response["result"]["ids"][0]
                         input_json_final["params"]["workerId"] = worker_id
