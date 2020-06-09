@@ -70,4 +70,4 @@ pcrypto::pkenc::PrivateKey::PrivateKey(pcrypto::pkenc::PrivateKey&& privateKey) 
 pcrypto::pkenc::PublicKey pcrypto::pkenc::PrivateKey::GetPublicKey() const {
     PublicKey publicKey(*this);
     return publicKey;
-}  // pcrypto::pkenc::GetPublicKey
+}  // pcrypto::pkenc::PrivateKey::GetPublicKey

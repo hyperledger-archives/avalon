@@ -83,8 +83,10 @@ build/pktest: build build/pktest.o \
 		$(UTILTESTOBJS) $(LDFLAGS)
 
 build/signtest: build build/signtest.o \
-		build/sig_private_key.o build/sig_public_key.o
-	g++ -o $@ $@.o build/sig_private_key.o build/sig_public_key.o \
+		build/sig_private_key.o build/sig_private_key_common.o \
+		build/sig_public_key.o build/sig_public_key_common.o
+	g++ -o $@ $@.o build/sig_private_key.o build/sig_private_key_common.o \
+		build/sig_public_key.o build/sig_public_key_common.o \
 		$(LDFLAGS)
 
 build/secrettest: build build/secrettest.o $(UTILTESTOBJS)

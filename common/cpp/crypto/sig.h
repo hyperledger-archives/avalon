@@ -24,7 +24,10 @@
 namespace tcf {
 namespace crypto {
     namespace constants {
-        // Secp256k1 signature size = 64 bytes (512b) + 8 byte DER prefix
+        /**
+          * ECDSA Secp256k1 signature size, in bytes:
+          * 64 bytes (512b) + 8 byte DER prefix
+          */
         const int MAX_SIG_SIZE = 72;
     }  // namespace constants
 }  // namespace crypto

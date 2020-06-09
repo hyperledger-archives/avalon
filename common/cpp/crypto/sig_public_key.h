@@ -66,7 +66,9 @@ namespace crypto {
                 const ByteArray& signature) const;
 
         private:
-            EC_KEY* public_key_;
+            // void * is an opaque pointer to implementation-dependent context
+            void* public_key_;
+            void *deserializeECDSAPublicKey(const std::string& encoded);
         };
     }  // namespace sig
 }  // namespace crypto
