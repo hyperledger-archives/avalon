@@ -27,7 +27,7 @@
 #include "enclave_utils.h"
 #include "base_enclave.h"
 #include "enclave_data.h"
-#include "work_order_processor.h"
+#include "work_order_processor_wpe.h"
 
 ByteArray last_serialized_response_wpe;
 
@@ -53,8 +53,7 @@ tcf_err_t ecall_HandleWorkOrderRequestWPE(const uint8_t* inSerializedRequest,
         ByteArray request(inSerializedRequest,
             inSerializedRequest + inSerializedRequestSize);
 
-        // Persist enclave type info in WorkOrderProcessor instance
-        tcf::WorkOrderProcessor wo_processor;
+        tcf::WorkOrderProcessorWPE wo_processor;
 
         // Persist Extended work order data in WorkOrderProcessor instance
         wo_processor.ext_work_order_data = \
@@ -116,4 +115,3 @@ tcf_err_t ecall_GetSerializedResponseWPE(uint8_t* outSerializedResponse,
 
     return result;
 }  // ecall_GetSerializedResponseWPE
-

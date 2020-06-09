@@ -24,7 +24,7 @@
 #include "parson.h"
 #include "types.h"
 #include "work_order_data.h"
-
+#include "enclave_types.h"
 
 namespace tcf {
         class WorkOrderDataHandler {
@@ -53,8 +53,13 @@ namespace tcf {
                 this->iv = iv;
             }
 
-            void Unpack(EnclaveData* enclaveData,
-                        const JSON_Object* object);
+            void Unpack(EnclaveData* enclaveData, const JSON_Object* object);
+
+            // Below overloaded function will be used by only WPE to unpack
+            // TODO: Remove this function after adding WPE
+            // specific WorkOrderDataHandler
+            void Unpack(EnclaveData* enclaveData, const JSON_Object* object,
+                ByteArray data_encryption_key_from_pre_processing);
 
             void Pack(JSON_Array* json_array);
 

@@ -20,6 +20,9 @@
 
 #pragma once
 
+#include "types.h"
+#include "parson.h"
+
 const char* GetJsonStr(const JSON_Object* json_object,
                        const char* name,
                        const char* err_msg = nullptr);

@@ -43,7 +43,7 @@ namespace tcf {
         session_key.clear();
     }
 
-    void WorkOrderProcessor::ParseJsonInput(EnclaveData* enclaveData, std::string json_str) {
+    JsonValue WorkOrderProcessor::ParseJsonInput(std::string json_str) {
         // Parse the work order request
         JsonValue parsed(json_parse_string(json_str.c_str()));
         tcf::error::ThrowIfNull(
@@ -162,13 +162,28 @@ namespace tcf {
         tcf::error::ThrowIf<tcf::error::ValueError>(payload_format != "json-rpc",
             "Unsupported payload format found in the input");
 
+        // return JSON deserialized value
+        return parsed;
+    }  // WorkOrderProcessor::ParseJsonInput
+
+    void WorkOrderProcessor::DecryptWorkOrderKeys(
+        EnclaveData* enclave_data, const JsonValue& wo_req_json_val) {
+
         // Decrypt Encryption key
         ByteArray encrypted_session_key_bytes = \
             HexStringToBinary(encrypted_session_key);
-        session_key = enclaveData->decrypt_message(
+        session_key = enclave_data->decrypt_message(
             encrypted_session_key_bytes);
-
         ByteArray session_key_iv_bytes = HexStringToBinary(session_key_iv);
+
+        JSON_Object* request_object = json_value_get_object(wo_req_json_val);
+        tcf::error::ThrowIfNull(request_object,
+            "Missing JSON object in work order request");
+
+        JSON_Object* params_object = json_object_dotget_object(request_object, "params");
+        tcf::error::ThrowIfNull(params_object,
+            "Missing params object in work order request");
+
         JSON_Array* data_array = json_object_get_array(
             params_object, "inData");
         size_t count = json_array_get_count(data_array);
@@ -179,7 +194,7 @@ namespace tcf {
         for (i = 0; i < count; i++) {
             JSON_Object* data_object = json_array_get_object(data_array, i);
             WorkOrderDataHandler wo_data(session_key, session_key_iv_bytes);
-            wo_data.Unpack(enclaveData, data_object);
+            wo_data.Unpack(enclave_data, data_object);
             data_items_in.emplace_back(wo_data);
         }
         data_array = json_object_get_array(params_object, "outData");
@@ -188,13 +203,12 @@ namespace tcf {
         for (i = 0; i < count; i++) {
             JSON_Object* data_object = json_array_get_object(data_array, i);
             WorkOrderDataHandler wo_data(session_key, session_key_iv_bytes);
-            wo_data.Unpack(enclaveData, data_object);
+            wo_data.Unpack(enclave_data, data_object);
             data_items_out.emplace_back(wo_data);
         }
+    }  // WorkOrderProcessor::DecryptWorkOrderKeys
 
-    }
-
-    ByteArray WorkOrderProcessor::CreateJsonOutput() {
+    JsonValue WorkOrderProcessor::CreateJsonOutput() {
         JSON_Status jret;
 
         // Create the response structure
@@ -238,18 +252,21 @@ namespace tcf {
         for (auto out_data : data_items_out)
             out_data.Pack(data_array);
 
-        // Serialize the resulting json
-        size_t serializedSize = json_serialization_size(resp_value);
+        // return constructed json
+        return resp_value;
+    }  // WorkOrderProcessor::CreateJsonOutput
+
+    ByteArray WorkOrderProcessor::SerializeJson(JsonValue& json_value) {
+        size_t serializedSize = json_serialization_size(json_value);
         ByteArray serialized_response;
         serialized_response.resize(serializedSize);
 
-        jret = json_serialize_to_buffer(resp_value,
+        JSON_Status jret = json_serialize_to_buffer(json_value,
             reinterpret_cast<char*>(&serialized_response[0]), serialized_response.size());
         tcf::error::ThrowIf<tcf::error::RuntimeError>(
             jret != JSONSuccess, "workorder response serialization failed");
-
         return serialized_response;
-    }
+    }  // WorkOrderProcessor::SerializeJson
 
     std::vector<tcf::WorkOrderData> WorkOrderProcessor::ExecuteWorkOrder(
         EnclaveData* enclave_data) {
@@ -427,7 +444,8 @@ namespace tcf {
         return final_hash;
     }
 
-    void WorkOrderProcessor::ComputeSignature(EnclaveData* enclave_data, ByteArray& message_hash) {
+    void WorkOrderProcessor::ComputeSignature(ByteArray& message_hash) {
+        EnclaveData* enclave_data = EnclaveData::getInstance();
         ByteArray sig = enclave_data->sign_message(message_hash);
         worker_signature = base64_encode(sig);
     }
@@ -483,7 +501,9 @@ namespace tcf {
 
     ByteArray WorkOrderProcessor::Process(EnclaveData* enclaveData, std::string json_str) {
         try {
-            ParseJsonInput(enclaveData, json_str);
+            // Parse serialized json request and return serialized json object
+            JsonValue wo_req_json_val = ParseJsonInput(json_str);
+            DecryptWorkOrderKeys(enclaveData, wo_req_json_val);
             tcf::error::ThrowIf<tcf::error::ValueError>(VerifyEncryptedRequestHash()!= TCF_SUCCESS,
                 "Decryption of client request hash failed. Request is tampered.");
             if (!requester_signature.empty()) {
@@ -494,8 +514,9 @@ namespace tcf {
             size_t i = 0;
             size_t out_data_size = data_items_out.size();
             ByteArray hash = ResponseHashCalculate(wo_data);
-            ComputeSignature(enclaveData, hash);
-            return CreateJsonOutput();
+            ComputeSignature(hash);
+            JsonValue response_json = CreateJsonOutput();
+            return SerializeJson(response_json);
         } catch (tcf::error::ValueError& e) {
             return CreateErrorResponse(e.error_code(), e.what());
         } catch (tcf::error::Error& e) {
