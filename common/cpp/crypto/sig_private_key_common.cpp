@@ -1,4 +1,4 @@
-/* Copyright 2018-2020 Intel Corporation
+/* Copyright 2018 Intel Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,56 +15,58 @@
 
 /**
  * @file
- * Avalon RSA private key generation, serialization, and decryption functions.
- * Serialization reads and writes keys in PEM format strings.
+ * Avalon ECDSA private key functions: generation, serialization, and signing.
+ * Used for Secp256k1.
  *
  * No OpenSSL/Mbed TLS-dependent code is present.
- * See pkenc_private_key.cpp for OpenSSL/Mbed TLS-dependent code.
+ * See sig_private_key.cpp for OpenSSL/Mbed TLS-dependent code.
  */
 
 #include "crypto_shared.h"
 #include "error.h"
 #include "hex_string.h"
-#include "pkenc.h"
-#include "pkenc_public_key.h"
-#include "pkenc_private_key.h"
+#include "sig.h"
+#include "sig_public_key.h"
+#include "sig_private_key.h"
 
 namespace pcrypto = tcf::crypto;
 namespace constants = tcf::crypto::constants;
-namespace Error = tcf::error; // Error handling.
+namespace Error = tcf::error; // Error handling
 
 
 /**
- * Constructor from PEM encoded string.
+ * Constructor from encoded string.
  * Throws RuntimeError, ValueError.
  *
- * @param PEM encoded serialized RSA private key
+ * @param encoded ECDSA private key string created by Generate()
  */
-pcrypto::pkenc::PrivateKey::PrivateKey(const std::string& encoded) {
-    private_key_ = deserializeRSAPrivateKey(encoded);
-}  // pcrypto::pkenc::PrivateKey::PrivateKey
+pcrypto::sig::PrivateKey::PrivateKey(const std::string& encoded) {
+    private_key_ = deserializeECDSAPrivateKey(encoded);
+}  // pcrypto::sig::PrivateKey::PrivateKey
 
 
 /**
  * Move constructor.
  * Throws RuntimeError.
+ *
+ * @param privateKey ECDSA private key to move. Created by Generate()
  */
-pcrypto::pkenc::PrivateKey::PrivateKey(pcrypto::pkenc::PrivateKey&& privateKey) {
+pcrypto::sig::PrivateKey::PrivateKey(pcrypto::sig::PrivateKey&& privateKey) {
     private_key_ = privateKey.private_key_;
     privateKey.private_key_ = nullptr;
-    if (private_key_ == nullptr) {
-        std::string msg("Crypto Error (pkenc::PrivateKey() move): "
+    if (private_key_ = nullptr) {
+        std::string msg("Crypto Error (sig::PrivateKey() move): "
             "Cannot move null private key");
         throw Error::RuntimeError(msg);
     }
-}  // pcrypto::pkenc::PrivateKey::PrivateKey (move constructor)
+}  // pcrypto::sig::PrivateKey::PrivateKey (move constructor)
 
 
 /**
- * Get Public encryption from PrivateKey.
+ * Derive ECDSA public key from private key.
  * Throws RuntimeError.
  */
-pcrypto::pkenc::PublicKey pcrypto::pkenc::PrivateKey::GetPublicKey() const {
+pcrypto::sig::PublicKey pcrypto::sig::PrivateKey::GetPublicKey() const {
     PublicKey publicKey(*this);
     return publicKey;
-}  // pcrypto::pkenc::PrivateKey::GetPublicKey
+}  // pcrypto::sig::GetPublicKey()
