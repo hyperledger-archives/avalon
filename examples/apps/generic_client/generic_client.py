@@ -313,10 +313,13 @@ def _verify_receipt_signature(receipt_update_retrieve):
 
 
 def _verify_wo_res_signature(work_order_res,
-                             worker_verification_key):
+                             worker_verification_key,
+                             requester_nonce):
     # Verify work order result signature
     sig_obj = signature.ClientSignature()
-    status = sig_obj.verify_signature(work_order_res, worker_verification_key)
+    status = sig_obj.verify_signature(work_order_res,
+                                      worker_verification_key,
+                                      requester_nonce)
     if status == SignatureStatus.PASSED:
         logger.info("Signature verification Successful")
     else:
@@ -508,7 +511,8 @@ def Main(args=None):
     if "result" in res:
         # Verify work order response signature
         if _verify_wo_res_signature(res['result'],
-                                    worker_obj.verification_key) is False:
+                                    worker_obj.verification_key,
+                                    wo_params.get_requester_nonce()) is False:
             logger.error("Work order response signature verification Failed")
             sys.exit(1)
         # Decrypt work order response

@@ -378,7 +378,9 @@ class resultWindow(tk.Toplevel):
         if "result" in res:
             sig_obj = signature.ClientSignature()
             status = sig_obj.verify_signature(
-                res['result'], worker_obj.verification_key)
+                res['result'],
+                worker_obj.verification_key,
+                wo_params.get_requester_nonce())
             try:
                 if status == SignatureStatus.PASSED:
                     logger.info("Signature verification Successful")

@@ -71,6 +71,7 @@ def local_main(config):
                 wo_id = hex(random.randint(1, 2**64 - 1))
                 input_json_obj["params"]["workOrderId"] = wo_id
                 input_json_obj["params"]["workerId"] = worker_obj.worker_id
+
                 # Convert workloadId to a hex string and update the request
                 workload_id = input_json_obj["params"]["workloadId"]
                 workload_id_hex = workload_id.encode("UTF-8").hex()
@@ -89,6 +90,8 @@ def local_main(config):
                 if status != SignatureStatus.PASSED:
                     LOGGER.info("Generate signature failed\n")
                     exit(1)
+                requester_nonce = json.loads(
+                    input_json_str1)["params"]["requesterNonce"]
                 if input_json_str1 is None:
                     continue
             # -----------------------------------------------------------------
@@ -147,7 +150,9 @@ def local_main(config):
                                 "skipping signature verification")
                     continue
                 sig_bool = sig_obj.verify_signature(
-                    response['result'], worker_obj.verification_key)
+                    response['result'],
+                    worker_obj.verification_key,
+                    requester_nonce)
                 try:
                     if sig_bool > 0:
                         LOGGER.info("Signature Verified")
@@ -183,6 +188,7 @@ def parse_command_line(config, args):
     global private_key
     global encrypted_session_key
     global session_iv
+    global requester_nonce
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--logfile", help="Name of the log file. " +
