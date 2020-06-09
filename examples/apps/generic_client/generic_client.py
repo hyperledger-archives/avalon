@@ -88,6 +88,10 @@ def _parse_command_line(args):
         nargs="+",
         type=str)
     parser.add_argument(
+        "-p", "--in_data_plain",
+        help="Send input data as unencrypted plain text",
+        action='store_true')
+    parser.add_argument(
         "-r", "--receipt",
         help="If present, retrieve and display work order receipt",
         action='store_true')
@@ -208,7 +212,8 @@ def _do_worker_verification(worker_obj):
 
 
 def _create_work_order_params(worker_id, workload_id, in_data,
-                              worker_encrypt_key, session_key, session_iv):
+                              worker_encrypt_key, session_key, session_iv,
+                              enc_data_enc_key):
     # Convert workloadId to hex
     workload_id = workload_id.encode("UTF-8").hex()
     work_order_id = secrets.token_hex(32)
@@ -224,7 +229,8 @@ def _create_work_order_params(worker_id, workload_id, in_data,
     )
     # Add worker input data
     for value in in_data:
-        wo_params.add_in_data(value)
+        wo_params.add_in_data(value,
+                              encrypted_data_encryption_key=enc_data_enc_key)
 
     # Encrypt work order request hash
     wo_params.add_encrypted_request_hash()
@@ -362,6 +368,9 @@ def Main(args=None):
     # work order input data
     in_data = options.in_data
 
+    # Option to send input data in plain text
+    in_data_plain_text = options.in_data_plain
+
     # show receipt in output
     show_receipt = options.receipt
 
@@ -435,9 +444,20 @@ def Main(args=None):
                 "*********\n%s\n", worker_id)
 
     # Create work order
+    if in_data_plain_text:
+        # As per TC spec, if encryptedDataEncryptionKey is "-" then
+        # input data is not encrypted
+        encrypted_data_encryption_key = "-"
+    else:
+        # As per TC spec, if encryptedDataEncryptionKey is not
+        # provided then set it to None which means
+        # use default session key to encrypt input data
+        encrypted_data_encryption_key = None
+
     wo_params = _create_work_order_params(worker_id, workload_id,
                                           in_data, worker_obj.encryption_key,
-                                          session_key, session_iv)
+                                          session_key, session_iv,
+                                          encrypted_data_encryption_key)
 
     client_private_key = crypto_utility.generate_signing_keys()
     if requester_signature:

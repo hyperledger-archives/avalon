@@ -230,17 +230,17 @@ namespace tcf {
         tcf::error::ThrowIfNull(result, "failed to serialize the result");
 
         JsonSetStr(result, "workOrderId", work_order_id.c_str(),
-				"failed to serialize work order id");
+                  "failed to serialize work order id");
         JsonSetStr(result, "workloadId", workload_id.c_str(),
-				"failed to serialize workload id");
+                "failed to serialize workload id");
         JsonSetStr(result, "workerId", worker_id.c_str(),
-				"failed to serialize worker id");
+                "failed to serialize worker id");
         JsonSetStr(result, "requesterId", requester_id.c_str(),
-				"failed to serialize requester id");
+                "failed to serialize requester id");
         JsonSetStr(result, "workerNonce", worker_nonce.c_str(),
-				"failed to serialize worker nonce");
+                "failed to serialize worker nonce");
         JsonSetStr(result, "workerSignature", worker_signature.c_str(),
-				"failed to serialize worker signature");
+                "failed to serialize worker signature");
 
         jret = json_object_set_value(result, "outData", json_value_init_array());
         tcf::error::ThrowIf<tcf::error::RuntimeError>(
@@ -308,7 +308,7 @@ namespace tcf {
     ByteArray WorkOrderProcessor::ComputeRequestHash() {
         ByteArray concat_hashes;
         std::string concat_string = requester_nonce + work_order_id +
-				worker_id + workload_id + requester_id;
+                worker_id + workload_id + requester_id;
         ByteArray hash_1 =  tcf::crypto::ComputeMessageHash(StrToByteArray(concat_string));
 
         ByteArray hash_data;
@@ -347,8 +347,8 @@ namespace tcf {
         ByteArray decrypt_request_hash;
         try {
             decrypt_request_hash = tcf::crypto::skenc::DecryptMessage(session_key,
-	                                         HexStringToBinary(session_key_iv),
-		                                 HexStringToBinary(encrypted_request_hash));
+                                     HexStringToBinary(session_key_iv),
+                                     HexStringToBinary(encrypted_request_hash));
         } catch (tcf::error::ValueError& e) {
             Log(TCF_LOG_ERROR, "error::DecryptMessage - %d - %s", e.error_code(), e.what());
             return TCF_ERR_CRYPTO;
@@ -389,12 +389,13 @@ namespace tcf {
         return SIG_result;
     }
 
-    ByteArray WorkOrderProcessor::ResponseHashCalculate(std::vector<tcf::WorkOrderData>& wo_data) {
+    ByteArray WorkOrderProcessor::ResponseHashCalculate(
+                        std::vector<tcf::WorkOrderData>& wo_data) {
         ByteArray concat_hashes;
         ByteArray nonce = tcf::crypto::RandomBitString(16);
         worker_nonce = base64_encode(tcf::crypto::ComputeMessageHash(nonce));
         std::string concat_string = worker_nonce + work_order_id +
-				worker_id + workload_id + requester_id;
+                worker_id + workload_id + requester_id;
 
         std::string hash_1 = base64_encode(tcf::crypto::ComputeMessageHash(StrToByteArray(concat_string)));
 
@@ -403,18 +404,19 @@ namespace tcf {
 
         for (auto data : wo_data) {
             if (i < out_data_size) {
+                // If client request contains outData then update only
+                // the data field
                 tcf::WorkOrderDataHandler& out_data = data_items_out.at(i);
                 out_data.workorder_data.decrypted_data = data.decrypted_data;
                 out_data.ComputeHashString();
             } else {
-                // Assign data_encryption_key, iv, data_iv and encrypted_data_encryption_key
-                // params with corresponding values from inData
-                ByteArray encryption_key = data_items_in[i].GetEncryptionKey();
-                std::string iv = data_items_in[i].GetIv();
-                std::string encrypted_data_encryption_key =
-                        data_items_in[i].GetEncryptedDataEncryptionKey();
-                ByteArray data_iv = data_items_in[i].GetDataIv();
-                tcf::WorkOrderDataHandler out_data(data, encryption_key,
+                // If client has not provided outData element then use
+                // session keys to encrypt the output data.
+                std::string iv = "";
+                std::string encrypted_data_encryption_key = "";
+                ByteArray data_encryption_key = session_key;
+                ByteArray data_iv = HexStringToBinary(session_key_iv);
+                tcf::WorkOrderDataHandler out_data(data, data_encryption_key,
                         data_iv, encrypted_data_encryption_key, iv);
                 out_data.ComputeHashString();
                 data_items_out.emplace_back(out_data);
