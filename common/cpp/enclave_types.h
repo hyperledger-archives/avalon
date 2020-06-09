@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#pragma once
+
 /** Avalon worker enclave Type (singleton, KME, WPE) */
 enum EnclaveType {
     /** SINGLETON_ENCLAVE does both Key management and workload processing */

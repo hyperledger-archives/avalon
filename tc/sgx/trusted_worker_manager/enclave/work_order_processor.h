@@ -20,8 +20,8 @@
 #include "enclave_data.h"
 
 #include "parson.h"
+#include "jsonvalue.h"
 #include "types.h"
-#include "enclave_types.h"
 #include "work_order_data_handler.h"
 
 namespace tcf {
@@ -33,13 +33,14 @@ namespace tcf {
         ~WorkOrderProcessor();
         ByteArray CreateErrorResponse(int err_code, const char* err_message);
         ByteArray Process(EnclaveData* enclaveData, std::string json_str);
-        // In case of Singleton enclave, ext_work_order_data is empty
-        // and it contains additional data in case of KME and WPE
         std::string ext_work_order_data;
 
     protected:
-        void ParseJsonInput(EnclaveData* enclaveData, std::string json_str);
-        ByteArray CreateJsonOutput();
+        JsonValue ParseJsonInput(std::string json_str);
+        virtual void DecryptWorkOrderKeys(EnclaveData* enclave_data,
+            const JsonValue& wo_req_json_obj);
+        virtual JsonValue CreateJsonOutput();
+        ByteArray SerializeJson(JsonValue& json_value);
         virtual std::vector<tcf::WorkOrderData> ExecuteWorkOrder(
             EnclaveData* enclave_data);
         ByteArray ComputeRequestHash();
@@ -47,13 +48,8 @@ namespace tcf {
             std::vector<tcf::WorkOrderData>& wo_data);
         tcf_err_t VerifyEncryptedRequestHash();
         int VerifyRequesterSignature();
-        void ComputeSignature(EnclaveData* enclaveData,
-            ByteArray& message_hash);
+        virtual void ComputeSignature(ByteArray& message_hash);
         void ConcatHash(ByteArray& dst, ByteArray& src);
-        /***Required for work order processing **/
-        std::string tc_service_address;
-        std::string participant_address;
-        /***************************************/
 
         std::vector<WorkOrderDataHandler> data_items_in;
         std::vector<WorkOrderDataHandler> data_items_out;

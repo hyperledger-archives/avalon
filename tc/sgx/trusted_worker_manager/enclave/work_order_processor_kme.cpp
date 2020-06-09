@@ -117,7 +117,9 @@ namespace tcf {
                 std::string ext_data = ByteArrayToStr(
                     data_items_in[1].workorder_data.decrypted_data);
                 WorkOrderProcessorKME kme_wo_proc;
-                kme_wo_proc.ParseJsonInput(enclave_data, orig_wo_req);
+                JsonValue wo_req_json_val = \
+                    kme_wo_proc.ParseJsonInput(orig_wo_req);
+                kme_wo_proc.DecryptWorkOrderKeys(enclave_data, wo_req_json_val);
                 ExtWorkOrderInfoKME* ext_wo_info_kme = \
                     (ExtWorkOrderInfoKME*) processor->ext_work_order_info;
                 kme_wo_proc.PopulateExtWorkOrderInfoData(ext_data,

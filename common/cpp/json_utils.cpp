@@ -13,10 +13,8 @@
 * limitations under the License.
 */
 
-#include "parson.h"
 #include "error.h"
 #include "tcf_error.h"
-#include "types.h"
 #include "json_utils.h"
 
 const char* GetJsonStr(const JSON_Object* json_object,
