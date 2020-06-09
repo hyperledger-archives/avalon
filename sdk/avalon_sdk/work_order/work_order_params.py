@@ -285,7 +285,7 @@ class WorkOrderParams():
                 data, self.session_key, self.session_iv
             )
             return crypto.byte_array_to_base64(enc_data)
-        elif encrypted_data_encryption_key == "-".encode('UTF-8'):
+        elif encrypted_data_encryption_key == "-":
             # Skip encryption and just encode workorder data to
                         # base64 format.
             enc_data = crypto.byte_array_to_base64(data)

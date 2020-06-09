@@ -22,8 +22,8 @@ For command line options, type `./generic_client.py -h` from this directory.
 ```
 usage: generic_client.py [-h] [-c CONFIG] [-u URI | -a ADDRESS]
                          [-m {listing,registry}] [-w WORKER_ID]
-                         [-l WORKLOAD_ID] [-i IN_DATA [IN_DATA ...]] [-r] [-o]
-                         [-rs]
+                         [-l WORKLOAD_ID] [-i IN_DATA [IN_DATA ...]]
+                         [-p] [-r] [-o] [-rs]
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -43,6 +43,7 @@ optional arguments:
                         workload id (hex string) for a given worker
   -i IN_DATA [IN_DATA ...], --in_data IN_DATA [IN_DATA ...]
                         Input data
+  -p, --in_data_plain   If present, send input data as unencrypted plain text
   -r, --receipt         If present, retrieve and display work order receipt
   -o, --decrypted_output
                         If present, display decrypted output as JSON
@@ -123,3 +124,10 @@ With Docker:
     --address "0x9Be28B132aeE1b2c5A1C50529a636cEd807842cd" --mode "listing" \
     --workload_id "echo-result" --in_data "Hello"
 ```
+
+### Echo workload with input data as unencrypted plain text
+```bash
+./generic_client.py -o --uri "http://localhost:1947" \
+    --workload_id "echo-result" --in_data "Hello" -p
+```
+

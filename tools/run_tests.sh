@@ -116,6 +116,11 @@ try $generic_client_path/generic_client.py --uri "http://$LISTENER_URL:1947" \
     --workload_id "heart-disease-eval" \
     --in_data "Data: 25 10 1 67  102 125 1 95 5 10 1 11 36 1"
 
+yell "Start testing generic client with input data as plain text................"
+yell "#------------------------------------------------------------------------------------------------"
+try $generic_client_path/generic_client.py --uri "http://$LISTENER_URL:1947" \
+    --workload_id "echo-result" --in_data "Hello" -p
+
 yell "#------------------------------------------------------------------------------------------------"
 yell "#------------------------------------------------------------------------------------------------"
 sleep 10s
