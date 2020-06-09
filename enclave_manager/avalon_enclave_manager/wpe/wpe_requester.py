@@ -98,7 +98,8 @@ class WPERequester():
         if "result" in response:
             wo_response_json = response["result"]
             if self._verify_res_signature(wo_response_json,
-                                          self._worker.verification_key):
+                                          self._worker.verification_key,
+                                          wo_req["params"]["requesterNonce"]):
                 decrypted_res = crypto_utils.decrypted_response(
                     wo_response_json, session_key, session_iv)
                 # Response contains an array of results. In this case, the
@@ -149,7 +150,8 @@ class WPERequester():
         if "result" in response:
             wo_response_json = response["result"]
             if self._verify_res_signature(wo_response_json,
-                                          self._worker.verification_key):
+                                          self._worker.verification_key,
+                                          wo_req["params"]["requesterNonce"]):
                 decrypted_res = crypto_utils.decrypted_response(
                     wo_response_json, session_key, session_iv)
                 # Response contains an array of results. In this case, the
@@ -189,7 +191,8 @@ class WPERequester():
         if "result" in response:
             wo_response_json = response["result"]
             if self._verify_res_signature(wo_response_json,
-                                          self._worker.verification_key):
+                                          self._worker.verification_key,
+                                          wo_req["params"]["requesterNonce"]):
                 decrypted_res = crypto_utils.decrypted_response(
                     wo_response_json, session_key, session_iv)
                 # Response contains an array of results. In this case, the
@@ -244,20 +247,26 @@ class WPERequester():
             "method": self._jrpc_methods[workload_id]
         }
 
-    def _verify_res_signature(self, work_order_res, worker_verification_key):
+    def _verify_res_signature(self, work_order_res,
+                              worker_verification_key,
+                              requester_nonce):
         """
         Verify work order result signature
 
         Parameters :
             @param work_order_res - Result from work order response
             @param worker_verification_key - Worker verification key
+            @param requester_nonce - requester generated nonce in work
+            order request
         Returns :
             @returns True - If verification succeeds
                     False - If verification fails
         """
         sig_obj = signature.ClientSignature()
         status = sig_obj.verify_signature(
-            work_order_res, worker_verification_key)
+            work_order_res,
+            worker_verification_key,
+            requester_nonce)
         if status == SignatureStatus.PASSED:
             logger.info("Signature verification successful")
         else:

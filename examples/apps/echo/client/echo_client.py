@@ -308,7 +308,9 @@ def Main(args=None):
     sig_obj = signature.ClientSignature()
     if "result" in res:
         status = sig_obj.verify_signature(
-            res['result'], worker_obj.verification_key)
+            res['result'],
+            worker_obj.verification_key,
+            wo_params.get_requester_nonce())
         try:
             if status == SignatureStatus.PASSED:
                 logger.info(

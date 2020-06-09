@@ -273,10 +273,13 @@ def _verify_receipt_signature(receipt_update_retrieve):
 
 
 def _verify_wo_res_signature(work_order_res,
-                             worker_verification_key):
+                             worker_verification_key,
+                             requester_nonce):
     # Verify work order result signature
     sig_obj = signature.ClientSignature()
-    status = sig_obj.verify_signature(work_order_res, worker_verification_key)
+    status = sig_obj.verify_signature(work_order_res,
+                                      worker_verification_key,
+                                      requester_nonce)
     if status == SignatureStatus.PASSED:
         logger.info("Signature verification Successful")
     else:
@@ -372,20 +375,6 @@ def _get_first_active_worker(worker_registry, worker_id, config):
     worker_obj.load_worker(worker_retrieve_result["result"]["details"])
 
     return worker_obj, worker_id
-
-
-def _verify_work_order_response(res):
-    # Verify work order response signature
-    sig_obj = signature.ClientSignature()
-    status = sig_obj.verify_signature(res, verification_key)
-    if status == SignatureStatus.PASSED:
-        logger.info("Signature verification Successful")
-    else:
-        logger.error("Signature verification Failed")
-    decrypted_res = crypto_utility.decrypted_response(
-        res, s_key, s_iv)
-    logger.info("\nDecrypted response:\n {}"
-                .format(decrypted_res))
 
 
 def Main(args=None):
@@ -545,7 +534,9 @@ def Main(args=None):
         if "result" in res:
             # Verify work order response signature
             if _verify_wo_res_signature(res['result'],
-                                        worker_obj.verification_key) is False:
+                                        worker_obj.verification_key,
+                                        wo_params.get_requester_nonce()) \
+                                            is False:
                 logger.error(
                     "Work order response signature verification Failed")
                 sys.exit(1)

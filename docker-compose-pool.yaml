@@ -63,8 +63,11 @@ services:
     expose:
       # ZMQ socket port.
       - 5555
+      # sleep is required to wait WPE until KME starts and register worker.
+      # This is temporary work around.
     command: |
       bash -c "
+        sleep 5s
         enclave_manager --lmdb_url http://avalon-lmdb:9090 --kme_listener_url http://avalon-kme:1948
         tail -f /dev/null
       "

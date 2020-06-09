@@ -322,36 +322,33 @@ class ClientSignature(object):
 
         return input_json_str, SignatureStatus.PASSED
 
-# -----------------------------------------------------------------------------
-    def verify_signature(self, input_json, verification_key):
+    def _verify_wo_response_signature(self, wo_response,
+                                      wo_res_verification_key):
         """
-        Function to verify the signature received from the enclave
+        Function to verify the work order response signature
         Parameters:
-            - input_json is dictionary contains payload returned by the
-              Worker Service in response to successful workorder submit request
-              as per Trusted Compute EEA API 6.1.2 Work Order Result Payload
-            - verification_key is ECDSA/SECP256K1 public key used to verify
-              signatures created by the Enclave.
+            @param wo_response - dictionary contains work order response
+            as per Trusted Compute EEA API 6.1.2 Work Order Result Payload
+            @param wo_res_verification_key - ECDSA/SECP256K1 public key
+            used to verify work order response signature.
         Returns enum type SignatureStatus
         """
-
-        input_json_params = input_json
-
-        nonce = (input_json_params['workerNonce']).encode('UTF-8')
-        signature = input_json_params['workerSignature']
-
+        worker_nonce = (wo_response["workerNonce"]).encode('UTF-8')
+        signature = wo_response['workerSignature']
         hash_string_1 = self.__calculate_hash_on_concatenated_string(
-            input_json_params, nonce)
-        data_objects = input_json_params['outData']
+            wo_response, worker_nonce)
+        data_objects = wo_response['outData']
         hash_string_2 = self.calculate_datahash(data_objects)
         concat_string = hash_string_1 + hash_string_2
         concat_hash = bytes(concat_string, 'UTF-8')
         final_hash = crypto.compute_message_hash(concat_hash)
 
         try:
-            _verifying_key = crypto.SIG_PublicKey(verification_key)
+            _verifying_key = crypto.SIG_PublicKey(wo_res_verification_key)
         except Exception as error:
-            logger.info("Error in verification key : %s", error)
+            logger.error("Error in verification key of "
+                         "work order response : %s",
+                         error)
             return SignatureStatus.INVALID_VERIFICATION_KEY
 
         decoded_signature = crypto.base64_to_byte_array(signature)
@@ -364,6 +361,85 @@ class ClientSignature(object):
             return SignatureStatus.FAILED
         else:
             return SignatureStatus.INVALID_SIGNATURE_FORMAT
+
+    def _verify_wo_verification_key_signature(self, wo_response,
+                                              wo_verification_key,
+                                              requester_nonce):
+        """
+        Function to verify the work order response signature
+        Parameters:
+            @param wo_response - dictionary contains work order response
+            as per Trusted Compute EEA API 6.1.2 Work Order Result Payload
+            @param wo_verification_key - ECDSA/SECP256K1 public key used
+            to verify work order verification key signature.
+            @param requester_nonce - requester generated nonce passed in work
+            order request. Required in 2 step verification.
+        Returns enum type SignatureStatus
+        """
+        if requester_nonce is None:
+            logger.error("Missing requester_nonce argument")
+            return SignatureStatus.FAILED
+
+        concat_string = wo_response["extVerificationKey"] + requester_nonce
+        v_key_sig = wo_response["extVerificationKeySignature"]
+        v_key_hash = crypto.compute_message_hash(
+            bytes(concat_string, 'UTF-8'))
+        try:
+            _verifying_key = crypto.SIG_PublicKey(wo_verification_key)
+        except Exception as error:
+            logger.error("Error in verification key of"
+                         "verification key signature : %s", error)
+            return SignatureStatus.INVALID_VERIFICATION_KEY
+        decoded_v_key_sig = crypto.base64_to_byte_array(v_key_sig)
+        sig_result = _verifying_key.VerifySignature(
+            v_key_hash,
+            decoded_v_key_sig)
+        if sig_result == 1:
+            return SignatureStatus.PASSED
+        elif sig_result == 0:
+            return SignatureStatus.FAILED
+        else:
+            return SignatureStatus.INVALID_SIGNATURE_FORMAT
+
+# -----------------------------------------------------------------------------
+    def verify_signature(self, wo_response, wo_res_verification_key,
+                         requester_nonce=None):
+        """
+        Function to verify the signature received from the enclave
+        Parameters:
+            @param wo_response - dictionary contains work order response
+            as per Trusted Compute EEA API 6.1.2 Work Order Result Payload
+            @param wo_res_verification_key - worker ECDSA/SECP256K1
+            public key used to verify work order response signature.
+            @param requester_nonce - requester generated nonce passed in work
+            order request. Required in 2 step verification.
+        Returns enum type SignatureStatus
+        """
+        # if verification_key present in work order response
+        # then do 2 step verification
+        # step1 - The verification key signature from the
+        # response is verified using worker’s public verification key
+        # (aka KME's verification key)
+        if "extVerificationKey" in wo_response:
+            status = self._verify_wo_verification_key_signature(
+                wo_response,
+                wo_res_verification_key,
+                requester_nonce)
+            if status == SignatureStatus.PASSED:
+                # step2 : work order response signature is verified
+                # using the verification key in the response
+                return self._verify_wo_response_signature(
+                    wo_response,
+                    wo_response["extVerificationKey"])
+            else:
+                return status
+        else:
+            # In case of singleton worker, it is 1 step
+            # verification. Verify work order response signature
+            # using singleton worker public verification key.
+            return self._verify_wo_response_signature(
+                wo_response,
+                wo_res_verification_key)
 
 # -----------------------------------------------------------------------------
     def verify_update_receipt_signature(self, input_json):

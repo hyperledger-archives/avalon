@@ -126,7 +126,7 @@ namespace tcf {
         // extVerificationKeySignature - client needs to verify using
         //                Worker's(KME) public verification key
         JsonSetStr(result, "extVerificationKey",
-            ByteArrayToBase64EncodedString(
+            ByteArrayToStr(
                 wo_pre_proc_keys.verification_key).c_str(),
             "failed to serialize verification key");
         JsonSetStr(result, "extVerificationKeySignature",
