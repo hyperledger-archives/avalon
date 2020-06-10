@@ -207,6 +207,51 @@ namespace db_store {
         const ByteArray& inId,
         const ByteArray& inValue);
 
+    // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+    /**
+     * Updates a key->value pair in the database store. Appends/prepends a
+     * new string to the value separated by comma. The behavior is similar
+     * to pushing to the head/tail of a deque. Adds key-value pair if no
+     * entry is found.
+     * Primary expected use: python / untrusted side
+     *
+     * @param table     table name
+     * @param inId      id byte array
+     * @param inValue   data to be appended/written
+     *
+     * @return
+     *  TCF_SUCCESS  id->value updated/stored
+     *  else         failed, data store unchanged
+     */
+    tcf_err_t db_store_csv_extend(
+        const std::string& table,
+        const ByteArray& inId,
+        const ByteArray& inValue,
+        const bool isPrepend);
+
+    // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+    /**
+     * Updates a key->value pair in the database store. Removes the first
+     * string from value which is a comma separated string. The behavior
+     * is similar to removing from the head of a deque. Deletes the
+     * key-value pair if this is the lone element in the value.
+     * Primary expected use: python / untrusted side
+     *
+     * @param table      table name
+     * @param inId       id byte array
+     * @param outValue   data to be written
+     *
+     * @return
+     *  TCF_SUCCESS    outValue contains the first element in the value
+     *                 field and it is removed from data store
+     *  TCF_ERR_VALUE  key was not present in the database store
+     *  else           failed, outValue unchanged and data store unchanged
+     */
+    tcf_err_t db_store_csv_pop(
+        const std::string& table,
+        const ByteArray& inId,
+        ByteArray& outValue);
+
     }  /* namespace db_store */
 
 
