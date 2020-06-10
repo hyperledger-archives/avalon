@@ -27,18 +27,18 @@
 #include "db_store.h"
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-void db_store_init(const std::string& db_path, const size_t map_size) {
+void DbStore::db_store_init(const std::string& db_path, const size_t map_size) {
     tcf_err_t presult = lmdb_store::db_store_init(db_path, map_size);
     db_error::ThrowIf<db_error::RuntimeError>(presult, "db store init failed");
 }
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-void db_store_close() {
+void DbStore::db_store_close() {
     lmdb_store::db_store_close();
 }
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-int db_store_get_value_size(
+int DbStore::db_store_get_value_size(
     const std::string& table_b64,
     const std::string& key_b64) {
     ByteArray raw_key = base64_decode(key_b64);
@@ -62,7 +62,7 @@ int db_store_get_value_size(
 }
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-std::string db_store_get(
+std::string DbStore::db_store_get(
     const std::string& table_b64,
     const std::string& key_b64) {
     ByteArray raw_key(key_b64.begin(), key_b64.end());
@@ -78,7 +78,7 @@ std::string db_store_get(
 }
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-void db_store_put(
+void DbStore::db_store_put(
     const std::string& table_b64,
     const std::string& key_b64,
     const std::string& value_b64) {
@@ -88,7 +88,7 @@ void db_store_put(
     db_error::ThrowIf<db_error::RuntimeError>(presult, "db store put failed");
 }
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-void db_store_del(
+void DbStore::db_store_del(
     const std::string& table_b64,
     const std::string& key_b64,
     const std::string& value_b64) {
@@ -97,5 +97,5 @@ void db_store_del(
     tcf_err_t presult = db_store::db_store_del(table_b64, raw_key, raw_value);
     db_error::ThrowIf<db_error::RuntimeError>(presult, "db store delete failed");
 }
-// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
+// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX

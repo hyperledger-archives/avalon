@@ -37,6 +37,9 @@ class KvDBStore(KvStorage):
     """KvStorage interface maintains information about registries supported by
     the TCS in direct model."""
 
+    def __init__(self):
+        self._db_store = db_store.DbStore()
+
     def open(self, lmdb_file, map_size="1 TB"):
         """
         Function to open the database file
@@ -53,7 +56,7 @@ class KvDBStore(KvStorage):
                     "Invalid KV Storage Size, it must be a multiple \
                      of the page size (4096)")
                 raise Exception("Invalid Map Storage Size")
-            ret = db_store.db_store_init(lmdb_file, map_size)
+            ret = self._db_store.db_store_init(lmdb_file, map_size)
             return True
         except Exception as err:
             logger.error("Exception reading KV Storage Size: %s \n %s", str(
@@ -63,7 +66,7 @@ class KvDBStore(KvStorage):
 # ---------------------------------------------------------------------------------------------------
     def close(self):
         """Function to close the database file."""
-        db_store.db_store_close()
+        self._db_store.db_store_close()
 
 # ---------------------------------------------------------------------------------------------------
     def set(self, table, key, value):
@@ -76,7 +79,7 @@ class KvDBStore(KvStorage):
            - value is the value that needs to be inserted in the table.
         """
         try:
-            db_store.db_store_put(table, key, value)
+            self._db_store.db_store_put(table, key, value)
             return True
         except Exception:
             return False
@@ -92,7 +95,7 @@ class KvDBStore(KvStorage):
         """
         try:
             if key != "" or lookup_flag is True:
-                value = db_store.db_store_get(table, key)
+                value = self._db_store.db_store_get(table, key)
             else:
                 value = None
         except Exception:
@@ -120,9 +123,9 @@ class KvDBStore(KvStorage):
         """
         try:
             if value is None:
-                db_store.db_store_del(table, key, "")
+                self._db_store.db_store_del(table, key, "")
             else:
-                db_store.db_store_del(table, key, value)
+                self._db_store.db_store_del(table, key, value)
             return True
         except Exception:
             return False
@@ -137,7 +140,7 @@ class KvDBStore(KvStorage):
         result = []
         try:
             lookup_flag = True
-            table_keys = db_store.db_store_get(table, "")
+            table_keys = self._db_store.db_store_get(table, "")
             lookup_flag = False
             table_keys = table_keys.split(",")
             for i in table_keys:
