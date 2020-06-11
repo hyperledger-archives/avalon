@@ -121,13 +121,12 @@ namespace tcf {
         // extVerificationKeySignature from preprocessed json used at client
         // to do 2 step signing verification.
         //
-        // extVerificationKey - needs to be used by client to verify signature
-        //                of the output
+        // extVerificationKey - PEM encoded public key which needs to be
+        //            used by client to verify signature of the output
         // extVerificationKeySignature - client needs to verify using
-        //                Worker's(KME) public verification key
+        //            Worker's(KME) public verification key
         JsonSetStr(result, "extVerificationKey",
-            ByteArrayToStr(
-                wo_pre_proc_keys.verification_key).c_str(),
+            (wo_pre_proc_keys.verification_key).c_str(),
             "failed to serialize verification key");
         JsonSetStr(result, "extVerificationKeySignature",
             ByteArrayToBase64EncodedString(

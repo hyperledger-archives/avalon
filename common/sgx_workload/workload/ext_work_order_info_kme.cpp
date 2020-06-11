@@ -249,8 +249,8 @@ int ExtWorkOrderInfoKME::CreateWorkOrderKeyInfo(
         public_sig_key = private_sig_key.GetPublicKey();
 
         ByteArray signing_key = StrToByteArray(private_sig_key.Serialize());
-        wo_key_info.verification_key = StrToByteArray(
-            public_sig_key.Serialize());
+        // verification_key is PEM encoded public key string
+        wo_key_info.verification_key = public_sig_key.Serialize();
 
         // Generate signature on verification key and nonce
         std::string concat_str = \

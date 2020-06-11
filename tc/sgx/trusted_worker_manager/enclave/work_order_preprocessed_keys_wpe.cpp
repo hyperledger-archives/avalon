@@ -98,12 +98,10 @@ tcf_err_t WorkOrderPreProcessedKeys::ParsePreProcessingJson(
     this->signing_key = DecryptKey(this->sym_key,
         Base64EncodedStringToByteArray(encrypted_signing_key));
 
-    std::string wo_verification_key = GetJsonStr(wo_keys_obj,
+    this->verification_key = GetJsonStr(wo_keys_obj,
         "wo-verification-key",
         "failed to retrieve work order verification key "
         "from preprocessed keys");
-    this->verification_key = \
-        Base64EncodedStringToByteArray(wo_verification_key);
 
     std::string wo_verification_key_sig = GetJsonStr(wo_keys_obj,
         "wo-verification-key-sig",
