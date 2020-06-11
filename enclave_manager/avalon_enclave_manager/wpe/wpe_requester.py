@@ -48,6 +48,7 @@ class WPERequester():
         """
         self._uri_client = HttpJrpcClient(
             config["KMEListener"]["kme_listener_url"])
+        self._conn_retries = config["KMEListener"]["connection_retry"]
         worker_id = config.get("WorkerConfig")["worker_id"]
         # Calculate sha256 of worker id to get 32 bytes. The TC spec proxy
         # model contracts expect byte32. Then take a hexdigest for hex str.
@@ -286,7 +287,15 @@ class WPERequester():
         """
         json_request_str = json.dumps(json_rpc_request)
         logger.info("Request to KME listener %s", json_request_str)
-        response = self._uri_client._postmsg(json_request_str)
+        try:
+            # Attempt to post request could fail if KME yet to be ready to
+            # receive requests. Hence pass in the number of retries(>1)
+            # to post a request.
+            response = self._uri_client._postmsg(json_request_str,
+                                                 self._conn_retries)
+        except Exception as err:
+            logger.error("Exception occured in communication with KME")
+            raise err
         logger.info("Response from KME %s", response)
 
         return response
