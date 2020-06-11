@@ -32,6 +32,10 @@
 #include "sig_private_key.h"
 #include "sig_public_key.h"
 
+#ifndef CRYPTOLIB_OPENSSL
+#error "CRYPTOLIB_OPENSSL must be defined to compile source with OpenSSL."
+#endif
+
 namespace pcrypto = tcf::crypto;
 namespace constants = tcf::crypto::constants;
 
@@ -58,8 +62,17 @@ namespace Error = tcf::error;
  */
 void *pcrypto::sig::PublicKey::deserializeECDSAPublicKey(
         const std::string& encoded) {
+
+    // Sanity check
+    if (encoded.size() == 0) {
+        std::string msg(
+            "Crypto Error (sig::PublicKey::deserializeECDSAPublicKey(): "
+            "ECDSA public key PEM string is empty");
+        throw Error::ValueError(msg);
+    }
+
     BIO_ptr bio(BIO_new_mem_buf(encoded.c_str(), -1), BIO_free_all);
-    if (!bio) {
+    if (bio == nullptr) {
         std::string msg(
             "Crypto Error (sig::PublicKey::deserializeECDSAPublicKey): "
             "Could not create BIO");
@@ -68,7 +81,7 @@ void *pcrypto::sig::PublicKey::deserializeECDSAPublicKey(
 
     EC_KEY* public_key = PEM_read_bio_EC_PUBKEY(bio.get(),
         nullptr, nullptr, nullptr);
-    if (!public_key) {
+    if (public_key == nullptr) {
         std::string msg(
             "Crypto Error (sig::PublicKey::deserializeECDSAPublicKey): "
             "Could not deserialize public ECDSA key");
@@ -86,7 +99,7 @@ void *pcrypto::sig::PublicKey::deserializeECDSAPublicKey(
  */
 pcrypto::sig::PublicKey::PublicKey(const pcrypto::sig::PrivateKey& privateKey) {
     EC_KEY_ptr public_key(EC_KEY_new(), EC_KEY_free);
-    if (!public_key) {
+    if (public_key == nullptr) {
         std::string msg("Crypto Error (sig::PublicKey()): "
             "Could not create new public EC_KEY");
         throw Error::RuntimeError(msg);
@@ -102,14 +115,14 @@ pcrypto::sig::PublicKey::PublicKey(const pcrypto::sig::PrivateKey& privateKey) {
     EC_GROUP_set_point_conversion_form(ec_group.get(),
         POINT_CONVERSION_COMPRESSED);
     BN_CTX_ptr context(BN_CTX_new(), BN_CTX_free);
-    if (!context) {
+    if (context == nullptr) {
         std::string msg(
             "Crypto Error (sig::PublicKey()): Could not create new CTX");
         throw Error::RuntimeError(msg);
     }
 
     EC_POINT_ptr p(EC_POINT_new(ec_group.get()), EC_POINT_free);
-    if (!p) {
+    if (p == nullptr) {
         std::string msg(
             "Crypto Error (sig::PublicKey()): Could not create new EC_POINT");
         throw Error::RuntimeError(msg);
@@ -225,6 +238,7 @@ void pcrypto::sig::PublicKey::Deserialize(const std::string& encoded) {
 /**
  * Deserialize EC point (X,Y) hex string.
  *
+ * A EC point is the public key for ECDSA.
  * A point is represented as two 256-bit integers in hex
  * with the Ethereum prefix "04" (for uncompressed public key).
  * In hex, this is a 2 hex digit prefix followed by two 64 hex digit points.
@@ -239,8 +253,16 @@ void pcrypto::sig::PublicKey::Deserialize(const std::string& encoded) {
  * @param hexXY EC point (X,Y) represented as a hex string
  */
 void pcrypto::sig::PublicKey::DeserializeXYFromHex(const std::string& hexXY) {
+
+    // Sanity check
+    if (hexXY.size() != 2 * constants::EC_POINT_BYTE_LEN) {
+        std::string msg("Crypto Error (sig::PublicKey::DeserializeXYFromHex()): "
+            "hexadecimal point (X,Y) has incorrect length");
+        throw Error::ValueError(msg);
+    }
+
     EC_KEY_ptr public_key(EC_KEY_new(), EC_KEY_free);
-    if (!public_key) {
+    if (public_key == nullptr) {
         std::string msg("Crypto Error (sig::PublicKey::DeserializeXYFromHex): "
             "Could not create new public EC_KEY");
         throw Error::RuntimeError(msg);
@@ -264,14 +286,14 @@ void pcrypto::sig::PublicKey::DeserializeXYFromHex(const std::string& hexXY) {
 
     EC_POINT_ptr p(EC_POINT_hex2point(
         ec_group.get(), hexXY.data(), nullptr, nullptr), EC_POINT_free);
-    if (!p) {
+    if (p == nullptr) {
         std::string msg("Crypto Error (sig::PublicKey::DeserializeXYFromHex): "
             "Could not create new EC_POINT");
         throw Error::RuntimeError(msg);
     }
 
     int res = EC_KEY_set_public_key(public_key.get(), p.get());
-    if (!res) {
+    if (res == 0) {
         std::string msg(
             "Crypto Error (DeserializeXYFromHex): Could not set EC point");
         throw Error::ValueError(msg);
@@ -316,14 +338,14 @@ std::string pcrypto::sig::PublicKey::Serialize() const {
     int keylen = 0;
 
     BIO_ptr bio(BIO_new(BIO_s_mem()), BIO_free_all);
-    if (!bio) {
+    if (bio == nullptr) {
         std::string msg("Crypto Error (sig::PublicKey::Serialize): "
             "Could not create BIO");
         throw Error::RuntimeError(msg);
     }
     res = PEM_write_bio_EC_PUBKEY(bio.get(), (EC_KEY *)public_key_);
 
-    if (!res) {
+    if (res == 0) {
         std::string msg(
             "Crypto Error (sig::PublicKey::Serialize): "
             "Could not serialize EC Public key");
@@ -349,6 +371,7 @@ std::string pcrypto::sig::PublicKey::Serialize() const {
 /**
  * Serialize EC point (X,Y) to a hexadecimal string.
  *
+ * A EC point is the public key for ECDSA.
  * A point is represented as two 256-bit integers in hex
  * with the Ethereum prefix "04" (for uncompressed public key).
  * In hex, this is a 2 hex digit prefix followed by two 64 hex digit points.
@@ -391,12 +414,15 @@ std::string pcrypto::sig::PublicKey::SerializeXYToHex() const {
  * Verifies ECDSA signature of message. It's expected that the caller of
  * this function passes a hash value of the original message.
  *
- * @param signature ByteArray contains raw binary signature data
+ * @param hashMessage Data in a byte array to verify.
+ *                    This is not the message to verify but a hash of the message
+ * @param signature ByteArray containing signature data in DER format
  * @returns 1 if signature is valid, 0 if signature is invalid,
  *          and -1 if there is an internal error.
  */
 int pcrypto::sig::PublicKey::VerifySignature(
-    const ByteArray& hashMessage, const ByteArray& signature) const {
+        const ByteArray& hashMessage, const ByteArray& signature) const {
+
     // Decode signature B64 -> DER -> ECDSA_SIG
     const unsigned char* der_SIG = (const unsigned char*)signature.data();
     ECDSA_SIG_ptr sig(
@@ -405,6 +431,7 @@ int pcrypto::sig::PublicKey::VerifySignature(
     if (sig == nullptr) {
         return -1;
     }
+
     // Verify
     return ECDSA_do_verify(
         (const unsigned char*)hashMessage.data(), hashMessage.size(),

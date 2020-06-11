@@ -33,6 +33,10 @@
 #include "sig_public_key.h"
 #include "sig_private_key.h"
 
+#ifndef CRYPTOLIB_OPENSSL
+#error "CRYPTOLIB_OPENSSL must be defined to compile source with OpenSSL."
+#endif
+
 namespace pcrypto = tcf::crypto;
 namespace constants = tcf::crypto::constants;
 
@@ -73,8 +77,17 @@ extern int ECDSA_SIG_set0(ECDSA_SIG *sig, BIGNUM *r, BIGNUM *s);
  */
 void* pcrypto::sig::PrivateKey::deserializeECDSAPrivateKey(
         const std::string& encoded) {
+
+    // Sanity check
+    if (encoded.size() == 0) {
+        std::string msg(
+            "Crypto Error (pkenc::PrivateKey::deserializeECDSAPrivateKey(): "
+            "ECDSA private key PEM string is empty");
+        throw Error::ValueError(msg);
+    }
+
     BIO_ptr bio(BIO_new_mem_buf(encoded.c_str(), -1), BIO_free_all);
-    if (!bio) {
+    if (bio == nullptr) {
         std::string msg(
             "Crypto Error (sig::PrivateKey::deserializeECDSAPrivateKey): "
             "Could not create BIO");
@@ -83,7 +96,7 @@ void* pcrypto::sig::PrivateKey::deserializeECDSAPrivateKey(
 
     EC_KEY* private_key = PEM_read_bio_ECPrivateKey(bio.get(),
         nullptr, nullptr, nullptr);
-    if (!private_key) {
+    if (private_key == nullptr) {
         std::string msg(
             "Crypto Error (sig::PrivateKey::deserializeECDSAPrivateKey): "
             "Could not deserialize private ECDSA key");
@@ -228,8 +241,7 @@ void pcrypto::sig::PrivateKey::Generate() {
  */
 std::string pcrypto::sig::PrivateKey::Serialize() const {
     BIO_ptr bio(BIO_new(BIO_s_mem()), BIO_free_all);
-
-    if (!bio) {
+    if (bio == nullptr) {
         std::string msg("Crypto Error (sig::PrivateKey::Serialize): "
             "Could not create BIO");
         throw Error::RuntimeError(msg);
@@ -259,11 +271,13 @@ std::string pcrypto::sig::PrivateKey::Serialize() const {
  * hash value of the original message to this function for signing.
  * Throws RuntimeError.
  *
- * @param hashMessage Data in a byte array to sign
- * @returns ByteArray containing raw binary signature data
+ * @param hashMessage Data in a byte array to sign.
+ *                    This is not the message to sign but a hash of the message
+ * @returns ByteArray containing signature data in DER format
  */
 ByteArray pcrypto::sig::PrivateKey::SignMessage(
-    const ByteArray& hashMessage) const {
+        const ByteArray& hashMessage) const {
+
     // Sign
     ECDSA_SIG_ptr sig(ECDSA_do_sign((const unsigned char*)hashMessage.data(),
         hashMessage.size(), (EC_KEY *)private_key_),
@@ -275,6 +289,7 @@ ByteArray pcrypto::sig::PrivateKey::SignMessage(
         throw Error::RuntimeError(msg);
     }
 
+    // Get the R and S bignum values of an ECDSA signature
     const BIGNUM* sc;
     const BIGNUM* rc;
     BIGNUM* r = nullptr;
@@ -283,20 +298,23 @@ ByteArray pcrypto::sig::PrivateKey::SignMessage(
     ECDSA_SIG_get0(sig.get(), &rc, &sc);
 
     s = BN_dup(sc);
-    if (!s) {
+    if (s == nullptr) {
         std::string msg("Crypto Error (sig::PrivateKey:SignMessage): "
             "Could not dup BIGNUM for s");
         throw Error::RuntimeError(msg);
     }
     r = BN_dup(rc);
-    if (!r) {
+    if (r == nullptr) {
         std::string msg("Crypto Error (sig::PrivateKey:SignMessage): "
             "Could not dup BIGNUM for r");
         throw Error::RuntimeError(msg);
     }
 
+    // Make signature Bitcoin canonical if needed.
+
+    // Perform bignum math with ord, ordh, r, and s
     BIGNUM_ptr ord(BN_new(), BN_free);
-    if (!ord) {
+    if (ord == nullptr) {
         std::string msg(
             "Crypto Error (sig::PrivateKey::SignMessage): "
             "Could not create BIGNUM for ord");
@@ -304,56 +322,60 @@ ByteArray pcrypto::sig::PrivateKey::SignMessage(
     }
 
     BIGNUM_ptr ordh(BN_new(), BN_free);
-    if (!ordh) {
+    if (ordh == nullptr) {
         std::string msg(
             "Crypto Error (sig::PrivateKey::SignMessage): "
             "Could not create BIGNUM for ordh");
         throw Error::RuntimeError(msg);
     }
 
+    // ord = EC group (base point) for our key pair
     int res = EC_GROUP_get_order(EC_KEY_get0_group((EC_KEY *)private_key_),
         ord.get(), nullptr);
-    if (!res) {
+    if (res == 0) {
         std::string msg("Crypto Error (sig::PrivateKey::SignMessage): "
             "Could not get order");
         throw Error::RuntimeError(msg);
     }
 
+    // ordh = ord >> 1
     res = BN_rshift(ordh.get(), ord.get(), 1);
-
-    if (!res) {
+    if (res == 0) {
         std::string msg("Crypto Error (sig::PrivateKey::SignMessage): "
             "Could not shift order BN");
         throw Error::RuntimeError(msg);
     }
 
+    // if s >= ordh, then s = ord - s
     if (BN_cmp(s, ordh.get()) >= 0) {
         res = BN_sub(s, ord.get(), s);
-        if (!res) {
+        if (res == 0) {
             std::string msg("Crypto Error (sig::PrivateKey::SignMessage): "
             "Could not subtract BNs");
             throw Error::RuntimeError(msg);
         }
     }
 
+    // Set s in the signature, which may have changed
     res = ECDSA_SIG_set0(sig.get(), r, s);
-    if (!res) {
+    if (res == 0) {
         std::string msg("Crypto Error (sig::PrivateKey::SignMessage): "
             "Could not set r and s");
         throw Error::RuntimeError(msg);
     }
 
+    // DER encode the ECDSA signature.
     // The -1 here is because we canonicalize the signature as in Bitcoin
     unsigned int der_sig_size = i2d_ECDSA_SIG(sig.get(), nullptr);
     ByteArray der_SIG(der_sig_size, 0);
     unsigned char* data = der_SIG.data();
     res = i2d_ECDSA_SIG(sig.get(), &data);
-
-    if (!res) {
+    if (res == 0) {
         std::string msg(
             "Crypto Error (sig::PrivateKey::SignMessage): "
             "Could not convert signature to DER");
         throw Error::RuntimeError(msg);
     }
+
     return der_SIG;
 }  // pcrypto::sig::PrivateKey::SignMessage

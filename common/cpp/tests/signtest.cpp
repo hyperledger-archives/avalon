@@ -34,7 +34,8 @@
 #endif
 #endif
 
-#include "error.h"       // tcf::error
+#include "error.h"           // tcf::error
+#include "crypto_utils.h"    // ComputeMessageHash()
 #include "sig_private_key.h"
 #include "sig_public_key.h"
 
@@ -111,12 +112,15 @@ main(void)
     ByteArray msg2;
     msg2.insert(msg2.end(), msgStr2.data(), msgStr2.data() + msgStr2.size());
 
+#ifdef CRYPTOLIB_OPENSSL
 #if OPENSSL_API_COMPAT < 0x10100000L
     OpenSSL_add_all_digests();
+#endif
 #endif
 
     printf("Test ECDSA key management functions.\n");
     try {
+        printf("Test constructors.\n");
         // Default constructor
         tcf::crypto::sig::PrivateKey privateKey_t;
         privateKey_t.Generate();
@@ -148,6 +152,7 @@ main(void)
     // PublicKey constructor from PrivateKey
     tcf::crypto::sig::PublicKey publicKey(privateKey);
 
+    printf("Test serialization\n");
     std::string privateKeyStr;
     try {
         privateKeyStr = privateKey.Serialize();
@@ -177,6 +182,7 @@ main(void)
         ++count;                                              
     }  
 
+    printf("Test deserialization\n");
     std::string privateKeyStr1;
     std::string publicKeyStr1;
     tcf::crypto::sig::PrivateKey privateKey1;
@@ -207,6 +213,7 @@ main(void)
         ++count;
     }
 
+    printf("Test point (X,Y) serialization/deserialization\n");
     try {
         std::string XYstr = publicKey1.SerializeXYToHex();
         printf("Serialized EC point (X,Y) is:\n%s\n", XYstr.c_str());
@@ -226,17 +233,17 @@ main(void)
         ++count;
     }
 
+    printf("Test ECDSA keypair deserialization\n");
     try {
         privateKey1.Deserialize(privateKeyStr);
         publicKey1.Deserialize(publicKeyStr);
         privateKeyStr1 = privateKey1.Serialize();
         publicKeyStr1 = publicKey1.Serialize();
-        printf("Deserialize ECDSA keypair test PASSED");
+        printf("Deserialize ECDSA keypair test PASSED\n");
     } catch (const tcf::error::RuntimeError& e) {
         printf("Deserialize ECDSA keypair test FAILED:\n%s\n", e.what());
         ++count;
     }
-
 
     printf("Test deserializing pre-existing PEM format ECDSA keys\n");
     tcf::crypto::sig::PrivateKey static_rprivate_key;
@@ -261,9 +268,10 @@ main(void)
 
     // Test of SignMessage and VerifySignature
     printf("SignMessage() Test\n");
+    ByteArray hash = tcf::crypto::ComputeMessageHash(msg);
     ByteArray sig;
     try {
-        sig = privateKey1.SignMessage(msg);
+        sig = privateKey1.SignMessage(hash);
         printf("SignMessage test PASSED\n");
     } catch (const tcf::error::RuntimeError& e) {
         printf("SignMessage test FAILED, signature not computed:\n%s\n",
@@ -272,7 +280,7 @@ main(void)
     }
 
     printf("VerifySignature() Test\n");
-    int res = publicKey1.VerifySignature(msg, sig);
+    int res = publicKey1.VerifySignature(hash, sig);
     if (res == -1) {
         printf("VerifySignature test FAILED, internal error.\n");
         ++count;
@@ -284,9 +292,10 @@ main(void)
     }
 
     printf("Negative Test: SignMessage()/VerifySignature()\n");
-    ByteArray sig2 = privateKey1.SignMessage(msg2);
+    ByteArray hash2 = tcf::crypto::ComputeMessageHash(msg2);
+    ByteArray sig2 = privateKey1.SignMessage(hash2);
 
-    res = publicKey1.VerifySignature(msg2, sig);
+    res = publicKey1.VerifySignature(hash2, sig);
     if (res == -1) {
         printf("VerifySignature test FAILED, internal error.\n");
         ++count;
@@ -295,7 +304,7 @@ main(void)
         ++count;
     }
 
-    res = publicKey1.VerifySignature(msg, sig2);
+    res = publicKey1.VerifySignature(hash, sig2);
     if (res == -1) {
         printf("VerifySignature test FAILED, internal error.\n");
         ++count;
