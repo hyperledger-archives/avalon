@@ -194,7 +194,6 @@ int ExtWorkOrderInfoKME::VerifyAttestationWpe(
     sgx_report_body_t* report_body = &quote_body->report_body;
     sgx_report_data_t expected_report_data = *(&report_body->report_data);
     sgx_measurement_t mr_enclave_from_report = *(&report_body->mr_enclave);
-    sgx_basename_t mr_basename_from_report = *(&quote_body->basename);
     sgx_measurement_t mr_signer_from_report = *(&report_body->mr_signer);
 
     /// Convert uint8_t array to ByteArray(vector<uint8_t>)
