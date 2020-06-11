@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import json
+import time
 import urllib.request
 import urllib.error
 
@@ -37,12 +38,13 @@ class HttpJrpcClient(object):
         self.ServiceURL = url
         self.ProxyHandler = urllib.request.ProxyHandler({})
 
-    def _postmsg(self, request):
+    def _postmsg(self, request, retries=0):
         """
         Post a request JSON RPC string and return the response.
 
         Parameters:
-        request   JSON string request to post
+            @param request - JSON string request to post
+            @param retries - Number of attempts to submit request
         """
 
         data = request.encode('utf8')
@@ -59,7 +61,8 @@ class HttpJrpcClient(object):
                 {'Content-Type': 'application/json',
                  'Content-Length': datalen})
             opener = urllib.request.build_opener(self.ProxyHandler)
-            response = opener.open(request, timeout=10)
+            response = self._open_with_retries(
+                opener, request, retries)
 
         except urllib.error.HTTPError as err:
             logger.warn('operation failed with response: %s', err.code)
@@ -91,3 +94,32 @@ class HttpJrpcClient(object):
             pass
         value = json.loads(content)
         return value
+
+    def _open_with_retries(self, opener, request, retries):
+        """
+        Function to retry opening a given url/request if URLError is
+        encountered. URLError for request would encompass HTTPError
+        as well as Timeout.
+
+        Parameters:
+            @param opener - An instance of OpenerDiretor
+            @param request - Request to be sent to the url
+            @param retries - Number of attempts to open
+        Returns:
+            @returns response - Response received
+        """
+        count = 0
+        while count < retries:
+            try:
+                return opener.open(request, timeout=10)
+            except urllib.error.URLError as err:
+                logger.error("Connection error - %s", err.reason)
+                time.sleep(10)
+            except Exception as err:
+                raise err
+            # Increment counter for each handled Exception
+            count += 1
+            if count < retries:
+                logger.info("Will retry to connect.")
+        # Make a final call after retries are exhausted
+        return opener.open(request, timeout=10)

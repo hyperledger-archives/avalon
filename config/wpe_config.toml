@@ -79,6 +79,9 @@ enclave_type = "WPE"
 # URL of KMEListener where a Work order processor can send requests meant for
 # the Key Management Enclave(KME)  
 kme_listener_url = "http://localhost:1948"
+# Number of times the WPE will attempt to send a request to a KME if a timeout
+# or connection error occurs
+connection_retry = 3
 
 [WorkerConfig]
 # Id of worker in plain text
