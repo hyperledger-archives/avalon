@@ -28,7 +28,14 @@ namespace crypto {
           * ECDSA Secp256k1 signature size, in bytes:
           * 64 bytes (512b) + 8 byte DER prefix
           */
-        const int MAX_SIG_SIZE = 72;
+        const unsigned int MAX_SIG_SIZE = 72;
+        /**
+          * Length of binary EC point, in bytes.
+          * The printable hexadecimal character length is 2 times this value.
+          * A uncompressed EC point in binary contains a 1 byte prefix (0x04),
+          * followed by two 32 byte (256 bit) (X,Y) coordinates.
+          */
+        const unsigned int EC_POINT_BYTE_LEN = 1 + 32 + 32;
     }  // namespace constants
 }  // namespace crypto
 }  // namespace tcf
