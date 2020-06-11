@@ -194,7 +194,7 @@ namespace tcf {
         for (i = 0; i < count; i++) {
             JSON_Object* data_object = json_array_get_object(data_array, i);
             WorkOrderDataHandler wo_data(session_key, session_key_iv_bytes);
-            wo_data.Unpack(enclave_data, data_object);
+            wo_data.Unpack(data_object);
             data_items_in.emplace_back(wo_data);
         }
         data_array = json_object_get_array(params_object, "outData");
@@ -203,7 +203,7 @@ namespace tcf {
         for (i = 0; i < count; i++) {
             JSON_Object* data_object = json_array_get_object(data_array, i);
             WorkOrderDataHandler wo_data(session_key, session_key_iv_bytes);
-            wo_data.Unpack(enclave_data, data_object);
+            wo_data.Unpack(data_object);
             data_items_out.emplace_back(wo_data);
         }
     }  // WorkOrderProcessor::DecryptWorkOrderKeys

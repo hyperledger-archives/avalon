@@ -23,6 +23,7 @@
 #include "base64.h"
 #include "parson.h"
 #include "types.h"
+#include "tcf_error.h"
 #include "work_order_data.h"
 #include "enclave_types.h"
 
@@ -53,13 +54,12 @@ namespace tcf {
                 this->iv = iv;
             }
 
-            void Unpack(EnclaveData* enclaveData, const JSON_Object* object);
+            void Unpack(const JSON_Object* object);
 
-            // Below overloaded function will be used by only WPE to unpack
-            // TODO: Remove this function after adding WPE
-            // specific WorkOrderDataHandler
-            void Unpack(EnclaveData* enclaveData, const JSON_Object* object,
-                ByteArray data_encryption_key_from_pre_processing);
+            void InitializeDataEncryptionKey();
+
+            virtual void GetDataEncryptionKey(
+                ByteArray& data_encrypt_key, ByteArray& iv_bytes);
 
             void Pack(JSON_Array* json_array);
 
@@ -87,7 +87,7 @@ namespace tcf {
                 return this->data_encryption_key;
             }
 
-        private:
+        protected:
             // iv is used for calculating hash during signature verification
             // and signature computation
             std::string iv;
