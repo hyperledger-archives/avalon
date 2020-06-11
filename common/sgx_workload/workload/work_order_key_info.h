@@ -17,6 +17,7 @@
 
 #include <string>
 
+#include "types.h"
 #include "work_order_data.h"
 
 class WorkOrderKeyInfo {
@@ -26,7 +27,7 @@ public:
         encrypted_sym_key = {};
         encrypted_wo_key = {};
         encrypted_signing_key = {};
-        verification_key = {};
+        verification_key = "";
         verification_key_signature = {};
         signature = {};
         in_data_keys = {};
@@ -46,7 +47,7 @@ public:
     }
 
     std::string GetVerificationKey() {
-        return ByteArrayToBase64EncodedString(verification_key);
+        return this->verification_key;
     }
 
     std::string GetVerificationKeySignature() {
@@ -61,7 +62,7 @@ public:
     ByteArray encrypted_sym_key;
     ByteArray encrypted_wo_key;
     ByteArray encrypted_signing_key;
-    ByteArray verification_key;
+    Base64EncodedString verification_key;
     ByteArray verification_key_signature;
     ByteArray signature;
     std::vector<tcf::WorkOrderData> in_data_keys;

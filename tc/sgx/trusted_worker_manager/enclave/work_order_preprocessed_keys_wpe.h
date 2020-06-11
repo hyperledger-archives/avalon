@@ -34,7 +34,7 @@ public:
         sym_key = {};
         work_order_session_key = {};
         signing_key = {};
-        verification_key = {};
+        verification_key = "";
         verification_key_signature = {};
         signature = {};
         in_data_keys = {};
@@ -52,7 +52,7 @@ public:
     ByteArray sym_key;
     ByteArray work_order_session_key;
     ByteArray signing_key;
-    ByteArray verification_key;
+    Base64EncodedString verification_key;
     ByteArray verification_key_signature;
     ByteArray signature;
     std::vector<tcf::WorkOrderData> in_data_keys;
