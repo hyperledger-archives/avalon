@@ -133,6 +133,52 @@ class LMDBRequestHandler(resource.Resource):
             else:
                 logger.error("Invalid args for cmd Remove")
                 response = "e\nInvalid args for cmd Remove"
+
+        # Append to csv
+        elif (cmd == "CA"):
+            if len(args) == 4:
+                result = self.kv_helper.csv_append(args[1], args[2], args[3])
+                # Append to csv successful (returned True)
+                if result:
+                    response = "t"
+                # Append to csv unsuccessful (returned False)
+                else:
+                    response = "f"
+            # Error
+            else:
+                logger.error("Invalid args for cmd csv_append")
+                response = "e\nInvalid args for cmd csv_append"
+
+        # Prepend to csv
+        elif (cmd == "CP"):
+            if len(args) == 4:
+                result = self.kv_helper.csv_prepend(args[1], args[2], args[3])
+                # Prepend to csv successful (returned True)
+                if result:
+                    response = "t"
+                # Prepend to csv unsuccessful (returned False)
+                else:
+                    response = "f"
+            # Error
+            else:
+                logger.error("Invalid args for cmd csv_prepend")
+                response = "e\nInvalid args for cmd csv_prepend"
+
+        # Pop/retrieve from CSV
+        elif (cmd == "CR"):
+            if len(args) == 3:
+                result = self.kv_helper.csv_pop(args[1], args[2])
+                # Value found
+                if result is not None:
+                    response = "v\n" + escape(result)
+                # Value not found
+                else:
+                    response = "n"
+            # Error
+            else:
+                logger.error("Invalid args for cmd csv_pop")
+                response = "e\nInvalid args for cmd csv_pop"
+
         # Error
         else:
             logger.error("Unknown cmd")

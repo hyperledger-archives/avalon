@@ -25,7 +25,9 @@ import json
 import logging
 
 import kv_storage.remote_lmdb.db_store as db_store
+import kv_storage.remote_lmdb.db_store_csv as db_store_csv
 from kv_storage.interface.shared_kv_interface import KvStorage
+from kv_storage.interface.kv_csv_interface import KvCsvStorage
 
 logger = logging.getLogger(__name__)
 lookup_flag = False
@@ -33,7 +35,7 @@ lookup_flag = False
 # ---------------------------------------------------------------------------------------------------
 
 
-class KvDBStore(KvStorage):
+class KvDBStore(KvStorage, KvCsvStorage):
     """KvStorage interface maintains information about registries supported by
     the TCS in direct model."""
 
@@ -149,4 +151,75 @@ class KvDBStore(KvStorage):
             result = []
 
         return result
+# ---------------------------------------------------------------------------------------------------
+
+    def csv_append(self, table, key, value):
+        """
+        Function to update a key-value pair in a lmdb table that holds
+        comma-separated strings as value. This function adds a string
+        to the end of the comma-separated value.
+
+        Parameters:
+           @param table - Name of the lmdb table in which key-value pair
+                          needs to be updated.
+           @param key - The primary key of the table.
+           @param value - The value that needs to be appended to the existing
+                          value(comma-separated) corresponding to the key.
+        """
+        try:
+            db_store_csv.db_store_csv_append(table, key, value)
+            return True
+        except Exception:
+            return False
+
+# ---------------------------------------------------------------------------------------------------
+    def csv_prepend(self, table, key, value):
+        """
+        Function to update a key-value pair in a lmdb table that holds
+        comma-separated strings as value. This function adds a string
+        to the beginning of the comma-separated value.
+
+        Parameters:
+           @param table - Name of the lmdb table in which key-value pair
+                          needs to be updated.
+           @param key - The primary key of the table.
+           @param value - The value that needs to be prepended to the existing
+                          value(comma-separated) corresponding to the key.
+        """
+        try:
+            db_store_csv.db_store_csv_prepend(table, key, value)
+            return True
+        except Exception:
+            return False
+
+# ---------------------------------------------------------------------------------------------------
+    def csv_pop(self, table, key):
+        """
+        Function to update a key-value pair in a lmdb table that holds
+        comma-separated strings as value. This function retrieves a string
+        from the beginning of the comma-separated value. It also deletes
+        the string from the value and if this is the lone string, the key-
+        value pair is removed.
+
+        Parameters:
+           @param table - Name of the lmdb table from which key-value pair
+                          needs to be read and updated.
+           @param key - The primary key of the table.
+        Returns:
+           @returns value - First element from comma-separated value for key
+                            passed in.
+        """
+        try:
+            if key != "":
+                value = db_store_csv.db_store_csv_pop(table, key)
+            else:
+                value = None
+        except Exception:
+            value = None
+
+        if not value:
+            value = None
+
+        return value
+
 # ---------------------------------------------------------------------------------------------------

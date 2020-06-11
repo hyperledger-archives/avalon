@@ -72,6 +72,9 @@ module_files = [
     os.path.join(
         tcf_root_dir, 'shared_kv_storage/kv_storage/remote_lmdb/db_store.i'),
     os.path.join(module_src_path, 'db_store.cpp'),
+    os.path.join(
+        tcf_root_dir, 'shared_kv_storage/kv_storage/remote_lmdb/db_store_csv.i'),
+    os.path.join(module_src_path, 'db_store_csv.cpp'),
 ]
 
 dbstore_module = Extension(
