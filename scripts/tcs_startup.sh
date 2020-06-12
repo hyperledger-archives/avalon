@@ -23,8 +23,14 @@ COMPONENTS="$ENCLAVE_MANAGER" # #KV_STORAGE added if -s passed
 START_STOP_AVALON_SERVICES=0 # default if -s not passed
 LMDB_URL="http://localhost:9090" # -l default
 LISTENER_URL="http://localhost:1947"
+ENCLAVE_ZMQ_URL="tcp://localhost:5555"
 # Trap handler
 trap 'stop_avalon_components' HUP INT QUIT ABRT ALRM TERM
+
+is_sync_mode()
+{
+    return grep "sync_workload_execution" ${TCF_HOME}/listener/listener_config.toml | awk -F'=' '{print $2}'
+}
 
 start_avalon_components()
 {
@@ -32,10 +38,6 @@ start_avalon_components()
         echo "Starting Avalon KV Storage $VERSION ..."
         $KV_STORAGE --bind $LMDB_URL & 
         echo "Avalon KV Storage started"
-
-	echo "Starting Avalon Listener $VERSION ..."
-	$LISTENER --bind $LISTENER_URL --lmdb_url $LMDB_URL &
-	echo "Avalon Listener started"
     fi
     
     # START_STOP_AVALON_SERVICES doesn't control enclave manager. It will be
@@ -43,6 +45,18 @@ start_avalon_components()
     echo "Starting Avalon Enclave Manager $VERSION ..."
     python3 $ENCLAVE_MANAGER --lmdb_url $LMDB_URL &
     echo "Avalon Enclave Manager started"
+
+    if [ $START_STOP_AVALON_SERVICES = 1 ] ; then
+        echo "Starting Avalon Listener $VERSION ..."
+        is_sync_mode
+        is_sync_mode_on=$?
+        if [ "$is_sync_mode_on" -eq "1" ]; then
+	        $LISTENER --bind $LISTENER_URL --lmdb_url $LMDB_URL --zmq_url $ENCLAVE_ZMQ_URL &
+        else
+            $LISTENER --bind $LISTENER_URL --lmdb_url $LMDB_URL &
+        fi
+	    echo "Avalon Listener started"
+    fi
 
     sleep 5s
     check_avalon_components
