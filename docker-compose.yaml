@@ -68,7 +68,6 @@ services:
       "
     depends_on:
       - avalon-lmdb
-      - avalon-listener
 
   avalon-lmdb:
     container_name: avalon-lmdb
