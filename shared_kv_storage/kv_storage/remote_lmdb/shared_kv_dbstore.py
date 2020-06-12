@@ -24,7 +24,6 @@ of the provided table name.
 import json
 import logging
 
-import kv_storage.remote_lmdb.db_store as db_store
 import kv_storage.remote_lmdb.db_store_csv as db_store_csv
 from kv_storage.interface.shared_kv_interface import KvStorage
 from kv_storage.interface.kv_csv_interface import KvCsvStorage
@@ -40,7 +39,7 @@ class KvDBStore(KvStorage, KvCsvStorage):
     the TCS in direct model."""
 
     def __init__(self):
-        self._db_store = db_store.DbStore()
+        self._db_store = db_store_csv.DbStoreCsv()
 
     def open(self, lmdb_file, map_size="1 TB"):
         """
@@ -167,7 +166,7 @@ class KvDBStore(KvStorage, KvCsvStorage):
                           value(comma-separated) corresponding to the key.
         """
         try:
-            db_store_csv.db_store_csv_append(table, key, value)
+            self._db_store.db_store_csv_append(table, key, value)
             return True
         except Exception:
             return False
@@ -187,7 +186,7 @@ class KvDBStore(KvStorage, KvCsvStorage):
                           value(comma-separated) corresponding to the key.
         """
         try:
-            db_store_csv.db_store_csv_prepend(table, key, value)
+            self._db_store.db_store_csv_prepend(table, key, value)
             return True
         except Exception:
             return False
@@ -211,7 +210,7 @@ class KvDBStore(KvStorage, KvCsvStorage):
         """
         try:
             if key != "":
-                value = db_store_csv.db_store_csv_pop(table, key)
+                value = self._db_store.db_store_csv_pop(table, key)
             else:
                 value = None
         except Exception:

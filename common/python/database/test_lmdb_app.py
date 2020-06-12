@@ -37,6 +37,8 @@ class TestRemoteLMDB(unittest.TestCase):
         self.value = "d\\\nvalue\n"
         self.key2 = "dke\\\\y2"
         self.value2 = "dvalue2"
+        self.value3 = "dvalue3"
+        self.key3 = "key3"
 
     def test_set(self):
         set_result = self.proxy.set(self.table, self.key, self.value)
@@ -65,6 +67,71 @@ class TestRemoteLMDB(unittest.TestCase):
         logger.info(get_value_result2)
         self.assertEqual(get_value_result2, self.value2,
                          "get_value Retrieved incorrect value")
+
+    def test_csv_append(self):
+        append_result = self.proxy.csv_append(
+            self.table, self.key2, self.value3)
+        self.assertTrue(append_result)
+        get_value_result = self.proxy.get(self.table, self.key2)
+        logger.info("Appended value : %s", get_value_result)
+        self.assertEqual(get_value_result,
+                         "{},{}".format(self.value2, self.value3),
+                         "csv_append failed to append new value")
+
+    def test_csv_prepend(self):
+        prepend_result = self.proxy.csv_prepend(
+            self.table, self.key2, self.value3)
+        self.assertTrue(prepend_result)
+        get_value_result = self.proxy.get(self.table, self.key2)
+        logger.info("Prepended value : %s", get_value_result)
+        self.assertEqual(get_value_result,
+                         "{},{},{}".format(
+                             self.value3, self.value2, self.value3),
+                         "csv_prepend failed to prepend new value")
+
+    def test_csv_pop(self):
+        pop_result = self.proxy.csv_pop(self.table, self.key2)
+        self.assertNotEqual(None, pop_result)
+        get_value_result = self.proxy.get(self.table, self.key2)
+        logger.info("Current value : %s", get_value_result)
+        self.assertEqual(get_value_result,
+                         "{},{}".format(self.value2, self.value3),
+                         "csv_pop failed")
+        self.assertEqual(pop_result, self.value3, "Incorrect pop result")
+
+    def test_csv_append_first_element(self):
+        append_result = self.proxy.csv_append(self.table,
+                                              self.key3, self.value3)
+        self.assertTrue(append_result)
+        get_value_result = self.proxy.get(self.table, self.key3)
+        logger.info("Appended value : %s", get_value_result)
+        self.assertEqual(get_value_result,
+                         "{}".format(self.value3),
+                         "csv_append failed to append new value")
+        self.assertTrue(self.proxy.remove(self.table, self.key3))
+
+    def test_csv_prepend_first_element(self):
+        prepend_result = self.proxy.csv_prepend(self.table,
+                                                self.key3, self.value3)
+        self.assertTrue(prepend_result)
+        get_value_result = self.proxy.get(self.table, self.key3)
+        logger.info("Prepended value : %s", get_value_result)
+        self.assertEqual(get_value_result,
+                         "{}".format(self.value3),
+                         "csv_prepend failed to prepend new value")
+
+    def test_csv_pop_last(self):
+        pop_result = self.proxy.csv_pop(self.table, self.key3)
+        self.assertNotEqual(None, pop_result)
+        get_value_result = self.proxy.get(self.table, self.key3)
+        logger.info("Current value : %s", get_value_result)
+        self.assertEqual(get_value_result,
+                         None, "csv_pop failed")
+        self.assertEqual(pop_result, self.value3, "Incorrect pop result")
+
+    def test_csv_pop_empty(self):
+        pop_result = self.proxy.csv_pop(self.table, self.key3)
+        self.assertEqual(pop_result, None, "Incorrect pop result")
 
     def test_remove(self):
         remove_result = self.proxy.remove(self.table, self.key)
@@ -100,6 +167,13 @@ def local_main():
     test.test_lookup()
     test.test_get_value()
     test.test_get_value2()
+    test.test_csv_append()
+    test.test_csv_prepend()
+    test.test_csv_pop()
+    test.test_csv_append_first_element()
+    test.test_csv_prepend_first_element()
+    test.test_csv_pop_last()
+    test.test_csv_pop_empty()
     test.test_remove()
     test.test_get_none()
     test.test_remove2()

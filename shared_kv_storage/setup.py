@@ -68,18 +68,26 @@ libraries = [
     'lmdb'
 ]
 
-module_files = [
-    os.path.join(
-        tcf_root_dir, 'shared_kv_storage/kv_storage/remote_lmdb/db_store.i'),
-    os.path.join(module_src_path, 'db_store.cpp'),
-    os.path.join(
-        tcf_root_dir, 'shared_kv_storage/kv_storage/remote_lmdb/db_store_csv.i'),
-    os.path.join(module_src_path, 'db_store_csv.cpp'),
-]
-
 dbstore_module = Extension(
     'kv_storage.remote_lmdb._db_store',
-    module_files,
+    [os.path.join(
+        tcf_root_dir, 'shared_kv_storage/kv_storage/remote_lmdb/db_store.i'),
+    os.path.join(module_src_path, 'db_store.cpp')],
+    swig_opts=['-c++', '-threads'] + ['-I%s' % i for i in include_dirs],
+    extra_compile_args=compile_args,
+    libraries=libraries,
+    include_dirs=include_dirs,
+    library_dirs=library_dirs,
+    define_macros=[],
+    undef_macros=[]
+)
+
+dbstore_csv_module = Extension(
+    'kv_storage.remote_lmdb._db_store_csv',
+    [os.path.join(
+        tcf_root_dir, 'shared_kv_storage/kv_storage/remote_lmdb/db_store_csv.i'),
+    os.path.join(module_src_path, 'db_store.cpp'),
+    os.path.join(module_src_path, 'db_store_csv.cpp')],
     swig_opts=['-c++', '-threads'] + ['-I%s' % i for i in include_dirs],
     extra_compile_args=compile_args,
     libraries=libraries,
@@ -100,7 +108,8 @@ setup(name='kv_storage',
           'requests',
       ],
       ext_modules=[
-          dbstore_module
+          dbstore_module,
+          dbstore_csv_module
       ],
       data_files=data_files,
       entry_points={

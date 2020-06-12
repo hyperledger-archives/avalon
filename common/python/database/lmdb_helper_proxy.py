@@ -155,6 +155,7 @@ class LMDBHelperProxy():
                           value(comma-separated) corresponding to the key.
         """
         # Csv_append, table, key, value
+        # CA corresponding to Csv Append
         request = "CA\n" + self.__escape(table) + "\n" + self.__escape(key) + \
             "\n" + self.__escape(value)
 
@@ -175,6 +176,7 @@ class LMDBHelperProxy():
                           value(comma-separated) corresponding to the key.
         """
         # Csv_prepend, table, key, value
+        # CP corresponding to Csv Prepend
         request = "CP\n" + self.__escape(table) + "\n" + self.__escape(key) + \
             "\n" + self.__escape(value)
 
@@ -198,6 +200,8 @@ class LMDBHelperProxy():
                             passed in.
         """
         # Csv_pop, table, key
+        # CR corresponding to Csv Pop where the 1st element from the csv is
+        # retrieved and the rest left intact.
         request = "CR\n" + self.__escape(table) + "\n" + self.__escape(key)
 
         return self.__get_update(request)
