@@ -28,8 +28,7 @@ bind = "http://localhost:1947"
 max_work_order_count = 10
 # ZMQ configurations the listener would connect to
 # Same as the url and port of enclave manager socket
-zmq_url = "tcp://avalon-enclave-manager:"
-zmq_port = '5555'
+zmq_url = "tcp://localhost:5555"
 
 # ------------------------------------------------------------------
 # Work load execution-settings for workload execution(synchronous/asynchronous)
