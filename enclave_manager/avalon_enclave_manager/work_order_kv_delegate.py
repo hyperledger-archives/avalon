@@ -35,7 +35,7 @@ class WorkOrderKVDelegate:
         # Key pair for work order receipt signing
         # This is temporary approach
         self.private_key = crypto_utils.generate_signing_keys()
-        self.public_key = self.private_key.GetPublicKey().Serialize()
+        self.public_key = self.private_key.get_verifying_key().to_pem()
 
     def cleanup_work_orders(self, wo_ids=None):
         """
