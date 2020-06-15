@@ -16,7 +16,7 @@
 
 # Since fabric 1.4.4 is takes less time to instantiate the chaincodes
 # default fabric version is set to 1.4.4
-FABRIC_VERSION=1.4.4
+FABRIC_VERSION=2.0
 CHAIN_CODE_VERSION=1.0
 SCRIPT_DIR="$(dirname $(readlink --canonicalize ${BASH_SOURCE}))"
 # Minifab url for 0.1.0 stable version
@@ -27,6 +27,7 @@ WORK_DIR=~/mywork
 START_FABRIC=0
 STOP_FABRIC=0
 CLEAN_UP_WORK_DIR=0
+EXPOSE_PORTS=
 
 # Default chaincode path is different for 1.4.4 and 2.0
 DEFAULT_CHAIN_CODE_PATH=""
@@ -87,6 +88,13 @@ while getopts "w:udch" OPTCHAR ; do
                 echo "Only one of these options should be specified: [u|d|c]"
                 exit
             fi
+	    ;;
+	e )
+	    if [[ $STOP_FABRIC == 1 || $CLEAN_UP_WORK_DIR == 1 ]]; then
+		echo "-e can not be used with -d|-c"
+		exit
+            fi
+	    EXPOSE_PORTS=" -e true "
             ;;
         w )
             WORK_DIR=$OPTARG
@@ -99,6 +107,7 @@ while getopts "w:udch" OPTCHAR ; do
             echo "   -w       Work directory. Default is $WORK_DIR" 1>&2
             echo "   -u       Bring up Fabric network" 1>&2
             echo "   -d       Bring down Fabric network" 1>&2
+            echo "   -e       Expose peers and orderers docker container ports to host" 1>&2
             echo "   -c       Clean up Fabric work directory" 1>&2
             echo "   -? or -h print usage information" 1>&2
             echo "Examples:" 1>&2
@@ -106,6 +115,7 @@ while getopts "w:udch" OPTCHAR ; do
             echo "   $BN -w ~/mywork -u" 1>&2
             echo "   $BN -w ~/mywork -d" 1>&2
             echo "   $BN -w ~/mywork -c" 1>&2
+            echo "   $BN -w ~/mywork -u -e" 1>&2
             exit 2
             ;;
     esac
@@ -146,7 +156,7 @@ elif [ $START_FABRIC == 1 ]; then
     if [[ ! $(docker ps --format '{{.Names}}' |grep "peer*") ]]; then
         # Start the fabric containers peers, orderers, cas
 	# "-e true" argument maps fabric container ports to host ports
-        minifab up -i $FABRIC_VERSION -e true
+        minifab up -i $FABRIC_VERSION $EXPOSE_PORTS
         # Create network profile file for avalon to use
         # profile file is generated in $WORK_DIR/vars/profiles/
         minifab profilegen
