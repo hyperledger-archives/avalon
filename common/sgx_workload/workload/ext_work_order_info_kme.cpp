@@ -281,6 +281,16 @@ int ExtWorkOrderInfoKME::CreateWorkOrderKeyInfo(
         int count = this->in_work_order_keys.size();
         wo_key_info.in_data_keys.resize(count);
         for (int i=0; i<count; i++) {
+            std::string in_data_enc_key = \
+                ByteArrayToStr(wo_key_info.in_data_keys[i].decrypted_data);
+            // skip encrypting input data encryption key if
+            // its value is equivalent to empty or null or "-"
+            // these checks are performed again while decrypting data
+            // during work order processing at WPE
+            if (in_data_enc_key.empty() || "null" == in_data_enc_key ||
+                "-" == in_data_enc_key ) {
+                continue;
+            }
             wo_key_info.in_data_keys[i].decrypted_data = \
                 tcf::crypto::skenc::EncryptMessage(wo_key_info.sym_key,
                     wo_key_info.in_data_keys[i].decrypted_data);
@@ -289,6 +299,16 @@ int ExtWorkOrderInfoKME::CreateWorkOrderKeyInfo(
         count = this->out_work_order_keys.size();
         wo_key_info.out_data_keys.resize(count);
         for (int i=0; i<count; i++) {
+            std::string out_data_enc_key = \
+                ByteArrayToStr(wo_key_info.out_data_keys[i].decrypted_data);
+            // skip encrypting output data encryption key if
+            // its value is equivalent to empty or null or "-"
+            // these checks are performed again while decrypting data
+            // during work order processing at WPE
+            if (out_data_enc_key.empty() || "null" == out_data_enc_key ||
+                "-" == out_data_enc_key) {
+                continue;
+            }
             wo_key_info.out_data_keys[i].decrypted_data = \
                 tcf::crypto::skenc::EncryptMessage(wo_key_info.sym_key,
                     wo_key_info.out_data_keys[i].decrypted_data);

@@ -37,6 +37,14 @@ void WorkOrderPreProcessedKeys::Unpack(const JSON_Object* keys_object,
 
     data_keys.index = GetJsonNumber(keys_object, "index");
     encrypted_data_key = GetJsonStr(keys_object, "encrypted-data-key");
+
+    // skip decrypting data encryption key if its value is
+    // equivalent to empty or null or "-"
+    if (encrypted_data_key.empty() ||  "null" == encrypted_data_key ||
+        "-" == encrypted_data_key) {
+        return;
+    }
+
     // Decrypt base64 encoded data key using symmetric key(after decryption)
     // from work_order_key_info json
     data_keys.decrypted_data = DecryptKey(this->sym_key,
