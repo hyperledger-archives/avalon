@@ -28,6 +28,7 @@ from avalon_enclave_manager.worker_kv_delegate import WorkerKVDelegate
 from avalon_enclave_manager.work_order_kv_delegate import WorkOrderKVDelegate
 from listener.base_jrpc_listener import parse_bind_url
 from avalon_enclave_manager.kme.kme_listener import KMEListener
+from jsonrpc.exceptions import JSONRPCDispatchException
 
 logger = logging.getLogger(__name__)
 
@@ -192,7 +193,15 @@ class KeyManagementEnclaveManager(EnclaveManager):
             return wo_response_json["result"]
         else:
             logger.error("Could not preprocess work order at KME")
-            return wo_response_json
+            # For all negative cases, response should have an error field.
+            # Hence constructing JSONRPC error response with
+            # error code and message mapped to KME enclave response
+            err_code = wo_response_json["error"]["code"]
+            err_msg = wo_response_json["error"]["message"]
+            data = {
+                "workOrderId": wo_response_json["error"]["data"]["workOrderId"]
+            }
+            raise JSONRPCDispatchException(err_code, err_msg, data)
 
 
 # -----------------------------------------------------------------

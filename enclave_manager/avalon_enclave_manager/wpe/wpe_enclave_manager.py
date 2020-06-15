@@ -246,12 +246,17 @@ class WorkOrderProcessorEnclaveManager(EnclaveManager):
         """
         wo_response = dict()
         try:
-            wo_key_info = self._wpe_requester\
+            pre_proc_output = self._wpe_requester\
                 .preprocess_work_order(input_json_str, self.encryption_key)
+            if "error" in pre_proc_output:
+                # If error in preprocessing response, skip workorder processing
+                logger.error("failed to preprocess at WPE enclave manager")
+                return json.dumps(pre_proc_output)
+
             wo_request = work_order_request.SgxWorkOrderRequest(
                 self._config.get("EnclaveModule"),
                 input_json_str,
-                wo_key_info)
+                pre_proc_output)
             wo_response = wo_request.execute()
 
             try:
