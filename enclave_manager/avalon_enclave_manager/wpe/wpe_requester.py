@@ -174,7 +174,7 @@ class WPERequester():
             @param encryption_key - WPE's public encryption key
         Returns :
             @returns result - Result from KME that includes the workorder
-                              key info. None, in case of failure.
+                              key info. error response, in case of failure.
         """
         workload_id = "kme-preprocess"
         in_data = [wo_request, encryption_key]
@@ -203,7 +203,7 @@ class WPERequester():
         else:
             logger.error("Could not preprocess work order at KME : {}"
                          .format(response))
-            return None
+            return response
 
     def _construct_wo_req(self, in_data, workload_id, encryption_key,
                           session_key, session_iv):
