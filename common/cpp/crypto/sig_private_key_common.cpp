@@ -54,7 +54,7 @@ pcrypto::sig::PrivateKey::PrivateKey(const std::string& encoded) {
 pcrypto::sig::PrivateKey::PrivateKey(pcrypto::sig::PrivateKey&& privateKey) {
     private_key_ = privateKey.private_key_;
     privateKey.private_key_ = nullptr;
-    if (private_key_ = nullptr) {
+    if (private_key_ == nullptr) {
         std::string msg("Crypto Error (sig::PrivateKey() move): "
             "Cannot move null private key");
         throw Error::RuntimeError(msg);
