@@ -45,30 +45,25 @@ class WOProcessorManager(EnclaveManager):
     def _process_work_order_sync(self, process_wo_id):
         """
         Process the work-order of the specified work-order id
-        and return the response.
-        Used for synchronous execution.
-        Parameters:
-        - process_wo_id is id of the work-order that is to be processed
-        """
-        logger.info("Processing work order")
-        try:
-            # Get all workorders requests from KV storage lookup and process
-            list_of_workorders = self._kv_helper.lookup("wo-scheduled")
-            if not list_of_workorders:
-                logger.info("Received empty list of work orders from " +
-                            "wo-scheduled table")
-                return
-        except Exception as e:
-            logger.error("Problem while getting ids from wo-scheduled table")
-            return
+        and return the response. Used for synchronous execution.
 
-        for wo_id in list_of_workorders:
-            if wo_id == process_wo_id:
-                resp = self._process_work_order_by_id(wo_id)
-                return resp
-            else:
-                return None
-        # end of for loop
+        Parameters:
+            @param process_wo_id - Id of the work-order that is to be processed
+        """
+        logger.info("Processing work orders found in wo-worker-pending table.")
+
+        # csv_match_pop will peek into the deque and pop out the first
+        # work-order id if it matches the process_wo_id
+        wo_id = self._kv_helper.csv_match_pop(
+            "wo-worker-pending", self._worker_id, process_wo_id)
+        if process_wo_id == wo_id:
+            # @TODO : Need to check if the workload_id in the work order
+            # is supported by this worker. Process only if check passes.
+            return self._process_work_order_by_id(wo_id)
+        else:
+            return None
+
+        logger.info("No more worker orders in wo-worker-pending table.")
 
 # -------------------------------------------------------------------------
 
@@ -76,21 +71,17 @@ class WOProcessorManager(EnclaveManager):
         """
         Executes Run time flow of enclave manager
         """
-        logger.info("Processing work orders")
-        try:
-            # Get all workorders requests from KV storage lookup and process
-            list_of_workorders = self._kv_helper.lookup("wo-scheduled")
-            if not list_of_workorders:
-                logger.info("Received empty list of work orders from " +
-                            "wo-scheduled table")
-                return
-        except Exception as e:
-            logger.error("Problem while getting keys from wo-scheduled table")
-            return
+        logger.info("Processing work orders found in wo-worker-pending table.")
 
-        for wo_id in list_of_workorders:
+        wo_id = self._kv_helper.csv_pop("wo-worker-pending", self._worker_id)
+        while wo_id is not None:
+            # @TODO : Need to check if the workload_id in the work order
+            # is supported by this worker. Process only if check passes.
             self._process_work_order_by_id(wo_id)
-        # end of for loop
+            wo_id = self._kv_helper.csv_pop("wo-worker-pending",
+                                            self._worker_id)
+        # end of loop
+        logger.info("No more worker orders in wo-worker-pending table.")
 
 # -------------------------------------------------------------------------
 
@@ -117,7 +108,7 @@ class WOProcessorManager(EnclaveManager):
                 return None
 
         except Exception as e:
-            logger.error("Problem while reading the work order %s"
+            logger.error("Problem while reading the work order %s "
                          "from wo-requests table", wo_id)
             self._kv_helper.remove("wo-processing", wo_id)
             return None
@@ -126,10 +117,6 @@ class WOProcessorManager(EnclaveManager):
                     wo_id)
         self._kv_helper.set("wo-processing", wo_id,
                             WorkOrderStatus.PROCESSING.name)
-
-        logger.info("Delete workorder entry %s from wo-scheduled table",
-                    wo_id)
-        self._kv_helper.remove("wo-scheduled", wo_id)
 
         logger.info("Validating JSON workorder request %s", wo_id)
         if not self._validate_request(wo_id, wo_json_req):
