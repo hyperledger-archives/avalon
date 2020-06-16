@@ -40,8 +40,11 @@ install:
 clean:
 	if [ -f $(WHEEL_FILE) ] ; then pip3 uninstall --yes $(WHEEL_FILE); fi
 	rm -rf build deps dist *.egg-info
-	rm -f crypto/crypto.py crypto/crypto_wrap.cpp
-	rm -f verify_report/verify_report.py verify_report/verify_report_wrap.cpp
+	rm -f avalon_crypto_utils/crypto/crypto.py
+	rm -f avalon_crypto_utils/crypto/crypto_wrap.cpp
+	rm -f avalon_crypto_utils/verify_report/verify_report.py
+	rm -f avalon_crypto_utils/verify_report/verify_report_wrap.cpp
+
 	find . -iname '*.pyc' -delete
 	find . -iname '__pycache__' -delete
 
