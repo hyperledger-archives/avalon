@@ -28,7 +28,7 @@ LogFile  = "__screen__"
 # ------------------------------------------------------------------
 [WorkloadExecution]
 # Set this flag to 1 for sync workorder execution.Else set it to 0
-sync_workload_execution = 1
+sync_workload_execution = 0
 
 # -------------------------------------------------------------------
 # EnclaveManager -- configuration of Intel SGX Enclave EnclaveManager
