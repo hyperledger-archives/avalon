@@ -199,6 +199,8 @@ class TCSWorkOrderHandler:
                 data
             )
 
+        worker_id = input_value_json["params"]["workerId"]
+
         if "inData" in input_value_json["params"]:
             valid, err_msg = req_validator.validate_data_format(
                 input_value_json["params"]["inData"])
@@ -223,12 +225,10 @@ class TCSWorkOrderHandler:
                     err_msg,
                     data)
         # Check if workerId is exists in avalon
-        if not self._is_worker_exists(input_value_json["params"]["workerId"]):
+        if not self._is_worker_exists(worker_id):
             raise JSONRPCDispatchException(
                 JsonRpcErrorCode.INVALID_PARAMETER,
-                "worker {} doesn't exists".format(
-                    input_value_json["params"]["workerId"]
-                ),
+                "worker {} doesn't exists".format(worker_id),
                 data
             )
 
@@ -263,16 +263,18 @@ class TCSWorkOrderHandler:
             # Don't change the order of table updation.
             # The order is important for clean up if the TCS is restarted in
             # the middle.
+            # Add entry to wo-worker-pending which holds all the work order id
+            # separated by comma(csv) to be processed by corresponding worker.
+            # i.e. - <worker_id> -> <wo_id>,<wo_id>,<wo_id>...
             epoch_time = str(time.time())
 
             # Update the tables
             self.kv_helper.set("wo-timestamps", wo_id, epoch_time)
             self.kv_helper.set("wo-requests", wo_id, input_json_str)
-            self.kv_helper.set("wo-scheduled", wo_id, input_json_str)
+            self.kv_helper.csv_append("wo-worker-pending", worker_id, wo_id)
             # Add to the internal FIFO
             self.workorder_list.append(wo_id)
             self.workorder_count += 1
-
             raise JSONRPCDispatchException(
                 WorkOrderStatus.PENDING,
                 "Work order is computing. Please query for WorkOrderGetResult \
