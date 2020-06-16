@@ -35,7 +35,7 @@ if("${SGX_SSL} " STREQUAL " ")
     SET(SGX_SSL "/opt/intel/sgxssl")
 endif()
 
-SET(TCF_TOP_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../../../../")
+SET(TCF_TOP_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../../../../../")
 
 # Generates static library for Key Management Enclave workload
 ################################################################################
@@ -49,6 +49,7 @@ SET(GENERIC_PRIVATE_INCLUDE_DIRS "." "${TCF_TOP_DIR}/common/cpp"
     "${TCF_TOP_DIR}/common/cpp/packages/parson"
 SET(GENERIC_PUBLIC_INCLUDE_DIRS "${SGX_SDK}/include" "${SGX_SSL_INCLUDE}")
     "${TCF_TOP_DIR}/tc/sgx/trusted_worker_manager/enclave"
+    "${TCF_TOP_DIR}/tc/sgx/trusted_worker_manager/enclave/kme"
     "${TCF_TOP_DIR}/common/sgx_workload/workload")
 SET(GENERIC_PUBLIC_INCLUDE_DIRS "${SGX_SDK}/include")
 

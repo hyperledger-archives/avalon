@@ -23,7 +23,6 @@
 #include "types.h"
 
 #include "base.h"
-#include "signup_singleton.h"
 #include "signup_info.h"
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX

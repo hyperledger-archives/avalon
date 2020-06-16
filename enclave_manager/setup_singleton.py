@@ -57,7 +57,9 @@ if debug_flag :
 
 include_dirs = [
     enclave_bridge_wrapper_path,
+    os.path.join(enclave_bridge_wrapper_path, 'singleton'),
     enclave_bridge_path,
+    os.path.join(enclave_bridge_path, 'singleton'),
     os.path.join(tcf_root_dir, 'common/cpp'),
     os.path.join(tcf_root_dir, 'tc/sgx/trusted_worker_manager/common'),
     os.path.join(tcf_root_dir, 'common/cpp/crypto'),
@@ -82,7 +84,7 @@ enclave_module_files = [
     os.path.join(enclave_bridge_wrapper_path, 'work_order_wrap.cpp'),
     os.path.join(enclave_bridge_wrapper_path, 'enclave_info.cpp'),
     os.path.join(enclave_bridge_wrapper_path, 'signup_info.cpp'),
-    os.path.join(enclave_bridge_wrapper_path, 'signup_info_singleton.cpp'),
+    os.path.join(enclave_bridge_wrapper_path, 'singleton/signup_info_singleton.cpp'),
 ]
 
 enclave_module = Extension(
