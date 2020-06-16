@@ -215,6 +215,8 @@ RUN ldconfig \
  && echo "SGX_SSL=/opt/intel/sgxssl" >> /etc/environment
 
 COPY . /project/avalon
+# Docker build won't progress if host _dev folder not removed
+RUN rm -rf /project/avalon/tools/build/_dev
 
 # Copy Python build artifacts
 COPY --from=common_python_image /project/avalon/common/python/dist/*.whl dist/

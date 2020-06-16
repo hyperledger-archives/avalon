@@ -33,8 +33,20 @@ rm -f $SRCDIR/common/cpp/verify_ias_report/ias-certificates.cpp
 echo "******** DELETE LMDB FILES **************"
 rm -f $SRCDIR/config/Kv_Shared*
 
+#--------------- KV STORAGE ---------------
+cd $SRCDIR/shared_kv_storage
+make clean
+
+#--------------- KME WORKLOAD ---------------
+cd $SRCDIR/tc/sgx/trusted_worker_manager/enclave/kme_workload
+rm -rf build
+
 # --------------- COMMON CPP ---------------
 cd $SRCDIR/common/cpp
+rm -rf build
+
+# --------------- COMMON CPP TESTS---------------
+cd $SRCDIR/common/cpp/tests
 rm -rf build
 
 # --------------- COMMON INTEL SGX WORKLOAD ---------------
@@ -71,4 +83,8 @@ make clean
 
 # --------------- ENCLAVE MANAGER ---------------
 cd $SRCDIR/enclave_manager
+make clean
+
+#--------------- AVALON LISTENER ----------------
+cd $SRCDIR/listener
 make clean
