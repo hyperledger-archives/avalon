@@ -168,7 +168,13 @@ tcf_err_t db_store::db_store_get_value_size(
     }
 
     ret = mdb_dbi_open(stxn.txn, table.c_str(), 0, &dbi);
-    if (ret != 0) {
+    if (ret == MDB_NOTFOUND) {
+        // Set outIsPresent to false if database not found and return SUCCESS
+        // for the db_store_get_value_size operation
+        *outIsPresent = false;
+        return TCF_SUCCESS;
+    }
+    else if (ret != 0) {
         // SAFE_LOG(TCF_LOG_ERROR, "Failed to open LMDB transaction : %d", ret);
         *outIsPresent = false;
         return TCF_ERR_SYSTEM;
