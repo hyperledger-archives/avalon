@@ -196,7 +196,7 @@ The steps below will set up a Python virtual environment to run Avalon.
 9. Install PIP3 packages into your Python virtual environment:
 
    ```bash
-   pip3 install --upgrade setuptools json-rpc py-solc-x web3 colorlog twisted wheel toml
+   pip3 install --upgrade setuptools json-rpc py-solc-x web3 colorlog twisted wheel toml pyzmq
    ```
 
 10. Build Avalon components:
