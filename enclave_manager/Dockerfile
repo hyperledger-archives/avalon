@@ -259,7 +259,7 @@ RUN mkdir -p build \
 
 # Build Key Management Enclave workload which will be
 # linked to enclave shared library
-WORKDIR /project/avalon/tc/sgx/trusted_worker_manager/enclave/kme_workload
+WORKDIR /project/avalon/tc/sgx/trusted_worker_manager/enclave/kme/workload
 RUN mkdir -p build \
   && cd build \
   && cmake .. \

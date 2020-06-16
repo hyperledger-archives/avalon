@@ -68,6 +68,10 @@ SET(SGX_ENCLAVE_INCLUDE "${SGX_SDK}/include"
                         "${SGX_SDK}/include/tlibc"
                         "${SGX_SDK}/include/libcxx")
 
+SET(SINGLETON_PATH ${CMAKE_CURRENT_SOURCE_DIR}/singleton)
+SET(KME_PATH ${CMAKE_CURRENT_SOURCE_DIR}/kme)
+SET(WPE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/wpe)
+
 SET(SGX_LIBS_TRUSTED_NAMES sgx_tstdc sgx_tstdcxx sgx_tcrypto)
 SET(SGX_LIBS_UNTRUSTED_NAMES )
 
@@ -107,7 +111,9 @@ FUNCTION(SGX_EDGE_TRUSTED EDL EDGE_FILES)
     SET (EDGE_FILES_LIST "${CMAKE_CURRENT_BINARY_DIR}/${EDL_BASE_NAME}_t.h" "${CMAKE_CURRENT_BINARY_DIR}/${EDL_BASE_NAME}_t.c")
     SET (${EDGE_FILES} ${EDGE_FILES_LIST} PARENT_SCOPE)
     ADD_CUSTOM_COMMAND( OUTPUT ${EDGE_FILES_LIST}
-        COMMAND "${SGX_EDGER}" --trusted ${EDL} --search-path ${SGX_INCLUDE} --search-path ${SGX_SSL_INCLUDE} --search-path ${EDL_DIR_NAME}
+	    COMMAND "${SGX_EDGER}" --trusted ${EDL} --search-path ${SINGLETON_PATH}
+	    --search-path ${KME_PATH} --search-path ${WPE_PATH} --search-path ${SGX_INCLUDE}
+	    --search-path ${SGX_SSL_INCLUDE} --search-path ${EDL_DIR_NAME}
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
         DEPENDS ${EDL}
     )
@@ -128,7 +134,8 @@ ENDFUNCTION()
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 FILE(GLOB PROJECT_HEADERS *.h)
-FILE(GLOB PROJECT_SOURCES *.cpp *.c)
+FILE(GLOB PROJECT_SOURCES *.cpp *.c singleton/*.cpp singleton/*.c
+     kme/*.cpp kme/*.c wpe/*.cpp wpe/*.c)
 FILE(GLOB PROJECT_EDL enclave.edl)
 FILE(GLOB PROJECT_CONFIG *.xml)
 SOURCE_GROUP("Source" FILES ${PROJECT_HEADERS} ${PROJECT_SOURCES} ${PROJECT_EDL})
@@ -202,7 +209,7 @@ SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,-L,${TCF_CORE_DI
 SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,-L,${TCF_TOP_DIR}/common/sgx_workload/build/workload")
 SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,-L,${TCF_TOP_DIR}/common/sgx_workload/build/iohandler")
 # Include KME workload library path
-SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,-L,${TCF_CORE_DIR}/trusted_worker_manager/enclave/kme_workload/build")
+SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,-L,${TCF_CORE_DIR}/trusted_worker_manager/enclave/kme/workload/build")
 SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,-L,${TCF_TOP_DIR}/examples/apps/build/echo/workload")
 SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,-L,${TCF_TOP_DIR}/examples/apps/build/heart_disease_eval/workload")
 SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,-L,${TCF_TOP_DIR}/examples/apps/build/inside_out_demo/workload")
