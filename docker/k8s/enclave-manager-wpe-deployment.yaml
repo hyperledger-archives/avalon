@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: avalon-enclave-manager-wpe
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: avalon-enclave-manager-wpe
+  template:
+    metadata:
+      name: avalon-enclave-manager-wpe
+      labels:
+        app: avalon-enclave-manager-wpe
+    spec:
+      volumes:
+      - name: mrenclave-pv-storage
+        persistentVolumeClaim:
+          claimName: nfsname
+      containers:
+      - image: hyperledger/avalon-enclave-manager:wpe-0.6
+        name: avalon-enclave-manager-wpe
+        imagePullPolicy: Always
+        command: ["/bin/bash"]
+        args: ["-c", "mv /project/avalon/wpe_mr_enclave.txt /shared-pool-1 && enclave_manager --lmdb_url http://avalon-lmdb:9090 --kme_listener_url http://avalon-kme:1948"]
+        volumeMounts:
+        - mountPath: /shared-pool-1
+          name: mrenclave-pv-storage
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: avalon-enclave-manager-wpe
+spec:
+  ports:
+  - name: "5555"
+    protocol: TCP
+    port: 5555
+    targetPort: 5555
+  selector:
+    app: avalon-enclave-manager-wpe
+

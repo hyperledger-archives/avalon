@@ -14,9 +14,9 @@ spec:
         app: avalon-listener
     spec:
       containers:
-      - image: avalon-listener-dev:latest
+      - image: hyperledger/avalon-listener:0.6
         name: avalon-listener
-        imagePullPolicy: Never
+        imagePullPolicy: Always
         command: ["/bin/bash"]
         args: ["-c", "avalon_listener --bind http://0.0.0.0:1947 --lmdb_url http://avalon-lmdb:9090"]
 ---

@@ -14,9 +14,9 @@ spec:
         app: avalon-lmdb
     spec:
       containers:
-      - image: avalon-lmdb-dev:latest
+      - image: hyperledger/avalon-lmdb:0.6
         name: lmdb-server
-        imagePullPolicy: Never
+        imagePullPolicy: Always
         command: ["/bin/bash"]
         args: ["-c", "kv_storage --bind http://0.0.0.0:9090"]
         ports:

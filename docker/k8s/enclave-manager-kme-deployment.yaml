@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: avalon-enclave-manager-kme
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: avalon-kme
+  template:
+    metadata:
+      name: avalon-kme
+      labels:
+        app: avalon-kme
+    spec:
+      volumes:
+      - name: mrenclave-pv-storage
+        persistentVolumeClaim:
+          claimName: nfsname
+      containers:
+      - image: hyperledger/avalon-enclave-manager:kme-0.6
+        name: avalon-kme
+        imagePullPolicy: Always
+        command: ["/bin/bash"]
+        args: ["-c", "while true; do if [ -e /shared-pool-1/wpe_mr_enclave.txt ]; then cp /shared-pool-1/wpe_mr_enclave.txt /project/avalon/wpe_mr_enclave.txt; break; fi; sleep 1; done; enclave_manager --lmdb_url http://avalon-lmdb:9090 --bind http://0.0.0.0:1948"]
+        volumeMounts:
+        - mountPath: /shared-pool-1
+          name: mrenclave-pv-storage 
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: avalon-kme
+spec:
+  ports:
+  - name: "1948"
+    port: 1948
+    targetPort: 1948
+  selector:
+    app: avalon-kme
