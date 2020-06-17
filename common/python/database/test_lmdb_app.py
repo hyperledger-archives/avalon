@@ -89,6 +89,18 @@ class TestRemoteLMDB(unittest.TestCase):
                              self.value3, self.value2, self.value3),
                          "csv_prepend failed to prepend new value")
 
+    def test_csv_match_pop_not_matching(self):
+        pop_result = self.proxy.csv_match_pop(self.table,
+                                              self.key2, "notFound")
+        self.assertIsNone(pop_result)
+        get_value_result = self.proxy.get(self.table, self.key2)
+        logger.info("Current value : %s", get_value_result)
+        self.assertEqual(get_value_result,
+                         "{},{},{}".format(
+                             self.value3, self.value2, self.value3),
+                         "csv_match_pop failed")
+        self.assertEqual(pop_result, None, "Incorrect match pop result")
+
     def test_csv_pop(self):
         pop_result = self.proxy.csv_pop(self.table, self.key2)
         self.assertNotEqual(None, pop_result)
@@ -98,6 +110,20 @@ class TestRemoteLMDB(unittest.TestCase):
                          "{},{}".format(self.value2, self.value3),
                          "csv_pop failed")
         self.assertEqual(pop_result, self.value3, "Incorrect pop result")
+
+    def test_csv_match_pop_matching(self):
+        prepend_result = self.proxy.csv_prepend(self.table,
+                                                self.key2, self.value3)
+        self.assertTrue(prepend_result)
+        pop_result = self.proxy.csv_match_pop(self.table,
+                                              self.key2, self.value3)
+        self.assertNotEqual(None, pop_result)
+        get_value_result = self.proxy.get(self.table, self.key2)
+        logger.info("Current value : %s", get_value_result)
+        self.assertEqual(get_value_result,
+                         "{},{}".format(self.value2, self.value3),
+                         "csv_match_pop failed")
+        self.assertEqual(pop_result, self.value3, "Incorrect match pop result")
 
     def test_csv_append_first_element(self):
         append_result = self.proxy.csv_append(self.table,
@@ -129,9 +155,26 @@ class TestRemoteLMDB(unittest.TestCase):
                          None, "csv_pop failed")
         self.assertEqual(pop_result, self.value3, "Incorrect pop result")
 
+    def test_csv_match_pop_last(self):
+        set_result = self.proxy.set(self.table, self.key3, self.value3)
+        self.assertTrue(set_result)
+        pop_result = self.proxy.csv_match_pop(self.table,
+                                              self.key3, self.value3)
+        self.assertNotEqual(None, pop_result)
+        get_value_result = self.proxy.get(self.table, self.key3)
+        logger.info("Current value : %s", get_value_result)
+        self.assertEqual(get_value_result,
+                         None, "csv_pop failed")
+        self.assertEqual(pop_result, self.value3, "Incorrect match pop result")
+
     def test_csv_pop_empty(self):
         pop_result = self.proxy.csv_pop(self.table, self.key3)
         self.assertEqual(pop_result, None, "Incorrect pop result")
+
+    def test_csv_match_pop_empty(self):
+        pop_result = self.proxy.csv_match_pop(self.table,
+                                              self.key3, "notFound")
+        self.assertEqual(pop_result, None, "Incorrect match pop result")
 
     def test_remove(self):
         remove_result = self.proxy.remove(self.table, self.key)
@@ -169,11 +212,15 @@ def local_main():
     test.test_get_value2()
     test.test_csv_append()
     test.test_csv_prepend()
+    test.test_csv_match_pop_not_matching()
     test.test_csv_pop()
+    test.test_csv_match_pop_matching()
     test.test_csv_append_first_element()
     test.test_csv_prepend_first_element()
     test.test_csv_pop_last()
+    test.test_csv_match_pop_last()
     test.test_csv_pop_empty()
+    test.test_csv_match_pop_empty()
     test.test_remove()
     test.test_get_none()
     test.test_remove2()

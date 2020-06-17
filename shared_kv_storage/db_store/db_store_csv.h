@@ -28,7 +28,7 @@ class DbStoreCsv : public DbStore {
          * to pushing to the tail of a deque. Adds key-value pair if no entry is
          * found.
          *
-         * @param table_b64     base64 encode table name
+         * @param table_b64     base64 encoded table name
          * @param key_b64       base64 encoded key string
          * @param value_b64     base64 encoded value string
          *
@@ -48,7 +48,7 @@ class DbStoreCsv : public DbStore {
          * similar to pushing to the head of a deque. Adds key-value pair if no
          * entry is found.
          *
-         * @param table_b64     base64 encode table name
+         * @param table_b64     base64 encoded table name
          * @param key_b64       base64 encoded key string
          * @param value_b64     base64 encoded value string
          *
@@ -68,9 +68,8 @@ class DbStoreCsv : public DbStore {
          * is similar to removing from the head of a deque. Deletes the
          * key-value pair if this is the lone element in the value.
          *
-         * @param table_b64     base64 encode table name
+         * @param table_b64     base64 encoded table name
          * @param key_b64       base64 encoded key string
-         * @param value_b64     base64 encoded value string
          *
          * @return
          *  Success: base64 encoded string representing the first element of the
@@ -80,6 +79,29 @@ class DbStoreCsv : public DbStore {
         std::string db_store_csv_pop(
             const std::string& table_b64,
             const std::string& key_b64);
+
+        // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+        /**
+         * Updates a key->value pair in the database store conditionally.
+         * Reads the first string from value which is a comma separated
+         * string and removes it if the value passed in matches. The behavior
+         * is similar to peeking and then removing (if matched) from the head
+         * of a deque. Deletes the key-value pair if this is the lone element
+         * in the value.
+         *
+         * @param table_b64     base64 encoded table name
+         * @param key_b64       base64 encoded key string
+         * @param value_b64     base64 encoded value string to match
+         *
+         * @return
+         *  Success: base64 encoded string representing the first element of the
+         *           comma separated value for the key
+         *  Failure: throws exception
+         */
+        std::string db_store_csv_match_pop(
+            const std::string& table_b64,
+            const std::string& key_b64,
+            const std::string& value_b64);
 
         // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 };
