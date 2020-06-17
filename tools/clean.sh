@@ -31,7 +31,7 @@ rm -f $SRCDIR/common/cpp/verify_ias_report/ias-certificates.cpp
 
 # Remove LMDB files
 echo "******** DELETE LMDB FILES **************"
-rm -f $SRCDIR/config/Kv_Shared*
+rm -f $SRCDIR/Kv_Shared*
 
 #--------------- KV STORAGE ---------------
 cd $SRCDIR/shared_kv_storage
