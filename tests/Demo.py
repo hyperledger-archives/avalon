@@ -70,7 +70,7 @@ def local_main(config):
                 input_json_obj = json.loads(input_json_str1)
                 wo_id = hex(random.randint(1, 2**64 - 1))
                 input_json_obj["params"]["workOrderId"] = wo_id
-                input_json_obj["params"]["workerId"] = worker_obj.worker_id
+                input_json_obj["params"]["workerId"] = worker_id
 
                 # Convert workloadId to a hex string and update the request
                 workload_id = input_json_obj["params"]["workloadId"]
@@ -186,6 +186,7 @@ def parse_command_line(config, args):
     global consensus_file_name
     global sig_obj
     global worker_obj
+    global worker_id
     global private_key
     global encrypted_session_key
     global session_iv
