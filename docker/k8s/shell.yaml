@@ -14,8 +14,8 @@ spec:
         app: avalon-shell
     spec:
       containers:
-      - image: avalon-shell-dev:latest
+      - image: hyperledger/avalon-shell:0.6
         name: avalon-shell
-        imagePullPolicy: Never
+        imagePullPolicy: Always
         command: ["/bin/bash"]
         args: ["-c", "tail -f /dev/null"]

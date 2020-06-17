@@ -18,6 +18,22 @@ in SGX-SIM and SGX-HW mode.
   [PREREQUISITES.md](../../PREREQUISITES.md#intel-sgx-in-hardware-mode)
 - To use Intel SGX HW mode, build docker image using below command
   `docker-compose -f docker-compose.yaml -f docker-compose-sgx.yaml build`
+- To create Avalon k8s cluster in Worker Pool mode, you need to create nfs server to share the mrenclave value
+  across wpe and kme enclave managers. Below is the procedure you can follow to create the nfs server:
+  ```bash
+  1. Create a ubuntu linux machine in the same subnet as the kubernetes cluster is created in.
+  2. Copy the [create-nfs.sh](../create-nfs.sh) to the newly created ubuntu machine.
+  3. Modify the parameters EXPORT_DIRECTORY, DATA_DIRECTORY and KUB_SUBNET according to your need.
+  4. Run the script
+     sudo ./create-nfs.sh
+  This will create the nfs server.
+  5. Update the persistent-volume.yaml accordingly.
+  
+  Build docker images using below command
+   To use Intel SGX SIM mode:
+    `docker-compose -f docker-compose.yaml -f docker/compose/avalon-pool-combo.yaml build`
+   To use Intel SGX HW mode:
+    `docker-compose -f docker-compose.yaml -f docker/compose/avalon-pool.yaml -f docker/compose/avalon-pool-sgx.yaml build`
 
 ## Running Avalon with Kubernetes
 
@@ -27,14 +43,33 @@ in SGX-SIM and SGX-HW mode.
     kubectl create -f lmdb.yaml
     ```
 2. Start `EnclaveManager` (to manage Intel SGX enclaves)  
-   For Intel SGX simulator mode, use the below command
-    ```bash
-    kubectl create -f enclave-manager-deployment.yaml
-    ```
-   For Intel SGX hardware mode, use the below command
-    ```bash
-    kubectl create -f sgx-enclave-manager-deployment.yaml
-    ```
+   Singleton Mode (the same worker handles both keys and workloads):
+
+     For Intel SGX simulator mode, use the below command
+      ```bash
+      kubectl create -f enclave-manager-deployment.yaml
+      ```
+     For Intel SGX hardware mode, use the below command
+      ```bash
+      kubectl create -f sgx-enclave-manager-deployment.yaml
+      ```
+
+   Worker Pool Mode (with one Key Management Enclave and one Work order Processing Enclave):
+     Create a persistent volume and persistent volume claim from nfs for worker pool
+     ```bash
+     kubectl create -f persistent-volume.yaml
+     kubectl create -f persistent-volume-claim.yaml
+     ```
+     For Intel SGX simulator mode, use the following command
+      ```bash
+      kubectl create -f enclave-manager-kme-deployment.yaml
+      kubectl create -f enclave-manager-wpe-deployment.yaml
+      ```
+     For Intel SGX hardware mode, use the following command
+      ```bash
+      kubectl create -f sgx-enclave-manager-kme-deployment.yaml
+      kubectl create -f sgx-enclave-manager-wpe-deployment.yaml
+      ```
 3.  Start `http jrpc Listener service`
     (to accept and handle http jrpc requests from clients)
     ```bash
