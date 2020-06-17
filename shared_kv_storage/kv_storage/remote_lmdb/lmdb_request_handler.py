@@ -179,6 +179,22 @@ class LMDBRequestHandler(resource.Resource):
                 logger.error("Invalid args for cmd csv_pop")
                 response = "e\nInvalid args for cmd csv_pop"
 
+        # Pop/retrieve from CSV if a match is found
+        elif (cmd == "CM"):
+            if len(args) == 4:
+                result = self.kv_helper.csv_match_pop(
+                    args[1], args[2], args[3])
+                # Value found
+                if result is not None:
+                    response = "v\n" + escape(result)
+                # Value not found
+                else:
+                    response = "n"
+            # Error
+            else:
+                logger.error("Invalid args for cmd csv_match_pop")
+                response = "e\nInvalid args for cmd csv_match_pop"
+
         # Error
         else:
             logger.error("Unknown cmd")

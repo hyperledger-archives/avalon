@@ -50,10 +50,11 @@ void DbStoreCsv::db_store_csv_prepend(
 std::string DbStoreCsv::db_store_csv_pop(
     const std::string& table_b64,
     const std::string& key_b64){
+
     ByteArray raw_key(key_b64.begin(), key_b64.end());
     ByteArray raw_value;
 
-    tcf_err_t presult = db_store::db_store_csv_pop(table_b64, raw_key, raw_value);
+    tcf_err_t presult = db_store::db_store_csv_pop(table_b64, raw_key, raw_value, false);
     db_error::ThrowIf<db_error::RuntimeError>(presult, "db store update(pop) failed");
 
     std::string out_string;
@@ -63,4 +64,19 @@ std::string DbStoreCsv::db_store_csv_pop(
         [](unsigned char c) -> char { return (char)c; });
     return out_string;
 }
+// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+std::string DbStoreCsv::db_store_csv_match_pop(
+    const std::string& table_b64,
+    const std::string& key_b64,
+    const std::string& value_b64){
+
+    ByteArray raw_key(key_b64.begin(), key_b64.end());
+    ByteArray raw_value(value_b64.begin(), value_b64.end());
+
+    tcf_err_t presult = db_store::db_store_csv_pop(table_b64, raw_key, raw_value, true);
+    db_error::ThrowIf<db_error::RuntimeError>(presult, "db store update(match_pop) failed");
+
+    return value_b64;
+}
+
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX

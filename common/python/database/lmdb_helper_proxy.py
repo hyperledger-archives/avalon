@@ -207,6 +207,33 @@ class LMDBHelperProxy():
         return self.__get_update(request)
 
 # ------------------------------------------------------------------------------
+    def csv_match_pop(self, table, key, value):
+        """
+        Function to conditionally update a key-value pair in a lmdb table
+        that holds comma-separated strings as value. This function reads
+        the first of comma-seperated strings and then compares it with the
+        value passed in. If there is a match, the passed value is returned.
+        It also deletes the string from the value and if this is the lone
+        string, the key-value pair altogether is removed.
+
+        Parameters:
+           @param table - Name of the lmdb table from which key-value pair
+                          needs to be read and updated.
+           @param key - The primary key of the table.
+           @param value - Value to be compared against.
+        Returns:
+           @returns value - value if the first string of the comma-separated
+                            strings matches. None, otherwise.
+        """
+        # Csv_pop, table, key, value
+        # CM corresponding to Csv match and pop where the 1st element from the
+        # csv is conditionally(if matches) retrieved and the rest left intact.
+        request = "CM\n" + self.__escape(table) + "\n" + self.__escape(key) + \
+            "\n" + self.__escape(value)
+
+        return self.__get_update(request)
+
+# ------------------------------------------------------------------------------
     def __set_update(self, request):
         """
         Helper method to post request to remote uri and process

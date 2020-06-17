@@ -476,7 +476,8 @@ tcf_err_t db_store::db_store_csv_extend(
 tcf_err_t db_store::db_store_csv_pop(
     const std::string& table,
     const ByteArray& inId,
-    ByteArray& outValue){
+    ByteArray& outValue,
+    const bool isMatch){
 
     SafeUpdateLock ulock;
 
@@ -497,7 +498,7 @@ tcf_err_t db_store::db_store_csv_pop(
     // Resize the valueBuffer to current value size
     valueBuffer.resize(value_size);
 
-    // Fetch the state from the db storage
+    // Fetch the value from the db storage
     result = db_store_get(table, inId.data(), inId.size(), &valueBuffer[0], value_size);
     if (result != TCF_SUCCESS) {
         // SAFE_LOG(TCF_LOG_ERROR, "Failed to get from LMDB database : %d", result);
@@ -505,14 +506,21 @@ tcf_err_t db_store::db_store_csv_pop(
     }
 
     bool isLast = true;
-    // Loop over valueBuffer byte by byte and append to outValue till a ',' is
+    ByteArray first_value;
+    // Loop over valueBuffer byte by byte and append to first_value till a ',' is
     // encountered. Effectively parse the 1st string from the comma separated value.
     for (auto itr : valueBuffer){
         if(itr == ',') {
             isLast = false;
             break;
         }
-        outValue.emplace_back(itr);
+        first_value.emplace_back(itr);
+    }
+
+    // If matching is required and there isn't a match, nothing needs to be done.
+    // Return an error indicating failure in match.
+    if(isMatch && outValue != first_value){
+        return TCF_ERR_SYSTEM;
     }
 
     // If this is the only value, return value and delete key->value from db storage
@@ -520,6 +528,11 @@ tcf_err_t db_store::db_store_csv_pop(
         outValue = valueBuffer;
         return db_store_del(table, inId.data(), inId.size(), valueBuffer.data(), valueBuffer.size());
     }
+
+    outValue = first_value;
+    // valueBuffer which holds the current value in the store now needs to be truncated from
+    // the beginning, removing the first value in the csv. Then it is persisted back into the
+    // store to hold the rest of the comma-separated values.
     valueBuffer.erase(valueBuffer.begin(), valueBuffer.begin()+outValue.size()+1);
     return db_store_put(table, inId.data(), inId.size(), valueBuffer.data(), valueBuffer.size());
 }

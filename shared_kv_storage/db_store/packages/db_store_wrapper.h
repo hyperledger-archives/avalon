@@ -218,6 +218,7 @@ namespace db_store {
      * @param table     table name
      * @param inId      id byte array
      * @param inValue   data to be appended/written
+     * @param isPrepend flag to indicate if it is a prepend operation or append
      *
      * @return
      *  TCF_SUCCESS  id->value updated/stored
@@ -240,6 +241,7 @@ namespace db_store {
      * @param table      table name
      * @param inId       id byte array
      * @param outValue   data to be written
+     * @param isMatch    flag to indicate if a match is required before pop
      *
      * @return
      *  TCF_SUCCESS    outValue contains the first element in the value
@@ -250,7 +252,8 @@ namespace db_store {
     tcf_err_t db_store_csv_pop(
         const std::string& table,
         const ByteArray& inId,
-        ByteArray& outValue);
+        ByteArray& outValue,
+        const bool isMatch);
 
     }  /* namespace db_store */
 
