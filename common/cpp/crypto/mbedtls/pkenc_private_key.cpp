@@ -262,7 +262,7 @@ static int mbed_ctr_drbg_random_wrapper(void *unused,
     }
     memcpy(output, s.data(), output_len);
     return 0; // success
-}
+}   //  mbed_ctr_drbg_random_wrapper()
 
 
 /**
@@ -270,56 +270,36 @@ static int mbed_ctr_drbg_random_wrapper(void *unused,
  * Throws RuntimeError.
  */
 void pcrypto::pkenc::PrivateKey::Generate() {
-    mbedtls_pk_context pk_ctx;
     int rc;
 
-    // RSA key setup
-    mbedtls_pk_init(&pk_ctx);
-    rc = mbedtls_pk_setup(&pk_ctx, mbedtls_pk_info_from_type(MBEDTLS_PK_RSA));
-    if (rc != 0) {
-        mbedtls_pk_free(&pk_ctx);
-        std::string msg("Crypto Error (pkenc::PrivateKey::Generate): "
-            "mbedtls_pk_setup() failed");
-        throw Error::RuntimeError(msg);
-    }
-
     if (constants::RSA_KEY_SIZE > MBEDTLS_MPI_MAX_BITS) {
-        mbedtls_pk_free(&pk_ctx);
         std::string msg("Crypto Error (pkenc::PrivateKey::Generate): "
             "RSA key size is larger than what is supported by Mbed TLS");
         throw Error::RuntimeError(msg);
     }
 
-    // Generate key
-    rc = mbedtls_rsa_gen_key(mbedtls_pk_rsa(pk_ctx),
-        mbed_ctr_drbg_random_wrapper, nullptr,
-        constants::RSA_KEY_SIZE, 0x10001);
-    if (rc != 0) {
-        mbedtls_pk_free(&pk_ctx);
-        std::string msg("Crypto Error (pkenc::PrivateKey::Generate): "
-            "mbedtls_rsa_gen_key() failed");
-        throw Error::RuntimeError(msg);
-    }
-
-    // Allocate and copy context
+    // Allocate and initialize context
     mbedtls_rsa_context *rsa_ctx =
         (mbedtls_rsa_context *)malloc(sizeof (mbedtls_rsa_context));
     if (rsa_ctx == nullptr) {
-        mbedtls_pk_free(&pk_ctx);
         std::string msg(
             "Crypto Error (pkenc::PrivateKey::Generate(): "
             "Could not allocate memory for RSA key context");
         throw Error::RuntimeError(msg);
     }
     mbedtls_rsa_init(rsa_ctx, MBEDTLS_RSA_PKCS_V21, MBEDTLS_MD_SHA256);
-    rc = mbedtls_rsa_copy(rsa_ctx, mbedtls_pk_rsa(pk_ctx));
+
+    // Generate key
+    rc = mbedtls_rsa_gen_key(rsa_ctx,
+        mbed_ctr_drbg_random_wrapper, nullptr,
+        constants::RSA_KEY_SIZE, 0x10001);
     if (rc != 0) {
-        std::string msg("Crypto Error (pkenc::PrivateKey::Generate()): "
-            "Could not copy private key");
+        mbedtls_rsa_free(rsa_ctx);
+        free(rsa_ctx);
+        std::string msg("Crypto Error (pkenc::PrivateKey::Generate): "
+            "mbedtls_rsa_gen_key() failed");
         throw Error::RuntimeError(msg);
     }
-    mbedtls_rsa_set_padding(rsa_ctx, MBEDTLS_RSA_PKCS_V21, MBEDTLS_MD_SHA256);
-    mbedtls_pk_free(&pk_ctx);
 
     // Free old context, if any, and set new context
     if (private_key_ != nullptr) {
