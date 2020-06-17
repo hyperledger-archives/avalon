@@ -332,8 +332,7 @@ void pcrypto::pkenc::PublicKey::Deserialize(const std::string& encoded) {
  * Throws RuntimeError.
  */
 std::string pcrypto::pkenc::PublicKey::Serialize() const {
-    static const unsigned int max_pem_len = 16000;
-    unsigned char pem_str[max_pem_len];
+    unsigned char pem_str[constants::MAX_PEM_LEN];
     mbedtls_pk_context pk_ctx;
     int rc;
 
@@ -356,7 +355,7 @@ std::string pcrypto::pkenc::PublicKey::Serialize() const {
     mbedtls_rsa_copy(mbedtls_pk_rsa(pk_ctx),
         (mbedtls_rsa_context *)public_key_);
 
-    rc = mbedtls_pk_write_pubkey_pem(&pk_ctx, pem_str, max_pem_len);
+    rc = mbedtls_pk_write_pubkey_pem(&pk_ctx, pem_str, constants::MAX_PEM_LEN);
     if (rc != 0) {
         mbedtls_pk_free(&pk_ctx);
         std::string msg("Crypto Error (pkenc::PublicKey::Serialize): "

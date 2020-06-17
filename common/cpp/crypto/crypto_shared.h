@@ -41,7 +41,10 @@ namespace crypto {
         // OpenSSL: OAEP padding or better should always be used for RSA
         const int RSA_PADDING_SCHEME = RSA_PKCS1_OAEP_PADDING;
         // OpenSSL Error string buffer size
-        const int ERR_BUF_LEN = 130;
+        const unsigned int ERR_BUF_LEN = 130;
+#elif defined (CRYPTOLIB_MBEDTLS)
+        // Longest expected cert is 4K. Double a few more times for safety.
+        const unsigned int MAX_PEM_LEN = 16000;
 #endif
     }  // namespace constants
 }  // namespace crypto

@@ -318,8 +318,7 @@ void pcrypto::pkenc::PrivateKey::Generate() {
  * Throws RuntimeError.
  */
 std::string pcrypto::pkenc::PrivateKey::Serialize() const {
-    static const unsigned int max_pem_len = 16000;
-    unsigned char pem_str[max_pem_len];
+    unsigned char pem_str[constants::MAX_PEM_LEN];
     mbedtls_pk_context pk_ctx;
     int rc;
 
@@ -344,7 +343,7 @@ std::string pcrypto::pkenc::PrivateKey::Serialize() const {
 
     // Write NUL-terminated RSA private key PEM string
     // of the form "BEGIN RSA PRIVATE KEY"
-    rc = mbedtls_pk_write_key_pem(&pk_ctx, pem_str, max_pem_len);
+    rc = mbedtls_pk_write_key_pem(&pk_ctx, pem_str, constants::MAX_PEM_LEN);
     if (rc != 0) {
         mbedtls_pk_free(&pk_ctx);
         std::string msg("Crypto Error (pkenc::PrivateKey::Serialize): "
