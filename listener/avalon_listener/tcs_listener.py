@@ -27,6 +27,7 @@
 import sys
 import logging
 import argparse
+from urllib.parse import urlparse
 
 from avalon_listener.tcs_work_order_handler import TCSWorkOrderHandler
 from avalon_listener.tcs_work_order_handler_sync import TCSWorkOrderHandlerSync
@@ -72,8 +73,7 @@ class TCSListener(BaseJRPCListener):
             self.workorder_handler = TCSWorkOrderHandlerSync(
                 self.kv_helper,
                 config["Listener"]["max_work_order_count"],
-                config["Listener"]["zmq_url"],
-                config["Listener"]["zmq_port"])
+                config["Listener"]["zmq_url"])
         else:
             self.workorder_handler = TCSWorkOrderHandler(
                 self.kv_helper,
@@ -121,6 +121,13 @@ def parse_command_line(config, args):
         '--bind', help='URI to listen for requests ', type=str)
     parser.add_argument(
         '--lmdb_url', help='DB url to connect to LMDB ', type=str)
+    # Check if listener is running in sync work load
+    # execution mode then add additional argument zmq url
+    is_sync = config["WorkloadExecution"]["sync_workload_execution"]
+    if is_sync:
+        parser.add_argument(
+            '--zmq_url',
+            help='ZMQ url to connect to enclave manager ', type=str)
 
     options = parser.parse_args(args)
 
@@ -150,6 +157,21 @@ def parse_command_line(config, args):
             logger.error("Quit : remote_storage_url is not \
                             present in config for Listener")
             sys.exit(-1)
+    if options.zmq_url:
+        if not is_sync:
+            logger.error("Invalid option zmq_url! It should be supported"
+                         "in work order sync mode")
+            sys.exit(-1)
+        else:
+            if config.get("Listener") is None or \
+                        config["Listener"].get("zmq_url") is None:
+                logger.error("Quit : no zmq_url config found for Listener")
+                sys.exit(-1)
+            parse_res = urlparse(options.zmq_url)
+            if parse_res.scheme != "tcp" or parse_res.port == "":
+                logger.error("Invalid zmq url. It should tcp://<host>:<port>")
+                sys.exit(-1)
+            config["Listener"]["zmq_url"] = options.zmq_url
 
     return host_name, port
 

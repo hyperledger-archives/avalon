@@ -114,7 +114,7 @@ services:
       - 5555
     command: |
       bash -c "
-        avalon_listener --bind http://avalon-listener:1947 --lmdb_url http://avalon-lmdb:9090
+        avalon_listener --bind http://avalon-listener:1947 --lmdb_url http://avalon-lmdb:9090 --zmq_url tcp://avalon-enclave-manager:5555
         tail -f /dev/null
         "
     depends_on:

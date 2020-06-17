@@ -52,14 +52,13 @@ class TCSWorkOrderHandlerSync(TCSWorkOrderHandler):
     """
 # ------------------------------------------------------------------------------------------------
 
-    def __init__(self, kv_helper, max_wo_count, zmq_url, zmq_port):
+    def __init__(self, kv_helper, max_wo_count, zmq_url):
         """
         Function to perform init activity
         Parameters:
             - kv_helper is a object of lmdb database
         """
         self.zmq_url = zmq_url
-        self.zmq_port_number = zmq_port
         super(TCSWorkOrderHandlerSync, self).__init__(kv_helper, max_wo_count)
 
 # ---------------------------------------------------------------------------------------------
@@ -145,11 +144,11 @@ class TCSWorkOrderHandlerSync(TCSWorkOrderHandler):
             # ZeroMQ for sync workorder processing
             try:
                 socket = context.socket(zmq.REQ)
-                socket.connect(self.zmq_url + self.zmq_port_number)
+                socket.connect(self.zmq_url)
                 socket.send_string(wo_id, flags=0, encoding='utf-8')
                 replymessage = socket.recv()
                 logger.info(replymessage)
-                socket.disconnect(self.zmq_url + self.zmq_port_number)
+                socket.disconnect(self.zmq_url)
             except Exception as er:
                 raise JSONRPCDispatchException(
                     WorkOrderStatus.UNKNOWN_ERROR,

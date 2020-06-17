@@ -72,7 +72,7 @@ class TCSWorkOrderReceiptHandler:
         wo_id = params["workOrderId"]
         input_json_str = params["raw"]
         input_value = json.loads(input_json_str)
-
+        # Check if work order id exists
         wo_request = self.kv_helper.get("wo-requests", wo_id)
         if wo_request is None:
             raise JSONRPCDispatchException(
@@ -82,12 +82,22 @@ class TCSWorkOrderReceiptHandler:
             )
         else:
             wo_receipt = self.kv_helper.get("wo-receipts", wo_id)
-            if wo_receipt is None:
+            wo_receipt = json.loads(wo_receipt)
+            if wo_receipt and "workOrderId" not in wo_receipt["params"]:
                 status, err_msg = \
                     self.__validate_work_order_receipt_create_req(
                         input_value, wo_request)
                 if status is True:
-                    self.kv_helper.set("wo-receipts", wo_id, input_json_str)
+                    # If receiptUpdates doesn't exists then
+                    # create an entry with empty array
+                    if "receiptUpdates" not in wo_receipt["params"]:
+                        input_value["params"]["receiptUpdates"] = []
+                    else:
+                        input_value["params"]["receiptUpdates"] = \
+                            wo_receipt["receiptUpdates"]
+                    self.kv_helper.set("wo-receipts", wo_id, json.dumps(
+                        input_value
+                    ))
                     raise JSONRPCDispatchException(
                         JRPCErrorCodes.SUCCESS,
                         "Receipt created successfully"
@@ -186,11 +196,14 @@ class TCSWorkOrderReceiptHandler:
             status, err_msg = self.__validate_work_order_receipt_update_req(
                 input_value)
             if status is True:
+                value = json.loads(value)
                 # Load previous updates to receipt
-                updates_to_receipt = \
-                    self.kv_helper.get("wo-receipt-updates", wo_id)
+                if "receiptUpdates" in value["params"]:
+                    updates_to_receipt = value["params"]["receiptUpdates"]
+                else:
+                    updates_to_receipt = []
                 # If it is first update to receipt
-                if updates_to_receipt is None:
+                if len(updates_to_receipt) == 0:
                     updated_receipt = []
                 else:
                     updated_receipt = json.loads(updates_to_receipt)
@@ -220,8 +233,9 @@ class TCSWorkOrderReceiptHandler:
                             " is not allowed"
                         )
                 updated_receipt.append(input_value)
-                self.kv_helper.set("wo-receipt-updates", wo_id,
-                                   json.dumps(updated_receipt))
+                input_value["receiptUpdates"] = updated_receipt
+                self.kv_helper.set("wo-receipts", wo_id,
+                                   json.dumps(input_value))
                 raise JSONRPCDispatchException(
                     JRPCErrorCodes.SUCCESS,
                     "Receipt updated successfully"
@@ -377,15 +391,22 @@ class TCSWorkOrderReceiptHandler:
         value = self.kv_helper.get("wo-receipts", wo_id)
         if value:
             receipt = json.loads(value)
-            receipt_updates = self.kv_helper.get("wo-receipt-updates", wo_id)
-            if receipt_updates is None:
+            if "receiptUpdates" in receipt["params"]:
+                receipt_updates = receipt["params"]["receiptUpdates"]
+                # Remove "receiptUpdates" key from the receipt entry
+                # It has updates to receipt.
+                del receipt["params"]["receiptUpdates"]
+            else:
+                receipt_updates = []
+            if len(receipt_updates) == 0:
+                # If there is no updates to receipt
+                # then current status is same as create status
                 receipt["params"]["receiptCurrentStatus"] = \
                     receipt["params"]["receiptCreateStatus"]
             else:
-                receipt_updates_json = json.loads(receipt_updates)
-                # Get the recent update to receipt
-                last_receipt = receipt_updates_json[len(receipt_updates_json)
-                                                    - 1]
+                # Get the latest update to receipt
+                last_receipt = receipt_updates[len(receipt_updates)
+                                               - 1]
                 receipt["params"]["receiptCurrentStatus"] = \
                     last_receipt["updateType"]
             return receipt["params"]
@@ -420,10 +441,12 @@ class TCSWorkOrderReceiptHandler:
         # starts from 1
         update_index = input_params["updateIndex"]
         # Load list of updates to the receipt
-        receipt_updates = self.kv_helper.get("wo-receipt-updates", wo_id)
+        receipt_entry = self.kv_helper.get("wo-receipts", wo_id)
 
-        if receipt_updates:
-            receipt_updates_json = json.loads(receipt_updates)
+        if receipt_entry:
+            receipt_entry_json = json.loads(receipt_entry)
+            receipt_updates_json = \
+                receipt_entry_json["params"]["receiptUpdates"]
             total_updates = len(receipt_updates_json)
             if update_index <= 0:
                 raise JSONRPCDispatchException(
