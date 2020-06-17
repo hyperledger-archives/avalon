@@ -74,13 +74,19 @@ class TCSWorkOrderHandlerSync(TCSWorkOrderHandler):
         input_json_str = params["raw"]
         input_value_json = json.loads(input_json_str)
 
+        # Work order status payload should have
+        # data filed with work order id as defined in EEA spec section 6.
+        data = {
+            "workOrderId": wo_id
+        }
         req_validator = WorkOrderRequestValidator()
         valid, err_msg = req_validator.validate_parameters(
             input_value_json["params"])
         if not valid:
             raise JSONRPCDispatchException(
                 JsonRpcErrorCode.INVALID_PARAMETER,
-                err_msg
+                err_msg,
+                data
             )
 
         if "inData" in input_value_json["params"]:
@@ -89,11 +95,13 @@ class TCSWorkOrderHandlerSync(TCSWorkOrderHandler):
             if not valid:
                 raise JSONRPCDispatchException(
                     JsonRpcErrorCode.INVALID_PARAMETER,
-                    err_msg)
+                    err_msg,
+                    data)
         else:
             raise JSONRPCDispatchException(
                 JsonRpcErrorCode.INVALID_PARAMETER,
-                "Missing inData parameter"
+                "Missing inData parameter",
+                data
             )
 
         if "outData" in input_value_json["params"]:
@@ -102,8 +110,18 @@ class TCSWorkOrderHandlerSync(TCSWorkOrderHandler):
             if not valid:
                 raise JSONRPCDispatchException(
                     JsonRpcErrorCode.INVALID_PARAMETER,
-                    err_msg)
-
+                    err_msg,
+                    data)
+        # Check if workerId is exists in avalon
+        worker_id = input_value_json["params"]["workerId"]
+        if not self._is_worker_exists(worker_id):
+            raise JSONRPCDispatchException(
+                JsonRpcErrorCode.INVALID_PARAMETER,
+                "worker {} doesn't exists".format(
+                    worker_id
+                ),
+                data
+            )
         if((self.workorder_count + 1) > self.max_workorder_count):
 
             # if max count reached clear a processed entry
@@ -125,11 +143,12 @@ class TCSWorkOrderHandlerSync(TCSWorkOrderHandler):
             if((self.workorder_count + 1) > self.max_workorder_count):
                 raise JSONRPCDispatchException(
                     WorkOrderStatus.BUSY,
-                    "Work order handler is busy updating the result")
+                    "Work order handler is busy updating the result",
+                    data)
 
         if(self.kv_helper.get("wo-timestamps", wo_id) is None):
             # Create a new work order entry.
-            # Don't change the order of table updation.
+            # Don't change the order of table updates.
             # The order is important for clean up if the TCS is restarted in
             # the middle.
             epoch_time = str(time.time())
@@ -152,7 +171,8 @@ class TCSWorkOrderHandlerSync(TCSWorkOrderHandler):
             except Exception as er:
                 raise JSONRPCDispatchException(
                     WorkOrderStatus.UNKNOWN_ERROR,
-                    "Failed to connect with enclave-manager socket: " + er)
+                    "Failed to connect with enclave-manager socket: " + er,
+                    data)
             # Work order is processed. Fetch result from wo-response table
             value = self.kv_helper.get("wo-responses", wo_id)
             if value:
@@ -171,12 +191,13 @@ class TCSWorkOrderHandlerSync(TCSWorkOrderHandler):
                     err_code = WorkOrderStatus.UNKNOWN_ERROR
                 else:
                     err_code = WorkOrderStatus.FAILED
-                raise JSONRPCDispatchException(err_code, err_msg)
+                raise JSONRPCDispatchException(err_code, err_msg, data)
         else:
             # Workorder id already exists
             raise JSONRPCDispatchException(
                 WorkOrderStatus.INVALID_PARAMETER_FORMAT_OR_VALUE,
                 "Work order id already exists in the database. \
-                Hence invalid parameter")
+                Hence invalid parameter",
+                data)
 
 # ---------------------------------------------------------------------------------------------
