@@ -163,7 +163,8 @@ class WorkOrderParams():
             # public signing key is shared to enclave manager to
             # verify the signature.
             # It is temporary approach to share the key with the worker.
-            self.set_verifying_key(private_key.GetPublicKey().Serialize())
+            verifying_key = crypto_utility.get_verifying_key(private_key)
+            self.set_verifying_key(verifying_key)
             return True
         else:
             logger.error("Signing request failed")

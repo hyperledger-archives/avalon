@@ -40,6 +40,14 @@ def generate_signing_keys():
     return SigningKey.generate(curve=SECP256k1)
 
 
+# -----------------------------------------------------------------------------
+def get_verifying_key(private_key):
+    """
+    Function to return serialized verifying key from the private key
+    """
+    return private_key.get_verifying_key().to_pem().decode('ascii')
+
+
 # -----------------------------------------------------------------
 def generate_iv():
     """
