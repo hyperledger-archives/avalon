@@ -27,7 +27,7 @@
 #include "enclave_utils.h"
 
 #include "work_order_processor_kme.h"
-#include "workload_processor.h"
+#include "workload_processor_kme.h"
 
 namespace tcf {
     WorkOrderProcessorKME::~WorkOrderProcessorKME() {
@@ -45,31 +45,30 @@ namespace tcf {
      * @param ext_wo_info_kme - Instance of ExtWorkOrderInfoKME class
      */
     void WorkOrderProcessorKME::PopulateExtWorkOrderInfoData(
-            std::string ext_wo_data,
-            ExtWorkOrderInfoKME* ext_wo_info_kme) {
+        std::string ext_wo_data, ExtWorkOrderInfoKME* ext_wo_info_kme) {
 
-            // Create work order data vector having index and
-            // decrypted work order keys
-            std::vector<tcf::WorkOrderData> in_wo_keys;
-            std::vector<tcf::WorkOrderData> out_wo_keys;
-            for (auto d : this->data_items_in) {
-                in_wo_keys.emplace_back(
-                    d.workorder_data.index, d.GetDataEncryptionKey());
-            }
-
-            for (auto d : this->data_items_out) {
-                out_wo_keys.emplace_back(
-                    d.workorder_data.index, d.GetDataEncryptionKey());
-            }
-
-            // Initializing ExtWorkOrderInfo member variables
-            // whose values to be used in pre-processing
-            ext_wo_info_kme->SetExtWorkOrderData(ext_wo_data);
-            ext_wo_info_kme->SetWorkOrderRequesterNonce(this->requester_nonce);
-            ext_wo_info_kme->SetWorkOrderSymmetricKey(this->session_key);
-            ext_wo_info_kme->SetWorkOrderInDataKeys(in_wo_keys);
-            ext_wo_info_kme->SetWorkOrderOutDataKeys(out_wo_keys);
+        // Create work order data vector having index and
+        // decrypted work order keys
+        std::vector<tcf::WorkOrderData> in_wo_keys;
+        std::vector<tcf::WorkOrderData> out_wo_keys;
+        for (auto d : this->data_items_in) {
+            in_wo_keys.emplace_back(
+                d.workorder_data.index, d.GetDataEncryptionKey());
         }
+
+        for (auto d : this->data_items_out) {
+            out_wo_keys.emplace_back(
+                d.workorder_data.index, d.GetDataEncryptionKey());
+        }
+
+        // Initializing ExtWorkOrderInfo member variables
+        // whose values to be used in pre-processing
+        ext_wo_info_kme->SetExtWorkOrderData(ext_wo_data);
+        ext_wo_info_kme->SetWorkOrderRequesterNonce(this->requester_nonce);
+        ext_wo_info_kme->SetWorkOrderSymmetricKey(this->session_key);
+        ext_wo_info_kme->SetWorkOrderInDataKeys(in_wo_keys);
+        ext_wo_info_kme->SetWorkOrderOutDataKeys(out_wo_keys);
+    }  // WorkOrderProcessorKME::PopulateExtWorkOrderInfoData
 
     /*
      * Execute KME specific work order requests
@@ -95,15 +94,15 @@ namespace tcf {
             // Convert workload_id from hex string to string
             ByteArray workload_bytes = HexStringToBinary(workload_id);
             std::string workload_type(workload_bytes.begin(), workload_bytes.end());
-            WorkloadProcessor *processor;
-            // Creating workload processor for "kme" enclave type. The type of
+            WorkloadProcessorKME *processor;
+            // Creating workload processor for "kme" workload type. The type of
             // workload is checked in kme_workload_plugin in case of KME and
             // processed accordingly.
-
-            processor = WorkloadProcessor::CreateWorkloadProcessor("kme");
+            processor = dynamic_cast <WorkloadProcessorKME*>(
+                WorkloadProcessor::CreateWorkloadProcessor("kme"));
             tcf::error::ThrowIf<tcf::error::WorkloadError>(
                 (processor==nullptr) ||
-                (processor->ext_work_order_info==nullptr),
+                (processor->ext_work_order_info_kme==nullptr),
                 "Failed to initialize KME workload");
             if (workload_type == "kme-preprocess") {
                 // KME preprocess request will embed client's work order
@@ -120,10 +119,8 @@ namespace tcf {
                 JsonValue wo_req_json_val = \
                     kme_wo_proc.ParseJsonInput(orig_wo_req);
                 kme_wo_proc.DecryptWorkOrderKeys(enclave_data, wo_req_json_val);
-                ExtWorkOrderInfoKME* ext_wo_info_kme = \
-                    (ExtWorkOrderInfoKME*) processor->ext_work_order_info;
                 kme_wo_proc.PopulateExtWorkOrderInfoData(ext_data,
-                    ext_wo_info_kme);
+                    processor->ext_work_order_info_kme);
             }
 
             processor->ProcessWorkOrder(
@@ -138,4 +135,3 @@ namespace tcf {
         throw tcf::error::RuntimeError("Work order inData not found");
     }  // WorkOrderProcessorKME::ExecuteWorkOrder
 }  // namespace tcf
-

@@ -19,8 +19,7 @@
 #include <string>
 
 #include "types.h"
-#include "workload_processor.h"
-#include "ext_work_order_info_kme.h"
+#include "workload_processor_kme.h"
 
 #define KME_WO_COUNT_UNLIMITED   0
 #define KME_MAX_WO_COUNT          KME_WO_COUNT_UNLIMITED
@@ -36,7 +35,7 @@ typedef struct WPEInfo {
     WPEInfo(const ByteArray& _sk);
 } WPEInfo;
 
-class KMEWorkloadProcessor: public WorkloadProcessor {
+class KMEWorkloadProcessor: public WorkloadProcessorKME {
 
 public:
 
@@ -85,4 +84,3 @@ private:
 
     uint64_t max_wo_count_;
 };  // KMEWorkloadProcessor
-

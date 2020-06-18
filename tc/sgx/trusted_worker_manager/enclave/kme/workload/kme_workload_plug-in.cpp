@@ -25,7 +25,7 @@
 
 using namespace tcf::error;
 
-REGISTER_WORKLOAD_PROCESSOR("kme",KEY_MANAGEMENT_ENCLAVE,KMEWorkloadProcessor);
+REGISTER_WORKLOAD_PROCESSOR_KME("kme",KMEWorkloadProcessor);
 
 
 /*
@@ -66,13 +66,11 @@ void KMEWorkloadProcessor::GetUniqueId(
     ByteArray verification_key_signature_hex = {};
     ByteArray nonce_hex = in_work_order_data[0].decrypted_data;
 
-    ExtWorkOrderInfoKME* ext_wo_info_kme = \
-        dynamic_cast<ExtWorkOrderInfoKME*>(ext_work_order_info);
     tcf::error::ThrowIf<tcf::error::WorkloadError>(
-        (ext_wo_info_kme == nullptr),
+        (this->ext_work_order_info_kme == nullptr),
         "ExtWorkOrderInfoKME instance is not initialized");
 
-    int err = ext_wo_info_kme->GenerateSigningKey(
+    int err = ext_work_order_info_kme->GenerateSigningKey(
         ExtWorkOrderInfo::KeyType_SECP256K1, nonce_hex, signing_key,
         verification_key_hex, verification_key_signature_hex);
 
@@ -164,15 +162,13 @@ void KMEWorkloadProcessor::Register(
     ByteArray mr_enclave = {};
     ByteArray mr_signer = {};
 
-    ExtWorkOrderInfoKME* ext_wo_info_kme = \
-        dynamic_cast<ExtWorkOrderInfoKME*>(ext_work_order_info);
     tcf::error::ThrowIf<tcf::error::WorkloadError>(
-        (ext_wo_info_kme == nullptr),
+        (this->ext_work_order_info_kme == nullptr),
         "ExtWorkOrderInfoKME instance is not initialized");
 
     // Not simulator mode
     if (!this->isSgxSimulator()) {
-        int err = ext_wo_info_kme->VerifyAttestationWpe(
+        int err = ext_work_order_info_kme->VerifyAttestationWpe(
 	    StrToByteArray(proof_data),
             unique_id_bytes,
             mr_enclave, mr_signer,
@@ -258,22 +254,20 @@ void KMEWorkloadProcessor::PreprocessWorkorder(
     const std::vector<tcf::WorkOrderData>& in_work_order_data,
     std::vector<tcf::WorkOrderData>& out_work_order_data) {
 
-    ExtWorkOrderInfoKME* ext_wo_info_kme = \
-        dynamic_cast<ExtWorkOrderInfoKME*>(ext_work_order_info);
     tcf::error::ThrowIf<tcf::error::WorkloadError>(
-        (ext_wo_info_kme == nullptr),
+        (this->ext_work_order_info_kme == nullptr),
         "ExtWorkOrderInfoKME instance is not initialized");
 
     // Get WPE encryption key from in data
-    ByteArray wpe_encrypt_key = \
-        StrToByteArray(ext_wo_info_kme->GetExtWorkOrderData().c_str());
+    ByteArray wpe_encrypt_key = StrToByteArray(
+        ext_work_order_info_kme->GetExtWorkOrderData().c_str());
 
     auto search_enc_key = wpe_enc_key_map.find(wpe_encrypt_key);
     if (search_enc_key != wpe_enc_key_map.end()) {
         WPEInfo wpe_info = wpe_enc_key_map[wpe_encrypt_key];
         ByteArray wo_key_data = {};
 
-        int status = ext_wo_info_kme->CreateWorkOrderKeyInfo(
+        int status = ext_work_order_info_kme->CreateWorkOrderKeyInfo(
             wpe_encrypt_key, wpe_info.signing_key, wo_key_data);
 
         if (!status) {
