@@ -211,7 +211,7 @@ class ClientSignature(object):
         try:
             self.private_key = private_key
             self.public_key = \
-                self.private_key.get_verifying_key().to_pem().decode('ascii')
+                crypto_utility.get_verifying_key(private_key)
             signature_res = \
                 self.private_key.sign_digest_deterministic(
                                                 bytes(hash),
