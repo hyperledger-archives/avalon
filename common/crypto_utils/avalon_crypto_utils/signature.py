@@ -402,7 +402,7 @@ class ClientSignature(object):
         try:
             sig_result = _verifying_key.verify_digest(
                 decoded_v_key_sig,
-                v_key_hash,
+                bytes(v_key_hash),
                 sigdecode=sigdecode_der)
             if sig_result:
                 return SignatureStatus.PASSED
@@ -521,7 +521,7 @@ class ClientSignature(object):
         decoded_signature = crypto_utility.base64_to_byte_array(signature)
         try:
             sig_result = _verifying_key.verify_digest(decoded_signature,
-                                                      final_hash,
+                                                      bytes(final_hash),
                                                       sigdecode=sigdecode_der)
             if sig_result:
                 return SignatureStatus.PASSED
