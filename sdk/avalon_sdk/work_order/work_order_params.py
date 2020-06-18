@@ -50,12 +50,12 @@ class WorkOrderParams():
         encrypted_session_key = crypto_utility.generate_encrypted_key(
             session_key, worker_encryption_key)
         self.set_encrypted_session_key(
-            crypto.byte_array_to_hex(encrypted_session_key)
+            crypto_utility.byte_array_to_hex(encrypted_session_key)
         )
 
         self.session_iv = session_iv
         self.set_session_key_iv(
-            crypto.byte_array_to_hex(session_iv)
+            crypto_utility.byte_array_to_hex(session_iv)
         )
         self.set_requester_nonce(requester_nonce)
         self.params_obj["encryptedRequestHash"] = ""
@@ -130,8 +130,8 @@ class WorkOrderParams():
             self.get_requester_id()
         concat_bytes = bytes(concat_string, "UTF-8")
         # SHA-256 hashing is used
-        hash_1 = crypto.byte_array_to_base64(
-            crypto.compute_message_hash(concat_bytes)
+        hash_1 = crypto_utility.byte_array_to_base64(
+            crypto_utility.compute_message_hash(concat_bytes)
         )
         hash_2 = sig_obj.calculate_datahash(self.get_in_data())
         hash_3 = ""
@@ -140,11 +140,12 @@ class WorkOrderParams():
             hash_3 = sig_obj.calculate_datahash(out_data)
         concat_hash = hash_1 + hash_2 + hash_3
         concat_hash = bytes(concat_hash, "UTF-8")
-        self.final_hash = crypto.compute_message_hash(concat_hash)
+        self.final_hash = crypto_utility.compute_message_hash(concat_hash)
         encrypted_request_hash = crypto_utility.encrypt_data(
             self.final_hash, self.session_key, self.session_iv)
-        self.params_obj["encryptedRequestHash"] = crypto.byte_array_to_hex(
-            encrypted_request_hash)
+        encrypted_request_hash_hex = crypto_utility.byte_array_to_hex(
+                                        encrypted_request_hash)
+        self.params_obj["encryptedRequestHash"] = encrypted_request_hash_hex
 
     def add_requester_signature(self, private_key):
         """
@@ -284,16 +285,16 @@ class WorkOrderParams():
             enc_data = crypto_utility.encrypt_data(
                 data, self.session_key, self.session_iv
             )
-            return crypto.byte_array_to_base64(enc_data)
+            return crypto_utility.byte_array_to_base64(enc_data)
         elif encrypted_data_encryption_key == "-":
             # Skip encryption and just encode workorder data to
                         # base64 format.
-            enc_data = crypto.byte_array_to_base64(data)
+            enc_data = crypto_utility.byte_array_to_base64(data)
             return enc_data
         else:
             enc_data = crypto_utility.encrypt_data(
                             data, encrypted_data_encryption_key, data_iv)
-            return crypto.byte_array_to_base64(enc_data)
+            return crypto_utility.byte_array_to_base64(enc_data)
 
     def to_jrpc_string(self, id):
         """

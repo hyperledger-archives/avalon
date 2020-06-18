@@ -15,7 +15,6 @@
 import json
 import random
 
-import avalon_crypto_utils.crypto.crypto as crypto
 import avalon_crypto_utils.signature as signature
 import avalon_crypto_utils.crypto_utility as crypto_utility
 from error_code.error_status import ReceiptCreateStatus as ReceiptCreateStatus
@@ -81,7 +80,7 @@ class WorkOrderReceiptRequest():
         requester_nonce = nonce
         if nonce is None:
             requester_nonce = str(random.randint(1, 10**10))
-        public_key = signing_key.GetPublicKey().Serialize()
+        public_key = signing_key.get_verifying_key().to_pem().decode('ascii')
         wo_receipt_request = {
             "workOrderId": wo_request_params["workOrderId"],
             # TODO: workerServiceId is same as worker id,
@@ -104,7 +103,7 @@ class WorkOrderReceiptRequest():
             wo_receipt_request["workOrderRequestHash"] + \
             wo_receipt_request["requesterGeneratedNonce"]
         wo_receipt_bytes = bytes(wo_receipt_str, "UTF-8")
-        wo_receipt_hash = crypto.compute_message_hash(wo_receipt_bytes)
+        wo_receipt_hash = crypto_utility.compute_message_hash(wo_receipt_bytes)
         status, wo_receipt_sign = self.sig_obj.generate_signature(
             wo_receipt_hash,
             signing_key
@@ -141,10 +140,10 @@ class WorkOrderReceiptRequest():
             wo_resp_str = json.dumps(update_data)
             wo_resp_bytes = bytes(wo_resp_str, "UTF-8")
             # Hash of work order response is update_data
-            wo_resp_hash = crypto.compute_message_hash(wo_resp_bytes)
-            wo_resp_hash_str = crypto.byte_array_to_hex(wo_resp_hash)
+            wo_resp_hash = crypto_utility.compute_message_hash(wo_resp_bytes)
+            wo_resp_hash_str = crypto_utility.byte_array_to_hex(wo_resp_hash)
             data = wo_resp_hash_str
-        public_key = signing_key.GetPublicKey().Serialize()
+        public_key = signing_key.verifying_key.to_pem()
         updater_id = crypto_utility.strip_begin_end_public_key(public_key)
 
         wo_receipt_update = {
@@ -160,7 +159,7 @@ class WorkOrderReceiptRequest():
             str(wo_receipt_update["updateType"]) + \
             wo_receipt_update["updateData"]
         wo_receipt_bytes = bytes(wo_receipt_str, "UTF-8")
-        wo_receipt_hash = crypto.compute_message_hash(wo_receipt_bytes)
+        wo_receipt_hash = crypto_utility.compute_message_hash(wo_receipt_bytes)
         status, wo_receipt_sign = self.sig_obj.generate_signature(
             wo_receipt_hash,
             signing_key

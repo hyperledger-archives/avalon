@@ -249,7 +249,9 @@ RUN apt-get update \
  && apt-get install -y -q python3-pip \
  && echo "Install Common Python and SDK packages\n" \
  && pip3 install dist/*.whl \
+ && pip3 install pycryptodomex ecdsa \
  && echo "Remove unused packages from image\n" \
  && apt-get autoremove --purge -y -q python3-pip \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
+ 

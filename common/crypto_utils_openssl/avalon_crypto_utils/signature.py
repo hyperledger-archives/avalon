@@ -17,16 +17,15 @@ Functions to perform hash calculation and signature generation
 and verification.
 Functions based on Spec 1.0 compatibility.
 """
+
 import json
 import logging
 import secrets
+import avalon_crypto_utils.crypto.crypto as crypto
 import avalon_crypto_utils.crypto_utility as crypto_utility
 from utility.hex_utils import is_valid_hex_str, byte_array_to_hex_str
 from error_code.error_status import SignatureStatus
 import config.config as pconfig
-from ecdsa import VerifyingKey
-from ecdsa.util import sigencode_der, sigdecode_der
-import hashlib
 
 logger = logging.getLogger(__name__)
 # Number of bytes of encrypted session key to encrypt data
@@ -116,21 +115,21 @@ class ClientSignature(object):
                 enc_data = crypto_utility.encrypt_data(
                     data, session_key, session_iv)
                 input_json_params['inData'][i]['data'] = \
-                    crypto_utility.byte_array_to_base64(enc_data)
+                    crypto.byte_array_to_base64(enc_data)
                 logger.debug(
                     "encrypted indata - %s",
-                    crypto_utility.byte_array_to_base64(enc_data))
+                    crypto.byte_array_to_base64(enc_data))
             elif e_key == "-".encode('UTF-8'):
                 # Skip encryption and just encode workorder data to
                 # base64 format.
                 input_json_params['inData'][i]['data'] = \
-                    crypto_utility.byte_array_to_base64(data)
+                    crypto.byte_array_to_base64(data)
             else:
                 enc_data = crypto_utility.encrypt_data(data, data_key, data_iv)
                 input_json_params['inData'][i]['data'] = \
-                    crypto_utility.byte_array_to_base64(enc_data)
+                    crypto.byte_array_to_base64(enc_data)
                 logger.debug("encrypted indata - %s",
-                             crypto_utility.byte_array_to_base64(enc_data))
+                             crypto.byte_array_to_base64(enc_data))
             i = i + 1
 
         logger.debug("Workorder InData after encryption: %s", indata_objects)
@@ -160,8 +159,8 @@ class ClientSignature(object):
             requester_id
         concat_hash = bytes(concat_string)
         # SHA-256 hashing is used
-        hash_1 = crypto_utility.compute_message_hash(concat_hash)
-        result_hash = crypto_utility.byte_array_to_base64(hash_1)
+        hash_1 = crypto.compute_message_hash(concat_hash)
+        result_hash = crypto.byte_array_to_base64(hash_1)
 
         return result_hash
 
@@ -193,12 +192,12 @@ class ClientSignature(object):
                 iv = item['iv'].encode('UTF-8')
             concat_string = datahash + data + e_key + iv
             concat_hash = bytes(concat_string)
-            hash = crypto_utility.compute_message_hash(concat_hash)
-            hash_str = hash_str + crypto_utility.byte_array_to_base64(hash)
+            hash = crypto.compute_message_hash(concat_hash)
+            hash_str = hash_str + crypto.byte_array_to_base64(hash)
 
         return hash_str
 
-# -------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
     def generate_signature(self, hash, private_key):
         """
         Function to generate signature object
@@ -210,21 +209,14 @@ class ClientSignature(object):
         """
         try:
             self.private_key = private_key
-            self.public_key = \
-                self.private_key.get_verifying_key().to_pem().decode('ascii')
-            signature_res = \
-                self.private_key.sign_digest_deterministic(
-                                                bytes(hash),
-                                                sigencode=sigencode_der)
-            signature_base64 = crypto_utility.byte_array_to_base64(
-                                                        signature_res)
+            self.public_key = self.private_key.GetPublicKey().Serialize()
+            signature_result = self.private_key.SignMessage(hash)
+            signature_base64 = crypto.byte_array_to_base64(signature_result)
         except Exception as err:
             logger.error("Exception occurred during signature generation: %s",
                          str(err))
             return False, None
-
         return True, signature_base64
-
 
 # -----------------------------------------------------------------------------
     def generate_client_signature(
@@ -306,7 +298,7 @@ class ClientSignature(object):
 
         concat_string = hash_string_1 + hash_string_2 + hash_string_3
         concat_hash = bytes(concat_string, 'UTF-8')
-        final_hash = crypto_utility.compute_message_hash(concat_hash)
+        final_hash = crypto.compute_message_hash(concat_hash)
 
         encrypted_request_hash = crypto_utility.encrypt_data(
             final_hash, session_key, session_iv)
@@ -349,28 +341,28 @@ class ClientSignature(object):
         hash_string_2 = self.calculate_datahash(data_objects)
         concat_string = hash_string_1 + hash_string_2
         concat_hash = bytes(concat_string, 'UTF-8')
-        final_hash = crypto_utility.compute_message_hash(concat_hash)
+        final_hash = crypto.compute_message_hash(concat_hash)
+
         try:
-            _verifying_key = VerifyingKey.from_pem(wo_res_verification_key)
+            _verifying_key = crypto.SIG_PublicKey(wo_res_verification_key)
         except Exception as error:
             logger.error("Error in verification key of "
                          "work order response : %s",
                          error)
             return SignatureStatus.INVALID_VERIFICATION_KEY
-        decoded_signature = crypto_utility.base64_to_byte_array(signature)
-        try:
-            sig_result = _verifying_key.verify_digest(decoded_signature,
-                                                      bytes(final_hash),
-                                                      sigdecode=sigdecode_der)
-            if sig_result:
-                return SignatureStatus.PASSED
-        except Exception as er:
-            if("Malformed formatting of signature" in str(er)):
-                return SignatureStatus.INVALID_SIGNATURE_FORMAT
-            return SignatureStatus.FAILED
 
-    def _verify_wo_verification_key_signature(self,
-                                              wo_response,
+        decoded_signature = crypto.base64_to_byte_array(signature)
+        sig_result = _verifying_key.VerifySignature(final_hash,
+                                                    decoded_signature)
+
+        if sig_result == 1:
+            return SignatureStatus.PASSED
+        elif sig_result == 0:
+            return SignatureStatus.FAILED
+        else:
+            return SignatureStatus.INVALID_SIGNATURE_FORMAT
+
+    def _verify_wo_verification_key_signature(self, wo_response,
                                               wo_verification_key,
                                               requester_nonce):
         """
@@ -390,26 +382,24 @@ class ClientSignature(object):
 
         concat_string = wo_response["extVerificationKey"] + requester_nonce
         v_key_sig = wo_response["extVerificationKeySignature"]
-        v_key_hash = crypto_utility.compute_message_hash(
+        v_key_hash = crypto.compute_message_hash(
             bytes(concat_string, 'UTF-8'))
         try:
-            _verifying_key = VerifyingKey.from_pem(wo_verification_key)
+            _verifying_key = crypto.SIG_PublicKey(wo_verification_key)
         except Exception as error:
             logger.error("Error in verification key of"
                          "verification key signature : %s", error)
             return SignatureStatus.INVALID_VERIFICATION_KEY
-        decoded_v_key_sig = crypto_utility.base64_to_byte_array(v_key_sig)
-        try:
-            sig_result = _verifying_key.verify_digest(
-                decoded_v_key_sig,
-                v_key_hash,
-                sigdecode=sigdecode_der)
-            if sig_result:
-                return SignatureStatus.PASSED
-        except Exception as er:
-            if("Malformed formatting of signature" in str(er)):
-                return SignatureStatus.INVALID_SIGNATURE_FORMAT
+        decoded_v_key_sig = crypto.base64_to_byte_array(v_key_sig)
+        sig_result = _verifying_key.VerifySignature(
+            v_key_hash,
+            decoded_v_key_sig)
+        if sig_result == 1:
+            return SignatureStatus.PASSED
+        elif sig_result == 0:
             return SignatureStatus.FAILED
+        else:
+            return SignatureStatus.INVALID_SIGNATURE_FORMAT
 
 # -----------------------------------------------------------------------------
     def verify_signature(self, wo_response, wo_res_verification_key,
@@ -466,28 +456,26 @@ class ClientSignature(object):
             str(input_json_params["updateType"]) + \
             input_json_params["updateData"]
         concat_hash = bytes(concat_string, 'UTF-8')
-        final_hash = crypto_utility.compute_message_hash(concat_hash)
+        final_hash = crypto.compute_message_hash(concat_hash)
         signature = input_json_params["updateSignature"]
-        verification_key = \
-            input_json_params["receiptVerificationKey"].encode("ascii")
+        verification_key = input_json_params["receiptVerificationKey"]
 
         try:
-            _verifying_key = VerifyingKey.from_pem(verification_key)
+            _verifying_key = crypto.SIG_PublicKey(verification_key)
         except Exception as error:
             logger.info("Error in verification key : %s", error)
             return SignatureStatus.INVALID_VERIFICATION_KEY
 
-        decoded_signature = crypto_utility.base64_to_byte_array(signature)
-        try:
-            sig_result = _verifying_key.verify_digest(decoded_signature,
-                                                      bytes(final_hash),
-                                                      sigdecode=sigdecode_der)
-            if sig_result:
-                return SignatureStatus.PASSED
-        except Exception as er:
-            if("Malformed formatting of signature" in str(er)):
-                return SignatureStatus.INVALID_SIGNATURE_FORMAT
+        decoded_signature = crypto.base64_to_byte_array(signature)
+        sig_result = _verifying_key.VerifySignature(
+            final_hash, decoded_signature)
+
+        if sig_result == 1:
+            return SignatureStatus.PASSED
+        elif sig_result == 0:
             return SignatureStatus.FAILED
+        else:
+            return SignatureStatus.INVALID_SIGNATURE_FORMAT
 
 # -----------------------------------------------------------------------------
     def verify_create_receipt_signature(self, input_json):
@@ -508,33 +496,30 @@ class ClientSignature(object):
             input_json_params["workOrderRequestHash"] + \
             input_json_params["requesterGeneratedNonce"]
         concat_hash = bytes(concat_string, "UTF-8")
-        final_hash = bytes(crypto_utility.compute_message_hash(concat_hash))
+        final_hash = crypto.compute_message_hash(concat_hash)
         signature = input_json_params["requesterSignature"]
-        verification_key = \
-            input_json_params["receiptVerificationKey"].encode("ascii")
+        verification_key = input_json_params["receiptVerificationKey"]
         try:
-            _verifying_key = VerifyingKey.from_pem(verification_key)
+            _verifying_key = crypto.SIG_PublicKey(verification_key)
         except Exception as error:
             logger.info("Error in verification key : %s", error)
             return SignatureStatus.INVALID_VERIFICATION_KEY
 
-        decoded_signature = crypto_utility.base64_to_byte_array(signature)
-        try:
-            sig_result = _verifying_key.verify_digest(decoded_signature,
-                                                      final_hash,
-                                                      sigdecode=sigdecode_der)
-            if sig_result:
-                return SignatureStatus.PASSED
-        except Exception as er:
-            if("Malformed formatting of signature" in str(er)):
-                return SignatureStatus.INVALID_SIGNATURE_FORMAT
-            return SignatureStatus.FAILED
+        decoded_signature = crypto.base64_to_byte_array(signature)
+        sig_result = _verifying_key.VerifySignature(
+            final_hash, decoded_signature)
 
+        if sig_result == 1:
+            return SignatureStatus.PASSED
+        elif sig_result == 0:
+            return SignatureStatus.FAILED
+        else:
+            return SignatureStatus.INVALID_SIGNATURE_FORMAT
 
 # -----------------------------------------------------------------------------
     def calculate_request_hash(self, input_json):
         """
-        Function to create the work order request hash
+        Function to create the work order reuest hash
         as defined in EEA spec 6.1.8.1
         Parameters:
             - input_json is dictionary contains work order request payload
@@ -549,8 +534,8 @@ class ClientSignature(object):
             wo_request_params["requesterId"]
         concat_bytes = bytes(concat_string, "UTF-8")
         # SHA-256 hashing is used
-        hash_1 = crypto_utility.byte_array_to_base64(
-            crypto_utility.compute_message_hash(concat_bytes)
+        hash_1 = crypto.byte_array_to_base64(
+            crypto.compute_message_hash(concat_bytes)
         )
         hash_2 = self.calculate_datahash(wo_request_params["inData"])
         hash_3 = ""
@@ -559,6 +544,6 @@ class ClientSignature(object):
             hash_3 = self.calculate_datahash(wo_request_params["outData"])
         concat_hash = hash_1 + hash_2 + hash_3
         concat_hash = bytes(concat_hash, "UTF-8")
-        final_hash = crypto_utility.compute_message_hash(concat_hash)
-        final_hash_str = crypto_utility.byte_array_to_hex(final_hash)
+        final_hash = crypto.compute_message_hash(concat_hash)
+        final_hash_str = crypto.byte_array_to_hex(final_hash)
         return final_hash_str
