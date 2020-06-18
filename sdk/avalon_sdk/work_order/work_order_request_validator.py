@@ -83,7 +83,7 @@ class WorkOrderRequestValidator():
         if type(params["responseTimeoutMSecs"]) != int:
             return False, "Invalid data format for responseTimeoutMSecs"
 
-        if params["payloadFormat"] != "JSON-RPC":
+        if params["payloadFormat"].upper() != "JSON-RPC":
             return False, "Invalid payload format"
 
         if not is_valid_hex_str(params["workerId"]):
