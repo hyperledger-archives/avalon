@@ -34,11 +34,9 @@ services:
     expose:
       # KME listener port
       - 1948
-      # ZMQ socket port.
-      - 5555
     command: |
       bash -c "
-        enclave_manager --lmdb_url http://avalon-lmdb:9090
+        enclave_manager --lmdb_url http://avalon-lmdb:9090 --bind http://avalon-kme:1948
         tail -f /dev/null
       "
     depends_on:

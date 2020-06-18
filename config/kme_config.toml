@@ -54,8 +54,9 @@ enclave_type = "KME"
 
 [KMEListener]
 # URL of KMEListener where a Work order processor can send requests meant for
-# the Key Management Enclave(KME).
-bind = "http://avalon-kme:1948"
+# the Key Management Enclave(KME). This config can be overridden by passing a
+# command line argument using --bind option when starting the kme.
+bind = "http://localhost:1948"
 
 [KvStorage]
 # the remote version is of higher priority if enabled
