@@ -24,6 +24,9 @@ public:
 
     std::string GenerateNonce(size_t nonce_size);
 
+    size_t VerifyUniqueIdSignature(const std::string& unique_id_key,
+        const std::string& verification_key_signature);
+
     std::map<std::string, std::string> CreateEnclaveData(
         const std::string& in_ext_data,
         const std::string& in_ext_data_signature,

@@ -84,7 +84,7 @@ class WPERequester():
                               of failure.
         """
         workload_id = "kme-uid"
-        in_data = [json.dumps({"nonce": verification_key_nonce})]
+        in_data = [verification_key_nonce]
 
         # Create session key and iv to sign work order request
         session_key = crypto_utils.generate_key()
