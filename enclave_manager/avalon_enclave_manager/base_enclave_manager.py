@@ -164,25 +164,6 @@ class EnclaveManager(ABC):
     # -----------------------------------------------------------------
 
     @staticmethod
-    def validate_request(wo_request):
-        """
-        Validate JSON workorder request.
-        Parameters :
-            wo_request - Flattened JSON request
-        Returns :
-            True - If the input string is a valid JSON
-            False - Otherwise
-        """
-        try:
-            json_req = json.loads(wo_request)
-        except ValueError as e:
-            logger.error("Invalid JSON format found for workorder - %s", e)
-            return False, None
-        return True, json_req
-
-    # -----------------------------------------------------------------
-
-    @staticmethod
     def create_json_worker(enclave_data, config):
         """
         Create JSON worker object which gets saved in KvStorage
