@@ -38,7 +38,7 @@ cd $SRCDIR/shared_kv_storage
 make clean
 
 #--------------- KME WORKLOAD ---------------
-cd $SRCDIR/tc/sgx/trusted_worker_manager/enclave/kme_workload
+cd $SRCDIR/tc/sgx/trusted_worker_manager/enclave/kme/workload
 rm -rf build
 
 # --------------- COMMON CPP ---------------
