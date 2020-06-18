@@ -83,15 +83,14 @@ class BaseJRPCListener(resource.Resource):
 
         try:
             input_json = json.loads(input_json_str)
+            logger.info("Received request: %s", input_json['method'])
         except Exception as err:
-            logger.exception("exception loading Json: %s", str(err))
+            logger.error("exception loading Json: %s", str(err))
             response["error"]["message"] = "Improper Json request"
             return response
 
-        logger.info("Received request: %s", input_json['method'])
         # save the full json for WorkOrderSubmit
         input_json["params"]["raw"] = input_json_str
-
         data = json.dumps(input_json).encode('utf-8')
         response = JSONRPCResponseManager.handle(data, self.dispatcher)
         return response.data
