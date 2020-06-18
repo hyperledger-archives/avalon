@@ -64,9 +64,20 @@ class WorkOrderProcessorEnclaveManager(WOProcessorManager):
                     verification_key_nonce)
         response = self._wpe_requester.get_unique_verification_key(
             verification_key_nonce)
+        if response is None:
+            logger.error("Failed to get Unique ID from KME")
+            return None
         # Received response contains result,verification_key and
         # verification_key_signature delimited by ' '
         self._unique_verification_key = response.split(' ')[1]
+        self._unique_verification_key_signature = response.split(' ')[2]
+        # Verify unique verification key signature using unique id
+        result = signup_cpp_obj.VerifyUniqueIdSignature(
+            self._unique_verification_key,
+            self._unique_verification_key_signature)
+        if result != 0:
+            logger.error("Failed to verify unique id signature")
+            return None
         # signup enclave
         signup_data.create_enclave_signup_data(self._unique_verification_key)
         # return signup data

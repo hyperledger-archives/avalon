@@ -22,6 +22,12 @@ enclave {
            [out, size=in_nonce_size] uint8_t* out_nonce,
            size_t in_nonce_size
         );
+
+        public tcf_err_t ecall_VerifyUniqueIdSignature(
+            [in, string] const char* unique_id_key,
+            [in, string] const char* verification_key_signature
+        );
+
         public tcf_err_t ecall_CreateSignupDataWPE(
             [in] const sgx_target_info_t* inTargetInfo,
             [in, size=inExtDataSize] const uint8_t* inExtData,

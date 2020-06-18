@@ -67,10 +67,15 @@ int ExtWorkOrderInfoKME::GenerateSigningKey(
         std::string v_key_hex_str = ByteArrayToHexEncodedString(v_key_bytes);
         verification_key_hex = StrToByteArray(v_key_hex_str);
 
-        // Generate signature on verification and nonce
-        std::string msg = ByteArrayToStr(nonce_hex) +
-            ByteArrayToStr(v_key_bytes);
-        ByteArray signature = private_sig_key.SignMessage(StrToByteArray(msg));
+        // Generate signature on hash of concatenation of
+        // base64 encoded verification key and hex encoded nonce string.
+        // nonce_hex bytearray is converted to c_str to remove
+        // string termination '\0' char
+        std::string msg = ByteArrayToStr(v_key_bytes) +
+            ByteArrayToStr(nonce_hex).c_str();
+        ByteArray msg_hash = tcf::crypto::ComputeMessageHash(
+            StrToByteArray(msg));
+        ByteArray signature = private_sig_key.SignMessage(msg_hash);
 
         std::string signature_hex = ByteArrayToHexEncodedString(signature);
         verification_key_signature_hex = StrToByteArray(signature_hex);
