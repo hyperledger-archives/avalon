@@ -43,6 +43,12 @@ class WorkOrderProcessorEnclaveManager(EnclaveManager):
     def __init__(self, config):
         super(WorkOrderProcessorEnclaveManager, self).__init__(config)
 
+        workloads_str = config.get("WorkerConfig")["workloads"]
+        workloads = workloads_str.split(',')
+        self._workloads = []
+        for workload in workloads:
+            self._workloads.append(workload.encode("UTF-8").hex())
+
 # -------------------------------------------------------------------------
 
     def _create_signup_data(self):
@@ -164,13 +170,13 @@ class WorkOrderProcessorEnclaveManager(EnclaveManager):
                 logger.error("Received empty work order corresponding " +
                              "to id %s from wo-requests table", wo_id)
                 self._kv_helper.remove("wo-processing", wo_id)
-                return
+                return None
 
         except Exception as e:
             logger.error("Problem while reading the work order %s "
                          "from wo-requests table", wo_id)
             self._kv_helper.remove("wo-processing", wo_id)
-            return
+            return None
 
         logger.info("Create workorder entry %s in wo-processing table",
                     wo_id)
@@ -182,22 +188,30 @@ class WorkOrderProcessorEnclaveManager(EnclaveManager):
         self._kv_helper.remove("wo-scheduled", wo_id)
 
         logger.info("Validating JSON workorder request %s", wo_id)
-        validation_status = EnclaveManager.validate_request(wo_json_req)
+        validation_status, json_obj = EnclaveManager.validate_request(
+            wo_json_req)
 
         if not validation_status:
             logger.error(
                 "JSON validation for Workorder %s failed; " +
                 "handling Failure scenarios", wo_id)
-            wo_response = dict()
-            wo_response["Response"] = dict()
-            wo_response["Response"]["Status"] = WorkOrderStatus.FAILED
-            wo_response["Response"]["Message"] = \
-                "Workorder JSON request is invalid"
-            self._kv_helper.set("wo-responses", wo_id, json.dumps(wo_response))
-            self._kv_helper.set("wo-processed", wo_id,
-                                WorkOrderStatus.FAILED.name)
-            self._kv_helper.remove("wo-processing", wo_id)
-            return
+            self._handle_wo_process_failure(
+                "Workorder JSON request is invalid", wo_id)
+            return None
+
+        # Check if wo can be processed by this worker
+        if "params" in json_obj and "workloadId" in json_obj["params"]:
+            workload_id_in_req = json_obj["params"]["workloadId"]
+            if workload_id_in_req not in self._workloads:
+                logger.error("Workload cannot be processed by this worker")
+                self._handle_wo_process_failure(
+                    "Workload cannot be processed by this worker", wo_id)
+                return None
+        else:
+            logger.error("Work order request not well-formed")
+            self._handle_wo_process_failure(
+                "Workorder request is not well formed", wo_id)
+            return None
 
         # Execute work order request
 
@@ -215,7 +229,7 @@ class WorkOrderProcessorEnclaveManager(EnclaveManager):
                                 WorkOrderStatus.FAILED.name)
             self._kv_helper.set("wo-responses", wo_id, wo_json_resp)
             self._kv_helper.remove("wo-processing", wo_id)
-            return
+            return None
 
         logger.info("Mark workorder status for workorder id %s " +
                     "as Completed in wo-processed", wo_id)
@@ -276,6 +290,26 @@ class WorkOrderProcessorEnclaveManager(EnclaveManager):
             json_response = json.dumps(wo_response)
 
         return json_response
+
+# -------------------------------------------------------------------------
+
+    def _handle_wo_process_failure(self, msg, wo_id):
+        """
+        Handle failure of work order by creating proper response JSON
+        and updating database appropriately.
+
+        Parameters:
+            @param msg - Error message to put into response
+            @param wo_id - Id of the work-order being handled
+        """
+        wo_response = dict()
+        wo_response["error"] = dict()
+        wo_response["error"]["code"] = WorkOrderStatus.FAILED
+        wo_response["error"]["message"] = msg
+        self._kv_helper.set("wo-responses", wo_id, json.dumps(wo_response))
+        self._kv_helper.set("wo-processed", wo_id,
+                            WorkOrderStatus.FAILED.name)
+        self._kv_helper.remove("wo-processing", wo_id)
 
 # -------------------------------------------------------------------------
 
@@ -391,6 +425,9 @@ def main(args=None):
     parser.add_argument("--kme_listener_url",
                         help="KME listener url for requests to KME",
                         type=str)
+    parser.add_argument("--workloads",
+                        help="Comma-separated list of workloads supported",
+                        type=str)
     (options, remainder) = parser.parse_known_args(args)
 
     if options.config:
@@ -408,6 +445,8 @@ def main(args=None):
 
     if options.kme_listener_url:
         config["KMEListener"]["kme_listener_url"] = options.kme_listener_url
+    if options.workloads:
+        config["WorkerConfig"]["workloads"] = options.workloads
 
     plogger.setup_loggers(config.get("Logging", {}))
     sys.stdout = plogger.stream_to_logger(

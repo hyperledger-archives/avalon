@@ -174,11 +174,11 @@ class EnclaveManager(ABC):
             False - Otherwise
         """
         try:
-            json.loads(wo_request)
+            json_req = json.loads(wo_request)
         except ValueError as e:
             logger.error("Invalid JSON format found for workorder - %s", e)
-            return False
-        return True
+            return False, None
+        return True, json_req
 
     # -----------------------------------------------------------------
 

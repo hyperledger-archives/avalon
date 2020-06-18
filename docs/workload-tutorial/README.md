@@ -156,6 +156,12 @@ will be created next in [Phase 2](#phase2).
   SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,-L,${TCF_TOP_DIR}/examples/apps/build/hello_world/workload")
   TARGET_LINK_LIBRARIES(${PROJECT_NAME} -Wl,--whole-archive -lhello_world -Wl,--no-whole-archive)
   ```
+* Update the `workloads` config in `$TCF_HOME/config/singleton_enclave_config.toml` to include the new
+  workload. The work orders matching these workload ids will be processed by the enclave manager. The
+  enclaves should be built with matching workloads. After update, the configuration should look like:
+  ```bash
+  workloads = "echo-result,heart-disease-eval,inside-out-eval,simple-wallet,hello_world"
+  ```
 
 * Change to the top-level Avalon source repository directory, `$TCF_HOME`,
   and rebuild the framework (see [$TCF_HOME/BUILD.md](../../BUILD.md)).
