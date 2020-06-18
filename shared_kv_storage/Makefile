@@ -38,8 +38,9 @@ install:
 	pip3 install $(WHEEL_FILE)
 
 clean: clean-subdirs
-	pip3 uninstall --yes $(WHEEL_FILE)
-	rm -rf kv_storage/remote_lmdb/db_store.py db_store/db_store_wrap.cpp
+	if [ -f $(WHEEL_FILE) ] ; then pip3 uninstall --yes $(WHEEL_FILE); fi
+	rm -r kv_storage/remote_lmdb/db_store.py
+	rm -r kv_storage/remote_lmdb/db_store_wrap.cpp
 	rm -rf build deps dist *.egg-info
 	find . -iname '*.pyc' -delete
 	find . -iname '__pycache__' -delete

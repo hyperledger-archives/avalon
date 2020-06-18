@@ -88,7 +88,7 @@ class TCSWorkOrderHandler:
                 self.workorder_list.append(wo_id)
                 self.workorder_count += 1
 
-    def __is_worker_exists(self, worker_id):
+    def _is_worker_exists(self, worker_id):
         """
         Function to check if worker is exists or not
         Returns
@@ -223,7 +223,7 @@ class TCSWorkOrderHandler:
                     err_msg,
                     data)
         # Check if workerId is exists in avalon
-        if not self.__is_worker_exists(input_value_json["params"]["workerId"]):
+        if not self._is_worker_exists(input_value_json["params"]["workerId"]):
             raise JSONRPCDispatchException(
                 JsonRpcErrorCode.INVALID_PARAMETER,
                 "worker {} doesn't exists".format(

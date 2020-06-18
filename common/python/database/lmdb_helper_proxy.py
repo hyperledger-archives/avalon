@@ -55,22 +55,8 @@ class LMDBHelperProxy():
         # Set, table, key, value
         request = "S\n" + self.__escape(table) + "\n" + self.__escape(key) + \
             "\n" + self.__escape(value)
-        response = self.__uri_client._postmsg(request).decode("utf-8")
-        args = response.split("\n")
-        # Set successful (returned True)
-        if args[0] == "t" and len(args) == 1:
-            return True
-        # Set unsuccessful (returned False)
-        elif args[0] == "f" and len(args) == 1:
-            return False
-        # Error
-        elif args[0] == "e":
-            if len(args) != 2:
-                logger.error("Unknown error format")
-            else:
-                logger.error("Request error: %s", args[1])
-        else:
-            logger.error("Unknown response format")
+
+        return self.__set_update(request)
 
 # ------------------------------------------------------------------------------
     def get(self, table, key):
@@ -83,22 +69,8 @@ class LMDBHelperProxy():
         """
         # Get, table, key
         request = "G\n" + self.__escape(table) + "\n" + self.__escape(key)
-        response = self.__uri_client._postmsg(request).decode("utf-8")
-        args = response.split("\n")
-        # Value found
-        if args[0] == "v" and len(args) == 2:
-            return self.__unescape(args[1])
-        # Value not found
-        elif args[0] == "n" and len(args) == 1:
-            return None
-        # Error
-        elif args[0] == "e":
-            if len(args) != 2:
-                logger.error("Unknown error format")
-            else:
-                logger.error("Request error: %s", args[1])
-        else:
-            logger.error("Unknown response format")
+
+        return self.__get_update(request)
 
 # ------------------------------------------------------------------------------
     def remove(self, table, key, value=None):
@@ -167,6 +139,128 @@ class LMDBHelperProxy():
         else:
             logger.error("Unknown response format")
         return result
+
+# ------------------------------------------------------------------------------
+    def csv_append(self, table, key, value):
+        """
+        Function to update a key-value pair in a lmdb table that holds
+        comma-separated strings as value. This function adds a string
+        to the end of the comma-separated value.
+
+        Parameters:
+           @param table - Name of the lmdb table in which key-value pair
+                          needs to be updated.
+           @param key - The primary key of the table.
+           @param value - The value that needs to be appended to the existing
+                          value(comma-separated) corresponding to the key.
+        """
+        # Csv_append, table, key, value
+        # CA corresponding to Csv Append
+        request = "CA\n" + self.__escape(table) + "\n" + self.__escape(key) + \
+            "\n" + self.__escape(value)
+
+        return self.__set_update(request)
+
+# ------------------------------------------------------------------------------
+    def csv_prepend(self, table, key, value):
+        """
+        Function to update a key-value pair in a lmdb table that holds
+        comma-separated strings as value. This function adds a string
+        to the beginning of the comma-separated value.
+
+        Parameters:
+           @param table - Name of the lmdb table in which key-value pair
+                          needs to be updated.
+           @param key - The primary key of the table.
+           @param value - The value that needs to be prepended to the existing
+                          value(comma-separated) corresponding to the key.
+        """
+        # Csv_prepend, table, key, value
+        # CP corresponding to Csv Prepend
+        request = "CP\n" + self.__escape(table) + "\n" + self.__escape(key) + \
+            "\n" + self.__escape(value)
+
+        return self.__set_update(request)
+
+# ------------------------------------------------------------------------------
+    def csv_pop(self, table, key):
+        """
+        Function to update a key-value pair in a lmdb table that holds
+        comma-separated strings as value. This function retrieves a string
+        from the beginning of the comma-separated value. It also deletes
+        the string from the value and if this is the lone string, the key-
+        value pair is removed.
+
+        Parameters:
+           @param table - Name of the lmdb table from which key-value pair
+                          needs to be read and updated.
+           @param key - The primary key of the table.
+        Returns:
+           @returns value - First element from comma-separated value for key
+                            passed in.
+        """
+        # Csv_pop, table, key
+        # CR corresponding to Csv Pop where the 1st element from the csv is
+        # retrieved and the rest left intact.
+        request = "CR\n" + self.__escape(table) + "\n" + self.__escape(key)
+
+        return self.__get_update(request)
+
+# ------------------------------------------------------------------------------
+    def __set_update(self, request):
+        """
+        Helper method to post request to remote uri and process
+        response for set/update methods.
+
+        Parameters:
+            @param request - Prepared request string to send to remote uri
+        Returns:
+            @returns True - If operation is successful. False, otherwise.
+        """
+        response = self.__uri_client._postmsg(request).decode("utf-8")
+        args = response.split("\n")
+        # Set/Update successful (returned True)
+        if args[0] == "t" and len(args) == 1:
+            return True
+        # Set/Update unsuccessful (returned False)
+        elif args[0] == "f" and len(args) == 1:
+            return False
+        # Error
+        elif args[0] == "e":
+            if len(args) != 2:
+                logger.error("Unknown error format")
+            else:
+                logger.error("Request error: %s", args[1])
+        else:
+            logger.error("Unknown response format")
+
+# ------------------------------------------------------------------------------
+    def __get_update(self, request):
+        """
+        Helper method to post request to remote uri and process
+        response for get/retrieve(get and remove) methods.
+
+        Parameters:
+            @param request - Prepared request string to send to remote uri
+        Returns:
+            @returns value - If operation is successful. None, otherwise.
+        """
+        response = self.__uri_client._postmsg(request).decode("utf-8")
+        args = response.split("\n")
+        # Value found
+        if args[0] == "v" and len(args) == 2:
+            return self.__unescape(args[1])
+        # Value not found or could not be retrieved
+        elif args[0] == "n" and len(args) == 1:
+            return None
+        # Error
+        elif args[0] == "e":
+            if len(args) != 2:
+                logger.error("Unknown error format")
+            else:
+                logger.error("Request error: %s", args[1])
+        else:
+            logger.error("Unknown response format")
 
 # ------------------------------------------------------------------------------
     def __escape(self, string):

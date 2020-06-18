@@ -28,7 +28,9 @@ SET(GENERIC_PRIVATE_INCLUDE_DIRS "." "${TCF_TOP_DIR}/common/cpp"
     "${TCF_TOP_DIR}/common/cpp/crypto"
     "${TCF_TOP_DIR}/common/cpp/verify_ias_report"
     "${TCF_TOP_DIR}/common/cpp/packages/parson"
-    "${TCF_TOP_DIR}/tc/sgx/trusted_worker_manager/enclave")
+    "${TCF_TOP_DIR}/tc/sgx/trusted_worker_manager/enclave"
+    "${TCF_TOP_DIR}/tc/sgx/trusted_worker_manager/enclave/kme"
+    "${TCF_TOP_DIR}/tc/sgx/trusted_worker_manager/enclave/wpe")
 SET(GENERIC_CXX_FLAGS ${DEBUG_FLAGS} "-Wall" "-fPIC" "-Wno-write-strings" "-std=c++11")
 
 SET(WORKLOAD_STATIC_NAME common_sgx_workload)

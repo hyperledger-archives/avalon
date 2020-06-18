@@ -215,6 +215,8 @@ RUN ldconfig \
  && echo "SGX_SSL=/opt/intel/sgxssl" >> /etc/environment
 
 COPY . /project/avalon
+# Docker build won't progress if host _dev folder not removed
+RUN rm -rf /project/avalon/tools/build/_dev
 
 # Copy Python build artifacts
 COPY --from=common_python_image /project/avalon/common/python/dist/*.whl dist/
@@ -257,7 +259,7 @@ RUN mkdir -p build \
 
 # Build Key Management Enclave workload which will be
 # linked to enclave shared library
-WORKDIR /project/avalon/tc/sgx/trusted_worker_manager/enclave/kme_workload
+WORKDIR /project/avalon/tc/sgx/trusted_worker_manager/enclave/kme/workload
 RUN mkdir -p build \
   && cd build \
   && cmake .. \
