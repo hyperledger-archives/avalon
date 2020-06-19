@@ -143,7 +143,7 @@ class WorkOrderReceiptRequest():
             wo_resp_hash = crypto_utility.compute_message_hash(wo_resp_bytes)
             wo_resp_hash_str = crypto_utility.byte_array_to_hex(wo_resp_hash)
             data = wo_resp_hash_str
-        public_key = signing_key.verifying_key.to_pem()
+        public_key = signing_key.verifying_key.to_pem().decode("ascii")
         updater_id = crypto_utility.strip_begin_end_public_key(public_key)
 
         wo_receipt_update = {
