@@ -239,6 +239,8 @@ def main(args=None):
     parser.add_argument("--config-dir", help="configuration folder", nargs="+")
     parser.add_argument("--bind", help="KME listener url for requests to KME",
                         type=str)
+    parser.add_argument(
+        "--worker_id", help="Id of worker in plain text", type=str)
     (options, remainder) = parser.parse_known_args(args)
 
     if options.config:
@@ -256,6 +258,8 @@ def main(args=None):
 
     if options.bind:
         config["KMEListener"]["bind"] = options.bind
+    if options.worker_id:
+        config["WorkerConfig"]["worker_id"] = options.worker_id
 
     plogger.setup_loggers(config.get("Logging", {}))
     sys.stdout = plogger.stream_to_logger(

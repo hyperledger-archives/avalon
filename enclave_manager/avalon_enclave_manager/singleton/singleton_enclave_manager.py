@@ -108,6 +108,8 @@ def main(args=None):
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", help="configuration file", nargs="+")
     parser.add_argument("--config-dir", help="configuration folder", nargs="+")
+    parser.add_argument(
+        "--worker_id", help="Id of worker in plain text", type=str)
     parser.add_argument("--workloads",
                         help="Comma-separated list of workloads supported",
                         type=str)
@@ -128,6 +130,8 @@ def main(args=None):
 
     if options.workloads:
         config["WorkerConfig"]["workloads"] = options.workloads
+    if options.worker_id:
+        config["WorkerConfig"]["worker_id"] = options.worker_id
 
     plogger.setup_loggers(config.get("Logging", {}))
     sys.stdout = plogger.stream_to_logger(
