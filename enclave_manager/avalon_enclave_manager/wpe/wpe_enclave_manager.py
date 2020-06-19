@@ -133,6 +133,8 @@ def main(args=None):
     parser.add_argument("--kme_listener_url",
                         help="KME listener url for requests to KME",
                         type=str)
+    parser.add_argument(
+        "--worker_id", help="Id of worker in plain text", type=str)
     parser.add_argument("--workloads",
                         help="Comma-separated list of workloads supported",
                         type=str)
@@ -155,6 +157,8 @@ def main(args=None):
         config["KMEListener"]["kme_listener_url"] = options.kme_listener_url
     if options.workloads:
         config["WorkerConfig"]["workloads"] = options.workloads
+    if options.worker_id:
+        config["WorkerConfig"]["worker_id"] = options.worker_id
 
     plogger.setup_loggers(config.get("Logging", {}))
     sys.stdout = plogger.stream_to_logger(

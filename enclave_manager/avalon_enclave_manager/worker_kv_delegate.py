@@ -15,6 +15,7 @@
 # limitations under the License.
 
 import json
+import time
 import logging
 import hashlib
 import avalon_sdk.worker.worker_details as worker_details
@@ -81,7 +82,17 @@ class WorkerKVDelegate:
         Returns :
             @returns worker_obj - A worker retrieved from kv storage
         """
-        json_dict = json.loads(self._kv_helper.get("workers", worker_id))
+        worker_from_kv = None
+        # Retry infinitely if worker is not found in KV storage
+        while True:
+            worker_from_kv = self._kv_helper.get("workers", worker_id)
+            if worker_from_kv is None:
+                logger.warn(
+                    "Could not find worker in database. Will retry in 10s")
+                time.sleep(10)
+            else:
+                break
+        json_dict = json.loads(worker_from_kv)
         worker_obj = worker_details.SGXWorkerDetails()
         worker_obj.load_worker(json_dict['details'])
 

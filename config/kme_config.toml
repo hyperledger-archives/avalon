@@ -67,7 +67,8 @@ remote_url = "http://localhost:9090"
 # -------------------------------------------------------------
 
 [WorkerConfig]
-# Id of worker in plain text
+# Id of worker in plain text. This can be overridden by passing values in command line for
+# enclave manager using --worker_id option.
 worker_id = "kme-worker-1"
 ProofDataType = "TEE-SGX-IAS"
 
