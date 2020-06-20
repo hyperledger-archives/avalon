@@ -65,7 +65,7 @@ event_provider = "http://node1.avalon.local:8545" # http://local-ganache:8545 fo
 # "42": Kovan Testnet
 
 chain_id = 3
-gas_limit = 3000000
+gas_limit = 300000000
 gas_price = "100"
 
 # Fabric blockchain
