@@ -30,8 +30,9 @@ class WorkOrderKVDelegate:
     specific changes in the KV storage.
     """
 
-    def __init__(self, kv_helper):
+    def __init__(self, kv_helper, worker_id):
         self._kv_helper = kv_helper
+        self._worker_id = worker_id
         # Key pair for work order receipt signing
         # This is temporary approach
         self.private_key = crypto_utils.generate_signing_keys()
@@ -51,16 +52,34 @@ class WorkOrderKVDelegate:
             False - Otherwise
 
         """
-        # @TODO : Enable cleanup for wo_ids passed in argument.
-        # As of now a blanket cleanup is being done.
-        processing_list = self._kv_helper.lookup("wo-processing")
+        # Lookup workers that belong to this pool i.e.- sharing same worker_id.
+        # In case of Singleton, this will be a single worker_id whereas in case
+        # of worker pool mode, it will be a list of worker's identity (the
+        # enclave_id of a WPE).
+        workers_in_pool = self._kv_helper.get("worker-pool", self._worker_id)
+        if workers_in_pool is not None:
+            workers = workers_in_pool.split(",")
+        else:
+            logger.info("No worker found in pool. Cleanup not required")
+            return True
+        processing_list = []
+        for worker in workers:
+            active_wo = self._kv_helper.get("wo-worker-processing", worker)
+            # Add to processing_list, workorder ids that are in active state
+            # and are either part of wo_ids or wo_ids is None (indicating that
+            # all work-orders need to be restored and not selective).
+            if active_wo is not None:
+                wo_id = json.loads(active_wo)["work_order_id"]
+                if wo_ids is None or wo_id in wo_ids:
+                    processing_list.append(wo_id)
+
         if len(processing_list) == 0:
             logger.info("No workorder entries found in " +
-                        "wo-processing table, skipping Cleanup")
+                        "wo-worker-processing table, skipping Cleanup")
             return True
         result = True
         for wo in processing_list:
-            logger.info("Validating workorders in wo-processing table")
+            logger.info("Validating workorders in wo-worker-processing table")
             wo_json_resp = self._kv_helper.get("wo-responses", wo)
             wo_processed = self._kv_helper.get("wo-processed", wo)
 
@@ -74,7 +93,8 @@ class WorkOrderKVDelegate:
                     if wo_processed is None:
                         self._kv_helper.set("wo-processed", wo,
                                             WorkOrderStatus.FAILED.name)
-                    result &= self._kv_helper.remove("wo-processing", wo)
+                    result &= self._kv_helper.remove(
+                        "wo-worker-processing", wo)
                     continue
 
                 if "Response" in wo_resp and \
@@ -84,8 +104,9 @@ class WorkOrderKVDelegate:
                         self._kv_helper.set("wo-processed", wo,
                                             WorkOrderStatus.FAILED.name)
                     logger.error("Work order processing failed; " +
-                                 "removing it from wo-processing table")
-                    result &= self._kv_helper.remove("wo-processing", wo)
+                                 "removing it from wo-worker-processing table")
+                    result &= self._kv_helper.remove(
+                        "wo-worker-processing", wo)
                     continue
 
                 wo_receipt = self._kv_helper.get("wo-receipts", wo)
@@ -102,13 +123,13 @@ class WorkOrderKVDelegate:
             else:
                 logger.info("No response found for the workorder %s; " +
                             "hence placing the workorder request " +
-                            "back in wo-scheduled", wo)
-                self._kv_helper.set("wo-scheduled", wo,
-                                    WorkOrderStatus.SCHEDULED.name)
+                            "back in wo-worker-scheduled", wo)
+                self._kv_helper.csv_prepend("wo-worker-scheduled",
+                                            self._worker_id, wo)
 
-            logger.info(
-                "Finally deleting workorder %s from wo-processing table", wo)
-            result &= self._kv_helper.remove("wo-processing", wo)
+            logger.info("Finally deleting workorder %s from"
+                        + " wo-worker-processing table", wo)
+            result &= self._kv_helper.remove("wo-worker-processing", wo)
 
         return result
 

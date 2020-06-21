@@ -58,6 +58,17 @@ class WorkerKVDelegate:
                 result &= self._kv_helper.remove("workers", worker)
         return result
 
+    def cleanup_pool(self, worker_id):
+        """
+        Remove worker pool mapping from datastore. All workers need to
+        register afresh to be a part of the pool.
+
+        Parameters:
+            @param worker_id - Id of worker representing the pool.
+        """
+        logger.info("Clearing worker pool mapping for %s", worker_id)
+        return self._kv_helper.remove("worker-pool", worker_id)
+
     def add_new_worker(self, worker_id, worker_info):
         """
         Add a new worker to the KV Store
@@ -97,3 +108,18 @@ class WorkerKVDelegate:
         worker_obj.load_worker(json_dict['details'])
 
         return worker_obj
+
+    def update_worker_map(self, worker_id, identity):
+        """
+        Function to register a worker in database. It effectively adds a
+        new entry in the mapping of worker_id to workers in that pool.
+        For a Singleton worker, this mapping is worker_id->worker_id. On
+        the other hand, it is worker_id->enclave_id1,enclave_id2... (A
+        list of enclave_id representing each WPE in the pool represented
+        by worker_id).
+
+        Parameters:
+            @param worker_id - Worker id of the pool/singleton
+            @param identity - worker_id of Singleton or enclave_id of a WPE
+        """
+        self._kv_helper.csv_append("worker-pool", worker_id, identity)

@@ -65,10 +65,21 @@ class TCSWorkOrderHandler:
         """
 
         work_orders = self.kv_helper.lookup("wo-timestamps")
+        # Lookup all workers.
+        workers = self.kv_helper.lookup("worker-pool")
+        pending_wo_ids = []
+        # Get the pending list of work order for each worker and collate them
+        # into a list of pending work order ids
+        for worker in workers:
+            wo_ids_csv = self.kv_helper.get("wo-worker-scheduled", worker)
+            wo_ids = [] if wo_ids_csv is None else wo_ids_csv.split(",")
+            pending_wo_ids.extend(wo_ids)
+
         for wo_id in work_orders:
 
-            if(self.kv_helper.get("wo-scheduled", wo_id) is None and
-                    self.kv_helper.get("wo-processing", wo_id) is None and
+            if(wo_id not in pending_wo_ids and
+                    self.kv_helper.get("wo-worker-processing",
+                                       wo_id) is None and
                     self.kv_helper.get("wo-processed", wo_id) is None):
 
                 if(self.kv_helper.get("wo-requests", wo_id) is not None):
@@ -263,22 +274,22 @@ class TCSWorkOrderHandler:
             # Don't change the order of table updation.
             # The order is important for clean up if the TCS is restarted in
             # the middle.
-            # Add entry to wo-worker-pending which holds all the work order id
-            # separated by comma(csv) to be processed by corresponding worker.
-            # i.e. - <worker_id> -> <wo_id>,<wo_id>,<wo_id>...
+            # Add entry to wo-worker-scheduled which holds all the work order
+            # id separated by comma(csv) to be processed by corresponding
+            # worker. i.e. - <worker_id> -> <wo_id>,<wo_id>,<wo_id>...
             epoch_time = str(time.time())
 
             # Update the tables
             self.kv_helper.set("wo-timestamps", wo_id, epoch_time)
             self.kv_helper.set("wo-requests", wo_id, input_json_str)
-            self.kv_helper.csv_append("wo-worker-pending", worker_id, wo_id)
+            self.kv_helper.csv_append("wo-worker-scheduled", worker_id, wo_id)
             # Add to the internal FIFO
             self.workorder_list.append(wo_id)
             self.workorder_count += 1
             raise JSONRPCDispatchException(
                 WorkOrderStatus.PENDING,
-                "Work order is computing. Please query for WorkOrderGetResult \
-                to view the result",
+                "Work order is computing. Please query for WorkOrderGetResult"
+                + " to view the result",
                 data)
 
         # Workorder id already exists

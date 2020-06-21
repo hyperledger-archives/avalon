@@ -14,6 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
+import zmq
 import json
 import time
 import logging
@@ -39,6 +41,7 @@ class WOProcessorManager(EnclaveManager):
         self._workloads = []
         for workload in workloads:
             self._workloads.append(workload.encode("UTF-8").hex())
+        self._identity = None
 
 # -------------------------------------------------------------------------
 
@@ -50,20 +53,24 @@ class WOProcessorManager(EnclaveManager):
         Parameters:
             @param process_wo_id - Id of the work-order that is to be processed
         """
-        logger.info("Processing work orders found in wo-worker-pending table.")
+        logger.info(
+            "About to process work orders found in wo-worker-scheduled table.")
 
         # csv_match_pop will peek into the deque and pop out the first
         # work-order id if it matches the process_wo_id
         wo_id = self._kv_helper.csv_match_pop(
-            "wo-worker-pending", self._worker_id, process_wo_id)
+            "wo-worker-scheduled", self._worker_id, process_wo_id)
         if process_wo_id == wo_id:
-            # @TODO : Need to check if the workload_id in the work order
-            # is supported by this worker. Process only if check passes.
-            return self._process_work_order_by_id(wo_id)
+            wo_process_result = self._process_work_order_by_id(wo_id)
+
+            # Cleanup wo-worker-processing that hold in-progress work orders
+            self._kv_helper.remove("wo-worker-processing", self._identity)
+
+            return wo_process_result
         else:
             return None
 
-        logger.info("No more worker orders in wo-worker-pending table.")
+        logger.info("No more worker orders in wo-worker-scheduled table.")
 
 # -------------------------------------------------------------------------
 
@@ -71,17 +78,20 @@ class WOProcessorManager(EnclaveManager):
         """
         Executes Run time flow of enclave manager
         """
-        logger.info("Processing work orders found in wo-worker-pending table.")
+        logger.info(
+            "About to process work orders found in wo-worker-scheduled table.")
 
-        wo_id = self._kv_helper.csv_pop("wo-worker-pending", self._worker_id)
+        wo_id = self._kv_helper.csv_pop("wo-worker-scheduled", self._worker_id)
         while wo_id is not None:
-            # @TODO : Need to check if the workload_id in the work order
-            # is supported by this worker. Process only if check passes.
+
             self._process_work_order_by_id(wo_id)
-            wo_id = self._kv_helper.csv_pop("wo-worker-pending",
+            # Cleanup wo-worker-processing that hold in-progress work orders
+            self._kv_helper.remove("wo-worker-processing", self._identity)
+
+            wo_id = self._kv_helper.csv_pop("wo-worker-scheduled",
                                             self._worker_id)
         # end of loop
-        logger.info("No more worker orders in wo-worker-pending table.")
+        logger.info("No more worker orders in wo-worker-scheduled table.")
 
 # -------------------------------------------------------------------------
 
@@ -96,31 +106,29 @@ class WOProcessorManager(EnclaveManager):
             wo_resp - A JSON response of the executed work order
         """
         try:
-            self._kv_helper.set("wo-processing", wo_id,
-                                WorkOrderStatus.PROCESSING.name)
-
             # Get JSON workorder request corresponding to wo_id
             wo_json_req = self._kv_helper.get("wo-requests", wo_id)
             if wo_json_req is None:
                 logger.error("Received empty work order corresponding " +
                              "to id %s from wo-requests table", wo_id)
-                self._kv_helper.remove("wo-processing", wo_id)
                 return None
 
         except Exception as e:
             logger.error("Problem while reading the work order %s "
                          "from wo-requests table", wo_id)
-            self._kv_helper.remove("wo-processing", wo_id)
             return None
-
-        logger.info("Create workorder entry %s in wo-processing table",
-                    wo_id)
-        self._kv_helper.set("wo-processing", wo_id,
-                            WorkOrderStatus.PROCESSING.name)
 
         logger.info("Validating JSON workorder request %s", wo_id)
         if not self._validate_request(wo_id, wo_json_req):
             return None
+
+        # wo-worker-processing holds a mapping of worker_identity->wo_id.
+        # The identity of a worker is the worker_id in case of Singleton
+        # worker and it is the enclave id in case of a worker from a worker
+        # pool(WPE).
+        self._kv_helper.set("wo-worker-processing", self._identity, wo_id)
+        logger.info("Workorder %s picked up for processing by %s",
+                    wo_id, self._identity)
 
         # Execute work order request
 
@@ -134,24 +142,13 @@ class WOProcessorManager(EnclaveManager):
         if "Response" in wo_resp and \
                 wo_resp["Response"]["Status"] == WorkOrderStatus.FAILED:
             logger.error("error in Response")
-            self._kv_helper.set("wo-processed", wo_id,
-                                WorkOrderStatus.FAILED.name)
-            self._kv_helper.set("wo-responses", wo_id, wo_json_resp)
-            self._kv_helper.remove("wo-processing", wo_id)
+            self._persist_wo_response_to_db(
+                wo_id, WorkOrderStatus.FAILED, wo_json_resp)
             return None
 
-        logger.info("Mark workorder status for workorder id %s " +
-                    "as Completed in wo-processed", wo_id)
-        self._kv_helper.set("wo-processed", wo_id,
-                            WorkOrderStatus.SUCCESS.name)
+        self._persist_wo_response_to_db(
+            wo_id, WorkOrderStatus.SUCCESS, wo_json_resp)
 
-        logger.info("Create entry in wo-responses table for workorder %s",
-                    wo_id)
-        self._kv_helper.set("wo-responses", wo_id, wo_json_resp)
-
-        logger.info("Delete workorder entry %s from wo-processing table",
-                    wo_id)
-        self._kv_helper.remove("wo-processing", wo_id)
         return wo_resp
 
     # -------------------------------------------------------------------------
@@ -205,23 +202,30 @@ class WOProcessorManager(EnclaveManager):
 
     # -------------------------------------------------------------------------
 
-    def _handle_wo_process_failure(self, msg, wo_id):
+    def _persist_wo_response_to_db(self, wo_id, status,
+                                   wo_response=None, msg=None):
         """
-        Handle failure of work order by creating proper response JSON
-        and updating database appropriately.
+        persist the response of a work order processing into the database
+        for success as well as failure. Construct response JSON in case
+        one is not passed in. Make use of msg field in json.
 
         Parameters:
-            @param msg - Error message to put into response
             @param wo_id - Id of the work-order being handled
+            @param status - WorkOrderStatus of work order ro be persisted
+            @param wo_response - Response JSON to be persisted
+            @param msg - Message in response in case wo_response is None
         """
-        # Passing jrpc_id as 0 as this will be overridden anyways
-        wo_response = jrpc_utility.create_error_response(
-            WorkOrderStatus.FAILED, "0", msg)
+        if wo_response is None:
+            # Passing jrpc_id as 0 as this will be overridden anyways
+            err_response = jrpc_utility.create_error_response(
+                WorkOrderStatus.FAILED, "0", msg)
+            wo_response = json.dumps(err_response)
 
-        self._kv_helper.set("wo-responses", wo_id, json.dumps(wo_response))
-        self._kv_helper.set("wo-processed", wo_id,
-                            WorkOrderStatus.FAILED.name)
-        self._kv_helper.remove("wo-processing", wo_id)
+        logger.info("Update response in wo-responses for workorder %s", wo_id)
+        self._kv_helper.set("wo-responses", wo_id, wo_response)
+
+        logger.info("Persist status for workorder %s in wo-processed", wo_id)
+        self._kv_helper.set("wo-processed", wo_id, status.name)
 
     # -----------------------------------------------------------------
 
@@ -243,21 +247,24 @@ class WOProcessorManager(EnclaveManager):
                 workload_id_in_req = json_obj["params"]["workloadId"]
                 if workload_id_in_req not in self._workloads:
                     logger.error("Workload cannot be processed by this worker")
-                    self._handle_wo_process_failure(
-                        "Workload cannot be processed by this worker", wo_id)
+                    self._persist_wo_response_to_db(
+                        wo_id, WorkOrderStatus.FAILED, None,
+                        "Workload cannot be processed by this worker")
                     return False
             else:
                 logger.error("Work order request not well-formed")
-                self._handle_wo_process_failure(
-                    "Workorder request is not well-formed", wo_id)
+                self._persist_wo_response_to_db(
+                    wo_id, WorkOrderStatus.FAILED, None,
+                    "Workorder request is not well-formed")
                 return False
         except ValueError as e:
             logger.error("Invalid JSON format found for workorder - %s", e)
             logger.error(
                 "JSON validation for Workorder %s failed; " +
-                "handling Failure scenarios", wo_id)
-            self._handle_wo_process_failure(
-                "Workorder JSON request is invalid", wo_id)
+                "handling failure scenarios", wo_id)
+            self._persist_wo_response_to_db(
+                wo_id, WorkOrderStatus.FAILED, None,
+                "Workorder JSON request is invalid")
             return False
         return True
 
@@ -317,6 +324,22 @@ class WOProcessorManager(EnclaveManager):
                          .format(type(inst), inst.args, inst))
             exit(1)
 
+    # -----------------------------------------------------------------
+
+    def _bind_zmq_socket(self, zmq_port):
+        """
+        Function to bind to zmq port configured. ZMQ is used for
+        synchronous work order processing.
+
+        Returns :
+            socket - An instance of a Socket bound to the configured
+                     port.
+        """
+        context = zmq.Context()
+        socket = context.socket(zmq.REP)
+        socket.bind("tcp://0.0.0.0:"+zmq_port)
+        return socket
+
     # -------------------------------------------------------------------------
 
     def _start_zmq_listener(self):
@@ -328,7 +351,7 @@ class WOProcessorManager(EnclaveManager):
         """
         # Binding with ZMQ Port
         try:
-            socket = EnclaveManager.bind_zmq_socket(
+            socket = self._bind_zmq_socket(
                 self._config.get("EnclaveManager")["zmq_port"])
             logger.info("ZMQ Port hosted by Enclave")
         except Exception as ex:

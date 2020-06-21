@@ -17,6 +17,7 @@
 import argparse
 import json
 import logging
+import hashlib
 import os
 import sys
 
@@ -41,6 +42,10 @@ class WorkOrderProcessorEnclaveManager(WOProcessorManager):
     def __init__(self, config):
 
         super().__init__(config)
+        # Calculate sha256 of enclave id to get 32 bytes. Then take a
+        # hexdigest for hex str.
+        enclave_id_utf = self.enclave_id.encode("UTF-8")
+        self._identity = hashlib.sha256(enclave_id_utf).hexdigest()
 
 # -------------------------------------------------------------------------
 
@@ -95,6 +100,9 @@ class WorkOrderProcessorEnclaveManager(WOProcessorManager):
                                    self.encryption_key,
                                    self.proof_data):
             logger.info("WPE registration successful")
+            # Update mapping of worker_id to workers in a pool
+            self._worker_kv_delegate.update_worker_map(
+                self._worker_id, self._identity)
         else:
             logger.error("WPE registration failed. Cannot proceed further.")
             sys.exit(1)
@@ -108,16 +116,16 @@ class WorkOrderProcessorEnclaveManager(WOProcessorManager):
         Parameters :
             input_json_str - A JSON formatted str of the request to execute
         Returns :
-            json_response - A JSON formatted str of the response received from
-                            the enclave. Errors are also wrapped in a JSON str
-                            if exceptions have occurred.
+            json_response - A JSON response received from the enclave. Errors
+                            are also wrapped in a JSON str if exceptions have
+                            occurred.
         """
         pre_proc_output = self._wpe_requester\
             .preprocess_work_order(input_json_str, self.encryption_key)
         if "error" in pre_proc_output:
             # If error in preprocessing response, skip workorder processing
-            logger.error("failed to preprocess at WPE enclave manager")
-            return json.dumps(pre_proc_output)
+            logger.error("Failed to preprocess at WPE enclave manager.")
+            return pre_proc_output
 
         wo_request = work_order_request.SgxWorkOrderRequest(
             self._config.get("EnclaveModule"),
