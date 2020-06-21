@@ -39,6 +39,7 @@ class SingletonEnclaveManager(WOProcessorManager):
 
         super().__init__(config)
         self.proof_data_type = config.get("WorkerConfig")["ProofDataType"]
+        self._identity = self._worker_id
 
 # -------------------------------------------------------------------------
 
@@ -48,17 +49,20 @@ class SingletonEnclaveManager(WOProcessorManager):
         """
         logger.info("Executing boot time procedure")
 
-        # Cleanup "workers" table
-        self._worker_kv_delegate.cleanup_worker()
-
         # Add a new worker
         worker_info = EnclaveManager.create_json_worker(self, self._config)
         # Hex string read from config which is 64 characters long
         worker_id = self._worker_id
         self._worker_kv_delegate.add_new_worker(worker_id, worker_info)
+        # Update mapping of worker_id to workers in a pool
+        self._worker_kv_delegate.update_worker_map(
+            worker_id, self._identity)
 
-        # Cleanup wo-processing" table
-        self._wo_kv_delegate.cleanup_work_orders()
+        # Cleanup wo-worker-processing" table
+        wo_to_cleanup = []
+        if "cleanup_work_orders" in self._config["KvStorage"]:
+            wo_to_cleanup = self._config["KvStorage"]["cleanup_work_orders"]
+        self._wo_kv_delegate.cleanup_work_orders(wo_to_cleanup)
 
 # -------------------------------------------------------------------------
 
@@ -108,10 +112,13 @@ def main(args=None):
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", help="configuration file", nargs="+")
     parser.add_argument("--config-dir", help="configuration folder", nargs="+")
-    parser.add_argument(
-        "--worker_id", help="Id of worker in plain text", type=str)
+    parser.add_argument("--worker_id",
+                        help="Id of worker in plain text", type=str)
     parser.add_argument("--workloads",
                         help="Comma-separated list of workloads supported",
+                        type=str)
+    parser.add_argument("--cleanup_work_orders",
+                        help="Comma-separated list of work orders to recover",
                         type=str)
     (options, remainder) = parser.parse_known_args(args)
 
@@ -132,6 +139,9 @@ def main(args=None):
         config["WorkerConfig"]["workloads"] = options.workloads
     if options.worker_id:
         config["WorkerConfig"]["worker_id"] = options.worker_id
+    if options.cleanup_work_orders:
+        config["KvStorage"]["cleanup_work_orders"] = \
+            options.cleanup_work_orders
 
     plogger.setup_loggers(config.get("Logging", {}))
     sys.stdout = plogger.stream_to_logger(

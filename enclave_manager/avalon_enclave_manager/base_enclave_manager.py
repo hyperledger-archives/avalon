@@ -19,7 +19,6 @@ import hashlib
 import json
 import logging
 import sys
-import zmq
 from abc import ABC, abstractmethod
 
 from database import connector
@@ -46,7 +45,8 @@ class EnclaveManager(ABC):
         self._worker_id = hashlib.sha256(worker_id.encode("UTF-8")).hexdigest()
         self._kv_helper = self._connect_to_kv_store()
         self._worker_kv_delegate = WorkerKVDelegate(self._kv_helper)
-        self._wo_kv_delegate = WorkOrderKVDelegate(self._kv_helper)
+        self._wo_kv_delegate = WorkOrderKVDelegate(
+            self._kv_helper, self._worker_id)
         signup_data, measurements = self._setup_enclave()
         self.enclave_data = signup_data
         self.sealed_data = signup_data.sealed_data
@@ -225,23 +225,6 @@ class EnclaveManager(ABC):
         json_worker_info = json.dumps(worker_info)
         logger.info("JSON serialized worker info is %s", json_worker_info)
         return json_worker_info
-
-    # -----------------------------------------------------------------
-
-    @staticmethod
-    def bind_zmq_socket(zmq_port):
-        """
-        Function to bind to zmq port configured. ZMQ is used for
-        synchronous work order processing.
-
-        Returns :
-            socket - An instance of a Socket bound to the configured
-                     port.
-        """
-        context = zmq.Context()
-        socket = context.socket(zmq.REP)
-        socket.bind("tcp://0.0.0.0:"+zmq_port)
-        return socket
 
     # -----------------------------------------------------------------
 
