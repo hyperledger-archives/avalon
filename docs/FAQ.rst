@@ -215,7 +215,7 @@ What TCP ports does Avalon use?
 -------------------------------
 - TCP 1947: connections to Avalon listener from Avalon clients.
   The URL is ``http://localhost:1947/`` or, for Docker,
-  ``http://avalon-listener:9090/``
+  ``http://avalon-listener:1947/``
 - TCP 9090: connections to LMDB listener for KV Storage.
   The URL is ``http://localhost:9090/`` or, for Docker,
   ``http://avalon-lmdb:9090/``
