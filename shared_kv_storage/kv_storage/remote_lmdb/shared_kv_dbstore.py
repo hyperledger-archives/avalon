@@ -82,9 +82,10 @@ class KvDBStore(KvStorage, KvCsvStorage):
         try:
             self._db_store.db_store_put(table, key, value)
             return True
-        except Exception as ex:
-            logger.error("Exception occurred in set - {}".
-                         format(ex))
+        except Exception:
+            # @TODO : Instead of suppressing exception here, pass it back
+            # and let the caller decide how to react to the exception.
+            logger.warn("Could not set key-value in database.")
             return False
 
 # ---------------------------------------------------------------------------------------------------
@@ -101,9 +102,10 @@ class KvDBStore(KvStorage, KvCsvStorage):
                 value = self._db_store.db_store_get(table, key)
             else:
                 value = None
-        except Exception as ex:
-            logger.error("Exception occurred in get - {}".
-                         format(ex))
+        except Exception:
+            # @TODO : Instead of suppressing exception here, pass it back
+            # and let the caller decide how to react to the exception.
+            logger.warn("Could not retrieve value from database.")
             value = None
 
         if not value:
@@ -132,9 +134,10 @@ class KvDBStore(KvStorage, KvCsvStorage):
             else:
                 self._db_store.db_store_del(table, key, value)
             return True
-        except Exception as ex:
-            logger.error("Exception occurred in remove - {}".
-                         format(ex))
+        except Exception:
+            # @TODO : Instead of suppressing exception here, pass it back
+            # and let the caller decide how to react to the exception.
+            logger.warn("Could not delete key-value from database.")
             return False
 
 # ---------------------------------------------------------------------------------------------------
@@ -152,9 +155,10 @@ class KvDBStore(KvStorage, KvCsvStorage):
             table_keys = table_keys.split(",")
             for i in table_keys:
                 result.append(i)
-        except Exception as ex:
-            logger.error("Exception occurred in lookup - {}".
-                         format(ex))
+        except Exception:
+            # @TODO : Instead of suppressing exception here, pass it back
+            # and let the caller decide how to react to the exception.
+            logger.warn("Could not lookup keys in database.")
             result = []
 
         return result
@@ -176,9 +180,10 @@ class KvDBStore(KvStorage, KvCsvStorage):
         try:
             self._db_store.db_store_csv_append(table, key, value)
             return True
-        except Exception as ex:
-            logger.error("Exception occurred in csv_append - {}".
-                         format(ex))
+        except Exception:
+            # @TODO : Instead of suppressing exception here, pass it back
+            # and let the caller decide how to react to the exception.
+            logger.warn("Could not append value to csv in database.")
             return False
 
 # ---------------------------------------------------------------------------------------------------
@@ -198,9 +203,10 @@ class KvDBStore(KvStorage, KvCsvStorage):
         try:
             self._db_store.db_store_csv_prepend(table, key, value)
             return True
-        except Exception as ex:
-            logger.error("Exception occurred in csv_prepend - {}".
-                         format(ex))
+        except Exception:
+            # @TODO : Instead of suppressing exception here, pass it back
+            # and let the caller decide how to react to the exception.
+            logger.warn("Could not prepend value to csv in database.")
             return False
 
 # ---------------------------------------------------------------------------------------------------
@@ -225,9 +231,10 @@ class KvDBStore(KvStorage, KvCsvStorage):
                 value = self._db_store.db_store_csv_pop(table, key)
             else:
                 value = None
-        except Exception as ex:
-            logger.error("Exception occurred in csv_pop - {}".
-                         format(ex))
+        except Exception:
+            # @TODO : Instead of suppressing exception here, pass it back
+            # and let the caller decide how to react to the exception.
+            logger.warn("Could not pop value from csv in database.")
             value = None
 
         if not value:
@@ -260,9 +267,10 @@ class KvDBStore(KvStorage, KvCsvStorage):
                     table, key, value)
             else:
                 value = None
-        except Exception as ex:
-            logger.error("Exception occurred in csv_match_pop - {}".
-                         format(ex))
+        except Exception:
+            # @TODO : Instead of suppressing exception here, pass it back
+            # and let the caller decide how to react to the exception.
+            logger.warn("Could not match pop value from csv in database.")
             value = None
         if not value:
             value = None
