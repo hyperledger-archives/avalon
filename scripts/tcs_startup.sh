@@ -105,7 +105,21 @@ stop_avalon_components_forcefully()
     ps -ef | grep bin/$LISTENER | grep -v grep | awk '{print $2}' | xargs -r kill -9 ;
     ps -ef | grep bin/$KV_STORAGE | grep -v grep | awk '{print $2}' | xargs -r kill -9;
     ps -ef | grep $ENCLAVE_MANAGER | grep -v grep | awk '{print $2}' | xargs -r kill -9;
-    ps -ef | grep defunct | grep -v grep | cut -b8-20 | xargs -r kill -9
+
+    allPorts=("bind zmq_url remote_storage_url")
+    for i in $allPorts ; do
+	 # Port number of listerner, zmq and kv storage is picked from listener toml file.
+         # grep command reads the line as string from toml file which contails url.eg: bind = "http://localhost:1947".
+	 # awk command seperates the string  into 3, based on ":" such as "http,//localhost,1947".
+	 # sed truncates the last char of the string. eg, " is removed from the 3rd part i.e 1947". 
+	 # Hence the PORT stores the port value of the url. eg PORT=1947
+	 
+	 PORT=$(grep  $i ${TCF_HOME}/listener/listener_config.toml | awk -F':' '{print $3}' | sed 's/.$//i')
+	 
+	 #Below command kills the PID which occupied port. lsof command lists the PIDs holding the $PORT.
+	 echo $PORT | lsof -t -i | xargs -r kill -9;
+    done
+
     echo "Hyperledger Avalon forcefully terminated"
     exit
 }
