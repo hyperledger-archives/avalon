@@ -465,14 +465,17 @@ tcf_err_t db_store::db_store_csv_extend(
 
     if(isPrepend){
         ByteArray temp;
+        // Insert the value to pe prepended. Then append a ',' to the
+        // buffer and then append the existing value.
         temp.insert(temp.begin(),inValue.begin(), inValue.end());
         temp.emplace_back(',');
         temp.insert(temp.begin()+inValue.size()+1, valueBuffer.begin(), valueBuffer.end());
         valueBuffer = temp;
     }
     else {
+        // Append a ',' to the end and then append the new value.
         valueBuffer.emplace_back(',');
-        valueBuffer.insert(valueBuffer.begin()+inValue.size()+1, inValue.begin(), inValue.end());
+        valueBuffer.insert(valueBuffer.end(), inValue.begin(), inValue.end());
     }
 
     return db_store_put(table, inId.data(), inId.size(), valueBuffer.data(), valueBuffer.size());

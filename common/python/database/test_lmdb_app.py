@@ -37,7 +37,7 @@ class TestRemoteLMDB(unittest.TestCase):
         self.value = "d\\\nvalue\n"
         self.key2 = "dke\\\\y2"
         self.value2 = "dvalue2"
-        self.value3 = "dvalue3"
+        self.value3 = "dval3"
         self.key3 = "key3"
 
     def test_set(self):
