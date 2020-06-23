@@ -188,7 +188,7 @@ class JRPCWorkerRegistryImpl(WorkerRegistry):
                 "workerType": worker_type.value,
                 "organizationId": org_id,
                 "applicationTypeId": application_type_ids,
-                "details": json.loads(details)
+                "details": details
             }
         }
         response = self.__uri_client._postmsg(json.dumps(json_rpc_request))
