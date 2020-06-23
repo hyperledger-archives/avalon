@@ -222,6 +222,10 @@ What TCP ports does Avalon use?
 - TCP 5555: ZMQ connections to Avalon Enclave Manager from Avalon Listener.
   The URL is ``tcp://localhost:5555`` or, for Docker,
   ``tcp://avalon-enclave-manager:5555``
+- TCP 1948: connections to Avalon Key Management Enclave (KME).
+  Used only for Worker Pool Mode (not Singleton Mode).
+  The URL is ``tcp://localhost:1948`` or, for Docker,
+  ``tcp://avalon-kme:1948``
 
 What cryptography does Avalon use?
 ----------------------------------
@@ -276,6 +280,89 @@ build and setup Avalon, but you can also build without Docker
 How do I fix this docker-compose error: ``Invalid interpolation format for "build" option``
 -------------------------------------------------------------------------------------------
 Your docker-compose is too old.  Version 1.17.1 works OK.
+
+How do I open a TCP port in Docker?
+-----------------------------------
+With the ``ports:`` line. For example, if you want to open TCP port 1947, used by the
+Avalon Listener, to the outside world (outside the host and Docker containers), add these
+two lines in your ``docker-compose.yaml`` file (or similarly named file)
+
+   .. code:: none
+
+       ports:
+        - "1947:1947"
+
+This allows you to connect to TCP port 1947 from the host or external to the host.
+Beware that this may allow access to port 1947 from the outside world (Internet)
+if your firewall rules allow it. You can also map the port to another port on the host.
+For example, ``- "80:1947"`` maps Docker port 1947 to host port 80 (http).
+
+There is a similar line (``expose:``) that opens up ports between Docker containers on the
+internal Docker container network. This should already be present:
+
+   .. code:: none
+
+       expose:
+        - 1947
+
+
+Videos
+========
+
+- Introduction
+
+  - `Introduction to Hyperledger Avalon (Manoj Gopalakrishnan, 2019)
+    <https://youtu.be/YRXfzHzJVaU>`_
+    (from Hyperledger India Meetup) (20:24)
+  - `Introduction and Architecture (Eugene Yarmosh, 2020)
+    <https://www.youtube.com/watch?v=ex5k5QPSXdU>`_
+    (from Hyperledger Global Forum) (19:19)
+  - `Hyperledger Avalon Introduction (Eugene Yarmosh, 2019)
+    <https://youtu.be/KCa0Z2-Yins>`_
+    (from Avalon Developer Forum) (49:26)
+
+- *Hyperledger Avalon Hands-on Experience* at
+  Hyperledger Global Forum 2020
+
+  - `Entire presentation (parts 1-5)
+    <https://youtu.be/EdYJ-8eTqNc>`_ (1:30:56)
+  - Or view presentations split into five parts by speaker:
+  - `Part 1: Introduction and Architecture (Eugene Yarmosh)
+    <https://www.youtube.com/watch?v=ex5k5QPSXdU>`_ (19:19)
+  - `Part 2: Cold Chain Supply Chain Case Study (Joshua Satten)
+    <https://youtu.be/hPBRtUhO_w0>`_ (21:31)
+  - `Part 3: Avalon Setup and Development Options (Dan Anderson)
+    <https://youtu.be/DeKixYXddCE>`_ (9:24)
+  - `Part 4: Hyperledger Fabric Development (Tong Li)
+    <https://youtu.be/sA-J-4e--bE>`_ (27:45)
+  - `Part 5: Hyperledger Besu Development (Jim Zhang)
+    <https://youtu.be/WzI6XkJFtF8>`_ (12:50)
+  - Part 6: Tutorial (Dan Anderson and Manjunath A C).
+    Not recorded; instead see
+    `tutorial instructions
+    <https://github.com/hyperledger/avalon/tree/master/docs/workload-tutorial>`_
+    and
+    `tutorial video <https://youtu.be/yKDFJH9J3IU>`_
+  - `Presentation description and speaker biographies
+    <https://hgf20.sched.com/event/XogI/hands-on-experience-with-avalon-on-how-to-bridge-on-chain-and-off-chain-worlds-yevgeniy-yarmosh-dan-anderson-intel>`_
+  - `PDF slideset for these presentations
+    <https://static.sched.com/hosted_files/hgf20/e3/HLGF-AvalonWorkshop-T.pdf>`_
+
+- `Hyperledger Avalon Installation Part 1: with Docker Containers
+  (Dan Anderson, 2020) <https://youtu.be/uC4mAXrwgoc>`_ (19:22)
+- `Hyperledger Avalon Installation Part 2: Standalone build (without Docker)
+  (Dan Anderson, 2020) <https://youtu.be/XuSbKh0LOCg>`_ (17:06)
+- `Hyperledger Avalon Application Development Tutorial
+  (Dan Anderson, 2020) <https://youtu.be/yKDFJH9J3IU>`_ (39:56)
+
+- `Hyperledger Avalon Developer Forum videos
+  <https://wiki.hyperledger.org/display/avalon/Meetings>`_
+
+  - `Hyperledger Avalon Developer Forum Kick-off
+    (Eugene Yarmosh, 2019)
+    <https://wiki.hyperledger.org/display/avalon/2019-11-19+Kickoff>`_ (31:56)
+
+- `Hyperledger Avalon Heart Disease Demo
 
 
 TEEs and Intel® SGX
@@ -355,6 +442,20 @@ When starting Avalon with Intel SGX why do I get an error SGX_ERROR_BUSY from th
 If you are behind a corporate proxy, make sure you have ``proxy type`` and
 ``aesm proxy`` lines set in ``/etc/aesmd.conf`` .
 This file may be overwritten if you reinstall Intel SGX SDK.
+
+How do I know I am in Intel SGX Hardware Mode?
+----------------------------------------------
+If you set ``SGX_MODE=HW`` in your environment and setup Intel SGX correctly,
+Avalon will startup in Intel SGX Hardware Mode.
+You know you are in Intel SGX Hardware Mode (SGX_MODE=HW) when you see messages
+similar to this in the Avalon Enclave Manager output at startup
+(the SPID and IAS API keys are examples and not active):
+
+   .. code:: none
+
+       INFO avalon_enclave_manager.ias_client] IAS settings:
+       INFO avalon_enclave_manager.ias_client] SPID: BA5FDA588B8EA36B203955D38FA6B675
+       INFO avalon_enclave_manager.ias_client] IAS ApiKey: 8730f63c63da49258dd37ecf318997ed
 
 
 Videos
