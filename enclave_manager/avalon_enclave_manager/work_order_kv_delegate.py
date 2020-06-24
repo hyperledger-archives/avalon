@@ -38,100 +38,34 @@ class WorkOrderKVDelegate:
         self.private_key = crypto_utils.generate_signing_keys()
         self.public_key = self.private_key.get_verifying_key().to_pem()
 
-    def cleanup_work_orders(self, wo_ids=None):
+    def cleanup_work_orders(self):
         """
-        Cleanup work orders that might have got stuck due
-        to an abrupt shutdown of the system. Update their
-        status in the corresponding tables if processing
-        was complete but status not updated.
-        Parameters :
-            wo_ids - List of Work order id to be cleaned up. By default
-            all will be cleaned up
-        Returns :
-            True - If all expected work order are removed successfully
-            False - Otherwise
-
+        Remove all responses that have been generated for all work order id
+        processed by this worker. This is done as the key pair will change
+        with the restart of a worker i.e.- Singleton or KME. Since the keys
+        used previously are no more available in the worker details, the
+        response cannot be verified. Hence they are stale and not useful.
         """
-        # Lookup workers that belong to this pool i.e.- sharing same worker_id.
-        # In case of Singleton, this will be a single worker_id whereas in case
-        # of worker pool mode, it will be a list of worker's identity (the
-        # enclave_id of a WPE).
-        workers_in_pool = self._kv_helper.get("worker-pool", self._worker_id)
-        if workers_in_pool is not None:
-            workers = workers_in_pool.split(",")
-        else:
-            logger.info("No worker found in pool. Cleanup not required")
-            return True
-        processing_list = []
-        for worker in workers:
-            active_wo = self._kv_helper.get("wo-worker-processing", worker)
-            # Add to processing_list, workorder ids that are in active state
-            # and are either part of wo_ids or wo_ids is None (indicating that
-            # all work-orders need to be restored and not selective).
-            if active_wo is not None:
-                wo_id = json.loads(active_wo)["work_order_id"]
-                if wo_ids is None or wo_id in wo_ids:
-                    processing_list.append(wo_id)
+        # Get all work order ids that have been processed by this worker
+        # i.e.- Singleton or KME (WPEs using this KME). This list is a
+        # comma separated value string which needs to be split to obtain
+        # the actual work order ids.
+        logger.info("About to start removing stale work orders from database.")
+        wo_ids = self._kv_helper.get("wo-worker-processed", self._worker_id)
+        if wo_ids is None:
+            logger.info("No stale work order found. Cleanup not needed.")
+            return
+        wo_id_list = wo_ids.split(",")
 
-        if len(processing_list) == 0:
-            logger.info("No workorder entries found in " +
-                        "wo-worker-processing table, skipping Cleanup")
-            return True
-        result = True
-        for wo in processing_list:
-            logger.info("Validating workorders in wo-worker-processing table")
-            wo_json_resp = self._kv_helper.get("wo-responses", wo)
-            wo_processed = self._kv_helper.get("wo-processed", wo)
-
-            if wo_json_resp is not None:
-                try:
-                    wo_resp = json.loads(wo_json_resp)
-                except ValueError as e:
-                    logger.error(
-                        "Invalid JSON format found for the response for " +
-                        "workorder %s - %s", wo, e)
-                    if wo_processed is None:
-                        self._kv_helper.set("wo-processed", wo,
-                                            WorkOrderStatus.FAILED.name)
-                    result &= self._kv_helper.remove(
-                        "wo-worker-processing", wo)
-                    continue
-
-                if "Response" in wo_resp and \
-                        wo_resp["Response"]["Status"] == \
-                        WorkOrderStatus.FAILED:
-                    if wo_processed is None:
-                        self._kv_helper.set("wo-processed", wo,
-                                            WorkOrderStatus.FAILED.name)
-                    logger.error("Work order processing failed; " +
-                                 "removing it from wo-worker-processing table")
-                    result &= self._kv_helper.remove(
-                        "wo-worker-processing", wo)
-                    continue
-
-                wo_receipt = self._kv_helper.get("wo-receipts", wo)
-                if wo_receipt:
-                    # update receipt
-                    logger.info("Updating receipt in boot flow")
-                    self.update_receipt(wo, wo_json_resp)
-                    logger.info("Receipt updated for workorder %s during boot",
-                                wo)
-
-                if wo_processed is None:
-                    self._kv_helper.set("wo-processed", wo,
-                                        WorkOrderStatus.SUCCESS.name)
-            else:
-                logger.info("No response found for the workorder %s; " +
-                            "hence placing the workorder request " +
-                            "back in wo-worker-scheduled", wo)
-                self._kv_helper.csv_prepend("wo-worker-scheduled",
-                                            self._worker_id, wo)
-
-            logger.info("Finally deleting workorder %s from"
-                        + " wo-worker-processing table", wo)
-            result &= self._kv_helper.remove("wo-worker-processing", wo)
-
-        return result
+        count = 0
+        for wo_id in wo_id_list:
+            self._kv_helper.remove("wo-responses", wo_id)
+            self._kv_helper.remove("wo-requests", wo_id)
+            self._kv_helper.remove("wo-receipts", wo_id)
+            self._kv_helper.remove("wo-timestamps", wo_id)
+            count += 1
+        self._kv_helper.remove("wo-worker-processed", self._worker_id)
+        logger.info("Purged %d work orders from database.", count)
 
     def update_receipt(self, wo_id, wo_json_resp):
         """

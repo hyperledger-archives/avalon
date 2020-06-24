@@ -221,11 +221,14 @@ class WOProcessorManager(EnclaveManager):
                 WorkOrderStatus.FAILED, "0", msg)
             wo_response = json.dumps(err_response)
 
-        logger.info("Update response in wo-responses for workorder %s", wo_id)
+        logger.info("Update response in wo-responses for workorder %s.", wo_id)
         self._kv_helper.set("wo-responses", wo_id, wo_response)
 
-        logger.info("Persist status for workorder %s in wo-processed", wo_id)
-        self._kv_helper.set("wo-processed", wo_id, status.name)
+        logger.info(
+            "Persist work order id %s in wo-worker-processed map.", wo_id)
+        # Append wo_id to the list of work orders processed by this worker
+        self._kv_helper.csv_append("wo-worker-processed",
+                                   self._worker_id, wo_id)
 
     # -----------------------------------------------------------------
 
