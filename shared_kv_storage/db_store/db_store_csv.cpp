@@ -78,5 +78,14 @@ std::string DbStoreCsv::db_store_csv_match_pop(
 
     return value_b64;
 }
-
+// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+void DbStoreCsv::db_store_csv_search_delete(
+    const std::string& table_b64,
+    const std::string& key_b64,
+    const std::string& value_b64){
+    ByteArray raw_key(key_b64.begin(), key_b64.end());
+    ByteArray raw_value(value_b64.begin(), value_b64.end());
+    tcf_err_t presult = db_store::db_store_csv_search_delete(table_b64, raw_key, raw_value);
+    db_error::ThrowIf<db_error::RuntimeError>(presult, "db store update(search_delete) failed");
+}
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX

@@ -547,6 +547,71 @@ tcf_err_t db_store::db_store_csv_pop(
 }
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+tcf_err_t db_store::db_store_csv_search_delete(
+    const std::string& table,
+    const ByteArray& inId,
+    const ByteArray& inValue){
+
+    SafeUpdateLock ulock;
+
+    tcf_err_t result = TCF_SUCCESS;
+    bool isPresent;
+    size_t value_size;
+
+    result = db_store_get_value_size(table, inId.data(), inId.size(), &isPresent, &value_size);
+    if (result != TCF_SUCCESS) return result;
+
+    // If key not present, return Error
+    if (!isPresent) {
+        // SAFE_LOG(TCF_LOG_ERROR, "Failed to find key in LMDB database");
+        return TCF_ERR_VALUE;
+    }
+
+    ByteArray valueBuffer;
+    // Resize the valueBuffer to current value size
+    valueBuffer.resize(value_size);
+
+    // Fetch the value from the db storage
+    result = db_store_get(table, inId.data(), inId.size(), &valueBuffer[0], value_size);
+    if (result != TCF_SUCCESS) {
+        // SAFE_LOG(TCF_LOG_ERROR, "Failed to get from LMDB database : %d", result);
+        return result;
+    }
+
+    bool found = false;
+    // Iterate over the stored comma separated values and match them with the value passed
+    // in. If a match is found, it needs to be deleted and then the updated csv stored back.
+    for(auto itr = valueBuffer.begin(); itr < valueBuffer.end(); itr += inValue.size() + 1){
+        if( std::equal(itr, itr+inValue.size() , inValue.begin())){
+
+            // If the value is anywhere in the csv except last, remove value and following ','
+            if ((itr+inValue.size()) < valueBuffer.end())
+                valueBuffer.erase(itr, itr+inValue.size()+1);
+            // Else if the value is not the only one implying it is last, remove value and preceeding ','
+            else if (inValue.size() < valueBuffer.size())
+                valueBuffer.erase(itr-1, itr+inValue.size());
+            // Else if the value is the only one in the csv
+            else if (inValue.size() == valueBuffer.size())
+                valueBuffer.erase(itr, itr+inValue.size());
+            
+            found = true;
+            break;
+        }
+    }
+
+    if(!found){
+        return TCF_ERR_VALUE;
+    }
+
+    // If this was the only value, delete key->value from db storage
+    if(valueBuffer.size() == 0){
+        return db_store_del(table, inId.data(), inId.size(), valueBuffer.data(), valueBuffer.size());
+    }
+    // Restore udated csv to database
+    return db_store_put(table, inId.data(), inId.size(), valueBuffer.data(), valueBuffer.size());
+}
+
+// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 std::string db_store::db_store_get_all(
     const std::string& table,
     const uint8_t* inId,

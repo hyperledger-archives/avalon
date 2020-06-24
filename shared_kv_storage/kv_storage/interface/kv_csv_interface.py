@@ -92,3 +92,21 @@ class KvCsvStorage(ABC):
                             strings matches. None, otherwise.
         """
         pass
+
+# ---------------------------------------------------------------------------------------------------
+    @abstractmethod
+    def csv_search_delete(self, table, key, value):
+        """
+        Function to conditionally update a key-value pair in a lmdb table
+        that holds comma-separated strings as value. This function reads
+        each of the comma-separated strings and then compares it with the
+        value passed in. If there is a match, the passed value is deleted.
+        If this is the lone string, the key-value pair altogether is removed.
+
+        Parameters:
+           @param table - Name of the lmdb table from which key-value pair
+                          needs to be read and updated.
+           @param key - The primary key of the table.
+           @param value - Value to be compared against and deleted.
+        """
+        pass

@@ -255,6 +255,26 @@ namespace db_store {
         ByteArray& outValue,
         const bool isMatch);
 
-    }  /* namespace db_store */
+    // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+    /**
+     * Updates a key->value pair in the database store. Reads each of the
+     * comma-separated strings and then compares it with the value passed
+     * in. If there is a match, the passed value is deleted. If this is the
+     * lone string, the key-value pair altogether is removed.
+     * Primary expected use: python / untrusted side
+     *
+     * @param table     table name
+     * @param inId      id byte array
+     * @param inValue   data to be deleted
+     *
+     * @return
+     *  TCF_SUCCESS  id->value updated/deleted
+     *  else         failed, data store unchanged
+     */
+    tcf_err_t db_store_csv_search_delete(
+        const std::string& table,
+        const ByteArray& inId,
+        const ByteArray& inValue);
 
+}  /* namespace db_store */
 

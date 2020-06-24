@@ -176,6 +176,97 @@ class TestRemoteLMDB(unittest.TestCase):
                                               self.key3, "notFound")
         self.assertEqual(pop_result, None, "Incorrect match pop result")
 
+    def test_csv_search_delete_first(self):
+        append_result = self.proxy.csv_append(
+            self.table, "key5", "value1")
+        self.assertTrue(append_result)
+        append_result = self.proxy.csv_append(
+            self.table, "key5", "value2")
+        self.assertTrue(append_result)
+        get_value_result = self.proxy.get(self.table, "key5")
+        logger.info("Before delete value : %s", get_value_result)
+        delete_value_result = self.proxy.csv_search_delete(
+            self.table, "key5", "value1")
+        self.assertTrue(delete_value_result)
+        get_value_result = self.proxy.get(self.table, "key5")
+        logger.info("After delete value : %s", get_value_result)
+        self.assertEqual(get_value_result, "value2",
+                         "csv_search_delete failed to delete value")
+        self.proxy.remove(self.table, "key5")
+
+    def test_csv_search_delete_last(self):
+        append_result = self.proxy.csv_append(
+            self.table, "key5", "value1")
+        self.assertTrue(append_result)
+        append_result = self.proxy.csv_append(
+            self.table, "key5", "value2")
+        self.assertTrue(append_result)
+        get_value_result = self.proxy.get(self.table, "key5")
+        logger.info("Before delete value : %s", get_value_result)
+        delete_value_result = self.proxy.csv_search_delete(
+            self.table, "key5", "value2")
+        self.assertTrue(delete_value_result)
+        get_value_result = self.proxy.get(self.table, "key5")
+        logger.info("After delete value : %s", get_value_result)
+        self.assertEqual(get_value_result, "value1",
+                         "csv_search_delete failed to delete value")
+        self.proxy.remove(self.table, "key5")
+
+    def test_csv_search_delete_notfound(self):
+        append_result = self.proxy.csv_append(
+            self.table, "key5", "value1")
+        self.assertTrue(append_result)
+        append_result = self.proxy.csv_append(
+            self.table, "key5", "value2")
+        self.assertTrue(append_result)
+
+        get_value_result = self.proxy.get(self.table, "key5")
+        logger.info("Before delete value : %s", get_value_result)
+        delete_value_result = self.proxy.csv_search_delete(
+            self.table, "key5", "value3")
+        self.assertTrue(not delete_value_result)
+        get_value_result = self.proxy.get(self.table, "key5")
+        logger.info("After delete value : %s", get_value_result)
+        self.assertEqual(get_value_result, "value1,value2",
+                         "csv_search_delete failed to delete value")
+        self.proxy.remove(self.table, "key5")
+
+    def test_csv_search_delete_inbetween(self):
+        append_result = self.proxy.csv_append(
+            self.table, "key5", "value1")
+        self.assertTrue(append_result)
+        append_result = self.proxy.csv_append(
+            self.table, "key5", "value2")
+        self.assertTrue(append_result)
+        append_result = self.proxy.csv_append(
+            self.table, "key5", "value3")
+        self.assertTrue(append_result)
+        get_value_result = self.proxy.get(self.table, "key5")
+        logger.info("Before delete value : %s", get_value_result)
+        delete_value_result = self.proxy.csv_search_delete(
+            self.table, "key5", "value2")
+        self.assertTrue(delete_value_result)
+        get_value_result = self.proxy.get(self.table, "key5")
+        logger.info("After delete value : %s", get_value_result)
+        self.assertEqual(get_value_result, "value1,value3",
+                         "csv_search_delete failed to delete value")
+        self.proxy.remove(self.table, "key5")
+
+    def test_csv_search_delete_only(self):
+        append_result = self.proxy.csv_append(
+            self.table, "key5", "value1")
+        self.assertTrue(append_result)
+
+        get_value_result = self.proxy.get(self.table, "key5")
+        logger.info("Before delete value : %s", get_value_result)
+        delete_value_result = self.proxy.csv_search_delete(
+            self.table, "key5", "value1")
+        self.assertTrue(delete_value_result)
+        get_value_result = self.proxy.get(self.table, "key5")
+        logger.info("After delete value : %s", get_value_result)
+        self.assertEqual(get_value_result, None,
+                         "csv_search_delete failed to delete value")
+
     def test_remove(self):
         remove_result = self.proxy.remove(self.table, self.key)
         logger.info(remove_result)
@@ -221,6 +312,11 @@ def local_main():
     test.test_csv_match_pop_last()
     test.test_csv_pop_empty()
     test.test_csv_match_pop_empty()
+    test.test_csv_search_delete_first()
+    test.test_csv_search_delete_last()
+    test.test_csv_search_delete_notfound()
+    test.test_csv_search_delete_inbetween()
+    test.test_csv_search_delete_only()
     test.test_remove()
     test.test_get_none()
     test.test_remove2()
