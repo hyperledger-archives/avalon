@@ -63,12 +63,11 @@ class KeyManagementEnclaveManager(EnclaveManager):
         """
         logger.info("Executing boot time procedure")
 
-        wo_to_cleanup = []
-        if "cleanup_work_orders" in self._config["KvStorage"]:
-            wo_to_cleanup = self._config["KvStorage"]["cleanup_work_orders"]
-        self._wo_kv_delegate.cleanup_work_orders(wo_to_cleanup)
+        # Cleanup all stale work orders for this worker which
+        # used old worker keys
+        self._wo_kv_delegate.cleanup_work_orders()
 
-        # Clear all workers mapped to this worker_id (pool). WPEs will have
+        # Clear all WPEs mapped to this worker_id (pool). WPEs will have
         # to register afresh to get into the pool now.
         self._worker_kv_delegate.cleanup_pool(self._worker_id)
 
@@ -244,9 +243,7 @@ def main(args=None):
                         type=str)
     parser.add_argument("--worker_id",
                         help="Id of worker in plain text", type=str)
-    parser.add_argument("--cleanup_work_orders",
-                        help="Comma-separated list of work orders to recover",
-                        type=str)
+
     (options, remainder) = parser.parse_known_args(args)
 
     if options.config:
@@ -266,9 +263,6 @@ def main(args=None):
         config["KMEListener"]["bind"] = options.bind
     if options.worker_id:
         config["WorkerConfig"]["worker_id"] = options.worker_id
-    if options.cleanup_work_orders:
-        config["KvStorage"]["cleanup_work_orders"] = \
-            options.cleanup_work_orders
 
     plogger.setup_loggers(config.get("Logging", {}))
     sys.stdout = plogger.stream_to_logger(

@@ -95,6 +95,7 @@ class WorkOrderProcessorEnclaveManager(WOProcessorManager):
         """
         Executes Boot flow of enclave manager
         """
+
         if self._wpe_requester\
             .register_wo_processor(self._unique_verification_key,
                                    self.encryption_key,
