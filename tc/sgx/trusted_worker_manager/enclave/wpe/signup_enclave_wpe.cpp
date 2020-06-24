@@ -14,7 +14,7 @@
  */
 
 
-#include "enclave_t.h"
+#include "wpe_enclave_t.h"
 
 #include <stdio.h>
 #include <stdlib.h>

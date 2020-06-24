@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "enclave_t.h"
+#include "kme_enclave_t.h"
 
 #include <string>
 
@@ -29,10 +29,10 @@
 #include "enclave_data.h"
 #include "work_order_processor_kme.h"
 
-ByteArray last_serialized_response_kme;
+ByteArray last_serialized_response;
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-tcf_err_t ecall_HandleWorkOrderRequestKME(const uint8_t* inSerializedRequest,
+tcf_err_t ecall_HandleWorkOrderRequest(const uint8_t* inSerializedRequest,
     size_t inSerializedRequestSize,
     const uint8_t* inWorkOrderExtData,
     size_t inWorkOrderExtDataSize,
@@ -55,18 +55,18 @@ tcf_err_t ecall_HandleWorkOrderRequestKME(const uint8_t* inSerializedRequest,
         tcf::WorkOrderProcessorKME wo_processor;
 
         // Persist Extended work order data in WorkOrderProcessor instance.
-	// extended work order data contains WPE's public encryption key
+	    // extended work order data contains WPE's public encryption key
         if (inWorkOrderExtDataSize > 0) {
             wo_processor.ext_work_order_data = \
                 std::string((const char*) inWorkOrderExtData);
         }
 
         std::string wo_string(request.begin(), request.end());
-        last_serialized_response_kme = wo_processor.Process(
+        last_serialized_response = wo_processor.Process(
             enclaveData, wo_string);
 
         // Save the response and return the size of the buffer required for it
-        (*outSerializedResponseSize) = last_serialized_response_kme.size();
+        (*outSerializedResponseSize) = last_serialized_response.size();
 
         // clear Extended work order data if present after processing work order
         if (inWorkOrderExtDataSize > 0) {
@@ -74,49 +74,15 @@ tcf_err_t ecall_HandleWorkOrderRequestKME(const uint8_t* inSerializedRequest,
         }
     } catch (tcf::error::Error& e) {
         SAFE_LOG(TCF_LOG_ERROR,
-            "Error in KME(ecall_HandleWorkOrderRequestKME): %04X -- %s",
+            "Error in KME(ecall_HandleWorkOrderRequest): %04X -- %s",
             e.error_code(), e.what());
         ocall_SetErrorMessage(e.what());
         result = e.error_code();
     } catch (...) {
         SAFE_LOG(TCF_LOG_ERROR,
-            "Unknown error KME(ecall_HandleWorkOrderRequestKME)");
+            "Unknown error KME(ecall_HandleWorkOrderRequest)");
         result = TCF_ERR_UNKNOWN;
     }
 
     return result;
-}  // ecall_HandleWorkOrderRequestKME
-
-// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-tcf_err_t ecall_GetSerializedResponseKME(uint8_t* outSerializedResponse,
-    size_t inSerializedResponseSize) {
-    tcf_err_t result = TCF_SUCCESS;
-
-    try {
-        tcf::error::ThrowIfNull(outSerializedResponse,
-            "Serialized response pointer is NULL");
-        tcf::error::ThrowIf<tcf::error::ValueError>(
-            inSerializedResponseSize < last_serialized_response_kme.size(),
-            "Not enough space for the response");
-
-        // Unseal the enclave persistent data
-        EnclaveData* enclaveData = EnclaveData::getInstance();
-
-        memcpy_s(outSerializedResponse, inSerializedResponseSize,
-            last_serialized_response_kme.data(),
-            last_serialized_response_kme.size());
-    } catch (tcf::error::Error& e) {
-        SAFE_LOG(TCF_LOG_ERROR,
-            "Error in KME(ecall_GetSerializedResponseKME): %04X -- %s",
-            e.error_code(), e.what());
-        ocall_SetErrorMessage(e.what());
-        result = e.error_code();
-    } catch (...) {
-        SAFE_LOG(TCF_LOG_ERROR,
-            "Unknown error in KME(ecall_GetSerializedResponseKME)");
-        result = TCF_ERR_UNKNOWN;
-    }
-
-    return result;
-}  // ecall_GetSerializedResponseKME
-
+}  // ecall_HandleWorkOrderRequest

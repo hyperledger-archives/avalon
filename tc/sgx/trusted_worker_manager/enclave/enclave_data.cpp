@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "enclave_t.h"
+#include "enclave_common_t.h"
 #include "sgx_tseal.h"
 
 #include <stdlib.h>

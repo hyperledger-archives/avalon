@@ -75,7 +75,7 @@ library_dirs = [
 libraries = [
     'uavalon-parson',
     'uavalon-verify-ias-report',
-    'avalon-enclave-bridge'
+    'avalon-singleton-enclave-bridge'
 ]
 
 enclave_module_files = [

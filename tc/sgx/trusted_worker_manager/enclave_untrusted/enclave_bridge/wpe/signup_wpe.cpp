@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "enclave_u.h"
+#include "wpe_enclave_u.h"
 
 #include "error.h"
 #include "avalon_sgx_error.h"

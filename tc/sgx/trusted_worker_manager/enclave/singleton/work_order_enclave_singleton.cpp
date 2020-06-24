@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "enclave_t.h"
+#include "singleton_enclave_t.h"
 
 #include <string>
 
@@ -80,36 +80,3 @@ tcf_err_t ecall_HandleWorkOrderRequest(const uint8_t* inSerializedRequest,
 
     return result;
 }
-
-// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-tcf_err_t ecall_GetSerializedResponse(uint8_t* outSerializedResponse,
-    size_t inSerializedResponseSize) {
-    tcf_err_t result = TCF_SUCCESS;
-
-    try {
-        tcf::error::ThrowIfNull(outSerializedResponse,
-            "Serialized response pointer is NULL");
-        tcf::error::ThrowIf<tcf::error::ValueError>(
-            inSerializedResponseSize < last_serialized_response.size(),
-            "Not enough space for the response");
-
-        // Unseal the enclave persistent data
-        EnclaveData* enclaveData = EnclaveData::getInstance();
-
-        memcpy_s(outSerializedResponse, inSerializedResponseSize,
-            last_serialized_response.data(), last_serialized_response.size());
-    } catch (tcf::error::Error& e) {
-        SAFE_LOG(TCF_LOG_ERROR,
-            "Error in worker enclave(ecall_GetSerializedResponse): %04X -- %s",
-            e.error_code(), e.what());
-        ocall_SetErrorMessage(e.what());
-        result = e.error_code();
-    } catch (...) {
-        SAFE_LOG(TCF_LOG_ERROR,
-            "Unknown error in worker enclave (ecall_GetSerializedResponse)");
-        result = TCF_ERR_UNKNOWN;
-    }
-
-    return result;
-}
-

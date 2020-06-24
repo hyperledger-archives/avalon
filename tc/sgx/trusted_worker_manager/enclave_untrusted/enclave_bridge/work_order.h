@@ -17,15 +17,13 @@
 
 #include <string>
 #include <stdlib.h>
-#include <sgx_eid.h>
 
 #include "tcf_error.h"
 #include "types.h"
-#include "avalon_sgx_error.h"
 
 class WorkOrderHandler {
 public:
-    WorkOrderHandler(EnclaveType enclave_type);
+    WorkOrderHandler() {}
 
     tcf_err_t HandleWorkOrderRequest(
         const Base64EncodedString& inSerializedRequest,
@@ -39,12 +37,4 @@ public:
         const size_t inSerializedResponseSize,
         Base64EncodedString& outSerializedResponse,
         int enclaveIndex);
-
-    // Function pointer to call work order request handler of specfic worker
-    sgx_status_t (*ecall_handle_wo_request) (sgx_enclave_id_t, tcf_err_t*,
-        const uint8_t*, size_t, const uint8_t*, size_t, size_t*);
-    // Function pointer to get serialized response of work order request
-    // of specfic worker
-    sgx_status_t (*ecall_get_serialized_response) (sgx_enclave_id_t, tcf_err_t*,
-        uint8_t*, size_t);
 };

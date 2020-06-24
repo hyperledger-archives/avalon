@@ -1,4 +1,4 @@
-/* Copyright 2018 Intel Corporation
+/* Copyright 2020 Intel Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,11 +13,16 @@
  * limitations under the License.
  */
 
-enclave {
-    from "sgx_tstdc.edl" import *;
-    from "sgx_tsgxssl.edl" import *;
-    from "base.edl" import *;
-    from "iohandler.edl" import *;
-    from "signup.edl" import *;
-    from "work_order.edl" import *;
-};
+// this header file includes worker specific header file generated from edl files
+// present in singleton or kme or wpe modules
+
+#ifdef BUILD_SINGLETON
+    #include "singleton_enclave_t.h"
+#elif BUILD_KME
+    #include "kme_enclave_t.h"
+#elif BUILD_WPE
+    #include "wpe_enclave_t.h"
+#else
+    #error Unknown enclave build argument
+#endif
+

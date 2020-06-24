@@ -16,7 +16,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "enclave_t.h"
+#include "enclave_common_t.h"
 #include "tcf_error.h"
 #include "error.h"
 #include "iohandler_enclave.h"

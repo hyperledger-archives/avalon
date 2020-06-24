@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "enclave_u.h"
+#include "enclave_common_u.h"
 
 #include <stdio.h>
 #include <algorithm>

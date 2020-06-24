@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "enclave_u.h"
+#include "singleton_enclave_u.h"
 
 #include "error.h"
 #include "avalon_sgx_error.h"
