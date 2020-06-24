@@ -154,7 +154,7 @@ class LMDBHelperProxy():
            @param value - The value that needs to be appended to the existing
                           value(comma-separated) corresponding to the key.
         """
-        # Csv_append, table, key, value
+        # csv_append, table, key, value
         # CA corresponding to Csv Append
         request = "CA\n" + self.__escape(table) + "\n" + self.__escape(key) + \
             "\n" + self.__escape(value)
@@ -175,7 +175,7 @@ class LMDBHelperProxy():
            @param value - The value that needs to be prepended to the existing
                           value(comma-separated) corresponding to the key.
         """
-        # Csv_prepend, table, key, value
+        # csv_prepend, table, key, value
         # CP corresponding to Csv Prepend
         request = "CP\n" + self.__escape(table) + "\n" + self.__escape(key) + \
             "\n" + self.__escape(value)
@@ -199,7 +199,7 @@ class LMDBHelperProxy():
            @returns value - First element from comma-separated value for key
                             passed in.
         """
-        # Csv_pop, table, key
+        # csv_pop, table, key
         # CR corresponding to Csv Pop where the 1st element from the csv is
         # retrieved and the rest left intact.
         request = "CR\n" + self.__escape(table) + "\n" + self.__escape(key)
@@ -225,13 +225,35 @@ class LMDBHelperProxy():
            @returns value - value if the first string of the comma-separated
                             strings matches. None, otherwise.
         """
-        # Csv_pop, table, key, value
+        # csv_pop, table, key, value
         # CM corresponding to Csv match and pop where the 1st element from the
         # csv is conditionally(if matches) retrieved and the rest left intact.
         request = "CM\n" + self.__escape(table) + "\n" + self.__escape(key) + \
             "\n" + self.__escape(value)
 
         return self.__get_update(request)
+
+# ------------------------------------------------------------------------------
+    def csv_search_delete(self, table, key, value):
+        """
+        Function to conditionally update a key-value pair in a lmdb table
+        that holds comma-separated strings as value. This function reads
+        each of the comma-separated strings and then compares it with the
+        value passed in. If there is a match, the passed value is deleted.
+        If this is the lone string, the key-value pair altogether is removed.
+
+        Parameters:
+           @param table - Name of the lmdb table from which key-value pair
+                          needs to be read and updated.
+           @param key - The primary key of the table.
+           @param value - Value to be compared against and deleted.
+        """
+        # csv_search_delete, table, key, value
+        # CD corresponding to Csv Search Delete
+        request = "CD\n" + self.__escape(table) + "\n" + self.__escape(key) + \
+            "\n" + self.__escape(value)
+
+        return self.__set_update(request)
 
 # ------------------------------------------------------------------------------
     def __set_update(self, request):

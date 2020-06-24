@@ -104,4 +104,25 @@ class DbStoreCsv : public DbStore {
             const std::string& value_b64);
 
         // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+        /**
+         * Updates a key->value pair in the database store conditionally.
+         * Reads each of the comma-separated strings and then compares it
+         * with the value passed in. If there is a match, the passed value
+         * is deleted. If this is the lone string, the key-value pair
+         * altogether is removed.
+         *
+         * @param table_b64     base64 encoded table name
+         * @param key_b64       base64 encoded key string
+         * @param value_b64     base64 encoded value string to search and delete
+         *
+         * @return
+         *  Success: void/no return
+         *  Failure: throws exception
+         */
+        void db_store_csv_search_delete(
+            const std::string& table_b64,
+            const std::string& key_b64,
+            const std::string& value_b64);
+
+        // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 };

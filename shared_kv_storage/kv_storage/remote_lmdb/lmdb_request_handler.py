@@ -195,6 +195,22 @@ class LMDBRequestHandler(resource.Resource):
                 logger.error("Invalid args for cmd csv_match_pop")
                 response = "e\nInvalid args for cmd csv_match_pop"
 
+        # Delete from CSV if a match is found
+        elif (cmd == "CD"):
+            if len(args) == 4:
+                result = self.kv_helper.csv_search_delete(
+                    args[1], args[2], args[3])
+                # Value found
+                if result:
+                    response = "t"
+                # Value not found
+                else:
+                    response = "f"
+            # Error
+            else:
+                logger.error("Invalid args for cmd csv_search_delete")
+                response = "e\nInvalid args for cmd csv_search_delete"
+
         # Error
         else:
             logger.error("Unknown cmd")
