@@ -48,7 +48,7 @@ std::string HandleWorkOrderRequest(
     tcf::enclave_queue::ReadyEnclave readyEnclave = \
         tcf::enclave_api::base::GetReadyEnclave();
 
-    WorkOrderHandler wo_handle(enclave_type);
+    WorkOrderHandler wo_handle;
     presult = wo_handle.HandleWorkOrderRequest(
         serialized_request,
         ext_wo_data,

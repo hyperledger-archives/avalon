@@ -12,7 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "enclave_u.h"
+
+#include "kme_enclave_u.h"
 
 #include "error.h"
 #include "avalon_sgx_error.h"

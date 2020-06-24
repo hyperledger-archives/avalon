@@ -13,10 +13,11 @@
  * limitations under the License.
  */
 
-#include "enclave_u.h"
+#include "enclave_common_u.h"
 
 #include "tcf_error.h"
 #include "error.h"
+#include "avalon_sgx_error.h"
 #include "log.h"
 #include "types.h"
 #include "enclave_types.h"
@@ -24,20 +25,6 @@
 #include "enclave.h"
 #include "base.h"
 #include "work_order.h"
-
-WorkOrderHandler::WorkOrderHandler(EnclaveType enclave_type) {
-    // Initialize function pointers
-    if (enclave_type == SINGLETON_ENCLAVE) {
-        ecall_handle_wo_request = ecall_HandleWorkOrderRequest;
-        ecall_get_serialized_response = ecall_GetSerializedResponse;
-    } else if (enclave_type == KME_ENCLAVE) {
-         ecall_handle_wo_request = ecall_HandleWorkOrderRequestKME;
-         ecall_get_serialized_response = ecall_GetSerializedResponseKME;
-    } else if (enclave_type == WPE_ENCLAVE) {
-        ecall_handle_wo_request = ecall_HandleWorkOrderRequestWPE;
-        ecall_get_serialized_response = ecall_GetSerializedResponseWPE;
-    }
-}
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 /*
@@ -82,7 +69,7 @@ tcf_err_t WorkOrderHandler::HandleWorkOrderRequest(
                     &response_size
                 ]
                 () {
-                    sgx_status_t sresult_inner = this->ecall_handle_wo_request(
+                    sgx_status_t sresult_inner = ecall_HandleWorkOrderRequest(
                         enclaveid,
                         &presult,
                         serialized_request.data(),
@@ -148,7 +135,7 @@ tcf_err_t WorkOrderHandler::GetSerializedResponse(
                     &serialized_response
                 ]
                 () {
-                    sgx_status_t sresult_inner = this->ecall_get_serialized_response(
+                    sgx_status_t sresult_inner = ecall_GetSerializedResponse(
                         enclaveid,
                         &presult,
                         serialized_response.data(),

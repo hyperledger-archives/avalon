@@ -13,7 +13,6 @@
 * limitations under the License.
 */
 
-#include "enclave_t.h"
 #include <algorithm>
 #include <vector>
 #include <string>

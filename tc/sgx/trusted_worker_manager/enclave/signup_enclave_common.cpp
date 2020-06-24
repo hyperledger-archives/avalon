@@ -15,7 +15,7 @@
 
 #include <string.h>
 
-#include "enclave_t.h"
+#include "enclave_common_t.h"
 
 #include "avalon_sgx_error.h"
 #include "zero.h"

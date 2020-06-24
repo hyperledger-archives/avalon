@@ -22,7 +22,7 @@
 #include <pthread.h>
 
 #include <sgx_uae_service.h>
-#include "enclave_u.h"
+#include "enclave_common_u.h"
 #include "sgx_support.h"
 
 #include "log.h"
