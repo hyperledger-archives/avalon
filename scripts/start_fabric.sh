@@ -160,13 +160,6 @@ elif [ $START_FABRIC == 1 ]; then
         # Create network profile file for avalon to use
         # profile file is generated in $WORK_DIR/vars/profiles/
         minifab profilegen
-        # Create blockmark file with block number 0
-        # This file will be used by generic client to
-        # register event
-        echo "0">$WORK_DIR/vars/blockmark
-        # Delete the old blockmark files.
-        rm -rf $TCF_HOME/blockchain_connector/blockmark
-        rm -rf $TCF_HOME/examples/apps/generic_client/blockmark
         # Since cli container is creating go package by downloading
         # go external dependencies and it need proxy configurations
         # to access internet. Passing proxy settings for cli.

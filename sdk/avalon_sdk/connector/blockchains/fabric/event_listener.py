@@ -39,8 +39,6 @@ class EventListener(base.ClientBase):
         self._channel_event_hub = self.channel.newChannelEventHub(
             peer, self.user)
         self._event_regid = ''
-        self._last_block = 0
-        self._config = 'blockmark'
         self._event = ''
         self._chaincode = ''
 
@@ -68,29 +66,6 @@ class EventListener(base.ClientBase):
     def event(self, event):
         self._event = event
 
-    @property
-    def config(self):
-        return self._config
-
-    @config.setter
-    def config(self, config):
-        """Open configuration file named config."""
-        self._config = config
-        try:
-            with open(self._config, 'r') as file:
-                data = file.read()
-                if len(data) > 0:
-                    self._last_block = int(data) + 1
-            logger.info('Loaded block mark: %s', self._last_block)
-        except IOError:
-            pass
-
-    def _save_config(self):
-        """Save configuration file."""
-        with open(self._config, 'w') as file:
-            file.write(str(self._last_block))
-            logger.info('Saved blockmark: %s', self._last_block)
-
     async def start_event_handling(self):
         """
         Start event listener and listen for events forever
@@ -103,21 +78,21 @@ class EventListener(base.ClientBase):
                     event, block_num, txnid, status))
             try:
                 self._handler(event, block_num, txnid, status)
-                self._last_block = block_num
             except Exception as ex:
                 logger.error('Handler error: {0}'.format(ex))
 
+        # Event hub object with latest block
+        stream = self._channel_event_hub.connect(
+            filtered=False, start='newest')
+
         self._event_regid = self._channel_event_hub.registerChaincodeEvent(
-            self._chaincode, self._event, start=self._last_block,
+            self._chaincode, self._event,
             onEvent=_event_handler)
-        logger.info('Event handler registered!')
         try:
-            await self._channel_event_hub.connect(False)
-        except grpc.RpcError as ex:
+            await asyncio.gather(stream, return_exceptions=True)
+        except Exception as ex:
             # This is expected when event hub gets disconnected
-            logger.info("Event handler disconnected")
-        finally:
-            self._save_config()
+            logger.error("Channel event hub connect failed: {}".format(ex))
 
     async def stop_event_handling(self, seconds=0):
         """
@@ -144,21 +119,21 @@ class EventListener(base.ClientBase):
                 if is_done:
                     asyncio.get_event_loop().run_until_complete(
                         self.stop_event_handling())
-                self._last_block = block_num
             except Exception as ex:
                 logger.error('Handler error: {0}'.format(ex))
 
+        # Event hub object with latest block
+        stream = self._channel_event_hub.connect(filtered=False,
+                                                 start='newest')
+
         self._event_regid = self._channel_event_hub.registerChaincodeEvent(
-            self._chaincode, self._event, start=self._last_block,
+            self._chaincode, self._event,
             onEvent=_event_handler)
-        logger.info('Event handler registered!')
         try:
             # wait for the connect() to get the stream of events
             # it will call the event handler function(_event_handler)
             # it will be unblocked only when call disconnect()
-            await self._channel_event_hub.connect(False)
-        except grpc.RpcError as ex:
+            await asyncio.gather(stream, return_exceptions=True)
+        except Exception as ex:
             # This is expected when event hub gets disconnected
-            logger.info("Event handler disconnected")
-        finally:
-            self._save_config()
+            logger.error("Channel event hub connect failed: {}".format(ex))
