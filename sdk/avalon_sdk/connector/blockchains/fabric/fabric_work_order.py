@@ -150,7 +150,6 @@ class FabricWorkOrderImpl(WorkOrderProxy):
             loop.run_until_complete(
                 asyncio.wait(tasks,
                              return_when=asyncio.ALL_COMPLETED))
-            loop.close()
             return wo_resp
         else:
             logging.info("Failed while creating event handler")
