@@ -34,6 +34,10 @@ class TxCommitter(base.ClientBase):
     Utility class to invoke Fabric chain code and query
     chain code.
     """
+    def __init__(self, profile, channel_name,
+                 org_name, peer_name, user_name):
+        super().__init__(profile, channel_name,
+                         org_name, peer_name, user_name)
 
     def _get_endorsers(self, queryonly=False):
         """

@@ -21,7 +21,6 @@ services:
     volumes:
       - ../vars/keyfiles:/keyfiles
       - ../vars/profiles/mychannel_network_for_pysdk.json:/project/avalon/sdk/avalon_sdk/connector/blockchains/fabric/network.json
-      - ../vars/blockmark:/project/avalon/examples/apps/generic_client/blockmark
     entrypoint: "bash -c \"\
         ./tools/run_proxy_model_tests.sh \""
     depends_on:
@@ -89,7 +88,6 @@ services:
       # interact with fabric blockchain
       - ../vars/keyfiles:/keyfiles
       - ../vars/profiles/mychannel_network_for_pysdk.json:/project/avalon/sdk/avalon_sdk/connector/blockchains/fabric/network.json
-      - ../vars/blockmark:/project/avalon/blockchain_connector/blockmark
     depends_on:
       - avalon-listener
       - avalon-enclave-manager

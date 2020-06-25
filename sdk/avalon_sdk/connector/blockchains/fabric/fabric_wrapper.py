@@ -170,7 +170,6 @@ class FabricWrapper():
             self.__orgname,
             self.__peername,
             'Admin')
-        event_obj.config = 'blockmark'
         event_obj.event = event_name
         event_obj.chaincode = chain_code
         event_obj.handler = handler_func
