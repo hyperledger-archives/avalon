@@ -21,9 +21,9 @@ For command line options, type `./generic_client.py -h` from this directory.
 
 ```
 usage: generic_client.py [-h] [-c CONFIG] [-u URI | -a ADDRESS]
-                         [-m {listing,registry}] [-w WORKER_ID]
-                         [-l WORKLOAD_ID] [-i IN_DATA [IN_DATA ...]]
-                         [-p] [-r] [-o] [-rs]
+                         [-m {listing,registry}]
+                         [-w WORKER_ID | -wx WORKER_ID_HEX] [-l WORKLOAD_ID]
+                         [-i IN_DATA [IN_DATA ...]] [-p] [-r] [-o] [-rs]
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -38,7 +38,9 @@ optional arguments:
   -m {listing,registry}, --mode {listing,registry}
                         should be one of listing or registry (default)
   -w WORKER_ID, --worker_id WORKER_ID
-                        worker id (hex string) to use to submit a work order
+                        worker id in plain text to use to submit a work order
+  -wx WORKER_ID_HEX, --worker_id_hex WORKER_ID_HEX
+                        worker id as hex string to use to submit a work order
   -l WORKLOAD_ID, --workload_id WORKLOAD_ID
                         workload id (hex string) for a given worker
   -i IN_DATA [IN_DATA ...], --in_data IN_DATA [IN_DATA ...]

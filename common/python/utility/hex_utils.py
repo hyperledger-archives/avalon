@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import binascii
+import hashlib
 
 
 # Return list of binary hex ids as list of UTF strings
@@ -61,3 +62,18 @@ def byte_array_to_hex_str(in_byte_array):
     Converts tuple of bytes to hex string
     '''
     return ''.join(format(i, '02x') for i in in_byte_array)
+
+
+def get_worker_id_from_name(worker):
+    """
+    Converts a readable name string to a string of hex
+    character which is 64 characters long.
+
+    Parameters:
+        @param worker - Plain text string representing name of worker
+    Returns:
+        @returns worker_id - 64 characters long hex str
+    """
+    # Calculate sha256 of worker id to get 32 bytes. The TC spec proxy
+    # model contracts expect byte32. Then take a hexdigest for hex str.
+    return hashlib.sha256(worker.encode("UTF-8")).hexdigest()
