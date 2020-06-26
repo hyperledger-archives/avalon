@@ -40,6 +40,7 @@ from avalon_sdk.work_order.work_order_params import WorkOrderParams
 from avalon_sdk.connector.direct.avalon_direct_client import AvalonDirectClient
 import config.config as pconfig
 import utility.logger as plogger
+import utility.hex_utils as hex_utils
 import avalon_crypto_utils.crypto.crypto as crypto
 from error_code.error_status import WorkOrderStatus, ReceiptCreateStatus
 import avalon_crypto_utils.signature as signature
@@ -638,9 +639,14 @@ def parse_command_line(args):
         "-o", "--off-chain",
         help="skip URI lookup and use the registry in the config file",
         action="store_true")
-    parser.add_argument(
-        "-w", "--worker-id",
-        help="skip worker lookup and retrieve specified worker",
+    optional_worker_id = parser.add_mutually_exclusive_group()
+    optional_worker_id.add_argument(
+        "-w", "--worker_id",
+        help="skip worker lookup and retrieve specified worker (plain text)",
+        type=str)
+    optional_worker_id.add_argument(
+        "-wx", "--worker_id_hex",
+        help="skip worker lookup and retrieve specified worker (hex string)",
         type=str)
     parser.add_argument(
         "-v", "--verbose",
@@ -689,6 +695,10 @@ def parse_command_line(args):
 
     verbose = options.verbose
     worker_id = options.worker_id
+    worker_id_hex = options.worker_id_hex
+
+    worker_id = worker_id_hex if not worker_id \
+        else hex_utils.get_worker_id_from_name(worker_id)
 
     # Initializing Worker Object
     worker_obj = worker.SGXWorkerDetails()

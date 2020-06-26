@@ -15,10 +15,10 @@
 # limitations under the License.
 
 import argparse
-import hashlib
 import json
 import logging
 import sys
+import utility.hex_utils as hex_utils
 from abc import ABC, abstractmethod
 
 from database import connector
@@ -40,9 +40,7 @@ class EnclaveManager(ABC):
 
         self._config = config
         worker_id = config.get("WorkerConfig")["worker_id"]
-        # Calculate sha256 of worker id to get 32 bytes. The TC spec proxy
-        # model contracts expect byte32. Then take a hexdigest for hex str.
-        self._worker_id = hashlib.sha256(worker_id.encode("UTF-8")).hexdigest()
+        self._worker_id = hex_utils.get_worker_id_from_name(worker_id)
         self._kv_helper = self._connect_to_kv_store()
         self._worker_kv_delegate = WorkerKVDelegate(self._kv_helper)
         self._wo_kv_delegate = WorkOrderKVDelegate(

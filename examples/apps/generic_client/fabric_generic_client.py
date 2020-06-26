@@ -24,6 +24,7 @@ import asyncio
 
 import config.config as pconfig
 import utility.logger as plogger
+import utility.hex_utils as hex_utils
 import avalon_crypto_utils.crypto_utility as crypto_utility
 from avalon_sdk.worker.worker_details import WorkerType, WorkerStatus
 import avalon_sdk.worker.worker_details as worker_details
@@ -98,13 +99,18 @@ class GenericClient():
             default="registry",
             choices={"registry", "listing"},
             type=str)
-        parser.add_argument(
+        mutually_excl_group_worker = parser.add_mutually_exclusive_group()
+        mutually_excl_group_worker.add_argument(
             "-w", "--worker_id",
-            help="worker id (hex string) to use to submit a work order",
+            help="worker id in plain text to use to submit a work order",
+            type=str)
+        mutually_excl_group_worker.add_argument(
+            "-wx", "--worker_id_hex",
+            help="worker id as hex string to use to submit a work order",
             type=str)
         parser.add_argument(
             "-l", "--workload_id",
-            help='workload id (hex string) for a given worker',
+            help='workload id for a given worker',
             type=str)
         parser.add_argument(
             "-i", "--in_data",
@@ -458,6 +464,10 @@ def Main(args=None):
 
     # worker id
     worker_id = options.worker_id
+    worker_id_hex = options.worker_id_hex
+
+    worker_id = worker_id_hex if not worker_id \
+        else hex_utils.get_worker_id_from_name(worker_id)
 
     # work load id of worker
     workload_id = options.workload_id
