@@ -12,20 +12,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# To build and run these tests with OpenSSL, run: make && make test
+#
+# To use Mbed TLS instead of the default OpenSSL, define CRYPTOLIB_MBEDTLS=1
+# For example: CRYPTOLIB_MBEDTLS=1 make && make test
+#
+# To remove generated binaries run: make clean
+
 CPPFLAGS= -D_UNTRUSTED_
 CPPFLAGS+= -I..  -I../crypto -I../packages/base64
-LDFLAGS=-lcrypto
 
-# To use Mbed TLS instead of the default OpenSSL, define CRYPTOLIB_MBEDTLS=1
-# For example: CRYPTOLIB_MBEDTLS=1 make
 ifdef CRYPTOLIB_OPENSSL
 	CPPFLAGS+= -DCRYPTOLIB_OPENSSL
-	#LDFLAGS+=  -lcrypto
-else
-ifdef CRYPTOLIB_MBEDTLS
+	LDFLAGS+=  -lcrypto
+else ifdef CRYPTOLIB_MBEDTLS
 	CPPFLAGS+= -DCRYPTOLIB_MBEDTLS
 	LDFLAGS+=  -lmbedcrypto -lmbedx509
-endif
+else # default is OpenSSL
+	CPPFLAGS+= -DCRYPTOLIB_OPENSSL
+	LDFLAGS+=  -lcrypto
 endif
 
 PROGS= build build/b64test build/certtest build/secrettest \

@@ -414,9 +414,15 @@ std::string pcrypto::sig::PublicKey::SerializeXYToHex() const {
  * Verifies ECDSA signature of message. It's expected that the caller of
  * this function passes a hash value of the original message.
  *
+ * Sample DER-encoded signature in hexadecimal (71 bytes):
+ * 30450221008e6b04abffea7dab1d2c6190619096262e567fa9f94be337953aab
+ * 8742158d1c022034bd23799bc27308ce645191c43c16d5fb767e6cb5ab002442
+ * 7194cbba59783c
+ *
  * @param hashMessage Data in a byte array to verify.
  *                    This is not the message to verify but a hash of the message
  * @param signature ByteArray containing signature data in DER format
+ *                  as defined in RFC 4492
  * @returns 1 if signature is valid, 0 if signature is invalid,
  *          and -1 if there is an internal error.
  */
