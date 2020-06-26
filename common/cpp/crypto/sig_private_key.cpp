@@ -208,14 +208,14 @@ void pcrypto::sig::PrivateKey::Generate() {
     }
 
     if (!EC_KEY_generate_key(private_key.get())) {
-        std::string msg("Crypto Error (sig::PrivateKey::Generater()): "
+        std::string msg("Crypto Error (sig::PrivateKey::Generate()): "
                 "Could not generate EC_KEY");
         throw Error::RuntimeError(msg);
     }
 
     private_key_ = (void *)EC_KEY_dup(private_key.get());
     if (private_key_ == nullptr) {
-        std::string msg("Crypto Error (sig::PrivateKey::Generater()): "
+        std::string msg("Crypto Error (sig::PrivateKey::Generate()): "
                 "Could not dup private EC_KEY");
         throw Error::RuntimeError(msg);
     }
@@ -269,11 +269,18 @@ std::string pcrypto::sig::PrivateKey::Serialize() const {
  * Signs hashMessage.data() with ECDSA privkey.
  * It's expected that caller of this function passes the
  * hash value of the original message to this function for signing.
+ *
+ * Sample DER-encoded signature in hexadecimal (71 bytes):
+ * 30450221008e6b04abffea7dab1d2c6190619096262e567fa9f94be337953aab
+ * 8742158d1c022034bd23799bc27308ce645191c43c16d5fb767e6cb5ab002442
+ * 7194cbba59783c
+ *
  * Throws RuntimeError.
  *
  * @param hashMessage Data in a byte array to sign.
  *                    This is not the message to sign but a hash of the message
  * @returns ByteArray containing signature data in DER format
+ *                    as defined in RFC 4492
  */
 ByteArray pcrypto::sig::PrivateKey::SignMessage(
         const ByteArray& hashMessage) const {

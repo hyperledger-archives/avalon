@@ -118,6 +118,7 @@ main(void)
 #endif
 #endif
 
+    printf("ECDSA Secp256k1 Signature Tests.\n");
     printf("Test ECDSA key management functions.\n");
     try {
         printf("Test constructors.\n");
@@ -179,8 +180,8 @@ main(void)
         printf("BEGIN PUBLIC KEY header line test PASSED\n");
     } else {
         printf("BEGIN PUBLIC KEY header line test FAILED\n");
-        ++count;                                              
-    }  
+        ++count;
+    }
 
     printf("Test deserialization\n");
     std::string privateKeyStr1;
