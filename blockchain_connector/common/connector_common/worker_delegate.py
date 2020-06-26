@@ -147,22 +147,19 @@ class WorkerDelegate():
         """
         jrpc_req_id = random.randint(0, 100000)
         # TODO: Remove hardcoding and pass wild characters instead
-        worker_lookup_result = self._worker_instance.worker_lookup(
+        count, _, worker_ids = self._worker_instance.worker_lookup(
             WorkerType.TEE_SGX,
             self._config["WorkerConfig"]["OrganizationId"],
             self._config["WorkerConfig"]["ApplicationTypeId"],
             jrpc_req_id
         )
-        logging.info("Worker lookup response from blockchain: {}\n".format(
-            json.dumps(worker_lookup_result, indent=4)
-        ))
+        logging.info("Worker lookup response from blockchain: "
+                     "count {} worker ids {}\n".format(
+                         count, worker_ids))
         # Work lookup returns tuple (worker_count, lookup_tag and list of
         # worker ids)
-        if worker_lookup_result and len(worker_lookup_result) > 0:
-            if worker_lookup_result[0] > 0:
-                return worker_lookup_result[2]
-            else:
-                logging.error("No workers found in blockchain")
+        if count > 0:
+            return worker_ids
         else:
             logging.error("Failed to lookup worker in blockchain")
-        return []
+            return []

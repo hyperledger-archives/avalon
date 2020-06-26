@@ -83,7 +83,6 @@ class EthereumWorkerRegistryImpl(WorkerRegistry):
                     be retrieved by calling function worker_lookup_next
                     with this tag as an input parameter
         ids         Array of the worker IDs that match the input parameters
-
         On error returns None.
         """
 
@@ -98,10 +97,12 @@ class EthereumWorkerRegistryImpl(WorkerRegistry):
                 logging.error(
                     "Invalid application id {}".format(application_id))
                 return None
-            lookup_result = self.__contract_instance.functions.workerLookUp(
-                worker_type.value, org_id, application_id).call()
+            w_count, lookup_tag, w_ids = \
+                self.__contract_instance.functions.workerLookUp(
+                    worker_type.value, org_id, application_id).call()
 
-            return _convert_lookup_result_to_json(lookup_result)
+            return w_count, lookup_tag, _convert_byte32_arr_to_hex_arr(
+                w_ids)
         else:
             logging.error(
                 "worker registry contract instance is not initialized")
@@ -124,13 +125,11 @@ class EthereumWorkerRegistryImpl(WorkerRegistry):
         """
 
         if (self.__contract_instance is not None):
-            if not is_valid_hex_str(worker_id):
-                logging.error("Invalid worker id {}".format(worker_id))
-                return None
-
-            worker_details = self.__contract_instance.functions.workerRetrieve(
-                worker_id).call()
-            return _convert_retrieve_result_to_json(worker_details)
+            status, w_type, org_id, app_ids, details = \
+                self.__contract_instance.functions.workerRetrieve(
+                    worker_id).call()
+            return (status, w_type, org_id,
+                    _convert_byte32_arr_to_hex_arr(app_ids), details)
         else:
             logging.error(
                 "worker registry contract instance is not initialized")
@@ -384,16 +383,6 @@ class EthereumWorkerRegistryImpl(WorkerRegistry):
             )
 
 
-def _convert_lookup_result_to_json(worker_lookup_result):
-    """Convert worker lookup result to JSON format."""
-    result = {}
-    result["totalCount"] = worker_lookup_result[0]
-    result["lookupTag"] = worker_lookup_result[1]
-    result["ids"] = _convert_byte32_arr_to_hex_arr(worker_lookup_result[2])
-
-    return {"result": result}
-
-
 def _convert_byte32_arr_to_hex_arr(byte32_arr):
     """
     This function takes in an array of byte32 strings and
@@ -406,23 +395,3 @@ def _convert_byte32_arr_to_hex_arr(byte32_arr):
     for byte32_str in byte32_arr:
         hex_ids = hex_ids + [byte32_str.hex()]
     return hex_ids
-
-
-def _convert_retrieve_result_to_json(retrieve_result):
-    """
-    This function takes in the result retrieved from the blockchain
-    and converts it to JSON for external entities.
-
-    Parameters:
-    retrieve_result Result to convert from a byte32 array to hex
-    """
-    result = {}
-    result["status"] = retrieve_result[0]
-    result["workerType"] = retrieve_result[1]
-    result["organizationId"] = retrieve_result[2].hex()
-    result["applicationTypeId"] = _convert_byte32_arr_to_hex_arr(
-        retrieve_result[3])
-    result["details"] = json.loads(retrieve_result[4])
-
-    # Convert to make similar to JRPC response structure
-    return {"result": result}

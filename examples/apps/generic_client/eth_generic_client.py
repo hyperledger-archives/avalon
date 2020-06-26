@@ -335,46 +335,45 @@ def _get_first_active_worker(worker_registry, worker_id, config):
     worker_retrieve_result = None
     if not worker_id:
         # Lookup all worker id present on  blockchain
-        worker_lookup_result = worker_registry.worker_lookup(
+        # return tuple (workers count, lookup tag and list of
+        # workers)
+        count, _, worker_ids = worker_registry.worker_lookup(
             WorkerType.TEE_SGX,
             config["WorkerConfig"]["OrganizationId"],
             config["WorkerConfig"]["ApplicationTypeId"],
             jrpc_req_id
         )
-        logger.info("\n Worker lookup response: {}\n".format(
-            json.dumps(worker_lookup_result, indent=4)
-        ))
-        if "result" in worker_lookup_result and \
-                "ids" in worker_lookup_result["result"].keys():
-            if worker_lookup_result["result"]["totalCount"] != 0:
-                worker_ids = worker_lookup_result["result"]["ids"]
-                # Filter workers by status(active) field
-                # Return first worker whose status is active
-                for w_id in worker_ids:
-                    jrpc_req_id += 1
-                    worker = worker_registry\
-                        .worker_retrieve(w_id, jrpc_req_id)
-                    if worker["result"]["status"] == WorkerStatus.ACTIVE.value:
-                        worker_retrieve_result = worker
-                        worker_id = w_id
-                        break
-            else:
-                logger.error("No workers found")
+        logger.info("\n Worker lookup response: count {}"
+                    "workers {}\n".format(
+                        count, worker_ids))
+        if count > 0:
+            # Filter workers by status(active) field
+            # Return first worker whose status is active
+            for w_id in worker_ids:
+                jrpc_req_id += 1
+                # worker retrieve return tuple of worker
+                # status, worker type, Org id, app type ids
+                # details of worker.
+                w_status, _, _, _, w_details = worker_registry.worker_retrieve(
+                    w_id,
+                    jrpc_req_id)
+                if w_status == WorkerStatus.ACTIVE.value:
+                    worker_id = w_id
+                    break
         else:
-            logger.error("Failed to lookup worker")
+            logger.error("No workers found")
     else:
-        worker_retrieve_result = worker_registry\
-            .worker_retrieve(worker_id, jrpc_req_id)
+        w_status, _, _, _, w_details = worker_registry.worker_retrieve(
+            worker_id, jrpc_req_id)
+        if w_status != WorkerStatus.ACTIVE.value:
+            logger.info("Worker {} is not active".format(worker_id))
+            sys.exit(-1)
 
-    if worker_retrieve_result is None:
-        logger.error("Failed to lookup worker")
-        return None, None
     # Initializing Worker Object
-    logger.info("\n Worker retrieve response: {}\n".format(
-        json.dumps(worker_retrieve_result, indent=4)
-    ))
+    logger.info("\n Worker retrieve response: {} {}\n".format(
+        worker_id, w_details))
     worker_obj = worker_details.SGXWorkerDetails()
-    worker_obj.load_worker(worker_retrieve_result["result"]["details"])
+    worker_obj.load_worker(json.loads(w_details))
 
     return worker_obj, worker_id
 
@@ -538,7 +537,7 @@ def Main(args=None):
             if _verify_wo_res_signature(res['result'],
                                         worker_obj.verification_key,
                                         wo_params.get_requester_nonce()) \
-                                            is False:
+                    is False:
                 logger.error(
                     "Work order response signature verification Failed")
                 sys.exit(1)

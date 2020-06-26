@@ -37,6 +37,7 @@ echo "========================================================="
 
 docker run -d -p 8545:8545 --network=ganache_local_net --hostname=local-ganache \
     --name=local-ganache trufflesuite/ganache-cli:v6.9.1 \
+    --gasLimit 300000000 --gasPrice 100 \
     || error_exit "Failed to start Ganache container"
 echo "Done"
 
