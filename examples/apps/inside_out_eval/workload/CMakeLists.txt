@@ -19,6 +19,8 @@ FILE(GLOB PROJECT_SOURCES "*.cpp")
 
 SET(GENERIC_CXX_FLAGS ${DEBUG_FLAGS} "-Wall" "-fPIC" "-Wno-write-strings" "-std=c++11")
 
+# Workload static library name must match the name of the workload folder
+# created under $TCF_HOME/example/apps/<workload_name>
 SET(INSIDE_OUT_EVAL_STATIC_NAME inside_out_eval)
 PROJECT(${INSIDE_OUT_EVAL_STATIC_NAME} C CXX)
 

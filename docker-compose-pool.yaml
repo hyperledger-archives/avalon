@@ -54,6 +54,9 @@ services:
         - https_proxy
         - no_proxy
         - ENCLAVE_TYPE=wpe
+        # Configure list of workload that need to be supported
+        # by this WPE by separating each workload by delimiter semicolon.
+        - WORKLOADS=echo-result;heart-disease-eval;inside-out-eval;simple-wallet
     environment:
       - http_proxy
       - https_proxy
@@ -70,4 +73,3 @@ services:
       - avalon-lmdb
       - avalon-listener
       - avalon-kme
-

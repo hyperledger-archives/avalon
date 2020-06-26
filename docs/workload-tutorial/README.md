@@ -131,7 +131,10 @@ will be created next in [Phase 2](#phase2).
 
 * Change placeholder `$WORKLOAD_STATIC_NAME$` (one location)
   in file `CMakeLists.txt`
-  to an appropriate name, `hello_world` (note the underscore, `_`)
+  to an appropriate name, `hello_world` (note the underscore, `_`)  
+
+  Make sure the `$WORKLOAD_STATIC_NAME$` is same as workload folder created above using  
+  `mkdir -p examples/apps/<workload_name>/workload`
 
 * To include the new workload into the build,
   add this line to the end of
@@ -141,21 +144,45 @@ will be created next in [Phase 2](#phase2).
   ADD_SUBDIRECTORY(hello_world/workload)
   ```
 
-* To link the new workload library into the build, add these lines to
-  the end of
-  [$TCF_HOME/tc/sgx/trusted_worker_manager/enclave/CMakeLists.txt](../../tc/sgx/trusted_worker_manager/enclave/CMakeLists.txt) :
+* To link the new workload library into the build, change below lines in
+  [$TCF_HOME/tc/sgx/trusted_worker_manager/enclave/CMakeWorkloads.txt](../../tc/sgx/trusted_worker_manager/enclave/singleton/CMakeLists.txt) :  
+
+  Add workload to supported workload list
   ```bash
-  # Add $WORKLOAD_STATIC_NAME$ workload
-  SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,-L,${TCF_TOP_DIR}/examples/apps/build/$WORKLOAD_STATIC_NAME$/workload")
-  TARGET_LINK_LIBRARIES(${PROJECT_NAME} -Wl,--whole-archive -l$WORKLOAD_STATIC_NAME$ -Wl,--no-whole-archive)
-  ```
-  Replace `$WORKLOAD_STATIC_NAME$` (two locations)
-  with `hello_world` so it becomes:
+    MACRO(CREATE_SUPPORTED_WORKLOADS_LIST)
+        ...
+        ...
+        # LIST(SUPPORTED_WORKLOADS_LIST "<workload_id>")
+    ENDMACRO()
+  ```  
+
+  Replace `<workload_id>`  with `hello_world` as shown below:
   ```bash
-  # Add hello_world workload
-  SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,-L,${TCF_TOP_DIR}/examples/apps/build/hello_world/workload")
-  TARGET_LINK_LIBRARIES(${PROJECT_NAME} -Wl,--whole-archive -lhello_world -Wl,--no-whole-archive)
+    MACRO(CREATE_SUPPORTED_WORKLOADS_LIST)
+        ...
+        ...
+        # LIST(SUPPORTED_WORKLOADS_LIST "hello_world")
+    ENDMACRO()
+  ```  
+
+  Add workload static library to supported workload library list
+  ```bash
+    MACRO(CREATE_SUPPORTED_WORKLOAD_LIBRARY_LIST)
+        ...
+        ...
+        LIST(APPEND SUPPORTED_WORKLOAD_LIBRARY_LIST "<workload_lib_name>")
+    ENDMACRO()
+  ```  
+
+  Replace `<workload_lib_name>`  with `hello_world` as shown below:
+  ```bash
+    MACRO(CREATE_SUPPORTED_WORKLOADS_LIST)
+        ...
+        ...
+        # LIST(SUPPORTED_WORKLOADS_LIST "hello_world")
+    ENDMACRO()
   ```
+
 * Update the `workloads` config in `$TCF_HOME/config/singleton_enclave_config.toml` to include the new
   workload. The work orders matching these workload ids will be processed by the enclave manager. The
   enclaves should be built with matching workloads. After update, the configuration should look like:

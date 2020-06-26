@@ -1,0 +1,96 @@
+# Copyright 2020 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+##################################################################
+MACRO(CREATE_SUPPORTED_WORKLOADS_LIST)
+    SET(SUPPORTED_WORKLOADS_LIST "")
+    LIST(APPEND SUPPORTED_WORKLOADS_LIST "echo-result")
+    LIST(APPEND SUPPORTED_WORKLOADS_LIST "heart-disease-eval")
+    LIST(APPEND SUPPORTED_WORKLOADS_LIST "inside-out-eval")
+    LIST(APPEND SUPPORTED_WORKLOADS_LIST "simple-wallet")
+
+    # A new workload can be added by using below syntax
+    # LIST(APPEND SUPPORTED_WORKLOADS_LIST "<workload_id>")
+ENDMACRO()
+
+##################################################################
+MACRO(CREATE_SUPPORTED_WORKLOAD_LIBRARY_LIST)
+    SET(SUPPORTED_WORKLOAD_LIBRARY_LIST "")
+    LIST(APPEND SUPPORTED_WORKLOAD_LIBRARY_LIST "echo")
+    LIST(APPEND SUPPORTED_WORKLOAD_LIBRARY_LIST "heart_disease_eval")
+    LIST(APPEND SUPPORTED_WORKLOAD_LIBRARY_LIST "inside_out_eval")
+    LIST(APPEND SUPPORTED_WORKLOAD_LIBRARY_LIST "simple_wallet")
+
+    # A new workload library can be added by using below syntax
+    # Note: Order of workloads and workload library should match the order in
+    #       SUPPORTED_WORKLOADS_LIST and SUPPORTED_WORKLOAD_LIBRARY_LIST
+    # LIST(APPEND SUPPORTED_WORKLOAD_LIBRARY_LIST "<workload_lib_name>")
+ENDMACRO()
+
+##################################################################
+MACRO(CREATE_LINK_WORKLOAD_LIBRARY_LIST)
+    SET(WORKLOAD_LIST "$ENV{WORKLOADS}")
+    SET(WORKLOAD_LIB_LIST "")
+    # Create workload library list based on workloads passed
+    IF("${WORKLOAD_LIST}" STREQUAL "all" OR "${WORKLOAD_LIST} " STREQUAL " ")
+        SET(WORKLOAD_LIB_LIST ${SUPPORTED_WORKLOAD_LIBRARY_LIST})
+    ELSE()
+        FOREACH(workload ${WORKLOAD_LIST})
+            # Check if user provided workload is present in supported workload list
+            # If not found, return -1
+            LIST(FIND SUPPORTED_WORKLOADS_LIST ${workload} index)
+            IF(NOT ${index} EQUAL -1)
+                # Get workload library corresponding to workload identifier
+                LIST(GET SUPPORTED_WORKLOAD_LIBRARY_LIST ${index} workload_lib)
+                LIST(APPEND WORKLOAD_LIB_LIST ${workload_lib})
+            ELSE()
+                MESSAGE(FATAL_ERROR,
+                    "Unable to find workload library corresponding to parsed workload")
+            ENDIF()
+        ENDFOREACH(workload)
+    ENDIF()
+ENDMACRO()
+
+##################################################################
+MACRO(CONFIG_WORKLOAD_LINKER_FLAGS)
+    FOREACH(workload_lib ${WORKLOAD_LIB_LIST})
+        # workload static library name defined inside CMakelists.txt must match
+        # name of the workload folder name created at ${BASE_WORKLOAD_DIR}/<workload_folder>
+        SET(CMAKE_SHARED_LINKER_FLAGS
+            "${CMAKE_SHARED_LINKER_FLAGS} -Wl,-L,${BASE_WORKLOAD_DIR}/build/${workload_lib}/workload")
+    ENDFOREACH(workload_lib)
+ENDMACRO()
+
+##################################################################
+MACRO(LINK_ENCLAVE_WORKLOAD_LIBRARIES)
+    SET(BASE_WORKLOAD_DIR ${TCF_TOP_DIR}/examples/apps)
+
+    # Create list of supported workloads
+    CREATE_SUPPORTED_WORKLOADS_LIST()
+
+    # Create list of supported workload library names
+    CREATE_SUPPORTED_WORKLOAD_LIBRARY_LIST()
+
+    # Create list of workload library list to be linked against enclave
+    CREATE_LINK_WORKLOAD_LIBRARY_LIST()
+
+    # Configure workload specific CMAKE linker flags
+    CONFIG_WORKLOAD_LINKER_FLAGS()
+
+    # Iterate over user given workload library list and link
+    FOREACH(workload_lib ${WORKLOAD_LIB_LIST})
+        TARGET_LINK_LIBRARIES(
+            ${PROJECT_NAME} -Wl,--whole-archive -l${workload_lib} -Wl,--no-whole-archive)
+    ENDFOREACH(workload_lib)
+ENDMACRO()
