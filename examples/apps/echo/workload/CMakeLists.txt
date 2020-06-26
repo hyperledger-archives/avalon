@@ -22,7 +22,9 @@ FILE(GLOB PROJECT_SOURCES "*.cpp")
 
 SET(GENERIC_CXX_FLAGS ${DEBUG_FLAGS} "-Wall" "-fPIC" "-Wno-write-strings" "-std=c++11")
 
-SET(ECHO_WORK_ORDER_STATIC_NAME echo_wo)
+# Workload static library name must match the name of the workload folder
+# created under $TCF_HOME/example/apps/<workload_name>
+SET(ECHO_WORK_ORDER_STATIC_NAME echo)
 PROJECT(${ECHO_WORK_ORDER_STATIC_NAME} CXX)
 
 ADD_LIBRARY(${ECHO_WORK_ORDER_STATIC_NAME} STATIC ${PROJECT_HEADERS} ${PROJECT_SOURCES})
