@@ -14,7 +14,11 @@
 
 import json
 import logging
+
+from error_code.error_status import WorkOrderStatus, JRPCErrorCodes
+from avalon_sdk.worker.worker_details import WorkerType
 from utility.hex_utils import is_valid_hex_str
+from utility.jrpc_utility import create_error_response
 from http_client.http_jrpc_client import HttpJrpcClient
 from avalon_sdk.connector.interfaces.worker_registry \
     import WorkerRegistry
@@ -31,6 +35,33 @@ class JRPCWorkerRegistryImpl(WorkerRegistry):
 
     def __init__(self, config):
         self.__uri_client = HttpJrpcClient(config["tcf"]["json_rpc_uri"])
+
+    def workerType_validation(self, worker_type, json_rpc_request):
+        """
+        Validate the worker type recived in worker related request
+
+        Parameters:
+        worker_type Worker type value derived from the worker's DID
+        json_rpc_request    JSON RPC request
+
+        Returns:
+        True if worker type is valid
+        False with error response if workertype is invalid
+        """
+
+        if worker_type is not None:
+            if isinstance(worker_type, WorkerType):
+                json_rpc_request["params"]["workerType"] = worker_type.value
+            elif isinstance(worker_type, int) and \
+                    (worker_type in [w.value for w in WorkerType]):
+                json_rpc_request["params"]["workerType"] = worker_type
+            else:
+                return False, create_error_response(
+                    JRPCErrorCodes.INVALID_PARAMETER_FORMAT_OR_VALUE,
+                    json_rpc_request["id"],
+                    "WorkType should be an Integer of range 1-3")
+
+        return True, ""
 
     def worker_retrieve(self, worker_id, id=None):
         """
@@ -93,8 +124,10 @@ class JRPCWorkerRegistryImpl(WorkerRegistry):
             }
         }
 
-        if worker_type is not None:
-            json_rpc_request["params"]["workerType"] = worker_type.value
+        code, error_response = self.workerType_validation(
+                                    worker_type, json_rpc_request)
+        if not code:
+            return error_response
 
         if organization_id is not None:
             json_rpc_request["params"]["organizationId"] = organization_id
@@ -145,8 +178,10 @@ class JRPCWorkerRegistryImpl(WorkerRegistry):
             }
         }
 
-        if worker_type is not None:
-            json_rpc_request["params"]["workerType"] = worker_type.value
+        code, error_response = self.workerType_validation(
+                                    worker_type, json_rpc_request)
+        if not code:
+            return error_response
 
         if organization_id is not None:
             json_rpc_request["params"]["organizationId"] = organization_id
@@ -179,18 +214,24 @@ class JRPCWorkerRegistryImpl(WorkerRegistry):
         Returns:
         JRPC response with worker registry status.
         """
+
         json_rpc_request = {
             "jsonrpc": "2.0",
             "method": "WorkerRegister",
             "id": id,
             "params": {
                 "workerId": worker_id,
-                "workerType": worker_type.value,
                 "organizationId": org_id,
                 "applicationTypeId": application_type_ids,
                 "details": details
             }
         }
+
+        code, error_response = self.workerType_validation(
+                                    worker_type, json_rpc_request)
+        if not code:
+            return error_response
+
         response = self.__uri_client._postmsg(json.dumps(json_rpc_request))
         return response
 

@@ -16,19 +16,11 @@ import json
 import logging
 from error_code.error_status import WorkerError
 from avalon_sdk.worker.worker_details import WorkerStatus
-
+from avalon_sdk.worker.worker_request_validator \
+    import WorkerRequestValidator
 from jsonrpc.exceptions import JSONRPCDispatchException
 
 logger = logging.getLogger(__name__)
-
-
-def must_get_worker_id(params):
-    if 'workerId' not in params:
-        raise JSONRPCDispatchException(
-            WorkerError.INVALID_PARAMETER_FORMAT_OR_VALUE,
-            "Worker Id not found in the database. Hence invalid parameter")
-
-    return str(params['workerId'])
 
 
 class TCSWorkerRegistryHandler:
@@ -97,24 +89,6 @@ class TCSWorkerRegistryHandler:
         return response
 
 # ------------------------------------------------------------------------------------------------
-
-    def __validate_input_worker_status(self, params):
-        """
-        Function to validate the worker status.
-        It should be valid status(ACTIVE, OFF_LINE, DECOMMISSIONED or
-        COMPROMISED)
-        Returns true if it is valid status otherwise false
-        """
-        try:
-            worker_status = params["status"]
-            status = int(worker_status)
-            WorkerStatus(status)
-            return True
-        except Exception as err:
-            logger.error("Invalid worker status code: %s", str(err))
-            return False
-
-# ------------------------------------------------------------------------------------------------
     def __lookup_basic(self, is_lookup_next, params):
         # sync the work pool to that of DB
         self.worker_pool = self.kv_helper.lookup("workers")
@@ -166,6 +140,18 @@ class TCSWorkerRegistryHandler:
             - param is the 'param' object in the a worker request as per TCF
                 API 5.3.4 Worker Lookup JSON Payload
         """
+        input_json_str = params["raw"]
+        input_value_json = json.loads(input_json_str)
+        req_validator = WorkerRequestValidator()
+        valid, err_msg = \
+            req_validator.worker_lookup_validation(
+                input_value_json["params"])
+        logger.info(err_msg)
+        if not valid:
+            raise JSONRPCDispatchException(
+                WorkerError.INVALID_PARAMETER_FORMAT_OR_VALUE,
+                err_msg
+             )
         return self.__lookup_basic(False, params)
 # ------------------------------------------------------------------------------------------------
 
@@ -176,6 +162,17 @@ class TCSWorkerRegistryHandler:
             - param is the 'param' object in the a worker request as per TCF
                 API 5.3.5 Worker Lookup Next JSON Payload
         """
+        input_json_str = params["raw"]
+        input_value_json = json.loads(input_json_str)
+        req_validator = WorkerRequestValidator()
+        valid, err_msg = \
+            req_validator.worker_lookup_next_validation(
+                input_value_json["params"])
+        if not valid:
+            raise JSONRPCDispatchException(
+                WorkerError.INVALID_PARAMETER_FORMAT_OR_VALUE,
+                err_msg
+            )
         return self.__lookup_basic(True, params)
 # ------------------------------------------------------------------------------------------------
 
@@ -187,9 +184,20 @@ class TCSWorkerRegistryHandler:
                 Trusted Compute EEA API 5.3.7 Worker Retrieve JSON Payload
         """
 
-        worker_id = must_get_worker_id(params)
+        input_json_str = params["raw"]
+        input_value_json = json.loads(input_json_str)
+        req_validator = WorkerRequestValidator()
+        valid, err_msg = \
+            req_validator.worker_retrieve_validation(
+                input_value_json["params"])
+        if not valid:
+            raise JSONRPCDispatchException(
+                WorkerError.INVALID_PARAMETER_FORMAT_OR_VALUE,
+                err_msg
+            )
         # value retrieved is 'result' field as per Spec 5.3.8 Worker Retrieve
         # Response Payload
+        worker_id = str(params['workerId'])
         value = self.kv_helper.get("workers", worker_id)
 
         if value is None:

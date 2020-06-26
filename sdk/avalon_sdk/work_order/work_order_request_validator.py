@@ -103,6 +103,9 @@ class WorkOrderRequestValidator():
         if "sessionKeyIv" in params and \
                 not is_valid_hex_str(params["sessionKeyIv"]):
             return False, "Invalid data format for session key iv"
+        if "dataEncryptionAlgorithm" in params and \
+                type(params["dataEncryptionAlgorithm"]) != str:
+            return False, "Invalid data format for dataEncryptionAlgorithm"
         if "encryptedRequestHash" in params and \
                 not is_valid_hex_str(params["encryptedRequestHash"]):
             return False, "Invalid data format for encrypted request hash"
