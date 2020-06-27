@@ -31,7 +31,7 @@ services:
       - no_proxy
     command: |
       bash -c "
-        avalon_ethereum_connector -b ethereum -u http://avalon-listener:1947
+        avalon_ethereum_connector -u http://avalon-listener:1947
         tail -f /dev/null
         "
     volumes:
