@@ -350,7 +350,7 @@ def _get_first_active_worker(worker_registry, worker_id, config):
             jrpc_req_id
         )
         logger.info("\n Worker lookup response: count {}"
-                    "workers {}\n".format(
+                    "\n Workers {}\n".format(
                         count, worker_ids))
         if count > 0:
             # Filter workers by status(active) field
