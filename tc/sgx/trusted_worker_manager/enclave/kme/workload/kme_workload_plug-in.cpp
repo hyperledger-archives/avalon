@@ -192,17 +192,15 @@ void KMEWorkloadProcessor::Register(
                 out_work_order_data);
             return;
         }
-        /// Compare MRENCLAVE value
-	// Checks are disabled until we have automated way
-	// to calculate the MR enclave of WPE
-        /* EnclaveData* enclaveData = EnclaveData::getInstance();
+        // Compare MRENCLAVE value
+        EnclaveData* enclaveData = EnclaveData::getInstance();
         ByteArray ext_data = enclaveData->get_extended_data();
         if (memcmp(ext_data.data(),
 		mr_enclave.data(),SGX_HASH_SIZE) != 0) {
             this->SetStatus((int)ERR_MRENCLAVE_NOT_MATCH,
                 out_work_order_data);
             ThrowIf<ValueError>(true, "WPE MRENCLAVE value didn't match");
-        } */
+        }
 	// Verify the hash of verification key in the report data and
 	// unique_id in in_data
 	uint8_t unique_id_hash[SGX_HASH_SIZE] = {0};
@@ -222,7 +220,7 @@ void KMEWorkloadProcessor::Register(
 	    e_key.data(), encryption_key_hash, SGX_HASH_SIZE) != 0) {
             this->SetStatus((int)ERR_ENCRYPTION_KEY_NOT_MATCH,
                 out_work_order_data);
-            ThrowIf<ValueError>(true, "Unique id value didn't match");
+            ThrowIf<ValueError>(true, "Encryption key hash didn't match");
 	}
         // TODO: MRSIGNER value check
 

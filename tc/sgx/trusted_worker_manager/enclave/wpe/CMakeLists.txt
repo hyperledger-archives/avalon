@@ -79,7 +79,16 @@ TARGET_LINK_LIBRARIES(${PROJECT_NAME} -Wl,--whole-archive -lsimple_wallet -Wl,--
 
 LINK_ENCLAVE_COMMON_LIBRARIES()
 
-#Include common directories and common target directories required by enclave
+# Include common directories and common target directories required by enclave
 INCLUDE_ENCLAVE_COMMON_DIRECTORIES()
 INCLUDE_ENCLAVE_COMMON_TARGET_DIRECTORIES()
 TARGET_INCLUDE_DIRECTORIES(${PROJECT_NAME} PRIVATE ${TCF_TOP_DIR}/examples/apps)
+
+# Create wpe_mr_enclave.txt file containing the MRENCLAVE for the WPE Enclave.
+# Place this file in the top directory
+ADD_CUSTOM_COMMAND(
+    TARGET ${PROJECT_NAME}
+    POST_BUILD
+    COMMAND ${TCF_TOP_DIR}/scripts/generate_mrenclave.sh ${SIGNED_ENCLAVE} ${TCF_TOP_DIR}/wpe_mr_enclave.txt
+)
+
