@@ -22,6 +22,8 @@
 #include <string>
 
 #include "crypto.h"
+#include "utils.h"
+#include "hex_string.h"
 
 // JSON format for private data:
 // {
@@ -35,40 +37,52 @@
 //     {
 //         "PublicKey" : "",
 //         "PrivateKey" : "",
-//     }
+//     },
+//
+//     If KME, Extended data consists of MRENCLAVE value of associated WPE
+//     If WPE, Extended data consists of verification key of associated KME
+//     in hex format.
+//     "ExtendedData" : ""
 // }
 //
 // JSON format for public data
 // {
 //     "SigningKey" : "",
 //     "EncryptionKey" : ""
+//     "EncryptionKeySignature" : ""
 // }
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 class EnclaveData {
+private:
+    EnclaveData(void);
+    ~EnclaveData(void);
+
+    static EnclaveData* instance;
+ 
 protected:
     void SerializePrivateData(void);
     void SerializePublicData(void);
-
-    void DeserializeSealedData(const std::string& inSerializedEnclaveData);
 
     tcf::crypto::sig::PublicKey public_signing_key_;
     tcf::crypto::sig::PrivateKey private_signing_key_;
     tcf::crypto::pkenc::PublicKey public_encryption_key_;
     tcf::crypto::pkenc::PrivateKey private_encryption_key_;
+    std::string encryption_key_signature_;
+
+    ByteArray extended_data_;
+    std::string nonce_;
 
     std::string serialized_private_data_;
     std::string serialized_public_data_;
 
 public:
-    // We need some way to compute the required size so the client can
-    // allocated storage for the sealed data. There are a number of ways
-    // to do this; for now, the constant will be good enough.
-    static const size_t cMaxSealedDataSize = 8192;
-    static const size_t cMaxPublicDataSize = 4096;
-
-    EnclaveData(void);
-    EnclaveData(const uint8_t* inSealedData);
+    static EnclaveData* getInstance() {
+        if(!instance) {
+            instance = new EnclaveData;
+        }
+        return instance;
+    }
 
     ByteArray encrypt_message(const ByteArray& message) const {
         return public_encryption_key_.EncryptMessage(message);
@@ -84,6 +98,22 @@ public:
 
     int verify_signature(const ByteArray& message, const ByteArray& signature) const {
         return public_signing_key_.VerifySignature(message, signature);
+    }
+
+    void set_extended_data(const ByteArray& in_ex_data) {
+        extended_data_ = in_ex_data;
+    }
+
+    void set_nonce(std::string nonce) {
+        nonce_ = nonce;
+    }
+
+    std::string get_nonce() {
+        return nonce_;
+    }
+
+    ByteArray get_extended_data() {
+        return extended_data_;
     }
 
     std::string get_serialized_signing_key(void) const { return public_signing_key_.Serialize(); }
@@ -102,9 +132,16 @@ public:
 
     size_t get_private_data_size(void) const { return serialized_private_data_.length(); }
 
+    void generate_encryption_key_signature() {
+        std::string b64_pub_encr_key = public_encryption_key_.Serialize();
+        ByteArray encr_key_sig_bytes = \
+            private_signing_key_.SignMessage(StrToByteArray(b64_pub_encr_key));
+        encryption_key_signature_ = \
+            ByteArrayToHexEncodedString(encr_key_sig_bytes);
+    }
+
     size_t get_sealed_data_size(void) const {
         size_t sdsize = sgx_calc_sealed_data_size(0, get_private_data_size());
-        assert(sdsize < cMaxSealedDataSize);
         return sdsize;
     }
 };

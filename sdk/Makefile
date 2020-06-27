@@ -35,12 +35,11 @@ install:
 	pip3 install dist/*.whl
 
 clean:
-	pip3 uninstall --yes $(WHEEL_FILE)
+	if [ -f $(WHEEL_FILE) ] ; then pip3 uninstall --yes $(WHEEL_FILE); fi
 	rm -rf build deps dist *.egg-info
 	find . -iname '*.pyc' -delete
 	find . -iname '__pycache__' -delete
 
-
-.phony : all
-.phony : clean
-.phone : install
+.PHONY : all
+.PHONY : clean
+.PHONY : install

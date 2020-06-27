@@ -23,68 +23,21 @@ remote_url = "http://localhost:9090"
 LogLevel = "INFO"
 LogFile  = "__screen__"
 
-# -------------------------------------------------------------------
-# EnclaveManager -- configuration of Intel SGX Enclave EnclaveManager
-# -------------------------------------------------------------------
-[EnclaveManager]
-sleep_interval = "10"
+# ------------------------------------------------------------------
+# Work load execution-settings for workload execution(synchronous/asynchronous)
+# ------------------------------------------------------------------
+[WorkloadExecution]
+# Set this flag to 1 for sync workorder execution.Else set it to 0
+sync_workload_execution = 1
 
 [Listener]
 listener_port = 1947
 max_work_order_count = 10
 
-# -------------------------------------------------------
-# EnclaveModule -- configuration of the Intel SGX Enclave
-# -------------------------------------------------------
-[EnclaveModule]
-# Service Provider ID (SPID) is a 32-digit hex string tied to the
-# enclave implementation. Replace dummy SPID with value obtained after
-# subscription to run TCS in Intel SGX HW mode.
-spid = "DEADBEEF00000000DEADBEEF00000000"
-
-num_of_enclaves = "1"
-
-# ias_url is the URL of the Intel Attestation Service (IAS) server.
-ias_url = "https://api.trustedservices.intel.com/sgx/dev"
-
-# Proxy for https. Leave commented out for direct Internet connections or
-# uncomment and change to your corporate proxy.
-#https_proxy = "http://your-proxy:your-port/"
-
-# IAS API key is a 32-digit hex string subscription key used for authentication
-# of requests submitted to the IAS server. Obtain the key by subscribing in
-# the portal https://api.portal.trustedservices.intel.com/
-ias_api_key = "112233445566778899aabbccddeeff00"
-
-# TEE enclave library to use.
-enclave_library = "libtcf-enclave.signed.so"
-enclave_library_path = "tc/sgx/trusted_worker_manager/enclave/build/lib/"
-
-# -------------------------------------------------------------
-# TCS Worker configuration details
-# -------------------------------------------------------------
 [WorkerConfig]
-ProofDataType = "TEE-SGX-IAS"
 
-# The Following URIs are used in direct model to submit work orders in
-# synchronous, asynchronous, pull and notification modes.
-WorkOrderSyncUri = "http://localhost:8080"
-WorkOrderAsyncUri = "http://localhost:8080"
-WorkOrderPullUri = "http://localhost:8080"
-WorkOrderNotifyUri = "http://localhost:8080"
-# Replace ApplicationTypeId and OrganizationId with real hexadecimal values
 ApplicationTypeId = "11aa22bb33cc44dd"
 OrganizationId = "aabbcc1234ddeeff"
-
-# URI used by worker to process work order receipts
-ReceiptInvocationUri = "http://localhost:8080"
-
-# Deployed address of Work order invocation smart contract used in proxy model
-WorkOrderInvocationAddress = ""
-# Work Order Receipt smart contract used in proxy model
-ReceiptInvocationAddress = ""
-# Ethereum Address used by the worker to submit transactions
-FromAddress = ""
 
 # Optional - Comma separated list of Hashing algorithms. Default is SHA-256
 HashingAlgorithm = "SHA-256"
@@ -95,7 +48,3 @@ SigningAlgorithm = "SECP256K1"
 KeyEncryptionAlgorithm = "RSA-OAEP-3072"
 # Comma separated list of encryption algorithms. Default is AES-GCM-256
 DataEncryptionAlgorithm = "AES-GCM-256"
-# Supported work order formats are JSON-RPC, JSON-RPC-JWT, and Custom format
-# starting with tilde "~"
-workOrderPayloadFormats = "JSON-RPC"
-

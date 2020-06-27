@@ -14,22 +14,24 @@
 
 from utility.hex_utils import is_valid_hex_str
 import base64
+import binascii
 
 
 class WorkOrderRequestValidator():
     """
-    WorkOrderRequestValidator - validates work order request
-    for proper params fields and valid data formats
+    WorkOrderRequestValidator validates work order requests
+    for proper parameter fields and valid data formats.
     """
     def __init__(self):
         """
-        key value pair with field name and boolean indicator that tells
-        whether field is mandatory or not.
-        True is mandatory and False is optional.
+        Initialize __param_key_map and __value_key_map,
+        which are key-value pairs.
+        The key is the field name and value is a boolean that
+        indicates whether a field is mandatory (True) or optional (False).
         """
         self.__param_key_map = {
             "responseTimeoutMSecs": True,
-            "payloadFormat": False,
+            "payloadFormat": True,
             "resultUri": False,
             "notifyUri": False,
             "workOrderId": True,
@@ -55,11 +57,19 @@ class WorkOrderRequestValidator():
 
     def validate_parameters(self, params):
         """
-        Validate parameter dictionary for existence of
+        Validate params dictionary for existence of
         fields and mandatory fields
-        Returns False and string with error message on failure and
-        True and empty string on success
+
+        Parameters:
+        params    Parameter dictionary to validate
+
+        Returns:
+        True and empty string on success and
+        False and string with error message on failure.
         """
+        if len(params) == 0:
+            return False, "Empty params in the request"
+
         key_list = []
         for key in params.keys():
             if key not in self.__param_key_map.keys():
@@ -69,6 +79,12 @@ class WorkOrderRequestValidator():
         for k, v in self.__param_key_map.items():
             if v is True and k not in key_list:
                 return False, "Missing parameter {}".format(k)
+
+        if type(params["responseTimeoutMSecs"]) != int:
+            return False, "Invalid data format for responseTimeoutMSecs"
+
+        if params["payloadFormat"].upper() != "JSON-RPC":
+            return False, "Invalid payload format"
 
         if not is_valid_hex_str(params["workerId"]):
             return False, "Invalid data format for Worker id"
@@ -90,15 +106,31 @@ class WorkOrderRequestValidator():
         if "encryptedRequestHash" in params and \
                 not is_valid_hex_str(params["encryptedRequestHash"]):
             return False, "Invalid data format for encrypted request hash"
+        if not is_valid_hex_str(params["requesterNonce"]):
+            return False, "Invalid data format for requesterNonce"
+        if "requesterSignature" in params:
+            try:
+                decoded_str = base64.b64decode(
+                    params["requesterSignature"], validate=True)
+            except Exception:
+                return False, "Invalid data format for requesterSignature"
         return True, ""
 
     def validate_data_format(self, data):
         """
-        Validate data format of the params data field (in data or out data)
-        Returns False and string with error message on failure and
-        True and empty string on success
+        Validate data format of the params data field (inData or outData).
+
+        Parameters:
+        data    Data (inData or OutData)
+
+        Returns:
+        True and empty string on success and
+        False and string with error message on failure.
         """
+        # In/out data is array of dict/json objects
         for data_item in data:
+            if type(data_item) is not dict:
+                return False, "Invalid data format for in/out data"
             in_data_keys = []
             for key in data_item.keys():
                 if key not in self.__data_key_map.keys():

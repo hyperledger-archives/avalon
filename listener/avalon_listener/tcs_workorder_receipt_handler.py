@@ -16,10 +16,10 @@ import json
 import logging
 import base64
 from utility.hex_utils import is_valid_hex_str
-import crypto_utils.crypto.crypto as crypto
+import avalon_crypto_utils.crypto.crypto as crypto
 from error_code.error_status import ReceiptCreateStatus, SignatureStatus,\
     JRPCErrorCodes
-import crypto_utils.signature as signature
+import avalon_crypto_utils.signature as signature
 from jsonrpc.exceptions import JSONRPCDispatchException
 
 logger = logging.getLogger(__name__)
@@ -31,7 +31,7 @@ class TCSWorkOrderReceiptHandler:
     requests. It reads appropriate work order information from the
     KV storage to create the response.
     Work order receipts are created and placed in the KV storage by the
-    SGX Enclave Manager after the work order (successfully) completed.
+    Intel SGX Enclave Manager after the work order (successfully) completed.
     """
 # -----------------------------------------------------------------------------
 
@@ -65,7 +65,7 @@ class TCSWorkOrderReceiptHandler:
         """
         Function to process work order request
         Parameters:
-            - params is variable-length arugment list containing work request
+            - params is variable-length argument list containing work request
             as defined in EEA spec 7.2.2
         Returns jrpc response as defined in 4.1
         """
@@ -169,7 +169,7 @@ class TCSWorkOrderReceiptHandler:
         """
         Function to process update work order request
         Parameters:
-            - params is variable-length arugment list containing work request
+            - params is variable-length argument list containing work request
               as defined in EEA spec 7.2.3
         Returns jrpc response as defined in 4.1
         """
@@ -342,7 +342,7 @@ class TCSWorkOrderReceiptHandler:
         """
         Function to look the set of work order receipts available
         Parameters:
-            - params is variable-length arugment list containing work request
+            - params is variable-length argument list containing work request
               as defined in EEA spec 7.2.8
         Returns jrpc response as defined EEA spec 7.2.9
         """
@@ -355,7 +355,7 @@ class TCSWorkOrderReceiptHandler:
         """
         Function to look the set of work order receipt newly added
         Parameters:
-            - params is variable-length arugment list containing work request
+            - params is variable-length argument list containing work request
               as defined in EEA spec 7.2.10
         Returns jrpc response as defined EEA spec 7.2.9
         """
@@ -368,7 +368,7 @@ class TCSWorkOrderReceiptHandler:
         """
         Function to retrieve the details of worker
         Parameters:
-            - params is variable-length arugment list containing work order
+            - params is variable-length argument list containing work order
             receipt request request as defined in EEA spec 7.2.4
         Returns jrpc response as defined in 7.2.5
         """
@@ -403,7 +403,7 @@ class TCSWorkOrderReceiptHandler:
         """
         Function to retrieve the update to work order receipt
         Parameters:
-            - params is variable-length arugment list containing work order
+            - params is variable-length argument list containing work order
             update retrieve request as defined in EEA spec 7.2.6
         Returns:
             Jrpc response as defined in EEA spec 7.2.7

@@ -133,6 +133,84 @@ class LMDBRequestHandler(resource.Resource):
             else:
                 logger.error("Invalid args for cmd Remove")
                 response = "e\nInvalid args for cmd Remove"
+
+        # Append to csv
+        elif (cmd == "CA"):
+            if len(args) == 4:
+                result = self.kv_helper.csv_append(args[1], args[2], args[3])
+                # Append to csv successful (returned True)
+                if result:
+                    response = "t"
+                # Append to csv unsuccessful (returned False)
+                else:
+                    response = "f"
+            # Error
+            else:
+                logger.error("Invalid args for cmd csv_append")
+                response = "e\nInvalid args for cmd csv_append"
+
+        # Prepend to csv
+        elif (cmd == "CP"):
+            if len(args) == 4:
+                result = self.kv_helper.csv_prepend(args[1], args[2], args[3])
+                # Prepend to csv successful (returned True)
+                if result:
+                    response = "t"
+                # Prepend to csv unsuccessful (returned False)
+                else:
+                    response = "f"
+            # Error
+            else:
+                logger.error("Invalid args for cmd csv_prepend")
+                response = "e\nInvalid args for cmd csv_prepend"
+
+        # Pop/retrieve from CSV
+        elif (cmd == "CR"):
+            if len(args) == 3:
+                result = self.kv_helper.csv_pop(args[1], args[2])
+                # Value found
+                if result is not None:
+                    response = "v\n" + escape(result)
+                # Value not found
+                else:
+                    response = "n"
+            # Error
+            else:
+                logger.error("Invalid args for cmd csv_pop")
+                response = "e\nInvalid args for cmd csv_pop"
+
+        # Pop/retrieve from CSV if a match is found
+        elif (cmd == "CM"):
+            if len(args) == 4:
+                result = self.kv_helper.csv_match_pop(
+                    args[1], args[2], args[3])
+                # Value found
+                if result is not None:
+                    response = "v\n" + escape(result)
+                # Value not found
+                else:
+                    response = "n"
+            # Error
+            else:
+                logger.error("Invalid args for cmd csv_match_pop")
+                response = "e\nInvalid args for cmd csv_match_pop"
+
+        # Delete from CSV if a match is found
+        elif (cmd == "CD"):
+            if len(args) == 4:
+                result = self.kv_helper.csv_search_delete(
+                    args[1], args[2], args[3])
+                # Value found
+                if result:
+                    response = "t"
+                # Value not found
+                else:
+                    response = "f"
+            # Error
+            else:
+                logger.error("Invalid args for cmd csv_search_delete")
+                response = "e\nInvalid args for cmd csv_search_delete"
+
         # Error
         else:
             logger.error("Unknown cmd")

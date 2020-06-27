@@ -19,4 +19,3 @@
 std::string Process(std::string str_in) {
     return "RESULT: " + str_in;
 }
-

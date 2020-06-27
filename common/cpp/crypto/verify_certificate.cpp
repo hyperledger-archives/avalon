@@ -18,33 +18,44 @@
 #include <string.h>
 #include <openssl/x509v3.h>
 #include <openssl/pem.h>
+#include <openssl/evp.h>
 
+#include "crypto_shared.h"
 #include "verify_certificate.h"
-#include "c11_support.h"
 
+#ifndef CRYPTOLIB_OPENSSL
+#error "CRYPTOLIB_OPENSSL must be defined to compile source with OpenSSL."
+#endif
+
+
+/**
+ * Verify that cert_pem is signed by CA,
+ * using CA certificate ca_cert_pem as a root of trust.
+ *
+ * @param cert_pem    X.509 Certificate to verify
+ *                    with BEGIN and END lines and new lines
+ * @param ca_cert_pem CA Certificate (usually the IAS CA cert)
+ *                    with BEGIN and END lines and new lines
+ * @returns true on success and false on failure
+ */
 bool verify_certificate_chain(const char* cert_pem,
                               const char* ca_cert_pem)
 {
-    assert(cert_pem!=NULL);
-
-    /* Using the IAS CA certificate as a root of trust. */
-    /* Checking that cert is signed by CA. */
-
-    X509* cacrt;
-    X509* crt;
+    if (cert_pem == nullptr || ca_cert_pem == nullptr) // sanity check
+        return false;
 
     BIO* crt_bio = BIO_new_mem_buf((void*)cert_pem, -1);
-    crt = PEM_read_bio_X509(crt_bio, NULL, 0, NULL);
-    assert(crt != NULL);
+    X509* crt = PEM_read_bio_X509(crt_bio, nullptr, 0, nullptr);
+    assert(crt != nullptr);
 
     BIO* cacrt_bio = BIO_new_mem_buf((void*)ca_cert_pem, -1);
-    cacrt = PEM_read_bio_X509(cacrt_bio, NULL, 0, NULL);
-    assert(cacrt != NULL);
+    X509* cacrt = PEM_read_bio_X509(cacrt_bio, nullptr, 0, nullptr);
+    assert(cacrt != nullptr);
 
     X509_STORE* s = X509_STORE_new();
     X509_STORE_add_cert(s, cacrt);
     X509_STORE_CTX* ctx = X509_STORE_CTX_new();
-    X509_STORE_CTX_init(ctx, s, crt, NULL);
+    X509_STORE_CTX_init(ctx, s, crt, nullptr);
     int rc = X509_verify_cert(ctx);
 
     X509_STORE_CTX_free(ctx);
@@ -54,10 +65,5 @@ bool verify_certificate_chain(const char* cert_pem,
     BIO_free(crt_bio);
     BIO_free(cacrt_bio);
 
-    if(rc <= 0 ) {  // Error
-        return false; // Fail
-    }
-    // Else success
-    return true; /* 1 .. fail, 0 .. success */
+    return (rc > 0);
 }
-

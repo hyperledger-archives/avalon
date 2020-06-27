@@ -27,9 +27,7 @@ RUN apt-get update \
     curl \
     wget \
     liblmdb-dev \
- && apt-get -y -q upgrade \
- && apt-get clean \
- && rm -rf /var/lib/apt/lists/*
+ && apt-get clean
 
 # Make Python3 default
 RUN ln -sf /usr/bin/python3 /usr/bin/python
@@ -49,7 +47,7 @@ RUN apt-get update \
     python3-pip \
     swig
 
-RUN pip3 install --upgrade setuptools
+RUN pip3 install setuptools
 
 ENV TCF_HOME=/project/avalon
 
@@ -90,7 +88,7 @@ COPY --from=build_image /project/avalon/shared_kv_storage/lmdb_config.toml \
 RUN apt-get update \
  && apt-get install -y -q python3-pip \
  && echo "Install Shared KV package\n" \
- && pip3 install dist/*.whl \
+ && pip3 install dist/*.whl coverage \
  && echo "Remove unused packages from image\n" \
  && apt-get autoremove --purge -y -q python3-pip \
  && apt-get clean \

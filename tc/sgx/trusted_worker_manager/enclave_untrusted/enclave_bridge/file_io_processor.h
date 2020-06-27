@@ -38,3 +38,4 @@ uint32_t FileTell(string fileName, uint8_t *result, size_t resultSize,
 uint32_t FileSeek(string fileName, size_t position, uint8_t *result,
     size_t resultSize);
 
+uint32_t FileDelete(string fileName, uint8_t *result, size_t resultSize);

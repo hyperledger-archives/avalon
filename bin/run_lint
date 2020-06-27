@@ -34,8 +34,7 @@ find_python_packages() {
         | git check-ignore --stdin --non-matching --verbose \
         | grep ^:: \
         | sed -e 's/^::\s//' \
-        | grep -v /setup.py$ \
-        | grep -v /setup_tests.py$ \
+        | grep -v /setup.*py$ \
         | grep -v _pb2\.py$
 }
 
@@ -110,9 +109,7 @@ lint_module() {
             [ $VERBOSE = 1 ] && (
                 echo "--------------------------------------------------------"
                 echo "---- Running pylint3 $pylintrc in $subdir..."
-                echo "---- PYTHONPATH ${PYTHONPATH:-not set}"
             )
-
             pylint3 \
                 --rcfile=$pylintrc \
                 --reports=no \
@@ -154,7 +151,6 @@ lint_module() {
                 echo "--------------------------------------------------------"
                 echo "---- Running cppcheck in $subdir..."
             )
-
             cppcheck \
                 --std=c++11 \
                 --quiet \
@@ -195,8 +191,8 @@ lint_module() {
 usage() {
     echo "Run pycodestyle, pylint3, and cppcheck for this repository"
     echo "Usage:"
-    echo "  $0 [-s BRANCH] [-n] [-h]"
-    echo
+    echo "  $0 [-s BRANCH] [-n] [-h] MODULE..."
+    echo "Lint MODULE(s)"
     echo "Options:"
     echo "  -h          print usage and exit"
     echo "  -n          dry-run, only prints files that would be linted"
@@ -204,7 +200,18 @@ usage() {
     echo "  -v          increase verbosity"
 }
 
-
+# Exhaustive list of modules configured for linting
+ALL_MODULES="tests \
+enclave_manager \
+common \
+tc \
+docs_workload_tutorial \
+sdk \
+listener \
+shared_kv_storage \
+blockchain_connector \
+examples
+"
 #
 # Parse command line parameters
 #
@@ -238,15 +245,20 @@ do
     esac
 done
 
-# Print version information
-pwd
-echo "pycodestyle $(pycodestyle --version)"
-echo "$(pylint3 --version | head -1)"
-echo "PYTHONPATH ${PYTHONPATH:-not imported}"
-cppcheck --version
+# Default to lint all modules if no module is specified
+if [ -z "$@" ]; then
+    echo "No target MODULE(s) specified to lint."
+    echo "For usage information, type: run_lint -h."
+    echo ""
+    echo "Lint will run on all modules (default)."
+    echo ""
+    MODULES=$ALL_MODULES
+else
+    MODULES=$@
+fi
 
 if [ "$DRY_RUN" = "1" ]; then
-    for dir in validator
+    for dir in $MODULES
     do
         for package in $(find_packages "$dir" "$SINCE")
         do
@@ -259,22 +271,60 @@ fi
 top_dir=$(cd $(dirname $(dirname $0)) && pwd)
 rv=0
 
+# Print version information
+cppcheck --version
+echo "$(pylint3 --version | head -1)"
+echo "pycodestyle $(pycodestyle --version)"
+
 # Run pycodestyle or pylint or both for each module.
-# Modules should be ranked in decreasing likelihood of having lint errors.
 
 # Language:                                Python  | C
 # Checks:                           pycodestyle    | pycodestyle
 #                                           pylint |    cppcheck
-export PYTHONPATH=$PYTHONPATH:$top_dir/examples/common/python
-lint_module tests                    "$SINCE" 1  0   0  0 || rv=1
-lint_module examples/enclave_manager "$SINCE" 1  0   0  0 || rv=1
-lint_module examples/common          "$SINCE" 1  0   0  0 || rv=1
-lint_module examples/apps            "$SINCE" 1  0   0  1 || rv=1
-lint_module tc                       "$SINCE" 1  0   0  1 || rv=1
-lint_module common                   "$SINCE" 1  0   0  1 || rv=1
-lint_module docs/workload-tutorial   "$SINCE" 0  0   0  1 || rv=1
-lint_module sdk                      "$SINCE" 1  0   0  0 || rv=1
-lint_module listener                 "$SINCE" 1  0   0  0 || rv=1
-lint_module shared_kv_storage        "$SINCE" 1  0   0  1 || rv=1
 
-exit $rv
+for MODULE in $MODULES
+do
+    case $MODULE in
+        tests)
+                lint_module tests                    "$SINCE" 1  0   0  0 || rv=1
+                ;;
+        enclave_manager)
+                lint_module enclave_manager          "$SINCE" 1  0   0  0 || rv=1
+                ;;
+        tc)
+                lint_module tc                       "$SINCE" 1  0   0  1 || rv=1
+                ;;
+        common)
+                lint_module common                   "$SINCE" 1  0   0  1 || rv=1
+                ;;
+        docs_workload_tutorial)
+                lint_module docs/workload-tutorial   "$SINCE" 0  0   0  1 || rv=1
+                ;;
+        sdk)
+                lint_module sdk                      "$SINCE" 1  0   0  0 || rv=1
+                ;;
+        listener)
+                lint_module listener                 "$SINCE" 1  0   0  0 || rv=1
+                ;;
+        shared_kv_storage)
+                lint_module shared_kv_storage        "$SINCE" 1  0   0  1 || rv=1
+                ;;
+        blockchain_connector)
+                lint_module blockchain_connector     "$SINCE" 1  0   0  0 || rv=1
+                ;;
+        examples)
+                lint_module examples                 "$SINCE" 1  0   0  1 || rv=1
+                ;;
+        *)
+                echo "Module not configured for lint : $MODULE"
+                rv=1
+                ;;
+    esac
+done
+if [ $rv -eq 0 ]; then
+    echo ""
+    echo "SUCCESS"
+    exit 0
+else
+    exit $rv
+fi

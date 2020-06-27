@@ -13,10 +13,9 @@
 * limitations under the License.
 */
 
-#include "parson.h"
 #include "error.h"
 #include "tcf_error.h"
-#include "types.h"
+#include "json_utils.h"
 
 const char* GetJsonStr(const JSON_Object* json_object,
                        const char* name,
@@ -46,13 +45,14 @@ double GetJsonNumber(const JSON_Object* object, const char* name) {
         return json_object_dotget_number(object, name);
 }
 
-void JsonSetStr(JSON_Object* json, const char* name, const char* value, const char* err) {
+void JsonSetStr(JSON_Object* json, const char* name, const char* value,
+                const char* err) {
         JSON_Status jret = json_object_dotset_string(json, name, value);
         tcf::error::ThrowIf<tcf::error::RuntimeError>(jret != JSONSuccess, err);
 }
 
-void JsonSetNumber(JSON_Object* json, const char* name, double value, const char* err) {
+void JsonSetNumber(JSON_Object* json, const char* name, double value,
+                   const char* err) {
         JSON_Status jret = json_object_dotset_number(json, name, value);
         tcf::error::ThrowIf<tcf::error::RuntimeError>(jret != JSONSuccess, err);
 }
-

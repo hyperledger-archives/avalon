@@ -60,12 +60,10 @@ function try() {
     "$@" || die "test failed: $*"
 }
 
-check_error()
+function error_exit()
 {
-    if [ "$?" = "1" ]; then
-        echo "Directory doesn't exist!" 1>&2
-        exit 1
-    fi
+    echo "[Error]: " ${*}
+    exit 1
 }
 
 # -----------------------------------------------------------------
@@ -84,9 +82,9 @@ fi
 : "${PKG_CONFIG_PATH?Missing environment variable PKG_CONFIG_PATH}"
 
 if [[ ${SGX_MODE} &&  "${SGX_MODE}" == "HW" ]]; then
-    echo "SGX mode is set to HW"
+    echo "Intel SGX mode is set to HW"
 else
-    echo "Setting default SGX mode to SIM"
+    echo "Setting default Intel SGX mode to SIM"
     export SGX_MODE=SIM
 fi
 
@@ -140,9 +138,8 @@ NUM_CORES=1
 # BUILD
 # -----------------------------------------------------------------
 
-yell --------------- "COMMON SGX (WORKLOAD & IOHANDLER)" ---------------
-cd $TCF_HOME/common/sgx_workload/
-check_error
+yell --------------- "COMMON INTEL SGX (WORKLOAD & IOHANDLER)" ---------------
+cd $TCF_HOME/common/sgx_workload/ || error_exit "Failed to change to the directory"
 
 mkdir -p build
 cd build
@@ -150,8 +147,15 @@ try cmake ..
 try make "-j$NUM_CORES"
 
 yell --------------- EXAMPLE WORKLOADS ---------------
-cd $TCF_HOME/examples/apps
-check_error
+cd $TCF_HOME/examples/apps || error_exit "Failed to change to the directory"
+
+mkdir -p build
+cd build
+try cmake ..
+try make "-j$NUM_CORES"
+
+yell --------------- KME WORKLOAD ---------------
+cd $TCF_HOME/tc/sgx/trusted_worker_manager/enclave/kme/workload || error_exit "Failed to change to the directory"
 
 mkdir -p build
 cd build
@@ -159,17 +163,22 @@ try cmake ..
 try make "-j$NUM_CORES"
 
 yell --------------- COMMON CPP ---------------
-cd $TCF_HOME/common/cpp
-check_error
+cd $TCF_HOME/common/cpp || error_exit "Failed to change to the directory"
 
 mkdir -p build
 cd build
 try cmake ..
 try make "-j$NUM_CORES"
 
+yell --------------- COMMON CPP TESTS ---------------
+cd $TCF_HOME/common/cpp/tests || error_exit "Failed to change to the directory"
+
+mkdir -p build
+try make "-j$NUM_CORES"
+try make test "-j$NUM_CORES"
+
 yell --------------- TRUSTED WORKER MANAGER COMMON ---------------
-cd $TCF_HOME/tc/sgx/trusted_worker_manager/common
-check_error
+cd $TCF_HOME/tc/sgx/trusted_worker_manager/common || error_exit "Failed to change to the directory"
 
 mkdir -p build
 cd build
@@ -177,8 +186,7 @@ try cmake ..
 try make "-j$NUM_CORES"
 
 yell --------------- ENCLAVE ---------------
-cd $TCF_HOME/tc/sgx/trusted_worker_manager/enclave
-check_error
+cd $TCF_HOME/tc/sgx/trusted_worker_manager/enclave || error_exit "Failed to change to the directory"
 
 mkdir -p build
 cd build
@@ -186,53 +194,44 @@ try cmake ..
 try make "-j$NUM_CORES"
 
 yell --------------- ENCLAVE BRIDGE---------------
-cd $TCF_HOME/tc/sgx/trusted_worker_manager/enclave_untrusted/enclave_bridge
-check_error
+cd $TCF_HOME/tc/sgx/trusted_worker_manager/enclave_untrusted/enclave_bridge || error_exit "Failed to change to the directory"
 
 mkdir -p build
 cd build
 try cmake ..
 try make "-j$NUM_CORES"
 
-yell --------------- EXAMPLES COMMON PYTHON ---------------
-cd $TCF_HOME/common/python
-check_error
+yell --------------- COMMON PYTHON ---------------
+cd $TCF_HOME/common/python || error_exit "Failed to change to the directory"
+
+try make "-j$NUM_CORES"
+try make install
+
+yell --------------- COMMON CRYPTO UTILS PYTHON ---------------
+cd $TCF_HOME/common/crypto_utils || error_exit "Failed to change to the directory"
 
 try make "-j$NUM_CORES"
 try make install
 
 yell --------------- ENCLAVE MANAGER ---------------
-cd $TCF_HOME/examples/enclave_manager
-check_error
+cd $TCF_HOME/enclave_manager || error_exit "Failed to change to the directory"
 
 try make "-j$NUM_CORES"
 try make install
 
 yell --------------- AVALON SDK ---------------
-cd $TCF_HOME/sdk
-check_error
+cd $TCF_HOME/sdk || error_exit "Failed to change to the directory"
 
 try python3 setup.py bdist_wheel
 try pip3 install dist/*.whl
 
-yell --------------- LMDB LISTENER ---------------
-cd $TCF_HOME/shared_kv_storage/db_store/packages
-check_error
-
-mkdir -p build
-cd build
-try cmake ..
-try make
-
 yell --------------- SHARED KV STORAGE ---------------
-cd $TCF_HOME/shared_kv_storage
-check_error
-
+cd $TCF_HOME/shared_kv_storage || error_exit "Failed to change to the directory"
 try make
 try make install
 
 yell --------------- AVALON LISTENER ----------------
-cd $TCF_HOME/listener
+cd $TCF_HOME/listener || error_exit "Failed to change to the directory"
 try make "-j$NUM_CORES"
 try make install
 

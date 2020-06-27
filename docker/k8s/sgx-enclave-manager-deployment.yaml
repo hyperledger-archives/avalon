@@ -12,25 +12,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-version: '3.5'
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: enclave-manager-pool
+  name: avalon-enclave-manager
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: tee
+      app: avalon-enclave-manager
   template:
     metadata:
-      name: tee
+      name: avalon-enclave-manager
       labels:
-        app: tee
+        app: avalon-enclave-manager
     spec:
       containers:
-      - image: tcf-dev:latest
-        name: tee
+      - image: avalon-sgx-enclave-manager-dev:latest
+        name: avalon-enclave-manager
         imagePullPolicy: Never
         volumeMounts:
         - mountPath: /dev/isgx
@@ -39,12 +38,8 @@ spec:
           name: aesmsocket
         securityContext:
           privileged: true
-        envFrom:
-        - prefix: TCF_
-          configMapRef:
-            name: tcf-config
         command: ["/bin/bash"]
-        args: ["$(TCF_HOME)/scripts/enclave_manager.sh"]
+        args: ["-c", "enclave_manager --lmdb_url http://avalon-lmdb:9090"]
       volumes:
       - name: isgx
         hostPath:
@@ -54,3 +49,16 @@ spec:
         hostPath:
           path: /var/run/aesmd/aesm.socket
           type: Socket
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: avalon-enclave-manager
+spec:
+  ports:
+  - name: "5555"
+    protocol: TCP
+    port: 5555
+    targetPort: 5555
+  selector:
+    app: avalon-enclave-manager

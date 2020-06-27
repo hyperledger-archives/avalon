@@ -15,40 +15,50 @@
 
 #include <stdlib.h>
 #include <string>
-#include <map>
 
 #include "error.h"
 #include "tcf_error.h"
 #include "swig_utils.h"
 #include "types.h"
+#include "enclave_types.h"
 
 #include "work_order.h"
 
 #include "base.h"
 #include "work_order_wrap.h"
 
-// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+/*
+ * Handles json serialized work order requests and returns serialized
+ * work order response.
+ *
+ * @param serialized_request - JSON serialized work order request
+ * @param ext_wo_data - Extended work order data
+ * @param enclave_type - Type of Enclave.
+ * @ returns JSON serialized response
+*/
 std::string HandleWorkOrderRequest(
-    const std::string& sealed_signup_data,
-    const std::string& serialized_request) {
+    const std::string& serialized_request,
+    const std::string& ext_wo_data,
+    EnclaveType enclave_type) {
     tcf_err_t presult;
 
     uint32_t response_identifier;
     size_t response_size;
 
-    tcf::enclave_queue::ReadyEnclave readyEnclave = tcf::enclave_api::base::GetReadyEnclave();
+    tcf::enclave_queue::ReadyEnclave readyEnclave = \
+        tcf::enclave_api::base::GetReadyEnclave();
 
-    presult = tcf::enclave_api::workorder::HandleWorkOrderRequest(
-        sealed_signup_data,
+    WorkOrderHandler wo_handle;
+    presult = wo_handle.HandleWorkOrderRequest(
         serialized_request,
+        ext_wo_data,
         response_identifier,
         response_size,
         readyEnclave.getIndex());
     ThrowTCFError(presult);
 
     Base64EncodedString response;
-    presult = tcf::enclave_api::workorder::GetSerializedResponse(
-        sealed_signup_data,
+    presult = wo_handle.GetSerializedResponse(
         response_identifier,
         response_size,
         response,

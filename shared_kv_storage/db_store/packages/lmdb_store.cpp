@@ -55,12 +55,40 @@ public:
 };
 
 /* -----------------------------------------------------------------
+ * CLASS: SafeUpdateLock
+ *
+ * This class initializes a mutex lock to serialize csv update related
+ * transactions.
+ * ----------------------------------------------------------------- */
+
+/* Lock to protect access to the database */
+static pthread_mutex_t csv_update_lock = PTHREAD_MUTEX_INITIALIZER;
+
+class SafeUpdateLock {
+public:
+    SafeUpdateLock(void) {
+        pthread_mutex_lock(&csv_update_lock);
+    }
+
+    ~SafeUpdateLock(void) {
+        pthread_mutex_unlock(&csv_update_lock);
+    }
+};
+
+/* -----------------------------------------------------------------
  * CLASS: SafeTransaction
  *
  * This class initializes the lmdb database and wraps transactions to
  * ensure that the resources are released when the object is deallocated.
  * ----------------------------------------------------------------- */
 
+
+
+/* @TODO : Shift from functional to object-oriented approach is required for
+ * this file. Upgrade this file to a Singleton Class or lmdb_store_env as a static
+ * member variable of a normal class. Then data type specific APIs can be segregated
+ * to a derived class and this class holding pristine get/set/delete APIs only.
+ */
 /* Lightning database environment used to store data */
 static MDB_env* lmdb_store_env;
 
@@ -140,7 +168,13 @@ tcf_err_t db_store::db_store_get_value_size(
     }
 
     ret = mdb_dbi_open(stxn.txn, table.c_str(), 0, &dbi);
-    if (ret != 0) {
+    if (ret == MDB_NOTFOUND) {
+        // Set outIsPresent to false if database not found and return SUCCESS
+        // for the db_store_get_value_size operation
+        *outIsPresent = false;
+        return TCF_SUCCESS;
+    }
+    else if (ret != 0) {
         // SAFE_LOG(TCF_LOG_ERROR, "Failed to open LMDB transaction : %d", ret);
         *outIsPresent = false;
         return TCF_ERR_SYSTEM;
@@ -366,7 +400,8 @@ tcf_err_t db_store::db_store_get(
     result = db_store_get_value_size(table, inId.data(), inId.size(), &isPresent, &value_size);
     if (result != TCF_SUCCESS) {
         return result;
-    } else if (!isPresent) {
+    }
+    if (!isPresent) {
         return TCF_ERR_VALUE;
     }
 
@@ -395,6 +430,185 @@ tcf_err_t db_store::db_store_del(
     const ByteArray& inId,
     const ByteArray& inValue) {
     return db_store_del(table, inId.data(), inId.size(), inValue.data(), inValue.size());
+}
+
+// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+tcf_err_t db_store::db_store_csv_extend(
+    const std::string& table,
+    const ByteArray& inId,
+    const ByteArray& inValue,
+    const bool isPrepend){
+
+    SafeUpdateLock ulock;
+
+    tcf_err_t result = TCF_SUCCESS;
+    bool isPresent;
+    size_t value_size;
+
+    result = db_store_get_value_size(table, inId.data(), inId.size(), &isPresent, &value_size);
+    if (result != TCF_SUCCESS) return result;
+
+    // If key not present, simply add the new key->value pair
+    if (!isPresent) {
+        return db_store_put(table, inId.data(), inId.size(), inValue.data(), inValue.size());
+    }
+
+    ByteArray valueBuffer;
+    // Resize the valueBuffer to current value size
+    valueBuffer.resize(value_size);
+
+    // Fetch the state from the db storage
+    result = db_store_get(table, inId.data(), inId.size(), &valueBuffer[0], value_size);
+    if (result != TCF_SUCCESS) {
+        return result;
+    }
+
+    if(isPrepend){
+        ByteArray temp;
+        // Insert the value to pe prepended. Then append a ',' to the
+        // buffer and then append the existing value.
+        temp.insert(temp.begin(),inValue.begin(), inValue.end());
+        temp.emplace_back(',');
+        temp.insert(temp.begin()+inValue.size()+1, valueBuffer.begin(), valueBuffer.end());
+        valueBuffer = temp;
+    }
+    else {
+        // Append a ',' to the end and then append the new value.
+        valueBuffer.emplace_back(',');
+        valueBuffer.insert(valueBuffer.end(), inValue.begin(), inValue.end());
+    }
+
+    return db_store_put(table, inId.data(), inId.size(), valueBuffer.data(), valueBuffer.size());
+}
+
+// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+tcf_err_t db_store::db_store_csv_pop(
+    const std::string& table,
+    const ByteArray& inId,
+    ByteArray& outValue,
+    const bool isMatch){
+
+    SafeUpdateLock ulock;
+
+    tcf_err_t result = TCF_SUCCESS;
+    bool isPresent;
+    size_t value_size;
+
+    result = db_store_get_value_size(table, inId.data(), inId.size(), &isPresent, &value_size);
+    if (result != TCF_SUCCESS) return result;
+
+    // If key not present, return Error
+    if (!isPresent) {
+        // SAFE_LOG(TCF_LOG_ERROR, "Failed to find key in LMDB database");
+        return TCF_ERR_VALUE;
+    }
+
+    ByteArray valueBuffer;
+    // Resize the valueBuffer to current value size
+    valueBuffer.resize(value_size);
+
+    // Fetch the value from the db storage
+    result = db_store_get(table, inId.data(), inId.size(), &valueBuffer[0], value_size);
+    if (result != TCF_SUCCESS) {
+        // SAFE_LOG(TCF_LOG_ERROR, "Failed to get from LMDB database : %d", result);
+        return result;
+    }
+
+    bool isLast = true;
+    ByteArray first_value;
+    // Loop over valueBuffer byte by byte and append to first_value till a ',' is
+    // encountered. Effectively parse the 1st string from the comma separated value.
+    for (auto itr : valueBuffer){
+        if(itr == ',') {
+            isLast = false;
+            break;
+        }
+        first_value.emplace_back(itr);
+    }
+
+    // If matching is required and there isn't a match, nothing needs to be done.
+    // Return an error indicating failure in match.
+    if(isMatch && outValue != first_value){
+        return TCF_ERR_SYSTEM;
+    }
+
+    // If this is the only value, return value and delete key->value from db storage
+    if(isLast){
+        outValue = valueBuffer;
+        return db_store_del(table, inId.data(), inId.size(), valueBuffer.data(), valueBuffer.size());
+    }
+
+    outValue = first_value;
+    // valueBuffer which holds the current value in the store now needs to be truncated from
+    // the beginning, removing the first value in the csv. Then it is persisted back into the
+    // store to hold the rest of the comma-separated values.
+    valueBuffer.erase(valueBuffer.begin(), valueBuffer.begin()+outValue.size()+1);
+    return db_store_put(table, inId.data(), inId.size(), valueBuffer.data(), valueBuffer.size());
+}
+
+// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+tcf_err_t db_store::db_store_csv_search_delete(
+    const std::string& table,
+    const ByteArray& inId,
+    const ByteArray& inValue){
+
+    SafeUpdateLock ulock;
+
+    tcf_err_t result = TCF_SUCCESS;
+    bool isPresent;
+    size_t value_size;
+
+    result = db_store_get_value_size(table, inId.data(), inId.size(), &isPresent, &value_size);
+    if (result != TCF_SUCCESS) return result;
+
+    // If key not present, return Error
+    if (!isPresent) {
+        // SAFE_LOG(TCF_LOG_ERROR, "Failed to find key in LMDB database");
+        return TCF_ERR_VALUE;
+    }
+
+    ByteArray valueBuffer;
+    // Resize the valueBuffer to current value size
+    valueBuffer.resize(value_size);
+
+    // Fetch the value from the db storage
+    result = db_store_get(table, inId.data(), inId.size(), &valueBuffer[0], value_size);
+    if (result != TCF_SUCCESS) {
+        // SAFE_LOG(TCF_LOG_ERROR, "Failed to get from LMDB database : %d", result);
+        return result;
+    }
+
+    bool found = false;
+    // Iterate over the stored comma separated values and match them with the value passed
+    // in. If a match is found, it needs to be deleted and then the updated csv stored back.
+    for(auto itr = valueBuffer.begin(); itr < valueBuffer.end(); itr += inValue.size() + 1){
+        if( std::equal(itr, itr+inValue.size() , inValue.begin())){
+
+            // If the value is anywhere in the csv except last, remove value and following ','
+            if ((itr+inValue.size()) < valueBuffer.end())
+                valueBuffer.erase(itr, itr+inValue.size()+1);
+            // Else if the value is not the only one implying it is last, remove value and preceeding ','
+            else if (inValue.size() < valueBuffer.size())
+                valueBuffer.erase(itr-1, itr+inValue.size());
+            // Else if the value is the only one in the csv
+            else if (inValue.size() == valueBuffer.size())
+                valueBuffer.erase(itr, itr+inValue.size());
+            
+            found = true;
+            break;
+        }
+    }
+
+    if(!found){
+        return TCF_ERR_VALUE;
+    }
+
+    // If this was the only value, delete key->value from db storage
+    if(valueBuffer.size() == 0){
+        return db_store_del(table, inId.data(), inId.size(), valueBuffer.data(), valueBuffer.size());
+    }
+    // Restore udated csv to database
+    return db_store_put(table, inId.data(), inId.size(), valueBuffer.data(), valueBuffer.size());
 }
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX

@@ -1,25 +1,21 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: enclave-manager-pool
+  name: avalon-enclave-manager
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: tee
+      app: enclave-manager
   template:
     metadata:
-      name: tee
+      name: enclave-manager
       labels:
-        app: tee
+        app: enclave-manager
     spec:
       containers:
-      - image: tcf-dev:latest
-        name: tee
+      - image: avalon-enclave-manager-dev:latest
+        name: enclave-manager
         imagePullPolicy: Never
-        envFrom:
-        - prefix: TCF_
-          configMapRef:
-            name: tcf-config
         command: ["/bin/bash"]
-        args: ["$(TCF_HOME)/scripts/enclave_manager.sh"]
+        args: ["-c", "enclave_manager --lmdb_url http://avalon-lmdb:9090"]

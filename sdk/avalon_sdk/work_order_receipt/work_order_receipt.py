@@ -15,9 +15,8 @@
 import json
 import random
 
-import crypto_utils.crypto.crypto as crypto
-import crypto_utils.signature as signature
-import crypto_utils.crypto_utility as crypto_utility
+import avalon_crypto_utils.signature as signature
+import avalon_crypto_utils.crypto_utility as crypto_utility
 from error_code.error_status import ReceiptCreateStatus as ReceiptCreateStatus
 from error_code.error_status import WorkOrderStatus
 from enum import Enum, unique
@@ -25,6 +24,23 @@ from enum import Enum, unique
 
 @unique
 class ReceiptCreateStatus(Enum):
+    """
+    Receipt creation status values:
+    0 - PENDING. The work order is waiting to be processed by the worker
+    1 - COMPLETED. The worker processed the Work Order and no more worker
+        updates are expected
+    2 - PROCESSED. The worker processed the Work Order, but additional worker
+        updates are expected, e.g. oracle notifications
+    3 - FAILED. The Work Order processing failed, e.g. by the worker service
+        because of an invalid workerId
+    4 - REJECTED. The Work Order is rejected by the smart contract,
+        e.g. invalid workerServiceId
+    5 to 254 - reserved
+    255 - indicates any status
+    >255 - application-specific values
+
+    Defined in EEA spec 7.1.
+    """
     PENDING = 0
     COMPLETED = 1
     PROCESSED = 2
@@ -34,8 +50,8 @@ class ReceiptCreateStatus(Enum):
 
 class WorkOrderReceiptRequest():
     """
-    Class to create work order receipt APIs like
-    create, update, retrieve and lookup
+    Class to create work order receipt APIs such as
+    create, update, retrieve, and lookup.
     """
 
     def __init__(self):
@@ -46,14 +62,17 @@ class WorkOrderReceiptRequest():
     def create_receipt(self, wo_request,
                        receipt_create_status, signing_key, nonce=None):
         """
-        Create work order receipt corresponding to workorder id
+        Create a work order receipt corresponding to a workorder ID.
+
         Parameters:
-            - wo_request is jrpc work order request used to create the
-            work order request as defined in EEA spec 6.1.1.
-            - receipt_create_status is enum of type ReceiptCreateStatus
-            - signing_key is private key
-            - nonce is int type random number or monotonic counter
-        Returns jrpc request of type dictionary
+        wo_request            JSON RPC work order request used to create the
+                              work order request as defined in EEA spec 6.1.1
+        receipt_create_status Receipt creation status
+        signing_key           Private key of the signer
+        nonce                 Optional random number or monotonic counter
+
+        Returns:
+        JSON RPC request of type dictionary
         """
         final_hash_str = self.sig_obj.calculate_request_hash(wo_request)
         wo_request_params = wo_request["params"]
@@ -61,7 +80,7 @@ class WorkOrderReceiptRequest():
         requester_nonce = nonce
         if nonce is None:
             requester_nonce = str(random.randint(1, 10**10))
-        public_key = signing_key.GetPublicKey().Serialize()
+        public_key = signing_key.get_verifying_key().to_pem().decode('ascii')
         wo_receipt_request = {
             "workOrderId": wo_request_params["workOrderId"],
             # TODO: workerServiceId is same as worker id,
@@ -84,7 +103,7 @@ class WorkOrderReceiptRequest():
             wo_receipt_request["workOrderRequestHash"] + \
             wo_receipt_request["requesterGeneratedNonce"]
         wo_receipt_bytes = bytes(wo_receipt_str, "UTF-8")
-        wo_receipt_hash = crypto.compute_message_hash(wo_receipt_bytes)
+        wo_receipt_hash = crypto_utility.compute_message_hash(wo_receipt_bytes)
         status, wo_receipt_sign = self.sig_obj.generate_signature(
             wo_receipt_hash,
             signing_key
@@ -101,15 +120,17 @@ class WorkOrderReceiptRequest():
                        update_data, signing_key):
         """
         Update the existing work order receipt with
-        update_type, update_data.
+        update_type and update_data.
+
         Parameters:
-            - work_order_id is work order id whose receipt
-              needs to be updated.
-            - update_type is integer, these values corresponds to
-              receipt status as defined in 7.1.1
-            - update_data is update-specific data that depend on
-              the workOrderStatus
-        Returns jrpc work order update receipt request of type dictionary
+        work_order_id Work order ID whose receipt
+                      needs to be updated
+        update_type   Update type. These values correspond to
+                      receipt status as defined in EEA Spec 7.1.1
+        update_data   Update-specific data that depends on
+                      the workOrderStatus
+        Returns:
+        JSON RPC work order update receipt request of type dictionary
         """
         data = update_data
         if update_type in [ReceiptCreateStatus.PROCESSED.value,
@@ -119,10 +140,10 @@ class WorkOrderReceiptRequest():
             wo_resp_str = json.dumps(update_data)
             wo_resp_bytes = bytes(wo_resp_str, "UTF-8")
             # Hash of work order response is update_data
-            wo_resp_hash = crypto.compute_message_hash(wo_resp_bytes)
-            wo_resp_hash_str = crypto.byte_array_to_hex(wo_resp_hash)
+            wo_resp_hash = crypto_utility.compute_message_hash(wo_resp_bytes)
+            wo_resp_hash_str = crypto_utility.byte_array_to_hex(wo_resp_hash)
             data = wo_resp_hash_str
-        public_key = signing_key.GetPublicKey().Serialize()
+        public_key = signing_key.verifying_key.to_pem().decode("ascii")
         updater_id = crypto_utility.strip_begin_end_public_key(public_key)
 
         wo_receipt_update = {
@@ -138,7 +159,7 @@ class WorkOrderReceiptRequest():
             str(wo_receipt_update["updateType"]) + \
             wo_receipt_update["updateData"]
         wo_receipt_bytes = bytes(wo_receipt_str, "UTF-8")
-        wo_receipt_hash = crypto.compute_message_hash(wo_receipt_bytes)
+        wo_receipt_hash = crypto_utility.compute_message_hash(wo_receipt_bytes)
         status, wo_receipt_sign = self.sig_obj.generate_signature(
             wo_receipt_hash,
             signing_key

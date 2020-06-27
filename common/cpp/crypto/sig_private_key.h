@@ -13,6 +13,12 @@
  * limitations under the License.
  */
 
+/**
+ * @file
+ * Avalon ECDSA private key functions: generation, serialization, and signing.
+ * ECDSA used for Secp256k1 elliptical curves.
+ */
+
 #pragma once
 #include <openssl/ec.h>
 #include <string>
@@ -58,7 +64,9 @@ namespace crypto {
             ByteArray SignMessage(const ByteArray& hashMessage) const;
 
         private:
-            EC_KEY* private_key_;
+            // void * is an opaque pointer to implementation-dependent context
+            void *private_key_;
+            void *deserializeECDSAPrivateKey(const std::string& encoded);
         };
     }  // namespace sig
 }  // namespace crypto

@@ -14,9 +14,11 @@
  */
 
 #include <string>
-#include <map>
+
+#include "types.h"
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 std::string HandleWorkOrderRequest(
-    const std::string& sealedSignupData,
-    const std::string& serializedRequest);
+    const std::string& serializedRequest,
+    const std::string& ext_wo_data,
+    EnclaveType enclave_type);

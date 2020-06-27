@@ -1,0 +1,42 @@
+/* Copyright 2020 Intel Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+enclave {
+    include "sgx_trts.h"
+    include "sgx_tseal.h"
+    include "tcf_error.h"
+
+    trusted {
+        public tcf_err_t ecall_CreateSignupDataKME(
+            [in] const sgx_target_info_t* inTargetInfo,
+            [in, size=inExtDataSize] const uint8_t* inExtData,
+            size_t inExtDataSize,
+            [in, size=inExtDataSignatureSize] const uint8_t* inExtDataSignature,
+            size_t inExtDataSignatureSize,
+            [out, size=inAllocatedPublicEnclaveDataSize] char* outPublicEnclaveData,
+            size_t inAllocatedPublicEnclaveDataSize,
+            [out, size=inAllocatedSealedEnclaveDataSize] uint8_t* outSealedEnclaveData,
+            size_t inAllocatedSealedEnclaveDataSize,
+            [out] sgx_report_t* outEnclaveReport
+        );
+
+        public tcf_err_t ecall_VerifyEnclaveInfoKME(
+            [in, string] const char* inEnclaveInfo,
+            [in, string] const char* mrEnclaveValue,
+            [in, size=inExtDataSize] const uint8_t* inExtData,
+            size_t inExtDataSize
+        );
+    };
+};

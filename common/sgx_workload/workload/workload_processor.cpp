@@ -13,6 +13,12 @@
  * limitations under the License.
  */
 
+/**
+ * @file
+ * Implements base class WorkloadProcessor to create an
+ * Avalon workload processor.
+ */
+
 #include <string>
 #include "workload_processor.h"
 #include "enclave_utils.h"
@@ -26,17 +32,15 @@ WorkloadProcessor::~WorkloadProcessor() {}
 
 WorkloadProcessor* WorkloadProcessor::RegisterWorkloadProcessor(
     std::string workload_id,
-    WorkloadProcessor* processor)
-{
+    WorkloadProcessor* processor) {
    Log(TCF_LOG_INFO, "Register Workload Processor - %s",
-    workload_id.c_str());
+       workload_id.c_str());
    workload_processor_table[workload_id] = processor;
    return processor;
 }
 
 WorkloadProcessor* WorkloadProcessor::CreateWorkloadProcessor(
-    std::string workload_id)
-{
+    std::string workload_id) {
    WorkloadProcessor* processor;
 
    // Search the workload processor type in the table
@@ -49,11 +53,10 @@ WorkloadProcessor* WorkloadProcessor::CreateWorkloadProcessor(
    }
 
    // Clone the workload processor and return it.
-   if( processor == nullptr) {
-       Log(TCF_LOG_ERROR,"Workload Processor found, but it's class is nullptr");
+   if (processor == nullptr) {
+       Log(TCF_LOG_ERROR,"Workload Processor found, but its class is nullptr");
        return nullptr;
    } else {
        return processor->Clone();
    }
 }
-

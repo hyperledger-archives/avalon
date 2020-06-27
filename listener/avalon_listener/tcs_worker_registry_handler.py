@@ -34,7 +34,7 @@ def must_get_worker_id(params):
 class TCSWorkerRegistryHandler:
     """
      TCSWorkerRegistryHandler processes worker registry requests defined in the
-     TC API spec at Worker Registry Direct API and Worker Type Data API . It
+     TC API spec at Worker Registry Direct API and Worker Type Data API. It
      reads appropriate worker information from the KV storage to generate the
      response.
      All raised exceptions will be caught and handled by any
@@ -95,33 +95,6 @@ class TCSWorkerRegistryHandler:
                 'worker registry handler boot up'
 
         return response
-# ------------------------------------------------------------------------------------------------
-
-# ------------------------------------------------------------------------------------------------
-    def WorkerRegister(self, **params):
-        """
-        Function to register a new worker to the enclave
-        Parameters:
-            - param is the 'param' object in the a worker request as per TCF
-                5.3.1 Worker Register JSON Payload.
-        """
-
-        worker_id = must_get_worker_id(params)
-
-        if(self.kv_helper.get("workers", worker_id) is not None):
-            raise JSONRPCDispatchException(
-                WorkerError.INVALID_PARAMETER_FORMAT_OR_VALUE,
-                "Worker Id already exists in the database." +
-                " Hence invalid parameter")
-
-        # Worker Initial Status is set to Active
-        params["status"] = WorkerStatus.ACTIVE
-
-        input_json_str = json.dumps(params)
-        self.kv_helper.set("workers", worker_id, input_json_str)
-
-        raise JSONRPCDispatchException(
-            WorkerError.SUCCESS, "Successfully Registered")
 
 # ------------------------------------------------------------------------------------------------
 
@@ -140,39 +113,6 @@ class TCSWorkerRegistryHandler:
         except Exception as err:
             logger.error("Invalid worker status code: %s", str(err))
             return False
-
-# ------------------------------------------------------------------------------------------------
-    def WorkerSetStatus(self, **params):
-        """
-        Function to set the status of worker
-        Parameters:
-            - params is the 'params' object in a worker request json as per TCF
-                API 5.3.3 Worker Set Status JSON Payload
-        """
-
-        # status can be one of active, offline, decommissioned, or compromised
-
-        worker_id = must_get_worker_id(params)
-
-        value = self.kv_helper.get("workers", worker_id)
-        if value:
-            json_dict = json.loads(value)
-            if not self.__validate_input_worker_status(params):
-                raise JSONRPCDispatchException(
-                    WorkerError.INVALID_PARAMETER_FORMAT_OR_VALUE,
-                    "Invalid parameter: worker status code")
-
-            json_dict['status'] = params['status']
-            value = json.dumps(json_dict)
-            self.kv_helper.set("workers", worker_id, value)
-
-            raise JSONRPCDispatchException(
-                WorkerError.SUCCESS,
-                "Successfully Set Status")
-
-        raise JSONRPCDispatchException(
-            WorkerError.INVALID_PARAMETER_FORMAT_OR_VALUE,
-            "Worker Id not found in the database. Hence invalid parameter")
 
 # ------------------------------------------------------------------------------------------------
     def __lookup_basic(self, is_lookup_next, params):
@@ -243,8 +183,8 @@ class TCSWorkerRegistryHandler:
         """
         Function to retrieve the details of worker
         Parameters:
-            - param is the 'param' object in the a worker request as per TCF
-                per TCF API 5.3.7 Worker Retrieve JSON Payload
+            - param is the 'param' object in the a worker request as per
+                Trusted Compute EEA API 5.3.7 Worker Retrieve JSON Payload
         """
 
         worker_id = must_get_worker_id(params)
@@ -268,35 +208,4 @@ class TCSWorkerRegistryHandler:
         }
 
         return result
-# ------------------------------------------------------------------------------------------------
-
-    def WorkerUpdate(self, **params):
-        """
-        Function to update the worker details.
-        Parameters:
-            - param is the 'param' object in the a worker request as per TCF
-                API 5.3.2 Worker Update JSON Payload
-        """
-
-        worker_id = must_get_worker_id(params)
-
-        # value retrieved is 'result' field as per Spec 5.3.8 Worker Retrieve
-        # Response Payload
-        value = self.kv_helper.get("workers", worker_id)
-
-        if value is None:
-            raise JSONRPCDispatchException(
-                WorkerError.INVALID_PARAMETER_FORMAT_OR_VALUE,
-                "Worker Id not found in the database. Hence invalid parameter")
-
-        json_dict = json.loads(value)
-        worker_details = params["details"]
-        for item in worker_details:
-            json_dict["details"][item] = worker_details[item]
-
-        value = json.dumps(json_dict)
-        self.kv_helper.set("workers", worker_id, value)
-
-        raise JSONRPCDispatchException(
-            WorkerError.SUCCESS, "Successfully Updated")
 # ------------------------------------------------------------------------------------------------

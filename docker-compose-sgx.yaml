@@ -15,71 +15,14 @@
 version: '3.5'
 
 services:
-  tcf:
-    container_name: tcf
-    image: tcf-dev
+  avalon-enclave-manager:
+    image: avalon-sgx-enclave-manager-dev
     build:
-      context: .
-      dockerfile: ./docker/Dockerfile.tcf-dev
       args:
-        - http_proxy
-        - https_proxy
-        - no_proxy
         - SGX_MODE=HW
-        - TCF_DEBUG_BUILD=${TCF_DEBUG_BUILD:-}
-        - DISPLAY=${DISPLAY:-}
-        - MAKECLEAN=${MAKECLEAN:-1}
     volumes:
-      # Below volume mappings are required for DISPLAY settings by heart disease GUI client
-      - /tmp/.X11-unix:/tmp/.X11-unix
-      - ~/.Xauthority:/root/.Xauthority
       # Map aesm service on host to docker, required only in HW mode.
       - /var/run/aesmd/aesm.socket:/var/run/aesmd/aesm.socket
     devices:
       - "/dev/isgx:/dev/isgx"
-    working_dir: "/project/TrustedComputeFramework"
-    entrypoint: "bash -c \"\
-        source scripts/tcs_startup.sh -y -l http://avalon-lmdb:9090 \
-        && tail -f /dev/null \""
-    stop_signal: SIGKILL
-    depends_on:
-      - avalon-lmdb
 
-  avalon-lmdb:
-    container_name: avalon-lmdb
-    image: avalon-lmdb-dev
-    build:
-      context: .
-      dockerfile: ./shared_kv_storage/Dockerfile
-      args:
-        - http_proxy
-        - https_proxy
-        - no_proxy
-    expose:
-      # Port is where lmdb server will listen for http request.
-      # Port should be same as in bind parameter or lmdb_config.toml
-      - 9090
-    command: |
-      bash -c "
-        kv_storage --bind http://avalon-lmdb:9090
-        tail -f /dev/null
-      "
-  avalon-listener:
-    container_name: avalon-listener
-    image: avalon-listener-dev
-    build:
-      context: .
-      dockerfile: ./listener/Dockerfile
-      args:
-        - http_proxy
-        - https_proxy
-        - no_proxy
-    expose:
-      - 1947
-    command: |
-      bash -c "
-        avalon_listener --bind http://avalon-listener:1947 --lmdb-url http://avalon-lmdb:9090
-        tail -f /dev/null
-        "
-    depends_on:
-      - avalon-lmdb

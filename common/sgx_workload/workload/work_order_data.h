@@ -13,18 +13,27 @@
 * limitations under the License.
 */
 
+/**
+ * @file
+ * Defines class tcf::WorkOrderData for work order data submitted to
+ * workload processors.
+ * To use, #include "work_order_data.h"
+ */
+
 #pragma once
 
 #include <string>
 #include "types.h"
 
 namespace tcf {
-	// Wrapper class for Workorder data submitted to workloads for processing
+	/**
+         * Wrapper class for work order data submitted to workload processors.
+         */
 	class WorkOrderData {
 	public:
 
-                WorkOrderData();
-                explicit WorkOrderData(int in_index, ByteArray data);
+        WorkOrderData();
+        explicit WorkOrderData(int in_index, ByteArray data);
 		int index;
 		// Initialize here to suppress Klocwork initialization error
 		ByteArray decrypted_data = {};

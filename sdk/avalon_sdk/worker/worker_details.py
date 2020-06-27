@@ -13,13 +13,14 @@
 # limitations under the License.
 
 """
-Functions to perform worker related functions based on Spec 1.0 compatibility.
-
+Perform worker-related functions based on EEA Spec 1.0.
 """
 
 import logging
 import json
-import crypto_utils.crypto_utility as crypto_utility
+import hashlib
+
+import avalon_crypto_utils.crypto_utility as crypto_utility
 import config.config as pconfig
 from enum import Enum, unique
 from utility.hex_utils import is_valid_hex_str
@@ -29,6 +30,12 @@ logger = logging.getLogger(__name__)
 
 @unique
 class WorkerType(Enum):
+    """
+    Worker types are:
+    1 = TEE-SGX: Intel SGX Trusted Execution Environment (hardware based)
+    2 = MPC: Trusted Multi-Party Compute (software/hardware based)
+    3 = ZK: Zero-knowledge proofs (software based)
+    """
     TEE_SGX = 1
     MPC = 2
     ZK = 3
@@ -36,6 +43,15 @@ class WorkerType(Enum):
 
 @unique
 class WorkerStatus(Enum):
+    """
+    Worker status values:
+    1 - worker is ACTIVE
+    2 - worker is temporarily OFF_LINE
+    3 - worker is DECOMMISSIONED
+    4 - worker is COMPROMISED
+
+    From EEA spec 5.2.
+    """
     ACTIVE = 1
     OFF_LINE = 2
     DECOMMISSIONED = 3
@@ -48,8 +64,8 @@ class WorkerDetails():
 
     def __init__(self):
         """
-        Function to set the member variables of this class with default
-        value as per TCf Spec.
+        Set the member variables of this class with default
+        values as per the EEA Spec.
         """
         tcs_worker = pconfig.read_config_from_toml("tcs_config.toml",
                                                    "WorkerConfig")
@@ -69,9 +85,12 @@ class WorkerDetails():
 
     def validate_worker_details(self, details):
         """
-        Validate the details field of worker
-        params:
-            details is json formatted string
+        Validate the details field of a worker.
+
+        Parameters:
+            Details is json formatted string
+        Returns:
+            None on success and error string on failure
         """
         details_dict = json.loads(details)
         worker_details_fields = [
@@ -144,48 +163,29 @@ class WorkerDetails():
             return "Invalid argument fromAddress"
 
         if ("workOrderPayloadFormats" in details_dict.keys() and
-                not is_valid_hex_str(details_dict['workOrderPayloadFormats'])):
+                not is_valid_hex_str(
+                    details_dict['workOrderPayloadFormats'])):
             return "Invalid argument workOrderPayloadFormats"
 
         if ("workerTypeData" in details_dict.keys()):
             if ("verificationKey" in details_dict["workerTypeData"].keys() and
-                    not is_valid_hex_str(
-                    details_dict["workerTypeData"]["verificationKey"])):
+                    details_dict["workerTypeData"]["verificationKey"] is None):
                 return "Invalid argument verificationKey"
 
             if ("proofDataType" in details_dict["workerTypeData"].keys() and
-                    not is_valid_hex_str(
-                    details_dict["workerTypeData"]["proofDataType"])):
+                    details_dict["workerTypeData"]["proofDataType"] is None):
                 return "Invalid argument proofDataType"
 
             if ("encryptionKey" in details_dict["workerTypeData"].keys() and
-                    not is_valid_hex_str(
-                    details_dict["workerTypeData"]["encryptionKey"])):
+                    details_dict["workerTypeData"]["encryptionKey"] is None):
                 return "Invalid argument encryptionKey"
 
-            if ("encryptionKeyNonce" in details_dict["workerTypeData"].keys()
-                and not is_valid_hex_str(
-                    details_dict["workerTypeData"]["encryptionKeyNonce"])):
-                return "Invalid argument encryptionKeyNonce"
-
-            if ("encryptionKeySignature" in
-                details_dict["workerTypeData"].keys() and
-                not is_valid_hex_str(
-                    details_dict["workerTypeData"]["encryptionKeySignature"]
-                    )):
-                return "Invalid argument encryptionKeySignature"
-
-            if ("enclaveCertificate" in
-                details_dict["workerTypeData"].keys() and
-                not is_valid_hex_str(
-                    details_dict["workerTypeData"]["enclaveCertificate"])):
-                return "Invalid argument enclaveCertificate"
         return None
 
 
 class SGXWorkerDetails(WorkerDetails):
     """
-    TEE SGX worker type data
+    Contains Intel SGX TEE worker type data.
     """
 
     def __init__(self):
@@ -198,15 +198,16 @@ class SGXWorkerDetails(WorkerDetails):
         self.encryption_key_nonce = ""
         self.encryption_key_signature = ""
         self.enclave_certificate = ""
-        self.worker_id = ""
 
 # -----------------------------------------------------------------------------
-    def load_worker(self, input_str):
+    def load_worker(self, worker_data):
         """
-        Function to load the member variables of this class
-        based on worker retrieved details.
+        Load member variables of this class
+        based on worker-retrieved details.
+
+        Parameters:
+            worker_data Worker Data to load into the class
         """
-        worker_data = input_str['result']['details']
         logger.info("*********Updating Worker Details*********")
         self.hashing_algorithm = worker_data['hashingAlgorithm']
         self.signing_algorithm = worker_data['signingAlgorithm']
@@ -218,16 +219,11 @@ class SGXWorkerDetails(WorkerDetails):
         if 'proofData' in worker_data['workerTypeData'] and \
                 worker_data['workerTypeData']['proofData']:
             # proofData will be initialized only in HW mode by the
-            # tcf_enclave_bridge module when signup info is obtained from
+            # tcf_enclave_bridge module when sign up info is obtained from
             # the worker.
             self.proof_data = json.loads(
                 worker_data['workerTypeData']['proofData'])
 
-        self.worker_id = crypto_utility.strip_begin_end_public_key(
-            worker_data['workerTypeData']['verificationKey']) \
-            .encode("UTF-8").hex()
-        ''' worker_id - newline, BEGIN PUB KEY and END PUB KEY are removed
-                        from worker's verification key and converted to hex '''
         logger.info("Hashing Algorithm : %s", self.hashing_algorithm)
         logger.info("Signing Algorithm : %s", self.signing_algorithm)
 

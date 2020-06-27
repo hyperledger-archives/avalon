@@ -13,10 +13,17 @@
  * limitations under the License.
  */
 
-// Verifies signature of the message by extracting public key from certificate
+/**
+ * @file
+ * Avalon signature verification.
+ */
+
+
+/**
+ * Verifies signature of the message by extracting public key from certificate.
+ */
 bool verify_signature(const char* cert_pem,
                       const char* msg,
                       unsigned int msg_len,
-                      char* signature,
+                      const char* signature,
                       unsigned int signature_len);
-

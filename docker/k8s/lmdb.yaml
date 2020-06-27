@@ -6,23 +6,19 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      app: lmdb
+      app: avalon-lmdb
   template:
     metadata:
-      name: lmdb
+      name: avalon-lmdb
       labels:
-        app: lmdb
+        app: avalon-lmdb
     spec:
       containers:
-      - image: tcf-dev:latest
+      - image: avalon-lmdb-dev:latest
         name: lmdb-server
         imagePullPolicy: Never
-        envFrom:
-        - prefix: TCF_
-          configMapRef:
-            name: tcf-config
         command: ["/bin/bash"]
-        args: ["$(TCF_HOME)/scripts/lmdb.sh"]
+        args: ["-c", "kv_storage --bind http://0.0.0.0:9090"]
         ports:
         - containerPort: 9090
           protocol: TCP
@@ -36,10 +32,10 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: lmdb
+  name: avalon-lmdb
 spec:
   ports:
   - port: 9090
     targetPort: 9090
   selector:
-    app: lmdb
+    app: avalon-lmdb

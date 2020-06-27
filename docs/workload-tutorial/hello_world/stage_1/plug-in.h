@@ -1,4 +1,4 @@
-/* Copyright 2019 Intel Corporation
+/* Copyright 2020 Intel Corporation
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@
 
 namespace HelloWorld {
 
-const char* workload_id="hello-world";
+const char* workload_id = "hello-world";
 
 class Workload : public WorkloadProcessor {
 public:
@@ -54,4 +54,3 @@ public:
 }  // namespace HelloWorld
 
 using namespace HelloWorld;
-

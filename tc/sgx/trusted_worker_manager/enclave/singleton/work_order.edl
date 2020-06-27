@@ -1,0 +1,41 @@
+/* Copyright 2018 Intel Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+enclave {
+    include "sgx_trts.h"
+
+    trusted {
+        // inSerializedRequest is a binary encoding of the encrypted request
+        // outSerializedResponseSize is the computed size of the response
+        public tcf_err_t ecall_HandleWorkOrderRequest(
+            [in, size=inSerializedRequestSize] const uint8_t* inSerializedRequest,
+            size_t inSerializedRequestSize,
+            [in, size=inWorkOrderExtDataSize] const uint8_t* inWorkOrderExtData,
+            size_t inWorkOrderExtDataSize,
+            [out] size_t* outSerializedResponseSize
+            );
+
+        // outSerializedResponse is a base64 encoding of a JSON object
+        // encrypted with the AES session key
+        public tcf_err_t ecall_GetSerializedResponse(
+            [out, size = inSerializedResponseSize] uint8_t* outSerializedResponse,
+            size_t inSerializedResponseSize
+            );
+    };
+
+    untrusted {
+    };
+
+};

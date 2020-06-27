@@ -37,4 +37,3 @@ setup(name='avalon_sdk',
       ],
       entry_points={
       })
-

@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: avalon-shell
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: avalon-shell
+  template:
+    metadata:
+      name: avalon-shell
+      labels:
+        app: avalon-shell
+    spec:
+      containers:
+      - image: avalon-shell-dev:latest
+        name: avalon-shell
+        imagePullPolicy: Never
+        command: ["/bin/bash"]
+        args: ["-c", "tail -f /dev/null"]

@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: avalon-shell
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: avalon-shell
+  template:
+    metadata:
+      name: avalon-shell
+      labels:
+        app: avalon-shell
+    spec:
+      containers:
+      - image: avalon-shell-dev:latest
+        name: avalon-shell
+        imagePullPolicy: Never
+        command: ["/bin/bash"]
+        args: ["-c", "cp -rf /mywork/vars/keyfiles /keyfiles \
+                      && cp /mywork/vars/profiles/mychannel_network_for_pysdk.json \
+                      /project/avalon/sdk/avalon_sdk/connector/blockchains/fabric/network.json \
+                      && tail -f /dev/null"]
+        volumeMounts:
+        - name: fabric-files
+          mountPath: /mywork/vars
+      volumes:
+      - name: fabric-files
+        hostPath:
+          path: /home/ubuntu/mywork/vars

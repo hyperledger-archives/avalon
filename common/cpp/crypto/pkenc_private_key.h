@@ -13,8 +13,13 @@
  * limitations under the License.
  */
 
+/**
+ * @file
+ * Avalon RSA private key generation, serialization, and decryption functions.
+ * Serialization reads and writes keys in PEM format strings.
+ */
+
 #pragma once
-#include <openssl/rsa.h>
 #include <string>
 #include <vector>
 #include "types.h"
@@ -29,35 +34,40 @@ namespace crypto {
             friend PublicKey;
             // throws RuntimeError
         public:
-            // Default constructor
+            // Default constructor.
             PrivateKey(): private_key_(nullptr) {}
-            // copy constructor
+            // Copy constructor.
             // throws RuntimeError
             PrivateKey(const PrivateKey& privateKey);
-            // move constructor
+            // Move constructor.
             // throws RuntimeError
             PrivateKey(PrivateKey&& privateKey);
-            // deserializing constructor
-            // throws RuntimeError, ValueError
+            // Deserializing constructor.
+            // Reads PEM format string (with "BEGIN RSA PRIVATE KEY").
+            // Throws RuntimeError, ValueError
             PrivateKey(const std::string& encoded);
             ~PrivateKey();
             // throws RuntimeError
             PrivateKey& operator=(const PrivateKey& privateKey);
-            // throws RuntimeError, ValueError
+            // Reads PEM format string (with "BEGIN RSA PRIVATE KEY").
+            // Throws RuntimeError, ValueError.
             void Deserialize(const std::string& encoded);
-            // generate PrivateKey
+            // Generate PrivateKey.
             // throws RuntimeError
             void Generate();
             // throws RuntimeError
             PublicKey GetPublicKey() const;
-            // throws RuntimeError
+            // Creates PEM format string (with "BEGIN RSA PRIVATE KEY").
+            // Throws RuntimeError.
             std::string Serialize() const;
-            // Decrypt message.data() and return ByteArray containing raw binary plaintext
+            // Decrypt message.data() and return plaintext.
             // throws RuntimeError
             ByteArray DecryptMessage(const ByteArray& ct) const;
 
         private:
-            RSA* private_key_;
+            // void * is an opaque pointer to implementation-dependent context
+            void *private_key_;
+            void *deserializeRSAPrivateKey(const std::string& encoded);
         };
     }  // namespace pkenc
 }  // namespace crypto

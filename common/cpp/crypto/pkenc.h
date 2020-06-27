@@ -13,19 +13,32 @@
  * limitations under the License.
  */
 
+/**
+ * @file
+ * Avalon RSA constant definitions.
+ */
+
 #pragma once
-#include <openssl/rsa.h>
+
 namespace tcf {
 namespace crypto {
     namespace constants {
-        //***RSA is not quantum resistant ***//
-        //*** USE 3072 for long term security ***//
-        const int RSA_KEY_SIZE = 2048;
+         /**
+          * RSA key size, in bits.
+          * Use RSA-3072 for long-term security,
+          * with OAEP padding and SHA-256 digest.
+          * RSA is not quantum resistant.
+          */
+        const int RSA_KEY_SIZE = 3072;
+        /** Padding required, in bits, for OAEP padding. */
         const int RSA_PADDING_SIZE = 41;
-
-        //*** OAEP or better should always be used for RSA encryption ***//
-        const int RSA_PADDING_SCHEME = RSA_PKCS1_OAEP_PADDING;
-        constexpr int RSA_PLAINTEXT_LEN = ((RSA_KEY_SIZE - RSA_PADDING_SIZE) >> 3);
+        /**
+         * Maximum amount, in bytes, of plain text that can
+         * be encrypted with RSA. For longer lengths
+         * use symmetric encryption or a larger key size.
+         */
+        constexpr int RSA_PLAINTEXT_LEN =
+            ((RSA_KEY_SIZE - RSA_PADDING_SIZE) >> 3);
     }  // namespace constants
 }  // namespace crypto
 }  // namespace tcf

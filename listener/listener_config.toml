@@ -26,6 +26,16 @@ LogFile  = "__screen__"
 [Listener]
 bind = "http://localhost:1947"
 max_work_order_count = 10
+# ZMQ configurations the listener would connect to
+# Same as the url and port of enclave manager socket
+zmq_url = "tcp://avalon-enclave-manager:5555"
+
+# ------------------------------------------------------------------
+# Work load execution-settings for workload execution(synchronous/asynchronous)
+# ------------------------------------------------------------------
+[WorkloadExecution]
+# Set this flag to 1 for sync workorder execution.Else set it to 0
+sync_workload_execution = 0
 
 [KvStorage]
 remote_storage_url = "http://localhost:9090"

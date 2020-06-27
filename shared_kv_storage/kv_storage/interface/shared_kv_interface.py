@@ -86,6 +86,7 @@ class KvStorage(ABC):
            - table is the name of lmdb table.
         """
         pass
+
 # ---------------------------------------------------------------------------------------------------
 
     def human_read_to_byte(self, size):

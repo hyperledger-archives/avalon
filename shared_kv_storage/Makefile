@@ -12,14 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Set SGX_MODE default (which can be overridden with an environment variable):
-
+SUBDIRS = db_store
 PY_VERSION=${shell python3 --version | sed 's/Python \(3\.[0-9]\).*/\1/' | tr -d .}
 MOD_VERSION=${shell ../bin/get_version}
-
 WHEEL_FILE=dist/kv_storage-${MOD_VERSION}-cp${PY_VERSION}-cp${PY_VERSION}m-linux_x86_64.whl
 
-all : $(WHEEL_FILE)
+all : subdirs $(WHEEL_FILE)
+
+subdirs:
+	for dir in $(SUBDIRS) ; do $(MAKE) -C $$dir ; done
 
 $(WHEEL_FILE) : build_shared_kv
 	@echo Build Distribution
@@ -36,14 +37,20 @@ install:
 	@echo INSTALLING WHEEL FILE =================
 	pip3 install $(WHEEL_FILE)
 
-clean:
-	pip3 uninstall --yes $(WHEEL_FILE)
-	rm -rf kv_storage/remote_lmdb/db_store.py db_store/db_store_wrap.cpp
+clean: clean-subdirs
+	if [ -f $(WHEEL_FILE) ] ; then pip3 uninstall --yes $(WHEEL_FILE); fi
+	rm -r kv_storage/remote_lmdb/db_store.py
+	rm -r kv_storage/remote_lmdb/db_store_wrap.cpp
 	rm -rf build deps dist *.egg-info
 	find . -iname '*.pyc' -delete
 	find . -iname '__pycache__' -delete
 
+clean-subdirs:
+	for dir in $(SUBDIRS) ; do $(MAKE) -C $$dir clean ; done
 
-.phony : all
-.phony : clean
-.phone : install
+.PHONY : all
+.PHONY : clean
+.PHONY : install
+.PHONY : build_shared_kv
+.PHONY : subdirs
+.PHONY : clean-subdirs

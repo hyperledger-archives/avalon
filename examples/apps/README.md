@@ -1,4 +1,9 @@
-# Avalon Example Applications
+<!--
+Licensed under Creative Commons Attribution 4.0 International License
+https://creativecommons.org/licenses/by/4.0/
+-->
+
+# Hyperledger Avalon Example Applications
 
 The following Avalon example applications are available.
 They are intended as introductions to the Avalon API to learn how to
@@ -18,4 +23,3 @@ create and write new applications.
 
 - [Generic Workload Client](generic_client)
   This is a generic client for testing with any worker
-

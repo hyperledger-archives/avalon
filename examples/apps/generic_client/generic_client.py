@@ -23,20 +23,22 @@ import secrets
 
 import config.config as pconfig
 import utility.logger as plogger
-import crypto_utils.crypto_utility as crypto_utility
+import avalon_crypto_utils.crypto_utility as crypto_utility
+import avalon_crypto_utils.verify_report.verify_attestation_report \
+    as attestation_util
 from avalon_sdk.worker.worker_details import WorkerType
 import avalon_sdk.worker.worker_details as worker_details
 from avalon_sdk.work_order.work_order_params import WorkOrderParams
-from avalon_sdk.ethereum.ethereum_worker_registry_list import \
-    EthereumWorkerRegistryListImpl
-from avalon_sdk.direct.jrpc.jrpc_worker_registry import \
+from avalon_sdk.connector.blockchains.ethereum.ethereum_worker_registry_list \
+    import EthereumWorkerRegistryListImpl
+from avalon_sdk.connector.direct.jrpc.jrpc_worker_registry import \
     JRPCWorkerRegistryImpl
-from avalon_sdk.direct.jrpc.jrpc_work_order import \
+from avalon_sdk.connector.direct.jrpc.jrpc_work_order import \
     JRPCWorkOrderImpl
-from avalon_sdk.direct.jrpc.jrpc_work_order_receipt \
-     import JRPCWorkOrderReceiptImpl
+from avalon_sdk.connector.direct.jrpc.jrpc_work_order_receipt \
+    import JRPCWorkOrderReceiptImpl
 from error_code.error_status import WorkOrderStatus, ReceiptCreateStatus
-import crypto_utils.signature as signature
+import avalon_crypto_utils.signature as signature
 from error_code.error_status import SignatureStatus
 from avalon_sdk.work_order_receipt.work_order_receipt \
     import WorkOrderReceiptRequest
@@ -86,6 +88,10 @@ def _parse_command_line(args):
         nargs="+",
         type=str)
     parser.add_argument(
+        "-p", "--in_data_plain",
+        help="Send input data as unencrypted plain text",
+        action='store_true')
+    parser.add_argument(
         "-r", "--receipt",
         help="If present, retrieve and display work order receipt",
         action='store_true')
@@ -126,8 +132,8 @@ def _retrieve_uri_from_registry_list(config):
     # Get block chain type
     blockchain_type = config['blockchain']['type']
     if blockchain_type == "Ethereum":
-            worker_registry_list = EthereumWorkerRegistryListImpl(
-                config)
+        worker_registry_list = EthereumWorkerRegistryListImpl(
+            config)
     else:
         worker_registry_list = None
         logger.error("\n Worker registry list is currently supported only for "
@@ -178,8 +184,36 @@ def _lookup_first_worker(worker_registry, jrpc_req_id):
     return worker_id
 
 
+def _do_worker_verification(worker_obj):
+    # Do worker verfication on proof data if it exists
+    # Proof data exists in SGX hardware mode.
+    # TODO Need to do verify MRENCLAVE value
+    # in the attestation report
+    if not worker_obj.proof_data:
+        logger.info("Proof data is empty. " +
+                    "Skipping verification of attestation report")
+    else:
+        # Construct enclave signup info json
+        enclave_info = {
+            'verifying_key': worker_obj.verification_key,
+            'encryption_key': worker_obj.encryption_key,
+            'proof_data': worker_obj.proof_data,
+            'enclave_persistent_id': ''
+        }
+
+        logger.info("Perform verification of attestation report")
+        verify_report_status = attestation_util.verify_attestation_report(
+            enclave_info)
+        if verify_report_status is False:
+            logger.error("Verification of enclave signup info failed")
+            exit(1)
+        else:
+            logger.info("Verification of enclave signup info passed")
+
+
 def _create_work_order_params(worker_id, workload_id, in_data,
-                              worker_encrypt_key, session_key, session_iv):
+                              worker_encrypt_key, session_key, session_iv,
+                              enc_data_enc_key):
     # Convert workloadId to hex
     workload_id = workload_id.encode("UTF-8").hex()
     work_order_id = secrets.token_hex(32)
@@ -195,7 +229,8 @@ def _create_work_order_params(worker_id, workload_id, in_data,
     )
     # Add worker input data
     for value in in_data:
-        wo_params.add_in_data(value)
+        wo_params.add_in_data(value,
+                              encrypted_data_encryption_key=enc_data_enc_key)
 
     # Encrypt work order request hash
     wo_params.add_encrypted_request_hash()
@@ -205,8 +240,8 @@ def _create_work_order_params(worker_id, workload_id, in_data,
 
 def _create_work_order_receipt(wo_receipt, wo_params,
                                client_private_key, jrpc_req_id):
-    # Create work order receipt object using WorkOrderReceiptRequest class
-    # This fuction will send WorkOrderReceiptCreate json rpc request
+    # Create a work order receipt object using WorkOrderReceiptRequest class.
+    # This function will send a WorkOrderReceiptCreate JSON RPC request.
     wo_request = json.loads(wo_params.to_jrpc_string(jrpc_req_id))
     wo_receipt_request_obj = WorkOrderReceiptRequest()
     wo_create_receipt = wo_receipt_request_obj.create_receipt(
@@ -239,9 +274,9 @@ def _create_work_order_receipt(wo_receipt, wo_params,
 def _retrieve_work_order_receipt(wo_receipt, wo_params, jrpc_req_id):
     # Retrieve work order receipt
     receipt_res = wo_receipt.work_order_receipt_retrieve(
-                        wo_params.get_work_order_id(),
-                        id=jrpc_req_id
-                    )
+        wo_params.get_work_order_id(),
+        id=jrpc_req_id
+    )
     logger.info("\n Retrieve receipt response:\n {}".format(
         json.dumps(receipt_res, indent=4)
     ))
@@ -264,7 +299,7 @@ def _verify_receipt_signature(receipt_update_retrieve):
     # Verify receipt signature
     sig_obj = signature.ClientSignature()
     status = sig_obj.verify_update_receipt_signature(
-        receipt_update_retrieve)
+        receipt_update_retrieve['result'])
     if status == SignatureStatus.PASSED:
         logger.info(
             "Work order receipt retrieve signature verification " +
@@ -278,10 +313,13 @@ def _verify_receipt_signature(receipt_update_retrieve):
 
 
 def _verify_wo_res_signature(work_order_res,
-                             worker_verification_key):
+                             worker_verification_key,
+                             requester_nonce):
     # Verify work order result signature
     sig_obj = signature.ClientSignature()
-    status = sig_obj.verify_signature(work_order_res, worker_verification_key)
+    status = sig_obj.verify_signature(work_order_res,
+                                      worker_verification_key,
+                                      requester_nonce)
     if status == SignatureStatus.PASSED:
         logger.info("Signature verification Successful")
     else:
@@ -332,6 +370,9 @@ def Main(args=None):
 
     # work order input data
     in_data = options.in_data
+
+    # Option to send input data in plain text
+    in_data_plain_text = options.in_data_plain
 
     # show receipt in output
     show_receipt = options.receipt
@@ -397,15 +438,29 @@ def Main(args=None):
 
     # Initializing Worker Object
     worker_obj = worker_details.SGXWorkerDetails()
-    worker_obj.load_worker(worker_retrieve_result)
+    worker_obj.load_worker(worker_retrieve_result['result']['details'])
+
+    # Do worker verification
+    _do_worker_verification(worker_obj)
 
     logger.info("**********Worker details Updated with Worker ID" +
                 "*********\n%s\n", worker_id)
 
     # Create work order
+    if in_data_plain_text:
+        # As per TC spec, if encryptedDataEncryptionKey is "-" then
+        # input data is not encrypted
+        encrypted_data_encryption_key = "-"
+    else:
+        # As per TC spec, if encryptedDataEncryptionKey is not
+        # provided then set it to None which means
+        # use default session key to encrypt input data
+        encrypted_data_encryption_key = None
+
     wo_params = _create_work_order_params(worker_id, workload_id,
                                           in_data, worker_obj.encryption_key,
-                                          session_key, session_iv)
+                                          session_key, session_iv,
+                                          encrypted_data_encryption_key)
 
     client_private_key = crypto_utility.generate_signing_keys()
     if requester_signature:
@@ -455,14 +510,15 @@ def Main(args=None):
     # Check if result field is present in work order response
     if "result" in res:
         # Verify work order response signature
-        if _verify_wo_res_signature(res,
-                                    worker_obj.verification_key) is False:
+        if _verify_wo_res_signature(res['result'],
+                                    worker_obj.verification_key,
+                                    wo_params.get_requester_nonce()) is False:
             logger.error("Work order response signature verification Failed")
             sys.exit(1)
         # Decrypt work order response
         if show_decrypted_output:
             decrypted_res = crypto_utility.decrypted_response(
-                    res, session_key, session_iv)
+                res['result'], session_key, session_iv)
             logger.info("\nDecrypted response:\n {}"
                         .format(decrypted_res))
     else:
@@ -478,8 +534,13 @@ def Main(args=None):
             = _retrieve_work_order_receipt(wo_receipt,
                                            wo_params, jrpc_req_id)
         # Verify receipt signature
-        if _verify_receipt_signature(retrieve_wo_receipt) is False:
-            logger.error("Receipt signature verification Failed")
+        if "result" in retrieve_wo_receipt:
+            if _verify_receipt_signature(
+                    retrieve_wo_receipt) is False:
+                logger.error("Receipt signature verification Failed")
+                sys.exit(1)
+        else:
+            logger.info("Work Order receipt retrieve failed")
             sys.exit(1)
 
 

@@ -13,19 +13,30 @@
 * limitations under the License.
 */
 
+/**
+ * @file
+ * Avalon ByteArray and String conversion utilities.
+ */
+
 #include <string>
 #include <algorithm>
 
 #include "types.h"
+#include "utils.h"
 
+/**
+ * Convert a C++ string to a ByteArray vector.
+ */
 ByteArray StrToByteArray(std::string str) {
         ByteArray ba;
         std::copy(str.begin(), str.end(), std::back_inserter(ba));
         return ba;
 }
 
+/**
+ * Convert a ByteArray vector to a C++ string.
+ */
 std::string ByteArrayToStr(ByteArray ba) {
         std::string str(ba.begin(), ba.end());
         return str;
 }
-

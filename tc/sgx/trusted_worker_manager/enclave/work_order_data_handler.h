@@ -23,8 +23,9 @@
 #include "base64.h"
 #include "parson.h"
 #include "types.h"
+#include "tcf_error.h"
 #include "work_order_data.h"
-
+#include "enclave_types.h"
 
 namespace tcf {
         class WorkOrderDataHandler {
@@ -53,8 +54,12 @@ namespace tcf {
                 this->iv = iv;
             }
 
-            void Unpack(EnclaveData& enclaveData,
-                        const JSON_Object* object);
+            void Unpack(const JSON_Object* object);
+
+            void InitializeDataEncryptionKey();
+
+            virtual void GetDataEncryptionKey(
+                ByteArray& data_encrypt_key, ByteArray& iv_bytes);
 
             void Pack(JSON_Array* json_array);
 
@@ -78,7 +83,11 @@ namespace tcf {
             tcf::WorkOrderData workorder_data;
             std::string concat_string;
 
-        private:
+            ByteArray GetDataEncryptionKey() {
+                return this->data_encryption_key;
+            }
+
+        protected:
             // iv is used for calculating hash during signature verification
             // and signature computation
             std::string iv;

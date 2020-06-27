@@ -1,0 +1,20 @@
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+repository:
+  name: avalon
+  description: Hyperledger Avalon enables privacy in blockchain transactions,
+               moving intensive processing from a main blockchain to improve
+               scalability and latency, and to support attested Oracles
+  homepage: https://wiki.hyperledger.org/display/avalon/Hyperledger+Avalon
+  default_branch: master
+  has_downloads: true
+  has_issues: true
+  has_projects: true
+  has_wiki: false
+  archived: false
+  private: false
+  allow_squash_merge: true
+  allow_merge_commit: false
+  allow_rebase_merge: true

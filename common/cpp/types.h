@@ -13,6 +13,13 @@
  * limitations under the License.
  */
 
+/**
+ * @file
+ * Basic storage types used by Avalon.
+ * Avalon string utilities,
+ * including base 64, hex, and byte array conversion.
+ */
+
 #pragma once
 
 #include <stdint.h>
@@ -20,10 +27,10 @@
 #include <vector>
 #include <list>
 
-//*** For binary unformatted data***//
+/** Vector type for binary unformatted data. */
 typedef std::vector<uint8_t> ByteArray;
 
-//*** For vector containing printable characters ***//
+/** Vector type for containing printable characters. */
 class StringArray : public std::vector<char> {
 public:
     StringArray(const std::string& value) {
@@ -44,10 +51,18 @@ public:
     }
 };  /* class StringArray */
 
-//*** For printable base64 encoded string***//
+/**
+ * Type for printable base64 encoded string.
+ * May include '=' padding characters.
+ * No whitespace, header line, or footer line. For example,
+ * SHlwZXJsZWRnZXI=
+ */
 typedef std::string Base64EncodedString;
 
-//*** For printable hex encoded string***//
+/**
+ * Type for printable hex encoded string. For example,
+ * 2D81454D9C59D73867D65C0FCC98143D4B6F1B0BDB7EB04EFED72697F462309C
+ */
 typedef std::string HexEncodedString;
 
 // Simple conversion from ByteArray to String
@@ -65,6 +80,6 @@ ByteArray Base64EncodedStringToByteArray(const Base64EncodedString& encoded);
 // Simple conversion from ByteArray to HexEncodedString
 HexEncodedString ByteArrayToHexEncodedString(const ByteArray& buf);
 
-// Simple conversion from HexEncodedString to ByteArray
-// throws ValuenError
+// Simple conversion from HexEncodedString to ByteArray.
+// Throws ValueError
 ByteArray HexEncodedStringToByteArray(const HexEncodedString& encoded);

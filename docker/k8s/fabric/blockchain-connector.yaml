@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: avalon-blockchain-connector
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: avalon-blockchain-connector
+  template:
+    metadata:
+      name: avalon-blockchain-connector
+      labels:
+        app: avalon-blockchain-connector
+    spec:
+      containers:
+      - image: avalon-blockchain-connector-dev:latest
+        name: avalon-blockchain-connector
+        imagePullPolicy: Never
+        command: ["/bin/bash"]
+        args: ["-c", "cp -rf /mywork/vars/keyfiles /keyfiles \
+                      && cp /mywork/vars/profiles/mychannel_network_for_pysdk.json \
+                      /project/avalon/sdk/avalon_sdk/connector/blockchains/fabric/network.json \
+                      && avalon_blockchain_connector -b fabric -u http://avalon-listener:1947"]
+        volumeMounts:
+        - name: fabric-files
+          mountPath: /mywork/vars
+      volumes:
+      - name: fabric-files
+        hostPath:
+          path: /home/ubuntu/mywork/vars

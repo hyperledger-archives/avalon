@@ -23,7 +23,8 @@ This document describes how to get and compile these required components.
 
 # Recommended host system
 Hyperledger Avalon services (specifically the enclave manager and
-listener) should be ran on Ubuntu 18.04. Avalon has been tested on Ubuntu 18.04.
+listener) should be ran on Ubuntu 18.04 LTS ("Bionic Beaver").
+Avalon has been tested on Ubuntu 18.04.
 
 Avalon may run on other Linux distributions, but the installation
 process is likely to be more complicated, and the use of other distributions is
@@ -67,7 +68,7 @@ yourself using OpenSSL, then export the path to it:
 
 - `TCF_HOME`
 Used to locate the top level Avalon build directory.
-It is described in the [BUILD document](BUILD.md#buildtcf)
+It is described in the [BUILD document](BUILD.md#install)
 
 - `TCF_DEBUG_BUILD`
 Optional variable for enabling Avalon debug output. Set to `1` enable.
@@ -89,7 +90,8 @@ sudo apt-get install -y python3-venv
 
 Also, install the following pip3 packages:
 ```bash
-pip3 install --upgrade setuptools json-rpc py-solc web3 colorlog twisted wheel
+pip3 install --upgrade setuptools json-rpc py-solc-x web3 colorlog twisted wheel toml
+python3 -m solcx.install v0.5.15
 ```
 
 # <a name="docker"></a>Docker
@@ -199,13 +201,13 @@ sudo dpkg -i libsgx-enclave-common_2.7.101.3-bionic1_amd64.deb
 
 ### Run aesm service on host machine
 If you are behind a corporate proxy,
-uncomment and update the proxy type and aesm proxy lines in /etc/aesmd.conf:  
+uncomment and update the proxy type and aesm proxy lines in /etc/aesmd.conf:
 ```
 proxy type = manual
 aesm proxy = http://your-proxy:your-port
 ```
 
-Start aesm service on host machine  
+Start the AESM service on the host machine
 ```
 sudo source /opt/intel/libsgx-enclave-common/aesm/aesm_service
 ```
@@ -287,10 +289,10 @@ For example, to install OpenSSL v1.1.1d on an Ubuntu system:
 
 ```bash
 cd /var/tmp
-wget 'http://http.us.debian.org/debian/pool/main/o/openssl/libssl1.1_1.1.1d-2_amd64.deb'
-wget 'http://http.us.debian.org/debian/pool/main/o/openssl/libssl-dev_1.1.1d-2_amd64.deb'
-sudo dpkg -i libssl1.1_1.1.1d-2_amd64.deb
-sudo dpkg -i libssl-dev_1.1.1d-2_amd64.deb
+wget 'http://http.us.debian.org/debian/pool/main/o/openssl/libssl1.1_1.1.1d-0+deb10u3_amd64.deb'
+wget 'http://http.us.debian.org/debian/pool/main/o/openssl/libssl-dev_1.1.1d-0+deb10u3_amd64.deb'
+sudo dpkg -i libssl1.1_1.1.1d-0+deb10u3_amd64.deb
+sudo dpkg -i libssl-dev_1.1.1d-0+deb10u3_amd64.deb
 sudo apt-get install -f
 ```
 
@@ -305,7 +307,7 @@ These steps detail installing OpenSSL to the `~/openssl/install` directory.
 ```bash
 mkdir -p ~/openssl/install
 cd ~/openssl
-wget https://www.openssl.org/source/openssl-1.1.1d.tar.gz
+wget https://www.openssl.org/source/old/1.1.1/openssl-1.1.1d.tar.gz
 tar -xzf openssl-1.1.1d.tar.gz
 cd openssl-1.1.1d/
 ./Configure --prefix=$PWD/../install
@@ -355,10 +357,12 @@ problems.
   cd ~/sgxssl
   ```
 
-- Download the latest SGX SSL git repository for your version of OpenSSL:
+- Download a specific version of the Intel SGX SSL git repository.
+  Use Intel SGX SSL tag "lin_2.5_1.1.1d", which corresponds to
+  OpenSSL version 1.1.1d
 
   ```bash
-  git clone 'https://github.com/intel/intel-sgx-ssl.git'
+  git clone -b lin_2.5_1.1.1d 'https://github.com/intel/intel-sgx-ssl.git'
   ```
 
 - Download the OpenSSL source package for your version of OpenSSL.
@@ -366,7 +370,7 @@ problems.
 
   ```bash
   cd intel-sgx-ssl/openssl_source
-  wget 'https://www.openssl.org/source/openssl-1.1.1d.tar.gz'
+  wget 'https://www.openssl.org/source/old/1.1.1/openssl-1.1.1d.tar.gz'
   cd ..
   ```
 
@@ -427,8 +431,8 @@ problems.
 - If you get the error:
   `threads.h:57:22: error: conflicting types for ‘pthread_key_t’` or
   `threads.h:60:13: error: conflicting types for ‘pthread_once_t’`
-  your Intel SGX SDK is too old. Remove or rename `/opt/intel/sgxsdk` and `~/sgxssl`
-  then reinstall the Intel SGX SDK and rebuild the Intel SGX OpenSSL
+  your Intel SGX SDK is too old. Remove or rename `/opt/intel/sgxsdk` and
+  `~/sgxssl` then reinstall the Intel SGX SDK and rebuild the Intel SGX OpenSSL
   as instructed under [Intel SGX SDK](#sgx) and [Intel SGX OpenSSL](#sgxssl)
 
 - If the message  `intel_sgx: SGX is not enabled` appears in `/var/log/syslog`
@@ -441,7 +445,7 @@ problems.
   [Intel SGX](#sgx) section
 
 - If you get the error `failed to create enclave signup data`,
-  check the `ias_api_key` line in `$TCF_HOME/config/tcs_config.toml` .
+  check the `ias_api_key` line in `$TCF_HOME/config/singleton_enclave_config.toml` .
   It should be either either the Primary key or Secondary key you received
   from your IAS subscription as instructed in the
   [Intel SGX](#sgx) section
@@ -452,13 +456,12 @@ problems.
   device driver must be removed first
 
 - If you are running in Intel SGX hardware mode, you need to modify
-  the `ias_api_key` in `config/tcs_config.toml` with your
+  the `ias_api_key` in `$TCF_HOME/config/singleton_enclave_config.toml` with your
   IAS Subscription key obtained in the instructions above
 
 - If you are not running in a corporate proxy environment (and not connected
   directly to Internet), comment out the `https_proxy` line in
-  `config/tcs_config.toml`
+  `$TCF_HOME/config/tcs_config.toml`
 
 - If you reinstall the Intel SGX SDK and you modified `/etc/aesmd.conf`
   then save and restore the file before installing the SDK.
-

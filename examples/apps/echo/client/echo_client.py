@@ -24,15 +24,15 @@ import secrets
 
 import config.config as pconfig
 import utility.logger as plogger
-import crypto_utils.crypto_utility as utility
+import avalon_crypto_utils.crypto_utility as utility
 from avalon_sdk.worker.worker_details import WorkerType
 import avalon_sdk.worker.worker_details as worker
 from avalon_sdk.work_order.work_order_params import WorkOrderParams
-from avalon_sdk.direct.avalon_direct_client \
+from avalon_sdk.connector.direct.avalon_direct_client \
     import AvalonDirectClient
-import crypto_utils.crypto.crypto as crypto
+import avalon_crypto_utils.crypto.crypto as crypto
 from error_code.error_status import WorkOrderStatus, ReceiptCreateStatus
-import crypto_utils.signature as signature
+import avalon_crypto_utils.signature as signature
 import utility.hex_utils as hex_utils
 from error_code.error_status import SignatureStatus
 from avalon_sdk.work_order_receipt.work_order_receipt \
@@ -203,7 +203,7 @@ def Main(args=None):
     logger.info("\n Worker retrieve response: {}\n".format(
         json.dumps(worker_retrieve_result, indent=4)
     ))
-    worker_obj.load_worker(worker_retrieve_result)
+    worker_obj.load_worker(worker_retrieve_result["result"]["details"])
 
     logger.info("**********Worker details Updated with Worker ID" +
                 "*********\n%s\n", worker_id)
@@ -307,13 +307,16 @@ def Main(args=None):
     ))
     sig_obj = signature.ClientSignature()
     if "result" in res:
-        status = sig_obj.verify_signature(res, worker_obj.verification_key)
+        status = sig_obj.verify_signature(
+            res['result'],
+            worker_obj.verification_key,
+            wo_params.get_requester_nonce())
         try:
             if status == SignatureStatus.PASSED:
                 logger.info(
                     "Work order response signature verification Successful")
                 decrypted_res = utility.decrypted_response(
-                    res, session_key, session_iv)
+                    res['result'], session_key, session_iv)
                 logger.info("\nDecrypted response:\n {}".format(decrypted_res))
                 if input_data_hash:
                     decrypted_data = decrypted_res[0]["data"]
@@ -355,14 +358,21 @@ def Main(args=None):
     logger.info("\n Last update to receipt receipt is:\n {}".format(
         json.dumps(receipt_update_retrieve, indent=4)
     ))
-    status = sig_obj.verify_update_receipt_signature(receipt_update_retrieve)
-    if status == SignatureStatus.PASSED:
-        logger.info(
-            "Work order receipt retrieve signature verification Successful")
+    if "result" in receipt_update_retrieve:
+        status = sig_obj.verify_update_receipt_signature(
+            receipt_update_retrieve['result'])
+        if status == SignatureStatus.PASSED:
+            logger.info(
+                "Work order receipt retrieve signature" +
+                " verification Successful")
+        else:
+            logger.info(
+                "Work order receipt retrieve signature" +
+                " verification failed!!")
+            sys.exit(1)
     else:
-        logger.info(
-            "Work order receipt retrieve signature verification failed!!")
-        sys.exit(1)
+        logger.info("Work order receipt update failed")
+
     # Receipt lookup based on requesterId
     req_id += 1
     receipt_lookup_res = wo_receipt_instance.work_order_receipt_lookup(

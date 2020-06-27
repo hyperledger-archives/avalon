@@ -26,7 +26,11 @@ SOURCE_GROUP("Source" FILES ${PROJECT_HEADERS} ${PROJECT_SOURCES})
 
 SET(GENERIC_PRIVATE_INCLUDE_DIRS "." "${TCF_TOP_DIR}/common/cpp"
     "${TCF_TOP_DIR}/common/cpp/crypto"
-    "${TCF_TOP_DIR}/tc/sgx/trusted_worker_manager/enclave")
+    "${TCF_TOP_DIR}/common/cpp/verify_ias_report"
+    "${TCF_TOP_DIR}/common/cpp/packages/parson"
+    "${TCF_TOP_DIR}/tc/sgx/trusted_worker_manager/enclave"
+    "${TCF_TOP_DIR}/tc/sgx/trusted_worker_manager/enclave/kme"
+    "${TCF_TOP_DIR}/tc/sgx/trusted_worker_manager/enclave/wpe")
 SET(GENERIC_CXX_FLAGS ${DEBUG_FLAGS} "-Wall" "-fPIC" "-Wno-write-strings" "-std=c++11")
 
 SET(WORKLOAD_STATIC_NAME common_sgx_workload)
@@ -39,6 +43,7 @@ TARGET_INCLUDE_DIRECTORIES(${WORKLOAD_STATIC_NAME} PRIVATE "..")
 TARGET_INCLUDE_DIRECTORIES(${WORKLOAD_STATIC_NAME} PUBLIC ${GENERIC_PUBLIC_INCLUDE_DIRS})
 TARGET_INCLUDE_DIRECTORIES(${WORKLOAD_STATIC_NAME} PUBLIC "${SGX_SDK}/include/tlibc")
 TARGET_INCLUDE_DIRECTORIES(${WORKLOAD_STATIC_NAME} PUBLIC "${SGX_SDK}/include/libcxx")
+TARGET_INCLUDE_DIRECTORIES(${WORKLOAD_STATIC_NAME} PUBLIC "${SGX_SSL}/include")
 
 TARGET_COMPILE_OPTIONS(${WORKLOAD_STATIC_NAME} PRIVATE "${GENERIC_CXX_FLAGS}")
 TARGET_COMPILE_OPTIONS(${WORKLOAD_STATIC_NAME} PRIVATE "-nostdinc")

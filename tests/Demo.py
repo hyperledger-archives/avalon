@@ -20,11 +20,11 @@ import random
 import json
 import logging
 
-from avalon_sdk.http_client.http_jrpc_client import HttpJrpcClient
-import crypto_utils.crypto.crypto as crypto
-import crypto_utils.signature as signature
+from http_client.http_jrpc_client import HttpJrpcClient
+import avalon_crypto_utils.crypto.crypto as crypto
+import avalon_crypto_utils.signature as signature
 import avalon_sdk.worker.worker_details as worker
-import crypto_utils.crypto_utility as enclave_helper
+import avalon_crypto_utils.crypto_utility as enclave_helper
 import utility.file_utils as futils
 from error_code.error_status import SignatureStatus, WorkOrderStatus
 
@@ -70,7 +70,8 @@ def local_main(config):
                 input_json_obj = json.loads(input_json_str1)
                 wo_id = hex(random.randint(1, 2**64 - 1))
                 input_json_obj["params"]["workOrderId"] = wo_id
-                input_json_obj["params"]["workerId"] = worker_obj.worker_id
+                input_json_obj["params"]["workerId"] = worker_id
+
                 # Convert workloadId to a hex string and update the request
                 workload_id = input_json_obj["params"]["workloadId"]
                 workload_id_hex = workload_id.encode("UTF-8").hex()
@@ -89,6 +90,8 @@ def local_main(config):
                 if status != SignatureStatus.PASSED:
                     LOGGER.info("Generate signature failed\n")
                     exit(1)
+                requester_nonce = json.loads(
+                    input_json_str1)["params"]["requesterNonce"]
                 if input_json_str1 is None:
                     continue
             # -----------------------------------------------------------------
@@ -100,7 +103,8 @@ def local_main(config):
                     # response and update the worker id information for
                     # further json requests.
                     if "result" in response and \
-                            "ids" in response["result"].keys():
+                            "ids" in response["result"].keys() and \
+                            len(response["result"]["ids"]) > 0:
                         input_json_final = json.loads(input_json_str1)
                         worker_id = response["result"]["ids"][0]
                         input_json_final["params"]["workerId"] = worker_id
@@ -125,7 +129,7 @@ def local_main(config):
 
             # Worker details are loaded into Worker_Obj
             if "WorkerRetrieve" in input_json_str1 and "result" in response:
-                worker_obj.load_worker(response)
+                worker_obj.load_worker(response["result"]["details"])
             # -----------------------------------------------------------------
 
             # Poll for "WorkOrderGetResult" and break when you get the result
@@ -147,12 +151,14 @@ def local_main(config):
                                 "skipping signature verification")
                     continue
                 sig_bool = sig_obj.verify_signature(
-                    response, worker_obj.verification_key)
+                    response['result'],
+                    worker_obj.verification_key,
+                    requester_nonce)
                 try:
                     if sig_bool > 0:
                         LOGGER.info("Signature Verified")
                         enclave_helper.decrypted_response(
-                            response, session_key, session_iv)
+                            response['result'], session_key, session_iv)
                     else:
                         LOGGER.info("Signature verification Failed")
                         exit(1)
@@ -180,9 +186,11 @@ def parse_command_line(config, args):
     global consensus_file_name
     global sig_obj
     global worker_obj
+    global worker_id
     global private_key
     global encrypted_session_key
     global session_iv
+    global requester_nonce
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--logfile", help="Name of the log file. " +

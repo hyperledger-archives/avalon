@@ -13,6 +13,14 @@
 * limitations under the License.
 */
 
+/**
+ * @file
+ * FileIoExecutor C++ class definitions for Avalon Inside-Out File I/O.
+ * To use, #include "file_io.h"
+ */
+
+#pragma once
+
 #include <string>
 #include <stdint.h>
 
@@ -52,4 +60,6 @@ public:
         size_t out_buf_size);
 
     uint32_t FileSeek(size_t position, uint8_t *result, size_t result_size);
+
+    uint32_t FileDelete(uint8_t *result, size_t result_size);
 };

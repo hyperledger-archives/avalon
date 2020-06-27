@@ -19,26 +19,9 @@
 
 #include "types.h"
 
-namespace tcf {
-    namespace enclave_api {
-        namespace enclave_data {
-            // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-            tcf_err_t CreateEnclaveData(
-                const std::string& inOriginatorPublicKeyHash,
-                StringArray& outPublicEnclaveData,
-                Base64EncodedString& outSealedEnclaveData,
-                Base64EncodedString& outEnclaveQuote);
+class SignupData {
+public:
+    static size_t CalculateSealedEnclaveDataSize(void);
 
-            // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-            tcf_err_t UnsealEnclaveData(
-                const Base64EncodedString& inSealedEnclaveData,
-                StringArray& outPublicEnclaveData);
-
-            tcf_err_t VerifyEnclaveInfo(const std::string& enclaveInfo,
-                const std::string& mr_enclave,
-                const std::string& originator_public_key_hash);
-        }  /* namespace signup */
-
-    }  /* namespace enclave_api */
-
-}  /* namespace tcf */
+    static size_t CalculatePublicEnclaveDataSize(void);
+};

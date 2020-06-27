@@ -13,8 +13,8 @@
 # limitations under the License.
 
 import logging
-import crypto_utils.crypto.crypto as crypto
-import crypto_utils.crypto_utility as crypto_utility
+import avalon_crypto_utils.crypto.crypto as crypto
+import avalon_crypto_utils.crypto_utility as crypto_utility
 
 logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s',
                     level=logging.INFO)

@@ -13,23 +13,31 @@
  * limitations under the License.
  */
 
-#include "enclave_t.h"
+#include "enclave_common_t.h"
 #include "sgx_tseal.h"
 
 #include <stdlib.h>
 #include <string>
 #include <vector>
+#include <string.h>
+#include<mbusafecrt.h>
 
 #include "crypto.h"
 #include "error.h"
 #include "avalon_sgx_error.h"
 #include "tcf_error.h"
 #include "zero.h"
+#include "enclave_utils.h"
 
 #include "jsonvalue.h"
 #include "parson.h"
 
 #include "enclave_data.h"
+
+// Below constants are the max limit for serialized version(base64 encoded)
+// of private signature and private encryption keys
+#define MAX_SERIALIZED_SIG_PRIV_KEY_SIZE 256
+#define MAX_SERIALIZED_ENC_PRIV_KEY_SIZE 2048
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -49,30 +57,8 @@ EnclaveData::EnclaveData(void) {
     // Create the public encryption key
     public_encryption_key_ = private_encryption_key_.GetPublicKey();
 
-    SerializePrivateData();
-    SerializePublicData();
-}
-
-// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-EnclaveData::EnclaveData(const uint8_t* inSealedData) {
-    tcf::error::ThrowIfNull(inSealedData, "Sealed sign up data pointer is NULL");
-
-    uint32_t decrypted_size =
-        sgx_get_encrypt_txt_len(reinterpret_cast<const sgx_sealed_data_t*>(inSealedData));
-
-    // Need to check for error
-
-    std::vector<uint8_t> decrypted_data;
-    decrypted_data.resize(decrypted_size);
-
-    // Unseal the data
-    sgx_status_t ret = sgx_unseal_data(reinterpret_cast<const sgx_sealed_data_t*>(inSealedData),
-        nullptr, 0, &decrypted_data[0], &decrypted_size);
-    tcf::error::ThrowSgxError(ret, "Failed to unseal  data");
-
-    std::string decrypted_data_string(reinterpret_cast<const char*>(&decrypted_data[0]));
-    DeserializeSealedData(decrypted_data_string);
+    // Create encryption key signature
+    generate_encryption_key_signature();
 
     SerializePrivateData();
     SerializePublicData();
@@ -80,48 +66,11 @@ EnclaveData::EnclaveData(const uint8_t* inSealedData) {
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-void EnclaveData::DeserializeSealedData(const std::string& inSerializedEnclaveData) {
-    std::string svalue;
-    const char* pvalue = nullptr;
-
-    // Parse the incoming wait certificate
-    JsonValue parsed(json_parse_string(inSerializedEnclaveData.c_str()));
-    tcf::error::ThrowIfNull(parsed.value, "Failed to parse the Enclave data, badly formed JSON");
-
-    JSON_Object* keystore_object = json_value_get_object(parsed);
-    tcf::error::ThrowIfNull(keystore_object, "Failed to parse the key store object");
-
-    // Public signing key
-    pvalue = json_object_dotget_string(keystore_object, "SigningKey.PublicKey");
-    tcf::error::ThrowIf<tcf::error::ValueError>(
-        !pvalue, "Failed to retrieve public signing key from the key store");
-
-    svalue.assign(pvalue);
-    public_signing_key_.Deserialize(svalue);
-
-    // Private signing key
-    pvalue = json_object_dotget_string(keystore_object, "SigningKey.PrivateKey");
-    tcf::error::ThrowIf<tcf::error::ValueError>(
-        !pvalue, "Failed to retrieve private signing key from the key store");
-
-    svalue.assign(pvalue);
-    private_signing_key_.Deserialize(svalue);
-
-    // Public encryption key
-    pvalue = json_object_dotget_string(keystore_object, "EncryptionKey.PublicKey");
-    tcf::error::ThrowIf<tcf::error::ValueError>(
-        !pvalue, "Failed to retrieve public encryption key from the key store");
-
-    svalue.assign(pvalue);
-    public_encryption_key_.Deserialize(svalue);
-
-    // Private encryption key
-    pvalue = json_object_dotget_string(keystore_object, "EncryptionKey.PrivateKey");
-    tcf::error::ThrowIf<tcf::error::ValueError>(
-        !pvalue, "Failed to retrieve private encryption key from the key store");
-
-    svalue.assign(pvalue);
-    private_encryption_key_.Deserialize(svalue);
+EnclaveData::~EnclaveData(void) {
+    // Sanitizing class instance members other than below leads to enclave
+    // crash hence avoid the sanitization.
+    serialized_private_data_.clear();
+    serialized_public_data_.clear();
 }
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -147,6 +96,9 @@ void EnclaveData::SerializePrivateData(void) {
     tcf::error::ThrowIf<tcf::error::RuntimeError>(
         jret != JSONSuccess, "enclave data serialization failed on private signing key");
 
+    // Sanitize local variables storing secrets
+    b64_private_signing_key.clear();
+
     // Public signing key
     std::string b64_public_signing_key = public_signing_key_.Serialize();
     tcf::error::ThrowIf<tcf::error::RuntimeError>(
@@ -167,6 +119,9 @@ void EnclaveData::SerializePrivateData(void) {
     tcf::error::ThrowIf<tcf::error::RuntimeError>(
         jret != JSONSuccess, "enclave data serialization failed on private encryption key");
 
+    // Sanitize local variables storing secrets
+    b64_private_encryption_key.clear();
+
     // Public encryption key
     std::string b64_public_encryption_key = public_encryption_key_.Serialize();
     tcf::error::ThrowIf<tcf::error::RuntimeError>(
@@ -176,6 +131,9 @@ void EnclaveData::SerializePrivateData(void) {
         dataObject, "EncryptionKey.PublicKey", b64_public_encryption_key.c_str());
     tcf::error::ThrowIf<tcf::error::RuntimeError>(
         jret != JSONSuccess, "enclave data serialization failed on public encryption key");
+
+    // Sanitize local variables storing secrets
+    b64_public_encryption_key.clear();
 
     size_t serializedSize = json_serialization_size(dataValue);
 
@@ -220,6 +178,14 @@ void EnclaveData::SerializePublicData(void) {
         json_object_dotset_string(dataObject, "EncryptionKey", b64_public_encryption_key.c_str());
     tcf::error::ThrowIf<tcf::error::RuntimeError>(
         jret != JSONSuccess, "enclave data serialization failed on public encryption key");
+
+    // Public encryption key signature
+    jret =
+        json_object_dotset_string(dataObject, "EncryptionKeySignature", \
+            encryption_key_signature_.c_str());
+    tcf::error::ThrowIf<tcf::error::RuntimeError>(
+        jret != JSONSuccess, \
+        "enclave data serialization failed on public encryption key signature");
 
     size_t serializedSize = json_serialization_size(dataValue);
 

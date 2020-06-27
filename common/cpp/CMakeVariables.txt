@@ -58,7 +58,7 @@ if(NOT UNTRUSTED_ONLY)
 
     SET(SGX_SSL "$ENV{SGX_SSL}")
     if("${SGX_SSL} " STREQUAL " ")
-        SET(SGX_SSL "/opt/intel/sgxssl")     
+        SET(SGX_SSL "/opt/intel/sgxssl")
         message(STATUS "Setting default SGX_SSL=${SGX_SSL}")
     endif()
 endif()
@@ -72,7 +72,8 @@ SET(SGX_ENCLAVE_INCLUDE "${SGX_SDK}/include"
                         "${SGX_SDK}/include/libcxx")
 
 
-# allow opting out of running tests, primarily so we can skip sgx hw-mode based tests which fail in docker test
+# Allow opting out of running tests, primarily so we can skip
+# Intel SGX hw-mode based tests which fail in the Docker test
 if(NOT DISABLE_TESTS)
     enable_testing()
 endif()

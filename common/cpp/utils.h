@@ -13,6 +13,13 @@
 * limitations under the License.
 */
 
+/**
+ * @file
+ * Avalon ByteArray and String conversion utilities.
+ */
+
+#pragma once
+
 #include <string>
 
 #include "types.h"

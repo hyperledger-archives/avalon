@@ -1,37 +1,44 @@
-<!---
+<!--
 Licensed under Creative Commons Attribution 4.0 International License
 https://creativecommons.org/licenses/by/4.0/
---->
+-->
 
-Purpose of Common
------------------
-The common directory contains source code shared by untrusted and trusted (SGX Enclave) code.
+Purpose of C++ Common Hyperledger Avalon Code
+=============================================
+
+The cpp directory contains C++ source code shared by untrusted and trusted
+(Intel SGX Enclave) Hyperledger Avalon code.
 
 Dependencies:
 -------------
 1. OpenSSL 1.1
 https://www.openssl.org/
 
-2. SGX OpenSSL library built from OpenSSL 1.1
+2. Intel SGX OpenSSL library built from OpenSSL 1.1
 https://github.com/intel/intel-sgx-ssl
 
-3. SGX SDK
+3. Intel SGX SDK
 https://software.intel.com/en-us/sgx-sdk/download
 
 Source Directories
 ------------------
 
-Dir                     Content
----------------------   ------------------------------------------------------
-`crypto/`               \*.cpp,\*.h for OpenSSL based crypto functions.
-                        For more information, see
-                        [crypto/README.md](crypto/README.md)
-
-`.`                     \*.cpp,\*.h error handling and common types
-
-`packages/base64/`      \*.cpp,\*.h of Renee Nyffinger base64 encoding/decoding
-
-`packages/parson/`      \*.cpp,\*.h of Parson JSON  encoding/decoding
+* `.` <br />
+   \*.cpp,\*.h error handling, data conversion, utilities,
+   and common types
+* `crypto/` <br />
+   \*.cpp,\*.h for OpenSSL-based cryptographic functions.
+   For more information, see
+   [crypto/README.md](crypto/README.md)
+* `packages/base64/` <br />
+   \*.cpp,\*.h of Renee Nyffinger base64 encoding/decoding
+* `packages/parson/` <br />
+   \*.cpp,\*.h of Parson JSON encoding/decoding
+* `tests/` <br />
+  \*.cpp,\*.h of standalone unit test programs for these
+   common cpp source files.
+   For more information, see
+   [tests/README.md](tests/README.md)
 
 Python Wrapper
 --------------

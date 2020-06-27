@@ -13,6 +13,13 @@
  * limitations under the License.
  */
 
+/**
+ * @file
+ * Avalon Crypto Utilities:
+ * hashing, base 64 conversion, random number generation, key generation,
+ * encrypt, and decrypt.
+ */
+
 #pragma once
 
 #include <vector>
@@ -20,31 +27,25 @@
 
 namespace tcf {
 namespace crypto {
-    // SHA256 hashing
+    /** SHA256 hashing. */
+    namespace constants {
+        /** SHA-256 digest length in bytes (256 bits) */
+        const int DIGEST_LENGTH = 32;
+    }  // namespace constants
+
     ByteArray ComputeMessageHash(const ByteArray& message);
 
-    // Generate a cryptographically strong random bitstring.
+    /** Generate a cryptographically strong random bitstring. */
     // throws RuntimeError
     ByteArray RandomBitString(size_t length);
 
-    // Wrapper function for EVP_DecodeBlock.
-    // EVP_DecodeBlock pads its output with \0 if the output length
-    // is not a multiple of 3. Check if the base64 string is padded at the end
-    // and adjust the output length
-    int EVP_DecodeBlock_wrapper(unsigned char* out, int out_len,
-        const unsigned char* in, int in_len);
-
-    // Decodes specified number of blocks of base64 encoded data
-    int decode_base64_block(unsigned char *decoded_data,
-        const unsigned char *base64_data, int num_of_blocks);
-
-    // Create symmetric encryption key and return hex encoded key string
+    /** Create symmetric encryption key and return hex encoded key string. */
     std::string CreateHexEncodedEncryptionKey();
 
-    // Decrypt cipher using given encryption key and return message
+    /** Decrypt cipher using given encryption key and return message. */
     std::string DecryptData(std::string cipher, std::string key);
 
-    // Encrypt the message using given encryption key and return cipher
+    /** Encrypt the message using given encryption key and return cipher. */
     std::string EncryptData(std::string msg, std::string key);
 }  // namespace crypto
 }  // namespace tcf

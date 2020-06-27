@@ -15,31 +15,26 @@
 
 #pragma once
 
-#include "tcf_error.h"
-#include "types.h"
-
 #include <string>
 #include <stdlib.h>
 
-namespace tcf {
-    namespace enclave_api {
-        namespace workorder {
-            // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-            tcf_err_t HandleWorkOrderRequest(
-                const Base64EncodedString& inSealedEnclaveData,
-                const Base64EncodedString& inSerializedRequest,
-                uint32_t& outResponseIdentifier,
-                size_t& outSerializedResponseSize,
-                int enclaveIndex);
+#include "tcf_error.h"
+#include "types.h"
 
-            // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-            tcf_err_t GetSerializedResponse(
-                const Base64EncodedString& inSealedEnclaveData,
-                const uint32_t inResponseIdentifier,
-                const size_t inSerializedResponseSize,
-                Base64EncodedString& outSerializedResponse,
-                int enclaveIndex);
+class WorkOrderHandler {
+public:
+    WorkOrderHandler() {}
 
-        }  /* namespace workorder */
-    }  /* namespace enclave_api */
-}  /* namespace tcf */
+    tcf_err_t HandleWorkOrderRequest(
+        const Base64EncodedString& inSerializedRequest,
+        const std::string inWorkOrderExtData,
+        uint32_t& outResponseIdentifier,
+        size_t& outSerializedResponseSize,
+        int enclaveIndex);
+
+    tcf_err_t GetSerializedResponse(
+        const uint32_t inResponseIdentifier,
+        const size_t inSerializedResponseSize,
+        Base64EncodedString& outSerializedResponse,
+        int enclaveIndex);
+};

@@ -86,3 +86,5 @@ examples/common/java/*/bin/
 .vscode/
 .DS_Store
 
+# Fabric certificates folder
+vars/

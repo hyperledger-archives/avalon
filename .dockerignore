@@ -19,4 +19,5 @@ config/Kv*
 *.md
 docs/*
 CODEOWNERS
-
+# Fabric certificates folder
+vars/*

@@ -13,8 +13,13 @@
  * limitations under the License.
  */
 
+/**
+ * @file
+ * Avalon RSA public key serialization and encryption functions.
+ * Serialization reads and writes keys in PEM format strings.
+ */
+
 #pragma once
-#include <openssl/rsa.h>
 #include <string>
 #include <vector>
 #include "types.h"
@@ -24,36 +29,44 @@ namespace crypto {
     // Public Key encryption functions
     namespace pkenc {
         class PrivateKey;
+
         class PublicKey {
             friend PrivateKey;
 
         public:
-            // default constructor: UNINITIALIZED PublicKey!
+            // Default constructor for UNINITIALIZED PublicKey.
             PublicKey();
-            // copy constructor
+            // Copy constructor.
             // throws RuntimeError
             PublicKey(const PublicKey& publicKey);
-            // move constructor
+            // Move constructor.
             // throws RuntimeError
             PublicKey(PublicKey&& publicKey);
             // throws RuntimeError
             PublicKey(const PrivateKey& privateKey);
-            // deserializing constructor
-            // throws RuntimeError, ValueError
+            // Deserializing constructor.
+            // Reads RSA public key PEM format string.
+            // (with "BEGIN RSA PUBLIC KEY" or "BEGIN PUBLIC KEY").
+            // Throws RuntimeError, ValueError.
             PublicKey(const std::string& encoded);
             ~PublicKey();
             // throws RuntimeError
             PublicKey& operator=(const PublicKey& publicKey);
-            // throws RuntimeError, ValueError
+            // Reads RSA public key PEM format string
+            // Throws RuntimeError, ValueError.
             void Deserialize(const std::string& encoded);
-            // throws RuntimeError
+            // Creates RSA public key PEM format string
+            // (with "BEGIN PUBLIC KEY").
+            // Throws RuntimeError.
             std::string Serialize() const;
-            // Encrypt message.data() and return ByteArray containing raw binary ciphertext
+            // Encrypt message.data() and return ciphertext.
             // throws RuntimeError
             ByteArray EncryptMessage(const ByteArray& message) const;
 
         private:
-            RSA* public_key_;
+            // void * is an opaque pointer to implementation-dependent context
+            void *public_key_;
+            void *deserializeRSAPublicKey(const std::string& encoded);
         };
     }  // namespace pkenc
 }  // namespace crypto

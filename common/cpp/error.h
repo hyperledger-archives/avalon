@@ -13,6 +13,12 @@
  * limitations under the License.
  */
 
+/**
+ * @file
+ * Avalon error and exception handling functions.
+ * Namespace tcf::error
+ */
+
 #pragma once
 
 #include <stdexcept>
@@ -122,6 +128,14 @@ namespace tcf {
                 const std::string& msg
                 ) : Error(TCF_ERR_SYSTEM_BUSY, msg) {}
         }; // class SystemBusyError
+
+        // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+        class WorkloadError : public Error {
+        public:
+            explicit WorkloadError(
+                const std::string& msg
+                ) : Error(TCF_ERR_INVALID_WORKLOAD, msg) {}
+        }; // class WorkloadError
 
         // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
         class UnknownError : public Error {

@@ -12,41 +12,35 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-PY_VERSION=${shell python3 --version | sed 's/Python \(3\.[0-9]\).*/\1/' | tr -d .}
+# Get python version
+PY_VERSION=${shell python3 --version | sed 's/Python \(3\.[0-9]\).*/\1/' | cut -b 1}
 MOD_VERSION=${shell ../../bin/get_version}
 
 # Format of wheel package is <pkg_name>-{python-tag}-{abi-tag}-{platform}
-WHEEL_FILE=dist/avalon_common-${MOD_VERSION}-cp${PY_VERSION}-cp${PY_VERSION}m-linux_x86_64.whl
+WHEEL_FILE=dist/avalon_common-${MOD_VERSION}-py${PY_VERSION}-none-any.whl
 SOURCE_DIR=$(shell pwd)
 
 
 all : $(WHEEL_FILE)
 
-$(WHEEL_FILE) : build_ext
+$(WHEEL_FILE) :
 	@echo Build Distribution
 	python3 setup.py bdist_wheel
 	
-build_ext :
-	@echo Build build_ext
-	python3 setup.py build_ext
-
 build :
 	mkdir $@
-	cd $@ 
 
 install:
 	@echo INSTALLING WHEEL FILE =================
 	pip3 install $(WHEEL_FILE)
 
 clean:
-	pip3 uninstall --yes $(WHEEL_FILE)
+	if [ -f $(WHEEL_FILE) ] ; then pip3 uninstall --yes $(WHEEL_FILE); fi
 	rm -rf build deps dist *.egg-info
-	rm -f crypto/crypto.py crypto/crypto_wrap.cpp
-	rm -f verify_report/verify_report.py verify_report/verify_report_wrap.cpp
 	find . -iname '*.pyc' -delete
 	find . -iname '__pycache__' -delete
 
-.phony : all
-.phony : clean
-.phone : install
+.PHONY : all
+.PHONY : clean
+.PHONY : install
 

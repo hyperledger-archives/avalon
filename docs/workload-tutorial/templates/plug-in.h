@@ -1,4 +1,4 @@
-/* Copyright 2019 Intel Corporation
+/* Copyright 2020 Intel Corporation
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@
 namespace $NameSpace$ {
 
 // replace $WorkloadId$ below with a workload id, e.g. "hello-world"
-const char* workload_id = $WorkloadId$;
+const char* workload_id = "$WorkloadId$";
 
 class Workload : public WorkloadProcessor {
 public:
@@ -56,5 +56,3 @@ public:
 
 // replace $NameSpace$ below with a workload namespace, e.g. HelloWorld
 using namespace $NameSpace$;
-
-

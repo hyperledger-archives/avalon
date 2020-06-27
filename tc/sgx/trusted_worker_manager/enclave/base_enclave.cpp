@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "enclave_t.h"
+#include "enclave_common_t.h"
 
 #include <stdlib.h>
 
@@ -33,6 +33,7 @@
 #include "zero.h"
 
 #include "base_enclave.h"
+#include "signup_enclave_common.h"
 #include "enclave_utils.h"
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -48,6 +49,8 @@ tcf_err_t ecall_Initialize() {
     // since it can break confidentiality of workorder execution.
     SAFE_LOG(TCF_LOG_CRITICAL, "enclave initialized with debugging turned on");
 
+    // Initialize Enclave data
+    result = CreateEnclaveData();
     return result;
 }  // ecall_Initialize
 
@@ -63,19 +66,19 @@ tcf_err_t ecall_CreateErsatzEnclaveReport(sgx_target_info_t* targetInfo, sgx_rep
 
         // Create a relatively useless enclave report.  Well....the report
         // itself is not useful for anything except that it can be used to
-        // create SGX quotes, which contain potentially useful information
+        // create Intel SGX quotes, which contain potentially useful information
         // (like the enclave basename, mr_enclave, etc.).
         tcf::error::ThrowSgxError(
             sgx_create_report(targetInfo, nullptr, outReport), "Failed to create report.");
     } catch (tcf::error::Error& e) {
         SAFE_LOG(TCF_LOG_ERROR,
-            "Error in tcf enclave(ecall_CreateErsatzEnclaveReport): %04X "
+            "Error in Avalon enclave(ecall_CreateErsatzEnclaveReport): %04X "
             "-- %s",
             e.error_code(), e.what());
         ocall_SetErrorMessage(e.what());
         result = e.error_code();
     } catch (...) {
-        SAFE_LOG(TCF_LOG_ERROR, "Unknown error in tcf enclave(ecall_CreateErsatzEnclaveReport)");
+        SAFE_LOG(TCF_LOG_ERROR, "Unknown error in Avalon enclave(ecall_CreateErsatzEnclaveReport)");
         result = TCF_ERR_UNKNOWN;
     }
 

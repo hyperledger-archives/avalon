@@ -20,7 +20,7 @@ import logging
 import os
 from os.path import exists, realpath
 
-from avalon_sdk.ethereum.ethereum_wrapper \
+from avalon_sdk.connector.blockchains.ethereum.ethereum_wrapper \
     import EthereumWrapper as ethereum_wrapper
 
 logging.basicConfig(
