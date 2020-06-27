@@ -14,6 +14,13 @@
 
 version: '3.5'
 
+volumes:
+  # Named volume for WPE to share MRENCLAVE with KME. MRENCLAVE value can also be passed
+  # as a command line parameter (using the option --wpe_mr_enclave) to KME enclave manger.
+  # Then the MRENCLAVE value stored in file "wpe_mr_enclave.txt" in shared volume will be
+  # overridden by the value passed in command line.
+  pool-1:
+
 services:
 
   avalon-kme:
@@ -31,11 +38,21 @@ services:
       - http_proxy
       - https_proxy
       - no_proxy
+    volumes:
+      - pool-1:/shared-pool-1
     expose:
       # KME listener port
       - 1948
     command: |
       bash -c "
+        while true;
+          do
+            if [ -e /shared-pool-1/wpe_mr_enclave.txt ];
+              then mv /shared-pool-1/wpe_mr_enclave.txt /project/avalon/wpe_mr_enclave.txt;
+              break;
+            fi;
+            sleep 1;
+        done;
         enclave_manager --lmdb_url http://avalon-lmdb:9090 --bind http://avalon-kme:1948
         tail -f /dev/null
       "
@@ -58,11 +75,14 @@ services:
       - http_proxy
       - https_proxy
       - no_proxy
+    volumes:
+      - pool-1:/shared-pool-1
     expose:
       # ZMQ socket port.
       - 5555
     command: |
       bash -c "
+        mv /project/avalon/wpe_mr_enclave.txt /shared-pool-1
         enclave_manager --lmdb_url http://avalon-lmdb:9090 --kme_listener_url http://avalon-kme:1948
         tail -f /dev/null
       "

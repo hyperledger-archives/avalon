@@ -243,6 +243,10 @@ def main(args=None):
                         type=str)
     parser.add_argument("--worker_id",
                         help="Id of worker in plain text", type=str)
+    parser.add_argument(
+        "--wpe-mrenclave",
+        help="MRENCLAVE of WPE that can register with this KME",
+        type=str)
 
     (options, remainder) = parser.parse_known_args(args)
 
@@ -263,6 +267,8 @@ def main(args=None):
         config["KMEListener"]["bind"] = options.bind
     if options.worker_id:
         config["WorkerConfig"]["worker_id"] = options.worker_id
+    if options.wpe_mrenclave:
+        config["EnclaveModule"]["wpe_mrenclave"] = options.wpe_mrenclave
 
     plogger.setup_loggers(config.get("Logging", {}))
     sys.stdout = plogger.stream_to_logger(

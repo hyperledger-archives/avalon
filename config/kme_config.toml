@@ -32,6 +32,7 @@ ias_url = "https://api.trustedservices.intel.com/sgx/dev"
 # uncomment and change to your corporate proxy.
 #https_proxy = "http://your-proxy:your-port/"
 
+
 # IAS API key is a 32-digit hex string subscription key used for authentication
 # of requests submitted to the IAS server. Obtain the key by subscribing in
 # the portal https://api.portal.trustedservices.intel.com/
@@ -43,11 +44,9 @@ enclave_library_path = "tc/sgx/trusted_worker_manager/enclave/build/lib/"
 
 num_of_enclaves = "1"
 # MRENCLAVE for WPE that will be allowed to register with this KME
-# @TODO : Instead of hardcoding, read from a file (not part of codebase but generated
-#        using tool) as below where MRENCLAVE is saved.
-# This file is generated during WPE Enclave build
-# wpe_mrenclave_read_from_file = wpe_mr_enclave.txt
-wpe_mrenclave = "729B98A754CBBDE2C307E2563E467D8A965E9345A17B2A32E5EF4F083B07F8DE"
+# is read from a file. This file is generated using a script after
+# the WPE enclave has been built.
+wpe_mrenclave_read_from_file = "wpe_mr_enclave.txt"
 
 # The type of enclave viz - KME/WPE/SWE
 enclave_type = "KME"

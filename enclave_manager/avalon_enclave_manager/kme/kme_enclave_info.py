@@ -21,8 +21,10 @@ import logging
 from ssl import SSLError
 from requests.exceptions import Timeout
 from requests.exceptions import HTTPError
+import utility.hex_utils as hex_utils
 import avalon_crypto_utils.keys as keys
 import avalon_enclave_manager.kme.kme_enclave as enclave
+import avalon_enclave_manager.base_enclave_info as enclave_info
 from avalon_enclave_manager.base_enclave_info import BaseEnclaveInfo
 
 logger = logging.getLogger(__name__)
@@ -115,10 +117,16 @@ class KeyManagementEnclaveInfo(BaseEnclaveInfo):
 
         signup_cpp_obj = enclave.SignupInfoKME()
 
+        if "wpe_mrenclave" in config:
+            self._wpe_mrenclave = config["wpe_mrenclave"]
+        else:
+            self._wpe_mrenclave = hex_utils.mrenclave_hex_string(
+                enclave_info.TCF_HOME + "/"
+                + config["wpe_mrenclave_read_from_file"])
         # @TODO : Passing in_ext_data_signature as empty string "" as of now
         signup_data = signup_cpp_obj.CreateEnclaveData(
-            config['wpe_mrenclave'], "")
-        logger.info("WPE MRenclave value {}".format(config['wpe_mrenclave']))
+            self._wpe_mrenclave, "")
+        logger.info("WPE MRenclave value {}".format(self._wpe_mrenclave))
         if signup_data is None:
             return None
 
@@ -164,7 +172,7 @@ class KeyManagementEnclaveInfo(BaseEnclaveInfo):
         """
         return signup_cpp_obj.VerifyEnclaveInfo(enclave_info,
                                                 mr_enclave,
-                                                self._config["wpe_mrenclave"])
+                                                self._wpe_mrenclave)
 
     # ----------------------------------------------------------------
     def _init_enclave_with(self, signed_enclave, config):
