@@ -52,5 +52,5 @@ type WorkerRetrieveResParam struct {
 type WorkerLookUpResParam struct {
 	TotalCount uint64   `json:"totalCount"`
 	LookupTag  string   `json:"lookupTag"`
-	IDs        []string `json:"ids,omitempty"`
+	IDs        []string `json:"ids"`
 }

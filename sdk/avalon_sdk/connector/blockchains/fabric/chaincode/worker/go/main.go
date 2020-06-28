@@ -265,6 +265,7 @@ func (t *WorkerRegistry) workerLookUpNext(stub shim.ChaincodeStubInterface, args
 	}
 
 	var resparam WorkerLookUpResParam
+	resparam.IDs = []string{}
 	for iter.HasNext() {
 		item, _ := iter.Next()
 		logger.Infof("The value: %v", item)
