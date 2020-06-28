@@ -120,11 +120,14 @@ pipeline {
         //}
         success {
             archiveArtifacts '*.tgz, *.zip'
+            githubNotify context: 'continuous-integration/jenkins/SGX-SIM mode', description: 'This commit looks good',  status: 'SUCCESS'
         }
         aborted {
+            githubNotify context: 'continuous-integration/jenkins/SGX-SIM mode', description: 'This commit looks bad',  status: 'ABORTED'
             error "Aborted, exiting now"
         }
         failure {
+            githubNotify context: 'continuous-integration/jenkins/SGX-SIM mode', description: 'This commit looks bad',  status: 'FAILED'
             error "Failed, exiting now"
         }
     }
