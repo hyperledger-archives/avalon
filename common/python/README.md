@@ -6,8 +6,8 @@ https://creativecommons.org/licenses/by/4.0/
 Purpose of Common Python Hyperledger Avalon Code
 =============================================
 
-The common/python directory contains Python source code shared by
-untrusted and trusted (Intel SGX Enclave) Hyperledger Avalon code.
+The common/python directory contains common functionalities used by
+Hyperledger Avalon components.
 
 Source Directories
 ------------------
