@@ -21,7 +21,6 @@
 
 #include "parson.h"
 #include "types.h"
-#include "enclave_types.h"
 #include "work_order_data_handler_wpe.h"
 #include "work_order_processor.h"
 #include "work_order_preprocessed_keys_wpe.h"

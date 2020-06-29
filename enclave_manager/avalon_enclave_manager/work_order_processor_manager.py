@@ -139,9 +139,8 @@ class WOProcessorManager(EnclaveManager):
         logger.info("Update workorder receipt for workorder %s", wo_id)
         self._wo_kv_delegate.update_receipt(wo_id, wo_resp)
 
-        if "Response" in wo_resp and \
-                wo_resp["Response"]["Status"] == WorkOrderStatus.FAILED:
-            logger.error("error in Response")
+        if "error" in wo_resp and \
+                wo_resp["error"]["code"] == WorkOrderStatus.FAILED:
             self._persist_wo_response_to_db(
                 wo_id, WorkOrderStatus.FAILED, wo_json_resp)
             return None

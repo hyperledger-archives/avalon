@@ -20,7 +20,6 @@
 #include "tcf_error.h"
 #include "swig_utils.h"
 #include "types.h"
-#include "enclave_types.h"
 
 #include "work_order.h"
 
@@ -33,13 +32,11 @@
  *
  * @param serialized_request - JSON serialized work order request
  * @param ext_wo_data - Extended work order data
- * @param enclave_type - Type of Enclave.
  * @ returns JSON serialized response
 */
 std::string HandleWorkOrderRequest(
     const std::string& serialized_request,
-    const std::string& ext_wo_data,
-    EnclaveType enclave_type) {
+    const std::string& ext_wo_data) {
     tcf_err_t presult;
 
     uint32_t response_identifier;

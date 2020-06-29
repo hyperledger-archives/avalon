@@ -48,9 +48,6 @@ num_of_enclaves = "1"
 # the WPE enclave has been built.
 wpe_mrenclave_read_from_file = "wpe_mr_enclave.txt"
 
-# The type of enclave viz - KME/WPE/SWE
-enclave_type = "KME"
-
 [KMEListener]
 # URL of KMEListener where a Work order processor can send requests meant for
 # the Key Management Enclave(KME). This config can be overridden by passing a

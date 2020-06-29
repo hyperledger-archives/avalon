@@ -26,6 +26,7 @@ import avalon_enclave_manager.kme.kme_enclave_info as enclave_info
 from avalon_enclave_manager.base_enclave_manager import EnclaveManager
 from listener.base_jrpc_listener import parse_bind_url
 from avalon_enclave_manager.kme.kme_listener import KMEListener
+from error_code.error_status import WorkOrderStatus
 from jsonrpc.exceptions import JSONRPCDispatchException
 
 logger = logging.getLogger(__name__)
@@ -91,7 +92,7 @@ class KeyManagementEnclaveManager(EnclaveManager):
         try:
             logger.info("Request sent to enclave %s", input_json_str)
             wo_request = work_order_request.SgxWorkOrderRequest(
-                self._config["EnclaveModule"],
+                "KME",
                 input_json_str,
                 ext_data
             )
@@ -104,6 +105,11 @@ class KeyManagementEnclaveManager(EnclaveManager):
 
         except Exception as e:
             logger.error("failed to execute work order; %s", str(e))
+            wo_response = dict()
+            wo_response["error"] = dict()
+            wo_response["error"]["code"] = WorkOrderStatus.FAILED
+            wo_response["error"]["message"] = str(e)
+            json_response = json.dumps(wo_response, indent=4)
 
         return json_response
 
@@ -154,16 +160,30 @@ class KeyManagementEnclaveManager(EnclaveManager):
     def GetUniqueVerificationKey(self, **params):
         """
         """
-        wo_request = self._get_request_json("GetUniqueVerificationKey")
-        wo_request["params"] = params
-        wo_response = self._execute_work_order(json.dumps(wo_request), "")
-        wo_response_json = json.loads(wo_response)
+        try:
+            wo_request = self._get_request_json("GetUniqueVerificationKey")
+            wo_request["params"] = params
+            wo_response = self._execute_work_order(json.dumps(wo_request), "")
+            wo_response_json = json.loads(wo_response)
 
-        if "result" in wo_response_json:
-            return wo_response_json["result"]
-        else:
-            logger.error("Could not get UniqueVerificationKey")
-            return wo_response_json
+            data = {
+                "workOrderId": wo_request["params"]["workOrderId"]
+            }
+
+            if "result" in wo_response_json:
+                return wo_response_json["result"]
+            else:
+                logger.error("Could not get UniqueVerificationKey - %s",
+                             wo_response_json)
+                # For all negative cases, response should have an error field.
+                # Hence constructing JSONRPC error response with
+                # error code and message mapped to KME enclave response
+                err_code = wo_response_json["error"]["code"]
+                err_msg = wo_response_json["error"]["message"]
+                raise JSONRPCDispatchException(err_code, err_msg, data)
+        except Exception as e:
+            raise JSONRPCDispatchException(
+                WorkOrderStatus.FAILED, str(e), data)
 
 # -----------------------------------------------------------------
 

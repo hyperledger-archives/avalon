@@ -88,9 +88,13 @@ class SingletonEnclaveManager(WOProcessorManager):
                             the enclave. Errors are also wrapped in a JSON str
                             if exceptions have occurred.
         """
-        wo_request = work_order_request.SgxWorkOrderRequest(
-            self._config,
-            input_json_str)
+        try:
+            wo_request = work_order_request.SgxWorkOrderRequest(
+                "SINGLETON",
+                input_json_str)
+        except Exception as e:
+            logger.exception(
+                'Failed to initialize SgxWorkOrderRequest; %s', str(e))
         return wo_request.execute()
 
 

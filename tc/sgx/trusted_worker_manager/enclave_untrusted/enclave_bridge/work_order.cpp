@@ -20,7 +20,6 @@
 #include "avalon_sgx_error.h"
 #include "log.h"
 #include "types.h"
-#include "enclave_types.h"
 
 #include "enclave.h"
 #include "base.h"
