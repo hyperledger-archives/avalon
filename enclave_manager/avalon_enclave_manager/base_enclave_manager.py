@@ -46,6 +46,8 @@ class EnclaveManager(ABC):
         self._wo_kv_delegate = WorkOrderKVDelegate(
             self._kv_helper, self._worker_id)
         signup_data = self._setup_enclave()
+        if signup_data is None:
+            raise Exception("Failed to setup enclave")
         self.enclave_data = signup_data
         self.sealed_data = signup_data["sealed_data"]
         self.verifying_key = signup_data["verifying_key"]
@@ -138,6 +140,9 @@ class EnclaveManager(ABC):
         try:
             logger.info("Initialize enclave and create signup data")
             signup_data = self._create_signup_data()
+            if signup_data is None:
+                logger.error("Failed to create signup data")
+                return None
         except Exception as e:
             logger.exception("failed to initialize/signup enclave; %s", str(e))
             sys.exit(-1)

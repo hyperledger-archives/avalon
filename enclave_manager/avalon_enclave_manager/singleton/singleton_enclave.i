@@ -83,14 +83,12 @@ namespace std {
 #include "swig_utils.h"
 #include "signup_info.h"
 #include "signup_info_singleton.h"
-#include "enclave_types.h"
 %}
 
 %{
 #include "tcf_enclave.h"
 %}
 
-%include "enclave_types.h"
 %include "signup_info.h"
 %include "signup_info_singleton.h"
 %include "enclave_info.h"

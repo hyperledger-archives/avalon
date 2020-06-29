@@ -20,5 +20,5 @@
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 std::string HandleWorkOrderRequest(
     const std::string& serializedRequest,
-    const std::string& ext_wo_data,
-    EnclaveType enclave_type);
+    const std::string& ext_wo_data);
+

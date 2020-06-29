@@ -68,9 +68,6 @@ ias_api_key = "112233445566778899aabbccddeeff00"
 enclave_library = "libavalon-wpe-enclave.signed.so"
 enclave_library_path = "tc/sgx/trusted_worker_manager/enclave/build/lib/"
 
-# The type of enclave viz - KME/WPE/SWE
-enclave_type = "WPE"
-
 # -------------------------------------------------------------
 # TCS Worker configuration details
 # -------------------------------------------------------------

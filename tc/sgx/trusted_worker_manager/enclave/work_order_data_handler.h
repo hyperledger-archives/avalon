@@ -25,7 +25,6 @@
 #include "types.h"
 #include "tcf_error.h"
 #include "work_order_data.h"
-#include "enclave_types.h"
 
 namespace tcf {
         class WorkOrderDataHandler {
