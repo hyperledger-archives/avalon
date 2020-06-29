@@ -39,7 +39,7 @@ install:
 	pip3 install $(WHEEL_FILE)
 
 clean:
-	if [ -f $(WHEEL_FILE) ] ; then pip3 uninstall --yes $(WHEEL_FILE); fi
+	if pip3 uninstall --yes $(WHEEL_FILE); then echo UNINSTALLED $(WHEEL_FILE) WHEEL FILE ; fi
 	rm -f avalon_enclave_manager/singleton/singleton_enclave.py
 	rm -f avalon_enclave_manager/singleton/singleton_enclave_wrap.cpp
 	rm -rf build deps dist *.egg-info
