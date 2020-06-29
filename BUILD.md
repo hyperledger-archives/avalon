@@ -102,6 +102,20 @@ Follow the instructions below to execute a Docker-based build and execution.
 5. To execute test cases refer to [Testing](#testing) section below
 6. To exit the Avalon program, press `Ctrl-c`
 
+**Running multiple worker pools together**
+
+To run multiple worker pools together, modify `docker-compose-pool.yaml`. It also has a corresponding docker compose file `docker-compose-pool-sgx.yaml` for running in Intel SGX hardware mode. This setup starts a worker pool with the following default configuration:
+   1. One KME (Key Management Enclave)
+   2. One WPE (Work order Processing Enclave) supporting all workloads, viz. `echo-result, heart-disease-eval, inside-out-eval, simple-wallet`
+
+These docker compose files can be further customized to run multiple worker pools in a single Avalon setup. Points to note when customizing/running multiple pools together using docker:
+   1. Name of the docker image for all WPE in a pool should be same as pools are homogeneous as of now
+   2. All WPE in a pool should connect to same KME using command line arguments `--kme_listener_url` and `--worker_id`
+   3. When submitting work orders using the generic client application `--worker_id` argument needs to be mentioned explicitly to choose one of the workers in the system (Note : Each pool respresents a single worker). For example:
+   ```bash
+   ./generic_client.py -o --uri "http://avalon-listener:1947" \
+      --workload_id "echo-result" --in_data "Hello" --worker_id kme-worker-1
+   ```
 
 # <a name="standalonebuild"></a>Standalone Build
 ## <a name="prerequisites"></a>Standalone: Prerequisites
