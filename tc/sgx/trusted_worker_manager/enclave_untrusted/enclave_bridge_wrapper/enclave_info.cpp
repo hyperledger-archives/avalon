@@ -42,7 +42,7 @@ tcf_enclave_info::tcf_enclave_info(
     // Todo: PyLogV logs are removed, as its crashing the process, needs investigation
     tcf::Log(TCF_LOG_INFO, "Initializing Avalon Intel SGX Enclave\n");
     tcf::Log(TCF_LOG_DEBUG, "Enclave path: %s\n", enclaveModulePath.c_str());
-    tcf::Log(TCF_LOG_DEBUG, "SPID: %s\n", spid.c_str());
+    // tcf::Log(TCF_LOG_DEBUG, "SPID: %s\n", spid.c_str());
 
     tcf_err_t ret = tcf::enclave_api::base::Initialize(enclaveModulePath, spid, num_of_enclaves);
     ThrowTCFError(ret);

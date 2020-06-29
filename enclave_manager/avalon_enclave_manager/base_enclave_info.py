@@ -85,7 +85,7 @@ class BaseEnclaveInfo(ABC):
             logger.debug("Attempting to load enclave at: %s", signed_enclave)
             self._tcf_enclave_info = self._init_enclave_with(
                 signed_enclave, config)
-            logger.info("Basename: %s", self.get_enclave_basename())
+            logger.debug("Basename: %s", self.get_enclave_basename())
             logger.info("MRENCLAVE: %s", self.get_enclave_measurement())
 
         sig_rl_updated = False
@@ -145,6 +145,7 @@ class BaseEnclaveInfo(ABC):
         # If we are not running in the simulator, we are going to go and get
         # an attestation verification report for our signup data.
         if not self._is_sgx_simulator:
+            logger.info("Running in Intel SGX HW mode")
             logger.debug("posting verification to IAS")
             response = self._ias.post_verify_attestation(
                 quote=signup_data['enclave_quote'], nonce=ias_nonce)
