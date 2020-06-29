@@ -448,14 +448,11 @@ How do I know I am in Intel SGX Hardware Mode?
 If you set ``SGX_MODE=HW`` in your environment and setup Intel SGX correctly,
 Avalon will startup in Intel SGX Hardware Mode.
 You know you are in Intel SGX Hardware Mode (SGX_MODE=HW) when you see messages
-similar to this in the Avalon Enclave Manager output at startup
-(the SPID and IAS API keys are examples and not active):
+similar to this in the Avalon Enclave Manager output at startup:
 
    .. code:: none
 
-       INFO avalon_enclave_manager.ias_client] IAS settings:
-       INFO avalon_enclave_manager.ias_client] SPID: BA5FDA588B8EA36B203955D38FA6B675
-       INFO avalon_enclave_manager.ias_client] IAS ApiKey: 8730f63c63da49258dd37ecf318997ed
+       INFO avalon_enclave_manager.base_enclave_info] Running in Intel SGX HW mode
 
 
 Videos

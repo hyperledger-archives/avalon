@@ -37,7 +37,7 @@ class IasClient(object):
             logger.info("Proxy: %s", self._proxies["https"])
         if "Spid" in kwargs:
             self._spid = kwargs["Spid"]
-            logger.info("SPID: %s", self._spid)
+            logger.debug("SPID: %s", self._spid)
         else:
             raise KeyError('Missing Spid setting')
         if "IasServer" in kwargs:
@@ -47,7 +47,7 @@ class IasClient(object):
             raise KeyError('Missing IasServer setting')
         if "ApiKey" in kwargs:
             self._ias_api_key = kwargs["ApiKey"]
-            logger.info("IAS ApiKey: %s", self._ias_api_key)
+            logger.debug("IAS ApiKey: %s", self._ias_api_key)
         else:
             raise KeyError('Missing SpidCert setting')
         self._timeout = 300
