@@ -35,7 +35,7 @@ install:
 	pip3 install dist/*.whl
 
 clean:
-	if [ -f $(WHEEL_FILE) ] ; then pip3 uninstall --yes $(WHEEL_FILE); fi
+	if pip3 uninstall --yes $(WHEEL_FILE); then echo UNINSTALLED $(WHEEL_FILE) WHEEL FILE ; fi
 	rm -rf build deps dist *.egg-info
 	find . -iname '*.pyc' -delete
 	find . -iname '__pycache__' -delete

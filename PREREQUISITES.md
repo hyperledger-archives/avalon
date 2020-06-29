@@ -438,12 +438,6 @@ problems.
 - If the message  `intel_sgx: SGX is not enabled` appears in `/var/log/syslog`
   Intel SGX needs to be enabled in BIOS
 
-- If you get the error
-  `failed to initialize enclave; . . . ('Cannot connect to proxy.', . . .)`
-  check the `https_proxy` line in `$TCF_HOME/config/tcs_config.toml` .
-  It needs to be removed or updated, as instructed in the
-  [Intel SGX](#sgx) section
-
 - If you get the error `failed to create enclave signup data`,
   check the `ias_api_key` line in `$TCF_HOME/config/singleton_enclave_config.toml` .
   It should be either either the Primary key or Secondary key you received
@@ -458,10 +452,6 @@ problems.
 - If you are running in Intel SGX hardware mode, you need to modify
   the `ias_api_key` in `$TCF_HOME/config/singleton_enclave_config.toml` with your
   IAS Subscription key obtained in the instructions above
-
-- If you are not running in a corporate proxy environment (and not connected
-  directly to Internet), comment out the `https_proxy` line in
-  `$TCF_HOME/config/tcs_config.toml`
 
 - If you reinstall the Intel SGX SDK and you modified `/etc/aesmd.conf`
   then save and restore the file before installing the SDK.

@@ -38,7 +38,7 @@ install:
 	pip3 install $(WHEEL_FILE)
 
 clean: clean-subdirs
-	if [ -f $(WHEEL_FILE) ] ; then pip3 uninstall --yes $(WHEEL_FILE); fi
+	if pip3 uninstall --yes $(WHEEL_FILE); then echo UNINSTALLED $(WHEEL_FILE) WHEEL FILE ; fi
 	rm -r kv_storage/remote_lmdb/db_store.py
 	rm -r kv_storage/remote_lmdb/db_store_wrap.cpp
 	rm -rf build deps dist *.egg-info

@@ -83,10 +83,16 @@ class BaseJRPCListener(resource.Resource):
 
         try:
             input_json = json.loads(input_json_str)
+            if not ("id" in input_json.keys()) or \
+               not ("method" in input_json.keys()) or \
+               not (input_json["jsonrpc"] == "2.0"):
+                raise KeyError("Improper id or jsonrpc or method")
+
             logger.info("Received request: %s", input_json['method'])
         except Exception as err:
             logger.error("exception loading Json: %s", str(err))
-            response["error"]["message"] = "Improper Json request"
+            response["error"]["message"] = \
+                "Improper Json request Missing or Invalid parameter or value"
             return response
 
         # save the full json for WorkOrderSubmit
@@ -133,20 +139,8 @@ class BaseJRPCListener(resource.Resource):
             encoding = request.getHeader('Content-Type')
             data = request.content.read()
             if encoding == 'application/json':
-
-                try:
-                    input_json_str = data.decode('utf-8')
-                    input_json = json.loads(input_json_str)
-                    jrpc_id = input_json["id"]
-                    response = self._process_request(input_json_str)
-
-                except AttributeError:
-                    logger.error("Error while loading input json")
-                    response = jrpc_utility.create_error_response(
-                        JRPCErrorCodes.UNKNOWN_ERROR,
-                        jrpc_id,
-                        "UNKNOWN_ERROR: Error while loading input JSON file")
-                    return response
+                input_json_str = data.decode('utf-8')
+                response = self._process_request(input_json_str)
 
             else:
                 # JRPC response with 0 as id is returned because id can't be

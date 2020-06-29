@@ -38,7 +38,7 @@ install:
 	pip3 install $(WHEEL_FILE)
 
 clean:
-	if [ -f $(WHEEL_FILE) ] ; then pip3 uninstall --yes $(WHEEL_FILE); fi
+	if pip3 uninstall --yes $(WHEEL_FILE); then echo UNINSTALLED  $(WHEEL_FILE) WHEEL FILE ; fi
 	rm -rf build deps dist *.egg-info
 	rm -f avalon_crypto_utils/crypto/crypto.py
 	rm -f avalon_crypto_utils/crypto/crypto_wrap.cpp
