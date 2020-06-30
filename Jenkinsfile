@@ -123,11 +123,11 @@ pipeline {
             githubNotify context: 'continuous-integration/jenkins/SGX-SIM mode', description: 'This commit looks good',  status: 'SUCCESS'
         }
         aborted {
-            githubNotify context: 'continuous-integration/jenkins/SGX-SIM mode', description: 'This commit looks bad',  status: 'ABORTED'
+            githubNotify context: 'continuous-integration/jenkins/SGX-SIM mode', description: 'This commit is aborted',  status: 'FAILURE'
             error "Aborted, exiting now"
         }
         failure {
-            githubNotify context: 'continuous-integration/jenkins/SGX-SIM mode', description: 'This commit looks bad',  status: 'FAILED'
+            githubNotify context: 'continuous-integration/jenkins/SGX-SIM mode', description: 'This commit is failed',  status: 'FAILURE'
             error "Failed, exiting now"
         }
     }
