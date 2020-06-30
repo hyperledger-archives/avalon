@@ -95,8 +95,9 @@ class WorkOrderRequestValidator():
         if not is_valid_hex_str(params["requesterId"]):
             return False, "Invalid data format for requester id"
         if "workerEncryptionKey" in params and \
-                not is_valid_hex_str(params["workerEncryptionKey"]):
-            return False, "Invalid data format for worker encryption key"
+                (not params["workerEncryptionKey"] or
+                    not is_valid_hex_str(params["workerEncryptionKey"])):
+            return False, "Empty or Invalid dataformat for workerEncryptionKey"
         if "encryptedSessionKey" in params and \
                 not is_valid_hex_str(params["encryptedSessionKey"]):
             return False, "Invalid data format for encrypted session key"
@@ -106,8 +107,9 @@ class WorkOrderRequestValidator():
         if "encryptedRequestHash" in params and \
                 not is_valid_hex_str(params["encryptedRequestHash"]):
             return False, "Invalid data format for encrypted request hash"
-        if not is_valid_hex_str(params["requesterNonce"]):
-            return False, "Invalid data format for requesterNonce"
+        if params["requesterNonce"] is None or \
+                not is_valid_hex_str(params["requesterNonce"]):
+            return False, "Empty or Invalid data format for requesterNonce"
         if "requesterSignature" in params:
             try:
                 decoded_str = base64.b64decode(

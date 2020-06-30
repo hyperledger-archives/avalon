@@ -226,22 +226,29 @@ def _create_work_order_params(worker_id, workload_id, in_data,
     requester_id = secrets.token_hex(32)
     requester_nonce = secrets.token_hex(16)
     # Create work order params
-    wo_params = WorkOrderParams(
-        work_order_id, worker_id, workload_id, requester_id,
-        session_key, session_iv, requester_nonce,
-        result_uri=" ", notify_uri=" ",
-        worker_encryption_key=worker_encrypt_key,
-        data_encryption_algorithm="AES-GCM-256"
-    )
+    try:
+        wo_params = WorkOrderParams(
+            work_order_id, worker_id, workload_id, requester_id,
+            session_key, session_iv, requester_nonce,
+            result_uri=" ", notify_uri=" ",
+            worker_encryption_key=worker_encrypt_key,
+            data_encryption_algorithm="AES-GCM-256"
+            )
+
+    except Exception as err:
+        return False, err
+
     # Add worker input data
     for value in in_data:
         wo_params.add_in_data(value,
                               encrypted_data_encryption_key=enc_data_enc_key)
 
     # Encrypt work order request hash
-    wo_params.add_encrypted_request_hash()
+    code, out_json = wo_params.add_encrypted_request_hash()
+    if not code:
+        return code, out_json
 
-    return wo_params
+    return True, wo_params
 
 
 def _create_work_order_receipt(wo_receipt, wo_params,
@@ -467,10 +474,16 @@ def Main(args=None):
         # use default session key to encrypt input data
         encrypted_data_encryption_key = None
 
-    wo_params = _create_work_order_params(worker_id, workload_id,
-                                          in_data, worker_obj.encryption_key,
-                                          session_key, session_iv,
-                                          encrypted_data_encryption_key)
+    code, wo_params = _create_work_order_params(
+                            worker_id, workload_id,
+                            in_data, worker_obj.encryption_key,
+                            session_key, session_iv,
+                            encrypted_data_encryption_key)
+    if not code:
+        logger.error("Work order submission failed: {}\n".format(
+            wo_params
+        ))
+        exit(1)
 
     client_private_key = crypto_utility.generate_signing_keys()
     if requester_signature:
