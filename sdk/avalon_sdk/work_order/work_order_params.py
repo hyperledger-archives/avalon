@@ -18,7 +18,8 @@ import logging
 import avalon_crypto_utils.crypto.crypto as crypto
 import avalon_crypto_utils.crypto_utility as crypto_utility
 import avalon_crypto_utils.signature as signature
-
+from utility.jrpc_utility import create_error_response
+from error_code.error_status import JRPCErrorCodes
 logger = logging.getLogger(__name__)
 
 
@@ -30,6 +31,7 @@ class WorkOrderParams():
             response_timeout_msecs=6000, result_uri=None,
             notify_uri=None, worker_encryption_key=None,
             data_encryption_algorithm=None):
+
         self.params_obj = {}
         self.set_work_order_id(work_order_id)
         self.set_response_timeout_msecs(response_timeout_msecs)
@@ -42,16 +44,19 @@ class WorkOrderParams():
         self.set_workload_id(workload_id)
         self.set_requester_id(requester_id)
         if worker_encryption_key:
-            self.set_worker_encryption_key(
-                worker_encryption_key.encode("UTF-8").hex())
+                self.set_worker_encryption_key(
+                    worker_encryption_key)
         if data_encryption_algorithm:
             self.set_data_encryption_algorithm(data_encryption_algorithm)
-
-        encrypted_session_key = crypto_utility.generate_encrypted_key(
-            session_key, worker_encryption_key)
-        self.set_encrypted_session_key(
-            crypto_utility.byte_array_to_hex(encrypted_session_key)
-        )
+        if worker_encryption_key and session_key:
+            try:
+                encrypted_session_key = crypto_utility.generate_encrypted_key(
+                    session_key, worker_encryption_key)
+                self.set_encrypted_session_key(
+                    crypto_utility.byte_array_to_hex(encrypted_session_key))
+            except Exception as err:
+                raise ValueError("Encrypting Session key failed: \
+Invalid session key or worker encryption key")
 
         self.session_iv = session_iv
         self.set_session_key_iv(
@@ -98,10 +103,16 @@ class WorkOrderParams():
 
     def set_worker_encryption_key(self, worker_encryption_key):
         """Set workerEncryptionKey work order parameter."""
-        self.params_obj["workerEncryptionKey"] = worker_encryption_key
+        try:
+            self.params_obj["workerEncryptionKey"] = \
+                worker_encryption_key.encode("UTF-8").hex()
+        except Exception as err:
+            raise TypeError("Worker Encryption Key not valid")
 
     def set_data_encryption_algorithm(self, data_encryption_algorithm):
         """Set dataEncryptionAlgorithm work order parameter."""
+        if not isinstance(data_encryption_algorithm, str):
+            raise ValueError("Data Encryption Algorithm is not String")
         self.params_obj["dataEncryptionAlgorithm"] = \
             data_encryption_algorithm
 
@@ -115,6 +126,8 @@ class WorkOrderParams():
 
     def set_requester_nonce(self, requester_nonce):
         """Set requesterNonce work order parameter."""
+        if not requester_nonce.strip():
+            raise TypeError("requesterNonce cannot be None")
         self.params_obj["requesterNonce"] = requester_nonce
 
     def add_encrypted_request_hash(self):
@@ -122,30 +135,39 @@ class WorkOrderParams():
         Calculates request hash based on EEA trusted-computing spec 6.1.8.1
         and set encryptedRequestHash parameter in the request.
         """
-        sig_obj = signature.ClientSignature()
-        concat_string = self.get_requester_nonce() + \
-            self.get_work_order_id() + \
-            self.get_worker_id() + \
-            self.get_workload_id() + \
-            self.get_requester_id()
-        concat_bytes = bytes(concat_string, "UTF-8")
-        # SHA-256 hashing is used
-        hash_1 = crypto_utility.byte_array_to_base64(
-            crypto_utility.compute_message_hash(concat_bytes)
-        )
-        hash_2 = sig_obj.calculate_datahash(self.get_in_data())
-        hash_3 = ""
-        out_data = self.get_out_data()
-        if out_data and len(out_data) > 0:
-            hash_3 = sig_obj.calculate_datahash(out_data)
-        concat_hash = hash_1 + hash_2 + hash_3
-        concat_hash = bytes(concat_hash, "UTF-8")
-        self.final_hash = crypto_utility.compute_message_hash(concat_hash)
-        encrypted_request_hash = crypto_utility.encrypt_data(
-            self.final_hash, self.session_key, self.session_iv)
-        encrypted_request_hash_hex = crypto_utility.byte_array_to_hex(
-                                        encrypted_request_hash)
-        self.params_obj["encryptedRequestHash"] = encrypted_request_hash_hex
+        try:
+            sig_obj = signature.ClientSignature()
+            concat_string = self.get_requester_nonce() + \
+                self.get_work_order_id() + \
+                self.get_worker_id() + \
+                self.get_workload_id() + \
+                self.get_requester_id()
+            concat_bytes = bytes(concat_string, "UTF-8")
+            # SHA-256 hashing is used
+            hash_1 = crypto_utility.byte_array_to_base64(
+                crypto_utility.compute_message_hash(concat_bytes)
+            )
+            hash_2 = sig_obj.calculate_datahash(self.get_in_data())
+            hash_3 = ""
+            out_data = self.get_out_data()
+            if out_data and len(out_data) > 0:
+                hash_3 = sig_obj.calculate_datahash(out_data)
+            concat_hash = hash_1 + hash_2 + hash_3
+            concat_hash = bytes(concat_hash, "UTF-8")
+            self.final_hash = crypto_utility.compute_message_hash(concat_hash)
+            encrypted_request_hash = crypto_utility.encrypt_data(
+                self.final_hash, self.session_key, self.session_iv)
+            encrypted_request_hash_hex = crypto_utility.byte_array_to_hex(
+                                            encrypted_request_hash)
+            self.params_obj["encryptedRequestHash"] = \
+                encrypted_request_hash_hex
+            return True, ""
+
+        except Exception as err:
+            return False, create_error_response(
+                JRPCErrorCodes.INVALID_PARAMETER_FORMAT_OR_VALUE,
+                0,
+                err)
 
     def add_requester_signature(self, private_key):
         """

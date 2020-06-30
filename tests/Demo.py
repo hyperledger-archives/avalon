@@ -115,7 +115,7 @@ def local_main(config):
 
             # -----------------------------------------------------------------
             if "WorkOrderGetResult" in input_json_str1 or \
-                    "WorkOrderReceiptRetrieve":
+                    "WorkOrderReceiptRetrieve" in input_json_str1:
                 input_json_obj = json.loads(input_json_str1)
                 input_json_obj["params"]["workOrderId"] = wo_id
                 input_json_str1 = json.dumps(input_json_obj)
