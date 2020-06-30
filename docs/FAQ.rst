@@ -107,12 +107,57 @@ https://github.com/hyperledger/avalon/issues
 How many nodes does Avalon support?
 -----------------------------------
 One, specifically the Avalon blockchain connector that connects to
-a blockchain node.  In the future Avalon will support processing
+a blockchain node. In the future Avalon will support processing
 multiple work orders in parallel, but there will still be one connector.
 No other Avalon component connects to the blockchain.
 
 Another Avalon instance unrelated to any other Avalon instance may connect
 independently to the blockchain.
+
+What synchronization modes does Avalon Support?
+-----------------------------------------------
+The Off-Chain Trusted Compute Spec has three modes (asynchronous,
+notify, and synchronous). Avalon currently supports async mode.
+Synchronous mode using ZMQ is available for Singleton Mode workers. 
+
+Is the LMBD database available for application use?
+---------------------------------------------------
+No, that is not the intention. LMDB is dedicated for internal use by Avalon.
+Application data can be stored in a separate database or in files.
+The only potential external use that should be made of LMDB is by an
+Avalon hosting service for its monitoring and administration tools.
+
+Is there a mechanism to auto-trim the LMDB database?
+----------------------------------------------------
+Avalon is supposed to auto-trim LMDB after exceeding a maximum threshold
+by removing old entries. It may not be fuly implemented yet,
+but that is the plan. There is also an explicit API to delete a specific
+workorder, so the orchestrator app can explicitly remove completed workorders.
+This is especially useful to remove large, obsolete responses so as to not
+exhaust the database. This API mitigates the LMDB size but is not intended as
+a replacement for auto-clean up.
+
+In the future, a clean up tool may be added.
+
+Does Avalon support a Library OS (LibOS)?
+-----------------------------------------
+Avalon does not support a LibOS now, but support is planned in the future,
+initially with Graphene.
+
+Does the Avalon Enclave Manager support multiple workers?
+---------------------------------------------------------
+Currently Avalon is hard-coded to suport one Enclave worker.
+Support for multiple workers running in parallel is planned in the future.
+
+How can Avalon workers coordinate in Direct Mode (without a blockchain)?
+------------------------------------------------------------------------
+In Proxy Mode, Avalon workers can coordinate with blockchain entries.
+In Direct Mode, one possible solution is to write a
+"coordinator" or "governor" worker that acts as a trusted server and stores
+any global registry information (such as data access rights and dataset keys)
+required by all the enclave workers.
+In essence this mimics blockchain functionality through some sort of
+distributed database or ledger.
 
 
 Installation and Configuration
@@ -220,6 +265,7 @@ What TCP ports does Avalon use?
   The URL is ``http://localhost:9090/`` or, for Docker,
   ``http://avalon-lmdb:9090/``
 - TCP 5555: ZMQ connections to Avalon Enclave Manager from Avalon Listener.
+  This is used for Avalon singleton enclave workers using Synchronous Mode
   The URL is ``tcp://localhost:5555`` or, for Docker,
   ``tcp://avalon-enclave-manager:5555``
 - TCP 1948: connections to Avalon Key Management Enclave (KME).
@@ -279,7 +325,7 @@ build and setup Avalon, but you can also build without Docker
 
 How do I fix this docker-compose error: ``Invalid interpolation format for "build" option``
 -------------------------------------------------------------------------------------------
-Your docker-compose is too old.  Version 1.17.1 works OK.
+Your docker-compose is too old. Version 1.17.1 works OK.
 
 How do I open a TCP port in Docker?
 -----------------------------------
@@ -562,7 +608,7 @@ Chain code (CC)
     on a Hyperledger Fabric blockchain using the Fabric ledger as data
 
 Client
-    For Ethereum, it is any blockchain node.  This is not the traditional
+    For Ethereum, it is any blockchain node. This is not the traditional
     meaning as used in client-server architecture.
     To avoid ambiguity, an Avalon client is properly referred to as a
     requester
@@ -576,7 +622,7 @@ DCAP
     to provide their own attestation services for Intel SGX TEEs
 
 Dapp (or ÐApp)
-    Ethereum distributed application.  Uses a smart contract for the back end
+    Ethereum distributed application. Uses a smart contract for the back end
     and usually uses a web browser to execute the front end
 
 DID
@@ -680,6 +726,15 @@ Last lookup tag
     are more matching results that can be retrieved by passing this tag as
     an input parameter to a matching function with "_next" appended to the
     function name
+
+Library OS (LibOS)
+    A LibOS encapsulates the services of an operating system into libraries.
+    This may be done to have a single address space executable or to
+    minimize the Trusted Computing Base (TCB). For Avalon a LibOS allows
+    Avalon workers to execute in a TEE enclave with traditional operating
+    system and library calls. It also allows workers to be implemented
+    in interpretive languages such as Python.
+   
 
 LMDB
     Lightning Memory-mapped Database, which is implemented with
