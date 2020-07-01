@@ -49,6 +49,10 @@ class FabricWorkOrderImpl(WorkOrderProxy):
         self.CHAIN_CODE = 'order'
         self.WORK_ORDER_SUBMITTED_EVENT_NAME = 'workOrderSubmitted'
         self.WORK_ORDER_COMPLETED_EVENT_NAME = 'workOrderCompleted'
+        # When chain code call for the first time
+        # and if peer is not instantiate the chaincode
+        # then it will take some time to instantiate
+        self.WORK_ORDER_GET_RESULT_TIMEOUT = 60
         nest_asyncio.apply()
         if config is not None:
             self.__fabric_wrapper = FabricWrapper(config)
@@ -102,11 +106,10 @@ class FabricWorkOrderImpl(WorkOrderProxy):
         None on error.
         """
         wo_resp = None
-        # Calling the contract workOrderGet() will result in error
-        # work order id doesn't exist. This is because committing will
-        # take some time to commit to chain.
-        # Instead of calling contract api to get result chosen the
-        # event based approach.
+        # First make a call to contract query API workOrderGet,
+        # if it returns result then return it
+        # otherwise wait in event loop to get workOrderCompleted
+        # event from blockchain.
 
         def handle_fabric_event(event, block_num, txn_id, status):
             """
@@ -138,21 +141,47 @@ class FabricWorkOrderImpl(WorkOrderProxy):
             else:
                 return False
 
+        if (self.__fabric_wrapper is not None):
+            params = []
+            params.append(work_order_id)
+            txn_status = self.__fabric_wrapper.invoke_chaincode(
+                self.CHAIN_CODE,
+                'workOrderGet',
+                params)
+            # workOrderGet returns tuple containing work order
+            # result params as defined in EEA spec 6.10.5
+            if txn_status and len(txn_status) > 0:
+                logging.info(
+                    "work order get response {}".format(txn_status[3]))
+                return json.loads(txn_status[3])
+            else:
+                logging.warn("Work order seems to be not yet completed, "
+                             "going to listen for workOrderCompleted event")
+        # Wait for workOrderCompleted event
         event_handler = \
             self.get_work_order_completed_event_handler(
                 handle_fabric_event
             )
         if event_handler:
-            tasks = [
-                event_handler.get_single_event(),
-            ]
-            loop = asyncio.get_event_loop()
-            loop.run_until_complete(
-                asyncio.wait(tasks,
-                             return_when=asyncio.ALL_COMPLETED))
+            try:
+                asyncio.get_event_loop().run_until_complete(
+                    asyncio.wait_for(
+                        event_handler.get_single_event(),
+                        timeout=self.WORK_ORDER_GET_RESULT_TIMEOUT
+                        )
+                )
+            except asyncio.TimeoutError:
+                logging.error("Work order get result timed out."
+                              " Either work order id is invalid or"
+                              " Work order execution is not completed yet")
+                # stop event handler
+                asyncio.get_event_loop().run_until_complete(
+                    event_handler.stop_event_handling())
+                return None
+
             return wo_resp
         else:
-            logging.info("Failed while creating event handler")
+            logging.error("Failed while creating event handler")
             return None
 
     def work_order_complete(self, work_order_id, work_order_response):
