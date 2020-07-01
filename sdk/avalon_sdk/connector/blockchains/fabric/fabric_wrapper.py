@@ -50,7 +50,7 @@ class FabricWrapper():
             self.__channel_name = config["fabric"]["channel_name"]
             self.__orgname = base.get_net_info(self.__network_config,
                                                'client', 'organization')
-            logging.info("Org name choose: {}".format(self.__orgname))
+            logging.debug("Org name choose: {}".format(self.__orgname))
             self.__peername = random.choice(base.get_net_info(
                 self.__network_config, 'organizations', self.__orgname,
                 'peers'))
@@ -111,19 +111,19 @@ class FabricWrapper():
         """
         cc_methods = self.__valid_calls[chaincode_name]
         if cc_methods is None:
-            logging.info("Invalid chain code name")
+            logging.error("Invalid chain code name")
             return False
         the_call = cc_methods[method_name]
         if the_call is None:
-            logging.info("Please specify a valid method name. \
+            logging.error("Please specify a valid method name. \
                 Valid ones for chaincode " +
-                         chaincode_name + " are " +
-                         ",".join(cc_methods.keys()))
+                          chaincode_name + " are " +
+                          ",".join(cc_methods.keys()))
             return False
         resp = self.__txn_committer.cc_invoke(params, chaincode_name,
                                               method_name, '',
                                               queryonly=the_call['isQuery'])
-        logging.info("Response of chain code {} call: {}".format(
+        logging.debug("Response of chain code {} call: {}".format(
             method_name, resp
         ))
 
@@ -135,7 +135,7 @@ class FabricWrapper():
                 result = []
                 for v in resp.values():
                     result.append(v)
-                logging.info(
+                logging.debug(
                     "\nThe tuple created: %s\n ", result)
                 return result
             else:

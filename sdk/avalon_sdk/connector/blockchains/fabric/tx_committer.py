@@ -104,7 +104,7 @@ class TxCommitter(base.ClientBase):
         responses = loop.run_until_complete(base.get_stream_result(
             send_transaction(self.client.orderers, tran_req, tx_context_tx)))
 
-        logger.info('Tx response: {}'.format(responses))
+        logger.debug('Tx response: {}'.format(responses))
         return responses
 
     def cc_query(self, args, cc_name, fcn):
@@ -122,8 +122,10 @@ class TxCommitter(base.ClientBase):
             responses = loop.run_until_complete(self.client.chaincode_query(
                 requestor=self.user, channel_name=self.channel_name,
                 peers=[self.peer_name], args=args, cc_name=cc_name, fcn=fcn))
-            logger.info('Tx response: {0}'.format(responses))
+            logger.debug('Tx response: {0}'.format(responses))
             return json.loads(responses)
         except Exception as ex:
-            logger.error('Query error: {0}'.format(ex))
+            # In case of invalid input catch exception
+            # return empty dict.
+            logger.debug('Query response: {0}'.format(ex))
             return {}

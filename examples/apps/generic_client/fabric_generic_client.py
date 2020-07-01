@@ -602,7 +602,7 @@ def Main(args=None):
         jrpc_req_id+1)
 
     # Check if result field is present in work order response
-    if "result" in res:
+    if res and "result" in res:
         # Verify work order response signature
         if generic_client.verify_wo_res_signature(
                 res['result'],
