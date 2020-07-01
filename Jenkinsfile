@@ -77,14 +77,14 @@ pipeline {
                     },
                     "Build Avalon Proxy Model Components": {
                         script {
-                            sh 'docker-compose -f ci/docker-compose-proxy-model-build.yaml build'
+                            sh 'docker-compose -f ci/docker-compose-fabric-proxy-build.yaml build'
                         }
                     },
-                //    "Start fabric network": {
-                //        script {
-                //            sh './scripts/start_fabric.sh -w ./ -u'
-                //        }
-                //    }
+                    "Start fabric network": {
+                        script {
+                            sh './scripts/start_fabric.sh -w ./ -u'
+                        }
+                    }
                 )
             }
         }
@@ -95,11 +95,11 @@ pipeline {
             }
         }
 
-        //stage('Run Avalon proxy Model Tests') {
-        //    steps {
-        //        sh 'INSTALL_TYPE="" ./bin/run_tests -p'
-        //    }
-        //}
+        stage('Run Avalon Fabric proxy Model Tests') {
+            steps {
+                sh 'INSTALL_TYPE="" ./bin/run_tests -f'
+            }
+        }
 
         stage('Create git archive') {
             steps {
@@ -114,10 +114,10 @@ pipeline {
     }
 
     post {
-        //always {
-        //    echo 'Cleaning up fabric network'
-        //    sh './scripts/start_fabric.sh -w ./ -c'
-        //}
+        always {
+            echo 'Cleaning up fabric network'
+            sh './scripts/start_fabric.sh -w ./ -c'
+        }
         success {
             archiveArtifacts '*.tgz, *.zip'
             githubNotify context: 'continuous-integration/jenkins/SGX-SIM mode', description: 'This commit looks good',  status: 'SUCCESS'
