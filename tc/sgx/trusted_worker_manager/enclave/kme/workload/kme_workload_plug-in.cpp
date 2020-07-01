@@ -182,12 +182,12 @@ void KMEWorkloadProcessor::Register(
 
     if (search != sig_key_map.end()) {
         if (this->isSgxSimulator()) {
-        /// Add the WPE to the sig_key_map
-        wpe_enc_key_map[StrToByteArray(wpe_encryption_key)] = WPEInfo(
-            sig_key_map[unique_id_bytes]);
+            /// Add the WPE to the sig_key_map
+            wpe_enc_key_map[StrToByteArray(wpe_encryption_key)] = WPEInfo(
+                sig_key_map[unique_id_bytes]);
 
-        /// Remove the entry to avoid replay attack
-        sig_key_map.erase(unique_id_bytes);
+            /// Remove the entry to avoid replay attack
+            sig_key_map.erase(unique_id_bytes);
             this->SetStatus((int)ERR_WPE_REG_SUCCESS,
                 out_work_order_data);
             return;
@@ -195,33 +195,32 @@ void KMEWorkloadProcessor::Register(
         // Compare MRENCLAVE value
         EnclaveData* enclaveData = EnclaveData::getInstance();
         ByteArray ext_data = enclaveData->get_extended_data();
+
         if (memcmp(ext_data.data(),
-		mr_enclave.data(),SGX_HASH_SIZE) != 0) {
-            this->SetStatus((int)ERR_MRENCLAVE_NOT_MATCH,
-                out_work_order_data);
+		        mr_enclave.data(), SGX_HASH_SIZE) != 0) {
             ThrowIf<ValueError>(true, "WPE MRENCLAVE value didn't match");
         }
-	// Verify the hash of verification key in the report data and
-	// unique_id in in_data
-	uint8_t unique_id_hash[SGX_HASH_SIZE] = {0};
-	ComputeSHA256Hash(unique_id.c_str(), unique_id_hash);
-	if (memcmp(
-	    verification_key_hash.data(), unique_id_hash, SGX_HASH_SIZE) != 0) {
-            this->SetStatus((int)ERR_UNIQUE_ID_NOT_MATCH,
-                out_work_order_data);
-            ThrowIf<ValueError>(true, "Unique id value didn't match");
-	}
+        // Verify the hash of verification key in the report data and
+        // unique_id in in_data
+        uint8_t unique_id_hash[SGX_HASH_SIZE] = {0};
+        ComputeSHA256Hash(unique_id.c_str(), unique_id_hash);
+        if (verification_key_hash != ByteArray(std::begin(unique_id_hash),
+                                               std::end(unique_id_hash))){
 
-	// Compare if SHA256(wpe_encryption_key) matches
-	// with WPE report data [0:31]
-	uint8_t encryption_key_hash[SGX_HASH_SIZE] = {0};
-	ComputeSHA256Hash(wpe_encryption_key.c_str(), encryption_key_hash);
-	if (memcmp(
-	    e_key.data(), encryption_key_hash, SGX_HASH_SIZE) != 0) {
+            this->SetStatus((int)ERR_UNIQUE_ID_NOT_MATCH, out_work_order_data);
+            ThrowIf<ValueError>(true, "Unique id value didn't match");
+        }
+
+        // Compare if SHA256(wpe_encryption_key) matches
+        // with WPE report data [0:31]
+        uint8_t encryption_key_hash[SGX_HASH_SIZE] = {0};
+        ComputeSHA256Hash(wpe_encryption_key.c_str(), encryption_key_hash);
+        if (memcmp(e_key.data(), encryption_key_hash,
+                SGX_HASH_SIZE) != 0) {
             this->SetStatus((int)ERR_ENCRYPTION_KEY_NOT_MATCH,
                 out_work_order_data);
             ThrowIf<ValueError>(true, "Encryption key hash didn't match");
-	}
+        }
         // TODO: MRSIGNER value check
 
         /// Add the WPE to the sig_key_map
@@ -232,12 +231,10 @@ void KMEWorkloadProcessor::Register(
         sig_key_map.erase(unique_id_bytes);
     }
     else {
-        this->SetStatus((int)ERR_WPE_KEY_NOT_FOUND,
-            out_work_order_data);
+        this->SetStatus((int)ERR_WPE_KEY_NOT_FOUND, out_work_order_data);
         ThrowIf<ValueError>(true, "WPE verification key not found");
     }
-    this->SetStatus((int)ERR_WPE_REG_SUCCESS,
-        out_work_order_data);
+    this->SetStatus((int)ERR_WPE_REG_SUCCESS, out_work_order_data);
 }  // KMEWorkloadProcessor::Register
 
 

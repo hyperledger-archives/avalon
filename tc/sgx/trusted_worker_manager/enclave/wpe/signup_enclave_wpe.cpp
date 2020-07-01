@@ -231,10 +231,9 @@ void CreateSignupReportDataWPE(const uint8_t* ext_data,
     ComputeSHA256Hash((const char*) ext_data, ext_data_hash);
 
     // Concatenate hash of public encryption key and hash of extended data
-    strncpy((char*)report_data->d,
-        (const char*) enc_key_hash, SGX_HASH_SIZE);
-    strncat((char*)report_data->d,
-        (const char*) ext_data_hash, SGX_HASH_SIZE);
+    memcpy(report_data->d, enc_key_hash, SGX_HASH_SIZE);
+    memcpy((report_data->d) + SGX_HASH_SIZE, ext_data_hash, SGX_HASH_SIZE);
+
 }  // CreateSignupReportDataWPE
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -381,8 +380,8 @@ void CreateReportDataWPE(const char* ext_data,
     ComputeSHA256Hash(ext_data, ext_data_hash);
 
     // Concatenate hash of public encryption key and hash of extended data
-    strncpy((char*)report_data->d,
-        (const char*) enc_key_hash, SGX_HASH_SIZE);
-    strncat((char*)report_data->d,
-        (const char*) ext_data_hash, SGX_HASH_SIZE);
+
+    memcpy(report_data->d, enc_key_hash, SGX_HASH_SIZE);
+    memcpy((report_data->d) + SGX_HASH_SIZE, ext_data_hash, SGX_HASH_SIZE);
+
 }  // CreateReportDataWPE

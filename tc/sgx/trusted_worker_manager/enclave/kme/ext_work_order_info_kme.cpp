@@ -209,17 +209,11 @@ int ExtWorkOrderInfoKME::VerifyAttestationWpe(
     mr_enclave = mr_enclave_bytes;
     mr_signer = mr_signer_bytes;
 
-    uint8_t v_key_hash[SGX_HASH_SIZE] = {0};
-    uint8_t e_key_hash[SGX_HASH_SIZE] = {0};
-    strncpy((char* )e_key_hash,
-        (const char* )expected_report_data.d,
-        SGX_HASH_SIZE);
-    strncpy((char* )v_key_hash,
-        (const char* )expected_report_data.d + SGX_HASH_SIZE,
-        SGX_HASH_SIZE);
-    verification_key_hash = StrToByteArray((char*)v_key_hash);
-    encryption_public_key_hash = StrToByteArray((char*)e_key_hash);
 
+    encryption_public_key_hash = ByteArray(std::begin(expected_report_data.d),
+                                     std::begin(expected_report_data.d)+SGX_HASH_SIZE);
+    verification_key_hash = ByteArray(std::begin(expected_report_data.d)+SGX_HASH_SIZE,
+                                     std::end(expected_report_data.d));
     return result;
 
 }  // ExtWorkOrderInfoKME::VerifyAttestationWpe
