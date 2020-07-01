@@ -19,7 +19,10 @@ enclave {
     include "tcf_error.h"
 
     trusted {
-        public tcf_err_t ecall_Initialize();
+        public tcf_err_t ecall_Initialize(
+            [in, size=persistedSealedEnclaveDataSize] uint8_t* persistedSealedEnclaveData,
+            size_t persistedSealedEnclaveDataSize
+            );
 
         public tcf_err_t ecall_CreateErsatzEnclaveReport(
             [in, out] sgx_target_info_t* targetInfo,

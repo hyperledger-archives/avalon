@@ -304,3 +304,17 @@ class BaseEnclaveInfo(ABC):
         return self.get_enclave_basename(), self.get_enclave_measurement()
 
     # -----------------------------------------------------------------
+
+    def _get_sealed_data_file_name(self, relative_path, worker_id):
+        """
+        Helper function to construct sealed data path
+
+        Parameters :
+            @param relative_path - Relative path of sealed data
+            @param worker_id - Worker id to use as part of filename
+        Returns :
+            @returns file_name - Fully qualified file name for sealed data
+        """
+        return os.path.join(TCF_HOME, relative_path + "." + worker_id)
+
+    # -----------------------------------------------------------------

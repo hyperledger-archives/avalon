@@ -68,6 +68,10 @@ ias_api_key = "112233445566778899aabbccddeeff00"
 enclave_library = "libavalon-singleton-enclave.signed.so"
 enclave_library_path = "tc/sgx/trusted_worker_manager/enclave/build/lib/"
 
+# Sealed data from trusted enclave is stored at this location for recovery
+# in case of abrubt shutdown.
+sealed_data_path = ".sealed.data"
+
 # -------------------------------------------------------------
 # TCS Worker configuration details
 # -------------------------------------------------------------

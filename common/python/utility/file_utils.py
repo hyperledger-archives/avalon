@@ -70,6 +70,62 @@ def read_json_file(input_file, data_dir=['./', '../', '/']):
     return "".join(input_lines)
 
 
+# -----------------------------------------------------------------
+def read_file(input_file):
+    """
+    Utility function to read a file
+
+    Parameters:
+        @param input_file - Path of file to be read
+    Returns:
+        @returns data - Contents of the file if valid.
+                        Empty string, otherwise.
+
+    """
+    data = ""
+    if len(input_file) != 0 and os.path.exists(input_file):
+        logging.debug("Reading the file %s", input_file)
+        try:
+            with open(input_file, 'r') as data_file:
+                data = data_file.read()
+        except IOError as e:
+            logger.exception("Exception occurred while reading file {}"
+                             .format(e))
+    return data
+
+
+# -----------------------------------------------------------------
+def write_to_file(output, output_file):
+    """
+    Utility function to write to a file. This function would also
+    create intermediate directories if they do not exist.
+
+    Parameters:
+        @param output - Content to be written to file
+        @param output_file - Path of file to be written to
+    Returns:
+        @returns status - True, if write is successful
+                          False, otherwise
+    """
+    status = False
+    if len(output_file) != 0 and len(output) != 0:
+        dirname = os.path.dirname(output_file)
+        # If the directory does not exist, all intermediate directories
+        # should be created before the file is created
+        if len(dirname) > 0 and not os.path.exists(dirname):
+            os.makedirs(dirname)
+            logging.debug("Created directory %s", dirname)
+        logging.debug("Writing to the file %s", output_file)
+        try:
+            with open(output_file, 'w') as data_file:
+                data_file.write(output)
+            status = True
+        except IOError as e:
+            logger.exception("Exception occurred while writing to file {}"
+                             .format(e))
+    return status
+
+
 # -----------------------------------------------------------------------------
 def write_result_data_to_json_file(file_name, input_data, data_dir='./'):
     """

@@ -25,6 +25,7 @@ public:
     tcf_enclave_info(
         const std::string& enclaveModulePath,
         const std::string& spid,
+        const std::string& persisted_sealed_data,
         const int num_of_enclaves);
     virtual ~tcf_enclave_info();
     std::string get_epid_group();

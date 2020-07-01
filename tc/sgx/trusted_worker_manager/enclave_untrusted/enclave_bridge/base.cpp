@@ -70,6 +70,7 @@ std::string tcf::enclave_api::base::GetLastError(void) {
 tcf_err_t tcf::enclave_api::base::Initialize(
     const std::string& inPathToEnclave,
     const HexEncodedString& inSpid,
+    const std::string& persisted_sealed_data,
     const int numOfEnclaves) {
     tcf_err_t ret = TCF_SUCCESS;
 
@@ -86,7 +87,7 @@ tcf_err_t tcf::enclave_api::base::Initialize(
 
             for (tcf::enclave_api::Enclave& enc : g_Enclave) {
                 enc.SetSpid(inSpid);
-                enc.Load(inPathToEnclave);
+                enc.Load(inPathToEnclave, persisted_sealed_data);
             }
 
             g_IsInitialized = true;
