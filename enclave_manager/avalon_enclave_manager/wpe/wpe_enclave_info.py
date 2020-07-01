@@ -76,6 +76,7 @@ class WorkOrderProcessorEnclaveInfo(BaseEnclaveInfo):
                 self.proof_data = enclave_data.proof_data
             self.enclave_keys = \
                 keys.EnclaveKeys(self.verifying_key, self.encryption_key)
+            self.extended_measurements = self.get_extended_measurements()
             # No sealed data is present for WPE
             self.sealed_data = None
         except AttributeError as attr:
