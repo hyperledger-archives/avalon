@@ -42,7 +42,8 @@
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
-tcf_err_t ecall_Initialize() {
+tcf_err_t ecall_Initialize(uint8_t* persistedSealedEnclaveData,
+                           size_t persistedSealedEnclaveDataSize) {
     tcf_err_t result = TCF_SUCCESS;
 
     // We need to make sure we print a warning if the logging is turned on
@@ -50,7 +51,8 @@ tcf_err_t ecall_Initialize() {
     SAFE_LOG(TCF_LOG_CRITICAL, "enclave initialized with debugging turned on");
 
     // Initialize Enclave data
-    result = CreateEnclaveData();
+    result = persistedSealedEnclaveDataSize > 0 ? \
+        CreateEnclaveData(persistedSealedEnclaveData) : CreateEnclaveData();
     return result;
 }  // ecall_Initialize
 

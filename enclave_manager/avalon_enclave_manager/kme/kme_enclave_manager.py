@@ -54,7 +54,8 @@ class KeyManagementEnclaveManager(EnclaveManager):
                           enclave
         """
         return enclave_info.\
-            KeyManagementEnclaveInfo(self._config["EnclaveModule"])
+            KeyManagementEnclaveInfo(self._config["EnclaveModule"],
+                                     self._worker_id)
 
 # -------------------------------------------------------------------------
 

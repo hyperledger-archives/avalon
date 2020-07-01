@@ -21,6 +21,7 @@ import logging
 from ssl import SSLError
 from requests.exceptions import Timeout
 from requests.exceptions import HTTPError
+import utility.file_utils as file_utils
 import avalon_enclave_manager.singleton.singleton_enclave as enclave
 from avalon_enclave_manager.base_enclave_info import BaseEnclaveInfo
 
@@ -34,11 +35,13 @@ class SingletonEnclaveInfo(BaseEnclaveInfo):
     """
 
     # -------------------------------------------------------
-    def __init__(self, config):
+    def __init__(self, config, worker_id):
 
         # Initialize the keys that can be used later to
         # register the enclave
         enclave._SetLogger(logger)
+        self._config = config
+        self._worker_id = worker_id
         super().__init__(enclave.is_sgx_simulator())
 
         self._initialize_enclave(config)
@@ -107,6 +110,7 @@ class SingletonEnclaveInfo(BaseEnclaveInfo):
         # Now, let the enclave create the signup data
 
         signup_cpp_obj = enclave.SignupInfoSingleton()
+
         signup_data = signup_cpp_obj.CreateEnclaveData()
         if signup_data is None:
             return None
@@ -121,6 +125,13 @@ class SingletonEnclaveInfo(BaseEnclaveInfo):
             json.dumps(signup_info))
         signup_info_obj.sealed_signup_data = \
             signup_data['sealed_enclave_data']
+        if signup_info_obj.sealed_signup_data is None:
+            logger.info("Sealed data is None, so nothing to persist.")
+        else:
+            file_utils.write_to_file(signup_info_obj.sealed_signup_data,
+                                     self._get_sealed_data_file_name(
+                                         self._config["sealed_data_path"],
+                                         self._worker_id))
         # Now we can return the real object
         return signup_info_obj
 
@@ -166,7 +177,12 @@ class SingletonEnclaveInfo(BaseEnclaveInfo):
         Returns :
             @returns tcf_enclave_info - An instance of the tcf_enclave_info
         """
+        # Get sealed data if persisted from previous startup
+        persisted_sealed_data = file_utils.read_file(
+            self._get_sealed_data_file_name(config["sealed_data_path"],
+                                            self._worker_id))
         return enclave.tcf_enclave_info(
-            signed_enclave, config['spid'], int(config['num_of_enclaves']))
+            signed_enclave, config['spid'], persisted_sealed_data,
+            int(config['num_of_enclaves']))
 
     # -----------------------------------------------------------------

@@ -73,7 +73,8 @@ class SingletonEnclaveManager(WOProcessorManager):
                           enclave
         """
         return enclave_info.\
-            SingletonEnclaveInfo(self._config.get("EnclaveModule"))
+            SingletonEnclaveInfo(self._config.get("EnclaveModule"),
+                                 self._worker_id)
 
 # -------------------------------------------------------------------------
 

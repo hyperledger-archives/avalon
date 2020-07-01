@@ -34,6 +34,7 @@ bool is_sgx_simulator() {
 tcf_enclave_info::tcf_enclave_info(
     const std::string& enclaveModulePath,
     const std::string& spid,
+    const std::string& persistedSealedEnclaveData,
     const int num_of_enclaves
     ) {
     // tcf::logger::SetLogFunction(PyLog);
@@ -44,7 +45,8 @@ tcf_enclave_info::tcf_enclave_info(
     tcf::Log(TCF_LOG_DEBUG, "Enclave path: %s\n", enclaveModulePath.c_str());
     // tcf::Log(TCF_LOG_DEBUG, "SPID: %s\n", spid.c_str());
 
-    tcf_err_t ret = tcf::enclave_api::base::Initialize(enclaveModulePath, spid, num_of_enclaves);
+    tcf_err_t ret = tcf::enclave_api::base::Initialize(
+        enclaveModulePath, spid, persistedSealedEnclaveData, num_of_enclaves);
     ThrowTCFError(ret);
     tcf::Log(TCF_LOG_INFO, "Avalon Intel SGX Enclave initialized.\n");
 

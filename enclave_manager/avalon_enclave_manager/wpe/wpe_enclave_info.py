@@ -160,7 +160,10 @@ class WorkOrderProcessorEnclaveInfo(BaseEnclaveInfo):
         Returns :
             @returns tcf_enclave_info - An instance of the tcf_enclave_info
         """
+        # Pass empty string for sealed data as WPE does not need to recover
+        # from a sealed data. Its lifespan is limited to a startup and a
+        # a following shutdown (may be abrupt).
         return enclave.tcf_enclave_info(
-            signed_enclave, config['spid'], int(config['num_of_enclaves']))
+            signed_enclave, config['spid'], "", int(config['num_of_enclaves']))
 
     # -----------------------------------------------------------------

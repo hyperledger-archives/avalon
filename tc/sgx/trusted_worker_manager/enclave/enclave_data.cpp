@@ -63,6 +63,88 @@ EnclaveData::EnclaveData(void) {
     SerializePrivateData();
     SerializePublicData();
 }
+// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+EnclaveData::EnclaveData(const uint8_t* inSealedData) {
+    tcf::error::ThrowIfNull(inSealedData, "Sealed sign up data pointer is NULL");
+    uint32_t decrypted_size =
+        sgx_get_encrypt_txt_len(reinterpret_cast<const sgx_sealed_data_t*>(inSealedData));
+
+    // Need to check for error
+    std::vector<uint8_t> decrypted_data;
+    decrypted_data.resize(decrypted_size);
+
+    // Unseal the data
+    sgx_status_t ret = sgx_unseal_data(reinterpret_cast<const sgx_sealed_data_t*>(inSealedData),
+        nullptr, 0, &decrypted_data[0], &decrypted_size);
+    tcf::error::ThrowSgxError(ret, "Failed to unseal  data");
+    std::string decrypted_data_string(reinterpret_cast<const char*>(&decrypted_data[0]));
+    DeserializeSealedData(decrypted_data_string);
+    // Clear local variable storing secret(s)
+    decrypted_data.clear();
+    decrypted_data_string.clear();
+
+    // Create encryption key signature
+    generate_encryption_key_signature();
+
+    SerializePrivateData();
+    SerializePublicData();
+}
+// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+void EnclaveData::DeserializeSealedData(const std::string& inSerializedEnclaveData) {
+    std::string svalue;
+    const char* pvalue = nullptr;
+    size_t pvalue_len = 0;
+
+    // Parse the incoming enclave data
+    JsonValue parsed(json_parse_string(inSerializedEnclaveData.c_str()));
+    tcf::error::ThrowIfNull(parsed.value, "Failed to parse the Enclave data, badly formed JSON");
+
+    JSON_Object* keystore_object = json_value_get_object(parsed);
+    tcf::error::ThrowIfNull(keystore_object, "Failed to parse the key store object");
+
+    // Public signing key
+    pvalue = json_object_dotget_string(keystore_object, "SigningKey.PublicKey");
+    tcf::error::ThrowIf<tcf::error::ValueError>(
+        !pvalue, "Failed to retrieve public signing key from the key store");
+    svalue.assign(pvalue);
+    public_signing_key_.Deserialize(svalue);
+
+    // Private signing key
+    pvalue = json_object_dotget_string(keystore_object, "SigningKey.PrivateKey");
+    tcf::error::ThrowIf<tcf::error::ValueError>(
+        !pvalue, "Failed to retrieve private signing key from the key store");
+
+    // Compute string length upto size of MAX_SERIALIZED_SIG_PRIV_KEY_SIZE
+    pvalue_len = strnlen_s(pvalue, MAX_SERIALIZED_SIG_PRIV_KEY_SIZE);
+    svalue.assign(pvalue);
+    private_signing_key_.Deserialize(svalue);
+    // Clear local variables storing secrets before re-assigning new value
+    svalue.clear();
+    memset_s((char*)pvalue, MAX_SERIALIZED_SIG_PRIV_KEY_SIZE, 0, pvalue_len);
+
+    // Public encryption key
+    pvalue = json_object_dotget_string(keystore_object, "EncryptionKey.PublicKey");
+    tcf::error::ThrowIf<tcf::error::ValueError>(
+        !pvalue, "Failed to retrieve public encryption key from the key store");
+
+    svalue.assign(pvalue);
+    public_encryption_key_.Deserialize(svalue);
+
+    // Private encryption key
+    pvalue = json_object_dotget_string(keystore_object, "EncryptionKey.PrivateKey");
+    tcf::error::ThrowIf<tcf::error::ValueError>(
+        !pvalue, "Failed to retrieve private encryption key from the key store");
+
+    // Compute string length upto size of MAX_SERIALIZED_ENC_PRIV_KEY_SIZE
+    pvalue_len = strnlen_s(pvalue, MAX_SERIALIZED_ENC_PRIV_KEY_SIZE);
+    svalue.assign(pvalue);
+    private_encryption_key_.Deserialize(svalue);
+    // Clear local variables storing secrets before re-assigning new value
+    svalue.clear();
+    memset_s((char*)pvalue, MAX_SERIALIZED_ENC_PRIV_KEY_SIZE, 0, pvalue_len);
+}
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -78,7 +160,7 @@ EnclaveData::~EnclaveData(void) {
 void EnclaveData::SerializePrivateData(void) {
     JSON_Status jret;
 
-    // Create serialized wait certificate
+    // Create serialized public data
     JsonValue dataValue(json_value_init_object());
     tcf::error::ThrowIf<tcf::error::RuntimeError>(
         !dataValue.value, "Failed to create enclave data serialization object");
@@ -152,7 +234,7 @@ void EnclaveData::SerializePrivateData(void) {
 void EnclaveData::SerializePublicData(void) {
     JSON_Status jret;
 
-    // Create serialized wait certificate
+    // Create serialized public data
     JsonValue dataValue(json_value_init_object());
     tcf::error::ThrowIf<tcf::error::RuntimeError>(
         !dataValue.value, "Failed to create enclave data serialization object");

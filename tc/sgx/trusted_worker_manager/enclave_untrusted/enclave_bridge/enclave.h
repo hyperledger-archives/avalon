@@ -42,7 +42,8 @@ namespace tcf {
             virtual ~Enclave();
 
             void Load(
-                const std::string& inEnclaveFilePath);
+                const std::string& inEnclaveFilePath,
+                const Base64EncodedString& inSealedEnclaveData);
 
             void Unload();
 
@@ -88,7 +89,8 @@ namespace tcf {
             }
 
         protected:
-            void LoadEnclave();
+            void LoadEnclave(
+                const Base64EncodedString& persistedSealedEnclaveData = "");
             static void QuerySgxStatus();
 
             std::string enclaveFilePath;

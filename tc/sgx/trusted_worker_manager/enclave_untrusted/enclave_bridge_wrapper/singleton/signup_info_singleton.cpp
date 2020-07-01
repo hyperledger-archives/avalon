@@ -32,6 +32,7 @@ SignupInfo* SignupInfoSingleton::DeserializeSignupInfo(
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 std::map<std::string, std::string> SignupInfoSingleton::CreateEnclaveData() {
+
     tcf_err_t presult;
     // Create some buffers for receiving the output parameters
     // CreateEnclaveData will resize appropriately

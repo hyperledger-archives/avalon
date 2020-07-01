@@ -97,7 +97,8 @@ namespace tcf {
 
         // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
         void Enclave::Load(
-            const std::string& inEnclaveFilePath) {
+            const std::string& inEnclaveFilePath,
+            const Base64EncodedString& inSealedEnclaveData) {
             tcf::error::ThrowIf<tcf::error::ValueError>(
                 inEnclaveFilePath.empty() ||
                 inEnclaveFilePath.length() > PATH_MAX,
@@ -105,7 +106,7 @@ namespace tcf {
 
             this->Unload();
             this->enclaveFilePath = inEnclaveFilePath;
-            this->LoadEnclave();
+            this->LoadEnclave(inSealedEnclaveData);
         }  // Enclave::Load
 
         // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -326,7 +327,8 @@ namespace tcf {
         }  // Enclave::ThrowTCFError
 
         // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-        void Enclave::LoadEnclave() {
+        void Enclave::LoadEnclave(
+                const Base64EncodedString& persistedSealedEnclaveData) {
             if (!this->enclaveId) {
                 /* Enclave id, used in communicating with enclave */
                 Enclave::QuerySgxStatus();
@@ -354,14 +356,22 @@ namespace tcf {
                     250  // retryWaitMs
                     );
                 tcf::error::ThrowSgxError(ret, "Unable to create enclave.");
-
                 // Initialize the enclave
                 tcf_err_t tcfError = TCF_SUCCESS;
-                ret = this->CallSgx([this, &tcfError] () {
+
+                ByteArray persistedSealedData = \
+                    Base64EncodedStringToByteArray(persistedSealedEnclaveData);
+                ret = this->CallSgx([
+                            this,
+                            &tcfError,
+                            &persistedSealedData] () {
                         sgx_status_t ret =
                         ecall_Initialize(
                             this->enclaveId,
-                            &tcfError);
+                            &tcfError,
+                            persistedSealedData.data(),
+                            persistedSealedData.size()
+                        );
                         return error::ConvertErrorStatus(ret, tcfError);
                     });
                 tcf::error::ThrowSgxError(ret, "Enclave call to ecall_Initialize failed");

@@ -56,11 +56,13 @@ namespace tcf {
               inPathToEnclave - A pointer to a string that contains the path
               to the enclave DLL.
               inSpid - A pointer to a string that contains the hex encoded SPID.
+              persisted_sealed_data - Sealed data persisted from last bootup
               numOfEnclaves -- Number of worker enclaves to create
             */
             tcf_err_t Initialize(
                 const std::string& inPathToEnclave,
                 const HexEncodedString& inSpid,
+                const std::string& persisted_sealed_data,
                 const int numOfEnclaves);
 
             /*

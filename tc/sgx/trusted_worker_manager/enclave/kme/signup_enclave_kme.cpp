@@ -78,7 +78,7 @@ tcf_err_t ecall_CreateSignupDataKME(const sgx_target_info_t* inTargetInfo,
 
         // Get instance of enclave data
         EnclaveData* enclaveData = EnclaveData::getInstance();
-	ByteArray ext_data_bytes(inExtData, inExtData+inExtDataSize); 
+        ByteArray ext_data_bytes(inExtData, inExtData+inExtDataSize);
         enclaveData->set_extended_data(ext_data_bytes);
 
         tcf::error::ThrowIf<tcf::error::ValueError>(

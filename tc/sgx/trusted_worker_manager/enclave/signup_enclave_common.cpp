@@ -29,11 +29,13 @@
 EnclaveData* EnclaveData::instance = 0;
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-tcf_err_t CreateEnclaveData() {
+tcf_err_t CreateEnclaveData(uint8_t* persistedSealedEnclaveData) {
     tcf_err_t result = TCF_SUCCESS;
     try {
         // Initialize Enclave data
-        EnclaveData* enclaveData = EnclaveData::getInstance();
+        EnclaveData* enclaveData = persistedSealedEnclaveData == nullptr ? \
+            EnclaveData::getInstance() \
+            : EnclaveData::getInstance(persistedSealedEnclaveData);
     } catch (...) {
         SAFE_LOG(TCF_LOG_ERROR,
             "Unknown error in while creating enclave data");
