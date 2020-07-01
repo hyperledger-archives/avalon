@@ -53,6 +53,7 @@ class SingletonEnclaveInfo(BaseEnclaveInfo):
                 enclave_info['encryption_key_signature']
             self.proof_data = enclave_info['proof_data']
             self.enclave_id = enclave_info['enclave_id']
+            self.extended_measurements = self.get_extended_measurements()
         except KeyError as ke:
             raise Exception("missing enclave initialization parameter; {}"
                             .format(str(ke)))
