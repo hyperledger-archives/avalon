@@ -1,0 +1,89 @@
+{
+    "type": "object",
+    "minProperties": 1,
+    "error_msg":
+        "Empty params in the request",
+    "properties": {
+        "responseTimeoutMSecs": {
+            "type": "integer",
+            "error_msg":
+            "Invalid data format for responseTimeoutMSecs"},
+        "payloadFormat": {
+            "type": "string",
+            "enum": ["JSON-RPC", "json-rpc"],
+            "error_msg":
+            "Invalid payload format"},
+        "resultUri": {
+            "type": "string",
+            "error_msg":
+            "Invalid data format for resultUri"},
+        "notifyUri": {
+            "type": "string",
+            "error_msg":
+            "Invalid data format for notifyUri"},
+        "workOrderId": {
+            "type": "string",
+            "pattern": "^(0[x|X])?[0-9a-fA-F]+$",
+            "error_msg":
+            "Invalid data format for work order id"},
+        "workerId": {
+            "type": "string",
+            "pattern": "^(0[x|X])?[0-9a-fA-F]+$",
+            "error_msg":
+            "Invalid data format for Worker id"},
+        "workloadId": {
+            "type": "string",
+            "pattern": "^(0[x|X])?[0-9a-fA-F]+$",
+            "error_msg":
+            "Invalid data format for work load id"},
+        "requesterId": {
+            "type": "string",
+            "pattern": "^(0[x|X])?[0-9a-fA-F]+$",
+            "error_msg":
+            "Invalid data format for requester id"},
+        "workerEncryptionKey": {
+            "type": "string",
+            "error_msg":
+            "Empty or Invalid data format for workerEncryptionKey"},
+        "dataEncryptionAlgorithm": {
+            "type": "string",
+            "enum": ["AES-GCM-256", "aes-gcm-256"],
+            "error_msg":
+            "Invalid data format for dataEncryptionAlgorithm"},
+        "sessionKeyIv": {
+            "type": "string",
+            "pattern": "^(0[x|X])?[0-9a-fA-F]+$",
+            "error_msg":
+            "Invalid data format for session key iv"},
+        "requesterNonce": {
+            "type": "string",
+            "pattern": "^(0[x|X])?[0-9a-fA-F]+$",
+            "error_msg":
+            "Empty or Invalid data format for requesterNonce"},
+        "verifyingKey": {
+            "type": "string",
+            "error_msg":
+            "Invalid data format for verifyingKey"},
+        "encryptedSessionKey": {
+            "type": [
+                "string",
+                "null"
+                ],
+            "pattern": "^(0[x|X])?[0-9a-fA-F]+$"
+        }
+    },
+    "required": [
+        "responseTimeoutMSecs",
+        "payloadFormat",
+        "workOrderId",
+        "workerId",
+        "workloadId",
+        "requesterId",
+        "requesterNonce",
+        "sessionKeyIv",
+        "encryptedSessionKey"
+        ],
+    "if": {"properties": {"encryptedSessionKey": {"type": "null"}}},
+    "then": {"required": ["workerEncryptionKey"]}
+
+}

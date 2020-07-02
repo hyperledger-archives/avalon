@@ -94,7 +94,6 @@ class GenericClient():
         if not self._workload_id:
             logging.error("\nWorkload id is mandatory\n")
             sys.exit(-1)
-
         # work order input data
         self._in_data = options.in_data
 
@@ -301,8 +300,10 @@ def Main(args=None):
         worker_obj.encryption_key,
         session_key, session_iv,
         encrypted_data_encryption_key)
+
     if not code:
-        logging.error("Work order request creation failed")
+        logging.error("Work order request creation failed \
+                \n {}".format(wo_params))
         sys.exit(-1)
 
     client_private_key = crypto_utility.generate_signing_keys()
@@ -331,9 +332,9 @@ def Main(args=None):
         if status:
             # Verify work order response signature
             if generic_client_obj.verify_wo_response_signature(
-                wo_res['result'],
-                worker_obj.verification_key,
-                wo_params.get_requester_nonce()
+                    wo_res['result'],
+                    worker_obj.verification_key,
+                    wo_params.get_requester_nonce()
             ) is False:
                 logging.error("Work order response signature"
                               " verification Failed")

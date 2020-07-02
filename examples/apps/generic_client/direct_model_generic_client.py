@@ -116,6 +116,21 @@ class DirectModelGenericClient(BaseGenericClient):
         else:
             return None
 
+    def get_work_order_result(self, work_order_id):
+        """
+        Retrieve work order result for given work order id
+        """
+        work_order_res = self._work_order_instance.work_order_get_result(
+            work_order_id,
+            self._get_random_jrpc_id()
+        )
+        logging.info("Work order get result {}".format(
+            json.dumps(work_order_res, indent=4)))
+
+        if work_order_res and "result" in work_order_res:
+            return True, work_order_res
+        return False, work_order_res
+
     def submit_work_order(self, wo_params):
         """
         Submit work order request

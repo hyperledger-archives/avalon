@@ -16,8 +16,7 @@ import json
 import logging
 from error_code.error_status import WorkerError
 from avalon_sdk.worker.worker_details import WorkerStatus
-from avalon_sdk.worker.worker_request_validator \
-    import WorkerRequestValidator
+import schema_validation.validate as Validator
 from jsonrpc.exceptions import JSONRPCDispatchException
 
 logger = logging.getLogger(__name__)
@@ -142,9 +141,9 @@ class TCSWorkerRegistryHandler:
         """
         input_json_str = params["raw"]
         input_value_json = json.loads(input_json_str)
-        req_validator = WorkerRequestValidator()
         valid, err_msg = \
-            req_validator.worker_lookup_validation(
+            Validator.schema_validation(
+                "WorkerLookUp",
                 input_value_json["params"])
         logger.info(err_msg)
         if not valid:
@@ -164,9 +163,9 @@ class TCSWorkerRegistryHandler:
         """
         input_json_str = params["raw"]
         input_value_json = json.loads(input_json_str)
-        req_validator = WorkerRequestValidator()
         valid, err_msg = \
-            req_validator.worker_lookup_next_validation(
+            Validator.schema_validation(
+                "WorkerLookUpNext",
                 input_value_json["params"])
         if not valid:
             raise JSONRPCDispatchException(
@@ -186,9 +185,9 @@ class TCSWorkerRegistryHandler:
 
         input_json_str = params["raw"]
         input_value_json = json.loads(input_json_str)
-        req_validator = WorkerRequestValidator()
         valid, err_msg = \
-            req_validator.worker_retrieve_validation(
+            Validator.schema_validation(
+                "WorkerRetrieve",
                 input_value_json["params"])
         if not valid:
             raise JSONRPCDispatchException(

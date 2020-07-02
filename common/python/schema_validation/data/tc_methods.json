@@ -1,0 +1,38 @@
+{
+    "type": "object",
+    "uniqueItems": true,
+    "additionalProperties": false,
+    "properties": {
+        "params": {
+            "type": "object",
+            "minProperties": 1,
+            "error_msg":
+            "Empty params in the request"},
+        "jsonrpc": {
+            "type": "string",
+            "enum": ["2.0"],
+            "error_msg":
+            "Invalid data format or value for jsonrpc"},
+        "id": {
+            "type": "integer",
+            "error_msg":
+            "Invalid data format for id"},
+        "method": {
+            "type": "string",
+            "enum": [
+                "WorkerLookUp",
+                "WorkerLookUpNext",
+                "WorkerRetrieve",
+                "WorkOrderSubmit",
+                "WorkOrderGetResult",
+                "WorkOrderReceiptRetrieve",
+                "WorkOrderReceiptUpdate",
+                "WorkOrderReceiptUpdateRetrieve",
+                "WorkOrderReceiptLookUp",
+                "WorkOrderReceiptCreate",
+                "WorkOrderReceiptLookUpNext"],
+            "error_msg":
+            "Invalid data format for method or method not supported"}
+    },
+    "required": ["jsonrpc", "id", "method", "params"]
+}

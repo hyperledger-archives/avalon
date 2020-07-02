@@ -15,11 +15,11 @@
 import time
 import json
 import logging
+
+import schema_validation.validate as Validator
 from error_code.error_status import WorkOrderStatus
 from error_code.enclave_error import EnclaveError
 from avalon_sdk.connector.direct.jrpc.jrpc_util import JsonRpcErrorCode
-from avalon_sdk.work_order.work_order_request_validator \
-    import WorkOrderRequestValidator
 from avalon_listener.tcs_work_order_handler import TCSWorkOrderHandler
 
 from jsonrpc.exceptions import JSONRPCDispatchException
@@ -79,9 +79,10 @@ class TCSWorkOrderHandlerSync(TCSWorkOrderHandler):
         data = {
             "workOrderId": wo_id
         }
-        req_validator = WorkOrderRequestValidator()
-        valid, err_msg = req_validator.validate_parameters(
-            input_value_json["params"])
+        valid, err_msg = \
+            Validator.schema_validation(
+                "WorkOrderSubmit",
+                input_value_json["params"])
         if not valid:
             raise JSONRPCDispatchException(
                 JsonRpcErrorCode.INVALID_PARAMETER,
@@ -90,30 +91,6 @@ class TCSWorkOrderHandlerSync(TCSWorkOrderHandler):
             )
 
         worker_id = input_value_json["params"]["workerId"]
-
-        if "inData" in input_value_json["params"]:
-            valid, err_msg = req_validator.validate_data_format(
-                input_value_json["params"]["inData"])
-            if not valid:
-                raise JSONRPCDispatchException(
-                    JsonRpcErrorCode.INVALID_PARAMETER,
-                    err_msg,
-                    data)
-        else:
-            raise JSONRPCDispatchException(
-                JsonRpcErrorCode.INVALID_PARAMETER,
-                "Missing inData parameter",
-                data
-            )
-
-        if "outData" in input_value_json["params"]:
-            valid, err_msg = req_validator.validate_data_format(
-                input_value_json["params"]["outData"])
-            if not valid:
-                raise JSONRPCDispatchException(
-                    JsonRpcErrorCode.INVALID_PARAMETER,
-                    err_msg,
-                    data)
         # Check if workerId is exists in avalon
         worker_id = input_value_json["params"]["workerId"]
         if not self._is_worker_exists(worker_id):

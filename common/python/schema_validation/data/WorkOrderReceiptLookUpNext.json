@@ -1,0 +1,32 @@
+{
+    "type": "object",
+    "uniqueItems": true,
+    "additionalProperties": false,
+    "properties": {
+        "workerServiceId": {
+            "type": "string",
+            "pattern": "^(0[x|X])?[0-9a-fA-F]+$",
+            "error_msg":
+                "Invalid data format for workerServiceId"},
+        "workerId": {
+            "type": "string",
+            "pattern": "^(0[x|X])?[0-9a-fA-F]+$",
+            "error_msg":
+                "Invalid data format for workerId"},
+        "requesterId": {
+            "type": "string",
+            "pattern": "^(0[x|X])?[0-9a-fA-F]+$",
+            "error_msg":
+                "Invalid data format for requesterId"},
+        "receiptStatus": {
+            "type": "string",
+            "pattern": "^(0[x|X])?[0-9a-fA-F]+$",
+            "error_msg":
+                "Invalid data format for receiptStatus"},
+        "lastLookUpTag": {
+            "type": "string",
+            "pattern": "^(0[x|X])?[0-9a-fA-F]+$",
+            "error_msg":
+                "Invalid data format for lastLookUpTag"}
+    }
+}

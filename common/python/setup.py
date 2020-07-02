@@ -21,7 +21,6 @@ import re
 from setuptools import setup, find_packages, Extension
 
 # this should only be run with python3
-import sys
 if sys.version_info[0] < 3:
     print('ERROR: must run with python3')
     sys.exit(1)
@@ -40,6 +39,8 @@ setup(
     author='Hyperledger Avalon',
     url='https://github.com/hyperledger/avalon',
     packages=find_packages(),
+    package_data={'': ['data/*.json']},
+    include_package_data=True,
     install_requires=[],
     ext_modules=[],
     data_files=[],

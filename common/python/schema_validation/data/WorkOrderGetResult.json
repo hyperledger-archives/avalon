@@ -1,0 +1,14 @@
+{
+    "type": "object",
+    "uniqueItems": true,
+    "additionalProperties": false,
+    "properties": {
+        "workOrderId": {
+            "type": "string",
+            "pattern": "^(0[x|X])?[0-9a-fA-F]+$",
+            "error_msg":
+                "Invalid work order Id"
+            }
+    },
+    "required": ["workOrderId"]
+}
