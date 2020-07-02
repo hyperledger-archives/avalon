@@ -137,32 +137,13 @@ Invalid session key or worker encryption key")
         """
         try:
             sig_obj = signature.ClientSignature()
-            concat_string = self.get_requester_nonce() + \
-                self.get_work_order_id() + \
-                self.get_worker_id() + \
-                self.get_workload_id() + \
-                self.get_requester_id()
-            concat_bytes = bytes(concat_string, "UTF-8")
-            # SHA-256 hashing is used
-            hash_1 = crypto_utility.byte_array_to_base64(
-                crypto_utility.compute_message_hash(concat_bytes)
-            )
-            hash_2 = sig_obj.calculate_datahash(self.get_in_data())
-            hash_3 = ""
-            out_data = self.get_out_data()
-            if out_data and len(out_data) > 0:
-                hash_3 = sig_obj.calculate_datahash(out_data)
-            concat_hash = hash_1 + hash_2 + hash_3
-            concat_hash = bytes(concat_hash, "UTF-8")
-            self.final_hash = crypto_utility.compute_message_hash(concat_hash)
+            self.request_hash = sig_obj.calculate_request_hash(self.params_obj)
             encrypted_request_hash = crypto_utility.encrypt_data(
-                self.final_hash, self.session_key, self.session_iv)
-            encrypted_request_hash_hex = crypto_utility.byte_array_to_hex(
+                self.request_hash, self.session_key, self.session_iv)
+            enc_request_hash_hex = crypto_utility.byte_array_to_hex(
                                             encrypted_request_hash)
-            self.params_obj["encryptedRequestHash"] = \
-                encrypted_request_hash_hex
+            self.params_obj["encryptedRequestHash"] = enc_request_hash_hex
             return True, ""
-
         except Exception as err:
             return False, create_error_response(
                 JRPCErrorCodes.INVALID_PARAMETER_FORMAT_OR_VALUE,
@@ -177,7 +158,7 @@ Invalid session key or worker encryption key")
         """
         sig_obj = signature.ClientSignature()
         status, sign = sig_obj.generate_signature(
-            self.final_hash,
+            self.request_hash,
             private_key
         )
         if status is True:

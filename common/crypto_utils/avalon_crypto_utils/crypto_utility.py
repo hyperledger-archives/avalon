@@ -252,10 +252,18 @@ def byte_array_to_hex(byte_array):
 
 
 # -----------------------------------------------------------------------------
-def compute_message_hash(message):
+def compute_message_hash(message_bytes):
+    """
+    Compute SHA256 hash of message_bytes.
+
+    Parameters:
+        message_bytes Data to hash
+    Returns:
+        binary hash of data
+    """
     hash_obj = SHA256.new()
-    hash_obj.update(message)
-    return list(hash_obj.digest())
+    hash_obj.update(message_bytes)
+    return hash_obj.digest()
 
 
 # -----------------------------------------------------------------------------

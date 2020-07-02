@@ -305,40 +305,58 @@ namespace tcf {
     }
 
     ByteArray WorkOrderProcessor::ComputeRequestHash() {
-        ByteArray concat_hashes;
         std::string concat_string = requester_nonce + work_order_id +
                 worker_id + workload_id + requester_id;
-        ByteArray hash_1 =  tcf::crypto::ComputeMessageHash(StrToByteArray(concat_string));
-
-        ByteArray hash_data;
-        std::string hash_2;
+        ByteArray hash_1 =  tcf::crypto::ComputeMessageHash(
+                                    StrToByteArray(concat_string));
+        // Calculate inData hash
+        ByteArray hash_in_data;
+        std::string hash_in_data_str;
         size_t i;
+        // First sort the inData elements based on index
+        // Sorting is required to calculate hash deterministically
         std::sort(data_items_in.begin(), data_items_in.end(),
             [](WorkOrderDataHandler x, WorkOrderDataHandler  y)
             {return x.workorder_data.index < y.workorder_data.index;});
         for (i = 0; i < data_items_in.size(); i++) {
             tcf::WorkOrderDataHandler& d = data_items_in.at(i);
             if (!d.concat_string.empty()) {
-                concat_hashes = StrToByteArray(d.concat_string);
-                hash_data =  tcf::crypto::ComputeMessageHash(concat_hashes);
-                hash_2 = hash_2 + base64_encode(hash_data);
+                hash_in_data_str = hash_in_data_str + d.concat_string;
             }
         }
-
+        if(!hash_in_data_str.empty()) {
+            hash_in_data = tcf::crypto::ComputeMessageHash(
+                                StrToByteArray(hash_in_data_str));
+        }
+        // Compute outData hash
+        ByteArray hash_out_data;
+        std::string hash_out_data_str;
+        // First sort the outData elements based on index
+        // Sorting is required to calculate hash deterministically
         std::sort(data_items_out.begin(),  data_items_out.end(),
             [](WorkOrderDataHandler x, WorkOrderDataHandler  y)
             {return x.workorder_data.index < y.workorder_data.index;});
-        std::string hash_3;
         for (i = 0; i < data_items_out.size(); i++) {
             tcf::WorkOrderDataHandler& d = data_items_out.at(i);
-            concat_hashes = StrToByteArray(d.concat_string);
-            hash_data =  tcf::crypto::ComputeMessageHash(concat_hashes);
-            hash_3 = hash_3 + base64_encode(hash_data);
+            if (!d.concat_string.empty()) {
+                hash_out_data_str = hash_out_data_str + d.concat_string;
+            }
         }
-
-        concat_string = base64_encode(hash_1) + hash_2 + hash_3;
-        concat_hashes = StrToByteArray(concat_string);
-        return tcf::crypto::ComputeMessageHash(concat_hashes);
+        if(!hash_out_data_str.empty()) {
+            hash_out_data = tcf::crypto::ComputeMessageHash(
+                                    StrToByteArray(hash_out_data_str));
+        }
+        // Calculate final hash
+        std::string final_hash_string = ByteArrayToString(hash_1);
+        if(!hash_in_data_str.empty()) {
+            final_hash_string += ByteArrayToString(hash_in_data);
+        }
+        if(!hash_out_data_str.empty()) {
+            final_hash_string += ByteArrayToString(hash_out_data);
+        }
+        ByteArray final_hash = tcf::crypto::ComputeMessageHash(
+                                    StrToByteArray(final_hash_string));
+        return final_hash;
     }
 
     tcf_err_t WorkOrderProcessor::VerifyEncryptedRequestHash() {
@@ -390,17 +408,16 @@ namespace tcf {
 
     ByteArray WorkOrderProcessor::ResponseHashCalculate(
                         std::vector<tcf::WorkOrderData>& wo_data) {
-        ByteArray concat_hashes;
         ByteArray nonce = tcf::crypto::RandomBitString(16);
+        // Create a worker nonce string
         worker_nonce = base64_encode(tcf::crypto::ComputeMessageHash(nonce));
         std::string concat_string = worker_nonce + work_order_id +
                 worker_id + workload_id + requester_id;
 
-        std::string hash_1 = base64_encode(tcf::crypto::ComputeMessageHash(StrToByteArray(concat_string)));
-
+        ByteArray hash_1 = tcf::crypto::ComputeMessageHash(
+                                    StrToByteArray(concat_string));
         size_t i = 0;
         size_t out_data_size = data_items_out.size();
-
         for (auto data : wo_data) {
             if (i < out_data_size) {
                 // If client request contains outData then update only
@@ -425,23 +442,31 @@ namespace tcf {
             out_data.ComputeHashString();
             i++;
         }
-
+        // Calculate outData hash
+        // First sort the outData elements based on index
+        // Sorting is required to calculate hash deterministically
         std::sort(data_items_out.begin(),  data_items_out.end(),
             [](WorkOrderDataHandler x, WorkOrderDataHandler  y)
             {return x.workorder_data.index < y.workorder_data.index;});
-
-        ByteArray hash_2;
-        std::string outhash = "";
+        ByteArray hash_out_data;
+        std::string hash_out_data_str;
         for (size_t i = 0; i < data_items_out.size(); i++) {
             tcf::WorkOrderDataHandler& d = data_items_out.at(i);
             if (!d.concat_string.empty()) {
-                concat_hashes = StrToByteArray(d.concat_string);
-                hash_2 =  tcf::crypto::ComputeMessageHash(concat_hashes);
-                outhash +=  base64_encode(hash_2);
+               hash_out_data_str = hash_out_data_str + d.concat_string;
             }
         }
-        concat_string = hash_1 + outhash;
-        ByteArray final_hash = tcf::crypto::ComputeMessageHash(StrToByteArray(concat_string));
+        if(!hash_out_data_str.empty()) {
+            hash_out_data = tcf::crypto::ComputeMessageHash(
+                                        StrToByteArray(hash_out_data_str));
+        }
+        // Calculate final hash
+        std::string final_hash_string = ByteArrayToString(hash_1);
+        if(!hash_out_data_str.empty()) {
+            final_hash_string += ByteArrayToString(hash_out_data);
+        }
+        ByteArray final_hash = tcf::crypto::ComputeMessageHash(
+                                    StrToByteArray(final_hash_string));
         return final_hash;
     }
 

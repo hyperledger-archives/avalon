@@ -74,8 +74,11 @@ class WorkOrderReceiptRequest():
         Returns:
         JSON RPC request of type dictionary
         """
-        final_hash_str = self.sig_obj.calculate_request_hash(wo_request)
         wo_request_params = wo_request["params"]
+        wo_request_hash = \
+            self.sig_obj.calculate_request_hash(wo_request_params)
+        wo_request_hash_str = \
+            crypto_utility.byte_array_to_base64(wo_request_hash)
         worker_id = wo_request_params["workerId"]
         requester_nonce = nonce
         if nonce is None:
@@ -89,7 +92,7 @@ class WorkOrderReceiptRequest():
             "workerId": worker_id,
             "requesterId": wo_request_params["requesterId"],
             "receiptCreateStatus": receipt_create_status,
-            "workOrderRequestHash": final_hash_str,
+            "workOrderRequestHash": wo_request_hash_str,
             "requesterGeneratedNonce": requester_nonce,
             "signatureRules":
             self.HASHING_ALGORITHM + "/" + self.SIGNING_ALGORITHM,

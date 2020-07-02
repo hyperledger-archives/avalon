@@ -16,6 +16,7 @@ import json
 import logging
 import base64
 from utility.hex_utils import is_valid_hex_str
+import avalon_crypto_utils.crypto_utility as crypto_utility
 import avalon_crypto_utils.crypto.crypto as crypto
 from error_code.error_status import ReceiptCreateStatus, SignatureStatus,\
     JRPCErrorCodes
@@ -152,9 +153,14 @@ class TCSWorkOrderReceiptHandler:
 
         signature_obj = signature.ClientSignature()
         # Verify work order request is calculated properly or not.
-        wo_req_hash = \
-            signature_obj.calculate_request_hash(json.loads(wo_request))
-        if wo_req_hash != wo_receipt_req["params"]["workOrderRequestHash"]:
+        json_wo_request = json.loads(wo_request)
+        wo_request_params = json_wo_request["params"]
+        wo_request_hash = \
+            signature_obj.calculate_request_hash(wo_request_params)
+        wo_request_hash_str = \
+            crypto_utility.byte_array_to_base64(wo_request_hash)
+        expected_hash_str = wo_receipt_req["params"]["workOrderRequestHash"]
+        if wo_request_hash_str != expected_hash_str:
             return False, "Work order request hash does not match"
         # Verify requester signature with signing key in the request
         status = signature_obj.verify_create_receipt_signature(wo_receipt_req)
