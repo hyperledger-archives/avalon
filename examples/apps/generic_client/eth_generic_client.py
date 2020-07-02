@@ -572,6 +572,11 @@ def Main(args=None):
                 res
             ))
             sys.exit(1)
+    else:
+        logger.error("\n Work order get result failed {}\n".format(
+            res
+        ))
+        sys.exit(1)
 
     if show_receipt and wo_receipt:
         # Retrieve receipt
