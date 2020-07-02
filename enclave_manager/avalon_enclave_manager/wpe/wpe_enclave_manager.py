@@ -164,9 +164,7 @@ def main(args=None):
                         type=str)
     parser.add_argument(
         "--worker_id", help="Id of worker in plain text", type=str)
-    parser.add_argument("--workloads",
-                        help="Comma-separated list of workloads supported",
-                        type=str)
+
     (options, remainder) = parser.parse_known_args(args)
 
     if options.config:
@@ -184,8 +182,6 @@ def main(args=None):
 
     if options.kme_listener_url:
         config["KMEListener"]["kme_listener_url"] = options.kme_listener_url
-    if options.workloads:
-        config["WorkerConfig"]["workloads"] = options.workloads
     if options.worker_id:
         config["WorkerConfig"]["worker_id"] = options.worker_id
 

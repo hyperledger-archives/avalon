@@ -35,12 +35,6 @@ class WOProcessorManager(EnclaveManager):
 
     def __init__(self, config):
         super().__init__(config)
-
-        workloads_str = config.get("WorkerConfig")["workloads"]
-        workloads = workloads_str.split(',')
-        self._workloads = []
-        for workload in workloads:
-            self._workloads.append(workload.encode("UTF-8").hex())
         self._identity = None
 
 # -------------------------------------------------------------------------
@@ -243,22 +237,6 @@ class WOProcessorManager(EnclaveManager):
         """
         try:
             json_obj = json.loads(wo_request)
-
-            # Check if wo can be processed by this worker
-            if "params" in json_obj and "workloadId" in json_obj["params"]:
-                workload_id_in_req = json_obj["params"]["workloadId"]
-                if workload_id_in_req not in self._workloads:
-                    logger.error("Workload cannot be processed by this worker")
-                    self._persist_wo_response_to_db(
-                        wo_id, WorkOrderStatus.FAILED, None,
-                        "Workload cannot be processed by this worker")
-                    return False
-            else:
-                logger.error("Work order request not well-formed")
-                self._persist_wo_response_to_db(
-                    wo_id, WorkOrderStatus.FAILED, None,
-                    "Workorder request is not well-formed")
-                return False
         except ValueError as e:
             logger.error("Invalid JSON format found for workorder - %s", e)
             logger.error(
