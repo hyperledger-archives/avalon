@@ -301,7 +301,8 @@ class resultWindow(tk.Toplevel):
         requester_nonce = secrets.token_hex(16)
         work_order_id = secrets.token_hex(32)
         requester_id = secrets.token_hex(32)
-        wo_params = WorkOrderParams(
+        wo_params = WorkOrderParams()
+        wo_params.create_request(
             work_order_id, worker_id, workload_id, requester_id,
             session_key, session_iv, requester_nonce,
             result_uri=" ", notify_uri=" ",

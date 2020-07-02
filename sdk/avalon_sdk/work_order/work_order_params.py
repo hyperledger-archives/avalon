@@ -15,57 +15,82 @@
 import json
 import logging
 
+import schema_validation.validate as WOcheck
 import avalon_crypto_utils.crypto_utility as crypto_utility
 import avalon_crypto_utils.signature as signature
-from utility.jrpc_utility import create_error_response
-from error_code.error_status import JRPCErrorCodes
+from error_code.error_status import WorkOrderStatus
+import utility.jrpc_utility as util
 logger = logging.getLogger(__name__)
 
 
 class WorkOrderParams():
-    def __init__(
+    def __init__(self):
+        self.params_obj = {}
+
+    def create_request(
             self, work_order_id, worker_id, workload_id,
             requester_id, session_key, session_iv,
             requester_nonce, verifying_key=None, payload_format="JSON-RPC",
             response_timeout_msecs=6000, result_uri=None,
             notify_uri=None, worker_encryption_key=None,
-            data_encryption_algorithm=None):
-
-        self.params_obj = {}
-        self.set_work_order_id(work_order_id)
+            data_encryption_algorithm=None, encrypted_session_key=None):
+        """validate and creates workorder request with received values"""
+        if work_order_id:
+            self.set_work_order_id(work_order_id)
         self.set_response_timeout_msecs(response_timeout_msecs)
         self.set_payload_format(payload_format)
+        self.set_requester_nonce(requester_nonce)
+        self.session_key = session_key
+        self.set_workload_id(workload_id)
+        self.set_worker_id(worker_id)
+        if requester_id is not None:
+            self.set_requester_id(requester_id)
+        if session_iv:
+            self.set_session_key_iv(
+                crypto_utility.byte_array_to_hex(session_iv))
         if result_uri:
             self.set_result_uri(result_uri)
         if notify_uri:
             self.set_notify_uri(notify_uri)
-        self.set_worker_id(worker_id)
-        self.set_workload_id(workload_id)
-        self.set_requester_id(requester_id)
         if worker_encryption_key:
-                self.set_worker_encryption_key(
-                    worker_encryption_key)
+            self.set_worker_encryption_key(
+                worker_encryption_key)
         if data_encryption_algorithm:
             self.set_data_encryption_algorithm(data_encryption_algorithm)
-        if worker_encryption_key and session_key:
+
+        self.set_encrypted_session_key(encrypted_session_key)
+
+        code, err_msg = WOcheck.schema_validation(
+            "sdk_WorkOrderSubmit", self.params_obj)
+
+        # When the WorkorderSubmit request fails basic Json Validation
+        # the init object created is deleted to avoid futhur processing
+        # on that object by the user.
+        if not code:
+            return util.create_error_response(
+                WorkOrderStatus.INVALID_PARAMETER_FORMAT_OR_VALUE,
+                0,
+                err_msg)
+
+        self.set_worker_encryption_key(
+            worker_encryption_key.encode("UTF-8").hex())
+
+        self.session_iv = session_iv
+        self.params_obj["encryptedRequestHash"] = ""
+        self.params_obj["requesterSignature"] = ""
+        self.params_obj["inData"] = list()
+        if encrypted_session_key is None:
             try:
                 encrypted_session_key = crypto_utility.generate_encrypted_key(
                     session_key, worker_encryption_key)
                 self.set_encrypted_session_key(
                     crypto_utility.byte_array_to_hex(encrypted_session_key))
             except Exception as err:
-                raise ValueError("Encrypting Session key failed: \
-Invalid session key or worker encryption key")
-
-        self.session_iv = session_iv
-        self.set_session_key_iv(
-            crypto_utility.byte_array_to_hex(session_iv)
-        )
-        self.set_requester_nonce(requester_nonce)
-        self.params_obj["encryptedRequestHash"] = ""
-        self.params_obj["requesterSignature"] = ""
-        self.params_obj["inData"] = []
-        self.session_key = session_key
+                return util.create_error_response(
+                    WorkOrderStatus.INVALID_PARAMETER_FORMAT_OR_VALUE,
+                    0,
+                    err)
+        return None
 
     def set_response_timeout_msecs(self, response_timeout_msecs):
         """Set responseTimeoutMSecs work order parameter."""
@@ -102,16 +127,11 @@ Invalid session key or worker encryption key")
 
     def set_worker_encryption_key(self, worker_encryption_key):
         """Set workerEncryptionKey work order parameter."""
-        try:
-            self.params_obj["workerEncryptionKey"] = \
-                worker_encryption_key.encode("UTF-8").hex()
-        except Exception as err:
-            raise TypeError("Worker Encryption Key not valid")
+        self.params_obj["workerEncryptionKey"] = \
+            worker_encryption_key
 
     def set_data_encryption_algorithm(self, data_encryption_algorithm):
         """Set dataEncryptionAlgorithm work order parameter."""
-        if not isinstance(data_encryption_algorithm, str):
-            raise ValueError("Data Encryption Algorithm is not String")
         self.params_obj["dataEncryptionAlgorithm"] = \
             data_encryption_algorithm
 
@@ -125,8 +145,6 @@ Invalid session key or worker encryption key")
 
     def set_requester_nonce(self, requester_nonce):
         """Set requesterNonce work order parameter."""
-        if not requester_nonce.strip():
-            raise TypeError("requesterNonce cannot be None")
         self.params_obj["requesterNonce"] = requester_nonce
 
     def add_encrypted_request_hash(self):
@@ -140,12 +158,12 @@ Invalid session key or worker encryption key")
             encrypted_request_hash = crypto_utility.encrypt_data(
                 self.request_hash, self.session_key, self.session_iv)
             enc_request_hash_hex = crypto_utility.byte_array_to_hex(
-                                            encrypted_request_hash)
+                encrypted_request_hash)
             self.params_obj["encryptedRequestHash"] = enc_request_hash_hex
-            return True, ""
+            return None
         except Exception as err:
-            return False, create_error_response(
-                JRPCErrorCodes.INVALID_PARAMETER_FORMAT_OR_VALUE,
+            return util.create_error_response(
+                WorkOrderStatus.INVALID_PARAMETER_FORMAT_OR_VALUE,
                 0,
                 err)
 
@@ -179,6 +197,12 @@ Invalid session key or worker encryption key")
     def add_in_data(self, data, data_hash=None,
                     encrypted_data_encryption_key=None, data_iv=None):
         """Add inData work order parameter."""
+        if data is None:
+            return util.create_error_response(
+                WorkOrderStatus.INVALID_PARAMETER_FORMAT_OR_VALUE,
+                0,
+                "Invalid data format for in data")
+
         in_data_copy = self.params_obj["inData"]
         new_data_list = self.__add_data_params(
             in_data_copy, data, data_hash, encrypted_data_encryption_key,
@@ -186,9 +210,24 @@ Invalid session key or worker encryption key")
 
         self.params_obj["inData"] = new_data_list
 
+        code, err_msg = WOcheck.schema_validation(
+            "sdk_inData", self.params_obj["inData"])
+        if not code:
+            return util.create_error_response(
+                WorkOrderStatus.INVALID_PARAMETER_FORMAT_OR_VALUE,
+                0,
+                err_msg)
+
+        return None
+
     def add_out_data(self, data, data_hash=None,
                      encrypted_data_encryption_key=None, data_iv=None):
         """Add outData work order parameter."""
+        if data is None:
+            return util.create_error_response(
+                WorkOrderStatus.INVALID_PARAMETER_FORMAT_OR_VALUE,
+                0,
+                "Invalid data format for out data")
         if "outData" not in self.params_obj:
             self.params_obj["outData"] = []
         out_data_copy = self.params_obj["outData"]
@@ -196,6 +235,15 @@ Invalid session key or worker encryption key")
             out_data_copy, data, data_hash, encrypted_data_encryption_key,
             data_iv)
         self.params_obj["outData"] = new_data_list
+        code, err_msg = WOcheck.schema_validation(
+            "sdk_inData", self.params_obj["outData"])
+        if not code:
+            return util.create_error_response(
+                WorkOrderStatus.INVALID_PARAMETER_FORMAT_OR_VALUE,
+                0,
+                err_msg)
+
+        return None
 
     def __add_data_params(self, data_items, data, data_hash=None,
                           encrypted_data_encryption_key=None, data_iv=None):
@@ -205,11 +253,6 @@ Invalid session key or worker encryption key")
         index = len(data_items)
         data_items.append({})
         data_items[index]["index"] = index
-        data_items[index]["data"] = self.__encrypt_data(
-            data,
-            encrypted_data_encryption_key,
-            data_iv
-        )
         if data_hash:
             data_items[index]["dataHash"] = data_hash
         if encrypted_data_encryption_key:
@@ -217,6 +260,13 @@ Invalid session key or worker encryption key")
                 encrypted_data_encryption_key
         if data_iv:
             data_items[index]["iv"] = data_iv
+
+        data_items[index]["data"] = self.__encrypt_data(
+            data,
+            encrypted_data_encryption_key,
+            data_iv
+        )
+
         return data_items
 
     # Use these if you want to pass json to WorkOrderJRPCImpl
@@ -296,7 +346,7 @@ Invalid session key or worker encryption key")
             return enc_data
         else:
             enc_data = crypto_utility.encrypt_data(
-                            data, encrypted_data_encryption_key, data_iv)
+                data, encrypted_data_encryption_key, data_iv)
             return crypto_utility.byte_array_to_base64(enc_data)
 
     def to_jrpc_string(self, id):

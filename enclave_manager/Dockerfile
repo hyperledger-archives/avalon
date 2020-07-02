@@ -161,7 +161,7 @@ RUN apt-get update \
  && rm -rf /var/lib/apt/lists/*
 
 # Install setuptools packages using pip because
-RUN pip3 install setuptools
+RUN pip3 install setuptools jsonschema
 
 # Intel SGX common library and SDK are installed in /opt/intel directory.
 # Installation of Intel SGX libsgx-common packages requires

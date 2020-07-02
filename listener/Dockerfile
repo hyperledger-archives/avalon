@@ -146,6 +146,7 @@ COPY --from=build_image /project/avalon/listener/dist/*.whl dist/
 RUN apt-get update \
  && apt-get install -y -q python3-pip \
  && pip3 install json-rpc pyzmq \
+ && pip3 install jsonschema \
  && echo "Install Common Python, Crypto, Listener and SDK packages\n" \
  && pip3 install dist/*.whl coverage \
  && pip3 install pycryptodomex ecdsa \

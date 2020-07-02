@@ -1,0 +1,167 @@
+{
+"type": "object",
+"uniqueItems": true,
+"additionalProperties": false,
+"properties": {
+    "responseTimeoutMSecs": {
+        "type": "integer",
+        "error_msg":
+        "Invalid data format for responseTimeoutMSecs"},
+    "payloadFormat": {
+        "type": "string",
+        "enum": ["JSON-RPC", "json-rpc"],
+        "error_msg":
+        "Invalid payload format"},
+    "resultUri": {
+        "type": "string",
+        "error_msg":
+        "Invalid data format for resultUri"},
+    "notifyUri": {
+        "type": "string",
+        "error_msg":
+        "Invalid data format for notifyUri"},
+    "workOrderId": {
+        "type": "string",
+        "pattern": "^(0[x|X])?[0-9a-fA-F]+$",
+        "error_msg":
+        "Invalid data format for work order id"},
+    "workerId": {
+        "type": "string",
+        "pattern": "^(0[x|X])?[0-9a-fA-F]+$",
+        "error_msg":
+        "Invalid data format for Worker id"},
+    "workloadId": {
+        "type": "string",
+        "pattern": "^(0[x|X])?[0-9a-fA-F]+$",
+        "error_msg":
+        "Invalid data format for work load id"},
+    "requesterId": {
+        "type": "string",
+        "pattern": "^(0[x|X])?[0-9a-fA-F]+$",
+        "error_msg":
+        "Invalid data format for requester id"},
+    "workerEncryptionKey": {
+        "type": "string",
+        "pattern": "^(0[x|X])?[0-9a-fA-F]+$",
+        "error_msg":
+        "Empty or Invalid dataformat for workerEncryptionKey"},
+    "dataEncryptionAlgorithm": {
+        "type": "string",
+        "enum": ["AES-GCM-256", "aes-gcm-256"],
+        "error_msg":
+        "Invalid data format for dataEncryptionAlgorithm"},
+    "encryptedSessionKey": {
+        "type": "string",
+        "pattern": "^(0[x|X])?[0-9a-fA-F]+$",
+        "error_msg":
+        "Invalid data format for encrypted session key"},
+    "sessionKeyIv": {
+        "type": "string",
+        "pattern": "^(0[x|X])?[0-9a-fA-F]+$",
+        "error_msg":
+        "Invalid data format for session key iv"},
+    "requesterNonce": {
+        "type": "string",
+        "pattern": "^(0[x|X])?[0-9a-fA-F]+$",
+        "error_msg":
+        "Empty or Invalid data format for requesterNonce"},
+    "encryptedRequestHash": {
+        "type": "string",
+        "pattern": "^(0[x|X])?[0-9a-fA-F]+$",
+        "error_msg":
+        "Invalid data format for encrypted request hash"},
+    "requesterSignature": {
+        "type": "string",
+        "contentEncoding": "base64",
+        "error_msg":
+        "Invalid data format for requesterSignature"},
+    "verifyingKey": {
+        "type": "string",
+        "contentEncoding": "base64",
+        "error_msg":
+        "Invalid data format for verifyingKey"},
+    "inData": {
+        "type": "array",
+        "uniqueItems": true,
+        "additionalProperties": false,
+        "items": {
+        "type": "object",
+        "error_msg":
+        "Invalid data format for inData",
+        "properties": {
+            "index": {
+                "type": "integer",
+                "error_msg":
+                "Invalid data format for inData index"},
+            "data": {
+                "type": "string",
+                "pattern": "[0-9A-Za-z]",
+                "error_msg":
+                "Invalid data format for in data"},
+            "dataHash": {
+                "type": "string",
+                "pattern": "^(0[x|X])?[0-9a-fA-F]+$",
+                "error_msg":
+                "Invalid data format for data hash of in data"},
+            "encryptedDataEncryptionKey": {
+                "type": "string",
+                "pattern": "^-$|^$|^null$|^(0[x|X])?[0-9a-fA-F]+$",
+                "error_msg":
+                "Invalid data format for Encryption key of in data"},
+            "iv": {
+                "type": "string",
+                "pattern": "^$|^(0[x|X])?[0-9a-fA-F]+$",
+                "error_msg":
+                "Invalid data format for initialization vector of in data"}
+        },
+        "required": ["index", "data"]
+        }
+    },
+    "outData": {
+        "type": "array",
+        "uniqueItems": true,
+        "additionalProperties": false,
+        "items": {
+        "type": "object",
+        "error_msg":
+        "Invalid data format for outData ",
+        "properties": {
+            "index": {
+                "type": "integer",
+                "error_msg":
+                "Invalid data format for outData index"},
+            "dataHash": {
+                "type": "string",
+                "pattern": "^(0[x|X])?[0-9a-fA-F]+$",
+                "error_msg":
+                "Invalid data format for data hash of out data"},
+            "data": {
+                "type": "string",
+                "error_msg":
+                "Invalid data format for out data"},
+            "encryptedDataEncryptionKey": {
+                "type": "string",
+                "pattern": "^-$|^$|^null$|^(0[x|X])?[0-9a-fA-F]+$",
+                "error_msg":
+                "Invalid data format for Encryption key of out data"},
+            "iv": {
+                "type": "string",
+                "pattern": "^$|^(0[x|X])?[0-9a-fA-F]+$",
+                "error_msg":
+                "Invalid data format for initialization vector of out data"}
+        }
+        }
+    }
+},
+"required": [
+    "responseTimeoutMSecs",
+    "payloadFormat",
+    "workOrderId",
+    "workerId",
+    "workloadId",
+    "requesterId",
+    "encryptedSessionKey",
+    "requesterNonce",
+    "encryptedRequestHash"
+    ]
+}

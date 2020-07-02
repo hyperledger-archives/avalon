@@ -48,7 +48,7 @@ RUN apt-get update \
 
 # Install setuptools packages using pip because
 # these are not available in apt repository.
-RUN pip3 install setuptools
+RUN pip3 install setuptools jsonschema
 
 # -------------=== common/python build ===-------------
 

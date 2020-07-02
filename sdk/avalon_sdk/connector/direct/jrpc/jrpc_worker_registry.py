@@ -77,6 +77,12 @@ class JRPCWorkerRegistryImpl(WorkerRegistry):
         and worker details.
         """
 
+        if worker_id is None:
+            return create_error_response(
+                    JRPCErrorCodes.INVALID_PARAMETER_FORMAT_OR_VALUE,
+                    id,
+                    "Empty params in the request")
+
         json_rpc_request = {
             "jsonrpc": "2.0",
             "method": "WorkerRetrieve",

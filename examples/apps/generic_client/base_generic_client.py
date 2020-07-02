@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import json
 import logging
 import secrets
 from generic_client_interface import GenericClientInterface
@@ -91,6 +90,7 @@ class BaseGenericClient(GenericClientInterface):
         """
         Create work order request params
         """
+        logging.info("worker_encrypt_key {}".format(worker_encrypt_key))
         work_load_id = workload_id.encode("UTF-8").hex()
         self._work_order_id = secrets.token_hex(32)
         self._session_key = session_key
@@ -99,43 +99,34 @@ class BaseGenericClient(GenericClientInterface):
         requester_nonce = secrets.token_hex(16)
         # Create work order params
         try:
-            wo_params = WorkOrderParams(
+            wo_params = WorkOrderParams()
+            error = wo_params.create_request(
                 self._work_order_id, worker_id, work_load_id, requester_id,
                 self._session_key, self._session_iv, requester_nonce,
                 worker_encryption_key=worker_encrypt_key,
                 data_encryption_algorithm="AES-GCM-256"
             )
+
+            if error is not None:
+                return False, error
         except Exception as err:
             logging.error("Exception occurred while "
                           "creating work order request {}".format(err))
             return False, None
         # Add worker input data
         for value in in_data:
-            wo_params.add_in_data(
+            error = wo_params.add_in_data(
                 value,
                 encrypted_data_encryption_key=enc_data_enc_key)
-
+            if error is not None:
+                return False, error
         # Encrypt work order request hash
-        code, out_json = wo_params.add_encrypted_request_hash()
-        if not code:
+        error = wo_params.add_encrypted_request_hash()
+        if error is not None:
             logging.error("Creating encrypted request hash failed")
-            return code, None
+            return False, error
 
         return True, wo_params
-
-    def get_work_order_result(self, work_order_id):
-        """
-        Retrieve work order result for given work order id
-        """
-        work_order_res = self._work_order_instance.work_order_get_result(
-            work_order_id
-        )
-        logging.info("Work order get result {}".format(
-            json.dumps(work_order_res, indent=4)))
-
-        if work_order_res and "result" in work_order_res:
-            return True, work_order_res
-        return False, work_order_res
 
     def verify_wo_response_signature(self, work_order_res,
                                      worker_verification_key,

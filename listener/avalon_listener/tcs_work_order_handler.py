@@ -15,13 +15,12 @@
 import time
 import json
 import logging
+import base64
 
 from error_code.error_status import WorkOrderStatus
 from error_code.enclave_error import EnclaveError
 from avalon_sdk.connector.direct.jrpc.jrpc_util import JsonRpcErrorCode
-from avalon_sdk.work_order.work_order_request_validator \
-    import WorkOrderRequestValidator
-from utility.hex_utils import is_valid_hex_str
+import schema_validation.validate as Validator
 
 from jsonrpc.exceptions import JSONRPCDispatchException
 
@@ -114,6 +113,7 @@ class TCSWorkOrderHandler:
                 self.workorder_list.append(wo_id)
                 self.workorder_count += 1
 
+# ---------------------------------------------------------------------------------------------
     def _is_worker_exists(self, worker_id):
         """
         Function to check if worker is exists or not
@@ -137,47 +137,31 @@ class TCSWorkOrderHandler:
               as defined in EEA spec 6.1.4
         Returns jrpc response as defined in EEA spec 6.1.2
         """
-        if "workOrderId" in params:
-            wo_id = params["workOrderId"]
-            # Work order status payload should have
-            # data field with work order id as defined in EEA spec section 6.
-            data = {
-                "workOrderId": wo_id
-            }
-            if not is_valid_hex_str(wo_id):
-                logging.error("Invalid work order Id")
-                raise JSONRPCDispatchException(
-                    JsonRpcErrorCode.INVALID_PARAMETER,
-                    "Invalid work order Id",
-                    data
-                )
 
-            # Work order is processed if it is in wo-response table
-            value = self.kv_helper.get("wo-responses", wo_id)
-            if value:
-                response = json.loads(value)
-                if 'result' in response:
-                    return response['result']
+        input_json_str = params["raw"]
+        input_value_json = json.loads(input_json_str)
+        valid, err_msg = \
+            Validator.schema_validation(
+                "WorkOrderGetResult",
+                input_value_json["params"])
+        if not valid:
+            raise JSONRPCDispatchException(
+                WorkOrderStatus.INVALID_PARAMETER_FORMAT_OR_VALUE,
+                err_msg
+            )
 
-                # response without a result should have an error
-                err_code = response["error"]["code"]
-                err_msg = response["error"]["message"]
+        wo_id = params["workOrderId"]
+        # Work order status payload should have
+        # data field with work order id as defined in EEA spec section 6.
+        data = {
+            "workOrderId": wo_id
+        }
 
-                if err_code == EnclaveError.ENCLAVE_ERR_VALUE:
-                    err_code = \
-                        WorkOrderStatus.INVALID_PARAMETER_FORMAT_OR_VALUE
-                elif err_code == EnclaveError.ENCLAVE_ERR_UNKNOWN:
-                    err_code = WorkOrderStatus.UNKNOWN_ERROR
-                elif err_code == EnclaveError.ENCLAVE_ERR_INVALID_WORKLOAD:
-                    err_code = WorkOrderStatus.INVALID_WORKLOAD
-                else:
-                    err_code = WorkOrderStatus.FAILED
-                raise JSONRPCDispatchException(
-                    err_code,
-                    err_msg,
-                    data
-                )
+        # Work order is processed if it is in wo-response table
+        value = self.kv_helper.get("wo-responses", wo_id)
 
+        # Work order not in 'wo-timestamps' table
+        if not value:
             if(self.kv_helper.get("wo-timestamps", wo_id) is not None):
                 # work order is yet to be processed
                 raise JSONRPCDispatchException(
@@ -185,17 +169,36 @@ class TCSWorkOrderHandler:
                     "Work order result is yet to be updated",
                     data)
 
-            # work order not in 'wo-timestamps' table
             raise JSONRPCDispatchException(
                 WorkOrderStatus.INVALID_PARAMETER_FORMAT_OR_VALUE,
                 "Work order Id not found in the database. " +
                 "Hence invalid parameter",
                 data)
+
+        # Worker order is processed and result is avalibale
+        response = json.loads(value)
+        if 'result' in response:
+            return response['result']
+
+        # response without a result should have an error
+        err_code = response["error"]["code"]
+        err_msg = response["error"]["message"]
+
+        if err_code == EnclaveError.ENCLAVE_ERR_VALUE:
+            err_code = \
+                WorkOrderStatus.INVALID_PARAMETER_FORMAT_OR_VALUE
+        elif err_code == EnclaveError.ENCLAVE_ERR_UNKNOWN:
+            err_code = WorkOrderStatus.UNKNOWN_ERROR
+        elif err_code == EnclaveError.ENCLAVE_ERR_INVALID_WORKLOAD:
+            err_code = WorkOrderStatus.INVALID_WORKLOAD
         else:
-            raise JSONRPCDispatchException(
-                WorkOrderStatus.INVALID_PARAMETER_FORMAT_OR_VALUE,
-                "Missing work order id"
-            )
+            err_code = WorkOrderStatus.FAILED
+
+        raise JSONRPCDispatchException(
+            err_code,
+            err_msg,
+            data
+        )
 
 # ---------------------------------------------------------------------------------------------
     def WorkOrderSubmit(self, **params):
@@ -214,9 +217,10 @@ class TCSWorkOrderHandler:
         data = {
             "workOrderId": wo_id
         }
-        req_validator = WorkOrderRequestValidator()
-        valid, err_msg = req_validator.validate_parameters(
-            input_value_json["params"])
+        valid, err_msg = \
+            Validator.schema_validation(
+                "WorkOrderSubmit",
+                input_value_json["params"])
         if not valid:
             raise JSONRPCDispatchException(
                 JsonRpcErrorCode.INVALID_PARAMETER,
@@ -226,29 +230,6 @@ class TCSWorkOrderHandler:
 
         worker_id = input_value_json["params"]["workerId"]
 
-        if "inData" in input_value_json["params"]:
-            valid, err_msg = req_validator.validate_data_format(
-                input_value_json["params"]["inData"])
-            if not valid:
-                raise JSONRPCDispatchException(
-                    JsonRpcErrorCode.INVALID_PARAMETER,
-                    err_msg,
-                    data)
-        else:
-            raise JSONRPCDispatchException(
-                JsonRpcErrorCode.INVALID_PARAMETER,
-                "Missing inData parameter",
-                data
-            )
-
-        if "outData" in input_value_json["params"]:
-            valid, err_msg = req_validator.validate_data_format(
-                input_value_json["params"]["outData"])
-            if not valid:
-                raise JSONRPCDispatchException(
-                    JsonRpcErrorCode.INVALID_PARAMETER,
-                    err_msg,
-                    data)
         # Check if workerId is exists in avalon
         if not self._is_worker_exists(worker_id):
             raise JSONRPCDispatchException(
@@ -256,7 +237,16 @@ class TCSWorkOrderHandler:
                 "worker {} doesn't exists".format(worker_id),
                 data
             )
-
+        if "requesterSignature" in params:
+            try:
+                decoded_str = base64.b64decode(
+                    params["requesterSignature"], validate=True)
+            except Exception:
+                raise JSONRPCDispatchException(
+                    JsonRpcErrorCode.INVALID_PARAMETER,
+                    "Invalid data format for requesterSignature",
+                    data
+                )
         if((self.workorder_count + 1) > self.max_workorder_count):
             # Lookup all workers.
             workers = self.kv_helper.lookup("worker-pool")
