@@ -76,11 +76,7 @@ enclave_library_path = "tc/sgx/trusted_worker_manager/enclave/build/lib/"
 # Id of worker in plain text. This can be overridden by passing values in command line for
 # enclave manager using --worker_id option.
 worker_id = "singleton-worker-1"
-# Supported workloads for this worker. The work orders matching these workload ids
-# will be processed by the enclave manager. The enclaves should be built with matching
-# workloads. This can be overridden by passing values in command line for enclave manager
-# using --workloads option.
-workloads = "echo-result,heart-disease-eval,inside-out-eval,simple-wallet"
+
 ProofDataType = "TEE-SGX-IAS"
 
 # The Following URIs are used in direct model to submit work orders in

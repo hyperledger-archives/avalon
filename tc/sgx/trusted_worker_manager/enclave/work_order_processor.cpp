@@ -290,7 +290,8 @@ namespace tcf {
             WorkloadProcessor *processor = \
                 WorkloadProcessor::CreateWorkloadProcessor(workload_type);
             tcf::error::ThrowIf<tcf::error::WorkloadError>(
-                processor == nullptr, "Invalid workload id");
+                processor == nullptr,
+                "This Worker does not support the workload in the request");
             processor->ProcessWorkOrder(
                     workload_type,
                     StrToByteArray(requester_id),

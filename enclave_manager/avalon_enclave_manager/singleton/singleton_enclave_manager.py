@@ -116,9 +116,6 @@ def main(args=None):
     parser.add_argument("--config-dir", help="configuration folder", nargs="+")
     parser.add_argument("--worker_id",
                         help="Id of worker in plain text", type=str)
-    parser.add_argument("--workloads",
-                        help="Comma-separated list of workloads supported",
-                        type=str)
 
     (options, remainder) = parser.parse_known_args(args)
 
@@ -135,8 +132,6 @@ def main(args=None):
         logger.error(str(e))
         sys.exit(-1)
 
-    if options.workloads:
-        config["WorkerConfig"]["workloads"] = options.workloads
     if options.worker_id:
         config["WorkerConfig"]["worker_id"] = options.worker_id
 
