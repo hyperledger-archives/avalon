@@ -21,7 +21,6 @@ import logging
 from ssl import SSLError
 from requests.exceptions import Timeout
 from requests.exceptions import HTTPError
-import avalon_crypto_utils.keys as keys
 import avalon_enclave_manager.singleton.singleton_enclave as enclave
 from avalon_enclave_manager.base_enclave_info import BaseEnclaveInfo
 
@@ -57,9 +56,6 @@ class SingletonEnclaveInfo(BaseEnclaveInfo):
         except KeyError as ke:
             raise Exception("missing enclave initialization parameter; {}"
                             .format(str(ke)))
-
-        self.enclave_keys = \
-            keys.EnclaveKeys(self.verifying_key, self.encryption_key)
 
     # -------------------------------------------------------
 

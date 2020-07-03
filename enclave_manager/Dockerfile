@@ -298,6 +298,10 @@ WORKDIR /project/avalon/common/crypto_utils
 
 RUN make && make install
 
+WORKDIR /project/avalon/common/verify_report_utils
+
+RUN make && make install
+
 WORKDIR /project/avalon/enclave_manager
 
 RUN echo "Build and Install avalon enclave manager" \

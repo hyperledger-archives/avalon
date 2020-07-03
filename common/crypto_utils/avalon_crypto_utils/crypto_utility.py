@@ -269,12 +269,12 @@ def compute_message_hash(message_bytes):
 
 
 # -----------------------------------------------------------------------------
-def str_to_byte_array(in_str):
+def string_to_byte_array(in_str):
     return bytearray(in_str, 'utf-8')
 
 
 # -----------------------------------------------------------------------------
-def byte_array_to_str(byte_array):
+def byte_array_to_string(byte_array):
     return byte_array.decode('utf-8')
 
 

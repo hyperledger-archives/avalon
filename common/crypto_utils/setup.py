@@ -18,7 +18,7 @@ import sys
 import subprocess
 import re
 
-from setuptools import setup, find_packages, Extension
+from setuptools import setup, find_packages
 
 # this should only be run with python3
 import sys
@@ -32,84 +32,12 @@ tcf_root_dir = os.environ.get('TCF_HOME', '../..')
 version = subprocess.check_output(
     os.path.join(tcf_root_dir, 'bin/get_version')).decode('ascii').strip()
 
-openssl_cflags = subprocess.check_output(
-    ['pkg-config', 'openssl', '--cflags']).decode('ascii').strip().split()
-openssl_include_dirs = list(
-    filter(None, re.split('\s*-I',
-           subprocess.check_output(
-               ['pkg-config', 'openssl', '--cflags-only-I'])
-               .decode('ascii').strip())))
-openssl_libs = list(
-    filter(None, re.split('\s*-l',
-           subprocess.check_output(['pkg-config', 'openssl', '--libs-only-l'])
-           .decode('ascii').strip())))
-openssl_lib_dirs = list(
-    filter(None, re.split('\s*-L',
-           subprocess.check_output(['pkg-config', 'openssl', '--libs-only-L'])
-           .decode('ascii').strip())))
-
 compile_args = [
     '-std=c++11',
     '-Wno-switch',
     '-Wno-unused-function',
     '-Wno-unused-variable',
 ]
-
-
-crypto_include_dirs = [
-    os.path.join(tcf_root_dir, 'common/cpp'),
-    os.path.join(tcf_root_dir, 'common/cpp/crypto'),
-] + openssl_include_dirs
-
-verify_report_include_dirs = [
-    os.path.join(tcf_root_dir, 'common/cpp'),
-    os.path.join(tcf_root_dir, 'common/cpp/crypto'),
-    os.path.join(tcf_root_dir, 'common/cpp/packages/parson'),
-    os.path.join(tcf_root_dir, 'common/cpp/packages/base64'),
-    os.path.join(tcf_root_dir, 'common/cpp/verify_ias_report'),
-] + openssl_include_dirs
-
-library_dirs = [
-    os.path.join(tcf_root_dir, "common/cpp/build"),
-] + openssl_lib_dirs
-
-# Do not change the order of these
-# libraries otherwise we will get the undefined
-# symbols in verify_report shared library
-libraries = [
-    'uavalon-verify-ias-report',
-    'uavalon-crypto',
-    'uavalon-common',
-    'uavalon-base64',
-    'uavalon-parson',
-] + openssl_libs
-
-crypto_modulefiles = [
-    "avalon_crypto_utils/crypto/crypto.i",
-]
-
-crypto_module = Extension(
-    'avalon_crypto_utils.crypto._crypto',
-    crypto_modulefiles,
-    swig_opts=['-c++'] + openssl_cflags +
-    ['-I%s' % i for i in crypto_include_dirs],
-    extra_compile_args=compile_args,
-    include_dirs=crypto_include_dirs,
-    library_dirs=library_dirs,
-    libraries=libraries)
-
-verify_report_modulefiles = [
-    "avalon_crypto_utils/verify_report/verify_report.i"
-]
-
-verify_report_module = Extension(
-    'avalon_crypto_utils.verify_report._verify_report',
-    verify_report_modulefiles,
-    swig_opts=['-c++'] + ['-I%s' % i for i in verify_report_include_dirs],
-    extra_compile_args=compile_args,
-    include_dirs=verify_report_include_dirs,
-    library_dirs=library_dirs,
-    libraries=libraries)
 
 # -----------------------------------------------------------------
 setup(
@@ -120,6 +48,6 @@ setup(
     url='https://github.com/hyperledger/avalon',
     packages=find_packages(),
     install_requires=[],
-    ext_modules=[crypto_module, verify_report_module],
+    ext_modules=[],
     data_files=[],
     entry_points={})

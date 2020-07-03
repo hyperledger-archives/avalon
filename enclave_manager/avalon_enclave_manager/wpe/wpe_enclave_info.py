@@ -22,7 +22,6 @@ from ssl import SSLError
 from requests.exceptions import Timeout
 from requests.exceptions import HTTPError
 from abc import ABC, abstractmethod
-import avalon_crypto_utils.keys as keys
 import avalon_enclave_manager.wpe.wpe_enclave as enclave
 from avalon_enclave_manager.base_enclave_info import BaseEnclaveInfo
 
@@ -74,8 +73,6 @@ class WorkOrderProcessorEnclaveInfo(BaseEnclaveInfo):
             self.proof_data = ''
             if not enclave.is_sgx_simulator():
                 self.proof_data = enclave_data.proof_data
-            self.enclave_keys = \
-                keys.EnclaveKeys(self.verifying_key, self.encryption_key)
             self.extended_measurements = self.get_extended_measurements()
             # No sealed data is present for WPE
             self.sealed_data = None

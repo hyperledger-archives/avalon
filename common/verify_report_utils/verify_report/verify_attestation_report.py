@@ -14,7 +14,7 @@
 
 import json
 import logging
-import avalon_crypto_utils.verify_report.verify_report as verify_report_util
+import verify_report.verify_report as verify_report_util
 from error_code.error_status import QuoteStatus
 
 logger = logging.getLogger(__name__)
