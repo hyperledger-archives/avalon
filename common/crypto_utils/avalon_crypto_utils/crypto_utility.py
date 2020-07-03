@@ -20,6 +20,8 @@ from Cryptodome.Cipher import AES
 from Cryptodome.Random import get_random_bytes
 from Cryptodome.Hash import SHA256
 from ecdsa import SigningKey, SECP256k1
+import secrets
+import string
 
 import logging
 
@@ -267,6 +269,16 @@ def compute_message_hash(message_bytes):
 
 
 # -----------------------------------------------------------------------------
+def str_to_byte_array(in_str):
+    return bytearray(in_str, 'utf-8')
+
+
+# -----------------------------------------------------------------------------
+def byte_array_to_str(byte_array):
+    return byte_array.decode('utf-8')
+
+
+# -----------------------------------------------------------------------------
 def base64_to_byte_array(b64_str):
     b64_arr = bytearray(b64_str, 'utf-8')
     b_arr = base64.b64decode(b64_arr)
@@ -279,3 +291,9 @@ def byte_array_to_base64(byte_array):
     b64_arr = base64.b64encode(b_arr)
     b64_str = str(b64_arr, 'utf-8')
     return b64_str
+
+
+# -----------------------------------------------------------------------------
+def generate_random_string(num_of_bytes):
+    return ''.join(secrets.choice(string.ascii_uppercase + string.digits)
+                   for i in range(num_of_bytes))

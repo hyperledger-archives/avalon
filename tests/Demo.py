@@ -21,7 +21,6 @@ import json
 import logging
 
 from http_client.http_jrpc_client import HttpJrpcClient
-import avalon_crypto_utils.crypto.crypto as crypto
 import avalon_crypto_utils.signature as signature
 import avalon_sdk.worker.worker_details as worker
 import avalon_crypto_utils.crypto_utility as enclave_helper

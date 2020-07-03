@@ -15,7 +15,6 @@
 import json
 import logging
 
-import avalon_crypto_utils.crypto.crypto as crypto
 import avalon_crypto_utils.crypto_utility as crypto_utility
 import avalon_crypto_utils.signature as signature
 from utility.jrpc_utility import create_error_response

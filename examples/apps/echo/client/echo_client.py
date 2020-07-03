@@ -30,7 +30,6 @@ import avalon_sdk.worker.worker_details as worker
 from avalon_sdk.work_order.work_order_params import WorkOrderParams
 from avalon_sdk.connector.direct.avalon_direct_client \
     import AvalonDirectClient
-import avalon_crypto_utils.crypto.crypto as crypto
 from error_code.error_status import WorkOrderStatus, ReceiptCreateStatus
 import avalon_crypto_utils.signature as signature
 import utility.hex_utils as hex_utils
