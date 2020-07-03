@@ -16,7 +16,7 @@ import json
 import logging
 import importlib
 
-import avalon_crypto_utils.crypto.crypto as crypto
+import avalon_crypto_utils.crypto_utility as crypto
 
 logger = logging.getLogger(__name__)
 
@@ -43,7 +43,7 @@ class SgxWorkOrderRequest(object):
 
     # Execute work order in Intel SGX worker enclave
     def execute(self):
-        serialized_byte_array = crypto.string_to_byte_array(self.work_order)
+        serialized_byte_array = crypto.str_to_byte_array(self.work_order)
         encrypted_request = crypto.byte_array_to_base64(serialized_byte_array)
 
         try:
@@ -58,7 +58,7 @@ class SgxWorkOrderRequest(object):
         try:
             decrypted_response = crypto.base64_to_byte_array(
                 encoded_encrypted_response)
-            response_string = crypto.byte_array_to_string(decrypted_response)
+            response_string = crypto.byte_array_to_str(decrypted_response)
             response_parsed = json.loads(response_string[0:-1])
         except Exception as err:
             logger.exception('workorder response is invalid: %s',

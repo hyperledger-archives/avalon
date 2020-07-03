@@ -17,7 +17,6 @@ import logging
 import base64
 from utility.hex_utils import is_valid_hex_str
 import avalon_crypto_utils.crypto_utility as crypto_utility
-import avalon_crypto_utils.crypto.crypto as crypto
 from error_code.error_status import ReceiptCreateStatus, SignatureStatus,\
     JRPCErrorCodes
 import avalon_crypto_utils.signature as signature
@@ -291,8 +290,8 @@ class TCSWorkOrderReceiptHandler:
             # Load the work order response and calculate it's hash
             wo_resp = self.kv_helper.get("wo-responses", wo_id)
             wo_resp_bytes = bytes(wo_resp, "UTF-8")
-            wo_resp_hash = crypto.compute_message_hash(wo_resp_bytes)
-            wo_resp_hash_str = crypto.byte_array_to_hex(wo_resp_hash)
+            wo_resp_hash = crypto_utility.compute_message_hash(wo_resp_bytes)
+            wo_resp_hash_str = crypto_utility.byte_array_to_hex(wo_resp_hash)
             if wo_resp_hash_str != wo_receipt_req["params"]["updateData"]:
                 return False, "Invalid Update data in the request"
         # If all validation is pass

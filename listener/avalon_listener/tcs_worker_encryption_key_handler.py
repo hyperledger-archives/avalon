@@ -14,7 +14,7 @@
 
 import json
 import logging
-import avalon_crypto_utils.crypto.crypto as crypto
+import avalon_crypto_utils.crypto_utility as crypto
 from error_code.error_status import WorkerError
 
 from jsonrpc.exceptions import JSONRPCDispatchException
@@ -86,7 +86,7 @@ class WorkerEncryptionKeyHandler:
         try:
             encryptionKeyNonce = worker_type_data["encryptionKeyNonce"]
         except Exception:
-            encryptionKeyNonce = crypto.random_bit_string(NO_OF_BYTES)
+            encryptionKeyNonce = crypto.generate_random_string(NO_OF_BYTES)
 
         tag = ""
         # calculate signature

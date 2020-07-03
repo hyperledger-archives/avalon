@@ -25,8 +25,7 @@ import config.config as pconfig
 import utility.logger as plogger
 import utility.hex_utils as hex_utils
 import avalon_crypto_utils.crypto_utility as crypto_utility
-import avalon_crypto_utils.verify_report.verify_attestation_report \
-    as attestation_util
+import verify_report.verify_attestation_report as attestation_util
 from avalon_sdk.worker.worker_details import WorkerType
 import avalon_sdk.worker.worker_details as worker_details
 from avalon_sdk.work_order.work_order_params import WorkOrderParams

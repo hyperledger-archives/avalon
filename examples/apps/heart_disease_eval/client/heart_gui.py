@@ -41,7 +41,6 @@ from avalon_sdk.connector.direct.avalon_direct_client import AvalonDirectClient
 import config.config as pconfig
 import utility.logger as plogger
 import utility.hex_utils as hex_utils
-import avalon_crypto_utils.crypto.crypto as crypto
 from error_code.error_status import WorkOrderStatus, ReceiptCreateStatus
 import avalon_crypto_utils.signature as signature
 from error_code.error_status import SignatureStatus
