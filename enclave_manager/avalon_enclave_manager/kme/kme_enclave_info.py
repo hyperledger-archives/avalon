@@ -22,7 +22,6 @@ from ssl import SSLError
 from requests.exceptions import Timeout
 from requests.exceptions import HTTPError
 import utility.hex_utils as hex_utils
-import avalon_crypto_utils.keys as keys
 import avalon_enclave_manager.kme.kme_enclave as enclave
 import avalon_enclave_manager.base_enclave_info as enclave_info
 from avalon_enclave_manager.base_enclave_info import BaseEnclaveInfo
@@ -61,9 +60,6 @@ class KeyManagementEnclaveInfo(BaseEnclaveInfo):
         except KeyError as ke:
             raise Exception("missing enclave initialization parameter; {}"
                             .format(str(ke)))
-
-        self.enclave_keys = \
-            keys.EnclaveKeys(self.verifying_key, self.encryption_key)
 
     # -------------------------------------------------------
 

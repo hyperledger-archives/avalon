@@ -20,7 +20,6 @@ from ssl import SSLError
 from requests.exceptions import Timeout
 from requests.exceptions import HTTPError
 from abc import ABC, abstractmethod
-import avalon_crypto_utils.keys as keys
 import avalon_enclave_manager.ias_client as ias_client
 
 import logging

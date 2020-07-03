@@ -54,68 +54,6 @@ RUN apt-get update \
 # these are not available in apt repository.
 RUN pip3 install setuptools
 
-# -------------=== openssl build ===-------------
-
-#Build openssl intermediate docker image
-FROM ubuntu:bionic as openssl_image
-
-RUN apt-get update \
- && apt-get install -y -q \
-    ca-certificates \
-    pkg-config \
-    make \
-    wget \
-    tar \
- && apt-get clean \
- && rm -rf /var/lib/apt/lists/*
-
-WORKDIR /tmp
-
-# Build ("Untrusted") OpenSSL
-RUN OPENSSL_VER=1.1.1d \
- && wget https://www.openssl.org/source/old/1.1.1/openssl-$OPENSSL_VER.tar.gz \
- && tar -zxf openssl-$OPENSSL_VER.tar.gz \
- && cd openssl-$OPENSSL_VER/ \
- && ./config \
- && THREADS=8 \
- && make -j$THREADS \
- && make test \
- && make install -j$THREADS
-
-
-# -------------=== common/cpp build ===-------------
-
-#Build common/cpp intermediate docker image
-FROM ubuntu:bionic as common_cpp_image
-
-RUN apt-get update \
- && apt-get install -y -q \
-    pkg-config \
-    cmake \
-    make
-
-
-# Copy openssl build artifacts from openssl_image
-COPY --from=openssl_image /usr/local/ssl /usr/local/ssl
-COPY --from=openssl_image /usr/local/bin /usr/local/bin
-COPY --from=openssl_image /usr/local/include /usr/local/include
-COPY --from=openssl_image /usr/local/lib /usr/local/lib
-
-RUN ldconfig \
- && ln -s /etc/ssl/certs/* /usr/local/ssl/certs/
-
-ENV TCF_HOME=/project/avalon
-
-COPY ./common/cpp /project/avalon/common/cpp
-
-WORKDIR /project/avalon/common/cpp
-
-RUN mkdir -p build \
-  && cd build \
-  && cmake .. -DUNTRUSTED_ONLY=1 \
-  && make
-
-
 # -------------=== common/python build ===-------------
 
 #Build common/python intermediate docker image
@@ -133,29 +71,13 @@ WORKDIR /project/avalon/common/python
 RUN echo "Building Avalon Common Python\n" \
  && make
 
-
 # -------------=== common/crypto_utils build ===-------------
 
 #Build common/crypto_utils intermediate docker image
 FROM python_image as common_crypto_utils_image
 
-RUN apt-get update \
- && apt-get install -y -q \
-    swig
-
-# Copy openssl build artifacts from openssl_image
-COPY --from=openssl_image /usr/local/ssl /usr/local/ssl
-COPY --from=openssl_image /usr/local/bin /usr/local/bin
-COPY --from=openssl_image /usr/local/include /usr/local/include
-COPY --from=openssl_image /usr/local/lib /usr/local/lib
-
-RUN ldconfig \
- && ln -s /etc/ssl/certs/* /usr/local/ssl/certs/
-
-COPY --from=common_cpp_image /project/avalon/common/cpp/build /project/avalon/common/cpp/build
 COPY VERSION /project/avalon/
 COPY ./bin /project/avalon/bin
-COPY ./common/cpp /project/avalon/common/cpp
 
 ENV TCF_HOME=/project/avalon
 
