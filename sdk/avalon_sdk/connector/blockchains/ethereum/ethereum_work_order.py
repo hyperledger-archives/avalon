@@ -121,12 +121,11 @@ class EthereumWorkOrderProxyImpl(WorkOrderProxy):
                 return ContractResponse.ERROR
 
             try:
-                txn_dict = self.__contract_instance.functions.workOrderSubmit(
-                    work_order_id, worker_id, requester_id, work_order_request
-                ).buildTransaction(
-                    self.__eth_client.get_transaction_params()
-                )
-                txn_receipt = self.__eth_client.execute_transaction(txn_dict)
+                contract_func = \
+                    self.__contract_instance.functions.workOrderSubmit(
+                        work_order_id, worker_id,
+                        requester_id, work_order_request)
+                txn_receipt = self.__eth_client.build_exec_txn(contract_func)
                 if txn_receipt['status'] == 1:
                     return ContractResponse.SUCCESS
                 else:
@@ -156,12 +155,10 @@ class EthereumWorkOrderProxyImpl(WorkOrderProxy):
         """
         if (self.__contract_instance is not None):
             try:
-                txn_dict = \
+                contract_func = \
                     self.__contract_instance.functions.workOrderComplete(
-                        work_order_id, work_order_response).buildTransaction(
-                        self.__eth_client.get_transaction_params()
-                    )
-                txn_receipt = self.__eth_client.execute_transaction(txn_dict)
+                        work_order_id, work_order_response)
+                txn_receipt = self.__eth_client.build_exec_txn(contract_func)
                 if txn_receipt['status'] == 1:
                     return ContractResponse.SUCCESS
                 else:

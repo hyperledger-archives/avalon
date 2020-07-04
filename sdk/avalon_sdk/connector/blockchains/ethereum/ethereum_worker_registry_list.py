@@ -188,7 +188,7 @@ class EthereumWorkerRegistryListImpl(WorkerRegistryList):
             config["ethereum"]["direct_registry_contract_file"]
         contract_address = \
             config["ethereum"]["direct_registry_contract_address"]
-        self.__contract_instance = self.__eth_client.get_contract_instance(
+        self.__contract_instance, _ = self.__eth_client.get_contract_instance(
             contract_file_name, contract_address
         )
 
@@ -230,13 +230,10 @@ class EthereumWorkerRegistryListImpl(WorkerRegistryList):
                         is False):
                     logging.info("Invalid application id {}".format(aid))
                     return None
-
-            txn_dict = self.__contract_instance.functions.registryAdd(
-                org_id, uri, org_id, app_type_ids).buildTransaction(
-                    self.__eth_client.get_transaction_params()
-            )
-            txn_receipt = self.__eth_client.execute_transaction(
-                txn_dict)
+            contract_func = \
+                self.__contract_instance.functions.registryAdd(
+                    org_id, uri, org_id, app_type_ids)
+            txn_receipt = self.__eth_client.build_exec_txn(contract_func)
             return txn_receipt
         else:
             logging.error(
@@ -282,15 +279,10 @@ class EthereumWorkerRegistryListImpl(WorkerRegistryList):
                         is False):
                     logging.error("Invalid application id {}".format(aid))
                     return None
-
-            txn_dict = \
+            contract_func = \
                 self.__contract_instance.functions.registryUpdate(
-                    org_id, uri, sc_addr,
-                    app_type_ids).buildTransaction(
-                        self.__eth_client.get_transaction_params()
-                        )
-            txn_receipt = self.__eth_client.execute_transaction(
-                txn_dict)
+                    org_id, uri, sc_addr, app_type_ids)
+            txn_receipt = self.__eth_client.build_exec_txn(contract_func)
             return txn_receipt
         else:
             logging.error(
@@ -321,14 +313,10 @@ class EthereumWorkerRegistryListImpl(WorkerRegistryList):
             if not isinstance(status, RegistryStatus):
                 logging.info("Invalid registry status {}".format(status))
                 return None
-            txn_dict = \
+            contract_func = \
                 self.__contract_instance.functions.registrySetStatus(
-                    org_id,
-                    status.value).buildTransaction(
-                        self.__eth_client.get_transaction_params()
-                        )
-            txn_receipt = self.__eth_client.execute_transaction(
-                txn_dict)
+                    org_id, status.value)
+            txn_receipt = self.__eth_client.build_exec_txn(contract_func)
             return txn_receipt
         else:
             logging.error(
