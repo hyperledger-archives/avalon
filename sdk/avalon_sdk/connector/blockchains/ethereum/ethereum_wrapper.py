@@ -20,6 +20,8 @@ from solcx import compile_source, set_solc_version, get_solc_version
 from urllib.parse import urlparse
 import web3
 import json
+import random
+import time
 
 logging.basicConfig(
     format='%(asctime)s - %(levelname)s - %(message)s', level=logging.INFO)
@@ -189,8 +191,12 @@ class EthereumWrapper():
         signed_tx = self.__w3.eth.account.signTransaction(
             tx_dict, private_key=self.__eth_private_key)
         tx_hash = self.__w3.eth.sendRawTransaction(signed_tx.rawTransaction)
+        # This being a private network with minimum gas required being 0,
+        # there should not be a huge delay in mining. Hence timeout is 10s.
+        # Poll latency is kept 0.2 (not default 0.1) to cut down excessive
+        # traffic when load is higher.
         tx_receipt = self.__w3.eth.waitForTransactionReceipt(
-            tx_hash.hex(), 120)
+            tx_hash.hex(), timeout=10, poll_latency=0.2)
         logging.debug("Executed transaction hash: %s, receipt: %s",
                       format(tx_hash.hex()), format(tx_receipt))
         return tx_receipt
@@ -207,10 +213,52 @@ class EthereumWrapper():
         Transaction receipt on success or None on error.
         """
         tx_hash = self.__w3.eth.sendTransaction(tx_dict)
-        tx_receipt = self.__w3.eth.waitForTransactionReceipt(tx_hash)
+        # This being a private network with minimum gas required being 0,
+        # there should not be a huge delay in mining. Hence timeout is 10s.
+        # Poll latency is kept 0.2 (not default 0.1) to cut down excessive
+        # traffic when load is higher.
+        tx_receipt = self.__w3.eth.waitForTransactionReceipt(
+            tx_hash, timeout=10, poll_latency=0.2)
         logging.debug("Executed transaction hash: %s, receipt: %s",
                       format(tx_hash.hex()), format(tx_receipt))
         return tx_receipt
+
+    def build_exec_txn(self, contract_func):
+        """
+        Build transaction parameters and execute transaction. This function
+        makes an attempt to commit transactions 3 times if it fails on the
+        first attempt. Between each attempt, it sleeps for a random time
+        period less than 5 seconds.
+
+        Parameters:
+        contract_func   Populated function instance to be invoked
+        Returns:
+        txn_receipt     Transaction receipt, if the transaction is successful
+        """
+        retry_count = 0
+        while True:
+            try:
+                txn_dict = contract_func.buildTransaction(
+                    self.get_transaction_params())
+                return self.execute_transaction(txn_dict)
+            except Exception as ex:
+                # There is a possibility of timeout when a transaction is not
+                # mined. One of the reasons to not get mined could be that 2
+                # transactions had the same nonce (transaction sequence no.).
+                # So, a retry is worth doing at this point with a new nonce.
+                retry_count += 1
+                # Sleep for random number of seconds less than 5
+                time.sleep(random.randint(0, 5))
+                logging.warn("Exception in writing transaction to"
+                             " blockchain: {}".format(ex))
+                # Retry 3 times only
+                if retry_count == 3:
+                    if isinstance(ex, web3.exceptions.TimeExhausted):
+                        raise TimeoutError(
+                            "Transactions are being submitted at a faster "
+                            "rate than they can be processed.")
+                    else:
+                        raise
 
     def execute_transaction(self, tx_dict):
         """

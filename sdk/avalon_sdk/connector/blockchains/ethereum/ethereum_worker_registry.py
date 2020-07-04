@@ -241,13 +241,11 @@ class EthereumWorkerRegistryImpl(WorkerRegistry):
                         "Worker details not valid : {}".format(is_valid))
                     return None
             """
-            txn_dict = self.__contract_instance.functions.workerRegister(
-                worker_id, worker_type.value, organization_id,
-                application_type_ids, details)\
-                .buildTransaction(
-                self.__eth_client.get_transaction_params())
-            txn_receipt = self.__eth_client.execute_transaction(
-                txn_dict)
+            contract_func = \
+                self.__contract_instance.functions.workerRegister(
+                    worker_id, worker_type.value, organization_id,
+                    application_type_ids, details)
+            txn_receipt = self.__eth_client.build_exec_txn(contract_func)
             if txn_receipt['status'] == 1:
                 return ContractResponse.SUCCESS
             else:
@@ -286,10 +284,10 @@ class EthereumWorkerRegistryImpl(WorkerRegistry):
                         "Worker details not valid : {}".format(is_valid))
                     return None
             """
-            txn_dict = self.__contract_instance.functions.workerUpdate(
-                worker_id, details)\
-                .buildTransaction(self.__eth_client.get_transaction_params())
-            txn_receipt = self.__eth_client.execute_transaction(txn_dict)
+            contract_func = \
+                self.__contract_instance.functions.workerUpdate(
+                    worker_id, details)
+            txn_receipt = self.__eth_client.build_exec_txn(contract_func)
             if txn_receipt['status'] == 1:
                 return ContractResponse.SUCCESS
             else:
@@ -325,10 +323,10 @@ class EthereumWorkerRegistryImpl(WorkerRegistry):
                 logging.error("Invalid workerStatus {}".format(status))
                 return None
 
-            txn_dict = self.__contract_instance.functions.workerSetStatus(
-                worker_id, status.value)\
-                .buildTransaction(self.__eth_client.get_transaction_params())
-            txn_receipt = self.__eth_client.execute_transaction(txn_dict)
+            contract_func = \
+                self.__contract_instance.functions.workerSetStatus(
+                    worker_id, status.value)
+            txn_receipt = self.__eth_client.build_exec_txn(contract_func)
             if txn_receipt['status'] == 1:
                 return ContractResponse.SUCCESS
             else:
