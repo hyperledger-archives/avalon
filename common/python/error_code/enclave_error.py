@@ -31,4 +31,4 @@ class EnclaveError(IntEnum):
     # this should be converted to ENCLAVE_ERR_SYSTEM for reporting.
     ENCLAVE_ERR_SYSTEM_BUSY = -10,
     ENCLAVE_ERR_CRYPTO = -11,
-    ENCLAVE_ERR_INVALID_WORKLOAD = -12 # Invalid workload ID
+    ENCLAVE_ERR_INVALID_WORKLOAD = -12  # Invalid workload ID

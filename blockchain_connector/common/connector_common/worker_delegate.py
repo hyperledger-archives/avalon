@@ -125,9 +125,8 @@ class WorkerDelegate():
             # Mark all stale workers on blockchain as decommissioned
             if wid not in wids_in_kv:
                 worker_id = wid
-                worker = self._worker_instance\
+                worker_status_onchain, _, _, _, _ = self._worker_instance\
                     .worker_retrieve(wid, random.randint(0, 100000))
-                worker_status_onchain = worker["result"]["status"]
                 # If worker is not already decommissioned, mark it
                 # decommissioned as it is no longer available in the kv storage
                 if worker_status_onchain != WorkerStatus.DECOMMISSIONED.value:
