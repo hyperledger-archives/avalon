@@ -25,7 +25,11 @@ LogFile  = "__screen__"
 
 [Listener]
 bind = "http://localhost:1947"
-max_work_order_count = 10
+# Maximum number of work order requests the kv store is expected to hold
+# context for in a deployment. If the number of entries exceed this limit,
+# there will be purging of work order requests throughout the storage on
+# FCFS basis i.e.-The oldest request will be cleaned first.
+max_work_order_count = 1000
 # ZMQ configurations the listener would connect to
 # Same as the url and port of enclave manager socket
 zmq_url = "tcp://avalon-enclave-manager:5555"
