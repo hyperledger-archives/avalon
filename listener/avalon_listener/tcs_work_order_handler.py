@@ -259,26 +259,37 @@ class TCSWorkOrderHandler:
             )
 
         if((self.workorder_count + 1) > self.max_workorder_count):
-
-            # wo_ids is a csv of work order ids retrieved from database
-            wo_ids = self.kv_helper.get("wo-worker-processed", worker_id)
-            processed_wo_ids = [] if wo_ids is None else wo_ids.split(",")
+            # Lookup all workers.
+            workers = self.kv_helper.lookup("worker-pool")
+            wo_worker_map = dict()
+            processed_wo_ids = []
+            for worker in workers:
+                # wo_ids_csv is a csv of work order ids retrieved from database
+                wo_ids_csv = self.kv_helper.get("wo-worker-processed", worker)
+                wo_ids = [] if wo_ids_csv is None else wo_ids_csv.split(",")
+                # Create a reverse map for search delete in wo-worker-processed
+                for w in wo_ids:
+                    wo_worker_map[w] = worker
+                processed_wo_ids.extend(wo_ids)
 
             # if max count reached clear a processed entry
             work_orders = self.kv_helper.lookup("wo-timestamps")
             for id in work_orders:
-
                 # If work order is processed then remove from table
                 if id in processed_wo_ids:
                     self.kv_helper.csv_search_delete(
-                        "wo-worker-processed", worker_id, id)
+                        "wo-worker-processed", wo_worker_map[id], id)
                     self.kv_helper.remove("wo-requests", id)
                     self.kv_helper.remove("wo-responses", id)
                     self.kv_helper.remove("wo-receipts", id)
                     self.kv_helper.remove("wo-timestamps", id)
 
                     self.workorder_list.remove(id)
+                    logger.info("Purged work order {} from database"
+                                .format(id))
                     self.workorder_count -= 1
+                    # @TODO : Need to rethink if deleting just one entry
+                    # suffices as the operations performed are costly
                     break
 
             # If no work order is processed then return busy
