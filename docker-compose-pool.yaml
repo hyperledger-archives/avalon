@@ -48,7 +48,7 @@ services:
         while true;
           do
             if [ -e /shared-pool-1/wpe_mr_enclave.txt ];
-              then mv /shared-pool-1/wpe_mr_enclave.txt /project/avalon/wpe_mr_enclave.txt;
+              then cp /shared-pool-1/wpe_mr_enclave.txt /project/avalon/wpe_mr_enclave.txt;
               break;
             fi;
             sleep 1;
