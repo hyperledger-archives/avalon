@@ -19,7 +19,7 @@ from os import environ
 import time
 import asyncio
 import nest_asyncio
-
+from error_code.error_status import WOParamLength
 from utility.hex_utils import is_valid_hex_str
 from avalon_sdk.connector.blockchains.common.contract_response \
     import ContractResponse
@@ -76,6 +76,15 @@ class FabricWorkOrderImpl(WorkOrderProxy):
         Returns:
         0 on success and non-zero on error.
         """
+
+        if not self._is_valid_work_order_json(work_order_id,
+                                              worker_id,
+                                              requester_id,
+                                              work_order_request):
+            logging.error("Invalid request string {}"
+                          .format(work_order_request))
+            return ContractResponse.ERROR
+
         if (self.__fabric_wrapper is not None):
             params = []
             params.append(work_order_id)
@@ -282,3 +291,33 @@ class FabricWorkOrderImpl(WorkOrderProxy):
             logging.error(
                 "Fabric wrapper instance is not initialized")
             return None
+
+    def _is_valid_work_order_json(self, work_order_id, worker_id, requester_id,
+                                  work_order_request):
+        """
+        Validate the following fields in a JSON request against the ones
+        provided outside the JSON: work_order_id, worker_id, and requester_id.
+
+        Parameters:
+        work_order_id      Unique ID of the work order request
+        worker_id          Identifier for the worker
+        requester_id       Unique id to identify the requester
+        work_order_request JSON RPC string work order request.
+                           Complete definition at work_order.py and
+                           defined in EEA specification 6.1.1.
+
+        Returns:
+        True on success and False on error.
+        """
+        json_request = json.loads(work_order_request)
+        if (work_order_id == json_request.get("workOrderId") and
+                worker_id == json_request.get("workerId") and
+                requester_id == json_request.get("requesterId") and
+                work_order_id and worker_id and requester_id and
+                len(requester_id) == WOParamLength.BYTE32 and
+                len(work_order_id) == WOParamLength.BYTE32 and
+                len(json_request.get("requesterNonce")) ==
+                WOParamLength.BYTE16):
+            return True
+        else:
+            return False

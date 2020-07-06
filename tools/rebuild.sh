@@ -213,6 +213,12 @@ cd $TCF_HOME/common/crypto_utils || error_exit "Failed to change to the director
 try make "-j$NUM_CORES"
 try make install
 
+yell --------------- COMMON VERIFY REPORT UTILS PYTHON ---------------
+cd $TCF_HOME/common/verify_report_utils/ || error_exit "Failed to change to the directory"
+
+try make "-j$NUM_CORES"
+try make install
+
 yell --------------- ENCLAVE MANAGER ---------------
 cd $TCF_HOME/enclave_manager || error_exit "Failed to change to the directory"
 

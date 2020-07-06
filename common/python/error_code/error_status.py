@@ -102,3 +102,9 @@ class WPERegisterStatus(IntEnum):
 class WOPreprocessStatus(IntEnum):
     SUCCESS = 0
     FAILURE = 1
+
+
+@unique
+class WOParamLength(IntEnum):
+    BYTE32 = 64
+    BYTE16 = 32

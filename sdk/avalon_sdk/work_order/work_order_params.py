@@ -18,6 +18,7 @@ import logging
 import avalon_crypto_utils.crypto_utility as crypto_utility
 import avalon_crypto_utils.signature as signature
 from utility.jrpc_utility import create_error_response
+from utility.hex_utils import is_valid_hex_str
 from error_code.error_status import JRPCErrorCodes
 logger = logging.getLogger(__name__)
 
@@ -35,33 +36,30 @@ class WorkOrderParams():
         self.set_work_order_id(work_order_id)
         self.set_response_timeout_msecs(response_timeout_msecs)
         self.set_payload_format(payload_format)
+        self.set_requester_id(requester_id)
+        self.set_requester_nonce(requester_nonce)
         if result_uri:
             self.set_result_uri(result_uri)
         if notify_uri:
             self.set_notify_uri(notify_uri)
         self.set_worker_id(worker_id)
         self.set_workload_id(workload_id)
-        self.set_requester_id(requester_id)
-        if worker_encryption_key:
-                self.set_worker_encryption_key(
-                    worker_encryption_key)
+        self.set_worker_encryption_key(worker_encryption_key)
         if data_encryption_algorithm:
             self.set_data_encryption_algorithm(data_encryption_algorithm)
-        if worker_encryption_key and session_key:
-            try:
-                encrypted_session_key = crypto_utility.generate_encrypted_key(
-                    session_key, worker_encryption_key)
-                self.set_encrypted_session_key(
-                    crypto_utility.byte_array_to_hex(encrypted_session_key))
-            except Exception as err:
-                raise ValueError("Encrypting Session key failed: \
-Invalid session key or worker encryption key")
+        try:
+            encrypted_session_key = crypto_utility.generate_encrypted_key(
+                session_key, worker_encryption_key)
+            self.set_encrypted_session_key(
+                crypto_utility.byte_array_to_hex(encrypted_session_key))
+        except Exception as err:
+            raise ValueError("Encrypting Session key failed")
 
         self.session_iv = session_iv
         self.set_session_key_iv(
             crypto_utility.byte_array_to_hex(session_iv)
         )
-        self.set_requester_nonce(requester_nonce)
+
         self.params_obj["encryptedRequestHash"] = ""
         self.params_obj["requesterSignature"] = ""
         self.params_obj["inData"] = []
@@ -98,20 +96,27 @@ Invalid session key or worker encryption key")
 
     def set_requester_id(self, requester_id):
         """Set requesterId work order parameter."""
+        if requester_id is None or \
+                not is_valid_hex_str(requester_id):
+            raise ValueError("Empty or Invalid data "
+                             "format for requester_id")
         self.params_obj["requesterId"] = requester_id
 
     def set_worker_encryption_key(self, worker_encryption_key):
         """Set workerEncryptionKey work order parameter."""
-        try:
-            self.params_obj["workerEncryptionKey"] = \
-                worker_encryption_key.encode("UTF-8").hex()
-        except Exception as err:
-            raise TypeError("Worker Encryption Key not valid")
+        if worker_encryption_key is None or \
+                not isinstance(worker_encryption_key, str) or \
+                not worker_encryption_key.strip():
+            raise ValueError("Empty or Invalid data "
+                             "format for workerEncryptionKey")
+        self.params_obj["workerEncryptionKey"] = \
+            worker_encryption_key.encode("UTF-8").hex()
 
     def set_data_encryption_algorithm(self, data_encryption_algorithm):
         """Set dataEncryptionAlgorithm work order parameter."""
         if not isinstance(data_encryption_algorithm, str):
-            raise ValueError("Data Encryption Algorithm is not String")
+            raise ValueError("Empty or Invalid data "
+                             "format for Data Encryption Algorithm")
         self.params_obj["dataEncryptionAlgorithm"] = \
             data_encryption_algorithm
 
@@ -125,8 +130,10 @@ Invalid session key or worker encryption key")
 
     def set_requester_nonce(self, requester_nonce):
         """Set requesterNonce work order parameter."""
-        if not requester_nonce.strip():
-            raise TypeError("requesterNonce cannot be None")
+        if requester_nonce is None or \
+                not is_valid_hex_str(requester_nonce):
+            raise ValueError("Empty or Invalid data "
+                             "format for requesterNonce")
         self.params_obj["requesterNonce"] = requester_nonce
 
     def add_encrypted_request_hash(self):
@@ -140,7 +147,7 @@ Invalid session key or worker encryption key")
             encrypted_request_hash = crypto_utility.encrypt_data(
                 self.request_hash, self.session_key, self.session_iv)
             enc_request_hash_hex = crypto_utility.byte_array_to_hex(
-                                            encrypted_request_hash)
+                encrypted_request_hash)
             self.params_obj["encryptedRequestHash"] = enc_request_hash_hex
             return True, ""
         except Exception as err:
@@ -296,7 +303,7 @@ Invalid session key or worker encryption key")
             return enc_data
         else:
             enc_data = crypto_utility.encrypt_data(
-                            data, encrypted_data_encryption_key, data_iv)
+                data, encrypted_data_encryption_key, data_iv)
             return crypto_utility.byte_array_to_base64(enc_data)
 
     def to_jrpc_string(self, id):

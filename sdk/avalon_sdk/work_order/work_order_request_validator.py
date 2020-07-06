@@ -96,7 +96,7 @@ class WorkOrderRequestValidator():
             return False, "Invalid data format for requester id"
         if "workerEncryptionKey" in params and \
                 (not params["workerEncryptionKey"] or
-                    not is_valid_hex_str(params["workerEncryptionKey"])):
+                 not is_valid_hex_str(params["workerEncryptionKey"])):
             return False, "Empty or Invalid dataformat for workerEncryptionKey"
         if "encryptedSessionKey" in params and \
                 not is_valid_hex_str(params["encryptedSessionKey"]):
