@@ -96,10 +96,14 @@ class WorkOrderProcessorEnclaveManager(WOProcessorManager):
         Executes Boot flow of enclave manager
         """
 
+        # Extended_measurements is a tuple, viz., basename and measurement
+        # for the enclave
+        _, mr_enclave = self.extended_measurements
         if self._wpe_requester\
             .register_wo_processor(self._unique_verification_key,
                                    self.encryption_key,
-                                   self.proof_data):
+                                   self.proof_data,
+                                   mr_enclave):
             logger.info("WPE registration successful")
             # Update mapping of worker_id to workers in a pool
             self._worker_kv_delegate.update_worker_map(
