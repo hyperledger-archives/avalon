@@ -16,7 +16,7 @@ import logging
 import json
 from os import environ
 
-from utility.hex_utils import is_valid_hex_str
+from utility.hex_utils import is_valid_hex_of_length
 from avalon_sdk.connector.blockchains.common.contract_response \
     import ContractResponse
 from avalon_sdk.worker.worker_details import WorkerStatus, WorkerType
@@ -90,10 +90,10 @@ class EthereumWorkerRegistryImpl(WorkerRegistry):
             if not isinstance(worker_type, WorkerType):
                 logging.error("Invalid workerType {}".format(worker_type))
                 return None
-            if not is_valid_hex_str(org_id):
+            if not is_valid_hex_of_length(org_id, 64):
                 logging.error("Invalid organization id {}".format(org_id))
                 return None
-            if not is_valid_hex_str(application_id):
+            if not is_valid_hex_of_length(application_id, 64):
                 logging.error(
                     "Invalid application id {}".format(application_id))
                 return None
@@ -125,6 +125,10 @@ class EthereumWorkerRegistryImpl(WorkerRegistry):
         """
 
         if (self.__contract_instance is not None):
+            if not is_valid_hex_of_length(worker_id, 64):
+                logging.error(
+                    "Invalid worker id {}".format(worker_id))
+                return None
             status, w_type, org_id, app_ids, details = \
                 self.__contract_instance.functions.workerRetrieve(
                     worker_id).call()
@@ -171,10 +175,10 @@ class EthereumWorkerRegistryImpl(WorkerRegistry):
             if not isinstance(worker_type, WorkerType):
                 logging.error("Invalid workerType {}".format(worker_type))
                 return None
-            if not is_valid_hex_str(org_id):
+            if not is_valid_hex_of_length(org_id, 64):
                 logging.error("Invalid organization id {}".format(org_id))
                 return None
-            if not is_valid_hex_str(application_id):
+            if not is_valid_hex_of_length(application_id, 64):
                 logging.error("Invalid application id {}".format(org_id))
                 return None
             lookup_result = self.__contract_instance.functions\
@@ -217,20 +221,20 @@ class EthereumWorkerRegistryImpl(WorkerRegistry):
         """
 
         if (self.__contract_instance is not None):
-            if not is_valid_hex_str(worker_id):
+            if not is_valid_hex_of_length(worker_id, 64):
                 logging.error("Invalid worker id {}".format(worker_id))
-                return None
+                return ContractResponse.ERROR
             if not isinstance(worker_type, WorkerType):
                 logging.error("Invalid workerType {}".format(worker_type))
-                return None
-            if not is_valid_hex_str(organization_id):
+                return ContractResponse.ERROR
+            if not is_valid_hex_of_length(organization_id, 64):
                 logging.error("Invalid organization id {}"
                               .format(organization_id))
-                return None
+                return ContractResponse.ERROR
             for app_id in application_type_ids:
-                if not is_valid_hex_str(app_id):
+                if not is_valid_hex_of_length(app_id, 64):
                     logging.error("Invalid application id {}".format(app_id))
-                    return None
+                    return ContractResponse.ERROR
             # TODO : Validate worker details. As of now worker details are not
             # strictly following the spec
             """if details is not None:
@@ -270,9 +274,9 @@ class EthereumWorkerRegistryImpl(WorkerRegistry):
         """
 
         if (self.__contract_instance is not None):
-            if not is_valid_hex_str(worker_id):
+            if not is_valid_hex_of_length(worker_id, 64):
                 logging.error("Invalid worker id {}".format(worker_id))
-                return None
+                return ContractResponse.ERROR
 
             # TODO : Validate worker details. As of now worker details are not
             # strictly following the spec
@@ -316,12 +320,12 @@ class EthereumWorkerRegistryImpl(WorkerRegistry):
         """
 
         if (self.__contract_instance is not None):
-            if not is_valid_hex_str(worker_id):
+            if not is_valid_hex_of_length(worker_id, 64):
                 logging.error("Invalid worker id {}".format(worker_id))
-                return None
+                return ContractResponse.ERROR
             if not isinstance(status, WorkerStatus):
                 logging.error("Invalid workerStatus {}".format(status))
-                return None
+                return ContractResponse.ERROR
 
             contract_func = \
                 self.__contract_instance.functions.workerSetStatus(

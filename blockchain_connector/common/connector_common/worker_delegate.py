@@ -104,8 +104,8 @@ class WorkerDelegate():
                 result = self._worker_instance.worker_update(
                     worker_id, details)
                 if result != ContractResponse.SUCCESS:
-                    logging.error("Error while updating worker {} \
-                            to blockchain".format(wid))
+                    logging.error("Error while updating worker "
+                                  "{} to blockchain".format(wid))
                 else:
                     logging.info("Updated worker {} to blockchain".format(wid))
             else:
@@ -115,8 +115,8 @@ class WorkerDelegate():
                     worker_id, worker_type, org_id, [app_type_id], details
                 )
                 if result != ContractResponse.SUCCESS:
-                    logging.error("Error while registering worker {} \
-                            to blockchain".format(wid))
+                    logging.error("Error while registering worker "
+                                  "{} to blockchain".format(wid))
                 else:
                     logging.info(
                         "Registered worker {} to blockchain".format(wid))
@@ -133,8 +133,8 @@ class WorkerDelegate():
                     status = self._worker_instance.worker_set_status(
                         worker_id, WorkerStatus.DECOMMISSIONED)
                     if result != ContractResponse.SUCCESS:
-                        logging.error("Error while setting worker status {} \
-                            in blockchain".format(wid))
+                        logging.error("Error while setting worker status for "
+                                      "{} in blockchain".format(wid))
                     else:
                         logging.info("Marked worker " + wid +
                                      " as decommissioned on"

@@ -17,7 +17,7 @@ import asyncio
 import logging
 from os import environ
 
-from utility.hex_utils import is_valid_hex_str
+from utility.hex_utils import is_valid_hex_of_length
 from avalon_sdk.connector.blockchains.common.contract_response \
     import ContractResponse
 from avalon_sdk.worker.worker_details import WorkerStatus, WorkerType
@@ -114,6 +114,15 @@ class EthereumWorkOrderProxyImpl(WorkOrderProxy):
         """
         if (self.__contract_instance is not None):
 
+            if not is_valid_hex_of_length(work_order_id, 64):
+                logging.error("Invalid work order id {}".format(work_order_id))
+                return ContractResponse.ERROR
+            if not is_valid_hex_of_length(requester_id, 64):
+                logging.error("Invalid requester id {}".format(requester_id))
+                return ContractResponse.ERROR
+            if not is_valid_hex_of_length(worker_id, 64):
+                logging.error("Invalid worker id {}".format(worker_id))
+                return ContractResponse.ERROR
             if not _is_valid_work_order_json(work_order_id, worker_id,
                                              requester_id, work_order_request):
                 logging.error("Invalid request string {}"
@@ -154,6 +163,9 @@ class EthereumWorkOrderProxyImpl(WorkOrderProxy):
         errorCode           0 on success or non-zero on error.
         """
         if (self.__contract_instance is not None):
+            if not is_valid_hex_of_length(work_order_id, 64):
+                logging.error("Invalid work order id {}".format(work_order_id))
+                return ContractResponse.ERROR
             try:
                 contract_func = \
                     self.__contract_instance.functions.workOrderComplete(
@@ -195,6 +207,10 @@ class EthereumWorkOrderProxyImpl(WorkOrderProxy):
         # completed event.
         if (self.__contract_instance is not None):
             try:
+                if not is_valid_hex_of_length(work_order_id, 64):
+                    logging.error("Invalid work order id {}"
+                                  .format(work_order_id))
+                    return None
                 # workOrderGet returns tuple containing work order
                 # result params as defined in EEA spec 6.10.5
                 _, _, _, work_order_res, _ = \

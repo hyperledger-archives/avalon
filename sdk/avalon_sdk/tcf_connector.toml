@@ -76,5 +76,7 @@ channel_name = "mychannel"
 [WorkerConfig]
 # These configs need to be same as that in tcs_config -
 # https://github.com/hyperledger/avalon/blob/master/config/tcs_config.toml
-ApplicationTypeId = "11aa22bb33cc44dd"
-OrganizationId = "aabbcc1234ddeeff"
+# Replace ApplicationTypeId and OrganizationId with real hexadecimal values, 64 characters
+# longs. As per EEA spec v1.1, they are bytes32 which effectively is 64 hex characters.
+ApplicationTypeId = "11aa22bb33cc44dd11aa22bb33cc44dd11aa22bb33cc44dd11aa22bb33cc44dd"
+OrganizationId = "aabbcc1234ddeeffaabbcc1234ddeeffaabbcc1234ddeeffaabbcc1234ddeeff"
