@@ -40,8 +40,8 @@ install:
 clean:
 	if pip3 uninstall --yes $(WHEEL_FILE); then echo UNINSTALLED  $(WHEEL_FILE) WHEEL FILE ; fi
 	rm -rf build deps dist *.egg-info
-	rm -f verify_report_utils/verify_report/verify_report.py
-	rm -f verify_report_utils/verify_report/verify_report_wrap.cpp
+	rm -f verify_report/verify_report.py
+	rm -f verify_report/verify_report_wrap.cpp
 
 	find . -iname '*.pyc' -delete
 	find . -iname '__pycache__' -delete
