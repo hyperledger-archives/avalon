@@ -24,11 +24,13 @@ import argparse
 
 import config.config as pconfig
 import utility.logger as plogger
+import utility.hex_utils as hex_utils
 import avalon_crypto_utils.signature as signature
 import avalon_crypto_utils.crypto_utility as crypto_utils
 from database import connector
 from error_code.error_status import SignatureStatus
 from http_client.http_jrpc_client import HttpJrpcClient
+import avalon_enclave_manager.base_enclave_info as enclave_info
 from avalon_sdk.work_order.work_order_params import WorkOrderParams
 from avalon_enclave_manager.worker_kv_delegate import WorkerKVDelegate
 
@@ -117,7 +119,7 @@ class WPERequester():
 
     def register_wo_processor(self, unique_verification_id,
                               encryption_key,
-                              proof_data):
+                              proof_data, mr_enclave):
         """
         Request to register this WPE with the KME
 
@@ -126,6 +128,7 @@ class WPERequester():
             KME.
             @param encryption_key - encryption key of WPE
             @param proof_data - The IAS attestation report/DCAP quote
+            @param mr_enclave - MRENCLAVE for this WPE
         Returns :
             @returns status - The status of the registration.
                               True, for success. None, in case of errors.
@@ -134,7 +137,8 @@ class WPERequester():
         registration_params = {
             "unique_id": unique_verification_id,
             "proof_data": proof_data,
-            "wpe_encryption_key": encryption_key
+            "wpe_encryption_key": encryption_key,
+            "mr_enclave": mr_enclave
         }
         in_data = [json.dumps(registration_params)]
 
@@ -150,9 +154,9 @@ class WPERequester():
 
         if "result" in response:
             wo_response_json = response["result"]
-            if self._verify_res_signature(wo_response_json,
-                                          self._worker.verification_key,
-                                          wo_req["params"]["requesterNonce"]):
+            if "error" not in wo_response_json and self._verify_res_signature(
+                    wo_response_json, self._worker.verification_key,
+                    wo_req["params"]["requesterNonce"]):
                 decrypted_res = crypto_utils.decrypted_response(
                     wo_response_json, session_key, session_iv)
                 # Response contains an array of results. In this case, the
