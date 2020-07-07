@@ -1,4 +1,4 @@
-# Copyright 2020 Intel Corporation
+# Copyright 2019 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,8 +15,15 @@
 version: '3.5'
 
 services:
-  avalon-direct-model-sgx-tests:
+  avalon-tests:
     image: avalon-shell:${ISOLATION_ID}
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      args:
+        - http_proxy
+        - https_proxy
+        - no_proxy
     working_dir: "/project/avalon/"
     entrypoint: "bash -c \"\
         ./tools/run_tests.sh -l avalon-listener \""
@@ -25,19 +32,15 @@ services:
       - avalon-listener
 
   avalon-enclave-manager:
-    image: avalon-sgx-enclave-manager:${ISOLATION_ID}
-    environment:
-      - http_proxy
-      - https_proxy
-      - no_proxy
-    expose:
-      # ZMQ socket port.
-      - 5555
-    volumes:
-      # Map aesm service on host to docker, required only in HW mode.
-      - /var/run/aesmd/aesm.socket:/var/run/aesmd/aesm.socket
-    devices:
-      - "/dev/isgx:/dev/isgx"
+    image: avalon-enclave-manager:${ISOLATION_ID}
+    build:
+      context: ..
+      dockerfile: enclave_manager/Dockerfile
+      args:
+        - http_proxy
+        - https_proxy
+        - no_proxy
+        - TCF_DEBUG_BUILD=${TCF_DEBUG_BUILD:-}
     command: |
       bash -c "
         enclave_manager --lmdb_url http://avalon-lmdb:9090
@@ -48,10 +51,13 @@ services:
 
   avalon-lmdb:
     image: avalon-lmdb:${ISOLATION_ID}
-    environment:
-      - http_proxy
-      - https_proxy
-      - no_proxy
+    build:
+      context: ..
+      dockerfile: shared_kv_storage/Dockerfile
+      args:
+        - http_proxy
+        - https_proxy
+        - no_proxy
     expose:
       - 9090
     command: |
@@ -62,13 +68,15 @@ services:
 
   avalon-listener:
     image: avalon-listener:${ISOLATION_ID}
-    environment:
-      - http_proxy
-      - https_proxy
-      - no_proxy
+    build:
+      context: ..
+      dockerfile: ./listener/Dockerfile
+      args:
+        - http_proxy
+        - https_proxy
+        - no_proxy
     expose:
       - 1947
-      - 5555
     command: |
       bash -c "
         avalon_listener --bind http://avalon-listener:1947 --lmdb_url http://avalon-lmdb:9090

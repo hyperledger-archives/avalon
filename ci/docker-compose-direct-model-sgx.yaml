@@ -1,4 +1,4 @@
-# Copyright 2019 Intel Corporation
+# Copyright 2020 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,22 +15,23 @@
 version: '3.5'
 
 services:
-  avalon-proxy-model-tests:
-    image: avalon-shell:${ISOLATION_ID}
+  avalon-enclave-manager:
+    image: avalon-sgx-enclave-manager:${ISOLATION_ID}
     build:
-      context: ..
-      dockerfile: docker/Dockerfile
       args:
-        - http_proxy
-        - https_proxy
-        - no_proxy
+        - SGX_MODE=HW
+    depends_on:
+      - avalon-lmdb
+    expose:
+      # ZMQ socket port.
+      - 5555
+    volumes:
+      # Map aesm service on host to docker, required only in HW mode.
+      - /var/run/aesmd/aesm.socket:/var/run/aesmd/aesm.socket
+    devices:
+      - "/dev/isgx:/dev/isgx"
 
-  avalon-fabric-connector:
-    image: avalon-fabric-connector:${ISOLATION_ID}
-    build:
-      context: ..
-      dockerfile: ./blockchain_connector/docker/Dockerfile-fabric
-      args:
-        - http_proxy
-        - https_proxy
-        - no_proxy
+  avalon-listener:
+    expose:
+      - 5555
+

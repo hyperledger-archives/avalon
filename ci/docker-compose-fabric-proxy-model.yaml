@@ -1,4 +1,4 @@
-# Copyright 2020 Intel Corporation
+# Copyright 2019 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,21 +15,27 @@
 version: '3.5'
 
 services:
-  avalon-direct-model-sgx-tests:
-    image: avalon-shell:${ISOLATION_ID}
+  avalon-fabric-connector:
+    image: avalon-fabric-connector:${ISOLATION_ID}
     build:
       context: ..
-      dockerfile: docker/Dockerfile
+      dockerfile: ./blockchain_connector/docker/Dockerfile-fabric
       args:
         - http_proxy
         - https_proxy
         - no_proxy
+    command: |
+      bash -c "
+        avalon_fabric_connector -u http://avalon-listener:1947
+        tail -f /dev/null
+        "
+    volumes:
+      # Fabric crypto materials has to be shared to connector to
+      # interact with fabric blockchain
+      - ../vars/keyfiles:/keyfiles
+      - ../vars/profiles/mychannel_network_for_pysdk.json:/project/avalon/sdk/avalon_sdk/connector/blockchains/fabric/network.json
 
-  avalon-enclave-manager:
-    image: avalon-sgx-enclave-manager:${ISOLATION_ID}
-    build:
-      args:
-        - SGX_MODE=HW
-    depends_on:
-      - avalon-lmdb
-
+networks:
+  default:
+    external:
+      name: minifab

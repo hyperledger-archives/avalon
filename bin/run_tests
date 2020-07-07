@@ -33,13 +33,19 @@ FABRIC_PROXY_MODEL_SGX_TESTS=0
 main() {
 
     if [ "$DIRECT_MODEL_TESTS" == "1" ]; then
-        run_docker_test ./ci/avalon-direct-model-tests.yaml
+        run_docker_test ./ci/docker-compose-direct-model.yaml
     elif [ "$FABRIC_PROXY_MODEL_TESTS" == "1" ]; then
-        run_docker_test ./ci/avalon-fabric-proxy-model-tests.yaml
+        cd ci
+        docker-compose -f docker-compose-direct-model.yaml -f docker-compose-fabric-proxy-model.yaml -f docker-compose-fabric-tests.yaml config > fabric-proxy-model.yaml
+        run_docker_test ./fabric-proxy-model.yaml
     elif [ "$DIRECT_MODEL_SGX_TESTS" == "1" ]; then
-	run_docker_test ./ci/avalon-direct-model-sgx-tests.yaml
+        cd ci
+        docker-compose -f docker-compose-direct-model.yaml -f docker-compose-direct-model-sgx.yaml config > direct-model-sgx.yaml
+        run_docker_test ./direct-model-sgx.yaml
     elif [ "$FABRIC_PROXY_MODEL_SGX_TESTS" == "1" ]; then
-        run_docker_test ./ci/avalon-fabric-proxy-model-sgx-tests.yaml
+        cd ci
+        docker-compose -f docker-compose-direct-model.yaml -f docker-compose-fabric-proxy-model.yaml -f docker-compose-fabric-tests.yaml -f docker-compose-direct-model-sgx.yaml config > fabric-proxy-model-sgx.yaml
+        run_docker_test ./fabric-proxy-model-sgx.yaml
     fi
 }
 
