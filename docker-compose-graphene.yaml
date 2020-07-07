@@ -1,0 +1,61 @@
+# Copyright 2020 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+version: '3.5'
+
+services:
+  avalon-enclave-manager:
+    container_name: avalon-enclave-manager
+    image: avalon-enclave-manager-graphene-dev
+    build:
+      context: .
+      dockerfile: ./enclave_manager/Dockerfile-graphene
+      args:
+        - http_proxy
+        - https_proxy
+        - no_proxy
+        - ENCLAVE_TYPE=graphene
+    environment:
+      - http_proxy
+      - https_proxy
+      - no_proxy
+    expose:
+      # ZMQ socket port to receive work orders from Avalon listener.
+      - 5555
+      # ZMQ socket port to communicate with graphene python worker
+      - 7777
+    command: |
+      bash -c "
+        enclave_manager --lmdb_url http://avalon-lmdb:9090
+        tail -f /dev/null
+      "
+    depends_on:
+      - avalon-lmdb
+      - graphene-python-worker
+
+  graphene-python-worker:
+    container_name: graphene-python-worker
+    image: avalon-python-worker-dev
+    environment:
+      - http_proxy
+      - https_proxy
+      - no_proxy
+    expose:
+      # ZMQ socket port used to communicate with graphene python worker.
+      - 7777
+    # Need to pass full path of file to python interpreter.
+    # Pass ZMQ URL to listen for requests. Bind to all available interfaces.
+    command: /usr/local/bin/wo-processor --bind "tcp://*:7777"
+    stop_signal: SIGKILL
+      
