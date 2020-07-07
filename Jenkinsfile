@@ -72,12 +72,12 @@ pipeline {
                 parallel (
                     "Build Avalon Direct Model Components": {
                         script {
-                            sh 'docker-compose -f ci/docker-compose-direct-model-build.yaml build'
+                            sh 'docker-compose -f ci/docker-compose-direct-model.yaml build'
                         }
                     },
                     "Build Avalon Proxy Model Components": {
                         script {
-                            sh 'docker-compose -f ci/docker-compose-fabric-proxy-build.yaml build'
+                            sh 'docker-compose -f ci/docker-compose-fabric-proxy-model.yaml build'
                         }
                     },
                     "Start fabric network": {

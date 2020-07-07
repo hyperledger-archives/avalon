@@ -53,7 +53,7 @@ def main():
 
     # Search for compose file passed
     compose_file = _get_compose_file(args.compose_file)
-    test_service = _get_test_service(compose_file)
+    test_service = "avalon-tests"
 
     # Load isolation id if it is set and validate
     isolation_id = _get_isolation_id()
