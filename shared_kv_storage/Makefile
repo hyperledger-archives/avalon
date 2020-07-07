@@ -41,6 +41,8 @@ clean: clean-subdirs
 	if pip3 uninstall --yes $(WHEEL_FILE); then echo UNINSTALLED $(WHEEL_FILE) WHEEL FILE ; fi
 	rm -r kv_storage/remote_lmdb/db_store.py
 	rm -r kv_storage/remote_lmdb/db_store_wrap.cpp
+	rm -r kv_storage/remote_lmdb/db_store_csv.py
+	rm -r kv_storage/remote_lmdb/db_store_csv_wrap.cpp
 	rm -rf build deps dist *.egg-info
 	find . -iname '*.pyc' -delete
 	find . -iname '__pycache__' -delete
