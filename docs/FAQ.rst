@@ -265,9 +265,13 @@ What TCP ports does Avalon use?
   The URL is ``http://localhost:9090/`` or, for Docker,
   ``http://avalon-lmdb:9090/``
 - TCP 5555: ZMQ connections to Avalon Enclave Manager from Avalon Listener.
-  This is used for Avalon singleton enclave workers using Synchronous Mode
+  This is used by Avalon singleton enclave workers using Synchronous Mode.
   The URL is ``tcp://localhost:5555`` or, for Docker,
   ``tcp://avalon-enclave-manager:5555``
+- TCP 7777: ZMQ socket port used by Avalon Graphene Enclave Manager
+  to communicate with Graphene Python Worker.
+  The URL is ``tcp://localhost:7777`` or, for Docker,
+  ``tcp://graphene-python-worker:7777``
 - TCP 1948: connections to Avalon Key Management Enclave (KME).
   Used only for Worker Pool Mode (not Singleton Mode).
   The URL is ``tcp://localhost:1948`` or, for Docker,
@@ -677,6 +681,11 @@ Gas
 
 Ganache
     A personal blockchain software for Ethereum development
+
+Graphene
+    A Library OS (or "LibOS") that provides an Operating System
+    environment in a userspace library to execute an application.
+    It is used to execute code unmodified in a TEE such as Intel SGX.
 
 Hyperledger
     An open source collaborative effort created to advance
