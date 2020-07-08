@@ -1,0 +1,31 @@
+{
+    "jsonrpc": "2.0",
+    "method": "WorkOrderSubmit",
+    "id": 30,
+    "params": {
+        "workOrderId": "",
+        "responseTimeoutMSecs": 6000,
+        "payloadFormat": "JSON-RPC",
+        "resultUri": " ",
+        "notifyUri": " ",
+        "workerId": "",
+        "workloadId": "626f6d5f696f",
+        "requesterId": "",
+        "workerEncryptionKey": "",  
+        "dataEncryptionAlgorithm": "AES-GCM-256",
+        "encryptedSessionKey": "",  
+        "sessionKeyIv": "",
+        "requesterNonce": "",
+        "encryptedRequestHash": "",
+        "requesterSignature": "",
+        "inData": [
+            {
+                "index": 0,
+                "dataHash": "",
+                "data": "Hyperledger Avalon",
+                "encryptedDataEncryptionKey": "",
+                "iv": ""
+            }
+        ]
+    }
+}

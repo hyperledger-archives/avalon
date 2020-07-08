@@ -1,0 +1,13 @@
+{
+    "jsonrpc": "2.0",
+    "id":30,
+    "result": {
+        "workOrderId": "",
+        "updaterId": "",
+        "updateType": 1,
+        "updateData": "",
+        "updateSignature": "",
+        "signatureRules": "SHA-256/RSA-OAEP-4096",
+        "receiptVerificationKey": ""
+    }
+}

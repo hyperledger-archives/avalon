@@ -1,0 +1,21 @@
+{
+    "jsonrpc": "2.0",
+    "id":30,
+    "result": {
+        "workOrderId":"",
+        "workloadId": "",
+        "workerId": "",
+        "requesterId": "",
+        "workerNonce": "",
+        "workerSignature": "",
+        "outData": [
+            {
+                "index": 0,
+                "dataHash": "",
+                "data": "Hyperledger Avalon",
+                "encryptedDataEncryptionKey": "-",
+                "iv": ""
+            }
+        ]
+    }
+}
