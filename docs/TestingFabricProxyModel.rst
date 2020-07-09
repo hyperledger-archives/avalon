@@ -70,9 +70,9 @@ To run Fabric with Hyperledger Avalon, follow these steps:
 
        docker exec -it  avalon-shell bash
 
-   cd examples/apps/generic_client/
-   ./fabric_generic_client.py -b fabric --workload_id "echo-result" --in_data "Hello"
-   ```
+       cd examples/apps/generic_client/
+       ./fabric_generic_client.py -b fabric --workload_id "echo-result" --in_data "Hello" -o
+
 
 7. To stop the Fabric network run this command:
 
