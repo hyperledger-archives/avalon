@@ -79,8 +79,13 @@ To run Fabric with Hyperledger Avalon, follow these steps:
        docker exec -it  avalon-shell bash
 
        cd examples/apps/generic_client/
-       ./fabric_generic_client.py -b fabric --workload_id "echo-result" --in_data "Hello" -o
+       ./fabric_generic_client.py -b fabric --workload_id "echo-result" --in_data "Hello" -o \
+           --worker_id "singleton-worker-1"
 
+       NOTE: `worker_id` should match with worker id of singleton enclave manager.  
+       This worker_id can either be command line argument passed to enclave manager or  
+       in the absence of command line argument, worker_id in
+       `$TCF_HOME/config/singleton_enclave_config.toml` should be used.
 
 7. To stop the Fabric network run this command:
 

@@ -74,7 +74,8 @@ def _parse_command_line(args):
         default="registry",
         choices={"registry", "listing"},
         type=str)
-    mutually_excl_group_worker = parser.add_mutually_exclusive_group()
+    mutually_excl_group_worker = parser.add_mutually_exclusive_group(
+        required=True)
     mutually_excl_group_worker.add_argument(
         "-w", "--worker_id",
         help="worker id in plain text to use to submit a work order",

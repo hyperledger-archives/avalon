@@ -74,10 +74,17 @@ def ParseCommandLine(args):
         help="skip URI lookup and use the registry in the config file",
         action="store_true")
 
-    parser.add_argument(
-        "-w", "--worker-id",
-        help="skip worker lookup and retrieve specified worker",
+    mutually_excl_group_worker = parser.add_mutually_exclusive_group(
+        required=True)
+    mutually_excl_group_worker.add_argument(
+        "-w", "--worker_id",
+        help="worker id in plain text to use to submit a work order",
         type=str)
+    mutually_excl_group_worker.add_argument(
+        "-wx", "--worker_id_hex",
+        help="worker id as hex string to use to submit a work order",
+        type=str)
+
     parser.add_argument(
         "-m", "--message",
         help='text message to be included in the JSON request payload',
@@ -124,7 +131,13 @@ def ParseCommandLine(args):
 
     requester_signature = options.requester_signature
     input_data_hash = options.data_hash
+    # worker id
     worker_id = options.worker_id
+    worker_id_hex = options.worker_id_hex
+
+    worker_id = worker_id_hex if not worker_id \
+        else hex_utils.get_worker_id_from_name(worker_id)
+
     message = options.message
     if options.message is None or options.message == "":
         message = "Test Message"
