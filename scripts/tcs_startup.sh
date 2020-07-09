@@ -24,6 +24,7 @@ START_STOP_AVALON_SERVICES=0 # default if -s not passed
 LMDB_URL="http://localhost:9090" # -l default
 LISTENER_URL="http://localhost:1947"
 ENCLAVE_ZMQ_URL="tcp://localhost:5555"
+
 # Trap handler
 trap 'stop_avalon_components' HUP INT QUIT ABRT ALRM TERM
 

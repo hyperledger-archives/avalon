@@ -91,18 +91,24 @@ worker requests on the command line.
 ### Echo workload using a URI
 ```bash
 ./generic_client.py -o --uri "http://localhost:1947" \
-    --workload_id "echo-result" --in_data "Hello"
+    --workload_id "echo-result" --in_data "Hello" --worker_id "singleton-worker-1"
 ```
+
+NOTE: `worker_id` should match with worker id of singleton enclave manager.  
+This worker_id can either be command line argument passed to enclave manager or  
+in the absence of command line argument, worker_id in
+`$TCF_HOME/config/singleton_enclave_config.toml` should be used.
 
 Add or change the `--uri` parameter if using Docker:
 ```bash
 ./generic_client.py -o --uri "http://avalon-listener:1947" \
-    --workload_id "echo-result" --in_data "Hello"
+    --workload_id "echo-result" --in_data "Hello" --worker_id "singleton-worker-1"
 ```
 
 Or omit the URI if you use the default URI (standalone mode) :
 ```bash
-./generic_client.py -o --workload_id "echo-result" --in_data "Hello"
+./generic_client.py -o --workload_id "echo-result" --in_data "Hello" \
+    --worker_id "singleton-worker-1"
 ```
 
 ### Heart disease eval workload using a URI
@@ -110,26 +116,30 @@ Standalone mode (no Docker):
 ```bash
 ./generic_client.py -o --uri "http://localhost:1947" \
     --workload_id "heart-disease-eval" \
-    --in_data "Data: 25 10 1 67  102 125 1 95 5 10 1 11 36 1"
+    --in_data "Data: 25 10 1 67  102 125 1 95 5 10 1 11 36 1" \
+    --worker_id "singleton-worker-1"
 ```
 
 With Docker:
 ```bash
 ./generic_client.py -o --uri "http://avalon-listener:1947" \
     --workload_id "heart-disease-eval" \
-    --in_data "Data: 25 10 1 67  102 125 1 95 5 10 1 11 36 1"
+    --in_data "Data: 25 10 1 67  102 125 1 95 5 10 1 11 36 1" \
+    --worker_id "singleton-worker-1"
 ```
 
 ### Echo workload using registry listing smart contract address
 ```bash
 ./generic_client.py -o \
     --address "0x9Be28B132aeE1b2c5A1C50529a636cEd807842cd" --mode "listing" \
-    --workload_id "echo-result" --in_data "Hello"
+    --workload_id "echo-result" --in_data "Hello" \
+    --worker_id "singleton-worker-1"
 ```
 
 ### Echo workload with input data as unencrypted plain text
 ```bash
 ./generic_client.py -o --uri "http://localhost:1947" \
-    --workload_id "echo-result" --in_data "Hello" -p
+    --workload_id "echo-result" --in_data "Hello" -p \
+    --worker_id "singleton-worker-1"
 ```
 

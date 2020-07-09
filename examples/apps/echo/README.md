@@ -64,8 +64,12 @@ echo requests to the echo worker on the command line.
     ```
 5.  In Terminal 2, run
     ```bash
-    ./echo_client.py -s "http://avalon-listener:1947" -m "Hello world"
+    ./echo_client.py -s "http://avalon-listener:1947" -m "Hello world" -w "singleton-worker-1"
     ```
+    NOTE: `worker_id` should match with worker id of singleton enclave manager.  
+    This worker_id can either be command line argument passed to enclave manager or  
+    in the absence of command line argument, worker_id in
+    `$TCF_HOME/config/singleton_enclave_config.toml` should be used.
 
     If running in Standalone mode (without Docker), omit the `-s` option,
     so the client uses the default listener at `http://localhost:1947`

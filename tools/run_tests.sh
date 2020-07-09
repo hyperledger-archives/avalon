@@ -28,6 +28,8 @@ generic_client_path="${TCF_HOME}/examples/apps/generic_client"
 # Read Listener port from config file
 listener_port=`grep listener_port ${TCF_HOME}/config/tcs_config.toml | awk {'print $3'}`
 LISTENER_URL="localhost"
+# worker id should match with worker id of singleton enclave manager
+WORKER_ID="singleton-worker-1"
 
 while getopts "l:lh" OPTCHAR ; do
     case $OPTCHAR in
@@ -103,23 +105,24 @@ done
 
 yell "Start testing echo client with service uri ................"
 yell "#------------------------------------------------------------------------------------------------"
-try $echo_client_path/echo_client.py -m "Hello world" -s "http://$LISTENER_URL:1947" -dh
+try $echo_client_path/echo_client.py -m "Hello world" -s "http://$LISTENER_URL:1947" \
+    -dh --worker_id $WORKER_ID
 
 yell "Start testing generic client for echo workload ................"
 yell "#------------------------------------------------------------------------------------------------"
 try $generic_client_path/generic_client.py --uri "http://$LISTENER_URL:1947" \
-    --workload_id "echo-result" --in_data "Hello"
+    --workload_id "echo-result" --in_data "Hello" --worker_id $WORKER_ID
 
 yell "Start testing generic client for heart disease eval workload ................"
 yell "#------------------------------------------------------------------------------------------------"
 try $generic_client_path/generic_client.py --uri "http://$LISTENER_URL:1947" \
     --workload_id "heart-disease-eval" \
-    --in_data "Data: 25 10 1 67  102 125 1 95 5 10 1 11 36 1"
+    --in_data "Data: 25 10 1 67  102 125 1 95 5 10 1 11 36 1" --worker_id $WORKER_ID
 
 yell "Start testing generic client with input data as plain text................"
 yell "#------------------------------------------------------------------------------------------------"
 try $generic_client_path/generic_client.py --uri "http://$LISTENER_URL:1947" \
-    --workload_id "echo-result" --in_data "Hello" -p
+    --workload_id "echo-result" --in_data "Hello" -p --worker_id $WORKER_ID
 
 yell "#------------------------------------------------------------------------------------------------"
 yell "#------------------------------------------------------------------------------------------------"

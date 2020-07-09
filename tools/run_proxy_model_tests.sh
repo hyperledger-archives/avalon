@@ -37,18 +37,20 @@ sleep 30s
 SCRIPTDIR="$(dirname $(readlink --canonicalize ${BASH_SOURCE}))"
 SRCDIR="$(realpath ${SCRIPTDIR}/..)"
 generic_client_path="${TCF_HOME}/examples/apps/generic_client"
+WORKER_ID="singleton-worker-1"
 
 yell "Start testing fabric generic client for echo result workload ................"
 yell "#------------------------------------------------------------------------------------------------"
 try $generic_client_path/fabric_generic_client.py --blockchain fabric \
         --workload_id "echo-result" \
-        --in_data "Hello Fabric proxy model" -o
+        --in_data "Hello Fabric proxy model" -o --worker_id $WORKER_ID
 
 yell "Start testing fabric generic client for heart disease eval workload ................"
 yell "#------------------------------------------------------------------------------------------------"
 try $generic_client_path/fabric_generic_client.py --blockchain fabric \
         --workload_id "heart-disease-eval" \
-        --in_data "Data: 25 10 1 67  102 125 1 95 5 10 1 11 36 1" -o
+        --in_data "Data: 25 10 1 67  102 125 1 95 5 10 1 11 36 1" -o \
+        --worker_id $WORKER_ID
 
 yell "#------------------------------------------------------------------------------------------------"
 yell "#------------------------------------------------------------------------------------------------"
