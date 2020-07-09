@@ -35,6 +35,8 @@ optional arguments:
   -a ADDRESS, --address ADDRESS
                         an address (hex string) of the smart contract (e.g.
                         Worker registry listing)
+  -b {ethereum,fabric}, --blockchain {ethereum,fabric}
+                        Blockchain type to use in proxy model
   -m {listing,registry}, --mode {listing,registry}
                         should be one of listing or registry (default)
   -w WORKER_ID, --worker_id WORKER_ID

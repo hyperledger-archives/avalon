@@ -19,465 +19,273 @@ import sys
 import json
 import argparse
 import logging
-import secrets
-
 import config.config as pconfig
-import utility.logger as plogger
+from direct_model_generic_client import DirectModelGenericClient
+from proxy_model_generic_client import ProxyModelGenericClient
 import utility.hex_utils as hex_utils
 import avalon_crypto_utils.crypto_utility as crypto_utility
-import verify_report.verify_attestation_report as attestation_util
-from avalon_sdk.worker.worker_details import WorkerType
-import avalon_sdk.worker.worker_details as worker_details
-from avalon_sdk.work_order.work_order_params import WorkOrderParams
-from avalon_sdk.connector.blockchains.ethereum.ethereum_worker_registry_list \
-    import EthereumWorkerRegistryListImpl
-from avalon_sdk.connector.direct.jrpc.jrpc_worker_registry import \
-    JRPCWorkerRegistryImpl
-from avalon_sdk.connector.direct.jrpc.jrpc_work_order import \
-    JRPCWorkOrderImpl
-from avalon_sdk.connector.direct.jrpc.jrpc_work_order_receipt \
-    import JRPCWorkOrderReceiptImpl
-from error_code.error_status import WorkOrderStatus, ReceiptCreateStatus
-import avalon_crypto_utils.signature as signature
-from error_code.error_status import SignatureStatus
-from avalon_sdk.work_order_receipt.work_order_receipt \
-    import WorkOrderReceiptRequest
 
-# Remove duplicate loggers
-for handler in logging.root.handlers[:]:
-    logging.root.removeHandler(handler)
-logger = logging.getLogger(__name__)
-TCFHOME = os.environ.get("TCF_HOME", "../../")
+logging.basicConfig(
+    format="%(asctime)s - %(levelname)s - %(message)s", level=logging.INFO)
+TCF_HOME = os.environ.get("TCF_HOME", "../../../")
 
 
-def _parse_command_line(args):
+class GenericClient():
+    """
+    Generic client class to test end to end flow
+    for both direct model and proxy model
+    """
 
-    parser = argparse.ArgumentParser()
-    mutually_excl_group = parser.add_mutually_exclusive_group()
-    parser.add_argument(
-        "-c", "--config",
-        help="The config file containing the Ethereum contract information",
-        type=str)
-    mutually_excl_group.add_argument(
-        "-u", "--uri",
-        help="Direct API listener endpoint, default is http://localhost:1947",
-        default="http://localhost:1947",
-        type=str)
-    mutually_excl_group.add_argument(
-        "-a", "--address",
-        help="an address (hex string) of the smart contract " +
-        "(e.g. Worker registry listing)",
-        type=str)
-    parser.add_argument(
-        "-m", "--mode",
-        help="should be one of listing or registry (default)",
-        default="registry",
-        choices={"registry", "listing"},
-        type=str)
-    mutually_excl_group_worker = parser.add_mutually_exclusive_group(
-        required=True)
-    mutually_excl_group_worker.add_argument(
-        "-w", "--worker_id",
-        help="worker id in plain text to use to submit a work order",
-        type=str)
-    mutually_excl_group_worker.add_argument(
-        "-wx", "--worker_id_hex",
-        help="worker id as hex string to use to submit a work order",
-        type=str)
-    parser.add_argument(
-        "-l", "--workload_id",
-        help='workload id for a given worker',
-        type=str)
-    parser.add_argument(
-        "-i", "--in_data",
-        help='Input data',
-        nargs="+",
-        type=str)
-    parser.add_argument(
-        "-p", "--in_data_plain",
-        help="Send input data as unencrypted plain text",
-        action='store_true')
-    parser.add_argument(
-        "-r", "--receipt",
-        help="If present, retrieve and display work order receipt",
-        action='store_true')
-    parser.add_argument(
-        "-o", "--decrypted_output",
-        help="If present, display decrypted output as JSON",
-        action='store_true')
-    parser.add_argument(
-        "-rs", "--requester_signature",
-        help="Enable requester signature for work order requests",
-        action="store_true")
-    options = parser.parse_args(args)
-
-    return options
-
-
-def _parse_config_file(config_file):
-    # Parse config file and return a config dictionary.
-    if config_file:
-        conf_files = [config_file]
-    else:
-        conf_files = [TCFHOME +
-                      "/sdk/avalon_sdk/tcf_connector.toml"]
-    confpaths = ["."]
-    try:
-        config = pconfig.parse_configuration_files(conf_files, confpaths)
-        json.dumps(config)
-    except pconfig.ConfigurationException as e:
-        logger.error(str(e))
-        config = None
-
-    return config
-
-
-def _retrieve_uri_from_registry_list(config):
-    # Retrieve Http JSON RPC listener uri from registry
-    logger.info("\n Retrieve Http JSON RPC listener uri from registry \n")
-    # Get block chain type
-    blockchain_type = config['blockchain']['type']
-    if blockchain_type == "Ethereum":
-        worker_registry_list = EthereumWorkerRegistryListImpl(
-            config)
-    else:
-        worker_registry_list = None
-        logger.error("\n Worker registry list is currently supported only for "
-                     "ethereum block chain \n")
-        return None
-
-    # Lookup returns tuple, first element is number of registries and
-    # second is element is lookup tag and
-    # third is list of organization ids.
-    registry_count, lookup_tag, registry_list = \
-        worker_registry_list.registry_lookup()
-    logger.info("\n Registry lookup response: registry count: {} "
-                "lookup tag: {} registry list: {}\n".format(
-                    registry_count, lookup_tag, registry_list))
-    if (registry_count == 0):
-        logger.error("No registries found")
-        return None
-    # Retrieve the fist registry details.
-    registry_retrieve_result = worker_registry_list.registry_retrieve(
-        registry_list[0])
-    logger.info("\n Registry retrieve response: {}\n".format(
-        registry_retrieve_result
-    ))
-
-    return registry_retrieve_result[0]
-
-
-def _lookup_first_worker(worker_registry, jrpc_req_id):
-    # Get first worker id from worker registry
-    worker_id = None
-    worker_lookup_result = worker_registry.worker_lookup(
-        worker_type=WorkerType.TEE_SGX, id=jrpc_req_id
-    )
-    logger.info("\n Worker lookup response: {}\n".format(
-        json.dumps(worker_lookup_result, indent=4)
-    ))
-    if "result" in worker_lookup_result and \
-            "ids" in worker_lookup_result["result"].keys():
-        if worker_lookup_result["result"]["totalCount"] != 0:
-            worker_id = worker_lookup_result["result"]["ids"][0]
+    def __init__(self, args):
+        # Parse command line arguments
+        options = self._parse_command_line(args)
+        # Read config params
+        if options.config:
+            self._config = self._parse_config_file(options.config)
         else:
-            logger.error("ERROR: No workers found")
-            worker_id = None
-    else:
-        logger.error("ERROR: Failed to lookup worker")
-        worker_id = None
-
-    return worker_id
-
-
-def _do_worker_verification(worker_obj):
-    encryption_key_signature = worker_obj.encryption_key_signature
-    if encryption_key_signature is not None:
-        encryption_key = worker_obj.encryption_key
-        verify_key = worker_obj.verification_key
-
-        # Verify worker encryption key signature using worker verification key
-        sig_obj = signature.ClientSignature()
-        sig_status = sig_obj.verify_encryption_key_signature(
-            encryption_key_signature, encryption_key, verify_key)
-        if (sig_status != SignatureStatus.PASSED):
-            logger.error("Failed to verify worker encryption key signature")
-            exit(1)
-
-    # Do worker verfication on proof data if it exists
-    # Proof data exists in SGX hardware mode.
-    # TODO Need to do verify MRENCLAVE value
-    # in the attestation report
-    if not worker_obj.proof_data:
-        logger.info("Proof data is empty. " +
-                    "Skipping verification of attestation report")
-    else:
-        # Construct enclave signup info json
-        enclave_info = {
-            'verifying_key': worker_obj.verification_key,
-            'encryption_key': worker_obj.encryption_key,
-            'proof_data': worker_obj.proof_data,
-            'enclave_persistent_id': ''
-        }
-
-        logger.info("Perform verification of attestation report")
-        verify_report_status = attestation_util.verify_attestation_report(
-            enclave_info)
-        if verify_report_status is False:
-            logger.error("Verification of enclave signup info failed")
-            exit(1)
+            self._config = self._parse_config_file(
+                TCF_HOME +
+                "/sdk/avalon_sdk/tcf_connector.toml")
+        if self._config is None:
+            logging.error("\n Error in parsing config file: {}\n")
+            sys.exit(-1)
+        if options.blockchain:
+            self._config['blockchain']['type'] = options.blockchain
+            self._blockchain = options.blockchain
         else:
-            logger.info("Verification of enclave signup info passed")
+            self._blockchain = self._config['blockchain']['type']
 
+        self._is_direct_mode = False
+        # Mode
+        self._mode = options.mode
 
-def _create_work_order_params(worker_id, workload_id, in_data,
-                              worker_encrypt_key, session_key, session_iv,
-                              enc_data_enc_key):
-    # Convert workloadId to hex
-    workload_id = workload_id.encode("UTF-8").hex()
-    work_order_id = secrets.token_hex(32)
-    requester_id = secrets.token_hex(32)
-    requester_nonce = secrets.token_hex(16)
-    # Create work order params
-    try:
-        wo_params = WorkOrderParams(
-            work_order_id, worker_id, workload_id, requester_id,
-            session_key, session_iv, requester_nonce,
-            result_uri=" ", notify_uri=" ",
-            worker_encryption_key=worker_encrypt_key,
-            data_encryption_algorithm="AES-GCM-256"
-            )
+        # Http JSON RPC listener uri
+        self._uri = options.uri
+        if self._uri:
+            self._config["tcf"]["json_rpc_uri"] = self._uri
 
-    except Exception as err:
-        return False, err
+        # Address of smart contract
+        self._address = options.address
+        if self._address:
+            if self._mode == "listing":
+                self._config["ethereum"]["direct_registry_contract_address"] =\
+                    self._address
+            elif self._mode == "registry":
+                logging.error(
+                    "\n Only Worker registry listing address is supported." +
+                    "Worker registry address is unsupported \n")
+                sys.exit(-1)
 
-    # Add worker input data
-    for value in in_data:
-        wo_params.add_in_data(value,
-                              encrypted_data_encryption_key=enc_data_enc_key)
+        bc_type = self._blockchain
+        if self._uri or self._address:
+            self._is_direct_mode = True
+        elif bc_type == 'fabric' or bc_type == 'ethereum':
+            self._is_direct_mode = False
 
-    # Encrypt work order request hash
-    code, out_json = wo_params.add_encrypted_request_hash()
-    if not code:
-        return code, out_json
+        # worker id
+        self._worker_id = options.worker_id
+        self._worker_id_hex = options.worker_id_hex
 
-    return True, wo_params
+        self._worker_id = self._worker_id_hex if not self._worker_id \
+            else hex_utils.get_worker_id_from_name(self._worker_id)
 
+        # work load id of worker
+        self._workload_id = options.workload_id
+        if not self._workload_id:
+            logging.error("\nWorkload id is mandatory\n")
+            sys.exit(-1)
 
-def _create_work_order_receipt(wo_receipt, wo_params,
-                               client_private_key, jrpc_req_id):
-    # Create a work order receipt object using WorkOrderReceiptRequest class.
-    # This function will send a WorkOrderReceiptCreate JSON RPC request.
-    wo_request = json.loads(wo_params.to_jrpc_string(jrpc_req_id))
-    wo_receipt_request_obj = WorkOrderReceiptRequest()
-    wo_create_receipt = wo_receipt_request_obj.create_receipt(
-        wo_request,
-        ReceiptCreateStatus.PENDING.value,
-        client_private_key
-    )
-    logger.info("Work order create receipt request : {} \n \n ".format(
-        json.dumps(wo_create_receipt, indent=4)
-    ))
-    # Submit work order create receipt jrpc request
-    wo_receipt_resp = wo_receipt.work_order_receipt_create(
-        wo_create_receipt["workOrderId"],
-        wo_create_receipt["workerServiceId"],
-        wo_create_receipt["workerId"],
-        wo_create_receipt["requesterId"],
-        wo_create_receipt["receiptCreateStatus"],
-        wo_create_receipt["workOrderRequestHash"],
-        wo_create_receipt["requesterGeneratedNonce"],
-        wo_create_receipt["requesterSignature"],
-        wo_create_receipt["signatureRules"],
-        wo_create_receipt["receiptVerificationKey"],
-        jrpc_req_id
-    )
-    logger.info("Work order create receipt response : {} \n \n ".format(
-        wo_receipt_resp
-    ))
+        # work order input data
+        self._in_data = options.in_data
 
+        # Option to send input data in plain text
+        self._in_data_plain_text = options.in_data_plain
 
-def _retrieve_work_order_receipt(wo_receipt, wo_params, jrpc_req_id):
-    # Retrieve work order receipt
-    receipt_res = wo_receipt.work_order_receipt_retrieve(
-        wo_params.get_work_order_id(),
-        id=jrpc_req_id
-    )
-    logger.info("\n Retrieve receipt response:\n {}".format(
-        json.dumps(receipt_res, indent=4)
-    ))
-    # Retrieve last update to receipt by passing 0xFFFFFFFF
-    jrpc_req_id += 1
-    receipt_update_retrieve = \
-        wo_receipt.work_order_receipt_update_retrieve(
-            wo_params.get_work_order_id(),
-            None,
-            1 << 32,
-            id=jrpc_req_id)
-    logger.info("\n Last update to receipt receipt is:\n {}".format(
-        json.dumps(receipt_update_retrieve, indent=4)
-    ))
+        # show receipt in output
+        self._show_receipt = options.receipt
 
-    return receipt_update_retrieve
+        # show decrypted result in output
+        self._show_decrypted_output = options.decrypted_output
 
+        # requester signature for work order requests
+        self._requester_signature = options.requester_signature
 
-def _verify_receipt_signature(receipt_update_retrieve):
-    # Verify receipt signature
-    sig_obj = signature.ClientSignature()
-    status = sig_obj.verify_update_receipt_signature(
-        receipt_update_retrieve['result'])
-    if status == SignatureStatus.PASSED:
-        logger.info(
-            "Work order receipt retrieve signature verification " +
-            "successful")
-    else:
-        logger.error(
-            "Work order receipt retrieve signature verification failed!!")
-        return False
+        logging.info("******* Hyperledger Avalon Generic client *******")
 
-    return True
+        # mode should be one of listing or registry (default)
+        if self._mode == "registry" and self._address:
+            logging.error("\n Worker registry contract"
+                          " address is unsupported \n")
+            sys.exit(-1)
 
+    def _parse_command_line(self, args):
+        parser = argparse.ArgumentParser()
+        mutually_excl_group = parser.add_mutually_exclusive_group(
+            required=True)
+        parser.add_argument(
+            "-c", "--config",
+            help="The config file containing the "
+                 "Ethereum contract information",
+            type=str)
+        mutually_excl_group.add_argument(
+            "-u", "--uri",
+            help="Direct API listener endpoint",
+            type=str)
+        mutually_excl_group.add_argument(
+            "-a", "--address",
+            help="an address (hex string) of the smart contract " +
+            "(e.g. Worker registry listing)",
+            type=str)
+        mutually_excl_group.add_argument(
+            "-b", "--blockchain",
+            help="Blockchain type to use in proxy model",
+            choices={"fabric", "ethereum"},
+            type=str,
+        )
+        parser.add_argument(
+            "-m", "--mode",
+            help="should be one of listing or registry (default)",
+            default="registry",
+            choices={"registry", "listing"},
+            type=str)
+        mutually_excl_group_worker = parser.add_mutually_exclusive_group()
+        mutually_excl_group_worker.add_argument(
+            "-w", "--worker_id",
+            help="worker id in plain text to use to submit a work order",
+            type=str)
+        mutually_excl_group_worker.add_argument(
+            "-wx", "--worker_id_hex",
+            help="worker id as hex string to use to submit a work order",
+            type=str)
+        parser.add_argument(
+            "-l", "--workload_id",
+            help='workload id for a given worker',
+            type=str)
+        parser.add_argument(
+            "-i", "--in_data",
+            help='Input data',
+            nargs="+",
+            type=str)
+        parser.add_argument(
+            "-p", "--in_data_plain",
+            help="Send input data as un-encrypted plain text",
+            action='store_true')
+        parser.add_argument(
+            "-r", "--receipt",
+            help="If present, retrieve and display work order receipt",
+            action='store_true')
+        parser.add_argument(
+            "-o", "--decrypted_output",
+            help="If present, display decrypted output as JSON",
+            action='store_true')
+        parser.add_argument(
+            "-rs", "--requester_signature",
+            help="Enable requester signature for work order requests",
+            action="store_true")
+        options = parser.parse_args(args)
 
-def _verify_wo_res_signature(work_order_res,
-                             worker_verification_key,
-                             requester_nonce):
-    # Verify work order result signature
-    sig_obj = signature.ClientSignature()
-    status = sig_obj.verify_signature(work_order_res,
-                                      worker_verification_key,
-                                      requester_nonce)
-    if status == SignatureStatus.PASSED:
-        logger.info("Signature verification Successful")
-    else:
-        logger.error("Signature verification Failed")
-        return False
+        return options
 
-    return True
+    def _parse_config_file(self, config_file):
+        # Parse config file and return a config dictionary.
+        if config_file:
+            conf_files = [config_file]
+        else:
+            conf_files = [TCF_HOME + "/sdk/avalon_sdk/tcf_connector.toml"]
+        confpaths = ["."]
+        try:
+            config = pconfig.parse_configuration_files(conf_files, confpaths)
+            json.dumps(config)
+        except pconfig.ConfigurationException as e:
+            logging.error(str(e))
+            config = None
+
+        return config
+
+    def is_direct_mode(self):
+        return self._is_direct_mode is True
+
+    def get_config(self):
+        return self._config
+
+    def get_blockchain_type(self):
+        return self._blockchain
+
+    def get_worker_id(self):
+        return self._worker_id
+
+    def in_data_plain_text(self):
+        return self._in_data_plain_text
+
+    def show_receipt(self):
+        return self._show_receipt
+
+    def workload_id(self):
+        return self._workload_id
+
+    def in_data(self):
+        return self._in_data
+
+    def requester_signature(self):
+        return self._requester_signature
+
+    def show_decrypted_output(self):
+        return self._show_decrypted_output
+
+    def uri(self):
+        return self._uri
+
+    def mode(self):
+        return self._mode
 
 
 def Main(args=None):
-    options = _parse_command_line(args)
-
-    config = _parse_config_file(options.config)
-    if config is None:
-        logger.error("\n Error in parsing config file: {}\n".format(
-            options.config
-        ))
-        sys.exit(-1)
-
-    # mode should be one of listing or registry (default)
-    mode = options.mode
-
-    # Http JSON RPC listener uri
-    uri = options.uri
-    if uri:
-        config["tcf"]["json_rpc_uri"] = uri
-
-    # Address of smart contract
-    address = options.address
-    if address:
-        if mode == "listing":
-            config["ethereum"]["direct_registry_contract_address"] = \
-                address
-        elif mode == "registry":
-            logger.error(
-                "\n Only Worker registry listing address is supported." +
-                "Worker registry address is unsupported \n")
-            sys.exit(-1)
-
-    # worker id
-    worker_id = options.worker_id
-    worker_id_hex = options.worker_id_hex
-
-    worker_id = worker_id_hex if not worker_id \
-        else hex_utils.get_worker_id_from_name(worker_id)
-
-    # work load id of worker
-    workload_id = options.workload_id
-    if not workload_id:
-        logger.error("\nWorkload id is mandatory\n")
-        sys.exit(-1)
-
-    # work order input data
-    in_data = options.in_data
-
-    # Option to send input data in plain text
-    in_data_plain_text = options.in_data_plain
-
-    # show receipt in output
-    show_receipt = options.receipt
-
-    # show decrypted result in output
-    show_decrypted_output = options.decrypted_output
-
-    # requester signature for work order requests
-    requester_signature = options.requester_signature
-
-    # setup logging
-    config["Logging"] = {
-        "LogFile": "__screen__",
-        "LogLevel": "INFO"
-    }
-
-    plogger.setup_loggers(config.get("Logging", {}))
-    sys.stdout = plogger.stream_to_logger(
-        logging.getLogger("STDOUT"), logging.DEBUG)
-    sys.stderr = plogger.stream_to_logger(
-        logging.getLogger("STDERR"), logging.WARN)
-
-    logger.info("******* Hyperledger Avalon Generic client *******")
-
-    if mode == "registry" and address:
-        logger.error("\n Worker registry contract address is unsupported \n")
+    parser = GenericClient(args)
+    generic_client_obj = None
+    if parser.is_direct_mode():
+        generic_client_obj = DirectModelGenericClient(
+            parser.get_config())
+    elif parser.get_blockchain_type() in ["fabric", "ethereum"]:
+        generic_client_obj = ProxyModelGenericClient(
+            parser.get_config(),
+            parser.get_blockchain_type())
+    else:
+        logging.error("Invalid inputs to generic client")
         sys.exit(-1)
 
     # Retrieve JSON RPC uri from registry list
-    if not uri and mode == "listing":
-        uri = _retrieve_uri_from_registry_list(config)
-        if uri is None:
-            logger.error("\n Unable to get http JSON RPC uri \n")
-            sys.exit(-1)
-
+    if not parser.uri() and parser.mode() == "listing":
+        self._uri = self.retrieve_uri_from_registry_list(self._config)
     # Prepare worker
-    # JRPC request id. Choose any integer value
-    jrpc_req_id = 31
-    worker_registry = JRPCWorkerRegistryImpl(config)
-    if not worker_id:
-        # Get first worker from worker registry
-        worker_id = _lookup_first_worker(worker_registry, jrpc_req_id)
-        if worker_id is None:
-            logger.error("\n Unable to get worker \n")
-            sys.exit(-1)
+    worker_id = parser.get_worker_id()
+    if worker_id is None:
+        logging.error("worker id is missing")
+        sys.exit(-1)
+
+    if worker_id is None:
+        logging.error("\n Unable to get worker {}\n".format(worker_id))
+        sys.exit(-1)
 
     # Retrieve worker details
-    jrpc_req_id += 1
-    worker_retrieve_result = worker_registry.worker_retrieve(
-        worker_id, jrpc_req_id
+    worker_obj = generic_client_obj.get_worker_details(
+        worker_id
     )
-    logger.info("\n Worker retrieve response: {}\n".format(
-        json.dumps(worker_retrieve_result, indent=4)
-    ))
-
-    if "error" in worker_retrieve_result:
-        logger.error("Unable to retrieve worker details\n")
-        sys.exit(1)
+    if worker_obj is None:
+        logging.error("Unable to retrieve worker details\n")
+        sys.exit(-1)
 
     # Create session key and iv to sign work order request
     session_key = crypto_utility.generate_key()
     session_iv = crypto_utility.generate_iv()
 
-    # Initializing Worker Object
-    worker_obj = worker_details.SGXWorkerDetails()
-    worker_obj.load_worker(worker_retrieve_result['result']['details'])
-
     # Do worker verification
-    _do_worker_verification(worker_obj)
+    generic_client_obj.do_worker_verification(worker_obj)
 
-    logger.info("**********Worker details Updated with Worker ID" +
-                "*********\n%s\n", worker_id)
+    logging.info("**********Worker details Updated with Worker ID" +
+                 "*********\n%s\n", worker_id)
 
     # Create work order
-    if in_data_plain_text:
+    if parser.in_data_plain_text():
         # As per TC spec, if encryptedDataEncryptionKey is "-" then
         # input data is not encrypted
         encrypted_data_encryption_key = "-"
@@ -487,97 +295,77 @@ def Main(args=None):
         # use default session key to encrypt input data
         encrypted_data_encryption_key = None
 
-    code, wo_params = _create_work_order_params(
-                            worker_id, workload_id,
-                            in_data, worker_obj.encryption_key,
-                            session_key, session_iv,
-                            encrypted_data_encryption_key)
+    code, wo_params = generic_client_obj.create_work_order_params(
+        worker_id, parser.workload_id(),
+        parser.in_data(),
+        worker_obj.encryption_key,
+        session_key, session_iv,
+        encrypted_data_encryption_key)
     if not code:
-        logger.error("Work order submission failed: {}\n".format(
-            wo_params
-        ))
-        exit(1)
+        logging.error("Work order request creation failed")
+        sys.exit(-1)
 
     client_private_key = crypto_utility.generate_signing_keys()
-    if requester_signature:
+    if parser.requester_signature():
         # Add requester signature and requester verifying_key
         if wo_params.add_requester_signature(client_private_key) is False:
-            logger.info("Work order request signing failed")
-            exit(1)
+            logging.info("Work order request signing failed")
+            sys.exit(-1)
 
-    # Submit work order
-    logger.info("Work order submit request : %s, \n \n ",
-                wo_params.to_jrpc_string(jrpc_req_id))
-    work_order = JRPCWorkOrderImpl(config)
-    jrpc_req_id += 1
-    response = work_order.work_order_submit(
-        wo_params.get_work_order_id(),
-        wo_params.get_worker_id(),
-        wo_params.get_requester_id(),
-        wo_params.to_string(),
-        id=jrpc_req_id
-    )
-    logger.info("Work order submit response : {}\n ".format(
-        json.dumps(response, indent=4)
-    ))
+    submit_status, wo_submit_res = generic_client_obj.submit_work_order(
+        wo_params)
 
-    if "error" in response and response["error"]["code"] != \
-            WorkOrderStatus.PENDING:
-        sys.exit(1)
+    if submit_status:
+        # Create receipt
+        if parser.show_receipt():
+            generic_client_obj.create_work_order_receipt(
+                wo_params,
+                client_private_key)
+        work_order_id = wo_params.get_work_order_id()
+        # Retrieve work order result
+        status, wo_res = generic_client_obj.get_work_order_result(
+            work_order_id
+        )
 
-    # Create receipt
-    wo_receipt = JRPCWorkOrderReceiptImpl(config)
-    if show_receipt:
-        jrpc_req_id += 1
-        _create_work_order_receipt(wo_receipt, wo_params,
-                                   client_private_key, jrpc_req_id)
-
-    # Retrieve work order result
-    jrpc_req_id += 1
-    res = work_order.work_order_get_result(
-        wo_params.get_work_order_id(),
-        jrpc_req_id
-    )
-
-    logger.info("Work order get result : {}\n ".format(
-        json.dumps(res, indent=4)
-    ))
-
-    # Check if result field is present in work order response
-    if "result" in res:
-        # Verify work order response signature
-        if _verify_wo_res_signature(res['result'],
-                                    worker_obj.verification_key,
-                                    wo_params.get_requester_nonce()) is False:
-            logger.error("Work order response signature verification Failed")
-            sys.exit(1)
-        # Decrypt work order response
-        if show_decrypted_output:
-            decrypted_res = crypto_utility.decrypted_response(
-                res['result'], session_key, session_iv)
-            logger.info("\nDecrypted response:\n {}"
-                        .format(decrypted_res))
-    else:
-        logger.error("\n Work order get result failed {}\n".format(
-            res
-        ))
-        sys.exit(1)
-
-    if show_receipt:
-        # Retrieve receipt
-        jrpc_req_id += 1
-        retrieve_wo_receipt \
-            = _retrieve_work_order_receipt(wo_receipt,
-                                           wo_params, jrpc_req_id)
-        # Verify receipt signature
-        if "result" in retrieve_wo_receipt:
-            if _verify_receipt_signature(
-                    retrieve_wo_receipt) is False:
-                logger.error("Receipt signature verification Failed")
-                sys.exit(1)
+        # Check if result field is present in work order response
+        if status:
+            # Verify work order response signature
+            if generic_client_obj.verify_wo_response_signature(
+                wo_res['result'],
+                worker_obj.verification_key,
+                wo_params.get_requester_nonce()
+            ) is False:
+                logging.error("Work order response signature"
+                              " verification Failed")
+                sys.exit(-1)
+            # Decrypt work order response
+            if parser.show_decrypted_output():
+                decrypted_res = generic_client_obj.decrypt_wo_response(
+                    wo_res['result'])
+                logging.info("\nDecrypted response:\n {}".format(
+                    decrypted_res))
         else:
-            logger.info("Work Order receipt retrieve failed")
-            sys.exit(1)
+            logging.error("\n Work order get result failed\n")
+            sys.exit(-1)
+
+        if parser.show_receipt():
+            # Retrieve receipt
+            retrieve_wo_receipt = \
+                generic_client_obj.retrieve_work_order_receipt(
+                    work_order_id)
+            # Verify receipt signature
+            if retrieve_wo_receipt:
+                if "result" in retrieve_wo_receipt:
+                    if generic_client_obj.verify_receipt_signature(
+                            retrieve_wo_receipt) is False:
+                        logging.error("Receipt signature verification Failed")
+                        sys.exit(-1)
+                else:
+                    logging.info("Work Order receipt retrieve failed")
+                    sys.exit(-1)
+    else:
+        logging.error("Work order submit failed {}".format(wo_submit_res))
+        sys.exit(-1)
 
 
 # -----------------------------------------------------------------------------

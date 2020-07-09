@@ -103,13 +103,13 @@ To run Besu with Hyperledger Avalon, follow these steps:
 
    To run in Intel SGX hardware mode, use the corresponding docker compose file for singleton or worker pool mode (as specified in `BUILD.md <../BUILD.md>`_).
 
-8. Go to the ``avalon-shell`` container to run ``eth_generic_client.py``:
+8. Go to the ``avalon-shell`` container to run ``generic_client.py``:
 
    .. code:: sh
 
        docker exec -it avalon-shell bash
        cd examples/apps/generic_client/
-       ./eth_generic_client.py -b ethereum --workload_id "echo-result" -o --in_data "Hello" \
+       ./generic_client.py -b ethereum --workload_id "echo-result" -o --in_data "Hello" \
            --worker_id "singleton-worker-1"
 
    NOTE: ``worker_id`` should match with worker id of singleton enclave manager or target worker pool.

@@ -74,14 +74,13 @@ follow these steps:
    To save time, omit the ``--build`` parameter after running the first time
    so it will not rebuild Avalon.
 
-6. Go to the ``avalon-shell`` container to run ``fabric_generic_client.py``:
+6. Go to the ``avalon-shell`` container to run ``generic_client.py``:
 
    .. code:: sh
 
        docker exec -it  avalon-shell bash
-
        cd examples/apps/generic_client/
-       ./fabric_generic_client.py -b fabric --workload_id "echo-result" --in_data "Hello" -o \
+       ./generic_client.py -b fabric --workload_id "echo-result" --in_data "Hello" -o \
            --worker_id "singleton-worker-1"
 
    NOTE: ``worker_id`` should match with worker id of singleton enclave manager or target worker pool.
@@ -136,12 +135,12 @@ requires below changes.
    To run in Intel SGX hardware mode, use the corresponding Docker compose file for singleton or worker pool mode (as specified in BUILD.md).
 
 7. To test using fabric generic client.
-   Go to the avalon-shell container to run fabric_generic_client.py
+   Go to the avalon-shell container to run generic_client.py
 
    .. code:: sh
         docker exec -it  avalon-shell bash
         cd examples/apps/generic_client/
-        ./fabric_generic_client.py -b fabric --workload_id "echo-result" --in_data "Hello" -o \
+        ./generic_client.py -b fabric --workload_id "echo-result" --in_data "Hello" -o \
     --worker_id "singleton-worker-1"
 
 
