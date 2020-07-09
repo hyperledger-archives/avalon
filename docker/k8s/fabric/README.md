@@ -61,7 +61,7 @@ This serves as a playground to setup k8s cluster for Avalon Fabric proxy model.
 3. To execute a transaction from shell
    ```bash
    cd examples/apps/generic_client
-   ./fabric_generic_client.py -b fabric --workload_id "echo-result" --in_data "Hello" \
+   ./generic_client.py -b fabric --workload_id "echo-result" --in_data "Hello" \
        --worker_id "singleton-worker-1"
    ```
 
