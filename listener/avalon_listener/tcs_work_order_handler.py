@@ -206,7 +206,6 @@ class TCSWorkOrderHandler:
               as defined in EEA spec 6.1.1
         Returns jrpc response as defined in EEA spec 6.1.3
         """
-
         wo_id = params["workOrderId"]
         input_json_str = params["raw"]
         input_value_json = json.loads(input_json_str)
