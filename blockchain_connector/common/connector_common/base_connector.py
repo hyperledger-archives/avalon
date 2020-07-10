@@ -31,6 +31,9 @@ from connector_common.work_order_delegate import \
 logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(message)s", level=logging.INFO)
 
+# Poll interval to update workers on chain with those in kv store
+WORKER_REFRESH_INTERVAL = 30
+
 
 class BaseConnector(BlockchainConnectorInterface):
 
@@ -81,24 +84,32 @@ class BaseConnector(BlockchainConnectorInterface):
         # TODO need to use registries.
         logging.info("Not implemented yet")
 
-    def sync_workers(self):
+    async def sync_workers(self):
         """
         Sync up workers between blockchain and avalon
         """
         # Fetch first worker details from shared KV (via direct API)
         # and add the worker to block chain.
-        # TODO: Fetch all workers from shared KV and block chain
-        # and do 2-way sync.
-        self._active_worker_ids = \
-            self._worker_delegate.lookup_workers_in_kv_storage()
-        # Lookup worker ids from blockchain
-        chain_worker_ids = self._worker_delegate.lookup_workers_onchain()
-        # Add/Update workers to chain
-        self._worker_delegate.add_update_worker_to_chain(
-            self._active_worker_ids,
-            chain_worker_ids)
+        # TODO: Fetch all workers from blockchain and update kv store
+        # That will be a 2-way sync. As of now, only one way.
+        while True:
+            try:
+                self._active_worker_ids = \
+                    self._worker_delegate.lookup_workers_in_kv_storage()
+                # Lookup worker ids from blockchain
+                chain_worker_ids = self._worker_delegate.\
+                    lookup_workers_onchain()
+                # Add/Update workers to chain
+                self._worker_delegate.add_update_worker_to_chain(
+                    self._active_worker_ids,
+                    chain_worker_ids)
+                # Sleep for 30 seconds and poll again
+                await asyncio.sleep(WORKER_REFRESH_INTERVAL)
+            except Exception as ex:
+                logging.exception("Exception occurred during worker sync-up {}"
+                                  .format(ex))
 
-    def sync_work_orders(self):
+    async def sync_work_orders(self):
         """
         Sync up work orders between blockchain and avalon
         """
@@ -126,7 +137,7 @@ class BaseConnector(BlockchainConnectorInterface):
         """
         logging.info("Got work order request {} from blockchain".format(
             work_order_params
-            ))
+        ))
         # Submit work order request if request has active
         # worker id
         if worker_id in self._active_worker_ids:
@@ -141,6 +152,19 @@ class BaseConnector(BlockchainConnectorInterface):
                 logging.info("Work order processing failed!")
 
     def start(self):
+        """
+        Function to start the connector
+        """
+        event_loop = asyncio.get_event_loop()
         logging.info("Blockchain Connector service started")
-        self.sync_workers()
-        self.sync_work_orders()
+        try:
+            event_loop.run_until_complete(self.sync())
+        finally:
+            event_loop.close()
+
+    async def sync(self):
+        """
+        Wrapper function to wait for the coroutines to finish. It simply
+        waits for the sync_workers() & sync_work_orders() to complete.
+        """
+        await asyncio.wait([self.sync_workers(), self.sync_work_orders()])
