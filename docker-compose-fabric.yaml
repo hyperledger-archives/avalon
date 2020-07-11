@@ -35,8 +35,11 @@ services:
       - http_proxy
       - https_proxy
       - no_proxy
+    # Mandatory sleep before boot to ensure worker initialization is complete.
+    # Should be taken care via proper worker syncup
     command: |
       bash -c "
+        sleep 30
         avalon_fabric_connector -u http://avalon-listener:1947
         tail -f /dev/null
         "
