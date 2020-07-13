@@ -59,6 +59,14 @@ To run Fabric with Hyperledger Avalon, follow these steps:
 
        docker-compose -f docker-compose.yaml -f docker-compose-fabric.yaml up --build
 
+   To start a worker pool (with one Key Management Enclave and one Work order Processing Enclave):
+
+   .. code:: sh
+
+       docker-compose -f docker-compose.yaml -f docker-compose-pool.yaml -f docker-compose-fabric.yaml --build
+
+   To run in Intel SGX hardware mode, use the corresponding docker compose file for singleton or worker pool mode (as specified in `BUILD.md <../BUILD.md>`_).
+
    Once the Fabric containers are up and running we can start and stop Avalon
    containers any number of times without restarting the Fabric containers.
    To save time, omit the ``--build`` parameter after running the first time
