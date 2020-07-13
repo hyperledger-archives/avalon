@@ -96,6 +96,14 @@ To run Ganache with Hyperledger Avalon, follow these steps:
        cd $TCF_HOME
        docker-compose -f docker-compose.yaml -f docker-compose-eth-ganache.yaml up -d --build
 
+   To start a worker pool (with one Key Management Enclave and one Work order Processing Enclave):
+
+   .. code:: sh
+
+       docker-compose -f docker-compose.yaml -f docker-compose-pool.yaml -f docker-compose-eth-ganache.yaml --build
+
+   To run in Intel SGX hardware mode, use the corresponding docker compose file for singleton or worker pool mode (as specified in `BUILD.md <../BUILD.md>`_).
+
 6. Go to the ``avalon-shell`` container to run ``eth_generic_client.py``:
 
    .. code:: sh
