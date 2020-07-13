@@ -14,9 +14,9 @@ If you have not done so already, clone the Avalon source repository.
 Choose whether you want the stable version (recommended) or the most recent
 version
 
-- To use the current stable branch (recommended), run this command:
+- To use the current stable release (recommended), run this command:
   ```bash
-  git clone https://github.com/hyperledger/avalon --branch pre-release-v0.5
+  git clone https://github.com/hyperledger/avalon -b pre-release-v0.6
   ```
 
 - Or, to use the latest branch, run this command:
