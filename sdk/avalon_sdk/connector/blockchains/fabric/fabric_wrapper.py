@@ -23,6 +23,8 @@ from avalon_sdk.connector.blockchains.common.contract_response \
 from avalon_sdk.connector.blockchains.fabric import base
 from avalon_sdk.connector.blockchains.fabric import tx_committer
 from avalon_sdk.connector.blockchains.fabric import event_listener
+from avalon_sdk.connector.blockchains.fabric.chaincode_methods \
+    import ValidChainCodeMethods
 from hfc.protos.common import common_pb2 as common
 
 logging.basicConfig(
@@ -59,11 +61,8 @@ class FabricWrapper():
                 self.__network_conf_file,
                 self.__channel_name, self.__orgname,
                 self.__peername, 'Admin')
-            with open(
-                self.__tcf_home +
-                    '/sdk/avalon_sdk/connector/blockchains/fabric/' +
-                    'methods.json', 'r') as all_methods:
-                self.__valid_calls = json.load(all_methods)
+            cc_methods = ValidChainCodeMethods()
+            self.__valid_calls = cc_methods.get_valid_cc_methods()
         else:
             raise Exception("Invalid configuration parameter")
 
