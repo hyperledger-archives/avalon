@@ -241,7 +241,6 @@ COPY ./tests /project/avalon/tests
 COPY ./sdk/avalon_sdk/tcf_connector.toml /project/avalon/sdk/avalon_sdk/
 COPY ./examples/apps/ /project/avalon/examples/apps
 COPY ./sdk/avalon_sdk/connector/blockchains/ethereum/contracts /project/avalon/sdk/avalon_sdk/connector/blockchains/ethereum/contracts
-COPY ./sdk/avalon_sdk/connector/blockchains/fabric/methods.json /project/avalon/sdk/avalon_sdk/connector/blockchains/fabric/
 
 # Copy Python build artifacts
 COPY --from=common_python_image /project/avalon/common/python/dist/*.whl dist/
