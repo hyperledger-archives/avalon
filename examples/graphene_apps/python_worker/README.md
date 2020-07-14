@@ -9,6 +9,7 @@ https://creativecommons.org/licenses/by/4.0/
 * Avalon python worker implementation is based on [EEA Trusted Compute Specification](https://entethalliance.github.io/trusted-computing/spec.html).
 * [Graphene Library OS](https://graphene.readthedocs.io/en/latest/index.html) supports running unmodified Linux applications on Intel SGX. A Library OS (or "LibOS") provides an Operating System environment in a user space library to execute an application.
 * Avalon python worker supports execution of python workloads inside a docker container (without Intel SGX) and also in Graphene-SGX environment.
+* Avalon python worker uses [pycryptodomex](https://pypi.org/project/pycryptodomex/) package for encryption and [ecdsa](https://pypi.org/project/ecdsa/) package for signing and verification.
 
 ## Design Assumptions
 
@@ -167,11 +168,11 @@ https://creativecommons.org/licenses/by/4.0/
 
 ## Reference
 * [Graphene Library OS](
-  github.com/oscarlab/graphene#graphene-library-os-with-intel-sgx-support)
+  https://github.com/oscarlab/graphene#graphene-library-os-with-intel-sgx-support)
   Graphene Library OS GitHub.
 * [Docker integration via Graphene Shielded Containers](
-  github.com/oscarlab/graphene/blob/master/Documentation/manpages/gsc.rst)
+  https://github.com/oscarlab/graphene/blob/master/Documentation/manpages/gsc.rst)
   Graphene Shielded Containers documentation.
 * [Graphene Avalon Integration Tech Talk](
-  wiki.hyperledger.org/display/avalon/2020-06-30+LibOS%2C+Graphene+in+Avalon)
+  https://wiki.hyperledger.org/display/avalon/2020-06-30+LibOS%2C+Graphene+in+Avalon)
   Graphene Avalon Integration tech talk by Manoj Gopalakrishnan (2020).
