@@ -100,7 +100,7 @@ To run Ganache with Hyperledger Avalon, follow these steps:
 
    .. code:: sh
 
-       docker-compose -f docker-compose.yaml -f docker-compose-pool.yaml -f docker-compose-eth-ganache.yaml --build
+       docker-compose -f docker-compose.yaml -f docker-compose-pool.yaml -f docker-compose-eth-ganache.yaml up -d --build
 
    To run in Intel SGX hardware mode, use the corresponding docker compose file for singleton or worker pool mode (as specified in `BUILD.md <../BUILD.md>`_).
 
