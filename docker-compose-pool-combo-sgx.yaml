@@ -1,0 +1,72 @@
+# Copyright 2020 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+version: '3.5'
+
+services:
+
+  avalon-kme-1:
+    container_name: avalon-kme-1
+    image: avalon-enclave-manager-kme-sgx-dev
+    build:
+      args:
+        - SGX_MODE=HW
+    volumes:
+      # Map aesm service on host to docker, required only in HW mode.
+      - /var/run/aesmd/aesm.socket:/var/run/aesmd/aesm.socket
+    devices:
+      - "/dev/isgx:/dev/isgx"
+
+  avalon-enclave-manager:
+    container_name: avalon-wpe-1-1
+    image: avalon-enclave-manager-wpe-heart-disease-sgx-dev
+    build:
+      args:
+        - SGX_MODE=HW
+    volumes:
+      # Map aesm service on host to docker, required only in HW mode.
+      - /var/run/aesmd/aesm.socket:/var/run/aesmd/aesm.socket
+    devices:
+      - "/dev/isgx:/dev/isgx"
+
+  avalon-kme-2:
+    container_name: avalon-kme-2
+    image: avalon-enclave-manager-kme-sgx-dev
+    volumes:
+      # Map aesm service on host to docker, required only in HW mode.
+      - /var/run/aesmd/aesm.socket:/var/run/aesmd/aesm.socket
+    devices:
+      - "/dev/isgx:/dev/isgx"
+
+  avalon-wpe-2-1:
+    container_name: avalon-wpe-2-1
+    image: avalon-enclave-manager-wpe-echo-sgx-dev
+    build:
+      args:
+        - SGX_MODE=HW
+    volumes:
+      # Map aesm service on host to docker, required only in HW mode.
+      - /var/run/aesmd/aesm.socket:/var/run/aesmd/aesm.socket
+    devices:
+      - "/dev/isgx:/dev/isgx"
+
+  avalon-wpe-2-2:
+    container_name: avalon-wpe-2-2
+    image: avalon-enclave-manager-wpe-echo-sgx-dev
+    volumes:
+      # Map aesm service on host to docker, required only in HW mode.
+      - /var/run/aesmd/aesm.socket:/var/run/aesmd/aesm.socket
+    devices:
+      - "/dev/isgx:/dev/isgx"
+
