@@ -38,7 +38,7 @@ if [ "$GSC_IMAGE_EXISTS" = "yes" ]; then
 fi
 
 # Manifest files
-MANIFEST_FILE_DIR="${TCF_HOME}/examples/graphene_apps/python_worker/graphene"
+MANIFEST_FILE_DIR="${TCF_HOME}/examples/graphene_apps/python_worker/graphene/manifest"
 MANIFEST_FILES="python.manifest
 sh.manifest
 gcc.manifest

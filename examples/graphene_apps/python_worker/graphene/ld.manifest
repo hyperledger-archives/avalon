@@ -1,2 +1,0 @@
-sgx.enclave_size = 1G
-sgx.file_check_policy = allow_all_but_log
