@@ -190,6 +190,19 @@ def _lookup_first_worker(worker_registry, jrpc_req_id):
 
 
 def _do_worker_verification(worker_obj):
+    encryption_key_signature = worker_obj.encryption_key_signature
+    if encryption_key_signature is not None:
+        encryption_key = worker_obj.encryption_key
+        verify_key = worker_obj.verification_key
+
+        # Verify worker encryption key signature using worker verification key
+        sig_obj = signature.ClientSignature()
+        sig_status = sig_obj.verify_encryption_key_signature(
+            encryption_key_signature, encryption_key, verify_key)
+        if (sig_status != SignatureStatus.PASSED):
+            logger.error("Failed to verify worker encryption key signature")
+            exit(1)
+
     # Do worker verfication on proof data if it exists
     # Proof data exists in SGX hardware mode.
     # TODO Need to do verify MRENCLAVE value

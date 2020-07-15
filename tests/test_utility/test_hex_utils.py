@@ -17,6 +17,7 @@ import unittest
 from utility.hex_utils import (
     byte_array_to_hex_str,
     hex_to_utf8,
+    hex_to_byte_array,
     is_valid_hex_str,
     pretty_ids,
 )
@@ -48,6 +49,31 @@ class HexUtilsTest(unittest.TestCase):
         binhex = b''                    # empty input case
         utfstr = hex_to_utf8(binhex)
         self.assertEqual(utfstr, "")
+
+    def test_hex_to_byte_arrary(self):
+        """
+        Tests to verify hex_to_byte_array(hex_str) function
+        """
+        hex_str = "abcd1234"
+        bin_hex = hex_to_byte_array(hex_str)
+        self.assertEqual(bin_hex, b'\xab\xcd\x124')
+
+        hex_str = "ccddba4321"
+        bin_hex = hex_to_byte_array(hex_str)
+        self.assertEqual(bin_hex, b'\xcc\xdd\xbaC!')
+
+        hex_str = "aabb6789ccdd"
+        bin_hex = hex_to_byte_array(hex_str)
+        self.assertEqual(bin_hex, b'\xaa\xbbg\x89\xcc\xdd')
+
+        # Negative test cases
+        hex_str = "hello"
+        bin_hex = hex_to_byte_array(hex_str)
+        self.assertEqual(bin_hex, None)
+
+        hex_str = None
+        bin_hex = hex_to_byte_array(hex_str)
+        self.assertEqual(bin_hex, None)
 
     def test_is_valid_hex_str(self):
         """Tests to verify is_valid_hex_str(hex_str) function

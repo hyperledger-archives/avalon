@@ -21,7 +21,9 @@ import json
 import logging
 import secrets
 import avalon_crypto_utils.crypto_utility as crypto_utility
-from utility.hex_utils import is_valid_hex_str, byte_array_to_hex_str
+
+from utility.hex_utils import is_valid_hex_str, \
+    byte_array_to_hex_str, hex_to_byte_array
 from error_code.error_status import SignatureStatus
 import config.config as pconfig
 from ecdsa import VerifyingKey
@@ -480,6 +482,35 @@ class ClientSignature(object):
             if("Malformed formatting of signature" in str(er)):
                 return SignatureStatus.INVALID_SIGNATURE_FORMAT
             return SignatureStatus.FAILED
+
+
+# -----------------------------------------------------------------------------
+    def verify_encryption_key_signature(
+            self, encryption_key_signature, encryption_key, verifying_key):
+        """
+        Utils function to verify integrity of worker encryption key using
+        worker verification key
+        @params encryption_key_signature - Signature computed on hash
+                                           of encryption key
+        @params encryption_key - Public encryption key of the worker
+        @params verifying_key - Public signing key or verification key
+                                of the worker
+        returns SignatureStatus.PASSED in case of successful verification
+                SignatureStatus.FAILED in case of verification failure
+        """
+
+        _verification_key = VerifyingKey.from_pem(verifying_key)
+        encrypt_key_sig_bytes = hex_to_byte_array(encryption_key_signature)
+        encrypt_key_bytes = crypto_utility.string_to_byte_array(encryption_key)
+        encryption_key_hash = crypto_utility.compute_message_hash(
+            encrypt_key_bytes)
+        sig_result = _verification_key.verify_digest(
+            bytes(encrypt_key_sig_bytes),
+            bytes(encryption_key_hash),
+            sigdecode=sigdecode_der)
+        if sig_result:
+            return SignatureStatus.PASSED
+        return SignatureStatus.FAILED
 
 
 # -----------------------------------------------------------------------------

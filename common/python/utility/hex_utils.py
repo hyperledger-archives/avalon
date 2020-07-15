@@ -14,6 +14,7 @@
 
 import binascii
 import hashlib
+import logging
 
 
 # Return list of binary hex ids as list of UTF strings
@@ -27,6 +28,28 @@ def pretty_ids(ids):
 # Return binary hex as UTF string
 def hex_to_utf8(binary):
     return binascii.hexlify(binary).decode("UTF-8")
+
+
+def hex_to_byte_array(hex_str):
+    """
+    Convert a hex string (i.e., a string of characters with values
+    between '0'-'9', 'A'-'F') to an array of bytes
+
+    @param hex_str - hex string to be converted to bytearray
+    @returns - array of bytes on successful conversion, otherwise return None
+    """
+    try:
+        return bytearray(binascii.unhexlify(hex_str))
+    except binascii.Error as err:
+        logging.error(
+            "Caught exception while converting hex string to bytearray - %s",
+            err)
+        return None
+    except TypeError as err:
+        logging.error(
+            "Caught exception while converting hex string to bytearray - %s",
+            err)
+        return None
 
 
 def is_valid_hex_str(hex_str):

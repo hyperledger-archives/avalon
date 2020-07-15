@@ -119,6 +119,7 @@ class WorkerDetails():
             "encryptionKeySignature",
             "enclaveCertificate"
         ]
+
         for key in details_dict:
             if key not in worker_details_fields:
                 return "Invalid argument {}".format(key)
@@ -216,6 +217,8 @@ class SGXWorkerDetails(WorkerDetails):
         self.verification_key = \
             worker_data['workerTypeData']['verificationKey']
         self.encryption_key = worker_data['workerTypeData']['encryptionKey']
+        self.encryption_key_signature = \
+            worker_data['workerTypeData']['encryptionKeySignature']
         if 'proofData' in worker_data['workerTypeData'] and \
                 worker_data['workerTypeData']['proofData']:
             # proofData will be initialized only in HW mode by the

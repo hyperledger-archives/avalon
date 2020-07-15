@@ -135,7 +135,8 @@ public:
     void generate_encryption_key_signature() {
         std::string b64_pub_encr_key = public_encryption_key_.Serialize();
         ByteArray encr_key_sig_bytes = \
-            private_signing_key_.SignMessage(StrToByteArray(b64_pub_encr_key));
+            private_signing_key_.SignMessage(
+                tcf::crypto::ComputeMessageHash(StrToByteArray(b64_pub_encr_key)));
         encryption_key_signature_ = \
             ByteArrayToHexEncodedString(encr_key_sig_bytes);
     }
