@@ -1,5 +1,9 @@
 sgx.allow_file_creation = 1
-sgx.enclave_size = 1G
+# Set the virtual memory size of the SGX enclave. For SGX v1, the enclave
+# size must be specified upfront. If Python worker needs more
+# virtual memory than the enclave size, Graphene will not be able to
+# allocate it.
+sgx.enclave_size = 512M
 sgx.thread_num = 8
 sgx.file_check_policy = allow_all_but_log
 
