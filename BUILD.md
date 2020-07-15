@@ -111,7 +111,7 @@ To run multiple worker pools together, make use of sample docker compose file `d
 These docker compose files can be further customized to run multiple worker pools in a single Avalon setup. Points to note when customizing/running multiple pools together using docker:
    1. Name of the docker image for all WPE in a pool should be same as pools are homogeneous as of now
    2. All WPE in a pool should connect to same KME using command line arguments `--kme_listener_url` and `--worker_id`
-   3. When submitting work orders using any of the sample client applications, `--worker_id` argument needs to be mentioned explicitly to choose one of the workers in the system (Note : Each pool respresents a single worker). For example:
+   3. When submitting work orders using any of the sample client applications, `--worker_id` argument needs to be mentioned explicitly to choose one of the workers in the system (Note : Each pool represents a single worker). For example:
    ```bash
    ./generic_client.py -o --uri "http://avalon-listener:1947" \
       --workload_id "echo-result" --in_data "Hello" --worker_id worker-pool-2
