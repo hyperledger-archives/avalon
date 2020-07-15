@@ -104,17 +104,17 @@ Follow the instructions below to execute a Docker-based build and execution.
 
 **Running multiple worker pools together**
 
-To run multiple worker pools together, modify `docker-compose-pool.yaml`. It also has a corresponding docker compose file `docker-compose-pool-sgx.yaml` for running in Intel SGX hardware mode. This setup starts a worker pool with the following default configuration:
-   1. One KME (Key Management Enclave)
-   2. One WPE (Work order Processing Enclave) supporting all workloads, viz. `echo-result, heart-disease-eval, inside-out-eval, simple-wallet`
+To run multiple worker pools together, make use of sample docker compose file `docker-compose-pool-combo.yaml` instead of `docker-compose-pool.yaml`. It also has a corresponding docker compose file `docker-compose-pool-combo-sgx.yaml` for running in Intel SGX hardware mode. This setup starts two pools of workers with the composition:
+   1. worker-pool-1 - One KME (Key Management Enclave), One WPE (Work order Processing Enclave) supporting `heart-disease-eval` workload
+   2. worker-pool-2 - One KME, two WPE supporting `echo-result` workload
 
 These docker compose files can be further customized to run multiple worker pools in a single Avalon setup. Points to note when customizing/running multiple pools together using docker:
    1. Name of the docker image for all WPE in a pool should be same as pools are homogeneous as of now
    2. All WPE in a pool should connect to same KME using command line arguments `--kme_listener_url` and `--worker_id`
-   3. When submitting work orders using the generic client application `--worker_id` argument needs to be mentioned explicitly to choose one of the workers in the system (Note : Each pool respresents a single worker). For example:
+   3. When submitting work orders using any of the sample client applications, `--worker_id` argument needs to be mentioned explicitly to choose one of the workers in the system (Note : Each pool respresents a single worker). For example:
    ```bash
    ./generic_client.py -o --uri "http://avalon-listener:1947" \
-      --workload_id "echo-result" --in_data "Hello" --worker_id kme-worker-1
+      --workload_id "echo-result" --in_data "Hello" --worker_id worker-pool-2
    ```
 
 # <a name="standalonebuild"></a>Standalone Build
