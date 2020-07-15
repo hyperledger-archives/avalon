@@ -42,6 +42,9 @@ class WorkerDelegate():
         self._jrpc_worker = jrpc_worker
         self._worker_instance = worker_instance
         self._config = config
+        # Map to store worker id to worker details mapping over the lifespan
+        # of the connector. Before updating a worker, this map is looked up.
+        self._worker_details_map = dict()
 
     def lookup_workers_in_kv_storage(self):
         """
@@ -73,8 +76,8 @@ class WorkerDelegate():
         # Retrieve worker details
         jrpc_req_id = random.randint(0, 100000)
         worker_info = self._jrpc_worker.worker_retrieve(worker_id, jrpc_req_id)
-        logging.info("Worker retrieve response from kv storage: {}"
-                     .format(json.dumps(worker_info, indent=4)))
+        logging.debug("Worker retrieve response from kv storage: {}"
+                      .format(json.dumps(worker_info, indent=4)))
 
         if "error" in worker_info:
             logging.error("Unable to retrieve worker details from kv storage")
@@ -101,13 +104,28 @@ class WorkerDelegate():
 
             result = None
             if wid in wids_onchain:
-                result = self._worker_instance.worker_update(
-                    worker_id, details)
-                if result != ContractResponse.SUCCESS:
-                    logging.error("Error while updating worker "
-                                  "{} to blockchain".format(wid))
-                else:
-                    logging.info("Updated worker {} to blockchain".format(wid))
+                if wid not in self._worker_details_map or \
+                        self._worker_details_map[wid] != details:
+                    result = self._worker_instance.worker_update(
+                        worker_id, details)
+                    if result != ContractResponse.SUCCESS:
+                        logging.error("Error while updating worker {}"
+                                      " to blockchain".format(wid))
+                    else:
+                        logging.info("Updated worker {} to blockchain"
+                                     .format(wid))
+                        # Update status of worker as active explicitly if a
+                        # worker is updated, as worker status is not part of
+                        # worker update.
+                        result = self._worker_instance.worker_set_status(
+                            wid, WorkerStatus.ACTIVE)
+                        if result != ContractResponse.SUCCESS:
+                            logging.error("Error while setting worker status "
+                                          "{} in blockchain".format(wid))
+                        else:
+                            logging.info("Marked worker " + wid + " as active "
+                                         "in blockchain")
+                            self._worker_details_map[wid] = details
             else:
                 logging.info("Adding new worker {} to blockchain"
                              .format(wid))
@@ -120,9 +138,10 @@ class WorkerDelegate():
                 else:
                     logging.info(
                         "Registered worker {} to blockchain".format(wid))
+                    self._worker_details_map[wid] = details
 
         for wid in wids_onchain:
-            # Mark all stale workers on blockchain as decommissioned
+            # Mark all stale workers in blockchain as decommissioned
             if wid not in wids_in_kv:
                 worker_id = wid
                 worker_status_onchain, _, _, _, _ = self._worker_instance\
@@ -130,15 +149,14 @@ class WorkerDelegate():
                 # If worker is not already decommissioned, mark it
                 # decommissioned as it is no longer available in the kv storage
                 if worker_status_onchain != WorkerStatus.DECOMMISSIONED.value:
-                    status = self._worker_instance.worker_set_status(
+                    result = self._worker_instance.worker_set_status(
                         worker_id, WorkerStatus.DECOMMISSIONED)
                     if result != ContractResponse.SUCCESS:
                         logging.error("Error while setting worker status for "
                                       "{} in blockchain".format(wid))
                     else:
                         logging.info("Marked worker " + wid +
-                                     " as decommissioned on"
-                                     + " blockchain")
+                                     " as decommissioned in blockchain")
 
     def lookup_workers_onchain(self):
         """
