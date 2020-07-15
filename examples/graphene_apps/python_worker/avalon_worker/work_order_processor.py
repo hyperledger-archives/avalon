@@ -16,7 +16,6 @@
 import sys
 import logging
 import argparse
-import base64
 import random
 import string
 import json
@@ -28,6 +27,8 @@ import avalon_worker.worker_hash as worker_hash
 import avalon_worker.workload_processor as workload_processor
 from avalon_worker.error_code import WorkerError
 import avalon_worker.utility.jrpc_utility as jrpc_utility
+from avalon_worker.attestation.sgx_attestation_factory \
+    import SgxAttestationFactory
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -65,16 +66,6 @@ class WorkOrderProcessor():
     """
     Graphene work order processing class.
     """
-
-# -------------------------------------------------------------------------
-    # Class variables
-
-    # Graphene SGX TARGET INFO
-    GRAPHENE_SGX_TARGET_INFO_FILE = "/dev/attestation/my_target_info"
-    # Graphene SGX user report data
-    GRAPHENE_SGX_USER_REPORT_DATA_FILE = "/dev/attestation/user_report_data"
-    # Graphene SGX Quote file
-    GRAPHENE_SGX_QUOTE_FILE = "/dev/attestation/quote"
 
 # -------------------------------------------------------------------------
 
@@ -119,6 +110,9 @@ class WorkOrderProcessor():
             self.worker_public_enc_key.decode("utf-8")
         signup_data_json["encryption_key_signature"] = \
             self.worker_public_enc_key_sign.hex()
+        # Create Graphene SGX Attestation instance.
+        self.sgx_attestation = \
+            SgxAttestationFactory().create(SgxAttestationFactory.GRAPHENE)
         signup_data_json["mrenclave"] = \
             self._get_mrenclave()
         signup_data_json["quote"] = \
@@ -344,57 +338,37 @@ class WorkOrderProcessor():
 
     def _get_mrenclave(self):
         """
-        Get mrenclave value of Graphene-SGX worker enclave.
+        Get SGX mrenclave value of worker enclave.
 
         Returns :
-            mrenclave value in case of Graphene-SGX worker as hex string.
+            mrenclave value of worker enclave as hex string.
             If Intel SGX environment is not present returns empty string.
         """
-        try:
-            # Read target info
-            target_info_file = \
-                WorkOrderProcessor.GRAPHENE_SGX_TARGET_INFO_FILE
-            with open(target_info_file, 'rb') as fd:
-                data = fd.read()
-                mrencalve = data[:32].hex()
-        except Exception:
-            logger.warn("Graphene-SGX Environment not setup."
-                        "Return empty mrencalve string.")
-            mrencalve = ""
-        return mrencalve
+        mrenclave = self.sgx_attestation.get_mrenclave()
+        return mrenclave
 
 # -------------------------------------------------------------------------
 
     def _get_quote(self):
         """
-        Get quote of Graphene-SGX worker enclave.
+        Get SGX quote of worker enclave.
 
         Returns :
-            quote value in case of Graphene-SGX worker as hex string.
+            SGX quote value of worker enclave as base64 encoded string.
             If Intel SGX environment is not present returns empty string.
         """
-        try:
-            # Write user report data
-            user_report_data_file = \
-                WorkOrderProcessor.GRAPHENE_SGX_USER_REPORT_DATA_FILE
-            with open(user_report_data_file, 'wb') as file:
-                # First 32 bytes of report data has SHA256 hash of worker's
-                # public signing key. Next 32 bytes is filled with Zero.
-                hash_pub_key = sha256(self.worker_public_sign_key).digest()
-                user_data = hash_pub_key + bytearray(32)
-                file.write(user_data)
-                logger.debug("user_data hex = {}".format(user_data.hex()))
-            # Read quote
-            quote_file = WorkOrderProcessor.GRAPHENE_SGX_QUOTE_FILE
-            with open(quote_file, 'rb') as fd:
-                data = fd.read()
-                logger.debug("quote hex = {}".format(data.hex()))
-                quote = base64.b64encode(data)
-                quote_str = quote.decode("UTF-8")
-        except Exception:
-            logger.warn("Graphene-SGX Environment not setup."
-                        "Return empty quote string.")
+        # Write user report data.
+        # First 32 bytes of report data has SHA256 hash of worker's
+        # public signing key. Next 32 bytes is filled with Zero.
+        hash_pub_key = sha256(self.worker_public_sign_key).digest()
+        user_data = hash_pub_key + bytearray(32)
+        ret = self.sgx_attestation.write_user_report_data(user_data)
+        # Get quote
+        if ret:
+            quote_str = self.sgx_attestation.get_quote()
+        else:
             quote_str = ""
+        # Return quote.
         return quote_str
 
 # -------------------------------------------------------------------------
