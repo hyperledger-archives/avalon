@@ -30,10 +30,14 @@ class WorkLoadProcessor():
     Graphene work load processing class.
     """
 
-    def __init__(self):
+    def __init__(self, workload_json_file):
         """
         Constructor for work load processing class.
+
+        Parameters :
+            workloads_json_file: JSON file which has workload module details.
         """
+        self.workload_json_file = workload_json_file
         logger.info("Initialize Work load processor")
 
 # -------------------------------------------------------------------------
@@ -74,7 +78,7 @@ class WorkLoadProcessor():
         """
         instance = None
         try:
-            with open("workloads.json", "rb") as file:
+            with open(self.workload_json_file, "rb") as file:
                 workload_json = json.load(file)
         except Exception as e:
             logger.error("Work load processor creation failed" + str(e))

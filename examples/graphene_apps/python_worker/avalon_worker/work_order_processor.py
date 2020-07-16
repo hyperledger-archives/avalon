@@ -24,7 +24,7 @@ import avalon_worker.receive_request as receive_request
 import avalon_worker.crypto.worker_encryption as worker_encryption
 import avalon_worker.crypto.worker_signing as worker_signing
 import avalon_worker.crypto.worker_hash as worker_hash
-import avalon_worker.workload_processor as workload_processor
+import avalon_worker.workload.workload_processor as workload_processor
 from avalon_worker.error_code import WorkerError
 import avalon_worker.utility.jrpc_utility as jrpc_utility
 from avalon_worker.attestation.sgx_attestation_factory \
@@ -41,13 +41,22 @@ def main(args=None):
     """
     Graphene worker main function.
     """
-    # Create Process work order object.
-    wo_processor = WorkOrderProcessor()
     # Parse command line parameters.
     parser = argparse.ArgumentParser()
     parser.add_argument(
         '--bind', help='URI to listen for requests ', type=str)
+    parser.add_argument(
+        '--workload', help='JSON file which has workload module details',
+        type=str)
     (options, remainder) = parser.parse_known_args(args)
+    # Get the workload JSON file name passed in command line.
+    if options.workload:
+        workload_json_file = options.workload
+    else:
+        # Default file name.
+        workload_json_file = "workloads.json"
+    # Create work order processor object.
+    wo_processor = WorkOrderProcessor(workload_json_file)
     # Setup ZMQ channel to receive work order.
     if options.bind:
         zmq_bind_url = options.bind
@@ -69,10 +78,14 @@ class WorkOrderProcessor():
 
 # -------------------------------------------------------------------------
 
-    def __init__(self):
+    def __init__(self, workload_json_file):
         """
         Constructor to generate worker signing and encryption keys.
+
+        Parameters :
+            workloads_json_file: JSON file which has workload module details.
         """
+        self.workload_json_file = workload_json_file
         self._generate_worker_keys()
         self._generate_worker_signup()
 
@@ -227,7 +240,8 @@ class WorkOrderProcessor():
                                                   session_key,
                                                   session_key_iv)
         # Process workload
-        wl_processor = workload_processor.WorkLoadProcessor()
+        wl_processor = \
+            workload_processor.WorkLoadProcessor(self.workload_json_file)
         workload_id_hex = input_json["params"]["workloadId"]
         workload_id = bytes.fromhex(workload_id_hex).decode("UTF-8")
         in_data_array = input_json["params"]["inData"]
