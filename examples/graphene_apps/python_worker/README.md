@@ -40,7 +40,7 @@ https://creativecommons.org/licenses/by/4.0/
 
 - To run python worker with Avalon Graphene Enclave Manager, go to Avalon repository top level directory and execute the following command:
 
-  `docker-compose -f docker-compose.yaml -f docker-compose-graphene.yaml up`
+  `docker-compose -f docker-compose.yaml -f docker/compose/avalon-graphene.yaml up`
 
 - To send work orders to python worker we can use [generic client](https://github.com/hyperledger/avalon/tree/master/examples/apps/generic_client) application. Execute following commands:
 
@@ -117,11 +117,11 @@ https://creativecommons.org/licenses/by/4.0/
 
   1. Start all the required containers in detached mode.
 
-     `docker-compose -f docker-compose.yaml -f docker-compose-graphene.yaml -f docker-compose-graphene-sgx.yaml up -d`
+     `docker-compose -f docker-compose.yaml -f docker/compose/avalon-graphene.yaml -f docker/compose/avalon-graphene-sgx.yaml up -d`
 
   2. Graphene-SGX Python worker will take around 3 minutes to get ready. Check the logs of graphene python worker using below command
 
-     `docker-compose -f docker-compose.yaml -f docker-compose-graphene.yaml  -f docker-compose-graphene-sgx.yaml logs -f graphene-python-worker`
+     `docker-compose -f docker-compose.yaml -f docker/compose/avalon-graphene.yaml -f docker/compose/avalon-graphene-sgx.yaml logs -f graphene-python-worker`
 
      If everything goes fine you should see following log in stdout
 
@@ -134,7 +134,7 @@ https://creativecommons.org/licenses/by/4.0/
 
   4. To restart the python worker you have to first bring all the containers down before bringing it up again. This is to ensure that python worker generate new keys and Avalon Graphene Enclave Manager gets the updated sign up information from python worker.
 
-     `docker-compose -f docker-compose.yaml -f docker-compose-graphene.yaml -f docker-compose-graphene-sgx.yaml down`
+     `docker-compose -f docker-compose.yaml -f docker/compose/avalon-graphene.yaml -f docker/compose/avalon-graphene-sgx.yaml down`
 
 ## Adding a new Python Workload
 
