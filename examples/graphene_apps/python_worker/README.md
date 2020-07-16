@@ -140,22 +140,22 @@ https://creativecommons.org/licenses/by/4.0/
 
 - Avalon Python worker supports two sample workloads: "python-hello" and "python-fib".
 
-- List of sample workloads are listed in *workloads.json* file in [python_worker](http://github.com/hyperledger/avalon/tree/master/examples/graphene_apps/python_worker) directory.
+- List of sample workloads are listed in *workloads.json* file kept in [python_worker](http://github.com/hyperledger/avalon/tree/master/examples/graphene_apps/python_worker) directory.
 
   *{*
       *"python-hello": {*
-          *"module": "avalon_worker.workload.hello",*
+          *"module": "sample_workloads.workload.hello",*
           *"class": "HelloWorkLoad"*
       *},*
       *"python-fib": {*
-          *"module": "avalon_worker.workload.fibonacci",*
+          *"module": "sample_workloads.workload.fibonacci",*
           *"class": "FibonacciWorkLoad"*
       *}*
   *}*
 
-- Python workload code is kept in [workload](http://github.com/hyperledger/avalon/tree/master/examples/graphene_apps/python_worker/avalon_worker/workload) directory.
+- Python sample workloads are is kept in [sample_workloads](http://github.com/hyperledger/avalon/tree/master/examples/graphene_apps/python_worker/sample_workloads) directory.
 
-- To add a new python workload, keep the python workload implementation class in workload directory and also edit the *workloads.json* file to add new workload. The format of workload in *workloads.json* file is as shown below :
+- To add a new python workload, keep the python workload implementation class in sample workloads directory and also edit the *workloads.json* file to add new workload. The format of workload in *workloads.json* file is as shown below :
 
   *"workload-id": {*
           *"module": "<workload python module>",*

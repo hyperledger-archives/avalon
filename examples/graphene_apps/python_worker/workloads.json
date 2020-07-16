@@ -1,10 +1,10 @@
 {
     "python-hello": {
-        "module": "avalon_worker.workload.hello",
+        "module": "sample_workloads.hello",
         "class": "HelloWorkLoad"
     },
     "python-fib": {
-        "module": "avalon_worker.workload.fibonacci",
+        "module": "sample_workloads.fibonacci",
         "class": "FibonacciWorkLoad"
     }
 }
