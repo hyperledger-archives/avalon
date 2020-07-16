@@ -20,9 +20,9 @@ import random
 import json
 import secrets
 import hashlib
-import avalon_worker.worker_encryption as worker_encryption
-import avalon_worker.worker_signing as worker_signing
-import avalon_worker.worker_hash as worker_hash
+import avalon_worker.crypto.worker_encryption as worker_encryption
+import avalon_worker.crypto.worker_signing as worker_signing
+import avalon_worker.crypto.worker_hash as worker_hash
 import time
 
 logger = logging.getLogger(__name__)
