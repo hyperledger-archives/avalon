@@ -54,7 +54,7 @@ Follow the instructions below to execute a Docker-based build and execution.
       ```
       To start a worker pool (with one Key Management Enclave and one Work order Processing Enclave):
       ```bash
-      sudo docker-compose -f docker-compose.yaml -f docker-compose-pool.yaml up --build
+      sudo docker-compose -f docker-compose.yaml -f docker/compose/avalon-pool.yaml up --build
       ```
    2. For subsequent runs on the same workspace, if you changed a
       source or configuration file, run the above command again
@@ -65,7 +65,7 @@ Follow the instructions below to execute a Docker-based build and execution.
       ```
       For worker pool, run:
       ```bash
-      MAKECLEAN=0 sudo docker-compose -f docker-compose.yaml -f docker-compose-pool.yaml up
+      MAKECLEAN=0 sudo docker-compose -f docker-compose.yaml -f docker/compose/avalon-pool.yaml up
       ```
 
    **SGX Hardware mode (for hosts with Intel SGX)**:
@@ -78,8 +78,8 @@ Follow the instructions below to execute a Docker-based build and execution.
       ```
       For worker pool, run:
       ```bash
-      sudo docker-compose -f docker-compose.yaml -f docker-compose-pool.yaml \
-      -f docker-compose-pool-sgx.yaml up --build
+      sudo docker-compose -f docker-compose.yaml -f docker/compose/avalon-pool.yaml \
+      -f docker/compose/avalon-pool-sgx.yaml up --build
       ```
    3. For subsequent runs on the same workspace, if you changed a
       source or configuration file, run the above command again
@@ -90,8 +90,8 @@ Follow the instructions below to execute a Docker-based build and execution.
       ```
       For worker pool, run:
       ```bash
-      MAKECLEAN=0 sudo docker-compose -f docker-compose.yaml -f docker-compose-pool.yaml \
-      -f docker-compose-pool-sgx.yaml up
+      MAKECLEAN=0 sudo docker-compose -f docker-compose.yaml -f docker/compose/avalon-pool.yaml \
+      -f docker/compose/avalon-pool-sgx.yaml up
       ```
 3. On a successful run, you should see the message `BUILD SUCCESS`
    followed by a repetitive message `Enclave manager sleeping for 10 secs`
@@ -104,7 +104,7 @@ Follow the instructions below to execute a Docker-based build and execution.
 
 **Running multiple worker pools together**
 
-To run multiple worker pools together, make use of sample docker compose file `docker-compose-pool-combo.yaml` instead of `docker-compose-pool.yaml`. It also has a corresponding docker compose file `docker-compose-pool-combo-sgx.yaml` for running in Intel SGX hardware mode. This setup starts two pools of workers with the composition:
+To run multiple worker pools together, make use of sample docker compose file `avalon-pool-combo.yaml` instead of `avalon-pool.yaml`. It also has a corresponding docker compose file `avalon-pool-combo-sgx.yaml` for running in Intel SGX hardware mode. This setup starts two pools of workers with the composition:
    1. worker-pool-1 - One KME (Key Management Enclave), One WPE (Work order Processing Enclave) supporting `heart-disease-eval` workload
    2. worker-pool-2 - One KME, two WPE supporting `echo-result` workload
 

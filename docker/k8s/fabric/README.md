@@ -7,7 +7,7 @@ This serves as a playground to setup k8s cluster for Avalon Fabric proxy model.
 - This setup is going to work with the assumption that the Fabric network with minifab, Avalon blockchain connector pod
   and Avalon shell pod are running in the same machine.
 - Build docker images by running the below command
-  `docker-compose -f docker-compose.yaml -f docker-compose-fabric.yaml build`
+  `docker-compose -f docker-compose.yaml -f docker/compose/avalon-fabric.yaml build`
 - To use Intel SGX HW mode, build avalon-sgx-enclave-manager-dev docker image using below command
   `docker-compose -f docker-compose.yaml -f docker-compose-sgx.yaml build avalon-enclave-manager`
 - Start fabric network.
