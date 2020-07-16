@@ -113,10 +113,9 @@ To run Ganache with Hyperledger Avalon, follow these steps:
        ./eth_generic_client.py -b ethereum --workload_id "echo-result" -o --in_data "Hello" \
            --worker_id "singleton-worker-1"
 
-       NOTE: `worker_id` should match with worker id of singleton enclave manager.  
-       This worker_id can either be command line argument passed to enclave manager or  
-       in the absence of command line argument, worker_id in
-       `$TCF_HOME/config/singleton_enclave_config.toml` should be used.
+   NOTE: ``worker_id`` should match with worker id of singleton enclave manager or target worker pool.
+   This ``worker_id`` can either be the command line argument passed in to the enclave manager (Singleton or KME)
+   or in the absence of it, ``worker_id`` in the corresponding config file in `config <../config>`_ directory.
 
 Cleanup
 -------
