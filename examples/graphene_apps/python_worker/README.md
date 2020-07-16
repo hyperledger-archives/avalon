@@ -34,7 +34,7 @@ https://creativecommons.org/licenses/by/4.0/
 
   `docker-compose up` 
 
-  Above command will run test work orders listed in file [*test_work_orders.json*](http://github.com/hyperledger/avalon/tree/master/examples/graphene_apps/python_worker/avalon_worker/tests/test_work_orders.json).
+  Above command will run test work orders listed in file [*test_work_orders.json*](http://github.com/hyperledger/avalon/tree/master/examples/graphene_apps/python_worker/tests/test_work_orders.json).
 
 ### Test python worker using Avalon
 
@@ -81,13 +81,13 @@ https://creativecommons.org/licenses/by/4.0/
 
      *# Avalon Python worker uses below configuration*.
 
-     *Distro: "ubuntu18.04"*
-     *Graphene:*
-         *Repository:* *"https://github.com/oscarlab/graphene.git"*
-         *Branch: "master"*
-     *SGXDriver:*
-         *Repository: "https://github.com/01org/linux-sgx-driver.git"*
-         *Branch: "sgx_driver_2.6"*
+     *Distro: "ubuntu18.04"*  
+     *Graphene:*  
+         *Repository:* *"https://github.com/oscarlab/graphene.git"*  
+         *Branch: "master"*  
+     *SGXDriver:*  
+         *Repository: "https://github.com/01org/linux-sgx-driver.git"*  
+         *Branch: "sgx_driver_2.6"*  
 
   2. Copy the Graphene python worker GSC build script file *build_gsc_python_worker.sh* from this [location](https://github.com/hyperledger/avalon/tree/master/examples/graphene_apps/python_worker/graphene) to <graphene_repo>/Tools/gsc using following command :
 
@@ -109,7 +109,7 @@ https://creativecommons.org/licenses/by/4.0/
 
   `docker-compose -f docker-compose.yaml -f docker-compose-graphene-sgx.yaml up`
 
-  Above command will run test work orders listed in file [*test_work_orders.json*](http://github.com/hyperledger/avalon/tree/master/examples/graphene_apps/python_worker/avalon_worker/tests/test_work_orders.json).
+  Above command will run test work orders listed in file [*test_work_orders.json*](http://github.com/hyperledger/avalon/tree/master/examples/graphene_apps/python_worker/tests/test_work_orders.json).
 
 ### Test python worker using Avalon
 
