@@ -21,9 +21,9 @@ import string
 import json
 from hashlib import sha256
 import avalon_worker.receive_request as receive_request
-import avalon_worker.worker_encryption as worker_encryption
-import avalon_worker.worker_signing as worker_signing
-import avalon_worker.worker_hash as worker_hash
+import avalon_worker.crypto.worker_encryption as worker_encryption
+import avalon_worker.crypto.worker_signing as worker_signing
+import avalon_worker.crypto.worker_hash as worker_hash
 import avalon_worker.workload_processor as workload_processor
 from avalon_worker.error_code import WorkerError
 import avalon_worker.utility.jrpc_utility as jrpc_utility

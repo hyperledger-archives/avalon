@@ -19,7 +19,7 @@ import logging
 import base64
 from ecdsa import SigningKey, VerifyingKey, SECP256k1
 from ecdsa.util import sigencode_der, sigdecode_der
-import avalon_worker.worker_hash as worker_hash
+import avalon_worker.crypto.worker_hash as worker_hash
 
 
 logger = logging.getLogger(__name__)

@@ -15,7 +15,7 @@
 # limitations under the License.
 import sys
 import logging
-import avalon_worker.worker_encryption as worker_encryption
+import avalon_worker.crypto.worker_encryption as worker_encryption
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
