@@ -5,7 +5,8 @@ Testing Hyperledger Avalon Proxy Model with Hyperledger Fabric
 ==============================================================
 
 Hyperledger Fabric is an enterprise, private, permissioned blockchain network.
-To run Fabric with Hyperledger Avalon, follow these steps:
+To run Fabric with Hyperledger Avalon on a single machine (both Avalon and Fabric network are running on same machine.)
+follow these steps:
 
 1. Set the environment variable ``TCF_HOME`` to the Avalon root directory.
 
@@ -22,7 +23,7 @@ To run Fabric with Hyperledger Avalon, follow these steps:
    If the host machine is behind any network firewall/proxy, you need to
    define the following parameters in your ``/etc/environment`` file:
 
-   .. code:: none
+   .. code:: sh
 
        http_proxy=<http-proxy-url>:<port>
        https_proxy=<https-proxy-url>:<port>
@@ -30,11 +31,12 @@ To run Fabric with Hyperledger Avalon, follow these steps:
    By default minifab creates 3 orderers, 2 peers with 2 organisations.
    The ``no_proxy`` for this setup is as follows (all on one line):
 
-   .. code:: none
+   .. code:: sh
 
-       no_proxy=localhost,127.0.0.1,orderer3.example.com,orderer2.example.com,
+       export no_proxy=localhost,127.0.0.1,orderer3.example.com,orderer2.example.com,
                 orderer1.example.com,peer2.org1.example.com,peer1.org1.example.com,
                 peer2.org0.example.com,peer1.org0.example.com
+       export NO_PROXY=$no_proxy
 
    If you modify the number of orderers, peers, or organisations,
    please update the ``no_proxy`` list accordingly.
@@ -91,6 +93,57 @@ To run Fabric with Hyperledger Avalon, follow these steps:
    .. code:: sh
 
        ./scripts/start_fabric.sh -d
+
+Setup Hyperledger Avalon Fabric Proxy Model on multiple machine
+----------------------------------------------------------------
+Multinode Hyperledger Avalon fabric proxy model setup requires certain modifications to existing
+Docker files. For example to setup the fabric blockchain network on a separate machine and Avalon on a separate machine
+requires below changes.
+
+1. On machine1(with ip address IP1) need to run the minifab if you are choose to setup fabric on single machine.
+   Or else if you chose the any customized way other than minifab to setup a fabric network on multiple nodes, then it is mandatory to deploy
+   the Avalon chaincodes which are located in (https://github.com/hyperledger/avalon/tree/master/sdk/avalon_sdk/connector/blockchains/fabric/chaincode)
+
+   .. code:: sh
+        cd $TCF_HOME
+        ./scripts/start_fabric.sh -e
+
+   start_fabric.sh with option -e exposes the ports to host machine and it generates the network profile with host ip in network config file.
+
+2. On machine2 (with ip address IP2) where Avalon is going to setup, copy the crypto materials used to setup the fabric network to home directory.
+   Avalon shell and Avalon fabric connector need these crypto materials to interact with the blockchain.
+
+   .. code:: sh
+        scp -r ~/mywork <user_name>@<IP1>:~/
+
+3. If you choose the customized setup other than the start_fabric.sh (minifab) then create the network.json as in (https://github.com/hyperledger/avalon/blob/master/sdk/avalon_sdk/connector/blockchains/fabric/network.json)
+
+4. If these 2 matchines are behind the corporate network please update environment variables `no_proxy` and `NO_PROXY`
+   with the IP1 on machine2 as mentioned above.
+
+5. Remove the network tag from the Docker compose file - https://github.com/hyperledger/avalon/blob/master/docker/compose/avalon-fabric.yaml#L55
+
+6. Start the Avalon components.
+
+   .. code:: sh
+        docker-compose -f docker-compose.yaml -f docker/compose/avalon-fabric.yaml up -d --build
+
+   To start a worker pool (with one Key Management Enclave and one Work order Processing Enclave):
+
+   .. code:: sh
+        docker-compose -f docker-compose.yaml -f docker/compose/avalon-pool.yaml -f docker/compose/avalon-fabric.yaml up -d --build
+
+   To run in Intel SGX hardware mode, use the corresponding Docker compose file for singleton or worker pool mode (as specified in BUILD.md).
+
+7. To test using fabric generic client.
+   Go to the avalon-shell container to run fabric_generic_client.py
+
+   .. code:: sh
+        docker exec -it  avalon-shell bash
+        cd examples/apps/generic_client/
+        ./fabric_generic_client.py -b fabric --workload_id "echo-result" --in_data "Hello" -o \
+    --worker_id "singleton-worker-1"
+
 
 Troubleshooting
 ---------------
