@@ -66,7 +66,7 @@ check_if_cc_artifacts_exists()
     return $exists
 }
 
-while getopts "w:udch" OPTCHAR ; do
+while getopts "w:udche" OPTCHAR ; do
     case $OPTCHAR in
         u )
             START_FABRIC=1
