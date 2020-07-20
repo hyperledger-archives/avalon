@@ -38,6 +38,9 @@ class WorkLoadProcessor():
             workloads_json_file: JSON file which has workload module details.
         """
         self.workload_json_file = workload_json_file
+        # Create empty map of workload id and workload instance.
+        # key: workload_id, value: workload class instance.
+        self.workload_instance_map = dict()
         logger.info("Initialize Work load processor")
 
 # -------------------------------------------------------------------------
@@ -93,13 +96,23 @@ class WorkLoadProcessor():
                 err_msg = "Work load class not found in workloads.json"
                 logger.error(err_msg)
                 return None
-            # Create an instance of workload module class.
+            # Create a workload module class instance if it doesn't exist.
+            if workload_id in self.workload_instance_map:
+                instance = self.workload_instance_map[workload_id]
+                if instance:
+                    logger.debug("Use existing {} class instance".
+                                 format(workload_id))
+                    return instance
             try:
                 module_name = workload_json[workload_id]["module"]
                 class_name = workload_json[workload_id]["class"]
                 module = importlib.import_module(module_name)
                 class_ = getattr(module, class_name)
                 instance = class_()
+                logger.debug("Created new {} class instance".
+                             format(workload_id))
+                # Store the workload class instance in map.
+                self.workload_instance_map[workload_id] = instance
             except Exception as e:
                 logger.error("Work load processor creation failed: " + str(e))
                 return None

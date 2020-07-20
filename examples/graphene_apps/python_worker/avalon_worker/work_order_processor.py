@@ -88,6 +88,9 @@ class WorkOrderProcessor():
         self.workload_json_file = workload_json_file
         self._generate_worker_keys()
         self._generate_worker_signup()
+        # Create workload processor.
+        self.wl_processor = \
+            workload_processor.WorkLoadProcessor(self.workload_json_file)
 
 # -------------------------------------------------------------------------
 
@@ -240,13 +243,11 @@ class WorkOrderProcessor():
                                                   session_key,
                                                   session_key_iv)
         # Process workload
-        wl_processor = \
-            workload_processor.WorkLoadProcessor(self.workload_json_file)
         workload_id_hex = input_json["params"]["workloadId"]
         workload_id = bytes.fromhex(workload_id_hex).decode("UTF-8")
         in_data_array = input_json["params"]["inData"]
-        result, out_data = wl_processor.execute_workload(workload_id,
-                                                         in_data_array)
+        result, out_data = self.wl_processor.execute_workload(workload_id,
+                                                              in_data_array)
         # Generate work order response
         if result is True:
             output_json = self._create_work_order_response(input_json,
