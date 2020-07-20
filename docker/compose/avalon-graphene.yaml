@@ -16,32 +16,15 @@ version: '3.5'
 
 services:
   avalon-enclave-manager:
-    container_name: avalon-enclave-manager
     image: avalon-enclave-manager-graphene-dev
     build:
-      context: .
       dockerfile: ./enclave_manager/Dockerfile-graphene
       args:
-        - http_proxy
-        - https_proxy
-        - no_proxy
         - ENCLAVE_TYPE=graphene
-    environment:
-      - http_proxy
-      - https_proxy
-      - no_proxy
     expose:
-      # ZMQ socket port to receive work orders from Avalon listener.
-      - 5555
       # ZMQ socket port to communicate with graphene python worker
       - 7777
-    command: |
-      bash -c "
-        enclave_manager --lmdb_url http://avalon-lmdb:9090
-        tail -f /dev/null
-      "
     depends_on:
-      - avalon-lmdb
       - graphene-python-worker
 
   graphene-python-worker:
@@ -56,6 +39,7 @@ services:
       - 7777
     # Need to pass full path of file to python interpreter.
     # Pass ZMQ URL to listen for requests. Bind to all available interfaces.
-    command: /usr/local/bin/wo-processor --bind "tcp://*:7777"
+    # Pass JSON file which has the workload module details.
+    command: /usr/local/bin/wo-processor --bind "tcp://*:7777" --workload "workloads.json"
     stop_signal: SIGKILL
       
