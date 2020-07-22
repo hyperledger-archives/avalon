@@ -40,6 +40,8 @@ services:
       - no_proxy
     volumes:
       - pool-1:/shared-pool-1
+      # Persistent volume to store sealed data across restarts
+      - ./.sealed:/project/avalon/.sealed
     expose:
       # KME listener port
       - 1948
