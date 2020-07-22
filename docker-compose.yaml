@@ -61,6 +61,9 @@ services:
     expose:
       # ZMQ socket port.
       - 5555
+    volumes:
+      # Persistent volume to store sealed data across restarts
+      - ./.sealed:/project/avalon/.sealed
     command: |
       bash -c "
         enclave_manager --lmdb_url http://avalon-lmdb:9090

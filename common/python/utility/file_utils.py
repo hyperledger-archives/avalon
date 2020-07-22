@@ -89,8 +89,11 @@ def read_file(input_file):
             with open(input_file, 'r') as data_file:
                 data = data_file.read()
         except IOError as e:
-            logger.exception("Exception occurred while reading file {}"
+            logger.exception("Exception occurred while opening file {}"
                              .format(e))
+        except Exception as ex:
+            logger.exception("Exception occurred while reading file {}"
+                             .format(ex))
     return data
 
 
@@ -121,8 +124,11 @@ def write_to_file(output, output_file):
                 data_file.write(output)
             status = True
         except IOError as e:
-            logger.exception("Exception occurred while writing to file {}"
+            logger.exception("Exception occurred while opening file {}"
                              .format(e))
+        except Exception as ex:
+            logger.exception("Exception occurred while writing to file {}"
+                             .format(ex))
     return status
 
 

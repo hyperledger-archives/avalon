@@ -50,7 +50,7 @@ wpe_mrenclave_read_from_file = "wpe_mr_enclave.txt"
 
 # Sealed data from trusted enclave is stored at this location for recovery
 # in case of abrubt shutdown.
-sealed_data_path = ".sealed.data"
+sealed_data_path = ".sealed/.sealed.data"
 
 [KMEListener]
 # URL of KMEListener where a Work order processor can send requests meant for

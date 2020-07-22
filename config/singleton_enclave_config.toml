@@ -70,7 +70,7 @@ enclave_library_path = "tc/sgx/trusted_worker_manager/enclave/build/lib/"
 
 # Sealed data from trusted enclave is stored at this location for recovery
 # in case of abrubt shutdown.
-sealed_data_path = ".sealed.data"
+sealed_data_path = ".sealed/.sealed.data"
 
 # -------------------------------------------------------------
 # TCS Worker configuration details
