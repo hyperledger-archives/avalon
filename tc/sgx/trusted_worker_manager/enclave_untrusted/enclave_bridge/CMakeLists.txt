@@ -63,7 +63,6 @@ endif()
 
 # Intel SGX edger is a utility that generates edl artifacts
 SET(SGX_EDGER "${SGX_SDK}/bin/x64/sgx_edger8r")
-
 SET(SGX_INCLUDE "${SGX_SDK}/include")
 SET(SGX_SSL_INCLUDE "${SGX_SSL}/include")
 
@@ -74,9 +73,9 @@ SET(SGX_LIBS_UNTRUSTED_NAMES ${SGX_LIBS_UNTRUSTED_NAMES} pthread)
 
 IF(${SGX_USE_SIMULATOR})
     ADD_DEFINITIONS(-D SGX_SIMULATOR)
-    SET(SGX_LIBS_UNTRUSTED_NAMES sgx_urts_sim sgx_uae_service_sim ${SGX_LIBS_UNTRUSTED_NAMES})
+    SET(SGX_LIBS_UNTRUSTED_NAMES sgx_urts_sim sgx_epid_sim ${SGX_LIBS_UNTRUSTED_NAMES})
 ELSE()
-    SET(SGX_LIBS_UNTRUSTED_NAMES sgx_urts sgx_uae_service ${SGX_LIBS_UNTRUSTED_NAMES})
+    SET(SGX_LIBS_UNTRUSTED_NAMES sgx_urts sgx_epid ${SGX_LIBS_UNTRUSTED_NAMES})
 ENDIF()
 
 FOREACH(lib ${SGX_LIBS_UNTRUSTED_NAMES})
@@ -106,7 +105,7 @@ FUNCTION(SGX_EDGE_UNTRUSTED EDL EDL_PATH EDGE_FILES)
 ENDFUNCTION()
 
 FUNCTION(LINK_ENCLAVE_BRIDGE_COMMON_LIBRARIES)
-    TARGET_LINK_LIBRARIES(${PROJECT_NAME} PRIVATE ${ABSOLUTE_SGX_LIBS_UNTRUSTED})
+    TARGET_LINK_LIBRARIES(${PROJECT_NAME} PRIVATE ${SGX_LIBS_UNTRUSTED})
     TARGET_LINK_LIBRARIES(${PROJECT_NAME} PRIVATE -luavalon-common -luavalon-crypto
         -luavalon-base64 -luavalon-sgx-common -lpthread)
 ENDFUNCTION()
@@ -135,20 +134,8 @@ SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} \
 -Wl,-L,${TCF_TOP_DIR}/common/cpp/build")
 SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} \
 -Wl,-L,${TCF_CORE_DIR}/trusted_worker_manager/common/build")
-
-# XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-# Compile targets
-# XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-
-# If we are using Linux, then find the libraries to get the absolute
-# path and add them that way and DO NOT add the linker path using
-# LINK_DIRECTORIES as it will add the -rpath option to the linker and this is
-# bad as when installing the SDK the version of libsgx_uae_service.so in the SDK
-# lib64 directory is different than the one in /usr/lib
-FOREACH(lib ${SGX_LIBS_UNTRUSTED})
-    FIND_LIBRARY(ABS-${lib} NAMES ${lib} PATHS "$ENV{SGX_SDK}/lib64" "$ENV{SGX_SSL}/lib64")
-    SET(ABSOLUTE_SGX_LIBS_UNTRUSTED ${ABSOLUTE_SGX_LIBS_UNTRUSTED} ${ABS-${lib}})
-ENDFOREACH(lib)
+SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,-L,$ENV{SGX_SDK}/lib64")
+SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,-L,$ENV{SGX_SSL}/lib64")
 
 IF(${ENCLAVE_TYPE} STREQUAL "singleton")
     ADD_DEFINITIONS(-DBUILD_SINGLETON=1)

@@ -82,8 +82,8 @@ RUN apt-get update \
 WORKDIR /tmp
 
 # Build ("Untrusted") OpenSSL
-RUN OPENSSL_VER=1.1.1d \
- && wget https://www.openssl.org/source/old/1.1.1/openssl-$OPENSSL_VER.tar.gz \
+RUN OPENSSL_VER=1.1.1g \
+ && wget https://www.openssl.org/source/openssl-$OPENSSL_VER.tar.gz \
  && tar -zxf openssl-$OPENSSL_VER.tar.gz \
  && cd openssl-$OPENSSL_VER/ \
  && ./config \
@@ -171,19 +171,27 @@ RUN mkdir -p /opt/intel \
  && mkdir -p /etc/init
 WORKDIR /opt/intel
 
-# Install Intel SGX common library
-RUN wget https://download.01.org/intel-sgx/sgx-linux/2.7.1/distro/ubuntu18.04-server/libsgx-enclave-common_2.7.101.3-bionic1_amd64.deb \
- && dpkg -i libsgx-enclave-common_2.7.101.3-bionic1_amd64.deb
+# Add Intel SGX repo to apt sources and install Intel SGX PSW packages
+RUN echo 'deb [arch=amd64] https://download.01.org/intel-sgx/sgx_repo/ubuntu bionic main' | tee /etc/apt/sources.list.d/intel-sgx.list \
+ && wget -qO - https://download.01.org/intel-sgx/sgx_repo/ubuntu/intel-sgx-deb.key | apt-key add \
+ && apt-get update \
+ && apt-get install -y -q \
+    libsgx-enclave-common \
+    libsgx-launch \
+    libsgx-urts \
+    libsgx-epid \
+    libsgx-quote-ex \
+ && apt-get clean \
+ && rm -rf /var/lib/apt/lists/*
 
-# Install Intel SGX SDK
-RUN SGX_SDK_FILE=sgx_linux_x64_sdk_2.7.101.3.bin \
- && wget https://download.01.org/intel-sgx/sgx-linux/2.7.1/distro/ubuntu18.04-server/$SGX_SDK_FILE \
- && echo "yes" | bash ./$SGX_SDK_FILE \
- && rm $SGX_SDK_FILE \
- && echo ". /opt/intel/sgxsdk/environment" >> /etc/environment
+RUN SGX_SDK_FILE=sgx_linux_x64_sdk_2.10.100.2.bin \
+  && wget https://download.01.org/intel-sgx/sgx-linux/2.10/distro/ubuntu18.04-server/$SGX_SDK_FILE \
+  && echo "yes" | bash ./$SGX_SDK_FILE \
+  && rm $SGX_SDK_FILE \
+  && echo ". /opt/intel/sgxsdk/environment" >> /etc/environment
 
 # Copy openssl build artifacts from openssl_image
-ENV OPENSSL_VER=1.1.1d
+ENV OPENSSL_VER=1.1.1g
 COPY --from=openssl_image /usr/local/ssl /usr/local/ssl
 COPY --from=openssl_image /usr/local/bin /usr/local/bin
 COPY --from=openssl_image /usr/local/include /usr/local/include
@@ -198,11 +206,20 @@ COPY --from=openssl_image /tmp/openssl-$OPENSSL_VER.tar.gz /tmp/
 
 WORKDIR /tmp
 
-# Using specific Intel SGX SSL tag "lin_2.5_1.1.1d" corresponding to
-# openSSL version 1.1.1d
+# Using specific Intel SGX SSL tag "lin_2.10_1.1.1g" corresponding to
+# openSSL version 1.1.1g
+# Intel SGX SSL is compiled with mitigation tools to address vulnerabilities
+# found in earlier versions of SGX as documented in SGX SDK install guide
+# https://github.com/intel/linux-sgx
+# Mitigations tool tar ball is downloaded, extracted and copied to /usr/local/bin
 RUN ldconfig \
  && ln -s /etc/ssl/certs/* /usr/local/ssl/certs/ \
- && git clone -b lin_2.5_1.1.1d https://github.com/intel/intel-sgx-ssl.git  \
+ && MITIGATION_TOOLS=as.ld.objdump.gold.r2.tar.gz \
+ && wget https://download.01.org/intel-sgx/latest/linux-latest/$MITIGATION_TOOLS \
+ && tar -xvf $MITIGATION_TOOLS \
+ && cp external/toolset/ubuntu18.04/* /usr/local/bin/ \
+ && rm $MITIGATION_TOOLS \
+ && git clone -b lin_2.10_1.1.1g https://github.com/intel/intel-sgx-ssl.git  \
  && . /opt/intel/sgxsdk/environment \
  && (cd intel-sgx-ssl/openssl_source; mv /tmp/openssl-$OPENSSL_VER.tar.gz . ) \
  && (cd intel-sgx-ssl/Linux; \
@@ -278,7 +295,7 @@ WORKDIR /project/avalon/tc/sgx/trusted_worker_manager/common
 RUN mkdir -p build \
   && cd build \
   && cmake .. \
-  && make
+ && make
 
 WORKDIR /project/avalon/tc/sgx/trusted_worker_manager/enclave
 

@@ -21,7 +21,9 @@
 #include <stdexcept>
 #include <pthread.h>
 
-#include <sgx_uae_service.h>
+#include "sgx_uae_quote_ex.h"
+#include "sgx_uae_epid.h"
+
 #include "enclave_common_u.h"
 #include "sgx_support.h"
 

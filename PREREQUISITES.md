@@ -45,7 +45,7 @@ activation script (e.g. `source /opt/intel/sgxsdk/environment`)
 - If you build your own OpenSSL (not the usual case),
   `PKG_CONFIG_PATH` and `LD_LIBRARY_PATH` also contain the the path to
   [OpenSSL](#openssl) package config files and libraries, respectively.
-  You need to do this when pre-built OpenSSL version 1.1.1d or later
+  You need to do this when pre-built OpenSSL version 1.1.1g
   packages are not available for your system
 
 - `SGX_MODE`
@@ -140,14 +140,14 @@ can be added by submitting a Pull Request.
 ## Intel SGX SDK
 The Intel SGX SDK is required for both Intel SGX hardware platform and
 Intel SGX simulator mode.
-The following instructions download the Intel SGX SDK 2.3 and installs it in
+The following instructions download the Intel SGX SDK 2.10 and installs it in
 `/opt/intel/sgxsdk/` :
 
 ```bash
 sudo mkdir -p /opt/intel
 cd /opt/intel
-sudo wget https://download.01.org/intel-sgx/sgx-linux/2.7.1/distro/ubuntu18.04-server/sgx_linux_x64_sdk_2.7.101.3.bin
-echo "yes" | sudo bash ./sgx_linux_x64_sdk_2.7.101.3.bin
+sudo wget https://download.01.org/intel-sgx/sgx-linux/2.10/distro/ubuntu18.04-server/sgx_linux_x64_sdk_2.10.100.2.bin
+echo "yes" | sudo bash ./sgx_linux_x64_sdk_2.10.100.2.bin
 ```
 
 This installs the Intel SGX SDK in the recommended location,
@@ -172,7 +172,7 @@ Downloads are listed at
 ## Intel SGX in Hardware Mode
 
 If you plan to run this on Intel SGX-enabled hardware, you will need to
-install the Intel SGX driver and install additional packages
+install the Intel SGX driver and install additional Intel SGX PSW packages
 for both standalone and docker builds.
 You need to install the Intel SGX driver whether you build Avalon standalone
 or using Docker.
@@ -193,11 +193,22 @@ If disabled, enter BIOS and find the Intel SGX feature
 (it is usually under the "Advanced" or "Security" menu),
 enable Intel SGX, save your BIOS settings, and exit BIOS.
 
-Download and install libsgx-enclave-common version 2.7.101:
-```bash
-wget https://download.01.org/intel-sgx/sgx-linux/2.7.1/distro/ubuntu18.04-server/libsgx-enclave-common_2.7.101.3-bionic1_amd64.deb
-sudo dpkg -i libsgx-enclave-common_2.7.101.3-bionic1_amd64.deb
-```
+Install Intel SGX PSW debian packages from Intel SGX repository:
+  Steps are also documented at [sgx-install-guide](https://download.01.org/intel-sgx/sgx-linux/2.10/docs/Intel_SGX_Installation_Guide_Linux_2.10_Open_Source.pdf)
+
+- Add Repository to your sources
+  ```bash
+  echo 'deb [arch=amd64] https://download.01.org/intel-sgx/sgx_repo/ubuntu bionic main' | sudo tee /etc/apt/sources.list.d/intel-sgx.list
+  ```
+- Add the key to list of trusted keys used by apt to authenticate packages
+  ```bash
+  wget -qO - https://download.01.org/intel-sgx/sgx_repo/ubuntu/intel-sgx-deb.key | sudo apt-key add
+  ```
+- Update apt and install Launch service, EPID based attestation service and Untrusted runtime service
+  ```bash
+  sudo apt-get update
+  sudo apt-get install libsgx-launch libsgx-epid libsgx-urts libsgx-quote-ex
+  ```
 
 ### Run aesm service on host machine
 If you are behind a corporate proxy,
@@ -209,7 +220,7 @@ aesm proxy = http://your-proxy:your-port
 
 Start the AESM service on the host machine
 ```
-sudo source /opt/intel/libsgx-enclave-common/aesm/aesm_service
+sudo service aesmd start
 ```
 
 ### Remove Old `/dev/sgx` Intel SGX DCAP Driver
@@ -237,8 +248,8 @@ Install the Intel SGX IAS driver:
 
 ```bash
 cd /var/tmp
-wget https://download.01.org/intel-sgx/sgx-linux/2.7.1/distro/ubuntu18.04-server/sgx_linux_x64_driver_2.6.0_4f5bb63.bin
-sudo bash ./sgx_linux_x64_driver_2.6.0_4f5bb63.bin
+wget https://download.01.org/intel-sgx/sgx-linux/2.10/distro/ubuntu18.04-server/sgx_linux_x64_driver_2.6.0_602374c.bin
+sudo bash ./sgx_linux_x64_driver_2.6.0_602374c.bin
 ```
 
 If installation of the Intel SGX driver fails due to syntax errors,
@@ -274,25 +285,23 @@ Verify `SGX_MODE` is not set, or is set to `SIM`, with `echo $SGX_MODE` .
 **The OpenSSL steps apply only to standalone builds.**
 
 OpenSSL is a popular cryptography library. This project requires OpenSSL
-version 1.1.1d or later.
+version 1.1.1g.
 
 Many Linux distributions have an older version of OpenSSL installed by default.
 If your version of OpenSSL is too old, follow these steps to compile a newer
-version from source. If you already have a newer version, 1.1.1d or later,
+version from source. If you already have a newer version, 1.1.1g or later,
 you can skip this.
 
 If using a Debian-based Linux distribution (Ubuntu, Mint, etc.) the recommended
 path is to download and install pre-built OpenSSL packages for your system.
 Check for available versions
 [here](http://http.us.debian.org/debian/pool/main/o/openssl/).
-For example, to install OpenSSL v1.1.1d on an Ubuntu system:
+For example, to install OpenSSL v1.1.1g on an Ubuntu system:
 
 ```bash
 cd /var/tmp
-wget 'http://http.us.debian.org/debian/pool/main/o/openssl/libssl1.1_1.1.1d-0+deb10u3_amd64.deb'
-wget 'http://http.us.debian.org/debian/pool/main/o/openssl/libssl-dev_1.1.1d-0+deb10u3_amd64.deb'
-sudo dpkg -i libssl1.1_1.1.1d-0+deb10u3_amd64.deb
-sudo dpkg -i libssl-dev_1.1.1d-0+deb10u3_amd64.deb
+wget 'http://http.us.debian.org/debian/pool/main/o/openssl/libssl-dev_1.1.1g-1_amd64.deb'
+sudo dpkg -i libssl-dev_1.1.1g-1_amd64.deb
 sudo apt-get install -f
 ```
 
@@ -307,9 +316,9 @@ These steps detail installing OpenSSL to the `~/openssl/install` directory.
 ```bash
 mkdir -p ~/openssl/install
 cd ~/openssl
-wget https://www.openssl.org/source/old/1.1.1/openssl-1.1.1d.tar.gz
-tar -xzf openssl-1.1.1d.tar.gz
-cd openssl-1.1.1d/
+wget https://www.openssl.org/source/openssl-1.1.1g.tar.gz
+tar -xzf openssl-1.1.1g.tar.gz
+cd openssl-1.1.1g/
 ./Configure --prefix=$PWD/../install
 ./config --prefix=$PWD/../install
 make
@@ -337,7 +346,7 @@ export LD_LIBRARY_PATH="$PWD/install/lib/${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
 Intel SGX OpenSSL is a compilation of OpenSSL specifically for use with
 Intel SGX secure enclaves.
 This project specifically requires Intel SGX OpenSSL based on
-OpenSSL version 1.1.1d or later.
+OpenSSL version 1.1.1g.
 It should match the version installed on your host system or set up
 in the previous step.
 
@@ -357,12 +366,21 @@ problems.
   cd ~/sgxssl
   ```
 
-- Download a specific version of the Intel SGX SSL git repository.
-  Use Intel SGX SSL tag "lin_2.5_1.1.1d", which corresponds to
-  OpenSSL version 1.1.1d
+- Download, extract and copy the mitigation tools needed to compile sgxssl with
+  mitigation applied on SGX CVEs as documented here [sgxsdk-guide](#https://github.com/intel/linux-sgx)
 
   ```bash
-  git clone -b lin_2.5_1.1.1d 'https://github.com/intel/intel-sgx-ssl.git'
+  wget https://download.01.org/intel-sgx/latest/linux-latest/as.ld.objdump.gold.r2.tar.gz
+  tar -xvf as.ld.objdump.gold.r2.tar.gz
+  sudo cp external/toolset/ubuntu18.04/* /usr/local/bin/
+  ```
+
+- Download a specific version of the Intel SGX SSL git repository.
+  Use Intel SGX SSL tag "lin_2.10_1.1.1g", which corresponds to
+  OpenSSL version 1.1.1g
+
+  ```bash
+  git clone -b lin_2.10_1.1.1g 'https://github.com/intel/intel-sgx-ssl.git'
   ```
 
 - Download the OpenSSL source package for your version of OpenSSL.
@@ -370,7 +388,7 @@ problems.
 
   ```bash
   cd intel-sgx-ssl/openssl_source
-  wget 'https://www.openssl.org/source/old/1.1.1/openssl-1.1.1d.tar.gz'
+  wget 'https://www.openssl.org/source/openssl-1.1.1g.tar.gz'
   cd ..
   ```
 
@@ -455,3 +473,4 @@ problems.
 
 - If you reinstall the Intel SGX SDK and you modified `/etc/aesmd.conf`
   then save and restore the file before installing the SDK.
+

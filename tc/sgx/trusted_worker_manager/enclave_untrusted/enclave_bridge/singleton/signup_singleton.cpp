@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include "sgx_uae_epid.h"
+
 #include "singleton_enclave_u.h"
 
 #include "error.h"
