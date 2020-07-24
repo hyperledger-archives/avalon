@@ -183,12 +183,11 @@ will be created next in [Phase 2](#phase2).
     ENDMACRO()
   ```
 
-* Update the `workloads` config in `$TCF_HOME/config/singleton_enclave_config.toml` to include the new
-  workload. The work orders matching these workload ids will be processed by the enclave manager. The
-  enclaves should be built with matching workloads. After update, the configuration should look like:
+* Update the `WORKLOADS` build argument in docker-compose files if running a worker pool setup using dockers. The work order processing enclave (WPE) should be built with workloads the worker pool supports. After update, the argument should look like:
   ```bash
-  workloads = "echo-result,heart-disease-eval,inside-out-eval,simple-wallet,hello_world"
+  WORKLOADS=echo-result;heart-disease-eval;inside-out-eval;simple-wallet;hello-world
   ```
+  You could have any number (one or more) of workloads in this list. This is especially useful when multiple worker pools are running together and there is a workload isolation with each pool running different set of workloads. Refer [avalon-pool-combo.yaml](../../docker/compose/avalon-pool-combo.yaml) for mutiple pools.
 
 * Change to the top-level Avalon source repository directory, `$TCF_HOME`,
   and rebuild the framework (see [$TCF_HOME/BUILD.md](../../BUILD.md)).
