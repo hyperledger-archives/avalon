@@ -1,0 +1,7 @@
+sgx.allow_file_creation = 1
+sgx.enclave_size = 2G
+sgx.thread_num = 16 
+sgx.file_check_policy = allow_all_but_log
+
+# eventfd used by C++ ZMQ library.
+sys.insecure__allow_eventfd = 1

@@ -1,0 +1,52 @@
+# Copyright 2020 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+version: '3.5'
+
+services:
+  ov-work-order:
+    container_name: ov-work-order
+    image: openvinowl
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    environment:
+      - http_proxy
+      - https_proxy
+      - no_proxy
+    expose:
+      - 8888
+    volumes:
+      - ./output:/home/openvino/output
+    command: openvinowl
+    stop_signal: SIGKILL
+
+
+  test-ov-send-work-order:
+    container_name: test-ov-send-work-order
+    image: openvinowl
+    environment:
+      - http_proxy
+      - https_proxy
+      - no_proxy
+    expose:
+      - 8888
+    command: |
+      bash -c "
+      ./test/test_send_request.py ov-inference test.png
+      "
+    stop_signal: SIGKILL
+    depends_on:
+      - ov-work-order
+
