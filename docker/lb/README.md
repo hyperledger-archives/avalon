@@ -24,5 +24,5 @@ coming from clients to one of the many avalon-listeners running in backend.
  
     # run the transaction
     cd examples/apps/generic_client
-    ./generic_client.py --uri "http://avalon-lb:9947" --workload_id "echo-result" --in_data "Hello"
+    ./generic_client.py --uri "http://avalon-lb:9947" --workload_id "echo-result" --in_data "Hello" --worker_id "singleton-worker-1"
      ```
