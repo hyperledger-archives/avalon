@@ -355,6 +355,15 @@ internal Docker container network. This should already be present:
        expose:
         - 1947
 
+Why are some Docker Compose .yaml files in $TCF_HOME and others in $TCF_HOME/docker/compose?
+--------------------------------------------------------------------------------------------
+The usual convention is to have a default ``docker-compose.yaml`` file
+in the base source directory so that a newbie can just run the command
+``docker-compose up`` and a bare minimal setup should be running.
+The other flavors of .yaml files, be it for proxy or worker pool,
+have been moved from $TCF_HOME to ward off confusion and cluttering
+in the base source directory.
+
 
 Videos
 ========
