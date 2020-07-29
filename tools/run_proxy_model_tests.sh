@@ -32,7 +32,7 @@ try() {
 # time, so run test will wait for about 1min.
 
 yell "Wait for fabric blockchain connector to register worker"
-sleep 30s
+sleep 60s
 
 SCRIPTDIR="$(dirname $(readlink --canonicalize ${BASH_SOURCE}))"
 SRCDIR="$(realpath ${SCRIPTDIR}/..)"
