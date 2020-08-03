@@ -30,7 +30,7 @@ class BlockchainConnectorInterface(ABC):
         pass
 
     @abstractmethod
-    def sync_workers(self):
+    async def sync_workers(self):
         """
         Sync workers from avalon to blockchain and blockchain to
         avalon
@@ -38,7 +38,7 @@ class BlockchainConnectorInterface(ABC):
         pass
 
     @abstractmethod
-    def sync_work_orders(self):
+    async def sync_work_orders(self):
         """
         Sync work orders from avalon to blockchain and blockchain to
         avalon
