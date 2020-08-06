@@ -364,12 +364,18 @@ The other flavors of .yaml files, be it for proxy or worker pool,
 have been moved from $TCF_HOME to ward off confusion and cluttering
 in the base source directory.
 
+What is the equivalent of "make clean" using Docker build?
+----------------------------------------------------------
+The closest to that is running ``git clean`` to remove all generated files.
+
 
 Videos
 ========
 
 - Introduction
-
+  - `Hyperledger Avalon [Introduction] (Eugene Yarmosh, 2020)
+    <https://youtu.be/I16EhP23HTg>`_
+    (from Hyperledger Denver Meetup) (1:00:44)
   - `Introduction to Hyperledger Avalon (Manoj Gopalakrishnan, 2019)
     <https://youtu.be/YRXfzHzJVaU>`_
     (from Hyperledger India Meetup) (20:24)
