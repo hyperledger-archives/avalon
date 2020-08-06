@@ -102,7 +102,9 @@ FROM ubuntu:bionic as common_cpp_image
 RUN apt-get update \
  && apt-get install -y -q \
     pkg-config \
+    wget \
     cmake \
+    libprotobuf-dev \
     make
 
 
@@ -111,6 +113,27 @@ COPY --from=openssl_image /usr/local/ssl /usr/local/ssl
 COPY --from=openssl_image /usr/local/bin /usr/local/bin
 COPY --from=openssl_image /usr/local/include /usr/local/include
 COPY --from=openssl_image /usr/local/lib /usr/local/lib
+
+# Intel SGX common library and SDK are installed in /opt/intel directory.
+# Installation of Intel SGX libsgx-common packages requires
+# /etc/init directory. In the Docker image this directory doesn't exist.
+# Hence creating /etc/init directory.
+RUN mkdir -p /opt/intel \
+ && mkdir -p /etc/init
+WORKDIR /opt/intel
+
+# Install Intel SGX common library
+RUN wget https://download.01.org/intel-sgx/sgx-linux/2.7.1/distro/ubuntu18.04-server/libsgx-enclave-common_2.7.101.3-bionic1_amd64.deb \
+ && dpkg -i libsgx-enclave-common_2.7.101.3-bionic1_amd64.deb
+
+# Install Intel SGX SDK
+RUN SGX_SDK_FILE=sgx_linux_x64_sdk_2.7.101.3.bin \
+ && wget --no-check-certificate https://download.01.org/intel-sgx/sgx-linux/2.7.1/distro/ubuntu18.04-server/$SGX_SDK_FILE \
+ && echo "yes" | bash ./$SGX_SDK_FILE \
+ && rm $SGX_SDK_FILE \
+ && echo ". /opt/intel/sgxsdk/environment" >> /etc/environment
+
+ENV SGX_SDK=/opt/intel/sgxsdk
 
 RUN ldconfig \
  && ln -s /etc/ssl/certs/* /usr/local/ssl/certs/

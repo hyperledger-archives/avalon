@@ -17,9 +17,12 @@
 
 // Verifies signature of the message by extracting public key from certificate
 bool verify_ias_report_signature(const std::string& ias_attestation_signing_cert_pem,
-                                   const std::string& ias_report,
-                                   const std::string& ias_signature);
+                                 const std::string& ias_report,
+                                 const std::string& ias_signature);
 
 // Verifies certificate against IAS CA certificate
 bool verify_quote(const std::string& ias_report, int group_out_of_date_is_ok);
 
+// Verify MR enclave value
+bool verify_mr_enclave_value(const std::string& ias_report,
+		             const std::string& mr_enclave);
