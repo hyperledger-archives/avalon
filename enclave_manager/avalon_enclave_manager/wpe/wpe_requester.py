@@ -178,7 +178,7 @@ class WPERequester():
             @param encryption_key - WPE's public encryption key
         Returns :
             @returns result - Result from KME that includes the workorder
-                              key info. error response, in case of failure.
+                              key info. Error response, in case of failure.
         """
         workload_id = "kme-preprocess"
         in_data = [wo_request, encryption_key]

@@ -34,11 +34,12 @@ enum KmeRegistrationStatus {
     ERR_MRSIGNER_NOT_MATCH = 4, /// WPE MRSIGNER value not matched
     ERR_WPE_VERIFICATION_FAILED = 5, /// WPE attestation report verification failed
     ERR_ENCRYPTION_KEY_NOT_MATCH = 6, /// WPE encryption hash value didn't matched
-    ERR_UNIQUE_ID_NOT_MATCH = 7 /// WPE unique id didn't match
+    ERR_UNIQUE_ID_NOT_MATCH = 7, /// WPE unique id didn't match
+    ERR_WPE_KEY_INFO_CREATION_FAILED = 8 /// CreateWorkOrderKeyInfo for WPE failed
 };
 
 enum KmePreProcessStatus {
-    ERR_WPE_MAX_WO_COUNT_REACHED = 1
+    ERR_WPE_MAX_WO_COUNT_REACHED = 10
 };
 
 class ExtWorkOrderInfoKME : public ExtWorkOrderInfoImpl {
