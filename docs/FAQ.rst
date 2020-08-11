@@ -206,6 +206,22 @@ The fix is to remove ``/dev/sgx`` then install ``/dev/isgx``
 For instructions on how to do tis, see "Intel SGX in Hardware Mode" at
 https://github.com/hyperledger/avalon/blob/master/PREREQUISITES.md#sgx
 
+How can I prevent a worker from using old keys when I restart a KME or a Singleton worker?
+------------------------------------------------------------------------------------------
+By default, workers use the same signing and encryption key pairs (asymmetric keys) across
+restarts to ensure validity of historical work order requests/responses. This is also done
+to ensure a smooth functioning in case of abrupt failures of the worker. Sealed data from
+respective worker enclaves are used to recover keys across restarts.
+However, this default behavior can be overriden if fresh pairs of aforementioned keys are
+desired. For this, it has to be ensured that the sealed data created during previous
+startup of the enclave manager (KME or Singleton) is cleaned up before starting again.
+This has been provisioned in the docker mode already. Prepend ``CLEAN_SEALED_DATA=1`` to
+the docker-compose command. For example -
+
+   .. code:: none
+
+       CLEAN_SEALED_DATA=1 docker-compose up -d
+
 
 Software Development
 ====================
@@ -315,6 +331,25 @@ URI of the Avalon Listener. The default URI for the Avalon Listener is
 If using Docker, specify the URI as the name of the Docker container running
 the Avalon Listener:  ``http://avalon-listener:1947`` on the
 command line (the option is usually ``--uri`` or ``--service-uri``).
+
+How do I fix ``RuntimeError`` when I make changes to trusted code in enclave managers (KME or Singleton) and try to run?
+------------------------------------------------------------------------------------------------------------------------
+An error stack similar to the one below can be seen if changes are made to the trusted
+code and the enclave manager (KME or Singleton) is restarted.
+
+   .. code:: none
+
+       [02:28:05 ERROR   avalon_enclave_manager.base_enclave_manager] failed to initialize/signup enclave;
+       Traceback (most recent call last):
+       ...
+       RuntimeError
+
+Note that this is only the beginning and end of the error stack. This happens because
+some sealed data from respective enclave is used across enclave lifetimes now. The
+change in the enclave itself across 2 lifetimes, with the second enclave trying to use
+the sealed data from the previous run causes this. The solution is to remove the sealed
+data before starting again. Refer to the steps mentioned in ``prevent a worker from
+using old keys`` in `Installation and Configuration`_ to achieve cleanup.
 
 
 Docker and Containers
