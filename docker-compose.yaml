@@ -58,6 +58,7 @@ services:
       - http_proxy
       - https_proxy
       - no_proxy
+      - CLEAN_SEALED_DATA
     expose:
       # ZMQ socket port.
       - 5555
@@ -66,6 +67,7 @@ services:
       - ./.sealed:/project/avalon/.sealed
     command: |
       bash -c "
+        if [ -v CLEAN_SEALED_DATA ] && [ $CLEAN_SEALED_DATA = 1 ]; then rm -f /project/avalon/.sealed/.sealed.data*; fi;
         enclave_manager --lmdb_url http://avalon-lmdb:9090
         tail -f /dev/null
       "

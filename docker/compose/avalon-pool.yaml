@@ -38,6 +38,7 @@ services:
       - http_proxy
       - https_proxy
       - no_proxy
+      - CLEAN_SEALED_DATA
     volumes:
       - pool-1:/shared-pool-1
       # Persistent volume to store sealed data across restarts
@@ -47,6 +48,7 @@ services:
       - 1948
     command: |
       bash -c "
+        if [ -v CLEAN_SEALED_DATA ] && [ $CLEAN_SEALED_DATA = 1 ]; then rm -f /project/avalon/.sealed/.sealed.data*; fi;
         while true;
           do
             if [ -e /shared-pool-1/wpe_mr_enclave.txt ];
