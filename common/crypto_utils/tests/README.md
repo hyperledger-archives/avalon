@@ -19,7 +19,9 @@ Test Build and Execution
    If the virtual environment for the current shell session is activated,
    you will the see this prompt: `(_dev)` 
 
-2. To build and run the tests run `./run_test.sh `.
+2. To build the tests run `./run_test.sh `.
+
+3. To execute the tests run `./run_test.sh test`.
 
 3. To remove generated binaries run `./run_test.sh clean `.
     To deactivate the virtual environment type `deactivate`
