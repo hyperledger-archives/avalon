@@ -194,7 +194,7 @@ void KMEWorkloadProcessor::Register(
     if (search != sig_key_map.end()) {
 
         // If this is simulator mode, mr_enclave_bytes should not be
-        // populated yet. Read the mr_enclave recevied as parameter
+        // populated yet. Read the mr_enclave received as a parameter
         // in this WPE registration request and populate it.
         if (this->isSgxSimulator())
             mr_enclave_bytes = HexEncodedStringToByteArray(mr_enclave);

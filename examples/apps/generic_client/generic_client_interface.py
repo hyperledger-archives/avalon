@@ -133,7 +133,8 @@ class GenericClientInterface(ABC):
     def verify_receipt_signature(self, receipt_update_retrieve_res):
         """
         Verify work order receipt signature
-        @param receipt_update_retrieve_res - receipt update retrive
+
+        @param receipt_update_retrieve_res - receipt update retrieve
         response
         Returns True on success, False otherwise
         """

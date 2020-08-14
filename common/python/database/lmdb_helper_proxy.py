@@ -211,7 +211,7 @@ class LMDBHelperProxy():
         """
         Function to conditionally update a key-value pair in a lmdb table
         that holds comma-separated strings as value. This function reads
-        the first of comma-seperated strings and then compares it with the
+        the first of comma-separated strings and then compares it with the
         value passed in. If there is a match, the passed value is returned.
         It also deletes the string from the value and if this is the lone
         string, the key-value pair altogether is removed.

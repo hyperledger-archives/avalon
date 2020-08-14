@@ -311,7 +311,7 @@ int ExtWorkOrderInfoKME::CreateWorkOrderKeyInfo(
                     wo_key_info.out_data_keys[i].decrypted_data);
         }
 
-        // Calculate signure of hash of all the encrypted values in this
+        // Calculate signature of hash of all the encrypted values in this
         // work order key info JSON using KME's signing key
         ByteArray wo_key_info_hash = {};
         CalculateWorkOrderKeyInfoHash(wo_key_info, wo_key_info_hash);
