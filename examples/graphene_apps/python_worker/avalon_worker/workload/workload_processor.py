@@ -64,7 +64,7 @@ class WorkLoadProcessor():
             out_data = self._create_response_out_data(out_msg_bytes)
             return result, out_data
         except Exception as e:
-            logger.error("Error exceuting workload: " + str(e))
+            logger.error("Error executing workload: " + str(e))
             return False, None
 
 # -------------------------------------------------------------------------

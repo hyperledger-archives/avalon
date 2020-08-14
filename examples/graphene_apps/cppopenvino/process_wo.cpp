@@ -121,7 +121,7 @@ std::string ProcessWorkOrder::process_work_order(std::string &msg) {
         if(ret == 0) {
             output = "Openvino Success: Generated output file: " + out_image_name;
         } else {
-            output = "Openvino Error: Could't execute OpenVino workorder";
+            output = "Openvino Error: Could not execute OpenVino workorder";
         }
     } else {
         output = "Error: Unsupported workload";

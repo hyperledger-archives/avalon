@@ -199,7 +199,7 @@ class WorkOrderProcessor():
 
         Parameters :
             input_json_str: JSON formatted work order request string.
-                            work order JSON if formattted as per
+                            work order JSON is formatted as per
                             TC spec ver 1.1 section 6.
         Returns :
             JSON RPC response containing result or error.
@@ -277,7 +277,7 @@ class WorkOrderProcessor():
             input_json: JSON work order request
             session_key: Session key of the client which submitted
                         this work order
-            session_key_iv: iv corresponding to teh session key
+            session_key_iv: iv corresponding to the session key
         Returns :
             JSON RPC response containing result or error.
         """

@@ -298,7 +298,7 @@ class WPERequester():
             response = self._uri_client._postmsg(json_request_str,
                                                  self._conn_retries)
         except Exception as err:
-            logger.error("Exception occured in communication with KME")
+            logger.error("Exception occurred in communication with KME")
             raise err
         logger.info("Response from KME %s", response)
 

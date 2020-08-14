@@ -22,7 +22,8 @@ To run, follow the instructions in the "Testing" section of the
 [build document](../../../BUILD.md#testing).
 You may run the CLI demo in standalone mode or in a Docker container.
 Heart disease workload is designed to compute average heart disease risk, 
-even when invalid data is passed at the in_data parametere via the command prompt.
+even when invalid data is passed at the in_data parameter via the
+command prompt.
 
 
 ## Using the Heart Disease Evaluation Interactive Command Line Client

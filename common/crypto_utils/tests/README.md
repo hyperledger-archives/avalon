@@ -17,19 +17,19 @@ Test Build and Execution
     source _dev/bin/activate
     ```
    If the virtual environment for the current shell session is activated,
-   you will the see this prompt: `(_dev)` 
+   you will the see this prompt: `(_dev)`
 
 2. To build the tests run `./run_test.sh `.
 
 3. To execute the tests run `./run_test.sh test`.
 
-3. To remove generated binaries run `./run_test.sh clean `.
+4. To remove generated binaries run `./run_test.sh clean `.
     To deactivate the virtual environment type `deactivate`
 
 Example
 -------
 ```
-$ ./run_test.sh 
+$ ./run_test.sh
 Collecting setuptools
 ...
 Successfully installed avalon-sdk-0.5.0.dev1
@@ -51,4 +51,3 @@ cleaning up binaries
 ...
 find . -iname '__pycache__' -delete
 ```
-

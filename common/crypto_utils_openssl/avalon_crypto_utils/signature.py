@@ -519,7 +519,7 @@ class ClientSignature(object):
 # -----------------------------------------------------------------------------
     def calculate_request_hash(self, input_json):
         """
-        Function to create the work order reuest hash
+        Function to create the work order request hash
         as defined in EEA spec 6.1.8.1
         Parameters:
             - input_json is dictionary contains work order request payload

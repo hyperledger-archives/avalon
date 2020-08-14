@@ -152,7 +152,7 @@ class EthereumWrapper():
         chain_id.
 
         Parameters:
-        contract_interace  Solidity contract interface
+        contract_interface  Solidity contract interface
 
         Returns:
         Solidity contract address.

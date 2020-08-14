@@ -43,7 +43,7 @@ class FabricWrapper():
     @classmethod
     def init_network_config(cls, net_config_file):
         # Read network file path from fabric toml file.
-        # Initalize the class variable network_config
+        # Initialize the class variable network_config
         if FabricWrapper.network_config is None:
             logging.info("INITIALIZING network_config")
             with open(net_config_file, 'r') as profile:

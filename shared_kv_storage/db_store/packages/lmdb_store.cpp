@@ -607,7 +607,7 @@ tcf_err_t db_store::db_store_csv_search_delete(
     if(valueBuffer.size() == 0){
         return db_store_del(table, inId.data(), inId.size(), valueBuffer.data(), valueBuffer.size());
     }
-    // Restore udated csv to database
+    // Restore updated csv to database
     return db_store_put(table, inId.data(), inId.size(), valueBuffer.data(), valueBuffer.size());
 }
 
