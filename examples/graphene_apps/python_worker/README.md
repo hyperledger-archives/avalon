@@ -61,7 +61,7 @@ https://creativecommons.org/licenses/by/4.0/
 - Before building and running application for Graphene-SGX, we need to install Intel SGX driver and Graphene SGX driver.
 
   - To install Intel SGX driver please refer https://github.com/hyperledger/avalon/blob/master/PREREQUISITES.md#intel-sgx-in-hardware-mode
-  - To install Graphene SGX driver please refer https://graphene.readthedocs.io/en/latest/building.html#install-the-graphene-sgx-driver-not-for-production
+  - Clone the Graphene codebase from [here](https://github.com/oscarlab/graphene.git) if not done already. Then, to install Graphene SGX driver please refer https://graphene.readthedocs.io/en/latest/building.html#install-the-graphene-sgx-driver-not-for-production.
 
 - To build Avalon Python worker docker image for Graphene-SGX we need to use [Graphene Shielded Container](https://github.com/oscarlab/graphene/tree/master/Tools/gsc) (GSC) tool. Please refer to [GSC tool documentation](https://github.com/oscarlab/graphene/blob/master/Documentation/manpages/gsc.rst) for detailed instructions to create graphene based docker image from application docker image.
 
@@ -81,21 +81,23 @@ https://creativecommons.org/licenses/by/4.0/
 
      *# Avalon Python worker uses below configuration*.
 
-     *Distro: "ubuntu18.04"*  
-     *Graphene:*  
-         *Repository:* *"https://github.com/oscarlab/graphene.git"*  
-         *Branch: "master"*  
-     *SGXDriver:*  
-         *Repository: "https://github.com/01org/linux-sgx-driver.git"*  
-         *Branch: "sgx_driver_2.6"*  
+     ```
+     Distro: "ubuntu18.04"
+     Graphene:
+         Repository: "https://github.com/oscarlab/graphene.git"
+         Branch: "master"
+     SGXDriver:
+         Repository: "https://github.com/01org/linux-sgx-driver.git"
+         Branch: "sgx_driver_2.6"
+     ```
 
-  2. Copy the Graphene python worker GSC build script file *build_gsc_python_worker.sh* from this [location](https://github.com/hyperledger/avalon/tree/master/examples/graphene_apps/python_worker/graphene) to <graphene_repo>/Tools/gsc using following command :
+  2. Copy the Graphene python worker GSC build script file *build_gsc_python_worker.sh* from [here](https://github.com/hyperledger/avalon/tree/master/examples/graphene_apps/python_worker/graphene) to <graphene_repo>/Tools/gsc using following command :
 
      `cp <path of build_gsc_python_worker.sh> Tools/gsc`
 
   3. Set *TCF_HOME* to the top level directory of your avalon source repository.
 
-     `export TCF_HOME = <path of avalon repo top level directory>`
+     `export TCF_HOME=<path of avalon repo top level directory>`
 
   4. Graphenize Avalon python worker docker image using following command :
 
@@ -130,7 +132,7 @@ https://creativecommons.org/licenses/by/4.0/
      *graphene-python-worker    | Bind to zmq port*
      *graphene-python-worker    | waiting for next request*
 
-  3. To send work orders to python worker we can use Avalon generic client application.
+  3. To send work orders to python worker we can use Avalon generic client application as shown [above](https://github.com/hyperledger/avalon/tree/master/examples/graphene_apps/python_worker#test-python-worker-using-avalon).
 
   4. To restart the python worker you have to first bring all the containers down before bringing it up again. This is to ensure that python worker generate new keys and Avalon Graphene Enclave Manager gets the updated sign up information from python worker.
 
