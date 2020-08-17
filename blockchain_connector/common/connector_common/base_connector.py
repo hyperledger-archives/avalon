@@ -157,14 +157,11 @@ class BaseConnector(BlockchainConnectorInterface):
         """
         event_loop = asyncio.get_event_loop()
         logging.info("Blockchain Connector service started")
-        try:
-            event_loop.run_until_complete(self.sync())
-        finally:
-            event_loop.close()
+        event_loop.run_until_complete(self.sync())
 
     async def sync(self):
         """
         Wrapper function to wait for the coroutines to finish. It simply
         waits for the sync_workers() & sync_work_orders() to complete.
         """
-        await asyncio.wait([self.sync_workers(), self.sync_work_orders()])
+        await asyncio.gather(self.sync_workers(), self.sync_work_orders())
