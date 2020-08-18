@@ -35,7 +35,7 @@ sync_workload_execution = 0
 # -------------------------------------------------------------------
 [EnclaveManager]
 # configurations for asynchronous work load execution
-sleep_interval = "5"
+sleep_interval = "2"
 # configurations for synchronous Work load execution
 # zmq_port is the port used for zmq socket communication
 # Port for socket interaction with listener

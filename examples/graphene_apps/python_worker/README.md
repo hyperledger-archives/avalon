@@ -109,7 +109,7 @@ https://creativecommons.org/licenses/by/4.0/
 
 - To run python worker as a docker container in Graphene-SGX environment and to use a test application to send work order requests, execute the following command from [python_worker](http://github.com/hyperledger/avalon/tree/master/examples/graphene_apps/python_worker) directory.
 
-  `docker-compose -f docker-compose.yaml -f docker-compose-graphene-sgx.yaml up`
+  `docker-compose -f docker-compose.yaml -f compose/graphene-sgx.yaml up`
 
   Above command will run test work orders listed in file [*test_work_orders.json*](http://github.com/hyperledger/avalon/tree/master/examples/graphene_apps/python_worker/tests/test_work_orders.json).
 
@@ -163,6 +163,22 @@ https://creativecommons.org/licenses/by/4.0/
           *"module": "<workload python module>",*
           *"class": "<workload implementation class name>"*
       *}*
+
+## Testing OpenVino Object detection with Python worker
+
+- First build OpenVino docker image and GSC docker image using the steps mentioned in cppopenvino [ReadMe](https://github.com/hyperledger/avalon/blob/master/examples/graphene_apps/cppopenvino/README.md)
+
+- Below steps will run sample openvino inference test cases in [test_ov_work_orders.json](http://github.com/hyperledger/avalon/tree/master/examples/graphene_apps/python_worker/tests/test_ov_work_orders.json)
+
+  ### Testing OpenVino (without Avalon)
+
+  - For non SGX mode, execute below command
+
+    `docker-compose -f docker-compose.yaml -f compose/ov.yaml -f compose/ov-subnet.yaml up`
+
+  - For SGX mode, execute below command
+
+    `docker-compose -f docker-compose.yaml -f compose/graphene-sgx.yaml -f compose/ov.yaml -f compose/ov-sgx.yaml -f compose/ov-subnet.yaml up`
 
 ## Known issues
 

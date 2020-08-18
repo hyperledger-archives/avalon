@@ -10,6 +10,7 @@ RUN apt-get update \
     pkg-config \
     python3-dev \
     python3-pip \
+    python3-toml \
     gcc \
  && python3 -m pip install pyzmq pycryptodomex ecdsa\
  && apt-get clean 
@@ -20,6 +21,7 @@ RUN ln -sf /usr/bin/python3 /usr/bin/python
 WORKDIR /home/pythonworker
 
 COPY . .
+COPY ./ov_workload/ov_workload_config.toml /home/pythonworker/ov_workload_config.toml
 
 RUN make && make install
 

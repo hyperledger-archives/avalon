@@ -6,5 +6,9 @@
     "python-fib": {
         "module": "sample_workloads.fibonacci",
         "class": "FibonacciWorkLoad"
+    },
+    "ov-inference": {
+        "module": "ov_workload.openvino",
+        "class": "OpenVinoWorkLoad"
     }
 }

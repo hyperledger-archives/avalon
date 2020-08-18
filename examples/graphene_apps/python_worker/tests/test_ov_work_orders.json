@@ -1,0 +1,25 @@
+{
+  "workOrders": [
+    {
+      "workloadId": "ov-inference",
+      "params": "elephants.jpg"
+    },
+    {
+      "workloadId": "ov-inference",
+      "params": "scenery.jpg"
+    },
+    {
+      "workloadId": "ov-inference",
+      "params": "street.jpg"
+    },
+    {
+      "workloadId": "ov-inference",
+      "params": "test.png"
+    },
+    {
+      "workloadId": "ov-inference",
+      "params": "horses.jpg"
+    }
+  ]
+}
+
