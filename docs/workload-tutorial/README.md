@@ -145,7 +145,7 @@ will be created next in [Phase 2](#phase2).
   ```
 
 * To link the new workload library into the build, change below lines in
-  [$TCF_HOME/tc/sgx/trusted_worker_manager/enclave/CMakeWorkloads.txt](../../tc/sgx/trusted_worker_manager/enclave/singleton/CMakeLists.txt) :  
+  [$TCF_HOME/tc/sgx/trusted_worker_manager/enclave/CMakeWorkloads.txt](../../tc/sgx/trusted_worker_manager/enclave/CMakeWorkloads.txt) :  
 
   Add workload to supported workload list
   ```bash
@@ -156,12 +156,12 @@ will be created next in [Phase 2](#phase2).
     ENDMACRO()
   ```  
 
-  Replace `<workload_id>`  with `hello_world` as shown below:
+  Replace `<workload_id>`  with `hello-world` as shown below:
   ```bash
     MACRO(CREATE_SUPPORTED_WORKLOADS_LIST)
         ...
         ...
-        # LIST(SUPPORTED_WORKLOADS_LIST "hello_world")
+        # LIST(SUPPORTED_WORKLOADS_LIST "hello-world")
     ENDMACRO()
   ```  
 
