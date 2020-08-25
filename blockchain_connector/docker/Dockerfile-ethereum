@@ -13,20 +13,21 @@
 # limitations under the License.
 # ------------------------------------------------------------------------------
 
-FROM ubuntu:bionic as base_image
-
-# Ignore timezone prompt in apt
-ENV DEBIAN_FRONTEND=noninteractive
-
-# Add necessary packages
-RUN apt-get update \
- && apt-get install -y -q \
-    ca-certificates \
-    python3-toml \
-    python3-requests \
-    python3-colorlog \
-    python3-twisted \
- && apt-get clean
+ARG IMAGE
+FROM $IMAGE as base_image
+ARG DISTRO
+COPY ./scripts/install_packages /project/avalon/scripts/
+RUN packages=""; \
+    pip_packages=""; \
+    if [ "$DISTRO" = "bionic" ] ; then \
+      DEBIAN_FRONTEND=noninteractive \
+      packages="$packages ca-certificates python3-requests python3-toml python3-colorlog python3-twisted"; \
+    elif [ "$DISTRO" = "centos" ] ; then \
+      packages="$packages python3" \
+      pip_packages="$pip_packages toml colorlog twisted requests"; \
+      /project/avalon/scripts/install_packages -c install -q "epel-release"; \
+    fi; \
+    /project/avalon/scripts/install_packages -c install -q "$packages" -p "$pip_packages"
 
 # Make Python3 default
 RUN ln -sf /usr/bin/python3 /usr/bin/python
@@ -34,21 +35,21 @@ RUN ln -sf /usr/bin/python3 /usr/bin/python
 # -------------=== python build ===-------------
 
 #Build python intermediate docker image
-FROM ubuntu:bionic as python_image
+FROM $IMAGE as python_image
+ARG DISTRO
+
+COPY ./scripts/install_packages /project/avalon/scripts/
 
 # Add necessary packages
-RUN apt-get update \
- && apt-get install -y -q \
-    ca-certificates \
-    pkg-config \
-    python3-pip \
-    python3-dev \
-    make \
- && apt-get clean
-
-# Install setuptools packages using pip because
-# these are not available in apt repository.
-RUN pip3 install setuptools jsonschema
+RUN packages="ca-certificates pkg-config python3-pip make" \
+    pip_packages="setuptools jsonschema"; \
+    if [ "$DISTRO" = "bionic" ] ; then \
+      packages="$packages python3-dev"; \
+    elif [ "$DISTRO" = "centos" ] ; then \
+      packages="$packages python3-devel" \
+      pip_packages="$pip_packages wheel"; \
+    fi; \
+    /project/avalon/scripts/install_packages -c install -q "$packages" -p "$pip_packages"
 
 # -------------=== common/python build ===-------------
 
@@ -106,24 +107,24 @@ RUN echo "Building Avalon SDK\n" \
 
 # Build Avalon blockchain connector docker image
 FROM python_image as build_image
-# Add necessary packages to build
-RUN apt-get update \
- && apt-get install -y -q \
-    protobuf-compiler \
-    libprotobuf-dev \
-    software-properties-common \
-    dh-autoreconf \
-    ocaml \
-    xxd \
-    ocamlbuild \
-    cmake \
-    git \
-    swig \
- && apt-get clean \
- && rm -rf /var/lib/apt/lists/*
+ARG DISTRO
 
-# Installing web3 for ethereum
-RUN pip3 install --upgrade setuptools json-rpc web3 py-solc-x nose2
+COPY ./scripts/install_packages /project/avalon/scripts/
+
+# Add necessary packages to build
+RUN packages="cmake git swig"; \
+    pip_packages="setuptools json-rpc web3 py-solc-x nose2"; \
+    if [ "$DISTRO" = "bionic" ] ; then \
+      packages="$packages protobuf-compiler libprotobuf-dev software-properties-common dh-autoreconf ocaml xxd ocamlbuild"; \
+    elif [ "$DISTRO" = "centos" ] ; then \
+      packages="$packages libcurl-devel gcc-c++ which" \
+      pip_packages="$pip_packages wheel"; \
+    fi; \
+    /project/avalon/scripts/install_packages -c install -q "$packages" -p "$pip_packages"
+
+RUN if [ "$DISTRO" = "centos" ] ; then \
+      dnf -y --enablerepo=PowerTools install protobuf-devel yum-utils ocaml ocaml-ocamlbuild dh-autoreconf; \
+    fi
 
 # Install specific version of solc to support versions <0.6.0
 RUN python3 -m solcx.install v0.5.15
@@ -144,6 +145,9 @@ RUN echo "Building ethereum connector\n" \
 
 # Build final image and install modules
 FROM base_image as final_image
+ARG DISTRO
+
+COPY ./scripts/install_packages /project/avalon/scripts/
 
 ENV TCF_HOME=/project/avalon
 
@@ -159,15 +163,31 @@ COPY --from=build_image /project/avalon/blockchain_connector/ethereum/dist/*.whl
 COPY --from=build_image /project/avalon/blockchain_connector/common/dist/*.whl dist/
 COPY ./sdk/avalon_sdk/tcf_connector.toml /project/avalon/sdk/avalon_sdk/
 
+RUN if [ "$DISTRO" = "centos" ] ; then \
+      dnf remove -y python3; \
+      packages="openssl-devel wget make gcc"; \
+      /project/avalon/scripts/install_packages -c install -q "$packages"; \
+      cd /tmp \
+      && wget https://www.python.org/ftp/python/3.6.9/Python-3.6.9.tgz \
+      && tar -xvzf Python-3.6.9.tgz \
+      && cd Python-3.6.9 \
+      && ./configure \
+      && make \
+      && make install; \
+    fi
+
 # Installing wheel file requires python3-pip package.
 # python3-pip package will increase size of final docker image.
 # So remove python3-pip package and dependencies.
-RUN apt-get update \
- && apt-get install -y -q python3-pip \
- && echo "Install Common Python, SDK & Blockchain_connector packages\n" \
- && pip3 install dist/*.whl \
- && pip3 install pycryptodomex ecdsa \
- && echo "Remove unused packages from image\n" \
- && apt-get autoremove --purge -y -q python3-pip \
- && apt-get clean \
- && rm -rf /var/lib/apt/lists/*
+RUN packages=""; \
+    pip_packages="pycryptodomex ecdsa"; \
+    if [ "$DISTRO" = "bionic" ] ; then \
+      packages="$packages python3-pip"; \
+    fi; \
+    /project/avalon/scripts/install_packages -c install -q "$packages" -p "$pip_packages" \
+    && echo "Install Common Python, SDK & Blockchain_connector packages\n" \
+    && pip3 install dist/*.whl \
+    && if [ "$DISTRO" = "bionic" ] ; then \
+         echo "Remove unused packages from image\n" \
+         /project/avalon/scripts/install_packages -c uninstall -q "$packages"; \
+       fi

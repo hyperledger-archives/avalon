@@ -15,44 +15,44 @@
 
 # -------------=== listener build ===-------------
 
-FROM ubuntu:bionic as base_image
-
-# Ignore timezone prompt in apt
-ENV DEBIAN_FRONTEND=noninteractive
-
-# Add necessary packages
-RUN apt-get update \
- && apt-get install -y -q \
-    ca-certificates \
-    python3-toml \
-    python3-requests \
-    python3-colorlog \
-    python3-twisted \
- && apt-get clean
-
+ARG IMAGE
+FROM $IMAGE as base_image
+ARG DISTRO
+COPY ./scripts/install_packages /project/avalon/scripts/
+RUN packages=""; \
+    pip_packages=""; \
+    if [ "$DISTRO" = "bionic" ] ; then \
+      DEBIAN_FRONTEND=noninteractive \
+      packages="$packages ca-certificates python3-requests python3-toml python3-colorlog python3-twisted"; \
+    elif [ "$DISTRO" = "centos" ] ; then \
+      packages="$packages python3" \
+      pip_packages="$pip_packages toml colorlog twisted requests"; \
+      /project/avalon/scripts/install_packages -c install -q "epel-release"; \
+    fi; \
+    /project/avalon/scripts/install_packages -c install -q "$packages" -p "$pip_packages"
+    
 # Make Python3 default
 RUN ln -sf /usr/bin/python3 /usr/bin/python
-
 
 # -------------=== python build ===-------------
 
 #Build python intermediate docker image
-FROM ubuntu:bionic as python_image
+FROM $IMAGE as python_image
+ARG DISTRO
 
+COPY ./scripts/install_packages /project/avalon/scripts/
 
 # Add necessary packages
-RUN apt-get update \
- && apt-get install -y -q \
-    ca-certificates \
-    pkg-config \
-    python3-pip \
-    python3-dev \
-    make \
- && apt-get clean
+RUN packages="pkg-config python3-pip make" \
+    pip_packages="setuptools"; \
+    if [ "$DISTRO" = "bionic" ] ; then \
+      packages="ca-certificates $packages python3-dev"; \
+    elif [ "$DISTRO" = "centos" ] ; then \
+      packages="$packages python3-devel" \
+      pip_packages="$pip_packages wheel"; \
+    fi; \
+    /project/avalon/scripts/install_packages -c install -q "$packages" -p "$pip_packages"
 
-# Install setuptools packages using pip because
-# these are not available in apt repository.
-RUN pip3 install setuptools
 
 # -------------=== common/python build ===-------------
 
@@ -87,7 +87,6 @@ WORKDIR /project/avalon/common/crypto_utils
 
 RUN echo "Building Avalon Common Crypto Python\n" \
  && make
-
 
 # -------------=== Avalon SDK build ===-------------
 
@@ -127,6 +126,8 @@ RUN echo "Building avalon listener\n" \
 
 # Build final image and install modules
 FROM base_image as final_image
+ARG DISTRO
+COPY ./scripts/install_packages /project/avalon/scripts/
 
 ENV TCF_HOME=/project/avalon
 
@@ -143,14 +144,15 @@ COPY --from=build_image /project/avalon/listener/dist/*.whl dist/
 # Installing wheel file requires python3-pip package.
 # But python3-pip package will increase size of final docker image.
 # So remove python3-pip package and dependencies after installing wheel file.
-RUN apt-get update \
- && apt-get install -y -q python3-pip \
- && pip3 install json-rpc pyzmq \
- && pip3 install jsonschema \
- && echo "Install Common Python, Crypto, Listener and SDK packages\n" \
- && pip3 install dist/*.whl coverage \
- && pip3 install pycryptodomex ecdsa \
- && echo "Remove unused packages from image\n" \
- && apt-get autoremove --purge -y -q python3-pip \
- && apt-get clean \
- && rm -rf /var/lib/apt/lists/*
+RUN packages=""; \
+    pip_packages="json-rpc pyzmq jsonschema coverage pycryptodomex ecdsa"; \
+    if [ "$DISTRO" = "bionic" ] ; then \
+      packages="$packages python3-pip"; \
+    fi; \
+    /project/avalon/scripts/install_packages -c install -q "$packages" -p "$pip_packages" \
+    && echo "Install Common Python, Crypto, Listener and SDK packages\n" \
+    && pip3 install dist/*.whl \
+    && if [ "$DISTRO" = "bionic" ] ; then \
+         echo "Remove unused packages from image\n" \
+         /project/avalon/scripts/install_packages -c uninstall -q "$packages"; \
+       fi

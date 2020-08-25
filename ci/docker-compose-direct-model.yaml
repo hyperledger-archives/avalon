@@ -24,6 +24,8 @@ services:
         - http_proxy
         - https_proxy
         - no_proxy
+        - IMAGE=$IMAGE
+        - DISTRO=$DISTRO
     working_dir: "/project/avalon/"
     entrypoint: "bash -c \"\
         ./tools/run_tests.sh -l avalon-listener \""
@@ -42,6 +44,8 @@ services:
         - no_proxy
         - TCF_DEBUG_BUILD=${TCF_DEBUG_BUILD:-}
         - ENCLAVE_TYPE=singleton
+        - IMAGE=$IMAGE
+        - DISTRO=$DISTRO
     command: |
       bash -c "
         enclave_manager --lmdb_url http://avalon-lmdb:9090
@@ -59,6 +63,8 @@ services:
         - http_proxy
         - https_proxy
         - no_proxy
+        - DISTRO=$DISTRO
+        - IMAGE=$IMAGE
     expose:
       - 9090
     command: |
@@ -76,6 +82,8 @@ services:
         - http_proxy
         - https_proxy
         - no_proxy
+        - DISTRO=$DISTRO
+        - IMAGE=$IMAGE
     expose:
       - 1947
     command: |

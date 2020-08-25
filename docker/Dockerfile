@@ -25,20 +25,22 @@
 #   --build-arg https_proxy=$https_proxy --build-arg http_proxy=$http_proxy --build-arg ftp_proxy=$ftp_proxy
 
 # -------------=== build avalon shell image ===-------------
-FROM ubuntu:bionic as base_image
+ARG IMAGE
+FROM $IMAGE as base_image
+ARG DISTRO
 
-# Ignore timezone prompt in apt
-ENV DEBIAN_FRONTEND=noninteractive
+COPY ./scripts/install_packages /project/avalon/scripts/
 
-# Add necessary packages
-RUN apt-get update \
- && apt-get install -y -q \
-    software-properties-common \
-    python3-toml \
-    python3-requests \
-    python3-colorlog \
-    python3-twisted \
- && apt-get clean
+RUN packages=""; \
+    pip_packages=""; \
+    if [ "$DISTRO" = "bionic" ] ; then \
+      DEBIAN_FRONTEND=noninteractive \
+      packages="$packages software-properties-common python3-toml python3-colorlog python3-twisted python3-requests"; \
+    elif [ "$DISTRO" = "centos" ] ; then \
+      packages="$packages python3-pip" \
+      pip_packages="$pip_packages toml colorlog twisted requests"; \
+    fi; \
+    /project/avalon/scripts/install_packages -c install -q "$packages" -p "$pip_packages"
 
 # Make Python3 default
 RUN ln -sf /usr/bin/python3 /usr/bin/python
@@ -47,38 +49,34 @@ RUN ln -sf /usr/bin/python3 /usr/bin/python
 # -------------=== python build ===-------------
 
 #Build python intermediate docker image
-FROM ubuntu:bionic as python_image
+FROM $IMAGE as python_image
+ARG DISTRO
 
+COPY ./scripts/install_packages /project/avalon/scripts/
 
 # Add necessary packages
-RUN apt-get update \
- && apt-get install -y -q \
-    ca-certificates \
-    pkg-config \
-    python3-pip \
-    python3-dev \
-    make \
- && apt-get clean
-
-# Install setuptools packages using pip because
-# these are not available in apt repository.
-RUN pip3 install setuptools
-
+RUN packages="ca-certificates pkg-config python3-pip make" \
+    pip_packages="setuptools"; \
+    if [ "$DISTRO" = "bionic" ] ; then \
+      packages="$packages python3-dev"; \
+    elif [ "$DISTRO" = "centos" ] ; then \
+      packages="$packages python3-devel" \
+      pip_packages="$pip_packages wheel"; \
+    fi; \
+    /project/avalon/scripts/install_packages -c install -q "$packages" -p "$pip_packages"
 
 # -------------=== Build openssl_image ===-------------
 
-#Build openssl intermediate docker image
-FROM ubuntu:bionic as openssl_image
+FROM $IMAGE as openssl_image
+ARG DISTRO
 
-RUN apt-get update \
- && apt-get install -y -q \
-    ca-certificates \
-    pkg-config \
-    make \
-    wget \
-    tar \
- && apt-get clean \
- && rm -rf /var/lib/apt/lists/*
+COPY ./scripts/install_packages /project/avalon/scripts/
+
+RUN packages="ca-certificates pkg-config make wget tar"; \
+    if [ "$DISTRO" = "centos" ] ; then \
+      packages="$packages perl gcc"; \
+    fi; \
+    /project/avalon/scripts/install_packages -c install -q "$packages"
 
 WORKDIR /tmp
 
@@ -93,29 +91,41 @@ RUN OPENSSL_VER=1.1.1g \
  && make test \
  && make install -j$THREADS
 
+# Created an empty /usr/local/lib64 dir for bionic, because in case of centos
+# we need to COPY /usr/local/lib64 for openssl artifacts which will fail for bionic
+# as bionic doesn't have this directory.
+RUN if [ "$DISTRO" = "bionic" ] ; then \
+      mkdir /usr/local/lib64; \
+    fi
 
 # -------------=== common/cpp build ===-------------
 
 #Build common/cpp intermediate docker image
-FROM ubuntu:bionic as common_cpp_image
+FROM $IMAGE as common_cpp_image
+ARG DISTRO
+COPY ./scripts/install_packages /project/avalon/scripts/
 
-RUN apt-get update \
- && apt-get install -y -q \
-    pkg-config \
-    cmake \
-    make
-
+RUN packages="pkg-config make cmake "; \
+    if [ "$DISTRO" = "centos" ] ; then \
+      packages="$packages gcc gcc-c++"; \
+    fi; \
+    /project/avalon/scripts/install_packages -c install -q "$packages"
 
 # Copy openssl build artifacts from openssl_image
 COPY --from=openssl_image /usr/local/ssl /usr/local/ssl
 COPY --from=openssl_image /usr/local/bin /usr/local/bin
 COPY --from=openssl_image /usr/local/include /usr/local/include
 COPY --from=openssl_image /usr/local/lib /usr/local/lib
+# In case of openssl, artifacts are installed at /usr/local/lib64
+COPY --from=openssl_image /usr/local/lib64 /usr/local/lib64
 
 RUN ldconfig \
  && ln -s /etc/ssl/certs/* /usr/local/ssl/certs/
 
 ENV TCF_HOME=/project/avalon
+
+# For centos, /usr/local/lib64/pkgconfig/ path be included in PKG_CONFIG_PATH
+ENV PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/usr/local/lib64/pkgconfig/
 
 COPY ./common/cpp /project/avalon/common/cpp
 
@@ -149,16 +159,22 @@ RUN echo "Building Avalon Common Python\n" \
 
 #Build common/crypto_utils intermediate docker image
 FROM python_image as common_crypto_utils_image
+ARG DISTRO
+COPY ./scripts/install_packages /project/avalon/scripts/
 
-RUN apt-get update \
- && apt-get install -y -q \
-    swig
+RUN packages="swig"; \
+    if [ "$DISTRO" = "centos" ] ; then \
+      packages="$packages make gcc gcc-c++"; \
+    fi; \
+    /project/avalon/scripts/install_packages -c install -q "$packages"
 
 # Copy openssl build artifacts from openssl_image
 COPY --from=openssl_image /usr/local/ssl /usr/local/ssl
 COPY --from=openssl_image /usr/local/bin /usr/local/bin
 COPY --from=openssl_image /usr/local/include /usr/local/include
 COPY --from=openssl_image /usr/local/lib /usr/local/lib
+# In case of openssl, artifacts are installed at /usr/local/lib64
+COPY --from=openssl_image /usr/local/lib64 /usr/local/lib64
 
 RUN ldconfig \
  && ln -s /etc/ssl/certs/* /usr/local/ssl/certs/
@@ -169,6 +185,9 @@ COPY ./bin /project/avalon/bin
 COPY ./common/cpp /project/avalon/common/cpp
 
 ENV TCF_HOME=/project/avalon
+
+# For centos, /usr/local/lib64/pkgconfig/ path be included in PKG_CONFIG_PATH
+ENV PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/usr/local/lib64/pkgconfig/
 
 COPY ./common/crypto_utils /project/avalon/common/crypto_utils
 
@@ -205,22 +224,34 @@ RUN echo "Building Avalon SDK\n" \
 
 # Build Final image and install dependent modules
 FROM base_image as final_image
+ARG DISTRO
+COPY ./scripts/install_packages /project/avalon/scripts/
 
-RUN apt-get update \
- && apt-get install -y -q python3-pip git \
- && pip3 install json-rpc web3 py-solc-x nose2 \
- && echo "Install fabric python sdk\n" \
- && pip3 install virtualenv \
- && echo "fastapi==0.27.*" >>requirement.txt \
- && echo "grpcio-tools==1.21.*" >>requirement.txt \
- && echo "uvicorn==0.7.*" >>requirement.txt \
- && pip3 install -r requirement.txt \
- && pip3 install git+https://github.com/hyperledger/fabric-sdk-py.git \
-# nest_asyncio allows to run nested asyncio event loops
- && pip3 install nest_asyncio \
- && apt-get autoremove --purge -y -q python3-pip git
- 
-# Install specific version of solc to support versions <0.6.0
+RUN if [ "$DISTRO" = "centos" ] ; then \
+      dnf remove -y python3-pip; \
+      packages="openssl-devel wget make gcc"; \
+      /project/avalon/scripts/install_packages -c install -q "$packages"; \
+      cd /tmp \
+      && wget https://www.python.org/ftp/python/3.6.9/Python-3.6.9.tgz \
+      && tar -xvzf Python-3.6.9.tgz \
+      && cd Python-3.6.9 \
+      && ./configure \
+      && make \
+      && make install; \
+    fi
+
+RUN packages="git"; \
+    pip_packages="json-rpc web3 py-solc-x nose2 virtualenv fastapi==0.27.* grpcio-tools==1.21.* uvicorn==0.7.* git+https://github.com/hyperledger/fabric-sdk-py.git nest_asyncio"; \
+    if [ "$DISTRO" = "bionic" ] ; then \
+      packages="python3-pip $packages"; \
+    elif [ "$DISTRO" = "centos" ] ; then \
+      packages="$packages gcc-c++ which"; \
+    fi; \
+    /project/avalon/scripts/install_packages -c install -q "$packages" -p "$pip_packages"; \
+    if [ "$DISTRO" = "bionic" ] ; then \
+      /project/avalon/scripts/install_packages -c uninstall -q "python3-pip"; \
+    fi
+      
 RUN python3 -m solcx.install v0.5.15
 
 ARG DISPLAY
@@ -251,13 +282,16 @@ COPY --from=avalon_sdk_image /project/avalon/sdk/dist/*.whl dist/
 # Installing wheel file requires python3-pip package.
 # But python3-pip package will increase size of final docker image.
 # So remove python3-pip package and dependencies after installing wheel file.
-RUN apt-get update \
- && apt-get install -y -q python3-pip \
- && echo "Install Common Python and SDK packages\n" \
- && pip3 install dist/*.whl \
- && pip3 install pycryptodomex ecdsa \
- && echo "Remove unused packages from image\n" \
- && apt-get autoremove --purge -y -q python3-pip \
- && apt-get clean \
- && rm -rf /var/lib/apt/lists/*
+RUN packages=""; \
+    pip_packages="pycryptodomex ecdsa"; \
+    if [ "$DISTRO" = "bionic" ] ; then \
+      packages="$packages python3-pip"; \
+   fi; \
+    /project/avalon/scripts/install_packages -c install -q "$packages" -p "$pip_packages" \
+    && echo "Install Common Python and SDK packages\n" \
+    && pip3 install dist/*.whl \
+    && if [ "$DISTRO" = "bionic" ] ; then \
+         echo "Remove unused packages from image\n" \
+         /project/avalon/scripts/install_packages -c uninstall -q "$packages"; \
+       fi
  
