@@ -27,6 +27,8 @@ services:
         - http_proxy
         - https_proxy
         - no_proxy
+        - IMAGE=$IMAGE
+        - DISTRO=$DISTRO
     environment:
       - DISPLAY
       - http_proxy
@@ -54,6 +56,8 @@ services:
         - https_proxy
         - no_proxy
         - ENCLAVE_TYPE=singleton
+        - DISTRO=$DISTRO
+        - IMAGE=$IMAGE
     environment:
       - http_proxy
       - https_proxy
@@ -83,6 +87,8 @@ services:
         - http_proxy
         - https_proxy
         - no_proxy
+        - DISTRO=$DISTRO
+        - IMAGE=$IMAGE
     environment:
       - http_proxy
       - https_proxy
@@ -107,6 +113,8 @@ services:
         - http_proxy
         - https_proxy
         - no_proxy
+        - DISTRO=$DISTRO
+        - IMAGE=$IMAGE
     environment:
       - http_proxy
       - https_proxy

@@ -38,6 +38,9 @@ We recommend the Docker-based build since it is automated and requires fewer ste
     - [Static Analysis](#staticanalysis)
     - [Troubleshooting](#troubleshooting)
     - [Troubleshooting: Standalone Build](#troubleshootingstandalone)
+- [Avalon on CentOS 8.2](#avaloncentos8)
+    - [SGX driver and PSW package installation](#sgxinstall)
+    - [Run Avalon](#runavalon)
 
 # <a name="dockerbuild"></a>Docker-based Build and Execution
 Follow the instructions below to execute a Docker-based build and execution.
@@ -295,3 +298,35 @@ Module names can be found [here](bin/run_lint#L205) in the codebase.
   then you need to set `LD_LIBRARY_PATH` with:
   `source /opt/intel/sgxsdk/environment` .
   For details, see [PREREQUISITES](PREREQUISITES.md)
+
+# <a name="avaloncentos8"></a>Run Avalon on CentOS 8.2
+## <a name="sgxinstall"></a>SGX driver and PSW package installation
+1. Install SGX drivers
+   ```
+   cd /tmp
+   sudo yum update
+   sudo yum install kernel-devel gcc
+   wget https://download.01.org/intel-sgx/sgx-linux/2.10/distro/centos8.1-server/sgx_linux_x64_driver_2.6.0_602374c.bin
+   chmod +x sgx_linux_x64_driver_2.6.0_602374c.bin
+   sudo ./sgx_linux_x64_driver_2.6.0_602374c.bin
+   
+   You should be able to see /dev/isgx device mapping on your host.
+   ```
+2. Install SGX PSW package
+   ```
+   cd /tmp
+   wget https://download.01.org/intel-sgx/sgx-linux/2.10/distro/centos8.1-server/sgx_rpm_local_repo.tgz
+   tar -xvf sgx_rpm_local_repo.tgz
+   sudo yum-config-manager --add-repo file:///tmp/sgx_rpm_local_repo
+   sudo yum --nogpgcheck install -y libsgx-launch libsgx-epid libsgx-quote-ex libsgx-urts
+   
+   You can check the aesm service should be up and running:
+     sudo systemctl status aesmd.service
+   ```
+
+## <a name="runavalon"></a>Run Avalon
+This section describes how to run Avalon on CentOS 8.2 host in docker mode.
+Prepare a host with CentOS 8.2 and install docker, docker-compose on it. Clone the hyperledger/avalon repository and go to
+avalon directory. Change the parameter DISTRO to `centos` and IMAGE to `centos:centos8` in .env file.
+
+To build and run in direct model and proxy model, you can follow the procedure mentioned at [Docker-based build](#dockerbuild)

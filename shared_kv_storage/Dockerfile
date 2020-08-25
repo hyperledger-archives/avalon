@@ -12,22 +12,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM ubuntu:bionic as base_image
+ARG IMAGE
+FROM $IMAGE as base_image
+ARG DISTRO
+COPY ./scripts/install_packages /project/avalon/scripts/
 
-# Ignore timezone prompt in apt
-ENV DEBIAN_FRONTEND=noninteractive
-
-RUN apt-get update \
- && apt-get install -y -q \
-    ca-certificates \
-    python3-requests \
-    python3-colorlog \
-    python3-twisted \
-    python3-toml \
-    curl \
-    wget \
-    liblmdb-dev \
- && apt-get clean
+RUN packages="curl wget"; \
+    pip_packages=""; \
+    if [ "$DISTRO" = "bionic" ] ; then \
+      # Ignore timezone prompt in apt
+      DEBIAN_FRONTEND=noninteractive \
+      packages="ca-certificates $packages python3-requests python3-colorlog python3-twisted python3-toml liblmdb-dev"; \
+    elif [ "$DISTRO" = "centos" ] ; then \
+      packages="$packages python3 lmdb-devel" \
+      pip_packages="$pip_packages toml colorlog twisted requests"; \
+      /project/avalon/scripts/install_packages -c install -q "epel-release"; \
+    fi; \
+    /project/avalon/scripts/install_packages -c install -q "$packages" -p "$pip_packages"
 
 # Make Python3 default
 RUN ln -sf /usr/bin/python3 /usr/bin/python
@@ -35,19 +36,18 @@ RUN ln -sf /usr/bin/python3 /usr/bin/python
 #------------------------------------------------------------------------------
 # Build Shared KV intermediate docker image.
 FROM base_image as build_image
+ARG DISTRO
+COPY ./scripts/install_packages /project/avalon/scripts/
 
-RUN apt-get update \
- && apt-get install -y -q \
-    build-essential \
-    software-properties-common \
-    pkg-config \
-    cmake \
-    make \
-    python3-dev \
-    python3-pip \
-    swig
-
-RUN pip3 install setuptools
+RUN packages="pkg-config cmake make python3-pip swig"; \
+    pip_packages="setuptools"; \
+    if [ "$DISTRO" = "bionic" ] ; then \
+      packages="$packages build-essential software-properties-common python3-dev"; \
+    elif [ "$DISTRO" = "centos" ] ; then \
+      packages="$packages python3-devel gcc gcc-c++" \
+      pip_packages="$pip_packages wheel"; \
+    fi; \
+    /project/avalon/scripts/install_packages -c install -q "$packages" -p "$pip_packages"
 
 ENV TCF_HOME=/project/avalon
 
@@ -72,6 +72,8 @@ RUN echo "Building avalon Shared KV" \
 #------------------------------------------------------------------------------
 # Build final image and install Shared KV module.
 FROM base_image as final_image
+ARG DISTRO
+COPY ./scripts/install_packages /project/avalon/scripts/
 
 ENV TCF_HOME=/project/avalon
 
@@ -85,12 +87,15 @@ COPY --from=build_image /project/avalon/shared_kv_storage/lmdb_config.toml \
 # Installing wheel file requires python3-pip package.
 # But python3-pip package will increase size of final docker image.
 # So remove python3-pip package and dependencies after installing wheel file.
-RUN apt-get update \
- && apt-get install -y -q python3-pip \
- && echo "Install Shared KV package\n" \
- && pip3 install dist/*.whl coverage \
- && echo "Remove unused packages from image\n" \
- && apt-get autoremove --purge -y -q python3-pip \
- && apt-get clean \
- && rm -rf /var/lib/apt/lists/*
-
+RUN packages=""; \
+    pip_packages="coverage"; \
+    if [ "$DISTRO" = "bionic" ] ; then \
+      packages="$packages python3-pip"; \
+    fi; \
+    /project/avalon/scripts/install_packages -c install -q "$packages" -p "$pip_packages" \
+    && echo "Install Shared KV package\n" \
+    && pip3 install dist/*.whl \
+    && if [ "$DISTRO" = "bionic" ] ; then \
+         echo "Remove unused packages from image\n" \
+         /project/avalon/scripts/install_packages -c uninstall -q "$packages"; \
+       fi

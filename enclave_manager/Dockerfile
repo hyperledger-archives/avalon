@@ -22,62 +22,59 @@
 #
 
 # -------------=== build avalon Enclave Manager image ===-------------
-#Build base docker image
-FROM ubuntu:bionic as base_image
 
-# Ignore timezone prompt in apt
-ENV DEBIAN_FRONTEND=noninteractive
-
-# Add necessary packages
-RUN apt-get update \
- && apt-get install -y -q \
-    ca-certificates \
-    python3-toml \
-    python3-requests \
-    python3-colorlog \
-    python3-twisted \
- && apt-get clean
+ARG IMAGE
+FROM $IMAGE as base_image
+ARG DISTRO
+COPY ./scripts/install_packages /project/avalon/scripts/
+RUN packages=""; \
+    pip_packages=""; \
+    if [ "$DISTRO" = "bionic" ] ; then \
+      DEBIAN_FRONTEND=noninteractive \
+      packages="$packages ca-certificates python3-requests python3-toml python3-colorlog python3-twisted"; \
+    elif [ "$DISTRO" = "centos" ] ; then \
+      packages="$packages python3" \
+      pip_packages="$pip_packages toml colorlog twisted requests"; \
+      /project/avalon/scripts/install_packages -c install -q "epel-release"; \
+    fi; \
+    /project/avalon/scripts/install_packages -c install -q "$packages" -p "$pip_packages"
 
 # Make Python3 default
 RUN ln -sf /usr/bin/python3 /usr/bin/python
 
-
-
 # -------------=== python build ===-------------
 
 #Build python intermediate docker image
-FROM ubuntu:bionic as python_image
+FROM $IMAGE as python_image
+ARG DISTRO
 
+COPY ./scripts/install_packages /project/avalon/scripts/
 
 # Add necessary packages
-RUN apt-get update \
- && apt-get install -y -q \
-    ca-certificates \
-    pkg-config \
-    python3-pip \
-    python3-dev \
-    make \
- && apt-get clean
-
-# Install setuptools packages using pip because
-# these are not available in apt repository.
-RUN pip3 install setuptools
+RUN packages="pkg-config python3-pip make" \
+    pip_packages="setuptools"; \
+    if [ "$DISTRO" = "bionic" ] ; then \
+      packages="ca-certificates $packages python3-dev"; \
+    elif [ "$DISTRO" = "centos" ] ; then \
+      packages="$packages python3-devel" \
+      pip_packages="$pip_packages wheel"; \
+    fi; \
+    /project/avalon/scripts/install_packages -c install -q "$packages" -p "$pip_packages"
 
 
 # -------------=== Build openssl_image ===-------------
 
 #Build openssl intermediate docker image
-FROM ubuntu:bionic as openssl_image
+FROM $IMAGE as openssl_image
+ARG DISTRO
 
-RUN apt-get update \
- && apt-get install -y -q \
-    ca-certificates \
-    pkg-config \
-    make \
-    wget \
-    tar \
- && apt-get clean \
- && rm -rf /var/lib/apt/lists/*
+COPY ./scripts/install_packages /project/avalon/scripts/
+
+RUN packages="ca-certificates pkg-config make wget tar"; \
+    if [ "$DISTRO" = "centos" ] ; then \
+      packages="$packages perl gcc"; \
+    fi; \
+    /project/avalon/scripts/install_packages -c install -q "$packages"
 
 WORKDIR /tmp
 
@@ -92,8 +89,13 @@ RUN OPENSSL_VER=1.1.1g \
  && make test \
  && make install -j$THREADS
 
-
-
+# Created an empty /usr/local/lib64 dir for bionic, because in case of centos
+# we need to COPY /usr/local/lib64 for openssl artifacts which will fail for bionic
+# as bionic doesn't have this directory.
+RUN if [ "$DISTRO" = "bionic" ] ; then \
+      mkdir /usr/local/lib64; \
+    fi
+ 
 # -------------=== common/python build ===-------------
 
 #Build common/python intermediate docker image
@@ -134,34 +136,25 @@ RUN echo "Building Avalon SDK\n" \
 
 #Build Avalon Enclave Manager docker image
 FROM base_image as build_image
+ARG DISTRO
 
-RUN apt-get update \
- && apt-get install -y -q \
-    build-essential \
-    software-properties-common \
-    pkg-config \
-    cmake \
-    make \
-    git \
-    libprotobuf-dev \
-    swig \
-    wget \
-    tar \
-    libprotobuf-dev \
-    curl \
-    dh-autoreconf \
-    ocaml \
-    wget \
-    xxd \
-    unzip \
-    ocamlbuild \
-    python3-twisted \
-    python3-pip \
- && apt-get clean \
- && rm -rf /var/lib/apt/lists/*
+COPY ./scripts/install_packages /project/avalon/scripts/
 
-# Install setuptools packages using pip because
-RUN pip3 install setuptools jsonschema
+RUN packages="pkg-config cmake make git swig wget tar curl unzip" \
+    && pip_packages="setuptools jsonschema"; \
+    if [ "$DISTRO" = "bionic" ] ; then \
+      packages="$packages ca-certificates build-essential software-properties-common python3-pip libprotobuf-dev dh-autoreconf ocaml xxd ocamlbuild"; \
+    elif [ "$DISTRO" = "centos" ] ; then \
+      packages="$packages perl gcc python3-devel libcurl-devel python3-wheel"; \
+    fi; \
+    /project/avalon/scripts/install_packages -c install -q "$packages" -p "$pip_packages"
+
+RUN if [ "$DISTRO" = "centos" ] ; then \
+      dnf -y --enablerepo=PowerTools install protobuf-devel yum-utils ocaml ocaml-ocamlbuild dh-autoreconf \
+      && yum groupinstall 'Development Tools' -y \
+      && alternatives --set python /usr/bin/python3; \
+    fi
+
 
 # Intel SGX common library and SDK are installed in /opt/intel directory.
 # Installation of Intel SGX libsgx-common packages requires
@@ -171,31 +164,52 @@ RUN mkdir -p /opt/intel \
  && mkdir -p /etc/init
 WORKDIR /opt/intel
 
-# Add Intel SGX repo to apt sources and install Intel SGX PSW packages
-RUN echo 'deb [arch=amd64] https://download.01.org/intel-sgx/sgx_repo/ubuntu bionic main' | tee /etc/apt/sources.list.d/intel-sgx.list \
- && wget -qO - https://download.01.org/intel-sgx/sgx_repo/ubuntu/intel-sgx-deb.key | apt-key add \
- && apt-get update \
- && apt-get install -y -q \
-    libsgx-enclave-common \
-    libsgx-launch \
-    libsgx-urts \
-    libsgx-epid \
-    libsgx-quote-ex \
- && apt-get clean \
- && rm -rf /var/lib/apt/lists/*
+RUN if [ "$DISTRO" = "bionic" ] ; then \
+      # Add Intel SGX repo to apt sources and install Intel SGX PSW packages
+      echo 'deb [arch=amd64] https://download.01.org/intel-sgx/sgx_repo/ubuntu bionic main' | tee /etc/apt/sources.list.d/intel-sgx.list \
+      && wget -qO - https://download.01.org/intel-sgx/sgx_repo/ubuntu/intel-sgx-deb.key | apt-key add \
+      && apt-get update \
+      && apt-get install -y -q \
+         libsgx-enclave-common \
+         libsgx-launch \
+         libsgx-urts \
+         libsgx-epid \
+         libsgx-quote-ex \
+      && apt-get clean \
+      && rm -rf /var/lib/apt/lists/* \
+     
+      && SGX_SDK_FILE=sgx_linux_x64_sdk_2.10.100.2.bin \
+      && wget https://download.01.org/intel-sgx/sgx-linux/2.10/distro/ubuntu18.04-server/$SGX_SDK_FILE \
+      && echo "yes" | bash ./$SGX_SDK_FILE \
+      && rm $SGX_SDK_FILE \
+      && echo ". /opt/intel/sgxsdk/environment" >> /etc/environment; \
 
-RUN SGX_SDK_FILE=sgx_linux_x64_sdk_2.10.100.2.bin \
-  && wget https://download.01.org/intel-sgx/sgx-linux/2.10/distro/ubuntu18.04-server/$SGX_SDK_FILE \
-  && echo "yes" | bash ./$SGX_SDK_FILE \
-  && rm $SGX_SDK_FILE \
-  && echo ". /opt/intel/sgxsdk/environment" >> /etc/environment
-
+    elif [ "$DISTRO" = "centos" ] ; then \
+      wget https://download.01.org/intel-sgx/sgx-linux/2.10/distro/centos8.1-server/sgx_rpm_local_repo.tgz \
+      && tar -xvf sgx_rpm_local_repo.tgz \
+      && yum-config-manager --add-repo file:///opt/intel/sgx_rpm_local_repo \
+      && yum --nogpgcheck install -y \
+         libsgx-launch \
+         libsgx-epid \
+         libsgx-quote-ex \
+         libsgx-urts; \
+      cd /opt/intel \
+      && wget https://download.01.org/intel-sgx/sgx-linux/2.10/distro/centos8.1-server/sgx_linux_x64_sdk_2.10.100.2.bin \
+      && chmod +x sgx_linux_x64_sdk_2.10.100.2.bin \
+      && echo "yes" | bash ./sgx_linux_x64_sdk_2.10.100.2.bin \
+      && echo ". /opt/intel/sgxsdk/environment" >> /etc/environment; \
+    fi
+     
+     
 # Copy openssl build artifacts from openssl_image
 ENV OPENSSL_VER=1.1.1g
+
 COPY --from=openssl_image /usr/local/ssl /usr/local/ssl
 COPY --from=openssl_image /usr/local/bin /usr/local/bin
 COPY --from=openssl_image /usr/local/include /usr/local/include
 COPY --from=openssl_image /usr/local/lib /usr/local/lib
+# In case of openssl, artifacts are installed at /usr/local/lib64
+COPY --from=openssl_image /usr/local/lib64 /usr/local/lib64
 COPY --from=openssl_image /tmp/openssl-$OPENSSL_VER.tar.gz /tmp/
 
 # Build ("trusted") Intel SGX OpenSSL
@@ -212,24 +226,31 @@ WORKDIR /tmp
 # found in earlier versions of SGX as documented in SGX SDK install guide
 # https://github.com/intel/linux-sgx
 # Mitigations tool tar ball is downloaded, extracted and copied to /usr/local/bin
-RUN ldconfig \
- && ln -s /etc/ssl/certs/* /usr/local/ssl/certs/ \
- && MITIGATION_TOOLS=as.ld.objdump.gold.r2.tar.gz \
- && wget https://download.01.org/intel-sgx/latest/linux-latest/$MITIGATION_TOOLS \
- && tar -xvf $MITIGATION_TOOLS \
- && cp external/toolset/ubuntu18.04/* /usr/local/bin/ \
- && rm $MITIGATION_TOOLS \
- && git clone -b lin_2.10_1.1.1g https://github.com/intel/intel-sgx-ssl.git  \
- && . /opt/intel/sgxsdk/environment \
- && (cd intel-sgx-ssl/openssl_source; mv /tmp/openssl-$OPENSSL_VER.tar.gz . ) \
- && (cd intel-sgx-ssl/Linux; \
+
+RUN platform=""; \
+    if [ "$DISTRO" = "bionic" ] ; then \
+      platform="ubuntu18.04"; \
+    elif [ "$DISTRO" = "centos" ] ; then \
+      platform="centos8.1"; \
+    fi; \
+    ldconfig \
+    && ln -s /etc/ssl/certs/* /usr/local/ssl/certs/ \
+    && MITIGATION_TOOLS=as.ld.objdump.gold.r2.tar.gz \
+    && wget https://download.01.org/intel-sgx/latest/linux-latest/$MITIGATION_TOOLS \
+    && tar -xvf $MITIGATION_TOOLS \
+    && cp external/toolset/$platform/* /usr/local/bin/ \
+    && rm $MITIGATION_TOOLS \
+    && git clone -b lin_2.10_1.1.1g https://github.com/intel/intel-sgx-ssl.git  \
+    && . /opt/intel/sgxsdk/environment \
+    && (cd intel-sgx-ssl/openssl_source; mv /tmp/openssl-$OPENSSL_VER.tar.gz . ) \
+    && (cd intel-sgx-ssl/Linux; \
     if ([ -c /dev/isgx ] && [ -S /var/run/aesmd/aesm.socket ]); then SGX_MODE=HW; \
     else SGX_MODE=SIM; \
     fi; \
     make SGX_MODE=${SGX_MODE} DESTDIR=/opt/intel/sgxssl all test ) \
- && (cd intel-sgx-ssl/Linux; make install ) \
- && rm -rf /tmp/intel-sgx-ssl \
- && echo "SGX_SSL=/opt/intel/sgxssl" >> /etc/environment
+    && (cd intel-sgx-ssl/Linux; make install ) \
+    && rm -rf /tmp/intel-sgx-ssl \
+    && echo "SGX_SSL=/opt/intel/sgxssl" >> /etc/environment
 
 COPY . /project/avalon
 # Docker build won't progress if host _dev folder not removed
@@ -257,6 +278,8 @@ ENV PATH=$PATH:$SGX_SDK/bin:$SGX_SDK/bin/x64
 ENV PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$SGX_SDK/pkgconfig
 ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$SGX_SDK/sdk_libs
 ENV TCF_ENCLAVE_CODE_SIGN_PEM="$TCF_HOME/enclave.pem"
+# For centos, /usr/local/lib64/pkgconfig/ path be included in PKG_CONFIG_PATH
+ENV PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/usr/local/lib64/pkgconfig/
 
 RUN openssl genrsa -3 -out $TCF_HOME/enclave.pem 3072
 
@@ -299,7 +322,7 @@ WORKDIR /project/avalon/tc/sgx/trusted_worker_manager/common
 RUN mkdir -p build \
   && cd build \
   && cmake .. \
- && make
+  && make
 
 WORKDIR /project/avalon/tc/sgx/trusted_worker_manager/enclave
 

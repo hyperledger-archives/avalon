@@ -37,6 +37,8 @@ services:
         - https_proxy
         - no_proxy
         - NO_PROXY
+        - IMAGE=$IMAGE
+        - DISTRO=$DISTRO
     environment:
       - http_proxy
       - https_proxy

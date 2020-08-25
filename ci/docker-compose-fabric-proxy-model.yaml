@@ -24,6 +24,8 @@ services:
         - http_proxy
         - https_proxy
         - no_proxy
+        - IMAGE=$IMAGE
+        - DISTRO=$DISTRO
     # Sleep for 30sec while starting connector because worker registration
     # may take some time, especially in HW mode.
     command: |
