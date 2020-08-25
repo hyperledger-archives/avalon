@@ -180,6 +180,54 @@ https://creativecommons.org/licenses/by/4.0/
 
     `docker-compose -f docker-compose.yaml -f compose/graphene-sgx.yaml -f compose/ov.yaml -f compose/ov-sgx.yaml -f compose/ov-subnet.yaml up`
 
+  ### Testing OpenVino (with Avalon)
+
+  - If Intel SGX is not used , execute following commands from Avalon repository top-level directory
+
+    1. Combine the docker compose files to create `openvino.yaml`
+
+       `docker-compose -f docker-compose.yaml -f docker/compose/avalon-graphene.yaml -f docker/compose/avalon-graphene-ov.yaml -f docker/compose/avalon-ov-subnet.yaml config > openvino.yaml`
+
+    2. Start Avalon containers. This will also start Avalon python worker and openvino containers in detached mode.
+
+       `docker-compose -f openvino.yaml up -d`
+
+  - For Intel SGX, execute the following commands:
+
+    1. Combine the docker compose files to create `openvino-sgx.yaml`
+
+       `docker-compose -f docker-compose.yaml -f docker/compose/avalon-graphene.yaml -f docker/compose/avalon-graphene-sgx.yaml -f docker/compose/avalon-graphene-ov.yaml -f docker/compose/avalon-graphene-ov-sgx.yaml -f docker/compose/avalon-ov-subnet.yaml config > openvino-sgx.yaml`
+
+    2. Start Avalon containers. This will also start Avalon python worker and openvino containers running inside Graphene-SGX in detached mode.
+
+       `docker-compose -f openvino-sgx.yaml up -d`
+
+  - In case of Intel SGX, Graphene-SGX python worker and openvino containers will take around 3 minutes to get ready. To view the logs of python worker and openvino containers, execute the following command:
+
+    `docker-compose -f openvino-sgx.yaml logs -f graphene-python-worker ov-work-order`
+
+  - To send openvino work orders to python worker, we can use [generic client](https://github.com/hyperledger/avalon/tree/master/examples/apps/generic_client) application. Execute the following commands:
+
+    1. Get into Avalon Shell container : `sudo docker exec -it avalon-shell bash`
+
+    2. cd `/project/avalon/examples/apps/generic_client/`
+
+    3. Send openvino work order request with *"ov-inference"* workload id to Graphene worker *"graphene-worker-1"*
+
+       `./generic_client.py --uri "http://avalon-listener:1947" -w "graphene-worker-1" --workload_id "ov-inference" --in_data "street.jpg" -o`
+
+       If everything goes fine, then you should see the following output in stdout:
+
+       *Decryption result at client - Openvino Success: Generated output file: street.bmp*
+
+       output file *street.bmp* will be present in *output* folder in Avalon repository top level directory.
+
+  - To restart the python worker we have to first bring all the containers down before bringing it up again. This is to ensure that python worker generates new worker signing and encryption keys and Avalon Graphene Enclave Manager gets the updated signup information from python worker.
+
+    If Intel SGX is not used, execute the command: `docker-compose -f openvino.yaml down`
+
+    For Intel SGX, execute the command: `docker-compose -f openvino-sgx.yaml down`
+
 ## Known issues
 
 - Knows issues are captured in GitHub : https://github.com/hyperledger/avalon/issues/621
