@@ -40,6 +40,20 @@ To run Besu with Hyperledger Avalon, follow these steps:
 
    If you modify the number of nodes, please update the ``no_proxy`` list
    accordingly.
+   Note that HOME/.docker/config.json (Default Docker configuration file) should
+   also define the proxy configurations:
+
+   .. code:: none
+
+        { "proxies":
+                { "default":
+                        {
+                         "httpProxy": <http-proxy-url>:<port>,
+                         "httpsProxy": <http-proxy-url>:<port>,
+                         "noProxy": "localhost,127.0.0.1"
+                        }
+                }
+        }
 
 4. Start the Hyperledger Besu based Ethereum network and deploy contracts.
    To do so, you need to run the following
