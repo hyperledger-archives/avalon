@@ -40,7 +40,6 @@ services:
       - http_proxy
       - https_proxy
       - no_proxy
-      - CLEAN_SEALED_DATA
     volumes:
       - pool-1:/shared-pool-1
       # Persistent volume to store sealed data across restarts
@@ -111,7 +110,6 @@ services:
       - http_proxy
       - https_proxy
       - no_proxy
-      - CLEAN_SEALED_DATA
     volumes:
       - pool-2:/shared-pool-2
       # Persistent volume to store sealed data across restarts

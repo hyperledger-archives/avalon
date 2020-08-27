@@ -58,7 +58,6 @@ services:
       - http_proxy
       - https_proxy
       - no_proxy
-      - CLEAN_SEALED_DATA
     expose:
       # ZMQ socket port.
       - 5555
