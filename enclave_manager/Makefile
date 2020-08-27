@@ -40,8 +40,8 @@ install:
 
 clean:
 	if pip3 uninstall --yes $(WHEEL_FILE); then echo UNINSTALLED $(WHEEL_FILE) WHEEL FILE ; fi
-	rm -f avalon_enclave_manager/singleton/singleton_enclave.py
-	rm -f avalon_enclave_manager/singleton/singleton_enclave_wrap.cpp
+	rm -f avalon_enclave_manager/*/*_enclave.py
+	rm -f avalon_enclave_manager/*/*_enclave_wrap.cpp
 	rm -rf build deps dist *.egg-info
 	find . -iname '*.pyc' -delete
 	find . -iname '__pycache__' -delete
