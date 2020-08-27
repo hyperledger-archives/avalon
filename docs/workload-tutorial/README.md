@@ -194,7 +194,7 @@ will be created next in [Phase 2](#phase2).
   especially useful when multiple worker pools are running together and there
   is a workload isolation with each pool running different set of workloads.
   Refer to
-  [avalon-pool-combo.yaml](../../docker/compose/avalon-pool-combo.yaml)
+  [avalon-multi-pool.yaml](../../docker/compose/avalon-multi-pool.yaml)
   for multiple pools.
 
 * Change to the top-level Avalon source repository directory, `$TCF_HOME`,

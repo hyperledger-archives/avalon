@@ -222,6 +222,8 @@ the docker-compose command. For example -
 
        CLEAN_SEALED_DATA=1 docker-compose up -d
 
+You could also update the value of ``CLEAN_SEALED_DATA`` to ``1`` in the ``.env`` file at project root directory.
+
 
 Software Development
 ====================

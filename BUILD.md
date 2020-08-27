@@ -104,7 +104,7 @@ Follow the instructions below to execute a Docker-based build and execution.
 
 **Running multiple worker pools together**
 
-To run multiple worker pools together, make use of sample docker compose file `avalon-pool-combo.yaml` instead of `avalon-pool.yaml`. It also has a corresponding docker compose file `avalon-pool-combo-sgx.yaml` for running in Intel SGX hardware mode. This setup starts two pools of workers with the composition:
+To run multiple worker pools together, make use of sample docker compose file `avalon-multi-pool.yaml` instead of `avalon-pool.yaml`. It also has a corresponding docker compose file `avalon-multi-pool-sgx.yaml` for running in Intel SGX hardware mode. This setup starts two pools of workers with the composition:
    1. worker-pool-1 - One KME (Key Management Enclave), One WPE (Work order Processing Enclave) supporting `heart-disease-eval` workload
    2. worker-pool-2 - One KME, two WPE supporting `echo-result` workload
 
