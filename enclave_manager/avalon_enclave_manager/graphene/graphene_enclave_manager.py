@@ -186,6 +186,8 @@ def main(args=None):
     EnclaveManager.parse_command_line(config, remainder)
     try:
         enclave_manager = GrapheneEnclaveManager(config)
+        enclave_manager.init_kv_delegates()
+        enclave_manager.setup_enclave()
         logger.info("About to start Graphene Enclave manager")
         enclave_manager.start_enclave_manager()
     except Exception as ex:

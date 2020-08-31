@@ -147,6 +147,8 @@ def main(args=None):
     EnclaveManager.parse_command_line(config, remainder)
     logger.info("Initialize singleton enclave_manager")
     enclave_manager = SingletonEnclaveManager(config)
+    enclave_manager.init_kv_delegates()
+    enclave_manager.setup_enclave()
     logger.info("About to start Singleton Enclave manager")
     enclave_manager.start_enclave_manager()
 
