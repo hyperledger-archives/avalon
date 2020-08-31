@@ -45,10 +45,6 @@ class WorkOrderProcessorEnclaveManager(
     def __init__(self, config):
         WOProcessorManager.__init__(self, config)
         WOProcessorEnclaveManagerHelper.__init__(self)
-        # Calculate sha256 of enclave id to get 32 bytes. Then take a
-        # hexdigest for hex str.
-        enclave_id_utf = self.enclave_id.encode("UTF-8")
-        self._identity = hashlib.sha256(enclave_id_utf).hexdigest()
 
 # -------------------------------------------------------------------------
 
@@ -166,6 +162,12 @@ def main(args=None):
         EnclaveManager.parse_command_line(config, remainder)
         logger.info("Initialize WorkOrderProcessor enclave_manager")
         enclave_manager = WorkOrderProcessorEnclaveManager(config)
+        enclave_manager.init_kv_delegates()
+        enclave_manager.setup_enclave()
+        # Calculate sha256 of enclave id to get 32 bytes. Then take a
+        # hexdigest for hex str.
+        enclave_id_utf = enclave_manager.enclave_id.encode("UTF-8")
+        enclave_manager._identity = hashlib.sha256(enclave_id_utf).hexdigest()
         logger.info("About to start WorkOrderProcessor Enclave manager")
         enclave_manager.start_enclave_manager()
     except Exception as e:

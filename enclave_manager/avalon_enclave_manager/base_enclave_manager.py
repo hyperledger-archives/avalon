@@ -17,6 +17,7 @@
 import argparse
 import json
 import logging
+import random
 import sys
 import utility.hex_utils as hex_utils
 from abc import ABC, abstractmethod
@@ -41,26 +42,6 @@ class EnclaveManager(ABC):
         self._config = config
         worker_id = config.get("WorkerConfig")["worker_id"]
         self._worker_id = hex_utils.get_worker_id_from_name(worker_id)
-        self._kv_helper = self._connect_to_kv_store()
-        self._worker_kv_delegate = WorkerKVDelegate(self._kv_helper)
-        self._wo_kv_delegate = WorkOrderKVDelegate(
-            self._kv_helper, self._worker_id)
-        signup_data = self._setup_enclave()
-        if signup_data is None:
-            raise Exception("Failed to setup enclave")
-        self.enclave_data = signup_data
-        self.sealed_data = signup_data["sealed_data"]
-        self.verifying_key = signup_data["verifying_key"]
-        self.encryption_key = signup_data["encryption_key"]
-        self.encryption_key_signature = signup_data["encryption_key_signature"]
-        self.enclave_id = signup_data["enclave_id"]
-        self.proof_data = signup_data["proof_data"]
-        self.extended_measurements = signup_data["measurements"]
-
-        # TODO: encryption_key_nonce is hardcoded to an empty str
-        # Need to come up with a scheme to generate it for every unique
-        # encryption key.
-        self.encryption_key_nonce = ""
 
 # -------------------------------------------------------------------------
 
@@ -123,7 +104,18 @@ class EnclaveManager(ABC):
 
 # -------------------------------------------------------------------------
 
-    def _setup_enclave(self):
+    def init_kv_delegates(self):
+        """
+        This function instantiates KV delegates for future usage.
+        """
+        self._kv_helper = self._connect_to_kv_store()
+        self._worker_kv_delegate = WorkerKVDelegate(self._kv_helper)
+        self._wo_kv_delegate = WorkOrderKVDelegate(
+            self._kv_helper, self._worker_id)
+
+# -------------------------------------------------------------------------
+
+    def setup_enclave(self):
         """
         This function is responsible for initialization of the trusted
         enclave. It does so via the EnclaveInfo class which not only
@@ -132,21 +124,30 @@ class EnclaveManager(ABC):
         functionalities over this instance of the enclave. Therefore
         all relevant data is sent back here. This is kept in memory
         for use hereafter.
-
-        Returns :
-            signup_data - Relevant signup data to be used for requests to the
-                          enclave
         """
         try:
             logger.info("Initialize enclave and create signup data")
             signup_data = self._create_signup_data()
             if signup_data is None:
                 logger.error("Failed to create signup data")
-                return None
+                raise Exception("Failed to create signup data")
         except Exception as e:
-            logger.exception("failed to initialize/signup enclave; %s", str(e))
+            logger.exception("Failed to initialize/signup enclave; %s", str(e))
             sys.exit(-1)
-        return self._get_JSON_from_signup_object(signup_data)
+
+        self.enclave_data = self._get_JSON_from_signup_object(signup_data)
+        self.signup_info_handle = self.enclave_data["enclave_data"]
+        self.sealed_data = self.enclave_data["sealed_data"]
+        self.verifying_key = self.enclave_data["verifying_key"]
+        self.encryption_key = self.enclave_data["encryption_key"]
+        self.encryption_key_signature = \
+            self.enclave_data["encryption_key_signature"]
+        self.enclave_id = self.enclave_data["enclave_id"]
+        self.proof_data = self.enclave_data["proof_data"]
+        self.extended_measurements = self.enclave_data["measurements"]
+
+        # Generate a 24 byte random encryption key nonce.
+        self.encryption_key_nonce = '{}'.format(random.getrandbits(192))
 
     # -----------------------------------------------------------------
 
