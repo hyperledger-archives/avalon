@@ -21,6 +21,7 @@ import hashlib
 import os
 import sys
 
+import utility.jrpc_utility as jrpc_utility
 import avalon_enclave_manager.sgx_work_order_request as work_order_request
 import avalon_enclave_manager.wpe.wpe_enclave as enclave
 import avalon_enclave_manager.wpe.wpe_enclave_info as enclave_info
@@ -29,6 +30,9 @@ from avalon_enclave_manager.wpe.wpe_requester import WPERequester
 from error_code.error_status import WorkOrderStatus
 from avalon_enclave_manager.work_order_processor_manager \
     import WOProcessorManager
+from exception.avalon_exceptions import WorkerRestartException
+from multiprocessing import Process
+
 
 logger = logging.getLogger(__name__)
 
@@ -128,9 +132,13 @@ class WorkOrderProcessorEnclaveManager(WOProcessorManager):
         try:
             pre_proc_output = self._wpe_requester\
                 .preprocess_work_order(input_json_str, self.encryption_key)
-            if "error" in pre_proc_output:
+            if pre_proc_output is None or "error" in pre_proc_output:
                 # If error in preprocessing response, skip workorder processing
-                logger.error("Failed to preprocess at WPE enclave manager.")
+                logger.error("Failed to preprocess work order request.")
+                self._check_for_re_register()
+                if self._is_restart_required:
+                    raise WorkerRestartException(
+                        "This worker needs to restart.")
                 return pre_proc_output
 
             wo_request = work_order_request.SgxWorkOrderRequest(
@@ -138,14 +146,57 @@ class WorkOrderProcessorEnclaveManager(WOProcessorManager):
                 input_json_str,
                 pre_proc_output)
             wo_response = wo_request.execute()
+        except WorkerRestartException:
+            raise
         except Exception as e:
-            logger.error("failed to execute work order; %s", str(e))
-            wo_response = dict()
-            wo_response["error"] = dict()
-            wo_response["error"]["code"] = WorkOrderStatus.FAILED
-            wo_response["error"]["message"] = str(e)
-            logger.info("unknown enclave type response = %s", wo_response)
+            logger.error("Failed to execute work order; %s", str(e))
+            wo_response = jrpc_utility.create_error_response(
+                WorkOrderStatus.FAILED, "0",
+                "Failed to execute work order : {}".format(str(e)))
         return wo_response
+
+# -------------------------------------------------------------------------
+
+    def _check_for_re_register(self):
+        """
+        This function verifies worker details in this instance against that
+        in database to see if a worker update has taken place. If so, it
+        enables a flag to re-register this WPE with the KME before next work
+        order is picked up for processing.
+        """
+        wpes_csv = self._kv_helper.get("worker-pool", self._worker_id)
+        wpes = [] if wpes_csv is None else wpes_csv.split(",")
+        if self._identity not in wpes:
+            # If identity is not found in worker-pool, the KME might have
+            # restarted in which case the WPEs need to register again.
+            logger.info("WPE needs to restart and register with KME again.")
+            self._is_restart_required = True
+
+# -------------------------------------------------------------------------
+
+
+def run_wpe(config):
+    """
+    Delegate method that spawns up as a new process and runs the WPE Enclave
+    Manager.
+
+    Parameters:
+    @param config - A map of configurations read from file/command line
+    """
+    try:
+        logger.info("Initialize WorkOrderProcessor enclave_manager")
+        enclave_manager = WorkOrderProcessorEnclaveManager(config)
+        logger.info("About to start WorkOrderProcessor Enclave manager")
+        enclave_manager.start_enclave_manager()
+    except WorkerRestartException as ex:
+        logger.error("Exception occurred while processing work orders.")
+        logger.error(ex)
+        logger.info("Will try to restart WPE.")
+    except Exception as e:
+        logger.error(e)
+        logger.error("Exception occurred while running WPE, " +
+                     "exiting WPE enclave manager")
+        sys.exit(1)
 
 # -------------------------------------------------------------------------
 
@@ -195,16 +246,14 @@ def main(args=None):
     sys.stderr = plogger.stream_to_logger(
         logging.getLogger("STDERR"), logging.WARN)
 
-    try:
-        EnclaveManager.parse_command_line(config, remainder)
-        logger.info("Initialize WorkOrderProcessor enclave_manager")
-        enclave_manager = WorkOrderProcessorEnclaveManager(config)
-        logger.info("About to start WorkOrderProcessor Enclave manager")
-        enclave_manager.start_enclave_manager()
-    except Exception as e:
-        logger.error("Exception occurred while running WPE, " +
-                     "exiting WPE enclave manager")
-        exit(1)
+    EnclaveManager.parse_command_line(config, remainder)
+
+    while True:
+        wpe_manager = Process(target=run_wpe, args=(config,))
+        wpe_manager.start()
+        wpe_manager.join()
+        if wpe_manager.exitcode == 1:
+            sys.exit(1)
 
 
 main()

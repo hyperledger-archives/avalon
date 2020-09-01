@@ -24,6 +24,7 @@ import utility.jrpc_utility as jrpc_utility
 from abc import abstractmethod
 from error_code.error_status import WorkOrderStatus
 from avalon_enclave_manager.base_enclave_manager import EnclaveManager
+from exception.avalon_exceptions import WorkerRestartException
 
 logger = logging.getLogger(__name__)
 
@@ -36,6 +37,7 @@ class WOProcessorManager(EnclaveManager):
     def __init__(self, config):
         super().__init__(config)
         self._identity = None
+        self._is_restart_required = False
 
 # -------------------------------------------------------------------------
 
@@ -99,7 +101,15 @@ class WOProcessorManager(EnclaveManager):
         Returns :
             wo_resp - A JSON response of the executed work order
         """
+
         try:
+            if self._is_restart_required:
+                self._kv_helper.csv_prepend("wo-worker-scheduled",
+                                            self._worker_id, wo_id)
+                logger.info("Reinstating work order {} to ".format(wo_id)
+                            + "wo-worker-scheduled; This worker will restart.")
+                raise WorkerRestartException("This worker needs to restart.")
+
             # Get JSON workorder request corresponding to wo_id
             wo_json_req = self._kv_helper.get("wo-requests", wo_id)
             if wo_json_req is None:
@@ -107,6 +117,8 @@ class WOProcessorManager(EnclaveManager):
                              "to id %s from wo-requests table", wo_id)
                 return None
 
+        except WorkerRestartException:
+            raise
         except Exception as e:
             logger.error("Problem while reading the work order %s "
                          "from wo-requests table", wo_id)
@@ -126,9 +138,22 @@ class WOProcessorManager(EnclaveManager):
 
         # Execute work order request
 
-        logger.info("Execute workorder with id %s", wo_id)
-        wo_json_resp = self._execute_work_order(wo_json_req)
-        wo_resp = json.loads(wo_json_resp)
+        try:
+            logger.info("Execute workorder with id %s", wo_id)
+            wo_json_resp = self._execute_work_order(wo_json_req)
+            wo_resp = json.loads(wo_json_resp)
+        except WorkerRestartException:
+            self._kv_helper.csv_prepend("wo-worker-scheduled",
+                                        self._worker_id, wo_id)
+            logger.info("Reinstating work order {} to ".format(wo_id)
+                        + "wo-worker-scheduled as this worker will restart.")
+            raise
+        except Exception as e:
+            logger.error("Exception while processing work order: {}".format(e))
+            self._persist_wo_response_to_db(
+                wo_id, WorkOrderStatus.FAILED, None,
+                "Exception during work order processing")
+            raise
 
         logger.info("Update workorder receipt for workorder %s", wo_id)
         self._wo_kv_delegate.update_receipt(wo_id, wo_resp)
@@ -175,21 +200,19 @@ class WOProcessorManager(EnclaveManager):
         """
         try:
             wo_response = self._execute_wo_in_trusted_enclave(input_json_str)
-            try:
-                json_response = json.dumps(wo_response, indent=4)
-            except Exception as err:
-                wo_response["Response"] = dict()
-                logger.error("ERROR: Failed to serialize JSON; %s", str(err))
-                wo_response["Response"]["Status"] = WorkOrderStatus.FAILED
-                wo_response["Response"]["Message"] = "Failed to serialize JSON"
-                json_response = json.dumps(wo_response)
+            json_response = json.dumps(wo_response, indent=4)
 
+        except TypeError as err:
+            logger.error("Failed to serialize response JSON - %s", str(err))
+            return jrpc_utility.create_error_response(
+                WorkOrderStatus.FAILED, "0",
+                "Failed to serialize response JSON")
+        except WorkerRestartException:
+            raise
         except Exception as e:
-            wo_response["Response"] = dict()
-            logger.error("failed to execute work order; %s", str(e))
-            wo_response["Response"]["Status"] = WorkOrderStatus.FAILED
-            wo_response["Response"]["Message"] = str(e)
-            json_response = json.dumps(wo_response)
+            logger.error("Failed to execute work order - %s", str(e))
+            return jrpc_utility.create_error_response(
+                WorkOrderStatus.FAILED, "0", "Failed to execute work order")
 
         return json_response
 
@@ -297,6 +320,8 @@ class WOProcessorManager(EnclaveManager):
                 logger.info("Enclave manager sleeping for %d secs",
                             sleep_interval)
                 time.sleep(sleep_interval)
+        except WorkerRestartException:
+            raise
         except Exception as inst:
             logger.error("Error while processing work-order; " +
                          "shutting down enclave manager")
@@ -353,6 +378,8 @@ class WOProcessorManager(EnclaveManager):
                                        str(wo_id))
                 else:
                     socket.send_string("Work order processed: " + str(wo_id))
+        except WorkerRestartException:
+            raise
         except Exception as inst:
             logger.error("Error while processing work-order; " +
                          "shutting down enclave manager")

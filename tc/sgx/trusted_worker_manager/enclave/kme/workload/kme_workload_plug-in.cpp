@@ -303,8 +303,12 @@ void KMEWorkloadProcessor::PreprocessWorkorder(
             }
             AddOutput(0, wo_key_data, out_work_order_data);
         } else {
-            SetStatus(ERR_WPE_KEY_NOT_FOUND, out_work_order_data);
+            SetStatus(ERR_WPE_KEY_INFO_CREATION_FAILED, out_work_order_data);
+            ThrowIf<ValueError>(true, "WPE key info creation failed");
         }
+    } else {
+        SetStatus(ERR_WPE_KEY_NOT_FOUND, out_work_order_data);
+        ThrowIf<ValueError>(true, "WPE encryption key not found");
     }
 }  // KMEWorkloadProcessor::PreprocessWorkorder
 
