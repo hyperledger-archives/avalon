@@ -117,6 +117,64 @@ tcf_err_t SignupDataKME::CreateEnclaveData(
 }  // SignupDataKME::CreateEnclaveData
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+tcf_err_t SignupDataKME::RefreshWorkerEncryptionKey(
+    StringArray& outPublicEnclaveData,
+    Base64EncodedString& outSealedEnclaveData) {
+
+    tcf_err_t result = TCF_SUCCESS;
+
+    try {
+        tcf_err_t presult = TCF_SUCCESS;
+        sgx_status_t sresult;
+
+        outPublicEnclaveData.resize(CalculatePublicEnclaveDataSize());
+
+        ByteArray sealed_enclave_data_buffer(CalculateSealedEnclaveDataSize());
+
+        // Get the enclave id for passing into the ecall
+        sgx_enclave_id_t enclaveid = g_Enclave[0].GetEnclaveId();
+
+        size_t computed_public_enclave_data_size = 0;
+        size_t computed_sealed_enclave_data_size = 0;
+
+        sresult = g_Enclave[0].CallSgx(
+            [enclaveid,
+             &presult,
+             &outPublicEnclaveData,
+             &sealed_enclave_data_buffer,
+             &computed_sealed_enclave_data_size ] () {
+                sgx_status_t ret = ecall_RefreshWorkerEncryptionKey(
+                    enclaveid,
+                    &presult,
+                    outPublicEnclaveData.data(),
+                    outPublicEnclaveData.size(),
+                    sealed_enclave_data_buffer.data(),
+                    sealed_enclave_data_buffer.size());
+                return tcf::error::ConvertErrorStatus(ret, presult);
+            });
+
+        tcf::error::ThrowSgxError(sresult,
+            "SGX enclave call failed (ecall_RefreshWorkerEncryptionKey), "
+	    "failed to refresh enclave encryption key");
+        g_Enclave[0].ThrowTCFError(presult);
+
+        outSealedEnclaveData = \
+            ByteArrayToBase64EncodedString(sealed_enclave_data_buffer);
+    } catch (tcf::error::Error& e) {
+        tcf::enclave_api::base::SetLastError(e.what());
+        result = e.error_code();
+    } catch (std::exception& e) {
+        tcf::enclave_api::base::SetLastError(e.what());
+        result = TCF_ERR_UNKNOWN;
+    } catch (...) {
+        tcf::enclave_api::base::SetLastError(
+            "Unexpected exception in (RefreshEnclaveKey)");
+        result = TCF_ERR_UNKNOWN;
+    }
+    return result;
+}  // SignupDataKME::RefreshEnclaveKey
+
+// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 tcf_err_t SignupDataKME::UnsealEnclaveData(
     StringArray& outPublicEnclaveData) {
     tcf_err_t result = TCF_SUCCESS;

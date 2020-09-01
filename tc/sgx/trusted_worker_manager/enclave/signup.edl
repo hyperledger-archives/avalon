@@ -31,5 +31,12 @@ enclave {
             [out, size=inAllocatedPublicEnclaveDataSize] char* outPublicEnclaveData,
             size_t inAllocatedPublicEnclaveDataSize
             );
+
+        public tcf_err_t ecall_RefreshWorkerEncryptionKey(
+            [out, size=inAllocatedPublicEnclaveDataSize] char* outPublicEnclaveData,
+            size_t inAllocatedPublicEnclaveDataSize,
+            [out, size=inAllocatedSealedEnclaveDataSize] uint8_t* outSealedEnclaveData,
+            size_t inAllocatedSealedEnclaveDataSize
+            );
     };
 };

@@ -15,6 +15,7 @@
 
 #include <stdio.h>
 #include <string.h>
+
 #include "tcf_error.h"
 
 tcf_err_t CreateEnclaveData(uint8_t* persistedSealedEnclaveData=nullptr);

@@ -20,6 +20,7 @@ import random
 import logging
 import os
 import sys
+import asyncio
 
 import avalon_enclave_manager.sgx_work_order_request as work_order_request
 import avalon_enclave_manager.kme.kme_enclave_info as enclave_info
@@ -42,6 +43,7 @@ class KeyManagementEnclaveManager(EnclaveManager):
 
         super().__init__(config)
         self.proof_data_type = config.get("WorkerConfig")["ProofDataType"]
+        self.preprocessed_wo_count = 0
 
 # -------------------------------------------------------------------------
 
@@ -54,8 +56,7 @@ class KeyManagementEnclaveManager(EnclaveManager):
                           enclave
         """
         return enclave_info.\
-            KeyManagementEnclaveInfo(self._config["EnclaveModule"],
-                                     self._worker_id)
+            KeyManagementEnclaveInfo(self._config, self._worker_id)
 
 # -------------------------------------------------------------------------
 
@@ -130,9 +131,7 @@ class KeyManagementEnclaveManager(EnclaveManager):
             logger.error("Failed to execute boot time flow; " +
                          "exiting Intel SGX Enclave manager: {}".format(err))
             exit(1)
-
         self._start_kme_listener()
-
 
 # -------------------------------------------------------------------------
 
@@ -154,7 +153,6 @@ class KeyManagementEnclaveManager(EnclaveManager):
         ]
         kme_listener = KMEListener(rpc_methods)
         kme_listener.start(host_name, port)
-
 
 # -----------------------------------------------------------------
 
@@ -207,10 +205,29 @@ class KeyManagementEnclaveManager(EnclaveManager):
     def PreProcessWorkOrder(self, **params):
         """
         """
+        try:
+            wo_threshold = \
+                int(self._config["WorkerKeyRefresh"]["work_orders_count"])
+        except Exception as err:
+            logger.warning("Failed to get work order count from config file. " +
+                           "Setting work orders threshold to 0: %s", str(err))
+            wo_threshold = 0
+
         wo_request = self._get_request_json("PreProcessWorkOrder")
         wo_request["params"] = params
         wo_response = self._execute_work_order(json.dumps(wo_request), "")
         wo_response_json = json.loads(wo_response)
+
+        self.preprocessed_wo_count += 1
+        if wo_threshold > 0 and self.preprocessed_wo_count == wo_threshold:
+            try:
+                enclave_info = EnclaveManager.signup_data
+                enclave_info.worker_key_refresh._initiate_key_refresh()
+                # Set preprocessed_wo_count to 0
+                self.preprocessed_wo_count = 0
+            except Exception as e:
+                logger.error("failed to get signup data after key refresh: %s",
+                    str(e))
 
         if "result" in wo_response_json:
             return wo_response_json["result"]

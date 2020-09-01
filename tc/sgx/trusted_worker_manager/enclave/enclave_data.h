@@ -146,6 +146,13 @@ public:
             ByteArrayToHexEncodedString(encr_key_sig_bytes);
     }
 
+    void generate_new_encryption_key_pair(void) {
+        private_encryption_key_.Generate();
+        public_encryption_key_ = private_encryption_key_.GetPublicKey();
+    }
+
+    void PerformEncryptionKeyRefresh();
+
     size_t get_sealed_data_size(void) const {
         size_t sdsize = sgx_calc_sealed_data_size(0, get_private_data_size());
         return sdsize;

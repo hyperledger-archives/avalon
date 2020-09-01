@@ -19,6 +19,7 @@ import json
 import logging
 import os
 import sys
+import asyncio
 
 import avalon_enclave_manager.sgx_work_order_request as work_order_request
 import avalon_enclave_manager.singleton.singleton_enclave_info as enclave_info
@@ -73,8 +74,7 @@ class SingletonEnclaveManager(WOProcessorManager):
                           enclave
         """
         return enclave_info.\
-            SingletonEnclaveInfo(self._config.get("EnclaveModule"),
-                                 self._worker_id)
+            SingletonEnclaveInfo(self._config, self._worker_id)
 
 # -------------------------------------------------------------------------
 
@@ -100,7 +100,6 @@ class SingletonEnclaveManager(WOProcessorManager):
 
 
 # -----------------------------------------------------------------
-
 
 def main(args=None):
     import config.config as pconfig

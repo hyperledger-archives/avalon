@@ -42,7 +42,9 @@ typedef enum {
     TCF_ERR_SYSTEM_BUSY = -10,
     TCF_ERR_CRYPTO = -11,
     /** Invalid workload ID */
-    TCF_ERR_INVALID_WORKLOAD = -12
+    TCF_ERR_INVALID_WORKLOAD = -12,
+    /* Enclave key refresh error */
+    TCF_ERR_ENCRYPT_KEY_REFRESH = -13
 } tcf_err_t;
 
 typedef enum {

@@ -30,6 +30,10 @@ public:
             Base64EncodedString& outSealedEnclaveData,
             Base64EncodedString& outEnclaveQuote);
 
+    tcf_err_t RefreshWorkerEncryptionKey(
+        StringArray& outPublicEnclaveData,
+        Base64EncodedString& outSealedEnclaveData);
+
     tcf_err_t VerifyEnclaveInfo(
         const std::string& enclaveInfo,
         const std::string& mr_enclave,

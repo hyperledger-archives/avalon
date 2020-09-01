@@ -103,6 +103,39 @@ std::map<std::string, std::string> SignupInfoKME::UnsealEnclaveData() {
     return result;
 }  // SignupInfoKME::UnsealEnclaveData
 
+// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+std::map<std::string, std::string> SignupInfoKME::RefreshWorkerEncryptionKey() {
+    tcf_err_t presult;
+    /* Create some buffers for receiving the output parameters */
+    StringArray public_enclave_data(0);
+    Base64EncodedString out_sealed_enclave_data;
+
+    SignupDataKME signup_data;
+    presult = signup_data.RefreshWorkerEncryptionKey(
+        public_enclave_data,
+        out_sealed_enclave_data);
+    ThrowTCFError(presult);
+
+    /* Parse the json and save verifying key, encryption key and
+       encryption key signature */
+    std::string verifying_key;
+    std::string encryption_key;
+    std::string encryption_key_signature;
+    presult = DeserializePublicEnclaveData(
+        public_enclave_data.str(),
+        verifying_key,
+        encryption_key,
+        encryption_key_signature);
+    ThrowTCFError(presult);
+
+    std::map<std::string, std::string> result;
+    result["encryption_key"] = encryption_key;
+    result["encryption_key_signature"] = encryption_key_signature;
+    result["sealed_enclave_data"] = out_sealed_enclave_data;
+
+    return result;
+} // SignupInfoKME::RefreshWorkerEncryptionKey
+
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 size_t SignupInfoKME::VerifyEnclaveInfo(
     const std::string& enclave_info,

@@ -171,8 +171,34 @@ namespace tcf {
         // Decrypt Encryption key
         ByteArray encrypted_session_key_bytes = \
             HexStringToBinary(encrypted_session_key);
-        session_key = enclave_data->decrypt_message(
-            encrypted_session_key_bytes);
+
+        try {
+            // Decrypt Encryption key
+            session_key = enclave_data->decrypt_message(
+                encrypted_session_key_bytes);
+        } catch (tcf::error::KeyRefreshError& e) {
+            Log(TCF_LOG_ERROR, "error::DecryptMessage - %d - %s", \
+                e.error_code(), e.what());
+            tcf::error::ThrowIf<tcf::error::KeyRefreshError>(
+                true == true, "Failed to decrypt encrypted session key. " \
+                "Possibly worker key refreshed, " \
+                "fetch latest Worker Encryption Key");
+        } catch (tcf::error::Error& e) {
+            Log(TCF_LOG_ERROR, "error::DecryptMessage - %d - %s", \
+                e.error_code(), e.what());
+            tcf::error::ThrowIf<tcf::error::KeyRefreshError>(
+                true == true, "Failed to decrypt encrypted session key. " \
+                "Possibly worker key refreshed, " \
+                "fetch latest Worker Encryption Key");
+        } catch (...) {
+            Log(TCF_LOG_ERROR, \
+                "error::DecryptMessage - unknown internal error");
+            tcf::error::ThrowIf<tcf::error::KeyRefreshError>(
+                true == true, "Failed to decrypt encrypted session key. " \
+                "Possibly worker key refreshed, " \
+                "fetch latest Worker Encryption Key");
+        }
+
         ByteArray session_key_iv_bytes = HexStringToBinary(session_key_iv);
 
         JSON_Object* request_object = json_value_get_object(wo_req_json_val);
@@ -349,12 +375,13 @@ namespace tcf {
         }
         // Calculate final hash
         std::string final_hash_string = ByteArrayToString(hash_1);
-        if(!hash_in_data_str.empty()) {
+
+        //if(!hash_in_data_str.empty()) {
             final_hash_string += ByteArrayToString(hash_in_data);
-        }
-        if(!hash_out_data_str.empty()) {
+        //}
+        //if(!hash_out_data_str.empty()) {
             final_hash_string += ByteArrayToString(hash_out_data);
-        }
+        //}
         ByteArray final_hash = tcf::crypto::ComputeMessageHash(
                                     StrToByteArray(final_hash_string));
         return final_hash;
@@ -545,6 +572,8 @@ namespace tcf {
             JsonValue response_json = CreateJsonOutput();
             return SerializeJson(response_json);
         } catch (tcf::error::ValueError& e) {
+            return CreateErrorResponse(e.error_code(), e.what());
+        } catch (tcf::error::KeyRefreshError& e) {
             return CreateErrorResponse(e.error_code(), e.what());
         } catch (tcf::error::Error& e) {
             return CreateErrorResponse(e.error_code(), e.what());

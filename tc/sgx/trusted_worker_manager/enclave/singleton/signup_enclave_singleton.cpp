@@ -44,6 +44,7 @@
 #include "enclave_utils.h"
 #include "verify-report.h"
 #include "signup_enclave_util.h"
+#include "signup_enclave_common.h"
 
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX

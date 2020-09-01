@@ -24,6 +24,7 @@ from direct_model_generic_client import DirectModelGenericClient
 from proxy_model_generic_client import ProxyModelGenericClient
 import utility.hex_utils as hex_utils
 import avalon_crypto_utils.crypto_utility as crypto_utility
+from error_code.error_status import WorkOrderStatus
 
 logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(message)s", level=logging.INFO)
@@ -237,6 +238,111 @@ class GenericClient():
     def mode(self):
         return self._mode
 
+    def _start_client(self, generic_client_obj, worker_obj, worker_id):
+        # Do worker verification
+        generic_client_obj.do_worker_verification(worker_obj)
+
+        logging.info("**********Worker details Updated with Worker ID" +
+                    "*********\n%s\n", worker_id)
+
+        # Create session key and iv to sign work order request
+        session_key = crypto_utility.generate_key()
+        session_iv = crypto_utility.generate_iv()
+
+        # Create work order
+        if self.in_data_plain_text():
+            # As per TC spec, if encryptedDataEncryptionKey is "-" then
+            # input data is not encrypted
+            encrypted_data_encryption_key = "-"
+        else:
+            # As per TC spec, if encryptedDataEncryptionKey is not
+            # provided then set it to None which means
+            # use default session key to encrypt input data
+            encrypted_data_encryption_key = None
+
+        code, wo_params = generic_client_obj.create_work_order_params(
+            worker_id, self.workload_id(),
+            self.in_data(),
+            worker_obj.encryption_key,
+            session_key, session_iv,
+            encrypted_data_encryption_key)
+        if not code:
+            logging.error("Work order request creation failed")
+            sys.exit(-1)
+
+        client_private_key = crypto_utility.generate_signing_keys()
+        if self.requester_signature():
+            # Add requester signature and requester verifying_key
+            if wo_params.add_requester_signature(client_private_key) is False:
+                logging.info("Work order request signing failed")
+                sys.exit(-1)
+
+        submit_status, wo_submit_res = generic_client_obj.submit_work_order(
+            wo_params)
+
+        if submit_status:
+            # Create receipt
+            if self.show_receipt():
+                generic_client_obj.create_work_order_receipt(
+                    wo_params,
+                    client_private_key)
+            work_order_id = wo_params.get_work_order_id()
+            # Retrieve work order result
+            status, wo_res = generic_client_obj.get_work_order_result(
+                work_order_id
+            )
+
+            # Check if result field is present in work order response
+            if status and 'result' in wo_res:
+                # Verify work order response signature
+                if generic_client_obj.verify_wo_response_signature(
+                    wo_res['result'],
+                    worker_obj.verification_key,
+                    wo_params.get_requester_nonce()
+                ) is False:
+                    logging.error("Work order response signature"
+                                " verification Failed")
+                    sys.exit(-1)
+                # Decrypt work order response
+                if self.show_decrypted_output():
+                    decrypted_res = generic_client_obj.decrypt_wo_response(
+                        wo_res['result'])
+                    logging.info("\nDecrypted response:\n {}".format(
+                        decrypted_res))
+            elif 'error' in wo_res and wo_res['error']['code'] == \
+                WorkOrderStatus.WORKER_ENCRYPT_KEY_REFRESHED:
+                    logging.info("Worker Key refreshed. "
+                        "Retrieving latest Worker details and resubmit work order")
+                    # Retrieve updated worker details
+                    worker_obj = generic_client_obj.get_worker_details(
+                        worker_id)
+                    if worker_obj is None:
+                        logging.error("Unable to retrieve worker details\n")
+                        sys.exit(-1)
+                    self._start_client(generic_client_obj, worker_obj, worker_id)
+            else:
+                # Check for error response
+                logging.error("\n Work order get result failed\n")
+                sys.exit(-1)
+
+            if self.show_receipt():
+                # Retrieve receipt
+                retrieve_wo_receipt = \
+                    generic_client_obj.retrieve_work_order_receipt(
+                        work_order_id)
+                # Verify receipt signature
+                if retrieve_wo_receipt:
+                    if "result" in retrieve_wo_receipt:
+                        if generic_client_obj.verify_receipt_signature(
+                                retrieve_wo_receipt) is False:
+                            logging.error("Receipt signature verification Failed")
+                            sys.exit(-1)
+                    else:
+                        logging.info("Work Order receipt retrieve failed")
+                        sys.exit(-1)
+        else:
+            logging.error("Work order submit failed {}".format(wo_submit_res))
+            sys.exit(-1)
 
 def Main(args=None):
     parser = GenericClient(args)
@@ -272,6 +378,7 @@ def Main(args=None):
     if worker_obj is None:
         logging.error("Unable to retrieve worker details\n")
         sys.exit(-1)
+<<<<<<< HEAD
 
     # Create session key and iv to sign work order request
     session_key = crypto_utility.generate_key()
@@ -368,6 +475,7 @@ def Main(args=None):
         logging.error("Work order submit failed {}".format(wo_submit_res))
         sys.exit(-1)
 
+    parser._start_client(generic_client_obj, worker_obj, worker_id)
 
 # -----------------------------------------------------------------------------
 Main()

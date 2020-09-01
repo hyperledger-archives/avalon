@@ -33,7 +33,8 @@ class WorkOrderStatus(IntEnum):
     PROCESSING = 7
     BUSY = 8
     INVALID_WORKLOAD = 9
-    UNKNOWN_ERROR = 10
+    WORKER_ENCRYPT_KEY_REFRESHED = 10
+    UNKNOWN_ERROR = 11
 
 
 @unique

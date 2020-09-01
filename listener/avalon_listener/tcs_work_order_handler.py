@@ -187,6 +187,8 @@ class TCSWorkOrderHandler:
         if err_code == EnclaveError.ENCLAVE_ERR_VALUE:
             err_code = \
                 WorkOrderStatus.INVALID_PARAMETER_FORMAT_OR_VALUE
+        elif err_code == EnclaveError.ENCLAVE_ERR_ENCRYPT_KEY_REFRESH:
+            err_code = WorkOrderStatus.WORKER_ENCRYPT_KEY_REFRESHED
         elif err_code == EnclaveError.ENCLAVE_ERR_UNKNOWN:
             err_code = WorkOrderStatus.UNKNOWN_ERROR
         elif err_code == EnclaveError.ENCLAVE_ERR_INVALID_WORKLOAD:
