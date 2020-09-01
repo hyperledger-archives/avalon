@@ -316,5 +316,3 @@ class BaseEnclaveInfo(ABC):
             @returns file_name - Fully qualified file name for sealed data
         """
         return os.path.join(TCF_HOME, relative_path + "." + worker_id)
-
-    # -----------------------------------------------------------------

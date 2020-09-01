@@ -280,3 +280,18 @@ void EnclaveData::SerializePublicData(void) {
 
     serialized_public_data_.assign(&serialized_buffer[0]);
 }
+
+// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+void EnclaveData::PerformEncryptionKeyRefresh() {
+    // Perform key refresh and update EnclaveData object with
+    // refreshed key pair
+    generate_new_encryption_key_pair();
+
+    // Generate encryption key signature for the refreshed key
+    generate_encryption_key_signature();
+
+    // Serialize private and public data after enclave key refresh
+    SerializePrivateData();
+    SerializePublicData();
+    Log(TCF_LOG_INFO, "generated new key enc key pair");
+}  // EnclaveData::PerformEncryptionKeyRefresh

@@ -34,4 +34,8 @@ public:
         const std::string& mr_enclave);
 
     tcf_err_t UnsealEnclaveData(StringArray& outPublicEnclaveData);
+
+    tcf_err_t RefreshWorkerEncryptionKey(
+        StringArray& outPublicEnclaveData,
+        Base64EncodedString& outSealedEnclaveData);
 };  // SignupDataSingleton

@@ -19,9 +19,9 @@
 
 #include "avalon_sgx_error.h"
 #include "zero.h"
-#include "enclave_data.h"
 #include "enclave_utils.h"
 #include "signup_enclave_common.h"
+#include "enclave_data.h"
 
 
 // Initializing singleton class object which gets initialized when
@@ -128,3 +128,65 @@ tcf_err_t ecall_UnsealEnclaveData(char* outPublicEnclaveData,
 
     return result;
 }  // ecall_UnsealEnclaveData
+
+// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+tcf_err_t ecall_RefreshWorkerEncryptionKey(
+    char* outPublicEnclaveData,
+    size_t inAllocatedPublicEnclaveDataSize,
+    uint8_t* outSealedEnclaveData,
+    size_t inAllocatedSealedEnclaveDataSize) {
+
+    tcf_err_t result = TCF_SUCCESS;
+
+    try {
+
+        tcf::error::ThrowIfNull(outSealedEnclaveData,
+            "Sealed enclave data pointer is NULL");
+
+        Zero(outPublicEnclaveData, inAllocatedPublicEnclaveDataSize);
+        Zero(outSealedEnclaveData, inAllocatedSealedEnclaveDataSize);
+
+        EnclaveData* enclave_data = EnclaveData::getInstance();
+        enclave_data->PerformEncryptionKeyRefresh();
+        tcf::error::ThrowIf<tcf::error::ValueError>(
+            inAllocatedPublicEnclaveDataSize < enclave_data->get_public_data_size(),
+            "Public enclave data buffer size is too small");
+
+        tcf::error::ThrowIf<tcf::error::ValueError>(
+            inAllocatedSealedEnclaveDataSize < enclave_data->get_sealed_data_size(),
+            "Sealed enclave data buffer size is too small");
+
+        /*
+           Seal up the signup data into the caller's buffer.
+           NOTE - the attributes mask 0xfffffffffffffff3 seems rather
+           arbitrary, but according to Intel SGX SDK documentation, this is
+           what sgx_seal_data uses, so it is good enough for us.
+        */
+        sgx_attributes_t attribute_mask = {0xfffffffffffffff3, 0};
+        sgx_status_t ret = sgx_seal_data_ex(SGX_KEYPOLICY_MRENCLAVE, attribute_mask,
+            0,        // misc_mask
+            0,        // additional mac text length
+            nullptr,  // additional mac text
+            enclave_data->get_private_data_size(),
+            reinterpret_cast<const uint8_t*>(enclave_data->get_private_data().c_str()),
+            static_cast<uint32_t>(enclave_data->get_sealed_data_size()),
+            reinterpret_cast<sgx_sealed_data_t*>(outSealedEnclaveData));
+        tcf::error::ThrowSgxError(ret, "Failed to seal signup data");
+
+        // Give the caller a copy of the signing and encryption keys
+        strncpy_s(outPublicEnclaveData, inAllocatedPublicEnclaveDataSize,
+            enclave_data->get_public_data().c_str(),
+            enclave_data->get_public_data_size());
+    } catch (tcf::error::Error& e) {
+        SAFE_LOG(TCF_LOG_ERROR,
+            "Error in enclave(ecall_RefreshWorkerEncryptionKey): %04X -- %s",
+            e.error_code(), e.what());
+        ocall_SetErrorMessage(e.what());
+        result = e.error_code();
+    } catch (...) {
+        SAFE_LOG(TCF_LOG_ERROR,
+            "Unknown error in enclave(ecall_RefreshWorkerEncryptionKey)");
+        result = TCF_ERR_UNKNOWN;
+    }
+    return result;
+}  // ecall_RefreshWorkerEncryptionKey

@@ -18,8 +18,9 @@ import argparse
 import json
 import logging
 import sys
-import utility.hex_utils as hex_utils
 from abc import ABC, abstractmethod
+
+import utility.hex_utils as hex_utils
 
 from database import connector
 from avalon_enclave_manager.worker_kv_delegate import WorkerKVDelegate
@@ -33,6 +34,8 @@ class EnclaveManager(ABC):
     """
     Abstract base class for Enclave Manager
     """
+
+    signup_data = None
 
     def __init__(self, config):
 
@@ -143,10 +146,11 @@ class EnclaveManager(ABC):
             if signup_data is None:
                 logger.error("Failed to create signup data")
                 return None
+            EnclaveManager.signup_data = signup_data
         except Exception as e:
             logger.exception("failed to initialize/signup enclave; %s", str(e))
             sys.exit(-1)
-        return self._get_JSON_from_signup_object(signup_data)
+        return self._get_JSON_from_signup_object(EnclaveManager.signup_data)
 
     # -----------------------------------------------------------------
 
@@ -204,7 +208,8 @@ class EnclaveManager(ABC):
         worker_type_data["verificationKey"] = enclave_data.verifying_key
         worker_type_data["extendedMeasurements"] = \
             enclave_data.extended_measurements
-        worker_type_data["proofDataType"] = enclave_data.proof_data_type
+        worker_type_data["proofDataType"] = \
+            config.get("WorkerConfig")["ProofDataType"]
         worker_type_data["proofData"] = enclave_data.proof_data
         worker_type_data["encryptionKey"] = enclave_data.encryption_key
         worker_type_data["encryptionKeySignature"] = \

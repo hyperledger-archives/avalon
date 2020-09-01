@@ -147,6 +147,7 @@ class WorkOrderProcessorEnclaveManager(WOProcessorManager):
             logger.info("unknown enclave type response = %s", wo_response)
         return wo_response
 
+
 # -------------------------------------------------------------------------
 
 

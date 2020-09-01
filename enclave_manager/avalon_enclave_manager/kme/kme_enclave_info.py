@@ -25,6 +25,7 @@ import utility.hex_utils as hex_utils
 import utility.file_utils as file_utils
 import avalon_enclave_manager.kme.kme_enclave as enclave
 import avalon_enclave_manager.base_enclave_info as enclave_info
+import avalon_enclave_manager.worker_key_refresh as key_refresh
 
 logger = logging.getLogger(__name__)
 
@@ -41,9 +42,9 @@ class KeyManagementEnclaveInfo(enclave_info.BaseEnclaveInfo):
         enclave._SetLogger(logger)
         super().__init__(enclave.is_sgx_simulator())
 
-        self._config = config
+        self._config = config["EnclaveModule"]
         self._worker_id = worker_id
-        self._initialize_enclave(config)
+        self._initialize_enclave(self._config)
         enclave_info = self._create_enclave_signup_data()
         try:
             self.ias_nonce = enclave_info['ias_nonce']
@@ -58,6 +59,8 @@ class KeyManagementEnclaveInfo(enclave_info.BaseEnclaveInfo):
         except KeyError as ke:
             raise Exception("missing enclave initialization parameter; {}"
                             .format(str(ke)))
+        self.worker_key_refresh = key_refresh.WorkerKeyRefresh(
+            self, config, "kme")
 
     # -------------------------------------------------------
 

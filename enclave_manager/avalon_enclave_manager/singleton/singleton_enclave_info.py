@@ -23,6 +23,7 @@ from requests.exceptions import Timeout
 from requests.exceptions import HTTPError
 import utility.file_utils as file_utils
 import avalon_enclave_manager.singleton.singleton_enclave as enclave
+import avalon_enclave_manager.worker_key_refresh as key_refresh
 from avalon_enclave_manager.base_enclave_info import BaseEnclaveInfo
 
 logger = logging.getLogger(__name__)
@@ -40,11 +41,11 @@ class SingletonEnclaveInfo(BaseEnclaveInfo):
         # Initialize the keys that can be used later to
         # register the enclave
         enclave._SetLogger(logger)
-        self._config = config
+        self._config = config["EnclaveModule"]
         self._worker_id = worker_id
         super().__init__(enclave.is_sgx_simulator())
 
-        self._initialize_enclave(config)
+        self._initialize_enclave(self._config)
         enclave_info = self._create_enclave_signup_data()
         try:
             self.ias_nonce = enclave_info['ias_nonce']
@@ -59,6 +60,8 @@ class SingletonEnclaveInfo(BaseEnclaveInfo):
         except KeyError as ke:
             raise Exception("missing enclave initialization parameter; {}"
                             .format(str(ke)))
+        self.worker_key_refresh = key_refresh.WorkerKeyRefresh(
+            self, config, "singleton")
 
     # -------------------------------------------------------
 

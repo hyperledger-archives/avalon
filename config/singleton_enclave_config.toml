@@ -116,3 +116,7 @@ DataEncryptionAlgorithm = "AES-GCM-256"
 # starting with tilde "~"
 workOrderPayloadFormats = "JSON-RPC"
 
+[WorkerKeyRefresh]
+# Configure key refresh interval based on number of processed work orders.
+# By default, key refresh feature is disabled.
+work_orders_count = 0

@@ -26,6 +26,8 @@ public:
 
     std::map<std::string, std::string> UnsealEnclaveData();
 
+    std::map<std::string, std::string> RefreshWorkerEncryptionKey();
+
     size_t VerifyEnclaveInfo(
         const std::string& enclaveInfo,
         const std::string& mr_enclave);
