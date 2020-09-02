@@ -54,6 +54,7 @@ class GrapheneEnclaveManager(WOProcessorManager):
         self.zmq_socket = ZmqCommunication(graphene_zmq_url)
         self.zmq_socket.connect()
         super().__init__(config)
+        self._config = config
         self.proof_data_type = config.get("WorkerConfig")["ProofDataType"]
         self._identity = self._worker_id
 
@@ -110,7 +111,7 @@ class GrapheneEnclaveManager(WOProcessorManager):
             logger.error("Exception during signup json creation:" + str(ex))
             return None
         # Create Signup Graphene object
-        signup_data = GrapheneEnclaveInfo(worker_signup_json)
+        signup_data = GrapheneEnclaveInfo(self._config, worker_signup_json)
         return signup_data
 
 # -------------------------------------------------------------------------
