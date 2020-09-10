@@ -35,7 +35,7 @@ Cleanup () {
 trap 'echo "**ERROR - line $LINENO**"; Cleanup; exit 1' HUP INT QUIT PIPE TERM ERR
 
 #get certificate from Intel
-wget https://software.intel.com/sites/default/files/managed/7b/de/RK_PUB.zip
+curl https://software.intel.com/sites/default/files/managed/7b/de/RK_PUB.zip -o RK_PUB.zip
 test -e RK_PUB.zip
 echo "Zipped certificated downloaded"
 
