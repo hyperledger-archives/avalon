@@ -83,20 +83,16 @@ class BaseJRPCListener(resource.Resource):
 
         try:
             input_json = json.loads(input_json_str)
-            valid, err_msg = \
-                Validator.schema_validation("tc_methods", input_json)
-            if not valid:
-                raise ValueError(err_msg)
-            valid, err_msg = \
-                Validator.schema_validation(
-                    input_json["method"],
-                    input_json["params"])
-            if not valid:
-                raise ValueError(err_msg)
+            if not ("id" in input_json.keys()) or \
+               not ("method" in input_json.keys()) or \
+               not (input_json["jsonrpc"] == "2.0"):
+                raise KeyError("Improper id or jsonrpc or method")
+
+            logger.info("Received request: %s", input_json['method'])
         except Exception as err:
-            logger.error("Exception while processing Json: %s", str(err))
+            logger.error("exception loading Json: %s", str(err))
             response["error"]["message"] = \
-                "{}".format(str(err))
+                "Improper Json request Missing or Invalid parameter or value"
             return response
 
         # save the full json for WorkOrderSubmit

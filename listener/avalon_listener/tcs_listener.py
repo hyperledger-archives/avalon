@@ -25,10 +25,12 @@
 
 
 import sys
+import json
 import logging
 import argparse
-from urllib.parse import urlparse
+import schema_validation.validate as Validator
 
+from urllib.parse import urlparse
 from avalon_listener.tcs_work_order_handler import TCSWorkOrderHandler
 from avalon_listener.tcs_work_order_handler_sync import TCSWorkOrderHandlerSync
 from avalon_listener.tcs_worker_registry_handler \
@@ -40,6 +42,8 @@ from avalon_listener.tcs_worker_encryption_key_handler \
 from database import connector
 from listener.base_jrpc_listener \
     import BaseJRPCListener, parse_bind_url, get_config_dir
+from jsonrpc import JSONRPCResponseManager
+from error_code.error_status import JRPCErrorCodes
 
 logger = logging.getLogger(__name__)
 
@@ -101,6 +105,46 @@ class TCSListener(BaseJRPCListener):
         ]
         super().__init__(rpc_methods)
 
+# -----------------------------------------------------------------
+
+    def _process_request(self, input_json_str):
+        """
+        Overridden method to dispatch to appropriate rpc method with
+        added schema and request validation
+
+        Parameters :
+            input_json_str - JSON formatted str of the request
+        Returns :
+            response - data field from the response received which is a dict
+        """
+        response = {}
+        response['error'] = {}
+        response['error']['code'] = \
+            JRPCErrorCodes.INVALID_PARAMETER_FORMAT_OR_VALUE
+
+        try:
+            input_json = json.loads(input_json_str)
+            valid, err_msg = \
+                Validator.schema_validation("tc_methods", input_json)
+            if not valid:
+                raise ValueError(err_msg)
+            valid, err_msg = \
+                Validator.schema_validation(
+                    input_json["method"],
+                    input_json["params"])
+            if not valid:
+                raise ValueError(err_msg)
+        except Exception as err:
+            logger.error("Exception while processing Json: %s", str(err))
+            response["error"]["message"] = \
+                "{}".format(str(err))
+            return response
+
+        # save the full json for WorkOrderSubmit
+        input_json["params"]["raw"] = input_json_str
+        data = json.dumps(input_json).encode('utf-8')
+        response = JSONRPCResponseManager.handle(data, self.dispatcher)
+        return response.data
 
 # -----------------------------------------------------------------
 # -----------------------------------------------------------------
