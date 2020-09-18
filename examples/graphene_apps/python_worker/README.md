@@ -232,6 +232,11 @@ https://creativecommons.org/licenses/by/4.0/
 
 - Knows issues are captured in GitHub : https://github.com/hyperledger/avalon/issues/621
 
+- While running Avalon Python Worker or sample applications in gsc containers, if it take lot of time to initialize graphene
+  environemnt and container gets auto killed then check if your system has sufficient available memory. It's advisable to have
+  atleast 7GB to 8GB of memory available on the host.  
+  You can notice out of memory logs on *dmesg* while running gsc containers on limited memory setup.
+
 ## Reference
 * [Graphene Library OS](
   https://github.com/oscarlab/graphene#graphene-library-os-with-intel-sgx-support)
