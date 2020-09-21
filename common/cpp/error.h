@@ -52,6 +52,13 @@ namespace tcf {
                 ) : Error(TCF_ERR_CRYPTO, msg) {}
         }; // class CryptoError
 
+        // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+        class KeyRefreshError : public Error {
+        public:
+            explicit KeyRefreshError(
+                const std::string& msg
+                ) : Error(TCF_ERR_ENCRYPT_KEY_REFRESH, msg) {}
+        }; // class KeyRefreshError
 
         // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
         class MemoryError : public Error {

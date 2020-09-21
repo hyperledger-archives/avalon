@@ -36,6 +36,7 @@ class WOProcessorManager(EnclaveManager):
     def __init__(self, config):
         super().__init__(config)
         self._identity = None
+        self.wo_processed_count = 0
 
 # -------------------------------------------------------------------------
 
@@ -76,6 +77,14 @@ class WOProcessorManager(EnclaveManager):
             "About to process work orders found in wo-worker-scheduled table.")
 
         wo_id = self._kv_helper.csv_pop("wo-worker-scheduled", self._worker_id)
+        try:
+            wo_threshold = \
+                int(self._config["WorkerKeyRefresh"]["work_orders_count"])
+        except Exception as err:
+            logger.warning("Failed to get work order count from config file." +
+                           " Setting work orders threshold to 0: %s", str(err))
+            wo_threshold = 0
+
         while wo_id is not None:
 
             self._process_work_order_by_id(wo_id)
@@ -84,6 +93,18 @@ class WOProcessorManager(EnclaveManager):
 
             wo_id = self._kv_helper.csv_pop("wo-worker-scheduled",
                                             self._worker_id)
+            self.wo_processed_count += 1
+            if wo_threshold > 0 and self.wo_processed_count == wo_threshold:
+                try:
+                    enclave_info = EnclaveManager.signup_data
+                    enclave_info.worker_key_refresh._initiate_key_refresh()
+                    # Set processed work orders count to 0
+                    self.wo_processed_count = 0
+                except Exception as e:
+                    logger.error(
+                        "failed to get signup data after key refresh: %s",
+                        str(e))
+
         # end of loop
         logger.info("No more worker orders in wo-worker-scheduled table.")
 
@@ -248,12 +269,13 @@ class WOProcessorManager(EnclaveManager):
             return False
         return True
 
-    # -------------------------------------------------------------------------
+    # -----------------------------------------------------------------
 
     def start_enclave_manager(self):
         """
-        Execute boot flow and run time flow
+        Execute run time flow either by polling or by listening on ZMQ socket
         """
+
         try:
             logger.info(
                 "--------------- Starting Boot time flow ----------------")
@@ -277,7 +299,7 @@ class WOProcessorManager(EnclaveManager):
 
     def _start_polling_kvstore(self):
         """
-        This function is runs indefinitely polling the KV Storage
+        This function is run indefinitely polling the KV Storage
         for new work-order request and processing them. The poll
         is interleaved with sleeps hence avoiding busy waits. It
         terminates only when an exception occurs.

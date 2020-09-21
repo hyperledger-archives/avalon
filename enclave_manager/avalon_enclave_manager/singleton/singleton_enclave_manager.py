@@ -73,8 +73,7 @@ class SingletonEnclaveManager(WOProcessorManager):
                           enclave
         """
         return enclave_info.\
-            SingletonEnclaveInfo(self._config.get("EnclaveModule"),
-                                 self._worker_id)
+            SingletonEnclaveInfo(self._config, self._worker_id)
 
 # -------------------------------------------------------------------------
 
@@ -100,7 +99,6 @@ class SingletonEnclaveManager(WOProcessorManager):
 
 
 # -----------------------------------------------------------------
-
 
 def main(args=None):
     import config.config as pconfig
