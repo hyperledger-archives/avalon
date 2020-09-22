@@ -25,7 +25,7 @@ from avalon_enclave_manager.base_enclave_manager import EnclaveManager
 from avalon_enclave_manager.work_order_processor_manager \
     import WOProcessorManager
 from avalon_enclave_manager.graphene.graphene_enclave_info \
-    import SignupGraphene
+    import GrapheneEnclaveInfo
 from utility.zmq_comm import ZmqCommunication
 
 logger = logging.getLogger(__name__)
@@ -93,7 +93,7 @@ class GrapheneEnclaveManager(WOProcessorManager):
         try:
             # Send signup request to Graphene worker
             worker_signup = self.zmq_socket.send_request_zmq(
-                                            json.dumps(json_request))
+                json.dumps(json_request))
         except Exception as ex:
             logger.error("Exception while sending data over ZMQ:" + str(ex))
             return None
@@ -108,7 +108,7 @@ class GrapheneEnclaveManager(WOProcessorManager):
             logger.error("Exception during signup json creation:" + str(ex))
             return None
         # Create Signup Graphene object
-        signup_data = SignupGraphene(worker_signup_json)
+        signup_data = GrapheneEnclaveInfo(worker_signup_json)
         return signup_data
 
 # -------------------------------------------------------------------------

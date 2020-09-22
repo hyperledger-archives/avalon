@@ -13,21 +13,22 @@
 # limitations under the License.
 
 import logging
+from avalon_enclave_manager.enclave_attributes import EnclaveAttributes
 
 logger = logging.getLogger(__name__)
 
 # -------------------------------------------------------------------------
 
 
-class SignupGraphene():
+class GrapheneEnclaveInfo(EnclaveAttributes):
     """
-    Signup Object that will be used by BaseEnclave Manager
+    Signup Object that will be used by GrapheneEnclaveManager
     """
 
 # -------------------------------------------------------------------------
     def __init__(self, worker_signup_json):
         """
-        Constructor for SignupGraphene.
+        Constructor for GrapheneEnclaveInfo.
         Creates signup object.
         """
         self.sealed_data = worker_signup_json["sealed_data"]
@@ -41,3 +42,37 @@ class SignupGraphene():
         self.extended_measurements = None
 
 # -------------------------------------------------------------------------
+    def get_enclave_measurement(self):
+        """
+        A getter for enclave measurement
+
+        Returns :
+            @returns mr_enclave - Enclave measurement for enclave
+        """
+        # Return None as of now. Read from proof_data when enabled.
+        return None
+
+# -----------------------------------------------------------------
+
+    def get_enclave_basename(self):
+        """
+        A getter for enclave basename
+
+        Returns :
+            @returns basename - Basename of enclave
+        """
+        return None
+
+# -----------------------------------------------------------------
+
+    def get_extended_measurements(self):
+        """
+        A getter for enclave extended measurements which is a tuple of enclave
+        basename and enclave measurement
+
+        Returns :
+            @returns basename,measurement - A tuple of basename & measurement
+        """
+        return None
+
+# -----------------------------------------------------------------

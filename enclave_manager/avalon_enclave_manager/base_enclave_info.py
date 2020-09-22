@@ -19,7 +19,8 @@ import time
 from ssl import SSLError
 from requests.exceptions import Timeout
 from requests.exceptions import HTTPError
-from abc import ABC, abstractmethod
+from abc import abstractmethod
+from avalon_enclave_manager.enclave_attributes import EnclaveAttributes
 import avalon_enclave_manager.ias_client as ias_client
 
 import logging
@@ -29,7 +30,7 @@ TCF_HOME = os.environ.get("TCF_HOME", "../../../")
 SIG_RL_UPDATE_PERIOD = 8 * 60 * 60  # in seconds every 8 hours
 
 
-class BaseEnclaveInfo(ABC):
+class BaseEnclaveInfo(EnclaveAttributes):
     """
     Abstract base class to initialize enclave, signup enclave and hold
     data obtained post signup.
