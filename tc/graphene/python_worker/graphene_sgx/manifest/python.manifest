@@ -3,7 +3,7 @@ sgx.allow_file_creation = 1
 # size must be specified upfront. If Python worker needs more
 # virtual memory than the enclave size, Graphene will not be able to
 # allocate it.
-sgx.enclave_size = 512M
+sgx.enclave_size = 256M
 sgx.thread_num = 8
 sgx.file_check_policy = allow_all_but_log
 
