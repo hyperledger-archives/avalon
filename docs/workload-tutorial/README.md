@@ -62,7 +62,7 @@ Before beginning this tutorial, review the following items:
 
 * Review the base class `WorkloadProcessor`,
   which any workload class inherits, at
-  [$TCF_HOME/common/sgx_workload/workload_processor.h](../../common/sgx_workload/workload/workload_processor.h)
+  [$TCF_HOME/common/sgx_workload/workload/workload_processor.h](../../common/sgx_workload/workload/workload_processor.h)
 
   Observe the following:
   * Each workload must implement method `ProcessWorkOrder()`
@@ -131,9 +131,9 @@ will be created next in [Phase 2](#phase2).
 
 * Change placeholder `$WORKLOAD_STATIC_NAME$` (one location)
   in file `CMakeLists.txt`
-  to an appropriate name, `hello_world` (note the underscore, `_`)  
+  to an appropriate name, `hello_world` (note the underscore, `_`)
 
-  Make sure the `$WORKLOAD_STATIC_NAME$` is same as workload folder created above using  
+  Make sure the `$WORKLOAD_STATIC_NAME$` is same as workload folder created above using
   `mkdir -p examples/apps/<workload_name>/workload`
 
 * To include the new workload into the build,
@@ -145,7 +145,7 @@ will be created next in [Phase 2](#phase2).
   ```
 
 * To link the new workload library into the build, change below lines in
-  [$TCF_HOME/tc/sgx/trusted_worker_manager/enclave/CMakeWorkloads.txt](../../tc/sgx/trusted_worker_manager/enclave/CMakeWorkloads.txt) :  
+  [$TCF_HOME/tc/sgx/trusted_worker_manager/enclave/CMakeWorkloads.txt](../../tc/sgx/trusted_worker_manager/enclave/CMakeWorkloads.txt) :
 
   Add workload to supported workload list
   ```bash
@@ -154,7 +154,7 @@ will be created next in [Phase 2](#phase2).
         ...
         # LIST(SUPPORTED_WORKLOADS_LIST "<workload_id>")
     ENDMACRO()
-  ```  
+  ```
 
   Replace `<workload_id>`  with `hello-world` as shown below:
   ```bash
@@ -163,7 +163,7 @@ will be created next in [Phase 2](#phase2).
         ...
         # LIST(SUPPORTED_WORKLOADS_LIST "hello-world")
     ENDMACRO()
-  ```  
+  ```
 
   Add workload static library to supported workload library list
   ```bash
@@ -172,7 +172,7 @@ will be created next in [Phase 2](#phase2).
         ...
         LIST(APPEND SUPPORTED_WORKLOAD_LIBRARY_LIST "<workload_lib_name>")
     ENDMACRO()
-  ```  
+  ```
 
   Replace `<workload_lib_name>`  with `hello_world` as shown below:
   ```bash
