@@ -17,6 +17,7 @@ import logging
 import importlib
 
 import avalon_crypto_utils.crypto_utility as crypto
+from avalon_enclave_manager.enclave_type import EnclaveType
 
 logger = logging.getLogger(__name__)
 
@@ -26,13 +27,13 @@ class SgxWorkOrderRequest(object):
 
     def __init__(self, enclave_type, work_order, ext_data=""):
         self.enclave = None
-        if enclave_type == "KME":
+        if enclave_type == EnclaveType.KME:
             self.enclave = importlib.import_module(
                 "avalon_enclave_manager.kme.kme_enclave")
-        elif enclave_type == "WPE":
+        elif enclave_type == EnclaveType.WPE:
             self.enclave = importlib.import_module(
                 "avalon_enclave_manager.wpe.wpe_enclave")
-        elif enclave_type == "SINGLETON":
+        elif enclave_type == EnclaveType.SINGLETON:
             self.enclave = importlib.import_module(
                 "avalon_enclave_manager.singleton.singleton_enclave")
         else:

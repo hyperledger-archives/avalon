@@ -41,6 +41,7 @@ services:
         - https_proxy
         - no_proxy
         - TCF_DEBUG_BUILD=${TCF_DEBUG_BUILD:-}
+        - ENCLAVE_TYPE=singleton
     command: |
       bash -c "
         enclave_manager --lmdb_url http://avalon-lmdb:9090

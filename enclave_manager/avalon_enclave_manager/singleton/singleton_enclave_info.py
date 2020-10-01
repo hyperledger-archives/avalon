@@ -15,7 +15,6 @@
 import os
 import json
 import time
-import random
 import logging
 
 from ssl import SSLError
@@ -35,19 +34,17 @@ class SingletonEnclaveInfo(BaseEnclaveInfo):
     """
 
     # -------------------------------------------------------
-    def __init__(self, config, worker_id):
+    def __init__(self, config, worker_id, enclave_type):
 
         # Initialize the keys that can be used later to
         # register the enclave
         enclave._SetLogger(logger)
-        self._config = config
         self._worker_id = worker_id
-        super().__init__(enclave.is_sgx_simulator())
+        super().__init__(config, enclave_type)
 
-        self._initialize_enclave(config)
+        self._initialize_enclave()
         enclave_info = self._create_enclave_signup_data()
         try:
-            self.ias_nonce = enclave_info['ias_nonce']
             self.sealed_data = enclave_info['sealed_data']
             self.verifying_key = enclave_info['verifying_key']
             self.encryption_key = enclave_info['encryption_key']
@@ -70,15 +67,13 @@ class SingletonEnclaveInfo(BaseEnclaveInfo):
             @returns enclave_info - A dictionary of enclave data
         """
 
-        ias_nonce = '{0:032X}'.format(random.getrandbits(128))
         try:
-            enclave_data = self._create_signup_info(ias_nonce)
+            enclave_data = self._create_signup_info()
         except Exception as err:
             raise Exception('failed to create enclave signup data; {}'
                             .format(str(err)))
 
         enclave_info = dict()
-        enclave_info['ias_nonce'] = ias_nonce
         enclave_info['sealed_data'] = enclave_data.sealed_signup_data
         enclave_info['verifying_key'] = enclave_data.verifying_key
         enclave_info['encryption_key'] = enclave_data.encryption_key
@@ -86,28 +81,19 @@ class SingletonEnclaveInfo(BaseEnclaveInfo):
             enclave_data.encryption_key_signature
         enclave_info['enclave_id'] = enclave_data.verifying_key
         enclave_info['proof_data'] = ''
-        if not enclave.is_sgx_simulator():
+        if not self.is_sgx_simulator():
             enclave_info['proof_data'] = enclave_data.proof_data
 
         return enclave_info
 
     # -----------------------------------------------------------------
 
-    def _create_signup_info(self, ias_nonce):
+    def _create_signup_info(self):
         """
         Create enclave signup data
-
-        Parameters :
-            @param ias_nonce - Used in IAS request to verify attestation as
-                               a distinguishing factor
         Returns :
             @returns signup_info_obj - Signup info data
         """
-
-        # Part of what is returned with the signup data is an enclave quote, we
-        # want to update the revocation list first.
-        self._update_sig_rl()
-        # Now, let the enclave create the signup data
 
         signup_cpp_obj = enclave.SignupInfoSingleton()
 
@@ -116,7 +102,7 @@ class SingletonEnclaveInfo(BaseEnclaveInfo):
             return None
 
         signup_info = self._get_signup_info(
-            signup_data, signup_cpp_obj, ias_nonce)
+            signup_data, signup_cpp_obj)
 
         # Now we can finally serialize the signup info and create a
         # corresponding signup info object. Because we don't want the
@@ -166,23 +152,22 @@ class SingletonEnclaveInfo(BaseEnclaveInfo):
 
     # -----------------------------------------------------------------
 
-    def _init_enclave_with(self, signed_enclave, config):
+    def _init_enclave_with(self, signed_enclave):
         """
         Initialize and return tcf_enclave_info that holds details about
         the singleton enclave
 
         Parameters :
             @param signed_enclave - The enclave binary read from filesystem
-            @param config - A dictionary of configurations
         Returns :
             @returns tcf_enclave_info - An instance of the tcf_enclave_info
         """
         # Get sealed data if persisted from previous startup
         persisted_sealed_data = file_utils.read_file(
-            self._get_sealed_data_file_name(config["sealed_data_path"],
+            self._get_sealed_data_file_name(self._config["sealed_data_path"],
                                             self._worker_id))
-        return enclave.tcf_enclave_info(
-            signed_enclave, config['spid'], persisted_sealed_data,
-            int(config['num_of_enclaves']))
+        return self._attestation.init_enclave_info(
+            signed_enclave, persisted_sealed_data,
+            int(self._config['num_of_enclaves']))
 
     # -----------------------------------------------------------------

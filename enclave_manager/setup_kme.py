@@ -82,7 +82,6 @@ enclave_module_files = [
     "avalon_enclave_manager/kme/kme_enclave.i",
     os.path.join(enclave_bridge_wrapper_path, 'swig_utils.cpp'),
     os.path.join(enclave_bridge_wrapper_path, 'work_order_wrap.cpp'),
-    os.path.join(enclave_bridge_wrapper_path, 'enclave_info.cpp'),
     os.path.join(enclave_bridge_wrapper_path, 'signup_info.cpp'),
     os.path.join(enclave_bridge_wrapper_path, 'kme/signup_info_kme.cpp')
 ]
