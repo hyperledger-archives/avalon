@@ -45,12 +45,27 @@ zmq_port = '5555'
 # EnclaveModule -- configuration of the Intel SGX Enclave
 # -------------------------------------------------------
 [EnclaveModule]
+# Attestation type
+attestation_type = "EPID"
+
+num_of_enclaves = "1"
+
+# TEE enclave library to use.
+enclave_library = "libavalon-singleton-enclave.signed.so"
+enclave_library_path = "tc/sgx/trusted_worker_manager/enclave/build/lib/"
+
+# Sealed data from trusted enclave is stored at this location for recovery
+# in case of abrubt shutdown.
+sealed_data_path = ".sealed/.sealed.data"
+
+# ------------------------------------------------------------
+# Epid attestation data
+# ------------------------------------------------------------
+[EpidAttestation]
 # Service Provider ID (SPID) is a 32-digit hex string tied to the
 # enclave implementation. Replace dummy SPID with value obtained after
 # subscription to run TCS in Intel SGX HW mode.
 spid = "DEADBEEF00000000DEADBEEF00000000"
-
-num_of_enclaves = "1"
 
 # ias_url is the URL of the Intel Attestation Service (IAS) server.
 ias_url = "https://api.trustedservices.intel.com/sgx/dev"
@@ -63,14 +78,6 @@ ias_url = "https://api.trustedservices.intel.com/sgx/dev"
 # of requests submitted to the IAS server. Obtain the key by subscribing in
 # the portal https://api.portal.trustedservices.intel.com/
 ias_api_key = "112233445566778899aabbccddeeff00"
-
-# TEE enclave library to use.
-enclave_library = "libavalon-singleton-enclave.signed.so"
-enclave_library_path = "tc/sgx/trusted_worker_manager/enclave/build/lib/"
-
-# Sealed data from trusted enclave is stored at this location for recovery
-# in case of abrubt shutdown.
-sealed_data_path = ".sealed/.sealed.data"
 
 # -------------------------------------------------------------
 # TCS Worker configuration details

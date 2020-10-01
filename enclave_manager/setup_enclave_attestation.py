@@ -30,12 +30,13 @@ tcf_root_dir = os.environ.get('TCF_HOME', '../')
 
 enclave_bridge_wrapper_path = os.path.join(tcf_root_dir,
          'tc/sgx/trusted_worker_manager/enclave_untrusted/enclave_bridge_wrapper')
-
 enclave_bridge_path = os.path.join(tcf_root_dir,
-        'tc/sgx/trusted_worker_manager/enclave_untrusted/enclave_bridge')
+         'tc/sgx/trusted_worker_manager/enclave_untrusted/enclave_bridge')
+swig_file_path = os.path.join(tcf_root_dir,
+         'enclave_manager/avalon_enclave_manager/attestation')
 
-# Defaults to path '/opt/intel/sgxsdk' if SGX_SDK env variable is not passed
-sgx_sdk = os.environ.get('SGX_SDK', '/opt/intel/sgxsdk')
+# If enclave_type is not set then default to singleton
+enclave_type =  os.environ.get('ENCLAVE_TYPE', 'singleton').lower()
 
 ## -----------------------------------------------------------------
 ## Set up the enclave
@@ -57,14 +58,12 @@ if debug_flag :
 
 include_dirs = [
     enclave_bridge_wrapper_path,
-    os.path.join(enclave_bridge_wrapper_path, 'singleton'),
     enclave_bridge_path,
-    os.path.join(enclave_bridge_path, 'singleton'),
+    swig_file_path,
     os.path.join(tcf_root_dir, 'common/cpp'),
     os.path.join(tcf_root_dir, 'tc/sgx/trusted_worker_manager/common'),
     os.path.join(tcf_root_dir, 'common/cpp/crypto'),
     os.path.join(tcf_root_dir, 'common/cpp/packages/base64'),
-    os.path.join(sgx_sdk, 'include')
 ]
 
 library_dirs = [
@@ -72,23 +71,38 @@ library_dirs = [
     os.path.join(tcf_root_dir, "common/cpp/build"),
 ]
 
-libraries = [
-    'uavalon-parson',
-    'uavalon-verify-ias-report',
-    'avalon-singleton-enclave-bridge'
-]
+libraries = []
 
-enclave_module_files = [
-    "avalon_enclave_manager/singleton/singleton_enclave.i",
+if enclave_type == "kme":
+    module_name = 'enclave_info_kme'
+    libraries.append('avalon-kme-enclave-bridge')
+elif enclave_type == "wpe":
+    module_name = 'enclave_info_wpe'
+    libraries.append('avalon-wpe-enclave-bridge')
+elif enclave_type == "singleton":
+    module_name = 'enclave_info_singleton'
+    libraries.append('avalon-singleton-enclave-bridge')
+else:
+    print('Unsupported enclave type passed in the config %s', enclave_type)
+    sys.exit(1)
+
+lib_name = 'avalon_enclave_manager.attestation._' + module_name
+swig_file_name = os.path.join(tcf_root_dir,
+        'enclave_manager/avalon_enclave_manager/attestation/' \
+        + module_name + '.i')
+
+# Target wheel package name
+whl_package_name = enclave_type + '_enclave_manager_attestation'
+
+enclave_info_module_files = [
+    swig_file_name,
     os.path.join(enclave_bridge_wrapper_path, 'swig_utils.cpp'),
-    os.path.join(enclave_bridge_wrapper_path, 'work_order_wrap.cpp'),
-    os.path.join(enclave_bridge_wrapper_path, 'signup_info.cpp'),
-    os.path.join(enclave_bridge_wrapper_path, 'singleton/signup_info_singleton.cpp'),
+    os.path.join(enclave_bridge_wrapper_path, 'enclave_info.cpp'),
 ]
 
-enclave_module = Extension(
-    'avalon_enclave_manager.singleton._singleton_enclave',
-    enclave_module_files,
+enclave_info_module = Extension(
+    lib_name,
+    enclave_info_module_files,
     swig_opts = ['-c++', '-threads'] + ['-I%s' % i for i in include_dirs],
     extra_compile_args = compile_args,
     libraries = libraries,
@@ -106,9 +120,9 @@ enclave_module = Extension(
 version = subprocess.check_output(
     os.path.join(tcf_root_dir, 'bin/get_version')).decode('ascii').strip()
 
-setup(name='singleton_enclave_manager',
+setup(name = whl_package_name,
       version = version,
-      description = 'Avalon Intel SGX Singleton Enclave Manager',
+      description = 'Avalon Enclave Attestation Package',
       author = 'Hyperledger Avalon',
       url = 'https://github.com/hyperledger/avalon',
       packages = find_packages(),
@@ -116,11 +130,9 @@ setup(name='singleton_enclave_manager',
           'requests'
           ],
       ext_modules = [
-          enclave_module
+          enclave_info_module
       ],
       data_files = [],
       entry_points = {
-        'console_scripts':
-        ['enclave_manager = avalon_enclave_manager.singleton.singleton_enclave_manager:main']
           }
 )

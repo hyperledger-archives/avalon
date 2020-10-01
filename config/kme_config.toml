@@ -20,23 +20,8 @@ LogFile  = "__screen__"
 # EnclaveModule -- configuration of the Intel SGX Enclave
 # -------------------------------------------------------
 [EnclaveModule]
-# Service Provider ID (SPID) is a 32-digit hex string tied to the
-# enclave implementation. Replace dummy SPID with value obtained after
-# subscription to run TCS in Intel SGX HW mode.
-spid = "DEADBEEF00000000DEADBEEF00000000"
-
-# ias_url is the URL of the Intel Attestation Service (IAS) server.
-ias_url = "https://api.trustedservices.intel.com/sgx/dev"
-
-# Proxy for https. Leave commented out for direct Internet connections or
-# uncomment and change to your corporate proxy.
-#https_proxy = "http://your-proxy:your-port/"
-
-
-# IAS API key is a 32-digit hex string subscription key used for authentication
-# of requests submitted to the IAS server. Obtain the key by subscribing in
-# the portal https://api.portal.trustedservices.intel.com/
-ias_api_key = "112233445566778899aabbccddeeff00"
+# Attestation type
+attestation_type = "EPID"
 
 # TEE enclave library to use.
 enclave_library = "libavalon-kme-enclave.signed.so"
@@ -51,6 +36,27 @@ wpe_mrenclave_read_from_file = "wpe_mr_enclave.txt"
 # Sealed data from trusted enclave is stored at this location for recovery
 # in case of abrubt shutdown.
 sealed_data_path = ".sealed/.sealed.data"
+
+# ------------------------------------------------------------
+# Epid attestation data
+# ------------------------------------------------------------
+[EpidAttestation]
+# Service Provider ID (SPID) is a 32-digit hex string tied to the
+# enclave implementation. Replace dummy SPID with value obtained after
+# subscription to run TCS in Intel SGX HW mode.
+spid = "DEADBEEF00000000DEADBEEF00000000"
+
+# ias_url is the URL of the Intel Attestation Service (IAS) server.
+ias_url = "https://api.trustedservices.intel.com/sgx/dev"
+
+# Proxy for https. Leave commented out for direct Internet connections or
+# uncomment and change to your corporate proxy.
+#https_proxy = "http://your-proxy:your-port/"
+
+# IAS API key is a 32-digit hex string subscription key used for authentication
+# of requests submitted to the IAS server. Obtain the key by subscribing in
+# the portal https://api.portal.trustedservices.intel.com/
+ias_api_key = "112233445566778899aabbccddeeff00"
 
 [KMEListener]
 # URL of KMEListener where a Work order processor can send requests meant for

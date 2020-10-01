@@ -26,6 +26,7 @@ from avalon_enclave_manager.base_enclave_manager import EnclaveManager
 from avalon_enclave_manager.work_order_processor_manager \
     import WOProcessorManager
 from error_code.error_status import WorkOrderStatus
+from avalon_enclave_manager.enclave_type import EnclaveType
 
 logger = logging.getLogger(__name__)
 
@@ -73,8 +74,9 @@ class SingletonEnclaveManager(WOProcessorManager):
                           enclave
         """
         return enclave_info.\
-            SingletonEnclaveInfo(self._config.get("EnclaveModule"),
-                                 self._worker_id)
+            SingletonEnclaveInfo(self._config,
+                                 self._worker_id,
+                                 EnclaveType.SINGLETON)
 
 # -------------------------------------------------------------------------
 
@@ -91,7 +93,7 @@ class SingletonEnclaveManager(WOProcessorManager):
         """
         try:
             wo_request = work_order_request.SgxWorkOrderRequest(
-                "SINGLETON",
+                EnclaveType.SINGLETON,
                 input_json_str)
         except Exception as e:
             logger.exception(

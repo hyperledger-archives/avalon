@@ -13,8 +13,6 @@
  * limitations under the License.
  */
 
-%module wpe_enclave
-
 %include <std_vector.i>
 %include <std_map.i>
 %include <std_string.i>
@@ -24,6 +22,10 @@ namespace std {
     %template(StringVector) vector<string>;
     %template(StringMap) map<string, string>;
 }
+
+%{
+#include "error.h"
+%}
 
 %include <exception.i>
 
@@ -81,17 +83,13 @@ namespace std {
 %thread;
 %{
 #include "swig_utils.h"
-#include "signup_info.h"
-#include "signup_info_wpe.h"
 %}
 
 %{
 #include "tcf_enclave.h"
 %}
 
-%include "signup_info.h"
-%include "signup_info_wpe.h"
-%include "work_order_wrap.h"
+%include "enclave_info.h"
 %include "tcf_enclave.h"
 %nothread;
 

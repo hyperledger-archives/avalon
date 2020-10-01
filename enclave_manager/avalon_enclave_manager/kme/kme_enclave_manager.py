@@ -28,6 +28,7 @@ from listener.base_jrpc_listener import parse_bind_url
 from avalon_enclave_manager.kme.kme_listener import KMEListener
 from error_code.error_status import WorkOrderStatus
 from jsonrpc.exceptions import JSONRPCDispatchException
+from avalon_enclave_manager.enclave_type import EnclaveType
 
 logger = logging.getLogger(__name__)
 
@@ -54,8 +55,9 @@ class KeyManagementEnclaveManager(EnclaveManager):
                           enclave
         """
         return enclave_info.\
-            KeyManagementEnclaveInfo(self._config["EnclaveModule"],
-                                     self._worker_id)
+            KeyManagementEnclaveInfo(self._config,
+                                     self._worker_id,
+                                     EnclaveType.KME)
 
 # -------------------------------------------------------------------------
 
@@ -93,7 +95,7 @@ class KeyManagementEnclaveManager(EnclaveManager):
         try:
             logger.info("Request sent to enclave %s", input_json_str)
             wo_request = work_order_request.SgxWorkOrderRequest(
-                "KME",
+                EnclaveType.KME,
                 input_json_str,
                 ext_data
             )
