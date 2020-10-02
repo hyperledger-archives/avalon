@@ -32,3 +32,24 @@ def create_error_response(code, jrpc_id, message):
     error_response["error"]["code"] = code
     error_response["error"]["message"] = message
     return error_response
+
+# -----------------------------------------------------------------
+
+
+def get_request_json(method, jrpc_id, params=None):
+    """
+    Utility method to synthesize jrpc request JSON
+
+    Parameters :
+        @param method - JRPC method to be set in the method field
+        @param jrpc_id - JRPC id of the error response
+        @param params - JSON RPC params
+    Returns :
+        @returns A dict representing a basic request JSON
+    """
+    return {
+        "jsonrpc": "2.0",
+        "method": method,
+        "id": jrpc_id,
+        "params": params
+    }
