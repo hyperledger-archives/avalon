@@ -161,7 +161,7 @@ will be created next in [Phase 2](#phase2).
     MACRO(CREATE_SUPPORTED_WORKLOADS_LIST)
         ...
         ...
-        # LIST(SUPPORTED_WORKLOADS_LIST "hello-world")
+        LIST(SUPPORTED_WORKLOADS_LIST "hello-world")
     ENDMACRO()
   ```
 
@@ -170,7 +170,7 @@ will be created next in [Phase 2](#phase2).
     MACRO(CREATE_SUPPORTED_WORKLOAD_LIBRARY_LIST)
         ...
         ...
-        LIST(APPEND SUPPORTED_WORKLOAD_LIBRARY_LIST "<workload_lib_name>")
+        # LIST(APPEND SUPPORTED_WORKLOAD_LIBRARY_LIST "<workload_lib_name>")
     ENDMACRO()
   ```
 
@@ -179,7 +179,7 @@ will be created next in [Phase 2](#phase2).
     MACRO(CREATE_SUPPORTED_WORKLOADS_LIST)
         ...
         ...
-        # LIST(SUPPORTED_WORKLOADS_LIST "hello_world")
+        LIST(SUPPORTED_WORKLOADS_LIST "hello_world")
     ENDMACRO()
   ```
 
