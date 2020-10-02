@@ -1,0 +1,87 @@
+# Copyright 2020 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+[KvStorage]
+# the remote version is of higher priority if enabled
+remote_url = "http://localhost:9090"
+
+# --------------------------------------------------
+# Logging -- configuration of service logging
+# --------------------------------------------------
+[Logging]
+LogLevel = "INFO"
+LogFile  = "__screen__"
+
+# ------------------------------------------------------------------
+# Work load execution-settings for workload execution(synchronous/asynchronous)
+# ------------------------------------------------------------------
+[WorkloadExecution]
+# Set this flag to 1 for sync workorder execution.Else set it to 0
+sync_workload_execution = 0
+
+# -------------------------------------------------------------------
+# EnclaveManager -- configuration of Intel SGX Enclave EnclaveManager
+# -------------------------------------------------------------------
+[EnclaveManager]
+# configurations for asynchronous work load execution
+sleep_interval = "2"
+# configurations for synchronous Work load execution
+# zmq_port is the port used for zmq socket communication
+# Port for socket interaction with listener
+zmq_port = '5555'
+# Graphene worker url. Graphene worker uses ZMQ for communication
+graphene_zmq_url = "tcp://graphene-python-workload:7777"
+
+# -------------------------------------------------------
+# EnclaveModule -- configuration of the Intel SGX Enclave
+# -------------------------------------------------------
+[EnclaveModule]
+# Service Provider ID (SPID) is a 32-digit hex string tied to the
+# enclave implementation. Replace dummy SPID with value obtained after
+# subscription to run TCS in Intel SGX HW mode.
+spid = "DEADBEEF00000000DEADBEEF00000000"
+
+num_of_enclaves = "1"
+
+# ias_url is the URL of the Intel Attestation Service (IAS) server.
+ias_url = "https://api.trustedservices.intel.com/sgx/dev"
+
+# Proxy for https. Leave commented out for direct Internet connections or
+# uncomment and change to your corporate proxy.
+#https_proxy = "http://your-proxy:your-port/"
+
+# IAS API key is a 32-digit hex string subscription key used for authentication
+# of requests submitted to the IAS server. Obtain the key by subscribing in
+# the portal https://api.portal.trustedservices.intel.com/
+ias_api_key = "112233445566778899aabbccddeeff00"
+
+# The type of enclave viz - KME/WPE/STN/graphene-wpe
+enclave_type = "graphene-wpe"
+
+# -------------------------------------------------------------
+# TCS Worker configuration details
+# -------------------------------------------------------------
+[KMEListener]
+# URL of KMEListener where a Work order processor can send requests meant for
+# the Key Management Enclave(KME)
+kme_listener_url = "http://localhost:1948"
+# Number of times the WPE will attempt to send a request to a KME if a timeout
+# or connection error occurs
+connection_retry = 3
+
+[WorkerConfig]
+# Id of worker in plain text. This can be overridden by passing values in command line for
+# enclave manager using --worker_id option.
+worker_id = "graphene-pool-worker-1"
+
