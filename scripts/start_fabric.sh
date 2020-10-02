@@ -23,7 +23,7 @@ SCRIPT_DIR="$(dirname $(readlink --canonicalize ${BASH_SOURCE}))"
 MINIFAB_URL=https://tinyurl.com/s8fmmvx
 MINIFAB_INSTALL_DIR=~/.local/bin/
 # Command line options
-WORK_DIR=~/mywork
+WORK_DIR=$TCF_HOME/mywork
 START_FABRIC=0
 STOP_FABRIC=0
 CLEAN_UP_WORK_DIR=0
@@ -112,10 +112,10 @@ while getopts "w:udche" OPTCHAR ; do
             echo "   -? or -h print usage information" 1>&2
             echo "Examples:" 1>&2
             echo "   $BN -u" 1>&2
-            echo "   $BN -w ~/mywork -u" 1>&2
-            echo "   $BN -w ~/mywork -d" 1>&2
-            echo "   $BN -w ~/mywork -c" 1>&2
-            echo "   $BN -w ~/mywork -u -e" 1>&2
+            echo "   $BN -w $TCF_HOME/mywork -u" 1>&2
+            echo "   $BN -w $TCF_HOME/mywork -d" 1>&2
+            echo "   $BN -w $TCF_HOME/mywork -c" 1>&2
+            echo "   $BN -w $TCF_HOME/mywork -u -e" 1>&2
             exit 2
             ;;
     esac

@@ -65,6 +65,7 @@ examples/common/java/*/*/build/
 .settings
 .springBeans
 .sts4-cache
+.sealed/
 
 ### IntelliJ IDEA ###
 .idea
@@ -88,3 +89,7 @@ examples/common/java/*/bin/
 
 # Fabric certificates folder
 vars/
+
+# TestingFabricProxyModel.rst
+mywork/
+

@@ -59,13 +59,13 @@ follow these steps:
 
    .. code:: sh
 
-       docker-compose -f docker-compose.yaml -f docker/compose/avalon-fabric.yaml up -d --build
+       sudo docker-compose -f docker-compose.yaml -f docker/compose/avalon-fabric.yaml up -d --build
 
    To start a worker pool (with one Key Management Enclave and one Work order Processing Enclave):
 
    .. code:: sh
 
-       docker-compose -f docker-compose.yaml -f docker/compose/avalon-pool.yaml -f docker/compose/avalon-fabric.yaml up -d --build
+       sudo docker-compose -f docker-compose.yaml -f docker/compose/avalon-pool.yaml -f docker/compose/avalon-fabric.yaml up -d --build
 
    To run in Intel SGX hardware mode, use the corresponding docker compose file for singleton or worker pool mode (as specified in `BUILD.md <../BUILD.md>`_).
 
@@ -104,6 +104,7 @@ requires below changes.
    the Avalon chaincodes which are located in (https://github.com/hyperledger/avalon/tree/master/sdk/avalon_sdk/connector/blockchains/fabric/chaincode)
 
    .. code:: sh
+
         cd $TCF_HOME
         ./scripts/start_fabric.sh -e
 
@@ -113,7 +114,8 @@ requires below changes.
    Avalon shell and Avalon fabric connector need these crypto materials to interact with the blockchain.
 
    .. code:: sh
-        scp -r ~/mywork <user_name>@<IP1>:~/
+
+        scp -r $TCF_HOME/mywork <user_name>@<IP1>:~/
 
 3. If you choose the customized setup other than the start_fabric.sh (minifab) then create the network.json as in (https://github.com/hyperledger/avalon/blob/master/sdk/avalon_sdk/connector/blockchains/fabric/network.json)
 
@@ -125,11 +127,13 @@ requires below changes.
 6. Start the Avalon components.
 
    .. code:: sh
+
         docker-compose -f docker-compose.yaml -f docker/compose/avalon-fabric.yaml up -d --build
 
    To start a worker pool (with one Key Management Enclave and one Work order Processing Enclave):
 
    .. code:: sh
+
         docker-compose -f docker-compose.yaml -f docker/compose/avalon-pool.yaml -f docker/compose/avalon-fabric.yaml up -d --build
 
    To run in Intel SGX hardware mode, use the corresponding Docker compose file for singleton or worker pool mode (as specified in BUILD.md).
@@ -138,6 +142,7 @@ requires below changes.
    Go to the avalon-shell container to run generic_client.py
 
    .. code:: sh
+
         docker exec -it  avalon-shell bash
         cd examples/apps/generic_client/
         ./generic_client.py -b fabric --workload_id "echo-result" --in_data "Hello" -o \
@@ -156,8 +161,8 @@ Troubleshooting
 
          ./scripts/start_fabric.sh -c
 
-     This runs ``~/mywork/minifab cleanup`` and
-     removes directory ``~/mywork/vars``
+     This runs ``$TCF_HOME/mywork/minifab cleanup`` and
+     removes directory ``$TCF_HOME/mywork/vars``
   2. Verify Fabric Docker service containers are down with ``docker ps -a``
   3. To remove containers that exited but are not removed, type:
 
@@ -166,7 +171,7 @@ Troubleshooting
          docker rm $(docker ps -aq -f status=exited)
 
   4. Remove the Fabric work directory and minifab:
-     ``rm -rf ~/mywork``
+     ``rm -rf $TCF_HOME/mywork``
   5. Optional. To remove the Avalon directory type:
      ``cd; rm -rf $TCF_HOME``
 
