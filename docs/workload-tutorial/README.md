@@ -183,7 +183,9 @@ will be created next in [Phase 2](#phase2).
     ENDMACRO()
   ```
 
-* Update the `WORKLOADS` build argument in docker-compose files if running a
+* Update the `WORKLOADS` build argument in
+  [avalon-pool.yaml](../../docker/compose/avalon-pool.yaml)
+  if running a
   worker pool setup using Docker. The work order processing enclave (WPE)
   should be built with workloads the worker pool supports. After updating,
   the argument should look like:
@@ -205,7 +207,8 @@ will be created next in [Phase 2](#phase2).
   generic command line utility to test the newly-added workload:
   ```bash
   examples/apps/generic_client/generic_client.py -o \
-      --workload_id "hello-world" --in_data "Dan"
+      --workload_id "hello-world" --in_data "Dan" \
+      --worker_id "kme-worker-1"
 
   ```
 
@@ -216,7 +219,8 @@ will be created next in [Phase 2](#phase2).
 
   examples/apps/generic_client/generic_client.py -o \
       --uri "http://avalon-listener:1947" \
-      --workload_id "hello-world" --in_data "Dan"
+      --workload_id "hello-world" --in_data "Dan" \
+      --worker_id "kme-worker-1"
   ```
 
 
@@ -302,7 +306,8 @@ In this example we name the worker-specific function `ProcessHelloWorld()`.
   newly-added workload:
   ```bash
   examples/apps/generic_client/generic_client.py -o \
-     --workload_id "hello-world" --in_data "Jane" "Dan"
+      --workload_id "hello-world" --in_data "Jane" "Dan" \
+      --worker_id "kme-worker-1"
   ```
 
   If you are running Docker, run the utility from a Docker shell
@@ -312,7 +317,8 @@ In this example we name the worker-specific function `ProcessHelloWorld()`.
 
   examples/apps/generic_client/generic_client.py -o \
       --uri "http://avalon-listener:1947" \
-      --workload_id "hello-world" --in_data "Jane" "Dan"
+      --workload_id "hello-world" --in_data "Jane" "Dan" \
+      --worker_id "kme-worker-1"
   ```
 
 * The Hello World worker should return a string
@@ -487,7 +493,8 @@ to
 
   ```bash
   examples/apps/generic_client/generic_client.py -o \
-     --workload_id "hello-world" --in_data "jack"
+      --workload_id "hello-world" --in_data "jack" \
+      --worker_id "kme-worker-1"
   ```
 
   If you are running Docker, run the utility from the Docker shell
@@ -497,7 +504,8 @@ to
 
   examples/apps/generic_client/generic_client.py -o \
       --uri "http://avalon-listener:1947" \
-      --workload_id "hello-world" --in_data "jack"
+      --workload_id "hello-world" --in_data "jack" \
+      --worker_id "kme-worker-1"
   ```
 
 * The Hello World worker should return the string
@@ -542,7 +550,8 @@ to
   ```bash
   examples/apps/generic_client/generic_client.py -o \
       --workload_id "hello-world" --in_data \
-      "jack:8342EFBE7C379231A4E03C80E5BA1AC9E8ACBC5338976CE6146431D8CBF2318D"
+      "jack:8342EFBE7C379231A4E03C80E5BA1AC9E8ACBC5338976CE6146431D8CBF2318D" \
+      --worker_id "kme-worker-1"
   ```
   For Docker:
   ```bash
@@ -550,7 +559,8 @@ to
   examples/apps/generic_client/generic_client.py -o \
       --uri "http://avalon-listener:1947" \
       --workload_id "hello-world" --in_data \
-      "jack:8342EFBE7C379231A4E03C80E5BA1AC9E8ACBC5338976CE6146431D8CBF2318D"
+      "jack:8342EFBE7C379231A4E03C80E5BA1AC9E8ACBC5338976CE6146431D8CBF2318D" \
+      --worker_id "kme-worker-1"
   ```
 * The Hello World worker should return the string
   `Hello <name>, your result is <count>`
