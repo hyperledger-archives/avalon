@@ -35,18 +35,16 @@ tcf_enclave_info::tcf_enclave_info(
     const std::string& enclaveModulePath,
     const std::string& spid,
     const std::string& persistedSealedEnclaveData,
-    const int num_of_enclaves
-    ) {
-    // tcf::logger::SetLogFunction(PyLog);
-    // tcf::SetLogFunction(PyLog);
-
-    // Todo: PyLogV logs are removed, as its crashing the process, needs investigation
+    const int num_of_enclaves) {
+    this->epid_attestation = new tcf::attestation::EpidAttestation();
+    this->epid_attestation->SetSpid(spid);
     tcf::Log(TCF_LOG_INFO, "Initializing Avalon Intel SGX Enclave\n");
     tcf::Log(TCF_LOG_DEBUG, "Enclave path: %s\n", enclaveModulePath.c_str());
     // tcf::Log(TCF_LOG_DEBUG, "SPID: %s\n", spid.c_str());
 
     tcf_err_t ret = tcf::enclave_api::base::Initialize(
-        enclaveModulePath, spid, persistedSealedEnclaveData, num_of_enclaves);
+        enclaveModulePath, this->epid_attestation,
+        persistedSealedEnclaveData, num_of_enclaves);
     ThrowTCFError(ret);
     tcf::Log(TCF_LOG_INFO, "Avalon Intel SGX Enclave initialized.\n");
 
@@ -75,8 +73,7 @@ tcf_enclave_info::~tcf_enclave_info() {
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 std::string tcf_enclave_info::get_epid_group() {
     HexEncodedString epidGroupBuffer;
-    ThrowTCFError(
-        tcf::enclave_api::base::GetEpidGroup(epidGroupBuffer));
+    this->epid_attestation->GetEpidGroup(epidGroupBuffer);
 
     return epidGroupBuffer;
 }  // tcf_enclave_info::get_epid_group
@@ -84,7 +81,6 @@ std::string tcf_enclave_info::get_epid_group() {
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 void tcf_enclave_info::set_signature_revocation_list(
     const std::string& signature_revocation_list) {
-    ThrowTCFError(
-        tcf::enclave_api::base::SetSignatureRevocationList(signature_revocation_list));
+    this->epid_attestation->SetSignatureRevocationList(signature_revocation_list);
 
 }  // tcf_enclave_info::set_signature_revocation_lists

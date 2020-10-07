@@ -31,6 +31,8 @@
 #include "base.h"
 #include "signup.h"
 
+#include "sgx_utility.h"
+
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 size_t SignupData::CalculateSealedEnclaveDataSize(void) {
     size_t sealed_data_size = 0;
@@ -41,8 +43,7 @@ size_t SignupData::CalculateSealedEnclaveDataSize(void) {
     // Get the enclave id for passing into the ecall
     sgx_enclave_id_t enclaveid = g_Enclave[0].GetEnclaveId();
 
-    sresult =
-        g_Enclave[0].CallSgx(
+    sresult = tcf::sgx_util::CallSgx(
             [ enclaveid,
               &presult,
               &sealed_data_size ] () {
@@ -71,8 +72,7 @@ size_t SignupData::CalculatePublicEnclaveDataSize(void) {
     // Get the enclave id for passing into the ecall
     sgx_enclave_id_t enclaveid = g_Enclave[0].GetEnclaveId();
 
-    sresult =
-        g_Enclave[0].CallSgx(
+    sresult = tcf::sgx_util::CallSgx(
             [ enclaveid,
               &presult,
               &public_data_size ] () {

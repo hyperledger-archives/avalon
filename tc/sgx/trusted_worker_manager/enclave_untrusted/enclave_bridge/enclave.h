@@ -19,27 +19,19 @@
 #include <string>
 #include <vector>
 
-#include "sgx_urts.h"
-#include "sgx_uae_quote_ex.h"
-#include "sgx_uae_epid.h"
-
 #include "error.h"
 #include "tcf_error.h"
 #include "types.h"
 
-namespace tcf {
+#include "attestation.h"
 
-    namespace error {
-        sgx_status_t ConvertErrorStatus(
-            sgx_status_t ret,
-            tcf_err_t tcfRet);
-    }  // namespace error
+namespace tcf {
 
     namespace enclave_api {
 
         class Enclave {
         public:
-            Enclave();
+            Enclave(const tcf::attestation::Attestation *attestation);
             virtual ~Enclave();
 
             void Load(
@@ -49,37 +41,26 @@ namespace tcf {
             void Unload();
 
             size_t GetQuoteSize() const {
-                return this->quoteSize;
+                tcf::error::ThrowIf<tcf::error::ValueError>(
+                    this->attestation == nullptr,
+                    "Attestation object is not initialized"
+                );
+                return this->attestation->GetQuoteSize();
             }  // GetQuoteSize
 
             size_t GetSealedSignupDataSize() const {
                 return this->sealedSignupDataSize;
             }  // GetSealedSignupDataSize
 
-            void GetEpidGroup(
-                sgx_epid_group_id_t* outEpidGroup);
-
             void GetEnclaveCharacteristics(
                 sgx_measurement_t* outEnclaveMeasurement,
                 sgx_basename_t* outEnclaveBasename);
-
-            void SetSpid(
-                const HexEncodedString& inSpid);
-
-            void SetSignatureRevocationList(
-                const std::string& inSignatureRevocationList);
 
             void CreateQuoteFromReport(
                 const sgx_report_t* inEnclaveReport,
                 ByteArray& outEnclaveQuote);
 
-            void ThrowTCFError(
-                tcf_err_t err);
-
-            sgx_status_t CallSgx(
-                std::function<sgx_status_t(void)> sgxCall,
-                int retries = 5,
-                int retryDelayMs = 100);
+            void ThrowTCFError(tcf_err_t err);
 
             sgx_enclave_id_t GetEnclaveId() const {
                 return this->enclaveId;
@@ -89,27 +70,25 @@ namespace tcf {
                 return this->threadId;
             }
 
-        protected:
-            void LoadEnclave(
+	    void LoadEnclave(
                 const Base64EncodedString& persistedSealedEnclaveData = "");
+
+        protected:
             static void QuerySgxStatus();
 
             std::string enclaveFilePath;
             sgx_enclave_id_t enclaveId;
             long threadId;
 
-            size_t quoteSize;
             size_t sealedSignupDataSize;
 
-            std::string signatureRevocationList;
-            sgx_spid_t spid;
-
-            sgx_target_info_t reportTargetInfo;
-            sgx_epid_group_id_t epidGroupId;
-
             std::string enclaveError;
+	    tcf::attestation::Attestation *attestation;
+
         };  // class Enclave
+
     }  /* namespace enclave_api */
+
 }  // namespace tcf
 
 

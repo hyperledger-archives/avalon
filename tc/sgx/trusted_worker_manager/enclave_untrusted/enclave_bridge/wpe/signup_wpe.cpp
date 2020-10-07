@@ -25,6 +25,7 @@
 #include "enclave.h"
 #include "base.h"
 #include "signup_wpe.h"
+#include "sgx_utility.h"
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 tcf_err_t SignupDataWPE::GenerateNonce(
@@ -43,7 +44,7 @@ tcf_err_t SignupDataWPE::GenerateNonce(
         nonce.resize(in_nonce_size + 1);
 
         // Create nonce and convert to hex
-        sresult = g_Enclave[0].CallSgx(
+        sresult = tcf::sgx_util::CallSgx(
             [enclaveid,
                 &presult,
                 &nonce] () {
@@ -95,7 +96,7 @@ tcf_err_t SignupDataWPE::VerifyUniqueIdSignature(
         sgx_enclave_id_t enclaveid = g_Enclave[0].GetEnclaveId();
 
         // Create nonce and convert to hex
-        sresult = g_Enclave[0].CallSgx(
+        sresult = tcf::sgx_util::CallSgx(
             [enclaveid,
                 &presult,
                 unique_id_key,
@@ -148,8 +149,7 @@ tcf_err_t SignupDataWPE::CreateEnclaveData(
         // We need target info in order to create signup data report
         sgx_target_info_t target_info = { 0 };
         sgx_epid_group_id_t epidGroupId = { 0 };
-        sresult =
-            g_Enclave[0].CallSgx(
+        sresult = tcf::sgx_util::CallSgx(
                 [&target_info,
                  &epidGroupId] () {
                     return sgx_init_quote(&target_info, &epidGroupId);
@@ -164,7 +164,7 @@ tcf_err_t SignupDataWPE::CreateEnclaveData(
 
 	ByteArray ext_data_bytes = StrToByteArray(inExtData);
 	ByteArray ext_data_sig_bytes = StrToByteArray(inExtDataSignature);
-        sresult = g_Enclave[0].CallSgx(
+        sresult = tcf::sgx_util::CallSgx(
             [enclaveid,
              &presult,
              target_info,
@@ -225,7 +225,7 @@ tcf_err_t SignupDataWPE::VerifyEnclaveInfo(
         tcf_err_t presult = TCF_SUCCESS;
 
 	//ByteArray ext_data_bytes = StrToByteArray(ext_data);
-        sgx_status_t sresult = g_Enclave[0].CallSgx(
+        sgx_status_t sresult = tcf::sgx_util::CallSgx(
             [ enclaveid,
               &presult,
               enclaveInfo,
