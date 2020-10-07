@@ -22,6 +22,7 @@
 #include "tcf_error.h"
 #include "types.h"
 #include "enclave_queue.h"
+#include "attestation.h"
 
 namespace tcf {
     namespace enclave_api {
@@ -59,9 +60,8 @@ namespace tcf {
               persisted_sealed_data - Sealed data persisted from last bootup
               numOfEnclaves -- Number of worker enclaves to create
             */
-            tcf_err_t Initialize(
-                const std::string& inPathToEnclave,
-                const HexEncodedString& inSpid,
+            tcf_err_t Initialize(const std::string& inPathToEnclave,
+                const tcf::attestation::Attestation *attestation,
                 const std::string& persisted_sealed_data,
                 const int numOfEnclaves);
 
@@ -77,12 +77,6 @@ namespace tcf {
 
             size_t GetSignatureSize();
             size_t GetEnclaveQuoteSize();
-
-            /*
-              Returns the EPID group as a Hex(base 16) encoded string.
-            */
-            tcf_err_t GetEpidGroup(
-                HexEncodedString& outEpidGroup);
 
             /*
               Returns characteristics about the enclave that can be used later
@@ -103,16 +97,6 @@ namespace tcf {
             tcf_err_t GetEnclaveCharacteristics(
                 HexEncodedString& outMrEnclave,
                 HexEncodedString& outEnclaveBasename);
-
-            /*
-              Takes in the results from the IAS server and
-              stores the revocation list for future processing
-
-              inSignatureRevocationList - A string containing the signature
-              revocation list obtained from IAS.
-            */
-            tcf_err_t SetSignatureRevocationList(
-                const std::string& inSignatureRevocationList);
 
         }  /* namespace base */
 

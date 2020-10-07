@@ -18,15 +18,16 @@
 #include <Python.h>
 #include <string>
 
+#include "epid_attestation.h"
+
 bool is_sgx_simulator();
 
 class tcf_enclave_info {
 public:
-    tcf_enclave_info(
-        const std::string& enclaveModulePath,
-        const std::string& spid,
-        const std::string& persisted_sealed_data,
-        const int num_of_enclaves);
+    tcf_enclave_info(const std::string& enclaveModulePath,
+                     const std::string& spid,
+                     const std::string& persisted_sealed_data,
+                     const int num_of_enclaves);
     virtual ~tcf_enclave_info();
     std::string get_epid_group();
     void set_signature_revocation_list(
@@ -34,4 +35,6 @@ public:
 
     std::string mr_enclave;         // hex encoding of the enclave measurement
     std::string basename;           // hex encoding of the basename
+protected:
+    tcf::attestation::EpidAttestation *epid_attestation;
 };  // class tcf_enclave_info

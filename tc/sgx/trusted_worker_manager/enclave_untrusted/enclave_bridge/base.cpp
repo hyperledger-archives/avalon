@@ -69,7 +69,7 @@ std::string tcf::enclave_api::base::GetLastError(void) {
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 tcf_err_t tcf::enclave_api::base::Initialize(
     const std::string& inPathToEnclave,
-    const HexEncodedString& inSpid,
+    const tcf::attestation::Attestation *attestation,
     const std::string& persisted_sealed_data,
     const int numOfEnclaves) {
     tcf_err_t ret = TCF_SUCCESS;
@@ -81,12 +81,11 @@ tcf_err_t tcf::enclave_api::base::Initialize(
 
             g_Enclave.reserve(numOfEnclaves);
             for (int i = 0; i < numOfEnclaves; ++i) {
-                g_Enclave.push_back(tcf::enclave_api::Enclave());
+                g_Enclave.push_back(tcf::enclave_api::Enclave(attestation));
                 g_EnclaveReadyQueue->push(i);
             }
 
             for (tcf::enclave_api::Enclave& enc : g_Enclave) {
-                enc.SetSpid(inSpid);
                 enc.Load(inPathToEnclave, persisted_sealed_data);
             }
 
@@ -146,34 +145,6 @@ size_t tcf::enclave_api::base::GetSignatureSize() {
 }
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-tcf_err_t tcf::enclave_api::base::GetEpidGroup(
-    HexEncodedString& outEpidGroup) {
-     tcf_err_t ret = TCF_SUCCESS;
-
-     try {
-        // Get the EPID group from the enclave and convert it to big endian
-        sgx_epid_group_id_t epidGroup = { 0 };
-        g_Enclave[0].GetEpidGroup(&epidGroup);
-
-        std::reverse((uint8_t*)&epidGroup, (uint8_t*)&epidGroup + sizeof(epidGroup));
-
-        // Convert the binary data to a hex string
-        outEpidGroup = tcf::BinaryToHexString((const uint8_t*)&epidGroup, sizeof(epidGroup));
-    } catch (tcf::error::Error& e) {
-        tcf::enclave_api::base::SetLastError(e.what());
-        ret = e.error_code();
-    } catch (std::exception& e) {
-        tcf::enclave_api::base::SetLastError(e.what());
-        ret = TCF_ERR_UNKNOWN;
-    } catch (...) {
-        tcf::enclave_api::base::SetLastError("Unexpected exception");
-        ret = TCF_ERR_UNKNOWN;
-    }
-
-    return ret;
-}  // tcf::enclave_api::base::GetEpidGroup
-
-// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 tcf_err_t tcf::enclave_api::base::GetEnclaveCharacteristics(
     HexEncodedString& outMrEnclave,
     HexEncodedString& outEnclaveBasename) {
@@ -212,22 +183,3 @@ tcf_err_t tcf::enclave_api::base::GetEnclaveCharacteristics(
 }  // tcf::enclave_api::base::GetEnclaveCharacteristics
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-tcf_err_t tcf::enclave_api::base::SetSignatureRevocationList(
-    const std::string& inSignatureRevocationList) {
-    tcf_err_t ret = TCF_SUCCESS;
-
-    try {
-        g_Enclave[0].SetSignatureRevocationList(inSignatureRevocationList);
-    } catch (tcf::error::Error& e) {
-        tcf::enclave_api::base::SetLastError(e.what());
-        ret = e.error_code();
-    } catch (std::exception& e) {
-        tcf::enclave_api::base::SetLastError(e.what());
-        ret = TCF_ERR_UNKNOWN;
-    } catch (...) {
-        tcf::enclave_api::base::SetLastError("Unexpected exception");
-        ret = TCF_ERR_UNKNOWN;
-    }
-
-    return ret;
-}  // tcf::enclave_api::base::SetSignatureRevocationList

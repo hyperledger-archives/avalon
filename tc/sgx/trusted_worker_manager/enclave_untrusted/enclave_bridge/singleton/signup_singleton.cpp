@@ -25,6 +25,7 @@
 #include "enclave.h"
 #include "base.h"
 #include "signup_singleton.h"
+#include "sgx_utility.h"
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 tcf_err_t SignupDataSingleton::CreateEnclaveData(
@@ -49,8 +50,7 @@ tcf_err_t SignupDataSingleton::CreateEnclaveData(
         // We need target info in order to create signup data report
         sgx_target_info_t target_info = { 0 };
         sgx_epid_group_id_t epidGroupId = { 0 };
-        sresult =
-            g_Enclave[0].CallSgx(
+        sresult = tcf::sgx_util::CallSgx(
                 [&target_info,
                  &epidGroupId] () {
                     return sgx_init_quote(&target_info, &epidGroupId);
@@ -63,7 +63,7 @@ tcf_err_t SignupDataSingleton::CreateEnclaveData(
         // and call into the enclave to create the signup data
         sgx_report_t enclave_report = { 0 };
 
-        sresult = g_Enclave[0].CallSgx(
+        sresult = tcf::sgx_util::CallSgx(
             [enclaveid,
              &presult,
              target_info,
@@ -122,7 +122,7 @@ tcf_err_t SignupDataSingleton::UnsealEnclaveData(
         sgx_enclave_id_t enclaveid = g_Enclave[0].GetEnclaveId();
 
         tcf_err_t presult = TCF_SUCCESS;
-        sgx_status_t sresult = g_Enclave[0].CallSgx(
+        sgx_status_t sresult = tcf::sgx_util::CallSgx(
             [ enclaveid,
               &presult,
               &outPublicEnclaveData] () {
@@ -163,7 +163,7 @@ tcf_err_t SignupDataSingleton::VerifyEnclaveInfo(
         sgx_enclave_id_t enclaveid = g_Enclave[0].GetEnclaveId();
         tcf_err_t presult = TCF_SUCCESS;
 
-        sgx_status_t sresult = g_Enclave[0].CallSgx(
+        sgx_status_t sresult = tcf::sgx_util::CallSgx(
             [ enclaveid,
               &presult,
               enclaveInfo,
