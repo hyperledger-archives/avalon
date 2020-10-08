@@ -1,0 +1,53 @@
+# Copyright 2020 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+version: '3.5'
+
+services:
+  process-work-order:
+    container_name: process-work-order
+    image: avalon-{{ my_workload }}-workload-dev
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    environment:
+      - http_proxy
+      - https_proxy
+      - no_proxy
+    expose:
+      - 7777
+    # Need to pass full path of file to python interpreter
+    # Pass ZMQ URL to listen for requests. Bind to all available interfaces.
+    # Pass JSON file which has the workload module details.
+    command: /usr/local/bin/wo-processor --bind "tcp://*:7777" --workload "workload.json"
+    stop_signal: SIGKILL
+
+
+  test-send-work-order:
+    container_name: test-send-work-order
+    image: avalon-{{ my_workload }}-workload-dev
+    environment:
+      - http_proxy
+      - https_proxy
+      - no_proxy
+    expose:
+      - 7777
+    command: | 
+      bash -c "
+        python /home/python_worker/tests/test_send_work_order.py ./tests/test_work_orders.json"
+    stop_signal: SIGKILL
+    depends_on:
+      - process-work-order
+
+

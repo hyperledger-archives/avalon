@@ -1,0 +1,6 @@
+{
+    "python-{{ my_workload }}": {
+        "module": "src.{{ my_workload }}",
+        "class": "{{ My_workload }}WorkLoad"
+    }
+}
