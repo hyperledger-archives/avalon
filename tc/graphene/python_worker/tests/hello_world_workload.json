@@ -1,0 +1,6 @@
+{
+    "python-hello": {
+        "module": "tests.hello.hello",
+        "class": "HelloWorkLoad"
+    }
+}

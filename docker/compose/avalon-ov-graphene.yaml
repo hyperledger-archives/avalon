@@ -15,12 +15,21 @@
 version: '3.5'
 
 services:
+  avalon-enclave-manager:
+    image: avalon-enclave-manager-graphene-dev
+    build:
+      dockerfile: ./enclave_manager/Dockerfile-graphene
+      args:
+        - ENCLAVE_TYPE=graphene
+    expose:
+      # ZMQ socket port to communicate with graphene python worker
+      - 7777
+    depends_on:
+      - graphene-python-workload
+
   ov-work-order:
     container_name: ov-work-order
     image: openvinowl
-    build:
-      context: .
-      dockerfile: ./Dockerfile
     environment:
       - http_proxy
       - https_proxy
@@ -28,24 +37,23 @@ services:
     expose:
       - 8888
     volumes:
+      # Output images directory for openvino object detection.
       - ./output:/home/openvino/output
     command: openvinowl
     stop_signal: SIGKILL
 
-
-  test-ov-send-work-order:
-    container_name: test-ov-send-work-order
-    image: openvinowl
+  graphene-python-workload:
+    container_name: graphene-python-workload
+    image: avalon-ov-python-worker-dev
     environment:
       - http_proxy
       - https_proxy
       - no_proxy
     expose:
-      - 8888
-    command: |
-      bash -c "
-        ./test/test_send_request.py ov-inference test.png"
+      # ZMQ socket port used to communicate with graphene python worker.
+      - 7777
+    # Need to pass full path of file to python interpreter.
+    # Pass ZMQ URL to listen for requests. Bind to all available interfaces.
+    # Pass JSON file which has the workload module details.
+    command: /usr/local/bin/wo-processor --bind "tcp://*:7777" --workload "ov_workload.json"
     stop_signal: SIGKILL
-    depends_on:
-      - ov-work-order
-

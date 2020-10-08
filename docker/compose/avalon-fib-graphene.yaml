@@ -1,0 +1,44 @@
+# Copyright 2020 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+version: '3.5'
+
+services:
+  avalon-enclave-manager:
+    image: avalon-enclave-manager-graphene-dev
+    build:
+      dockerfile: ./enclave_manager/Dockerfile-graphene
+      args:
+        - ENCLAVE_TYPE=graphene
+    expose:
+      # ZMQ socket port to communicate with graphene python worker
+      - 7777
+    depends_on:
+      - graphene-python-workload
+
+  graphene-python-workload:
+    container_name: graphene-python-workload
+    image: avalon-fibonacci-workload-dev
+    environment:
+      - http_proxy
+      - https_proxy
+      - no_proxy
+    expose:
+      # ZMQ socket port used to communicate with graphene python worker.
+      - 7777
+    # Need to pass full path of file to python interpreter.
+    # Pass ZMQ URL to listen for requests. Bind to all available interfaces.
+    # Pass JSON file which has the workload module details.
+    command: /usr/local/bin/wo-processor --bind "tcp://*:7777" --workload "fib_workload.json"
+    stop_signal: SIGKILL

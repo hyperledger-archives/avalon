@@ -15,9 +15,9 @@
 version: '3.5'
 
 services:
-  ov-work-order:
-    container_name: ov-work-order
-    image: openvinowl
+  process-work-order:
+    container_name: process-work-order
+    image: avalon-python-worker-dev
     build:
       context: .
       dockerfile: ./Dockerfile
@@ -26,26 +26,28 @@ services:
       - https_proxy
       - no_proxy
     expose:
-      - 8888
-    volumes:
-      - ./output:/home/openvino/output
-    command: openvinowl
+      - 7777
+    # Need to pass full path of file to python interpreter
+    # Pass ZMQ URL to listen for requests. Bind to all available interfaces.
+    # Pass JSON file which has the workload module details.
+    command: /usr/local/bin/wo-processor --bind "tcp://*:7777" --workload "tests/hello_world_workload.json"
     stop_signal: SIGKILL
 
 
-  test-ov-send-work-order:
-    container_name: test-ov-send-work-order
-    image: openvinowl
+  test-send-work-order:
+    container_name: test-send-work-order
+    image: avalon-python-worker-dev
     environment:
       - http_proxy
       - https_proxy
       - no_proxy
     expose:
-      - 8888
-    command: |
+      - 7777
+    command: | 
       bash -c "
-        ./test/test_send_request.py ov-inference test.png"
+        python ./tests/test_send_work_order.py ./tests/test_hello_work_orders.json"
     stop_signal: SIGKILL
     depends_on:
-      - ov-work-order
+      - process-work-order
+
 

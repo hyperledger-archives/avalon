@@ -1,0 +1,6 @@
+{
+    "ov-inference": {
+        "module": "src.openvino",
+        "class": "OpenVinoWorkLoad"
+    }
+}
