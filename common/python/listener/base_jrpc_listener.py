@@ -136,7 +136,10 @@ class BaseJRPCListener(resource.Resource):
             # process the message encoding
             encoding = request.getHeader('Content-Type')
             data = request.content.read()
-            if encoding == 'application/json':
+            # To support curl command content type
+            # 'application/x-www-form-urlencoded' required
+            if encoding in ['application/json',
+                            'application/x-www-form-urlencoded']:
                 input_json_str = data.decode('utf-8')
                 response = self._process_request(input_json_str)
 
@@ -163,7 +166,8 @@ class BaseJRPCListener(resource.Resource):
 
         # send back the results
         try:
-            if encoding == 'application/json':
+            if encoding in ['application/json',
+                            'application/x-www-form-urlencoded']:
                 response = json.dumps(response)
             logger.info('response[%s]: %s', encoding, response)
             request.setHeader('content-type', encoding)
