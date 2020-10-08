@@ -1,0 +1,26 @@
+{
+  "workOrders": [
+    {
+      "workloadId":"python-{{ my_workload }}",
+      "params": ""
+    },
+    {
+      "workloadId":"python-{{ my_workload }}",
+      "params": ""
+    },
+    {
+      "workloadId":"python-{{ my_workload }}",
+      "params": ""
+    },
+    {
+      "workloadId":"python-{{ my_workload }}",
+      "params": ""
+    },
+    {
+      "workloadId":"python-{{ my_workload }}",
+      "params": ""
+    }
+
+  ]
+}
+
