@@ -41,7 +41,7 @@ sleep_interval = "2"
 # Port for socket interaction with listener
 zmq_port = '5555'
 # Graphene worker url. Graphene worker uses ZMQ for communication
-graphene_zmq_url = "tcp://graphene-python-worker:7777"
+graphene_zmq_url = "tcp://graphene-python-workload:7777"
 
 # -------------------------------------------------------
 # EnclaveModule -- configuration of the Intel SGX Enclave

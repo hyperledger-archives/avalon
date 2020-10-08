@@ -1,0 +1,6 @@
+{
+    "python-fib": {
+        "module": "src.fibonacci",
+        "class": "FibonacciWorkLoad"
+    }
+}

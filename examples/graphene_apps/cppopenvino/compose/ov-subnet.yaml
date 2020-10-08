@@ -14,40 +14,25 @@
 
 version: '3.5'
 
-# Define network for openvino and assign static ip for openvino container.
+# Define network and assign to static ip containers.
 # GSC tool/Graphene has an issue and is not able to resolve DNS name to IP.
-# So need to assign static IP for openvino container.
+# So need to assign static IP for containers.
 networks:
-  awov:
+  awip:
     ipam:
       config:
         - subnet: 10.5.0.0/24
 
 services:
-  avalon-shell:
+  process-work-order:
     networks:
-      - awov
+      - awip
 
-  avalon-enclave-manager:
+  test-ov-send-work-order:
     networks:
-      - awov
+      - awip
 
-  avalon-lmdb:
-    networks:
-      - awov
-
-  avalon-listener:
-    networks:
-      - awov
-
-  graphene-python-workload:
-    networks:
-      - awov
-
-  # This IP address should match with IP address in file
-  # examples/graphene_apps/python_worker/ov_workload/ov_workload_config.toml
   ov-work-order:
     networks:
-      awov:
+      awip:
         ipv4_address: 10.5.0.6
-

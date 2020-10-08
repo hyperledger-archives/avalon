@@ -1,0 +1,29 @@
+{
+  "workOrders": [
+    {
+      "workloadId": "python-hello",
+      "params": "Krsna"
+    },
+    {
+      "workloadId": "python-hello",
+      "params": "Rama"
+    },
+    {
+      "workloadId": "python-hello",
+      "params": "Shiva"
+    },
+    {
+      "workloadId": "python-hello",
+      "params": "Ganesha"
+    },
+    {
+      "workloadId": "python-hello",
+      "params": "Lakshmi"
+    },
+    {
+      "workloadId": "python-hello",
+      "params": "Parvathy"
+    }
+  ]
+}
+
