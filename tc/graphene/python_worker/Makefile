@@ -13,18 +13,19 @@
 # limitations under the License.
 
 PY_VERSION=${shell python3 --version | sed 's/Python \(3\.[0-9]\).*/\1/' | cut -b 1}
+WORKER_TYPE?=singleton
 
-WHEEL_FILE=dist/avalon_python_worker-0.6-py${PY_VERSION}-none-any.whl
+WHEEL_FILE=dist/${WORKER_TYPE}_avalon_python_worker-0.6-py${PY_VERSION}-none-any.whl
 
 all : $(WHEEL_FILE)
 
 $(WHEEL_FILE) : build_ext
 	@echo Build Distribution
-	python3 setup.py bdist_wheel
+	python3 setup_${WORKER_TYPE}.py bdist_wheel
 
 build_ext :
 	@echo Build build_ext
-	python3 setup.py build_ext
+	python3 setup_${WORKER_TYPE}.py build_ext
 
 build :
 	mkdir $@

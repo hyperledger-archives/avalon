@@ -14,6 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from setuptools import setup, find_packages
 import sys
 
 # This should only be run with python3
@@ -21,17 +22,16 @@ if sys.version_info[0] < 3:
     print('ERROR: must run with python3')
     sys.exit(1)
 
-from setuptools import setup, find_packages
 
-setup(name='avalon_python_worker',
+setup(name='singleton_avalon_python_worker',
       version=0.6,
-      description='Avalon python worker for Graphene ',
+      description='Avalon singleton python worker for Graphene ',
       author='Hyperledger Avalon',
       url='https://github.com/hyperledger/avalon',
       packages=find_packages(),
       data_files=[],
       entry_points={
           'console_scripts':
-          ['wo-processor = avalon_worker.work_order_processor:main']
+          ['wo-processor = avalon_worker.singleton_work_order_processor:main']
       }
       )
