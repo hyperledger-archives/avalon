@@ -81,8 +81,9 @@
     python3 test_ethereum_worker_registry_list_impl.py
     ```
 
-13. Test echo client with direct mode using Ropsten test network.
+13. Test echo workload using generic client with direct mode using Ropsten test network.
     ```bash
-    cd $TCF_HOME/examples/apps/echo/client
-    ./echo_client.py -m "Hello world"
+    cd $TCF_HOME/examples/apps/generic_client/
+    ./generic_client.py -o --uri "http://localhost:1947" \
+    --workload_id "echo-result" --in_data "Hello" --worker_id "singleton-worker-1"
     ```
