@@ -23,7 +23,6 @@ fi
 
 SCRIPTDIR="$(dirname $(readlink --canonicalize ${BASH_SOURCE}))"
 SRCDIR="$(realpath ${SCRIPTDIR}/..)"
-echo_client_path="${TCF_HOME}/examples/apps/echo/client"
 generic_client_path="${TCF_HOME}/examples/apps/generic_client"
 # Read Listener port from config file
 listener_port=`grep listener_port ${TCF_HOME}/config/tcs_config.toml | awk {'print $3'}`
@@ -96,17 +95,6 @@ do
     yell "#------------------------------------------------------------------------------------------------"
     yell "#------------------------------------------------------------------------------------------------"
 done
-
-# TODO: Disabled echo client run with blockchain from CI until we fix the infutra http interface issue
-
-#yell "Start testing echo client with reading registry from blockchain................"
-#yell "#------------------------------------------------------------------------------------------------"
-#try $echo_client_path/echo_client.py -m "Hello world" -rs -dh
-
-yell "Start testing echo client with service uri ................"
-yell "#------------------------------------------------------------------------------------------------"
-try $echo_client_path/echo_client.py -m "Hello world" -s "http://$LISTENER_URL:1947" \
-    -dh --worker_id $WORKER_ID
 
 yell "Start testing generic client for echo workload ................"
 yell "#------------------------------------------------------------------------------------------------"
