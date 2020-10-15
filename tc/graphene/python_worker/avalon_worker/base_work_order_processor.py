@@ -15,12 +15,11 @@
 # limitations under the License.
 import sys
 import logging
-import argparse
 import random
 import string
 import json
 from hashlib import sha256
-import avalon_worker.receive_request as receive_request
+from abc import ABC, abstractmethod
 import avalon_crypto_utils.worker_encryption as worker_encryption
 import avalon_crypto_utils.worker_signing as worker_signing
 import avalon_crypto_utils.worker_hash as worker_hash
@@ -38,43 +37,9 @@ logger.addHandler(logging.StreamHandler(sys.stdout))
 # -------------------------------------------------------------------------
 
 
-def main(args=None):
+class BaseWorkOrderProcessor(ABC):
     """
-    Graphene worker main function.
-    """
-    # Parse command line parameters.
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        '--bind', help='URI to listen for requests ', type=str)
-    parser.add_argument(
-        '--workload', help='JSON file which has workload module details',
-        type=str)
-    (options, remainder) = parser.parse_known_args(args)
-    # Get the workload JSON file name passed in command line.
-    if options.workload:
-        workload_json_file = options.workload
-    else:
-        # Default file name.
-        workload_json_file = "workloads.json"
-    # Create work order processor object.
-    wo_processor = WorkOrderProcessor(workload_json_file)
-    # Setup ZMQ channel to receive work order.
-    if options.bind:
-        zmq_bind_url = options.bind
-    else:
-        # default url. "*" means bind on all available interfaces.
-        zmq_bind_url = "tcp://*:7777"
-    zmq_socket = receive_request.ZmqSocket(zmq_bind_url, wo_processor)
-    logger.info("Listening for requests at url {}".format(zmq_bind_url))
-    # Start listener and wait for new request.
-    zmq_socket.start_zmq_listener()
-
-# -------------------------------------------------------------------------
-
-
-class WorkOrderProcessor():
-    """
-    Graphene work order processing class.
+    Graphene work order processing abstract base class.
     """
 
 # -------------------------------------------------------------------------
@@ -194,6 +159,7 @@ class WorkOrderProcessor():
 
 # -------------------------------------------------------------------------
 
+    @abstractmethod
     def _process_work_order(self, input_json_str):
         """
         Process Avalon work order and returns JSON RPC response
@@ -205,66 +171,7 @@ class WorkOrderProcessor():
         Returns :
             JSON RPC response containing result or error.
         """
-        try:
-            input_json = json.loads(input_json_str)
-        except Exception as ex:
-            err_code = WorkerError.INVALID_PARAMETER_FORMAT_OR_VALUE
-            err_msg = "Error loading JSON: " + str(ex)
-            error_json = jrpc_utility.create_error_response(err_code,
-                                                            0,
-                                                            err_msg)
-            return json.dumps(error_json)
-        # Decrypt session key
-        encrypted_session_key_hex = \
-            input_json["params"]["encryptedSessionKey"]
-        encrypted_session_key = bytes.fromhex(encrypted_session_key_hex)
-        session_key = \
-            self.encrypt.decrypt_session_key(encrypted_session_key)
-        session_key_iv = None
-        if "sessionKeyIv" in input_json["params"]:
-            session_key_iv_hex = input_json["params"]["sessionKeyIv"]
-            session_key_iv = bytes.fromhex(session_key_iv_hex)
-        # Verify work order integrity
-        res = self._verify_work_order_request(input_json, session_key,
-                                              session_key_iv)
-        if res is False:
-            err_code = WorkerError.INVALID_PARAMETER_FORMAT_OR_VALUE
-            err_msg = "Work order integrity check failed"
-            logger.error(err_msg)
-            jrpc_id = input_json["id"]
-            error_json = jrpc_utility.create_error_response(err_code,
-                                                            jrpc_id,
-                                                            err_msg)
-            return json.dumps(error_json)
-        else:
-            logger.info("Verify work order request success")
-        # Decrypt work order inData
-        in_data_array = input_json["params"]["inData"]
-        self.encrypt.decrypt_work_order_data_json(in_data_array,
-                                                  session_key,
-                                                  session_key_iv)
-        # Process workload
-        workload_id_hex = input_json["params"]["workloadId"]
-        workload_id = bytes.fromhex(workload_id_hex).decode("UTF-8")
-        in_data_array = input_json["params"]["inData"]
-        result, out_data = self.wl_processor.execute_workload(workload_id,
-                                                              in_data_array)
-        # Generate work order response
-        if result is True:
-            output_json = self._create_work_order_response(input_json,
-                                                           out_data,
-                                                           session_key,
-                                                           session_key_iv)
-        else:
-            jrpc_id = input_json["id"]
-            err_code = WorkerError.INVALID_PARAMETER_FORMAT_OR_VALUE
-            err_msg = "Error processing work load"
-            output_json = jrpc_utility.create_error_response(err_code,
-                                                             jrpc_id,
-                                                             err_msg)
-        # return json str
-        output_json_str = json.dumps(output_json)
-        return output_json_str
+        pass
 
 # -------------------------------------------------------------------------
 
@@ -280,7 +187,7 @@ class WorkOrderProcessor():
                         this work order
             session_key_iv: iv corresponding to the session key
         Returns :
-            JSON RPC response containing result or error.
+            True on successful verification. False, otherwise.
         """
         # Decrypt request hash
         encrypted_req_hash_hex = input_json["params"]["encryptedRequestHash"]
@@ -336,19 +243,27 @@ class WorkOrderProcessor():
             workerNonce.encode("UTF-8"))
         output_json["result"]["outData"] = [out_data]
 
-        # Encrypt outData
-        self.encrypt.encrypt_work_order_data_json(
-            output_json["result"]["outData"],
-            session_key,
-            session_key_iv)
-        # Compute worker signature
-        res_hash = worker_hash.WorkerHash().calculate_response_hash(
-            output_json["result"])
-        res_hash_sign = self.sign.sign_message(res_hash)
-        res_hash_sign_b64 = crypto_utility.byte_array_to_base64(res_hash_sign)
-        output_json["result"]["workerSignature"] = res_hash_sign_b64
+        return self._encrypt_and_sign_response(
+            session_key, session_key_iv, output_json)
 
-        return output_json
+# -------------------------------------------------------------------------
+
+    @abstractmethod
+    def _encrypt_and_sign_response(self, session_key,
+                                   session_key_iv, output_json):
+        """
+        Encrypt outdata and compute worker signature.
+
+        Parameters :
+            session_key: Session key of the client which submitted
+                        this work order
+            session_key_iv: iv corresponding to teh session key
+            output_json: Pre-populated response json
+        Returns :
+            JSON RPC response with worker signature
+
+        """
+        pass
 
 # -------------------------------------------------------------------------
 
@@ -388,6 +303,3 @@ class WorkOrderProcessor():
         return quote_str
 
 # -------------------------------------------------------------------------
-
-
-main()
