@@ -38,6 +38,9 @@ swig_file_path = os.path.join(tcf_root_dir,
 # If enclave_type is not set then default to singleton
 enclave_type =  os.environ.get('ENCLAVE_TYPE', 'singleton').lower()
 
+# Defaults to path '/opt/intel/sgxsdk' if SGX_SDK env variable is not passed
+sgx_sdk = os.environ.get('SGX_SDK', '/opt/intel/sgxsdk')
+
 ## -----------------------------------------------------------------
 ## Set up the enclave
 ## -----------------------------------------------------------------
@@ -64,6 +67,7 @@ include_dirs = [
     os.path.join(tcf_root_dir, 'tc/sgx/trusted_worker_manager/common'),
     os.path.join(tcf_root_dir, 'common/cpp/crypto'),
     os.path.join(tcf_root_dir, 'common/cpp/packages/base64'),
+    os.path.join(sgx_sdk, 'include')
 ]
 
 library_dirs = [
