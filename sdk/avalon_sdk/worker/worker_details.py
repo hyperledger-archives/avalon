@@ -20,7 +20,6 @@ import logging
 import json
 import hashlib
 
-import avalon_crypto_utils.crypto_utility as crypto_utility
 import config.config as pconfig
 from enum import Enum, unique
 from utility.hex_utils import is_valid_hex_str

@@ -20,9 +20,9 @@ import random
 import json
 import secrets
 import hashlib
-import avalon_worker.crypto.worker_encryption as worker_encryption
-import avalon_worker.crypto.worker_signing as worker_signing
-import avalon_worker.crypto.worker_hash as worker_hash
+import avalon_crypto_utils.worker_encryption as worker_encryption
+import avalon_crypto_utils.worker_signing as worker_signing
+import avalon_crypto_utils.worker_hash as worker_hash
 import time
 
 logger = logging.getLogger(__name__)
@@ -131,8 +131,8 @@ def _send_work_order_request(workload_id, input_data_str,
         sign = worker_signing.WorkerSign()
         worker_verify_key = worker_signup_json["verifying_key"]
         worker_verify_key_bytes = worker_verify_key.encode("UTF-8")
-        verify = sign.verify_response_signature(response_json,
-                                                worker_verify_key_bytes)
+        verify = sign._verify_wo_response_signature(
+            response_json['result'], worker_verify_key_bytes)
         if verify:
             logger.info("Work order result verification success")
             decrypt_out_message = _get_work_order_result(response_json,
@@ -193,8 +193,7 @@ def _create_work_order_request(workload_id, input_data_str,
     encrypted_session_key = encrypt.encrypt_session_key(
         session_key, worker_enc_key_str)
 
-    msg = input_data_str
-    msg_bytes = msg.encode("UTF-8")
+    msg_bytes = input_data_str.encode('UTF-8')
 
     input_json = dict()
     input_json["jsonrpc"] = "2.0"

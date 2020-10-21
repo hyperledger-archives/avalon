@@ -17,9 +17,10 @@ import logging
 import base64
 from utility.hex_utils import is_valid_hex_str
 import avalon_crypto_utils.crypto_utility as crypto_utility
+import avalon_crypto_utils.worker_hash as worker_hash
+import avalon_crypto_utils.worker_signing as worker_signing
 from error_code.error_status import ReceiptCreateStatus, SignatureStatus,\
     JRPCErrorCodes
-import avalon_crypto_utils.signature as signature
 from jsonrpc.exceptions import JSONRPCDispatchException
 
 logger = logging.getLogger(__name__)
@@ -49,6 +50,8 @@ class TCSWorkOrderReceiptHandler:
         # Supported hashing and signing algorithms
         self.SIGNING_ALGORITHM = "SECP256K1"
         self.HASHING_ALGORITHM = "SHA-256"
+        self.signer = worker_signing.WorkerSign()
+        self.hasher = worker_hash.WorkerHash()
 
 # -----------------------------------------------------------------------------
 
@@ -150,19 +153,18 @@ class TCSWorkOrderReceiptHandler:
                                 rules[1] != self.SIGNING_ALGORITHM):
             return False, "Unsupported the signing rules"
 
-        signature_obj = signature.ClientSignature()
         # Verify work order request is calculated properly or not.
         json_wo_request = json.loads(wo_request)
         wo_request_params = json_wo_request["params"]
         wo_request_hash = \
-            signature_obj.calculate_request_hash(wo_request_params)
+            self.hasher.calculate_request_hash(wo_request_params)
         wo_request_hash_str = \
             crypto_utility.byte_array_to_base64(wo_request_hash)
         expected_hash_str = wo_receipt_req["params"]["workOrderRequestHash"]
         if wo_request_hash_str != expected_hash_str:
             return False, "Work order request hash does not match"
         # Verify requester signature with signing key in the request
-        status = signature_obj.verify_create_receipt_signature(wo_receipt_req)
+        status = self.signer.verify_create_receipt_signature(wo_receipt_req)
         if status != SignatureStatus.PASSED:
             return False, "Receipt create requester signature does not match"
         # If all parameters are verified in the request
@@ -290,7 +292,8 @@ class TCSWorkOrderReceiptHandler:
             # Load the work order response and calculate it's hash
             wo_resp = self.kv_helper.get("wo-responses", wo_id)
             wo_resp_bytes = bytes(wo_resp, "UTF-8")
-            wo_resp_hash = crypto_utility.compute_message_hash(wo_resp_bytes)
+            wo_resp_hash = worker_hash.WorkerHash().compute_message_hash(
+                wo_resp_bytes)
             wo_resp_hash_str = crypto_utility.byte_array_to_hex(wo_resp_hash)
             if wo_resp_hash_str != wo_receipt_req["params"]["updateData"]:
                 return False, "Invalid Update data in the request"

@@ -34,8 +34,7 @@ from PIL import ImageTk, Image
 
 # Avalon imports
 import avalon_crypto_utils.crypto_utility as utility
-import avalon_sdk.worker.worker_details as worker
-from avalon_sdk.worker.worker_details import WorkerType
+from avalon_sdk.worker.worker_details import WorkerType, SGXWorkerDetails
 from avalon_sdk.work_order.work_order_params import WorkOrderParams
 from avalon_sdk.connector.direct.avalon_direct_client import AvalonDirectClient
 import config.config as pconfig
@@ -684,11 +683,9 @@ def parse_command_line(args):
             options.registry_list
 
     if options.service_uri:
-        service_uri = options.service_uri
         off_chain = True
 
     if options.off_chain:
-        service_uri = config["tcf"].get("json_rpc_uri")
         off_chain = True
 
     requester_signature = options.requester_signature
@@ -701,7 +698,7 @@ def parse_command_line(args):
         else hex_utils.get_worker_id_from_name(worker_id)
 
     # Initializing Worker Object
-    worker_obj = worker.SGXWorkerDetails()
+    worker_obj = SGXWorkerDetails()
 
 
 def initialize_logging(config):

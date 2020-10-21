@@ -143,3 +143,25 @@ class WorkerHash():
         return hash_obj.digest()
 
 # -------------------------------------------------------------------------
+
+    def verify_data_hash(self, msg, data_hash):
+        '''
+        Function to verify data hash
+        Parameters:
+            msg - Input text
+            data_hash - hash of the data in hex format
+        Returns:
+            verify_success: Boolean value, status of data hash verification
+        '''
+        verify_success = True
+        msg_hash = self.compute_message_hash(msg)
+        # Convert both hash hex string values to upper case
+        msg_hash_hex = hex_utils.byte_array_to_hex_str(msg_hash).upper()
+        data_hash = data_hash.upper()
+        if msg_hash_hex == data_hash:
+            logger.info("Computed hash of message matched with data hash")
+        else:
+            logger.error(
+                "Computed hash of message does not match with data hash")
+            verify_success = False
+        return verify_success

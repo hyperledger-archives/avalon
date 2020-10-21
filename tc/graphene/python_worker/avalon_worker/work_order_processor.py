@@ -21,9 +21,10 @@ import string
 import json
 from hashlib import sha256
 import avalon_worker.receive_request as receive_request
-import avalon_worker.crypto.worker_encryption as worker_encryption
-import avalon_worker.crypto.worker_signing as worker_signing
-import avalon_worker.crypto.worker_hash as worker_hash
+import avalon_crypto_utils.worker_encryption as worker_encryption
+import avalon_crypto_utils.worker_signing as worker_signing
+import avalon_crypto_utils.worker_hash as worker_hash
+import avalon_crypto_utils.crypto_utility as crypto_utility
 import avalon_worker.workload.workload_processor as workload_processor
 from avalon_worker.error_code import WorkerError
 import avalon_worker.utility.jrpc_utility as jrpc_utility
@@ -331,7 +332,7 @@ class WorkOrderProcessor():
         workerNonce = ''.join(random.choices(string.ascii_uppercase +
                                              string.digits, k=16))
         output_json["result"]["workerNonce"] = \
-            self.encrypt.byte_array_to_base64(
+            crypto_utility.byte_array_to_base64(
             workerNonce.encode("UTF-8"))
         output_json["result"]["outData"] = [out_data]
 
@@ -344,7 +345,7 @@ class WorkOrderProcessor():
         res_hash = worker_hash.WorkerHash().calculate_response_hash(
             output_json["result"])
         res_hash_sign = self.sign.sign_message(res_hash)
-        res_hash_sign_b64 = self.encrypt.byte_array_to_base64(res_hash_sign)
+        res_hash_sign_b64 = crypto_utility.byte_array_to_base64(res_hash_sign)
         output_json["result"]["workerSignature"] = res_hash_sign_b64
 
         return output_json

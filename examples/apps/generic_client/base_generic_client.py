@@ -16,8 +16,8 @@ import logging
 import secrets
 from generic_client_interface import GenericClientInterface
 from avalon_sdk.work_order.work_order_params import WorkOrderParams
-import avalon_crypto_utils.signature as signature
-import avalon_crypto_utils.crypto_utility as crypto_utility
+import avalon_crypto_utils.worker_encryption as worker_encryption
+import avalon_crypto_utils.worker_signing as worker_signing
 import verify_report.verify_attestation_report as attestation_util
 from error_code.error_status import SignatureStatus
 
@@ -38,6 +38,8 @@ class BaseGenericClient(GenericClientInterface):
         self._worker_instance = None
         self._work_order_instance = None
         self._work_order_receipt_instance = None
+        self.encrypt = worker_encryption.WorkerEncrypt()
+        self.signer = worker_signing.WorkerSign()
 
     def do_worker_verification(self, worker_obj):
         """
@@ -51,8 +53,7 @@ class BaseGenericClient(GenericClientInterface):
 
             # Verify worker encryption key signature
             # using worker verification key
-            sig_obj = signature.ClientSignature()
-            sig_status = sig_obj.verify_encryption_key_signature(
+            sig_status = self.signer.verify_encryption_key_signature(
                 encryption_key_signature, encryption_key, verify_key)
             if (sig_status != SignatureStatus.PASSED):
                 logger.error(
@@ -134,8 +135,7 @@ class BaseGenericClient(GenericClientInterface):
         """
         Verify Work order response signature
         """
-        sig_obj = signature.ClientSignature()
-        status = sig_obj.verify_signature(
+        status = self.signer.verify_signature(
             work_order_res, worker_verification_key,
             requester_nonce)
         if status == SignatureStatus.PASSED:
@@ -150,8 +150,8 @@ class BaseGenericClient(GenericClientInterface):
         Decrypt work order response
         """
         try:
-            decrypted_res = crypto_utility.decrypted_response(
-                wo_res, self._session_key, self._session_iv)
+            decrypted_res = self.encrypt.decrypt_work_order_data_json(
+                wo_res["outData"], self._session_key, self._session_iv)
         except Exception as ex:
             logging.error("Error in decrypting response {}".format(ex))
             return None

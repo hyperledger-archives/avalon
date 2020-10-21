@@ -16,6 +16,7 @@ import json
 import logging
 import avalon_crypto_utils.crypto_utility as crypto
 from error_code.error_status import WorkerError
+import avalon_crypto_utils.worker_hash as worker_hash
 
 from jsonrpc.exceptions import JSONRPCDispatchException
 
@@ -93,7 +94,7 @@ class WorkerEncryptionKeyHandler:
         concat_string = worker_id.encode('UTF-8') + encryptionKey.encode(
             'UTF-8') + encryptionKeyNonce.encode('UTF-8') + tag.encode('UTF-8')
         concat_hash = bytes(concat_string)
-        hash_1 = crypto.compute_message_hash(concat_hash)
+        hash_1 = worker_hash.WorkerHash().compute_message_hash(concat_hash)
         s1 = crypto.byte_array_to_base64(hash_1)
         # Requires worker private key to sign.
         # signature =  self.PrivateKey.SignMessage(hash)

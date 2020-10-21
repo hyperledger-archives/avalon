@@ -27,7 +27,7 @@ from avalon_sdk.connector.direct.jrpc.jrpc_work_order import \
 from avalon_sdk.connector.direct.jrpc.jrpc_work_order_receipt \
     import JRPCWorkOrderReceiptImpl
 from error_code.error_status import WorkOrderStatus, ReceiptCreateStatus
-import avalon_crypto_utils.signature as signature
+import avalon_crypto_utils.worker_signing as worker_signing
 from error_code.error_status import SignatureStatus
 from avalon_sdk.work_order_receipt.work_order_receipt \
     import WorkOrderReceiptRequest
@@ -226,8 +226,8 @@ class DirectModelGenericClient(BaseGenericClient):
         """
         Verify work order receipt signature
         """
-        sig_obj = signature.ClientSignature()
-        status = sig_obj.verify_update_receipt_signature(
+        signer = worker_signing.WorkerSign()
+        status = signer.verify_update_receipt_signature(
             receipt_update_retrieve['result'])
         if status == SignatureStatus.PASSED:
             logging.info(

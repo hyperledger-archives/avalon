@@ -14,13 +14,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import sys
-import base64
 import logging
 from Cryptodome.PublicKey import RSA
 from Cryptodome.Random import get_random_bytes
 from Cryptodome.Cipher import AES, PKCS1_OAEP
 from Cryptodome.Random import get_random_bytes
 
+import avalon_crypto_utils.crypto_utility as crypto_utility
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -44,6 +44,8 @@ class WorkerEncrypt(object):
     IV_SIZE = 12
     # AES-GCM authenticated tag size
     TAG_SIZE = 16
+    # AES_GCM authenticated key size
+    SYM_KEY_SIZE = 32
 
 # -------------------------------------------------------------------------
 
@@ -84,7 +86,7 @@ class WorkerEncrypt(object):
         Returns :
             32 bytes random session key
         """
-        return get_random_bytes(32)
+        return get_random_bytes(WorkerEncrypt.SYM_KEY_SIZE)
 
 # -------------------------------------------------------------------------
 
@@ -229,6 +231,7 @@ class WorkerEncrypt(object):
 
         try:
             result = cipher_aes.decrypt_and_verify(ciphertext, tag)
+            logger.info("Decryption result at client - %s", result)
         except Exception as e:
             err_msg = "Decrypt data failed: " + str(e)
             logger.error(err_msg)
@@ -240,14 +243,14 @@ class WorkerEncrypt(object):
     def decrypt_work_order_data_json(self, data_objects,
                                      session_key, session_iv=None):
         """
-        Function to encrypt inData/outData of workorder
+        Function to decrypt inData/outData of workorder
         Function iterate through the inData/outData items and
         decrypt the data using DataEncryptionKey/Session key.
         inData/outData data field is updated with decrypted data.
 
         Parameters:
             data_objects: inData/outData elements within the
-                          work order request as per Trusted Compute
+                          work order request or response as per Trusted Compute
                           EEA API 6.1.7 Work Order Data Formats.
             session_key: The key used to decrypt the encrypted data
                          of the response.
@@ -277,14 +280,15 @@ class WorkerEncrypt(object):
                                                             iv,
                                                             sesssion_key)
             if not do_decrypt:
-                item['data'] = self.base64_to_byte_array(data)
+                item['data'] = crypto_utility.base64_to_byte_array(data)
             else:
                 # Decrypt output data
-                item_data_bytes = self.base64_to_byte_array(data)
+                item_data_bytes = crypto_utility.base64_to_byte_array(data)
                 data_in_plain = self.decrypt_data(
                     item_data_bytes, data_key, iv)
                 item['data'] = data_in_plain
             i = i + 1
+        return data_objects
 
 # -------------------------------------------------------------------------
 
@@ -316,11 +320,11 @@ class WorkerEncrypt(object):
             if (not e_key) or (e_key == "null"):
                 enc_data = self.encrypt_data(
                     data, session_key, session_iv)
-                item['data'] = self.byte_array_to_base64(enc_data)
+                item['data'] = crypto_utility.byte_array_to_base64(enc_data)
             elif e_key == "-":
                 # Skip encryption and just encode workorder data to
                 # base64 format.
-                item['data'] = self.byte_array_to_base64(data)
+                item['data'] = crypto_utility.byte_array_to_base64(data)
             else:
                 if 'iv' in item:
                     data_iv = item['iv']
@@ -331,7 +335,7 @@ class WorkerEncrypt(object):
                                                             data_iv,
                                                             sesssion_key)
                 enc_data = self.encrypt_data(data, data_key, data_iv)
-                item['data'] = self.byte_array_to_base64(enc_data)
+                item['data'] = crypto_utility.byte_array_to_base64(enc_data)
             i = i + 1
 
 # -------------------------------------------------------------------------
@@ -383,45 +387,3 @@ class WorkerEncrypt(object):
         e_key = self.encrypt_data(first_encrypt_result, session_key, iv)
 
         return e_key
-
-# -------------------------------------------------------------------------
-
-    def base64_to_byte_array(self, b64_str):
-        """
-        Decode Base64 string to bytes.
-
-        Parameters :
-            b64_str: Base64 encoded string
-        Returns :
-            base64 decoded data in bytes.
-        """
-        try:
-            b64_bytes = b64_str.encode('UTF-8')
-            b64_dec_bytes = base64.b64decode(b64_bytes)
-            return b64_dec_bytes
-        except Exception as e:
-            err_msg = "base64 string decode to byte array failed: " + str(e)
-            logger.error(err_msg)
-            raise
-
-# -------------------------------------------------------------------------
-
-    def byte_array_to_base64(self, data_bytes):
-        """
-        Converts bytes to Base64 encoded string.
-
-        Parameters :
-            data_bytes: data to be encoded in bytes
-        Returns :
-            Base64 encoded string.
-        """
-        try:
-            b64 = base64.b64encode(data_bytes)
-            b64_str = b64.decode('UTF-8')
-            return b64_str
-        except Exception as e:
-            err_msg = "byte array to base64 encode string failed: " + str(e)
-            logger.error(err_msg)
-            raise
-
-# -------------------------------------------------------------------------
