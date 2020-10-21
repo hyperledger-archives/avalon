@@ -150,13 +150,14 @@ RUN echo "Install common/python and sdk packages\n" \
 FROM build_image as final_image
 
 ARG ENCLAVE_TYPE
+ENV ENCLAVE_TYPE=${ENCLAVE_TYPE}
 ENV TCF_HOME=/project/avalon
 
 COPY ./config/graphene_config.toml /project/avalon/config/
-COPY ./enclave_manager/setup_graphene.py /project/avalon/enclave_manager/
+COPY ./enclave_manager/setup_${ENCLAVE_TYPE}.py /project/avalon/enclave_manager/
 COPY ./enclave_manager/Makefile-graphene /project/avalon/enclave_manager/
 COPY ./enclave_manager/avalon_enclave_manager/*.py /project/avalon/enclave_manager/avalon_enclave_manager/
-COPY ./enclave_manager/avalon_enclave_manager/graphene /project/avalon/enclave_manager/avalon_enclave_manager/graphene
+COPY ./enclave_manager/avalon_enclave_manager/${ENCLAVE_TYPE} /project/avalon/enclave_manager/avalon_enclave_manager/${ENCLAVE_TYPE}
 
 WORKDIR /project/avalon/enclave_manager
 
