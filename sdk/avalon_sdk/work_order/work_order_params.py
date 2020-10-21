@@ -17,7 +17,10 @@ import logging
 
 import schema_validation.validate as WOcheck
 import avalon_crypto_utils.crypto_utility as crypto_utility
-import avalon_crypto_utils.signature as signature
+import avalon_crypto_utils.worker_encryption as worker_encryption
+import avalon_crypto_utils.worker_signing as worker_signing
+import avalon_crypto_utils.worker_hash as worker_hash
+
 from error_code.error_status import WorkOrderStatus
 import utility.jrpc_utility as util
 logger = logging.getLogger(__name__)
@@ -26,6 +29,9 @@ logger = logging.getLogger(__name__)
 class WorkOrderParams():
     def __init__(self):
         self.params_obj = {}
+        self.signer = worker_signing.WorkerSign()
+        self.encrypt = worker_encryption.WorkerEncrypt()
+        self.hasher = worker_hash.WorkerHash()
 
     def create_request(
             self, work_order_id, worker_id, workload_id,
@@ -81,7 +87,7 @@ class WorkOrderParams():
         self.params_obj["inData"] = list()
         if encrypted_session_key is None:
             try:
-                encrypted_session_key = crypto_utility.generate_encrypted_key(
+                encrypted_session_key = self.encrypt.encrypt_session_key(
                     session_key, worker_encryption_key)
                 self.set_encrypted_session_key(
                     crypto_utility.byte_array_to_hex(encrypted_session_key))
@@ -153,9 +159,9 @@ class WorkOrderParams():
         and set encryptedRequestHash parameter in the request.
         """
         try:
-            sig_obj = signature.ClientSignature()
-            self.request_hash = sig_obj.calculate_request_hash(self.params_obj)
-            encrypted_request_hash = crypto_utility.encrypt_data(
+            self.request_hash = self.hasher.calculate_request_hash(
+                self.params_obj)
+            encrypted_request_hash = self.encrypt.encrypt_data(
                 self.request_hash, self.session_key, self.session_iv)
             enc_request_hash_hex = crypto_utility.byte_array_to_hex(
                 encrypted_request_hash)
@@ -173,17 +179,14 @@ class WorkOrderParams():
         as defined in Off-Chain Trusted Compute EEA spec 6.1.8.3
         and set the requesterSignature parameter in the request.
         """
-        sig_obj = signature.ClientSignature()
-        status, sign = sig_obj.generate_signature(
-            self.request_hash,
-            private_key
-        )
+        signature = self.signer.sign_message(req_hash)
         if status is True:
-            self.params_obj["requesterSignature"] = sign
+            self.params_obj["requesterSignature"] = \
+                crypto_utility.byte_array_to_base64(signature)
             # public signing key is shared to enclave manager to
             # verify the signature.
             # It is temporary approach to share the key with the worker.
-            verifying_key = crypto_utility.get_verifying_key(private_key)
+            verifying_key = self.signer.get_public_sign_key(private_key)
             self.set_verifying_key(verifying_key)
             return True
         else:
@@ -335,7 +338,7 @@ class WorkOrderParams():
         if encrypted_data_encryption_key is None or \
                 encrypted_data_encryption_key == "" or \
                 encrypted_data_encryption_key == "null":
-            enc_data = crypto_utility.encrypt_data(
+            enc_data = self.encrypt.encrypt_data(
                 data, self.session_key, self.session_iv
             )
             return crypto_utility.byte_array_to_base64(enc_data)
@@ -345,7 +348,7 @@ class WorkOrderParams():
             enc_data = crypto_utility.byte_array_to_base64(data)
             return enc_data
         else:
-            enc_data = crypto_utility.encrypt_data(
+            enc_data = self.encrypt.encrypt_data(
                 data, encrypted_data_encryption_key, data_iv)
             return crypto_utility.byte_array_to_base64(enc_data)
 

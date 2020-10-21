@@ -19,8 +19,11 @@ services:
     container_name: process-work-order
     image: avalon-python-worker-dev
     build:
-      context: .
-      dockerfile: ./Dockerfile
+      # Context is set to TCF_HOME directory to copy crypto modules from
+      # <TCF_HOME>/common/crypto_utils/avalon_crypto_utils to
+      # graphene python worker docker image
+      context: ../../..
+      dockerfile: ./tc/graphene/python_worker/Dockerfile
     environment:
       - http_proxy
       - https_proxy

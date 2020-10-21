@@ -16,7 +16,7 @@
 
 import json
 import logging
-import avalon_crypto_utils.crypto_utility as crypto_utils
+import avalon_crypto_utils.worker_signing as worker_signing
 from error_code.error_status import ReceiptCreateStatus, WorkOrderStatus
 from avalon_sdk.work_order_receipt.work_order_receipt \
     import WorkOrderReceiptRequest
@@ -35,8 +35,10 @@ class WorkOrderKVDelegate:
         self._worker_id = worker_id
         # Key pair for work order receipt signing
         # This is temporary approach
-        self.private_key = crypto_utils.generate_signing_keys()
-        self.public_key = self.private_key.get_verifying_key().to_pem()
+        signer = worker_signing.WorkerSign()
+        signer.generate_signing_key()
+        self.private_key = signer.sign_private_key
+        self.public_key = signer.get_public_sign_key()
 
     def cleanup_work_orders(self):
         """

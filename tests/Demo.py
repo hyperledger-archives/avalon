@@ -19,22 +19,28 @@ import argparse
 import random
 import json
 import logging
+import secrets
 
 from http_client.http_jrpc_client import HttpJrpcClient
-import avalon_crypto_utils.signature as signature
+
+import avalon_crypto_utils.worker_encryption as worker_encryption
+import avalon_crypto_utils.worker_signing as worker_signing
+import avalon_crypto_utils.worker_hash as worker_hash
+import avalon_crypto_utils.crypto_utility as crypto_utility
+
 import avalon_sdk.worker.worker_details as worker
-import avalon_crypto_utils.crypto_utility as enclave_helper
 import utility.file_utils as futils
 from error_code.error_status import SignatureStatus, WorkOrderStatus
 
 LOGGER = logging.getLogger(__name__)
 
 TCFHOME = os.environ.get("TCF_HOME", "../../")
+NO_OF_BYTES = 16
 
 
-# -----------------------------------------------------------------
 # -----------------------------------------------------------------
 def local_main(config):
+    global input_json_str
     if not input_json_str and not input_json_dir:
         LOGGER.error("JSON input file is not provided")
         exit(1)
@@ -58,15 +64,15 @@ def local_main(config):
         for file in sorted(files):
             LOGGER.info("---------------- Input file name: %s -------------\n",
                         file.decode("utf-8"))
-            input_json_str1 = futils.read_json_file(
+            input_json_str = futils.read_json_file(
                 (directory.decode("utf-8") + file.decode("utf-8")))
             # -----------------------------------------------------------------
 
             # If Client request is WorkOrderSubmit, a requester payload's
             # signature with the requester private signing key is generated.
-            if "WorkOrderSubmit" in input_json_str1:
+            if "WorkOrderSubmit" in input_json_str:
                 # Update workOrderId , workerId and workloadId
-                input_json_obj = json.loads(input_json_str1)
+                input_json_obj = json.loads(input_json_str)
                 wo_id = hex(random.randint(1, 2**64 - 1))
                 input_json_obj["params"]["workOrderId"] = wo_id
                 input_json_obj["params"]["workerId"] = worker_id
@@ -75,95 +81,126 @@ def local_main(config):
                 workload_id = input_json_obj["params"]["workloadId"]
                 workload_id_hex = workload_id.encode("UTF-8").hex()
                 input_json_obj["params"]["workloadId"] = workload_id_hex
-                input_json_str1 = json.dumps(input_json_obj)
 
-                # Generate session iv an encrypted session key
-                session_iv = enclave_helper.generate_iv()
-                session_key = enclave_helper.generate_key()
-                encrypted_session_key = enclave_helper.generate_encrypted_key(
+                encrypt = worker_encryption.WorkerEncrypt()
+                # Generate session key, session iv and encrypted session key
+                session_key = encrypt.generate_session_key()
+                session_iv = encrypt.generate_iv()
+                encrypted_session_key = encrypt.encrypt_session_key(
                     session_key, worker_obj.encryption_key)
 
-                input_json_str1, status = sig_obj.generate_client_signature(
-                    input_json_str1, worker_obj, private_key, session_key,
-                    session_iv, encrypted_session_key)
-                if status != SignatureStatus.PASSED:
-                    LOGGER.info("Generate signature failed\n")
-                    exit(1)
-                requester_nonce = json.loads(
-                    input_json_str1)["params"]["requesterNonce"]
-                if input_json_str1 is None:
+                input_json_obj["params"]["encryptedSessionKey"] = \
+                    crypto_utility.byte_array_to_hex(encrypted_session_key)
+                input_json_obj["params"]["sessionKeyIv"] = \
+                    crypto_utility.byte_array_to_hex(session_iv)
+
+                if "requesterNonce" in input_json_obj["params"]:
+                    if len(input_json_obj["params"]["requesterNonce"]) == 0:
+                        # [NO_OF_BYTES] 16 BYTES for nonce.
+                        # This is the recommendation by NIST to
+                        # avoid collisions by the "Birthday Paradox".
+                        requester_nonce = secrets.token_hex(NO_OF_BYTES)
+                        input_json_obj["params"]["requesterNonce"] = \
+                            requester_nonce
+                requester_nonce = input_json_obj["params"]["requesterNonce"]
+
+                # Encode data in inData
+                for data_obj in input_json_obj["params"]["inData"]:
+                    encoded_data = data_obj["data"].encode('UTF-8')
+                    data_obj["data"] = encoded_data
+
+                # Encrypt inData
+                encrypt.encrypt_work_order_data_json(
+                    input_json_obj["params"]["inData"], session_key,
+                    session_iv)
+                req_hash = worker_hash.WorkerHash().calculate_request_hash(
+                    input_json_obj["params"])
+                encrypted_req_hash = encrypt.encrypt_data(
+                    req_hash, session_key, session_iv)
+                input_json_obj["params"]["encryptedRequestHash"] = \
+                    encrypted_req_hash.hex()
+                signer = worker_signing.WorkerSign()
+                signer.generate_signing_key()
+                wo_req_sig = signer.sign_message(req_hash)
+                input_json_obj["params"]["requesterSignature"] = \
+                    crypto_utility.byte_array_to_base64(wo_req_sig)
+                input_json_obj["params"]["verifyingKey"] = \
+                    signer.get_public_sign_key().decode('utf-8')
+                input_json_str = json.dumps(input_json_obj)
+                if input_json_str is None:
                     continue
             # -----------------------------------------------------------------
 
             # Update the worker ID
             if response:
-                if "workerId" in input_json_str1:
+                if "workerId" in input_json_str:
                     # Retrieve the worker id from the "WorkerRetrieve"
                     # response and update the worker id information for
                     # further json requests.
                     if "result" in response and \
                             "ids" in response["result"].keys() and \
                             len(response["result"]["ids"]) > 0:
-                        input_json_final = json.loads(input_json_str1)
+                        input_json_final = json.loads(input_json_str)
                         worker_id = response["result"]["ids"][0]
                         input_json_final["params"]["workerId"] = worker_id
-                        input_json_str1 = json.dumps(input_json_final)
+                        input_json_str = json.dumps(input_json_final)
                         LOGGER.info("********** Worker details Updated with "
                                     "Worker ID*********\n%s\n",
-                                    input_json_str1)
+                                    input_json_str)
 
             # -----------------------------------------------------------------
-            if "WorkOrderGetResult" in input_json_str1 or \
-                    "WorkOrderReceiptRetrieve" in input_json_str1:
-                input_json_obj = json.loads(input_json_str1)
+            if "WorkOrderGetResult" in input_json_str or \
+                    "WorkOrderReceiptRetrieve" in input_json_str:
+                input_json_obj = json.loads(input_json_str)
                 input_json_obj["params"]["workOrderId"] = wo_id
-                input_json_str1 = json.dumps(input_json_obj)
+                input_json_str = json.dumps(input_json_obj)
 
             LOGGER.info("*********Request Json********* \n%s\n",
-                        input_json_str1)
-            response = uri_client._postmsg(input_json_str1)
+                        input_json_str)
+            response = uri_client._postmsg(input_json_str)
             LOGGER.info("**********Received Response*********\n%s\n", response)
 
             # -----------------------------------------------------------------
 
             # Worker details are loaded into Worker_Obj
-            if "WorkerRetrieve" in input_json_str1 and "result" in response:
+            if "WorkerRetrieve" in input_json_str and "result" in response:
                 worker_obj.load_worker(response["result"]["details"])
             # -----------------------------------------------------------------
 
             # Poll for "WorkOrderGetResult" and break when you get the result
-            while("WorkOrderGetResult" in input_json_str1 and
+            while("WorkOrderGetResult" in input_json_str and
                     "result" not in response):
                 if response["error"]["code"] != WorkOrderStatus.PENDING:
                     break
-                response = uri_client._postmsg(input_json_str1)
+                response = uri_client._postmsg(input_json_str)
                 LOGGER.info("Received Response: %s, \n \n ", response)
                 time.sleep(3)
 
             # -----------------------------------------------------------------
 
             # Verify the signature
-            if "WorkOrderGetResult" in input_json_str1:
+            if "WorkOrderGetResult" in input_json_str:
                 if "error" in response:
                     # Response has error, hence skip Signature verification
                     LOGGER.info("Work order response has error; "
                                 "skipping signature verification")
                     continue
-                sig_bool = sig_obj.verify_signature(
+                sig_bool = signer.verify_signature(
                     response['result'],
                     worker_obj.verification_key,
                     requester_nonce)
                 try:
                     if sig_bool > 0:
                         LOGGER.info("Signature Verified")
-                        enclave_helper.decrypted_response(
-                            response['result'], session_key, session_iv)
+                        encrypt.decrypt_work_order_data_json(
+                            response['result']['outData'],
+                            session_key, session_iv)
                     else:
                         LOGGER.info("Signature verification Failed")
                         exit(1)
                 except Exception as e:
-                    LOGGER.error("ERROR: Failed to analyze " +
-                                 "Signature Verification")
+                    LOGGER.error("ERROR: Failed to verify signature of " +
+                                 "work order response")
                     exit(1)
 
             # -----------------------------------------------------------------
@@ -182,8 +219,6 @@ def parse_command_line(config, args):
     global input_json_dir
     global server_uri
     global output_json_file_name
-    global consensus_file_name
-    global sig_obj
     global worker_obj
     global worker_id
     global private_key
@@ -254,10 +289,9 @@ def parse_command_line(config, args):
         private_key = options.private_key
     else:
         # Generating the private Key for the client
-        private_key = enclave_helper.generate_signing_keys()
+        private_key = worker_signing.WorkerSign().generate_signing_key()
 
-    # Initializing Signature object, Worker Object
-    sig_obj = signature.ClientSignature()
+    # Initializing Worker Object
     worker_obj = worker.SGXWorkerDetails()
 
 

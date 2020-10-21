@@ -18,10 +18,26 @@ RUN apt-get update \
 # Make Python3 default
 RUN ln -sf /usr/bin/python3 /usr/bin/python
 
-COPY .  /home/python_worker/
+COPY ./tc/graphene/python_worker/  /home/python_worker/
+COPY ./common/python /home/python_worker/common/python
+COPY ./common/crypto_utils /home/python_worker/common/crypto_utils
+COPY ./bin/get_version /home/python_worker/bin/get_version
+COPY ./VERSION /home/python_worker/VERSION
+
+WORKDIR /home/python_worker/common/python
+
+RUN echo "Building Avalon Common Python\n" \
+ && make && make install
+
+WORKDIR /home/python_worker/common/crypto_utils
+
+# Build common python crypto utils
+RUN echo "Building Avalon Common Crypto Python\n" \
+ && make && make install
 
 WORKDIR /home/python_worker/
 
+#Build and install python worker
 RUN make && make install
 
 # GSC (Graphene Shielded Container) docker image build depends on child

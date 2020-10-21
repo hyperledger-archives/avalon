@@ -23,7 +23,8 @@ import config.config as pconfig
 from direct_model_generic_client import DirectModelGenericClient
 from proxy_model_generic_client import ProxyModelGenericClient
 import utility.hex_utils as hex_utils
-import avalon_crypto_utils.crypto_utility as crypto_utility
+import avalon_crypto_utils.worker_encryption as worker_encrypt
+import avalon_crypto_utils.worker_signing as worker_signing
 
 logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(message)s", level=logging.INFO)
@@ -273,9 +274,10 @@ def Main(args=None):
         logging.error("Unable to retrieve worker details\n")
         sys.exit(-1)
 
+    encrypt = worker_encrypt.WorkerEncrypt()
     # Create session key and iv to sign work order request
-    session_key = crypto_utility.generate_key()
-    session_iv = crypto_utility.generate_iv()
+    session_key = encrypt.generate_session_key()
+    session_iv = encrypt.generate_iv()
 
     # Do worker verification
     generic_client_obj.do_worker_verification(worker_obj)
@@ -306,7 +308,8 @@ def Main(args=None):
                 \n {}".format(wo_params))
         sys.exit(-1)
 
-    client_private_key = crypto_utility.generate_signing_keys()
+    signer = worker_signing.WorkerSign()
+    client_private_key = signer.generate_signing_key()
     if parser.requester_signature():
         # Add requester signature and requester verifying_key
         if wo_params.add_requester_signature(client_private_key) is False:

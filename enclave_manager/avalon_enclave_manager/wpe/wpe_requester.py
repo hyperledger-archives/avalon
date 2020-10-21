@@ -25,8 +25,7 @@ import argparse
 import config.config as pconfig
 import utility.logger as plogger
 import utility.hex_utils as hex_utils
-import avalon_crypto_utils.signature as signature
-import avalon_crypto_utils.crypto_utility as crypto_utils
+import avalon_crypto_utils.worker_encryption as worker_encryption
 from database import connector
 from error_code.error_status import SignatureStatus
 from http_client.http_jrpc_client import HttpJrpcClient
@@ -89,8 +88,9 @@ class WPERequester():
         in_data = [verification_key_nonce]
 
         # Create session key and iv to sign work order request
-        session_key = crypto_utils.generate_key()
-        session_iv = crypto_utils.generate_iv()
+        worker_encrypt = worker_encryption.WorkerEncrypt()
+        session_key = worker_encrypt.generate_key()
+        session_iv = worker_encrypt.generate_iv()
 
         wo_req = self._construct_wo_req(
             in_data, workload_id, self._worker.encryption_key,
@@ -103,7 +103,7 @@ class WPERequester():
             if self._verify_res_signature(wo_response_json,
                                           self._worker.verification_key,
                                           wo_req["params"]["requesterNonce"]):
-                decrypted_res = crypto_utils.decrypted_response(
+                decrypted_res = worker_encrypt.decrypted_response(
                     wo_response_json, session_key, session_iv)
                 # Response contains an array of results. In this case, the
                 # array has single element and the data field is of interest.
@@ -143,8 +143,9 @@ class WPERequester():
         in_data = [json.dumps(registration_params)]
 
         # Create session key and iv to sign work order request
-        session_key = crypto_utils.generate_key()
-        session_iv = crypto_utils.generate_iv()
+        worker_encrypt = worker_encryption.WorkerEncrypt()
+        session_key = worker_encrypt.generate_key()
+        session_iv = worker_encrypt.generate_iv()
 
         wo_req = self._construct_wo_req(
             in_data, workload_id, self._worker.encryption_key,
@@ -157,7 +158,7 @@ class WPERequester():
             if "error" not in wo_response_json and self._verify_res_signature(
                     wo_response_json, self._worker.verification_key,
                     wo_req["params"]["requesterNonce"]):
-                decrypted_res = crypto_utils.decrypted_response(
+                decrypted_res = worker_encrypt.decrypted_response(
                     wo_response_json, session_key, session_iv)
                 # Response contains an array of results. In this case, the
                 # array has single element and the data field is of interest.
@@ -184,8 +185,9 @@ class WPERequester():
         in_data = [wo_request, encryption_key]
 
         # Create session key and iv to sign work order request
-        session_key = crypto_utils.generate_key()
-        session_iv = crypto_utils.generate_iv()
+        worker_encrypt = worker_encryption.WorkerEncrypt()
+        session_key = worker_encrypt.generate_key()
+        session_iv = worker_encrypt.generate_iv()
 
         wo_req = self._construct_wo_req(
             in_data, workload_id, self._worker.encryption_key,
@@ -198,7 +200,7 @@ class WPERequester():
             if self._verify_res_signature(wo_response_json,
                                           self._worker.verification_key,
                                           wo_req["params"]["requesterNonce"]):
-                decrypted_res = crypto_utils.decrypted_response(
+                decrypted_res = worker_encrypt.decrypted_response(
                     wo_response_json, session_key, session_iv)
                 # Response contains an array of results. In this case, the
                 # array has single element and the data field is of interest.
@@ -268,8 +270,8 @@ class WPERequester():
             @returns True - If verification succeeds
                     False - If verification fails
         """
-        sig_obj = signature.ClientSignature()
-        status = sig_obj.verify_signature(
+        signer = worker_signing.WorkerSign()
+        status = signer.verify_signature(
             work_order_res,
             worker_verification_key,
             requester_nonce)

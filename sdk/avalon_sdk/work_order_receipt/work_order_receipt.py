@@ -15,8 +15,10 @@
 import json
 import random
 
-import avalon_crypto_utils.signature as signature
 import avalon_crypto_utils.crypto_utility as crypto_utility
+import avalon_crypto_utils.worker_signing as worker_signing
+import avalon_crypto_utils.worker_hash as worker_hash
+
 from error_code.error_status import ReceiptCreateStatus as ReceiptCreateStatus
 from error_code.error_status import WorkOrderStatus
 from enum import Enum, unique
@@ -55,9 +57,11 @@ class WorkOrderReceiptRequest():
     """
 
     def __init__(self):
-        self.sig_obj = signature.ClientSignature()
         self.SIGNING_ALGORITHM = "SECP256K1"
         self.HASHING_ALGORITHM = "SHA-256"
+        self.signer = worker_signing.WorkerSign()
+        self.signer.generate_signing_key()
+        self.hasher = worker_hash.WorkerHash()
 
     def create_receipt(self, wo_request,
                        receipt_create_status, signing_key, nonce=None):
@@ -76,14 +80,14 @@ class WorkOrderReceiptRequest():
         """
         wo_request_params = wo_request["params"]
         wo_request_hash = \
-            self.sig_obj.calculate_request_hash(wo_request_params)
+            self.hasher.calculate_request_hash(wo_request_params)
         wo_request_hash_str = \
             crypto_utility.byte_array_to_base64(wo_request_hash)
         worker_id = wo_request_params["workerId"]
         requester_nonce = nonce
         if nonce is None:
             requester_nonce = str(random.randint(1, 10**10))
-        public_key = signing_key.get_verifying_key().to_pem().decode('ascii')
+        public_key = self.signer.get_public_sign_key()
         wo_receipt_request = {
             "workOrderId": wo_request_params["workOrderId"],
             # TODO: workerServiceId is same as worker id,
@@ -106,17 +110,9 @@ class WorkOrderReceiptRequest():
             wo_receipt_request["workOrderRequestHash"] + \
             wo_receipt_request["requesterGeneratedNonce"]
         wo_receipt_bytes = bytes(wo_receipt_str, "UTF-8")
-        wo_receipt_hash = crypto_utility.compute_message_hash(wo_receipt_bytes)
-        status, wo_receipt_sign = self.sig_obj.generate_signature(
-            wo_receipt_hash,
-            signing_key
-        )
-        if status is False:
-            # if generate signature is failed.
-            wo_receipt_request["requesterSignature"] = ""
-            raise Exception("Generate signature is failed")
-        else:
-            wo_receipt_request["requesterSignature"] = wo_receipt_sign
+        wo_receipt_hash = self.hasher.compute_message_hash(wo_receipt_bytes)
+        wo_receipt_sign = self.signer.sign_message(wo_receipt_hash)
+        wo_receipt_request["requesterSignature"] = wo_receipt_sign
         return wo_receipt_request
 
     def update_receipt(self, work_order_id, update_type,
@@ -163,14 +159,6 @@ class WorkOrderReceiptRequest():
             wo_receipt_update["updateData"]
         wo_receipt_bytes = bytes(wo_receipt_str, "UTF-8")
         wo_receipt_hash = crypto_utility.compute_message_hash(wo_receipt_bytes)
-        status, wo_receipt_sign = self.sig_obj.generate_signature(
-            wo_receipt_hash,
-            signing_key
-        )
-        if status is False:
-            # if generating signature failed.
-            wo_receipt_update["updateSignature"] = ""
-            raise Exception("Generate signature is failed")
-        else:
-            wo_receipt_update["updateSignature"] = wo_receipt_sign
+        wo_receipt_sign = self.signer.sign_message(wo_receipt_hash)
+        wo_receipt_request["requesterSignature"] = wo_receipt_sign
         return wo_receipt_update
