@@ -49,7 +49,7 @@ services:
       - 1948
     command: |
       bash -c "
-        if [ -v CLEAN_SEALED_DATA ] && [ $CLEAN_SEALED_DATA = 1 ]; then rm -f /project/avalon/.sealed/.sealed.data*; fi;
+        if [ $CLEAN_SEALED_DATA = 1 ]; then rm -f /project/avalon/.sealed/.sealed.data*; fi;
         while true;
           do
             if [ -e /shared-pool-1/wpe_mr_enclave.txt ];
@@ -119,7 +119,7 @@ services:
       - 1948
     command: |
       bash -c "
-        if [ -v CLEAN_SEALED_DATA ] && [ $CLEAN_SEALED_DATA = 1 ]; then rm -f /project/avalon/.sealed/.sealed.data*; fi;
+        if [ $CLEAN_SEALED_DATA = 1 ]; then rm -f /project/avalon/.sealed/.sealed.data*; fi;
         while true;
           do
             if [ -e /shared-pool-2/wpe_mr_enclave.txt ];
