@@ -206,23 +206,21 @@ The fix is to remove ``/dev/sgx`` then install ``/dev/isgx``
 For instructions on how to do tis, see "Intel SGX in Hardware Mode" at
 https://github.com/hyperledger/avalon/blob/master/PREREQUISITES.md#sgx
 
-How can I prevent a worker from using old keys when I restart a KME or a Singleton worker?
+How can I make a worker from use old keys when I restart a KME or a Singleton worker?
 ------------------------------------------------------------------------------------------
-By default, workers use the same signing and encryption key pairs (asymmetric keys) across
-restarts to ensure validity of historical work order requests/responses. This is also done
-to ensure a smooth functioning in case of abrupt failures of the worker. Sealed data from
-respective worker enclaves are used to recover keys across restarts.
-However, this default behavior can be overriden if fresh pairs of aforementioned keys are
-desired. For this, it has to be ensured that the sealed data created during previous
-startup of the enclave manager (KME or Singleton) is cleaned up before starting again.
-This has been provisioned in the docker mode already. Prepend ``CLEAN_SEALED_DATA=1`` to
-the docker-compose command. For example -
+By default, workers use fresh set of signing and encryption key pairs (asymmetric keys) across
+restarts. Sealed data from respective worker enclaves are used to recover keys across restarts.
+However, the default behavior does not allow recovery from sealed data. This behavior can be
+overridden if old pairs of aforementioned keys are desired. For this, it has to be ensured that
+the sealed data created during previous startup of the enclave manager (KME or Singleton) is not
+cleaned up before starting again. This has been provisioned in the docker mode already. Prepend
+``CLEAN_SEALED_DATA=0`` to the docker-compose command. For example -
 
    .. code:: none
 
-       CLEAN_SEALED_DATA=1 docker-compose up -d
+       CLEAN_SEALED_DATA=0 docker-compose up -d
 
-You could also update the value of ``CLEAN_SEALED_DATA`` to ``1`` in the ``.env`` file at project root directory.
+You could also update the value of ``CLEAN_SEALED_DATA`` to ``0`` in the ``.env`` file at project root directory.
 
 
 Software Development
@@ -334,24 +332,24 @@ If using Docker, specify the URI as the name of the Docker container running
 the Avalon Listener:  ``http://avalon-listener:1947`` on the
 command line (the option is usually ``--uri`` or ``--service-uri``).
 
-How do I fix ``RuntimeError`` when I make changes to trusted code in enclave managers (KME or Singleton) and try to run?
+Why do I see ``RuntimeError`` when I make changes to trusted code in enclave managers (KME or Singleton) and try to run?
 ------------------------------------------------------------------------------------------------------------------------
 An error stack similar to the one below can be seen if changes are made to the trusted
-code and the enclave manager (KME or Singleton) is restarted.
+code and the enclave manager (KME or Singleton) is restarted without cleaning sealed data.
 
    .. code:: none
 
        [02:28:05 ERROR   avalon_enclave_manager.base_enclave_manager] failed to initialize/signup enclave;
        Traceback (most recent call last):
        ...
+       ...
        RuntimeError
 
-Note that this is only the beginning and end of the error stack. This happens because
-some sealed data from respective enclave is used across enclave lifetimes now. The
-change in the enclave itself across 2 lifetimes, with the second enclave trying to use
-the sealed data from the previous run causes this. The solution is to remove the sealed
-data before starting again. Refer to the steps mentioned in ``prevent a worker from
-using old keys`` in `Installation and Configuration`_ to achieve cleanup.
+Note that this is only the beginning and end of the error stack. This happens because some
+sealed data from respective enclave is used across enclave lifetimes now. The way out of
+this is to remove the sealed data before starting again. Be cautious before you do this
+beacause this would result in creating fresh pair of signing and encryption keys discarding
+the older ones.
 
 
 Docker and Containers
