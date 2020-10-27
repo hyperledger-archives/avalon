@@ -23,6 +23,7 @@ ADD_SUBDIRECTORY(echo/workload)
 ADD_SUBDIRECTORY(heart_disease_eval/workload)
 ADD_SUBDIRECTORY(inside_out_demo/workload)
 ADD_SUBDIRECTORY(simple_wallet/workload)
+ADD_SUBDIRECTORY(data_owner/workload)
 
 # To add a new workload, uncomment the following line and change
 # $WORKLOAD_STATIC_NAME$ to the appropriate name (such as hello_world):
