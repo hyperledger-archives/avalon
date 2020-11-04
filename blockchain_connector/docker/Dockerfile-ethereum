@@ -122,6 +122,9 @@ RUN apt-get update \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
 
+# Required to create nested asyncio loop
+RUN pip3 install nest_asyncio
+
 # Installing web3 for ethereum
 RUN pip3 install --upgrade setuptools json-rpc web3 py-solc-x nose2
 
