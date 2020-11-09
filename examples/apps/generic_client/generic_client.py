@@ -109,6 +109,12 @@ class GenericClient():
         # requester signature for work order requests
         self._requester_signature = options.requester_signature
 
+        # MR enclave value
+        if options.mr_enclave is None:
+            self._mr_enclave = ""
+        else:
+            self._mr_enclave = options.mr_enclave
+
         logging.info("******* Hyperledger Avalon Generic client *******")
 
         # mode should be one of listing or registry (default)
@@ -181,6 +187,10 @@ class GenericClient():
             "-rs", "--requester_signature",
             help="Enable requester signature for work order requests",
             action="store_true")
+        parser.add_argument(
+            "-mr", "--mr_enclave",
+            help='mr enclave value',
+            type=str)
         options = parser.parse_args(args)
 
         return options
@@ -237,6 +247,9 @@ class GenericClient():
     def mode(self):
         return self._mode
 
+    def mr_enclave(self):
+        return self._mr_enclave
+
 
 def Main(args=None):
     parser = GenericClient(args)
@@ -278,7 +291,10 @@ def Main(args=None):
     session_iv = crypto_utility.generate_iv()
 
     # Do worker verification
-    generic_client_obj.do_worker_verification(worker_obj)
+    status = generic_client_obj.do_worker_verification(worker_obj,
+                                                       parser.mr_enclave())
+    if status is False:
+        sys.exit(-1)
 
     logging.info("**********Worker details Updated with Worker ID" +
                  "*********\n%s\n", worker_id)

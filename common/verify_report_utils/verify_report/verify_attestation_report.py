@@ -20,9 +20,10 @@ from error_code.error_status import QuoteStatus
 logger = logging.getLogger(__name__)
 
 
-def verify_attestation_report(enclave_info):
+def verify_attestation_report(enclave_info, mr_enclave=""):
     '''
     Function to verify quote status, signature of IAS attestation report
+    and verify MR enclave value
     '''
 
     verification_report = \
@@ -47,4 +48,17 @@ def verify_attestation_report(enclave_info):
         logger.error("Enclave IAS report signature verification failed")
         return report_sig_status
     logger.info("Enclave IAS report signature verification passed")
+
+    if mr_enclave != "":
+        v_report = json.loads(
+            enclave_info["proof_data"]["verification_report"])
+        mr_check = verify_report_util.verify_mr_enclave_value(
+            v_report["isvEnclaveQuoteBody"],
+            mr_enclave)
+        if mr_check is False:
+            logger.error("MR enclave value check failed")
+            return mr_check
+        else:
+            logger.info("MR enclave value check passed")
+
     return True

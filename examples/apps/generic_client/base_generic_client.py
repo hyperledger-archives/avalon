@@ -39,7 +39,7 @@ class BaseGenericClient(GenericClientInterface):
         self._work_order_instance = None
         self._work_order_receipt_instance = None
 
-    def do_worker_verification(self, worker_obj):
+    def do_worker_verification(self, worker_obj, mr_enclave):
         """
         Do worker verification on proof data if it exists
         Proof data exists in SGX hardware mode.
@@ -59,8 +59,6 @@ class BaseGenericClient(GenericClientInterface):
                     "Failed to verify worker encryption key signature")
                 return False
 
-        # TODO Need to do verify MRENCLAVE value
-        # in the attestation report
         if not worker_obj.proof_data:
             logging.info("Proof data is empty. " +
                          "Skipping verification of attestation report")
@@ -75,7 +73,7 @@ class BaseGenericClient(GenericClientInterface):
 
             logging.info("Perform verification of attestation report")
             verify_report_status = attestation_util.verify_attestation_report(
-                enclave_info)
+                enclave_info, mr_enclave)
             if verify_report_status is False:
                 logging.error("Verification of enclave sign-up info failed")
                 return False
