@@ -17,6 +17,9 @@ import logging
 import random
 import json
 import importlib
+from ssl import SSLError
+from requests.exceptions import Timeout
+from requests.exceptions import HTTPError
 
 from ssl import SSLError
 from requests.exceptions import HTTPError, Timeout
