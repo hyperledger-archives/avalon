@@ -24,6 +24,8 @@ services:
       # graphene python worker docker image
       context: ../../..
       dockerfile: ./tc/graphene/python_worker/Dockerfile
+      args:
+        - WORKER_TYPE=singleton
     environment:
       - http_proxy
       - https_proxy

@@ -21,6 +21,8 @@ services:
     build:
       context: .
       dockerfile: ./Dockerfile
+      args:
+        - BASE_IMAGE=avalon-python-worker-dev
     environment:
       - http_proxy
       - https_proxy

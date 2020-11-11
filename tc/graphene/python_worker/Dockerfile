@@ -1,5 +1,10 @@
 FROM ubuntu:bionic
 
+# WORKER_TYPE passed in at image build time
+ARG WORKER_TYPE
+# Setting environment variable meant to be used by Makefile
+ENV WORKER_TYPE=$WORKER_TYPE
+
 # Ignore timezone prompt in apt
 ENV DEBIAN_FRONTEND=noninteractive
 

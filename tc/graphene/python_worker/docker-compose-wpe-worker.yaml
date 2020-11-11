@@ -1,4 +1,4 @@
-# Copyright 2020 Intel Corporation
+# Copyright 2021 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,13 +12,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+#
+# This docker compose file is meant only to build python worker image for WPE.
+# Unlike singleton worker, WPE worker cannot be run independent of KME. It can
+# run only alongside Avalon KME.
+#
+
 version: '3.5'
 
 services:
   process-work-order:
-    image: gsc-avalon-fibonacci-workload-dev
-    devices:
-      - "/dev/gsgx:/dev/gsgx"
-      - "/dev/isgx:/dev/isgx"
-    volumes:
-      - /var/run/aesmd/aesm.socket:/var/run/aesmd/aesm.socket
+    container_name: process-work-order-wpe
+    image: avalon-python-worker-wpe-dev
+    build:
+      context: ../../../
+      dockerfile: tc/graphene/python_worker/Dockerfile
+      args:
+        - WORKER_TYPE=wpe
+    environment:
+      - http_proxy
+      - https_proxy
+      - no_proxy
+
