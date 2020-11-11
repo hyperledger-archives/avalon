@@ -83,5 +83,5 @@ connection_retry = 3
 [WorkerConfig]
 # Id of worker in plain text. This can be overridden by passing values in command line for
 # enclave manager using --worker_id option.
-worker_id = "graphene-pool-worker-1"
+worker_id = "kme-worker-1"
 
