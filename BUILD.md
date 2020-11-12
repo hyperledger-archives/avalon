@@ -117,7 +117,8 @@ These docker compose files can be further customized to run multiple worker pool
    3. When submitting work orders using any of the sample client applications, `--worker_id` argument needs to be mentioned explicitly to choose one of the workers in the system (Note : Each pool represents a single worker). For example:
    ```bash
    ./generic_client.py -o --uri "http://avalon-listener:1947" \
-      --workload_id "echo-result" --in_data "Hello" --worker_id worker-pool-2
+      --workload_id "echo-result" --in_data "Hello" --worker_id worker-pool-2 \
+      -avs "http://avalon-avs:6090" 
    ```
 
 # <a name="standalonebuild"></a>Standalone Build

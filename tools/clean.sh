@@ -78,7 +78,7 @@ cd $SRCDIR/common/crypto_utils
 make clean
 
 # --------------- VERIFY REPORT UTILS ---------------
-cd $SRCDIR/common/verify_report_utils/
+cd $SRCDIR/common/verify_report_utils/ias
 make clean
 
 # --------------- SDK ---------------

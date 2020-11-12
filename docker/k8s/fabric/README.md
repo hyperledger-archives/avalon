@@ -62,7 +62,7 @@ This serves as a playground to setup k8s cluster for Avalon Fabric proxy model.
    ```bash
    cd examples/apps/generic_client
    ./generic_client.py -b fabric --workload_id "echo-result" --in_data "Hello" \
-       --worker_id "singleton-worker-1"
+       --worker_id "singleton-worker-1" -avs "http://avalon-avs:6090"
    ```
 
    NOTE: `worker_id` should match with worker id of singleton enclave manager.  

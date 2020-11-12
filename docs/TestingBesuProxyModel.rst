@@ -110,7 +110,7 @@ To run Besu with Hyperledger Avalon, follow these steps:
        docker exec -it avalon-shell bash
        cd examples/apps/generic_client/
        ./generic_client.py -b ethereum --workload_id "echo-result" -o --in_data "Hello" \
-           --worker_id "singleton-worker-1"
+           --worker_id "singleton-worker-1" -avs "http://avalon-avs:6090"
 
    NOTE: ``worker_id`` should match with worker id of singleton enclave manager or target worker pool.
    This ``worker_id`` can either be the command line argument passed in to the enclave manager (Singleton or KME)

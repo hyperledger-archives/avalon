@@ -85,5 +85,5 @@
     ```bash
     cd $TCF_HOME/examples/apps/generic_client/
     ./generic_client.py -o --uri "http://localhost:1947" \
-    --workload_id "echo-result" --in_data "Hello" --worker_id "singleton-worker-1"
+    --workload_id "echo-result" --in_data "Hello" --worker_id "singleton-worker-1" -avs "http://localhost:6090"
     ```

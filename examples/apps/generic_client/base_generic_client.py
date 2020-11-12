@@ -18,7 +18,7 @@ from generic_client_interface import GenericClientInterface
 from avalon_sdk.work_order.work_order_params import WorkOrderParams
 import avalon_crypto_utils.worker_encryption as worker_encryption
 import avalon_crypto_utils.worker_signing as worker_signing
-import verify_report.verify_attestation_report as attestation_util
+import avalon_crypto_utils.verify_attestation_report as attestation_util
 from error_code.error_status import SignatureStatus
 
 logging.basicConfig(
@@ -41,10 +41,14 @@ class BaseGenericClient(GenericClientInterface):
         self.encrypt = worker_encryption.WorkerEncrypt()
         self.signer = worker_signing.WorkerSign()
 
-    def do_worker_verification(self, worker_obj):
+    def do_worker_verification(self, worker_obj, uri):
         """
         Do worker verification on proof data if it exists
         Proof data exists in SGX hardware mode.
+        @params worker_obj worker object with attestation report
+        @params uri end point of avalon attestation verification service
+        @returns True on verification success
+                 False on verification failed
         """
         encryption_key_signature = worker_obj.encryption_key_signature
         if encryption_key_signature is not None:
@@ -76,7 +80,7 @@ class BaseGenericClient(GenericClientInterface):
 
             logging.info("Perform verification of attestation report")
             verify_report_status = attestation_util.verify_attestation_report(
-                enclave_info)
+                enclave_info, uri)
             if verify_report_status is False:
                 logging.error("Verification of enclave sign-up info failed")
                 return False

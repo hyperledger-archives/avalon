@@ -28,10 +28,11 @@ services:
         - DISTRO=$DISTRO
     working_dir: "/project/avalon/"
     entrypoint: "bash -c \"\
-        ./tools/run_tests.sh -l avalon-listener \""
+        ./tools/run_tests.sh -l avalon-listener -a avalon-avs \""
     depends_on:
       - avalon-enclave-manager
       - avalon-listener
+      - avalon-avs
 
   avalon-enclave-manager:
     image: avalon-enclave-manager:${ISOLATION_ID}
@@ -94,4 +95,21 @@ services:
       "
     depends_on:
       - avalon-lmdb
+
+  avalon-avs:
+    image: avalon-avs:${ISOLATION_ID}
+    build:
+      context: ..
+      dockerfile: ./avs/Dockerfile
+      args:
+        - http_proxy
+        - https_proxy
+        - no_proxy
+    expose:
+      - 6090
+    command: |
+      bash -c "
+        attestation_verification_service --bind http://avalon-avs:6090
+        tail -f /dev/null
+        "
 

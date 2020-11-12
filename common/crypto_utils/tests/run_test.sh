@@ -64,7 +64,7 @@ elif [ $1 == "clean" ]; then
 	cd $TCF_HOME//common/crypto_utils
 	make clean
 
-	cd $TCF_HOME/common/verify_report_utils/
+	cd $TCF_HOME/common/verify_report_utils/ias
 	make clean
 
 	cd $TCF_HOME/sdk

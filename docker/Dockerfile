@@ -65,78 +65,6 @@ RUN packages="ca-certificates pkg-config python3-pip make" \
     fi; \
     /project/avalon/scripts/install_packages -c install -q "$packages" -p "$pip_packages"
 
-# -------------=== Build openssl_image ===-------------
-
-FROM $IMAGE as openssl_image
-ARG DISTRO
-
-COPY ./scripts/install_packages /project/avalon/scripts/
-
-RUN packages="ca-certificates pkg-config make wget tar"; \
-    if [ "$DISTRO" = "centos" ] ; then \
-      packages="$packages perl gcc"; \
-    fi; \
-    /project/avalon/scripts/install_packages -c install -q "$packages"
-
-WORKDIR /tmp
-
-# Build ("Untrusted") OpenSSL
-RUN OPENSSL_VER=1.1.1g \
- && wget https://www.openssl.org/source/openssl-$OPENSSL_VER.tar.gz \
- && tar -zxf openssl-$OPENSSL_VER.tar.gz \
- && cd openssl-$OPENSSL_VER/ \
- && ./config \
- && THREADS=8 \
- && make -j$THREADS \
- && make test \
- && make install -j$THREADS
-
-# Created an empty /usr/local/lib64 dir for bionic, because in case of centos
-# we need to COPY /usr/local/lib64 for openssl artifacts which will fail for bionic
-# as bionic doesn't have this directory.
-RUN if [ "$DISTRO" = "bionic" ] ; then \
-      mkdir /usr/local/lib64; \
-    fi
-
-# -------------=== common/cpp build ===-------------
-
-#Build common/cpp intermediate docker image
-FROM $IMAGE as common_cpp_image
-ARG DISTRO
-COPY ./scripts/install_packages /project/avalon/scripts/
-
-RUN packages="pkg-config make cmake "; \
-    if [ "$DISTRO" = "centos" ] ; then \
-      packages="$packages gcc gcc-c++"; \
-    fi; \
-    /project/avalon/scripts/install_packages -c install -q "$packages"
-
-# Copy openssl build artifacts from openssl_image
-COPY --from=openssl_image /usr/local/ssl /usr/local/ssl
-COPY --from=openssl_image /usr/local/bin /usr/local/bin
-COPY --from=openssl_image /usr/local/include /usr/local/include
-COPY --from=openssl_image /usr/local/lib /usr/local/lib
-# In case of openssl, artifacts are installed at /usr/local/lib64
-COPY --from=openssl_image /usr/local/lib64 /usr/local/lib64
-
-RUN ldconfig \
- && ln -s /etc/ssl/certs/* /usr/local/ssl/certs/
-
-ENV TCF_HOME=/project/avalon
-
-# For centos, /usr/local/lib64/pkgconfig/ path be included in PKG_CONFIG_PATH
-ENV PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/usr/local/lib64/pkgconfig/
-
-COPY ./common/cpp /project/avalon/common/cpp
-
-WORKDIR /project/avalon/common/cpp
-
-RUN mkdir -p build \
-  && cd build \
-  && cmake .. -DUNTRUSTED_ONLY=1 \
-  && make
-
-
 # -------------=== common/python build ===-------------
 
 #Build common/python intermediate docker image
@@ -168,18 +96,6 @@ RUN packages="swig"; \
     fi; \
     /project/avalon/scripts/install_packages -c install -q "$packages"
 
-# Copy openssl build artifacts from openssl_image
-COPY --from=openssl_image /usr/local/ssl /usr/local/ssl
-COPY --from=openssl_image /usr/local/bin /usr/local/bin
-COPY --from=openssl_image /usr/local/include /usr/local/include
-COPY --from=openssl_image /usr/local/lib /usr/local/lib
-# In case of openssl, artifacts are installed at /usr/local/lib64
-COPY --from=openssl_image /usr/local/lib64 /usr/local/lib64
-
-RUN ldconfig \
- && ln -s /etc/ssl/certs/* /usr/local/ssl/certs/
-
-COPY --from=common_cpp_image /project/avalon/common/cpp/build /project/avalon/common/cpp/build
 COPY VERSION /project/avalon/
 COPY ./bin /project/avalon/bin
 COPY ./common/cpp /project/avalon/common/cpp
@@ -194,13 +110,6 @@ COPY ./common/crypto_utils /project/avalon/common/crypto_utils
 WORKDIR /project/avalon/common/crypto_utils
 
 RUN echo "Building Avalon Common Crypto Python\n" \
- && make
-
-COPY ./common/verify_report_utils/ias /project/avalon/common/verify_report_utils/ias
-
-WORKDIR /project/avalon/common/verify_report_utils/ias
-
-RUN echo "Building Avalon Verify IAS Report Utils\n" \
  && make
 
 # -------------=== Avalon SDK build ===-------------
@@ -276,7 +185,6 @@ COPY ./sdk/avalon_sdk/connector/blockchains/ethereum/contracts /project/avalon/s
 # Copy Python build artifacts
 COPY --from=common_python_image /project/avalon/common/python/dist/*.whl dist/
 COPY --from=common_crypto_utils_image /project/avalon/common/crypto_utils/dist/*.whl dist/
-COPY --from=common_crypto_utils_image /project/avalon/common/verify_report_utils/ias/dist/*.whl dist/
 COPY --from=avalon_sdk_image /project/avalon/sdk/dist/*.whl dist/
 
 # Installing wheel file requires python3-pip package.

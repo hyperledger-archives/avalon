@@ -20,7 +20,7 @@ from error_code.error_status import QuoteStatus
 logger = logging.getLogger(__name__)
 
 
-def verify_attestation_report(enclave_info):
+def verify_ias_attestation_report(enclave_info):
     '''
     Function to verify quote status, signature of IAS attestation report
     '''

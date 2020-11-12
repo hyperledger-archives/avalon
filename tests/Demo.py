@@ -27,6 +27,7 @@ import avalon_crypto_utils.worker_encryption as worker_encryption
 import avalon_crypto_utils.worker_signing as worker_signing
 import avalon_crypto_utils.worker_hash as worker_hash
 import avalon_crypto_utils.crypto_utility as crypto_utility
+import avalon_crypto_utils.verify_attestation_report as attestation_util
 
 import avalon_sdk.worker.worker_details as worker
 import utility.file_utils as futils
@@ -165,6 +166,24 @@ def local_main(config):
             # Worker details are loaded into Worker_Obj
             if "WorkerRetrieve" in input_json_str and "result" in response:
                 worker_obj.load_worker(response["result"]["details"])
+                if not worker_obj.proof_data:
+                    LOGGER.info("Proof data is empty. " +
+                                "Skipping verification of attestation report")
+                else:
+                    # Construct enclave sign-up info json
+                    enclave_info = {
+                        'verifying_key': worker_obj.verification_key,
+                        'encryption_key': worker_obj.encryption_key,
+                        'proof_data': worker_obj.proof_data,
+                        'enclave_persistent_id': ''
+                    }
+
+                    if attestation_util.verify_attestation_report(
+                            enclave_info, avs_uri):
+                        LOGGER.info("Worker verification success")
+                    else:
+                        LOGGER.error("Worker verification failed")
+                        exit(1)
             # -----------------------------------------------------------------
 
             # Poll for "WorkOrderGetResult" and break when you get the result
@@ -225,6 +244,7 @@ def parse_command_line(config, args):
     global encrypted_session_key
     global session_iv
     global requester_nonce
+    global avs_uri
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--logfile", help="Name of the log file. " +
@@ -238,6 +258,8 @@ def parse_command_line(config, args):
     parser.add_argument("--input_dir", help="Logging level", type=str,
                         default=[])
     parser.add_argument("-c", "--connect_uri",
+                        help="URI to send requests to", type=str, default=[])
+    parser.add_argument("-a", "--avs_uri",
                         help="URI to send requests to", type=str, default=[])
     parser.add_argument(
         "output_file",
@@ -265,6 +287,13 @@ def parse_command_line(config, args):
         server_uri = options.connect_uri
     else:
         LOGGER.error("ERROR: Please enter the server URI")
+
+    if options.avs_uri:
+        avs_uri = options.avs_uri
+    else:
+        LOGGER.error("ERROR: Please enter the "
+                     "attestation verification service URI")
+        exit(1)
 
     if options.input_dir:
         LOGGER.info("Load Json Directory from %s", options.input_dir)
