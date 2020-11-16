@@ -15,6 +15,7 @@
 import json
 import logging
 import asyncio
+import nest_asyncio
 
 from avalon_sdk.connector.blockchains.ethereum.ethereum_listener \
     import BlockchainInterface, EventProcessor
@@ -92,6 +93,7 @@ class EthereumConnector(BaseConnector):
         # Listening only for workOrderSubmitted event now
         listener = w3.newListener(contract, "workOrderSubmitted")
 
+        nest_asyncio.apply()
         try:
             daemon = EventProcessor(self._config)
             asyncio.get_event_loop().run_until_complete(daemon.start(
