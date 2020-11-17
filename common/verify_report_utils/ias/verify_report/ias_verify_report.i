@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-%module verify_report 
+%module ias_verify_report 
 
 %{
 #include "types.h"

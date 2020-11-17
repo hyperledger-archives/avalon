@@ -1,4 +1,4 @@
-/* Copyright 2020 Intel Corporation
+/* Copyright 2019 Intel Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,13 @@
  * limitations under the License.
  */
 
-%module enclave_info_singleton
+#include <string>
 
-%include epid_enclave_info.i
+// Verifies signature of the message by extracting public key from certificate
+bool verify_dcap_quote_signature(const std::string& dcap_attestation_signing_cert_pem,
+                                   const std::string& dcap_report,
+                                   const std::string& dcap_signature);
+
+// Verifies certificate against IAS CA certificate
+bool verify_dcap_quote(const std::string& dcap_quote);
 

@@ -22,7 +22,6 @@ class EnclaveType(Enum):
     1 - Singleton enclave
     2 - Key management enclave
     3 - Work order processing enclave
-    From EEA spec 5.2.
     """
     SINGLETON = 1
     KME = 2

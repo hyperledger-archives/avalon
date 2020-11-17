@@ -17,7 +17,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "verify-report.h"
+#include "verify-ias-report.h"
 #include "verify_certificate.h"
 #include "verify_signature.h"
 #include "c11_support.h"

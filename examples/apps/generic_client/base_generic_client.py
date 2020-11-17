@@ -18,7 +18,8 @@ from generic_client_interface import GenericClientInterface
 from avalon_sdk.work_order.work_order_params import WorkOrderParams
 import avalon_crypto_utils.worker_encryption as worker_encryption
 import avalon_crypto_utils.worker_signing as worker_signing
-import verify_report.verify_attestation_report as attestation_util
+import verify_report.verify_attestation_report as ias_util
+import verify_dcap_quote.verify_dcap_quote_util as dcap_util
 from error_code.error_status import SignatureStatus
 
 logging.basicConfig(
@@ -41,7 +42,7 @@ class BaseGenericClient(GenericClientInterface):
         self.encrypt = worker_encryption.WorkerEncrypt()
         self.signer = worker_signing.WorkerSign()
 
-    def do_worker_verification(self, worker_obj):
+    def do_worker_verification(self, worker_obj, attestation="EPID"):
         """
         Do worker verification on proof data if it exists
         Proof data exists in SGX hardware mode.
@@ -74,9 +75,15 @@ class BaseGenericClient(GenericClientInterface):
                 'enclave_persistent_id': ''
             }
 
-            logging.info("Perform verification of attestation report")
-            verify_report_status = attestation_util.verify_attestation_report(
-                enclave_info)
+            if attestation == "EPID":
+                verify_report_status = \
+                    ias_util.verify_ias_attestation_report(
+                        enclave_info)
+            elif attestation == "DCAP":
+                verify_report_status = \
+                    dcap_util.verify_dcap_quote(
+                        enclave_info)
+
             if verify_report_status is False:
                 logging.error("Verification of enclave sign-up info failed")
                 return False

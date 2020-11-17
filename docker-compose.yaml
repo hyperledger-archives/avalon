@@ -58,6 +58,7 @@ services:
         - ENCLAVE_TYPE=singleton
         - DISTRO=$DISTRO
         - IMAGE=$IMAGE
+        - ATTESTATION_TYPE=epid
     environment:
       - http_proxy
       - https_proxy

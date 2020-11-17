@@ -16,6 +16,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "tcf_error.h"
+#include "sgx_utils.h"
 
 tcf_err_t CreateEnclaveData(uint8_t* persistedSealedEnclaveData=nullptr);
 
@@ -25,3 +26,5 @@ tcf_err_t ecall_CalculatePublicEnclaveDataSize(size_t* pPublicEnclaveDataSize);
 
 tcf_err_t ecall_UnsealEnclaveData(char* outPublicEnclaveData,
     size_t inAllocatedPublicEnclaveDataSize);
+
+sgx_status_t ecall_get_target_info(sgx_target_info_t* target_info);

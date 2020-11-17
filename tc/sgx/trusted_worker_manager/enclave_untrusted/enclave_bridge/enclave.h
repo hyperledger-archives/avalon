@@ -21,6 +21,7 @@
 
 #include "error.h"
 #include "tcf_error.h"
+#include "sgx_error.h"
 #include "types.h"
 
 #include "attestation.h"
@@ -72,6 +73,23 @@ namespace tcf {
 
 	    void LoadEnclave(
                 const Base64EncodedString& persistedSealedEnclaveData = "");
+
+            void InitQuote(sgx_target_info_t& target_info);
+#ifdef BUILD_SINGLETON
+            sgx_status_t VerifyEnclaveInfoSingleton(const std::string& enclaveInfo,
+                                                         const std::string& mr_enclave,
+                                                         const sgx_enclave_id_t& enclave_id);
+#elif BUILD_KME
+            tcf_err_t VerifyEnclaveInfoKME(const std::string& enclaveInfo,
+                                                   const std::string& mr_enclave,
+                                                   const std::string& ext_data,
+                                                   const sgx_enclave_id_t& enclave_id);
+#elif BUILD_WPE
+            tcf_err_t VerifyEnclaveInfoWPE(const std::string& enclaveInfo,
+                                                   const std::string& mr_enclave,
+                                                   const std::string& ext_data,
+                                                   const sgx_enclave_id_t& enclave_id);
+#endif
 
         protected:
             static void QuerySgxStatus();

@@ -29,7 +29,6 @@
 #include "error.h"
 #include "avalon_sgx_error.h"
 #include "hex_string.h"
-#include "tcf_error.h"
 #include "types.h"
 #include "sgx_utility.h"
 
@@ -235,6 +234,39 @@ namespace tcf {
                 break;
             }
         }  // Enclave::QuerySgxStatus
+
+        // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+        /* Initialize the quote by calling sgx sdk API */
+        void Enclave::InitQuote(sgx_target_info_t& target_info) {
+            this->attestation->InitQuote(target_info);
+        } // Enclave::InitQuote
+ 
+        // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+#ifdef BUILD_SINGLETON
+        sgx_status_t Enclave::VerifyEnclaveInfoSingleton(const std::string& enclaveInfo,
+            const std::string& mr_enclave,
+            const sgx_enclave_id_t& enclave_id) {
+            return this->attestation->VerifyEnclaveInfoSingleton(enclaveInfo,
+                mr_enclave, enclave_id);
+        }
+#elif BUILD_KME
+        tcf_err_t Enclave::VerifyEnclaveInfoKME(const std::string& enclaveInfo,
+            const std::string& mr_enclave,
+            const std::string& ext_data,
+            const sgx_enclave_id_t& enclave_id) {
+            return this->attestation->VerifyEnclaveInfoKME(enclaveInfo, mr_enclave,
+                ext_data, enclave_id);
+        }
+#elif BUILD_WPE
+        tcf_err_t Enclave::VerifyEnclaveInfoWPE(const std::string& enclaveInfo,
+            const std::string& mr_enclave,
+            const std::string& ext_data,
+            const sgx_enclave_id_t& enclave_id) {
+            return this->attestation->VerifyEnclaveInfoWPE(enclaveInfo, mr_enclave,
+                ext_data, enclave_id);
+        }
+#endif
 
     }  // namespace enclave_api
 

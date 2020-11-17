@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-%module enclave_info_kme
+%module epid_enclave_info_kme
 
 %include epid_enclave_info.i
-

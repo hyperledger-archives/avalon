@@ -41,7 +41,13 @@ enclave {
             [out] sgx_report_t* outEnclaveReport
         );
 
-        public tcf_err_t ecall_VerifyEnclaveInfoWPE(
+        public tcf_err_t ecall_VerifyEnclaveInfoWPEEpid(
+            [in, string] const char* inEnclaveInfo,
+            [in, string] const char* mrEnclave,
+            [in, string] const char* inExtData
+        );
+
+        public tcf_err_t ecall_VerifyEnclaveInfoWPEDcap(
             [in, string] const char* inEnclaveInfo,
             [in, string] const char* mrEnclave,
             [in, string] const char* inExtData

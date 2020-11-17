@@ -182,5 +182,40 @@ namespace tcf {
                 throw error::SystemError(buffer);
             }
         }  // ThrowSgxError
+
+	void ThrowSgxError(quote3_error_t ret, const char* msg) {
+            char buffer[256];
+            if (!msg) {
+                msg = "";
+            }
+
+            if (ret != SGX_QL_SUCCESS) {
+                snprintf(
+                    buffer,
+                    sizeof(buffer),
+                    "%s: UNKNOWN INTEL SGX ERROR: 0x%.8X",
+                    msg,
+                    ret);
+                throw error::SystemError(buffer);
+            }
+        }  // ThrowSgxError
+
+        void ThrowSgxError(tcf_err_t ret, const char* msg) {
+            char buffer[256];
+            if (!msg) {
+                msg = "";
+            }
+
+            if (ret != TCF_SUCCESS) {
+                snprintf(
+                    buffer,
+                    sizeof(buffer),
+                    "%s: UNKNOWN INTEL SGX ERROR: 0x%.8X",
+                    msg,
+                    ret);
+                throw error::SystemError(buffer);
+            }
+        }  // ThrowSgxError
+
     }  // namespace error
 }  // namespace tcf

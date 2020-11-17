@@ -97,11 +97,11 @@ std::map<std::string, std::string> SignupInfoSingleton::UnsealEnclaveData() {
 }  // SignupInfoSingleton::UnsealEnclaveData
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-size_t SignupInfoSingleton::VerifyEnclaveInfo(const std::string& enclave_info,
+int SignupInfoSingleton::VerifyEnclaveInfo(const std::string& enclave_info,
     const std::string& mr_enclave) {
 
     SignupDataSingleton signup_data;
     tcf_err_t result = signup_data.VerifyEnclaveInfo(
         enclave_info, mr_enclave);
-    return (size_t) result;
+    return (int) result;
 }  // SignupInfoSingleton::VerifyEnclaveInfo

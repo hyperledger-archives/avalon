@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-%module enclave_info_wpe
+%module epid_enclave_info_singleton
 
 %include epid_enclave_info.i
-

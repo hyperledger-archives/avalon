@@ -19,7 +19,7 @@
 #include <string.h>
 
 #include "ias_attestation_util.h"
-#include "verify-report.h"
+#include "verify-ias-report.h"
 #include "tcf_error.h"
 #include "parson.h"
 #include "jsonvalue.h"

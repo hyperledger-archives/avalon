@@ -22,6 +22,7 @@
 #include "error.h"
 #include "tcf_error.h"
 #include "types.h"
+#include "sgx_ql_lib_common.h"
 
 namespace tcf {
 
@@ -36,6 +37,9 @@ namespace tcf {
         sgx_status_t CallSgx (std::function<sgx_status_t(void)> sgxCall,
                               const int retries = 5,
                               const int retryDelayMs = 100);
+	quote3_error_t CallSgx (std::function<quote3_error_t(void)> sgxCall,
+                               const int retries = 5,
+                               const int retryDelayMs = 100);
 
     }  /* namespace sgx_util */
 

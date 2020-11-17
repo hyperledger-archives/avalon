@@ -16,6 +16,7 @@
 #include <algorithm>
 #include <string>
 
+#include "enclave_common_u.h"
 #include "epid_attestation.h"
 #include "sgx_utility.h"
 #include "avalon_sgx_error.h"
@@ -235,8 +236,108 @@ namespace tcf {
 	    tcf::error::ThrowSgxError(sgx_calc_quote_size(pRevocationList, revocationListSize, &size));
             this->quoteSize = size;
         } // EpidAttestation::SetSignatureRevocationList
+
         // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
+        void EpidAttestation::InitQuote(sgx_target_info_t& target_info) {
+            sgx_epid_group_id_t epidGroupId = { 0 };
+            sgx_status_t sresult = tcf::sgx_util::CallSgx(
+                [&target_info,
+                 &epidGroupId] () {
+                    return sgx_init_quote(&target_info, &epidGroupId);
+                });
+            tcf::error::ThrowSgxError(sresult,
+                "Intel SGX enclave call failed (sgx_init_quote);"
+                " failed to initialize the quote");
+        } // EpidAttestation::InitQuote
+
+        // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+#ifdef BUILD_SINGLETON
+
+        sgx_status_t EpidAttestation::VerifyEnclaveInfoSingleton(const std::string& enclaveInfo,
+                    const std::string& mr_enclave,
+                    const sgx_enclave_id_t& enclave_id) {
+            sgx_status_t result = SGX_SUCCESS;
+
+            sgx_status_t sresult = tcf::sgx_util::CallSgx(
+                [ enclave_id,
+                  &result,
+                  enclaveInfo,
+                  mr_enclave ] () {
+                  sgx_status_t sresult = ecall_VerifyEnclaveInfoEpid(
+                             enclave_id,
+                             &result,
+                             enclaveInfo.c_str(),
+                             mr_enclave.c_str());
+                  return sresult;
+            });
+
+            tcf::error::ThrowSgxError(sresult,
+                "Intel SGX enclave call failed (ecall_VerifyEnclaveInfo)");
+            return sresult;    
+        }
+#elif BUILD_KME
+        // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+ 
+        tcf_err_t EpidAttestation::VerifyEnclaveInfoKME(const std::string& enclaveInfo,
+                    const std::string& mr_enclave,
+                    const std::string& ext_data,
+                    const sgx_enclave_id_t& enclave_id) {
+            tcf_err_t presult = TCF_SUCCESS;
+
+            ByteArray ext_data_bytes = HexEncodedStringToByteArray(ext_data);
+            sgx_status_t sresult = tcf::sgx_util::CallSgx(
+                [ enclave_id,
+                  &presult,
+                  enclaveInfo,
+                  mr_enclave,
+                  ext_data_bytes ] () {
+                      sgx_status_t sresult = ecall_VerifyEnclaveInfoKMEEpid(
+                             enclave_id,
+                             &presult,
+                             enclaveInfo.c_str(),
+                             mr_enclave.c_str(),
+                             ext_data_bytes.data(),
+                             ext_data_bytes.size());
+                 return tcf::error::ConvertErrorStatus(sresult, presult);
+            });
+
+            tcf::error::ThrowSgxError(sresult,
+                "Intel SGX enclave call failed (ecall_VerifyEnclaveInfo)");
+            return presult;
+        }
+
+        // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+#elif BUILD_WPE
+        tcf_err_t EpidAttestation::VerifyEnclaveInfoWPE(const std::string& enclaveInfo,
+            const std::string& mr_enclave,
+            const std::string& ext_data,
+            const sgx_enclave_id_t& enclave_id) {
+            tcf_err_t presult = TCF_SUCCESS;
+
+            sgx_status_t sresult = tcf::sgx_util::CallSgx(
+                [ enclave_id,
+                  &presult,
+                  enclaveInfo,
+                  mr_enclave,
+                  ext_data ] () {
+                      sgx_status_t sresult = ecall_VerifyEnclaveInfoWPEEpid(
+                          enclave_id,
+                          &presult,
+                          enclaveInfo.c_str(),
+                          mr_enclave.c_str(),
+                          ext_data.c_str());
+                      return tcf::error::ConvertErrorStatus(sresult,
+                              presult);
+                });
+
+            tcf::error::ThrowSgxError(sresult,
+                "Intel SGX enclave call failed (ecall_VerifyEnclaveInfoWPE)");
+            return presult;
+        }
+
+        // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+#endif
     }  /* namespace enclave_api */
 }  // namespace tcf
 

@@ -107,6 +107,7 @@ class SingletonEnclaveInfo(BaseEnclaveInfo):
         # Now we can finally serialize the signup info and create a
         # corresponding signup info object. Because we don't want the
         # sealed signup data in the serialized version, we set it separately.
+        logger.info("signup_info {}".format(signup_info))
         signup_info_obj = signup_cpp_obj.DeserializeSignupInfo(
             json.dumps(signup_info))
         signup_info_obj.sealed_signup_data = \

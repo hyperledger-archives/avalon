@@ -18,7 +18,6 @@
 #include <Python.h>
 #include <string>
 
-#include "enclave_info.h"
 #include "work_order_wrap.h"
 
 void InitializeTCFEnclaveModule();

@@ -148,15 +148,7 @@ tcf_err_t SignupDataWPE::CreateEnclaveData(
     
         // We need target info in order to create signup data report
         sgx_target_info_t target_info = { 0 };
-        sgx_epid_group_id_t epidGroupId = { 0 };
-        sresult = tcf::sgx_util::CallSgx(
-                [&target_info,
-                 &epidGroupId] () {
-                    return sgx_init_quote(&target_info, &epidGroupId);
-                });
-        tcf::error::ThrowSgxError(sresult,
-            "Intel SGX enclave call failed (sgx_init_quote);"
-            " failed to initialize the quote");
+        g_Enclave[0].InitQuote(target_info);
 
         // Properly size the sealed signup data buffer for the caller
         // and call into the enclave to create the signup data
@@ -222,28 +214,12 @@ tcf_err_t SignupDataWPE::VerifyEnclaveInfo(
     try {
         // xxxxx call the enclave
         sgx_enclave_id_t enclaveid = g_Enclave[0].GetEnclaveId();
-        tcf_err_t presult = TCF_SUCCESS;
+        result = g_Enclave[0].VerifyEnclaveInfoWPE(enclaveInfo,
+            mr_enclave, ext_data, enclaveid);
 
-	//ByteArray ext_data_bytes = StrToByteArray(ext_data);
-        sgx_status_t sresult = tcf::sgx_util::CallSgx(
-            [ enclaveid,
-              &presult,
-              enclaveInfo,
-              mr_enclave,
-              ext_data ] () {
-              sgx_status_t sresult =
-              ecall_VerifyEnclaveInfoWPE(
-                             enclaveid,
-                             &presult,
-                             enclaveInfo.c_str(),
-                             mr_enclave.c_str(),
-                             ext_data.c_str());
-          return tcf::error::ConvertErrorStatus(sresult, presult);
-    });
-
-        tcf::error::ThrowSgxError(sresult,
+        tcf::error::ThrowSgxError(result,
             "Intel SGX enclave call failed (ecall_VerifyEnclaveInfoWPE)");
-        g_Enclave[0].ThrowTCFError(presult);
+        g_Enclave[0].ThrowTCFError(result);
 
     } catch (tcf::error::Error& e) {
         tcf::enclave_api::base::SetLastError(e.what());

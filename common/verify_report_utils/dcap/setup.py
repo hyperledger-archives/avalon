@@ -27,7 +27,7 @@ if sys.version_info[0] < 3:
     sys.exit(1)
 
 
-tcf_root_dir = os.environ.get('TCF_HOME', '../..')
+tcf_root_dir = os.environ.get('TCF_HOME', '../../..')
 
 version = subprocess.check_output(
     os.path.join(tcf_root_dir, 'bin/get_version')).decode('ascii').strip()
@@ -60,30 +60,33 @@ verify_report_include_dirs = [
     os.path.join(tcf_root_dir, 'common/cpp/crypto'),
     os.path.join(tcf_root_dir, 'common/cpp/packages/parson'),
     os.path.join(tcf_root_dir, 'common/cpp/packages/base64'),
-    os.path.join(tcf_root_dir, 'common/cpp/verify_ias_report'),
+    os.path.join(tcf_root_dir, 'common/cpp/verify_dcap_report'),
 ] + openssl_include_dirs
 
 library_dirs = [
     os.path.join(tcf_root_dir, "common/cpp/build"),
+    '/usr/lib/x86_64-linux-gnu',
 ] + openssl_lib_dirs
 
 # Do not change the order of these
 # libraries otherwise we will get the undefined
 # symbols in verify_report shared library
 libraries = [
-    'uavalon-verify-ias-report',
+    'uavalon-verify-dcap-report',
     'uavalon-crypto',
     'uavalon-common',
     'uavalon-base64',
     'uavalon-parson',
+    'sgx_dcap_quoteverify',
+    'sgx_dcap_ql'
 ] + openssl_libs
 
 verify_report_modulefiles = [
-    "verify_report/verify_report.i"
+    "verify_dcap_quote/dcap_verify_report.i"
 ]
 
 verify_report_module = Extension(
-    'verify_report._verify_report',
+    'verify_dcap_quote._dcap_verify_report',
     verify_report_modulefiles,
     swig_opts=['-c++'] + ['-I%s' % i for i in verify_report_include_dirs],
     extra_compile_args=compile_args,
@@ -93,7 +96,7 @@ verify_report_module = Extension(
 
 # -----------------------------------------------------------------
 setup(
-    name='avalon_verify_report_utils',
+    name='avalon_verify_dcap_report_utils',
     version=version,
     description='Avalon Verify Report Utils Library',
     author='Hyperledger Avalon',

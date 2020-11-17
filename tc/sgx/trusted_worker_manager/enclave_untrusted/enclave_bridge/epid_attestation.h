@@ -38,9 +38,25 @@ namespace tcf {
                 size_t GetQuoteSize(void);
                 void CreateQuoteFromReport(const sgx_report_t* inEnclaveReport,
                     ByteArray& outEnclaveQuote);
+                void InitQuote(sgx_target_info_t& target_info);
 		void GetEpidGroup(HexEncodedString& outEpidGroup);
 	        void SetSpid(const HexEncodedString& inSpid);
 	        void SetSignatureRevocationList (const std::string& inSignatureRevocationList);
+#ifdef BUILD_SINGLETON
+                sgx_status_t VerifyEnclaveInfoSingleton(const std::string& enclaveInfo,
+                    const std::string& mr_enclave,
+                    const sgx_enclave_id_t& enclave_id);
+#elif BUILD_KME
+                tcf_err_t VerifyEnclaveInfoKME(const std::string& enclaveInfo,
+                    const std::string& mr_enclave,
+                    const std::string& ext_data,
+                    const sgx_enclave_id_t& enclave_id);
+#elif BUILD_WPE
+                tcf_err_t VerifyEnclaveInfoWPE(const std::string& enclaveInfo,
+                    const std::string& mr_enclave,
+                    const std::string& ext_data,
+                    const sgx_enclave_id_t& enclave_id);
+#endif
 
             protected:
 	        std::string signatureRevocationList;

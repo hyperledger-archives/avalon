@@ -26,7 +26,7 @@ public:
 
     std::map<std::string, std::string> UnsealEnclaveData();
 
-    size_t VerifyEnclaveInfo(
+    int VerifyEnclaveInfo(
         const std::string& enclaveInfo,
         const std::string& mr_enclave);
 

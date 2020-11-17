@@ -175,11 +175,18 @@ RUN if [ "$DISTRO" = "bionic" ] ; then \
          libsgx-urts \
          libsgx-epid \
          libsgx-quote-ex \
+         libsgx-dcap-default-qpl \
+         libsgx-dcap-ql \
+         libsgx-dcap-ql-dev \
+         libsgx-ae-qve \
+         libsgx-dcap-quote-verify \
+         libsgx-dcap-quote-verify-dev \
+         libsgx-uae-service \
       && apt-get clean \
       && rm -rf /var/lib/apt/lists/* \
-     
-      && SGX_SDK_FILE=sgx_linux_x64_sdk_2.10.100.2.bin \
-      && wget https://download.01.org/intel-sgx/sgx-linux/2.10/distro/ubuntu18.04-server/$SGX_SDK_FILE \
+      && SGX_SDK_FILE=sgx_linux_x64_sdk_2.11.100.2.bin \
+      && wget https://download.01.org/intel-sgx/sgx-linux/2.11/distro/ubuntu18.04-server/$SGX_SDK_FILE \
+      && chmod +x $SGX_SDK_FILE \
       && echo "yes" | bash ./$SGX_SDK_FILE \
       && rm $SGX_SDK_FILE \
       && echo ". /opt/intel/sgxsdk/environment" >> /etc/environment; \
@@ -192,15 +199,26 @@ RUN if [ "$DISTRO" = "bionic" ] ; then \
          libsgx-launch \
          libsgx-epid \
          libsgx-quote-ex \
-         libsgx-urts; \
+         libsgx-urts \
+         libsgx-dcap-default-qpl \
+         libsgx-dcap-ql \
+         libsgx-dcap-ql-dev \
+         libsgx-ae-qve \
+         libsgx-dcap-quote-verify \
+         libsgx-dcap-quote-verify-dev \
+         libsgx-uae-service; \
       cd /opt/intel \
-      && wget https://download.01.org/intel-sgx/sgx-linux/2.10/distro/centos8.1-server/sgx_linux_x64_sdk_2.10.100.2.bin \
-      && chmod +x sgx_linux_x64_sdk_2.10.100.2.bin \
-      && echo "yes" | bash ./sgx_linux_x64_sdk_2.10.100.2.bin \
+      && SGX_SDK_FILE=sgx_linux_x64_sdk_2.11.100.2.bin \
+      && wget https://download.01.org/intel-sgx/sgx-linux/2.11/distro/centos8.1-server/$SGX_SDK_FILE \
+      && chmod +x $SGX_SDK_FILE \
+      && echo "yes" | bash ./$SGX_SDK_FILE \
       && echo ". /opt/intel/sgxsdk/environment" >> /etc/environment; \
     fi
      
      
+# Configure QPL to use self-signed cert for local PCCS
+COPY docker/pccs/sgx_default_qcnl.conf /etc/sgx_default_qcnl.conf
+
 # Copy openssl build artifacts from openssl_image
 ENV OPENSSL_VER=1.1.1g
 
@@ -235,7 +253,7 @@ RUN platform=""; \
     fi; \
     ldconfig \
     && ln -s /etc/ssl/certs/* /usr/local/ssl/certs/ \
-    && MITIGATION_TOOLS=as.ld.objdump.gold.r2.tar.gz \
+    && MITIGATION_TOOLS=as.ld.objdump.gold.r3.tar.gz \
     && wget https://download.01.org/intel-sgx/latest/linux-latest/$MITIGATION_TOOLS \
     && tar -xvf $MITIGATION_TOOLS \
     && cp external/toolset/$platform/* /usr/local/bin/ \
@@ -265,6 +283,7 @@ RUN echo "Install common/python and sdk packages\n" \
 
 
 ARG SGX_MODE
+ARG ATTESTATION_TYPE
 ARG MAKECLEAN
 ARG TCF_DEBUG_BUILD
 ARG ENCLAVE_TYPE
@@ -342,7 +361,7 @@ WORKDIR /project/avalon/common/crypto_utils
 
 RUN make && make install
 
-WORKDIR /project/avalon/common/verify_report_utils
+WORKDIR /project/avalon/common/verify_report_utils/ias
 
 RUN make && make install
 

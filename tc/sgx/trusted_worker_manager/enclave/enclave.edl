@@ -15,6 +15,7 @@
 
 enclave {
     from "sgx_tstdc.edl" import *;
+    from "sgx_dcap_tvl.edl" import *;
     from "sgx_tsgxssl.edl" import *;
     from "base.edl" import *;
     from "iohandler.edl" import *;

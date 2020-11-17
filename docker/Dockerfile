@@ -105,11 +105,50 @@ FROM $IMAGE as common_cpp_image
 ARG DISTRO
 COPY ./scripts/install_packages /project/avalon/scripts/
 
+
 RUN packages="pkg-config make cmake "; \
     if [ "$DISTRO" = "centos" ] ; then \
       packages="$packages gcc gcc-c++"; \
     fi; \
     /project/avalon/scripts/install_packages -c install -q "$packages"
+
+RUN if [ "$DISTRO" = "bionic" ] ; then \
+# Add Intel SGX repo to apt sources and install Intel SGX PSW packages
+ echo 'deb [arch=amd64] https://download.01.org/intel-sgx/sgx_repo/ubuntu bionic main' | tee /etc/apt/sources.list.d/intel-sgx.list \
+ && wget -qO - https://download.01.org/intel-sgx/sgx_repo/ubuntu/intel-sgx-deb.key | apt-key add - \
+ && apt-get update \
+ && apt-get install -y -q \
+    systemd \
+    libsgx-enclave-common \
+    libsgx-dcap-default-qpl \
+    libsgx-dcap-ql \
+    libsgx-dcap-ql-dev \
+    libsgx-ae-qve \
+    libsgx-dcap-quote-verify \
+    libsgx-dcap-quote-verify-dev \
+    libsgx-uae-service \
+    libsgx-launch \
+    libsgx-urts \
+    libsgx-quote-ex \
+ && apt-get clean \
+ && rm -rf /var/lib/apt/lists/* \
+elif [ "$DISTRO" = "centos" ] ; then \
+      wget https://download.01.org/intel-sgx/sgx-linux/2.10/distro/centos8.1-server/sgx_rpm_local_repo.tgz \
+      && tar -xvf sgx_rpm_local_repo.tgz \
+      && yum-config-manager --add-repo file:///opt/intel/sgx_rpm_local_repo \
+      && yum --nogpgcheck install -y \
+      libsgx-enclave-common \
+      libsgx-dcap-default-qpl \
+      libsgx-dcap-ql \
+      libsgx-dcap-ql-dev \
+      libsgx-ae-qve \
+      libsgx-dcap-quote-verify \
+      libsgx-dcap-quote-verify-dev \
+      libsgx-uae-service \
+      libsgx-launch \
+      libsgx-urts \
+      libsgx-quote-ex \
+fi
 
 # Copy openssl build artifacts from openssl_image
 COPY --from=openssl_image /usr/local/ssl /usr/local/ssl
@@ -118,6 +157,15 @@ COPY --from=openssl_image /usr/local/include /usr/local/include
 COPY --from=openssl_image /usr/local/lib /usr/local/lib
 # In case of openssl, artifacts are installed at /usr/local/lib64
 COPY --from=openssl_image /usr/local/lib64 /usr/local/lib64
+
+RUN mkdir -p /opt/intel/
+WORKDIR /opt/intel/
+RUN SGX_SDK_FILE=sgx_linux_x64_sdk_2.11.100.2.bin \
+  && wget https://download.01.org/intel-sgx/sgx-linux/2.11/distro/ubuntu18.04-server/$SGX_SDK_FILE \
+  && chmod +x ./$SGX_SDK_FILE \
+  && echo "yes" | bash ./$SGX_SDK_FILE \
+  && rm $SGX_SDK_FILE \
+  && echo ". /opt/intel/sgxsdk/environment" >> /etc/environment
 
 RUN ldconfig \
  && ln -s /etc/ssl/certs/* /usr/local/ssl/certs/
@@ -168,6 +216,43 @@ RUN packages="swig"; \
     fi; \
     /project/avalon/scripts/install_packages -c install -q "$packages"
 
+# Add Intel SGX repo to apt sources and install Intel SGX PSW packages
+RUN if [ "$DISTRO" = "bionic" ] ; then \
+ echo 'deb [arch=amd64] https://download.01.org/intel-sgx/sgx_repo/ubuntu bionic main' | tee /etc/apt/sources.list.d/intel-sgx.list \
+ && wget -qO - https://download.01.org/intel-sgx/sgx_repo/ubuntu/intel-sgx-deb.key | apt-key add - \
+ && apt-get update \
+ && apt-get install -y -q \
+    systemd \
+    libsgx-enclave-common \
+    libsgx-dcap-default-qpl \
+    libsgx-dcap-ql \
+    libsgx-dcap-ql-dev \
+    libsgx-ae-qve \
+    libsgx-dcap-quote-verify \
+    libsgx-dcap-quote-verify-dev \
+    libsgx-uae-service \
+    libsgx-launch \
+    libsgx-urts \
+    libsgx-quote-ex \
+ && apt-get clean \
+ && rm -rf /var/lib/apt/lists/* \
+elif [ "$DISTRO" = "centos" ] ; then \
+      wget https://download.01.org/intel-sgx/sgx-linux/2.10/distro/centos8.1-server/sgx_rpm_local_repo.tgz \
+      && tar -xvf sgx_rpm_local_repo.tgz \
+      && yum-config-manager --add-repo file:///opt/intel/sgx_rpm_local_repo \
+      && yum --nogpgcheck install -y \
+    libsgx-enclave-common \
+    libsgx-dcap-default-qpl \
+    libsgx-dcap-ql \
+    libsgx-dcap-ql-dev \
+    libsgx-ae-qve \
+    libsgx-dcap-quote-verify \
+    libsgx-dcap-quote-verify-dev \
+    libsgx-uae-service \
+    libsgx-launch \
+    libsgx-urts \
+    libsgx-quote-ex \
+fi
 # Copy openssl build artifacts from openssl_image
 COPY --from=openssl_image /usr/local/ssl /usr/local/ssl
 COPY --from=openssl_image /usr/local/bin /usr/local/bin
@@ -179,10 +264,10 @@ COPY --from=openssl_image /usr/local/lib64 /usr/local/lib64
 RUN ldconfig \
  && ln -s /etc/ssl/certs/* /usr/local/ssl/certs/
 
-COPY --from=common_cpp_image /project/avalon/common/cpp/build /project/avalon/common/cpp/build
 COPY VERSION /project/avalon/
 COPY ./bin /project/avalon/bin
 COPY ./common/cpp /project/avalon/common/cpp
+COPY --from=common_cpp_image /project/avalon/common/cpp/build /project/avalon/common/cpp/build
 
 ENV TCF_HOME=/project/avalon
 
@@ -198,9 +283,14 @@ RUN echo "Building Avalon Common Crypto Python\n" \
 
 COPY ./common/verify_report_utils /project/avalon/common/verify_report_utils
 
-WORKDIR /project/avalon/common/verify_report_utils
+WORKDIR /project/avalon/common/verify_report_utils/ias
 
-RUN echo "Building Avalon Verify Report Utils\n" \
+RUN echo "Building Avalon Verify IAS Report Utils\n" \
+ && make
+
+WORKDIR /project/avalon/common/verify_report_utils/dcap
+
+RUN echo "Building Avalon Verify DCAP Report Utils\n" \
  && make
 
 # -------------=== Avalon SDK build ===-------------
@@ -276,8 +366,51 @@ COPY ./sdk/avalon_sdk/connector/blockchains/ethereum/contracts /project/avalon/s
 # Copy Python build artifacts
 COPY --from=common_python_image /project/avalon/common/python/dist/*.whl dist/
 COPY --from=common_crypto_utils_image /project/avalon/common/crypto_utils/dist/*.whl dist/
-COPY --from=common_crypto_utils_image /project/avalon/common/verify_report_utils/dist/*.whl dist/
+COPY --from=common_crypto_utils_image /project/avalon/common/verify_report_utils/ias/dist/*.whl dist/
+COPY --from=common_crypto_utils_image /project/avalon/common/verify_report_utils/dcap/dist/*.whl dist/
 COPY --from=avalon_sdk_image /project/avalon/sdk/dist/*.whl dist/
+
+# Add Intel SGX repo to apt sources and install Intel SGX PSW packages
+
+RUN if [ "$DISTRO" = "bionic" ] ; then \
+ echo 'deb [arch=amd64] https://download.01.org/intel-sgx/sgx_repo/ubuntu bionic main' | tee /etc/apt/sources.list.d/intel-sgx.list \
+ && wget -qO - https://download.01.org/intel-sgx/sgx_repo/ubuntu/intel-sgx-deb.key | apt-key add - \
+ && apt-get update \
+ && apt-get install -y -q \
+    systemd \
+    libsgx-enclave-common \
+    libsgx-dcap-default-qpl \
+    libsgx-dcap-ql \
+    libsgx-dcap-ql-dev \
+    libsgx-ae-qve \
+    libsgx-dcap-quote-verify \
+    libsgx-dcap-quote-verify-dev \
+    libsgx-uae-service \
+    libsgx-launch \
+    libsgx-urts \
+    libsgx-quote-ex \
+ && apt-get clean \
+ && rm -rf /var/lib/apt/lists/* \
+ elif [ "$DISTRO" = "centos" ] ; then \
+  wget https://download.01.org/intel-sgx/sgx-linux/2.10/distro/centos8.1-server/sgx_rpm_local_repo.tgz \
+  && tar -xvf sgx_rpm_local_repo.tgz \
+  && yum-config-manager --add-repo file:///opt/intel/sgx_rpm_local_repo \
+  && yum --nogpgcheck install -y \
+    libsgx-enclave-common \
+    libsgx-dcap-default-qpl \
+    libsgx-dcap-ql \
+    libsgx-dcap-ql-dev \
+    libsgx-ae-qve \
+    libsgx-dcap-quote-verify \
+    libsgx-dcap-quote-verify-dev \
+    libsgx-uae-service \
+    libsgx-launch \
+    libsgx-urts \
+    libsgx-quote-ex \
+ fi
+
+# Configure QPL to use self-signed cert for local PCCS
+COPY docker/pccs/sgx_default_qcnl.conf /etc/sgx_default_qcnl.conf
 
 # Installing wheel file requires python3-pip package.
 # But python3-pip package will increase size of final docker image.

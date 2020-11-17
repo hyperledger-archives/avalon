@@ -15,7 +15,9 @@
 
 #include <stdexcept>
 
+#include "tcf_error.h"
 #include "sgx_error.h"
+#include "sgx_ql_lib_common.h"
 
 namespace tcf {
     namespace error {
@@ -45,5 +47,15 @@ namespace tcf {
             const char* msg = nullptr
             );
 
+        // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+        void ThrowSgxError(
+            quote3_error_t ret,
+            const char* msg = nullptr
+            );
+        // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+        void ThrowSgxError(
+            tcf_err_t ret,
+            const char* msg = nullptr
+            );
     }  // error
 }  // tcf

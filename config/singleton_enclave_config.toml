@@ -46,7 +46,7 @@ zmq_port = '5555'
 # -------------------------------------------------------
 [EnclaveModule]
 # Attestation type
-attestation_type = "EPID"
+attestation_type = "DCAP"
 
 num_of_enclaves = "1"
 
@@ -78,6 +78,22 @@ ias_url = "https://api.trustedservices.intel.com/sgx/dev"
 # of requests submitted to the IAS server. Obtain the key by subscribing in
 # the portal https://api.portal.trustedservices.intel.com/
 ias_api_key = "112233445566778899aabbccddeeff00"
+
+# ------------------------------------------------------------
+# DCAP attestation data
+# ------------------------------------------------------------
+[DcapAttestation]
+# pccs_url is the URL of the Intel Attestation Service (IAS) server.
+pccs_url = "https://avalon-pccs:8081/sgx/certification/v2/"
+
+# Proxy for https. Leave commented out for direct Internet connections or
+# uncomment and change to your corporate proxy.
+#https_proxy = "http://your-proxy:your-port/"
+
+# IAS API key is a 32-digit hex string subscription key used for authentication
+# of requests submitted to the IAS server. Obtain the key by subscribing in
+# the portal https://api.portal.trustedservices.intel.com/
+pccs_api_key = "112233445566778899aabbccddeeff00"
 
 # -------------------------------------------------------------
 # TCS Worker configuration details

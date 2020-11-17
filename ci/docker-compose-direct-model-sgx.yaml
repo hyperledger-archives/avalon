@@ -20,6 +20,7 @@ services:
     build:
       args:
         - SGX_MODE=HW
+        - ATTESTATION_TYPE=epid
     depends_on:
       - avalon-lmdb
     expose:

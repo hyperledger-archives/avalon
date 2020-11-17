@@ -14,10 +14,10 @@
 
 import os
 import json
+import importlib
 
 from abc import ABC, abstractmethod
 from avalon_enclave_manager.enclave_attributes import EnclaveAttributes
-from avalon_enclave_manager.attestation.epid_attestation import EpidAttestation
 
 import logging
 logger = logging.getLogger(__name__)
@@ -41,8 +41,15 @@ class BaseEnclaveInfo(EnclaveAttributes):
         self._attestation = None
         if "attestation_type" in self._config:
             if self._config["attestation_type"] == "EPID":
-                self._attestation = EpidAttestation(config.get(
-                    "EpidAttestation"), enclave_type)
+                epid_attestation = importlib.import_module(
+                    "avalon_enclave_manager.attestation.epid.epid_attestation")
+                self._attestation = epid_attestation.EpidAttestation(
+                    config.get("EpidAttestation"), enclave_type)
+            elif self._config["attestation_type"] == "DCAP":
+                dcap_attestation = importlib.import_module(
+                    "avalon_enclave_manager.attestation.dcap.dcap_attestation")
+                self._attestation = dcap_attestation.DcapAttestation(
+                    config.get("DcapAttestation"), enclave_type)
             else:
                 raise ValueError('Invalid attestation type {}'.format(
                     self._config["attestation_type"]))
@@ -102,7 +109,8 @@ class BaseEnclaveInfo(EnclaveAttributes):
             status = self._verify_enclave_info(
                 json.dumps(signup_info), mr_enclave, signup_cpp_obj)
             if status != 0:
-                logger.error("Verification of enclave signup info failed")
+                logger.error("Verification of enclave signup"
+                             " info failed {}".format(status))
             else:
                 logger.info("Verification of enclave signup info passed")
 
@@ -119,7 +127,7 @@ class BaseEnclaveInfo(EnclaveAttributes):
         """
         enclave_file_name = self._config.get('enclave_library')
         enclave_file_path = TCF_HOME + "/" + self._config.get(
-                'enclave_library_path')
+            'enclave_library_path')
         logger.info("Enclave Lib: %s", enclave_file_name)
 
         if enclave_file_path:

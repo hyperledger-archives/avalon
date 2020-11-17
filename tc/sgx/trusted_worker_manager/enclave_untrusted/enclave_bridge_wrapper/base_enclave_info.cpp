@@ -23,27 +23,24 @@
 #include "types.h"
 
 #include "base.h"
-#include "enclave_info.h"
+#include "base_enclave_info.h"
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-bool is_sgx_simulator() {
+bool base_enclave_info::is_sgx_simulator() {
     return 0 != tcf::enclave_api::base::IsSgxSimulator();
-}  // _is_sgx_simulator
+}  // base_enclave_info::is_sgx_simulator
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-tcf_enclave_info::tcf_enclave_info(
+void base_enclave_info::init_enclave_info(
     const std::string& enclaveModulePath,
-    const std::string& spid,
+    const tcf::attestation::Attestation *attestation,
     const std::string& persistedSealedEnclaveData,
     const int num_of_enclaves) {
-    this->epid_attestation = new tcf::attestation::EpidAttestation();
-    this->epid_attestation->SetSpid(spid);
     tcf::Log(TCF_LOG_INFO, "Initializing Avalon Intel SGX Enclave\n");
     tcf::Log(TCF_LOG_DEBUG, "Enclave path: %s\n", enclaveModulePath.c_str());
-    // tcf::Log(TCF_LOG_DEBUG, "SPID: %s\n", spid.c_str());
 
     tcf_err_t ret = tcf::enclave_api::base::Initialize(
-        enclaveModulePath, this->epid_attestation,
+        enclaveModulePath, attestation,
         persistedSealedEnclaveData, num_of_enclaves);
     ThrowTCFError(ret);
     tcf::Log(TCF_LOG_INFO, "Avalon Intel SGX Enclave initialized.\n");
@@ -59,28 +56,13 @@ tcf_enclave_info::tcf_enclave_info(
     this->mr_enclave = mrEnclaveBuffer;
     this->basename = basenameBuffer;
 
-}  // tcf_enclave_info::tcf_enclave_info
+}  // base_enclave_info::init_enclave_info
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-tcf_enclave_info::~tcf_enclave_info() {
+base_enclave_info::~base_enclave_info() {
     try {
         tcf::enclave_api::base::Terminate();
         TerminateInternal();
     } catch (...) {}
 
-}  // tcf_enclave_info::~tcf_enclave_info
-
-// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-std::string tcf_enclave_info::get_epid_group() {
-    HexEncodedString epidGroupBuffer;
-    this->epid_attestation->GetEpidGroup(epidGroupBuffer);
-
-    return epidGroupBuffer;
-}  // tcf_enclave_info::get_epid_group
-
-// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-void tcf_enclave_info::set_signature_revocation_list(
-    const std::string& signature_revocation_list) {
-    this->epid_attestation->SetSignatureRevocationList(signature_revocation_list);
-
-}  // tcf_enclave_info::set_signature_revocation_lists
+}  // base_enclave_info::~base_enclave_info

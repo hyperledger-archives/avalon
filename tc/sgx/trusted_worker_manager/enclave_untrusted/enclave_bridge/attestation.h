@@ -41,6 +41,22 @@ namespace tcf {
             virtual size_t GetQuoteSize(void) = 0;
             virtual void CreateQuoteFromReport(const sgx_report_t* inEnclaveReport,
                                        ByteArray& outEnclaveQuote) = 0;
+            virtual void InitQuote(sgx_target_info_t &target_info) = 0;
+#ifdef BUILD_SINGLETON
+            virtual sgx_status_t VerifyEnclaveInfoSingleton(const std::string& enclaveInfo,
+                                                         const std::string& mr_enclave,
+                                                         const sgx_enclave_id_t& enclave_id) = 0;
+#elif BUILD_KME
+            virtual tcf_err_t VerifyEnclaveInfoKME(const std::string& enclaveInfo,
+                                                   const std::string& mr_enclave,
+                                                   const std::string& ext_data,
+                                                   const sgx_enclave_id_t& enclave_id) = 0;
+#elif BUILD_WPE
+            virtual tcf_err_t VerifyEnclaveInfoWPE(const std::string& enclaveInfo,
+                                                   const std::string& mr_enclave,
+                                                   const std::string& ext_data,
+                                                   const sgx_enclave_id_t& enclave_id) = 0;
+#endif
 
         protected:
             size_t quoteSize;
