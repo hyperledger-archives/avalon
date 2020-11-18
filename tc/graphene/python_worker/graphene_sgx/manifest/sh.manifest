@@ -1,1 +1,1 @@
-sgx.enclave_size = 256M
+sgx.enclave_size = "256M"
