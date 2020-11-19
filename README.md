@@ -8,6 +8,8 @@ https://creativecommons.org/licenses/by/4.0/
 
 # Hyperledger Avalon
 
+[![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/3323/badge)](https://bestpractices.coreinfrastructure.org/projects/3323)
+
 Hyperledger Avalon (formerly Trusted Compute Framework)
 enables privacy in blockchain transactions,
 moving intensive processing from a main blockchain to improve scalability and
