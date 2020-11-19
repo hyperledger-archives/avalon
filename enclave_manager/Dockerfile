@@ -236,7 +236,7 @@ RUN platform=""; \
     ldconfig \
     && ln -s /etc/ssl/certs/* /usr/local/ssl/certs/ \
     && MITIGATION_TOOLS=as.ld.objdump.gold.r2.tar.gz \
-    && wget https://download.01.org/intel-sgx/latest/linux-latest/$MITIGATION_TOOLS \
+    && wget https://download.01.org/intel-sgx/sgx-linux/2.10/$MITIGATION_TOOLS \
     && tar -xvf $MITIGATION_TOOLS \
     && cp external/toolset/$platform/* /usr/local/bin/ \
     && rm $MITIGATION_TOOLS \

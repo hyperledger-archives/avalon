@@ -370,7 +370,7 @@ problems.
   mitigation applied on SGX CVEs as documented here [sgxsdk-guide](#https://github.com/intel/linux-sgx)
 
   ```bash
-  wget https://download.01.org/intel-sgx/latest/linux-latest/as.ld.objdump.gold.r2.tar.gz
+  wget https://download.01.org/intel-sgx/sgx-linux/2.10/as.ld.objdump.gold.r2.tar.gz
   tar -xvf as.ld.objdump.gold.r2.tar.gz
   sudo cp external/toolset/ubuntu18.04/* /usr/local/bin/
   ```
