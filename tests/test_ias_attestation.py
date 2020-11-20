@@ -28,8 +28,7 @@ import utility.logger as plogger
 from avalon_sdk.worker.worker_details import WorkerType
 import avalon_sdk.worker.worker_details as worker
 from avalon_sdk.work_order.work_order_params import WorkOrderParams
-from connectors.direct.direct_json_rpc_api_connector \
-    import DirectJsonRpcApiConnector
+from avalon_sdk.connector.direct.avalon_direct_client import AvalonDirectClient
 import verify_report.verify_attestation_report as attestation_util
 from error_code.error_status import WorkOrderStatus
 
@@ -91,7 +90,6 @@ def ParseCommandLine(args):
                 sys.exit(-1)
 
         global direct_jrpc
-        direct_jrpc = DirectJsonRpcApiConnector(conf_files[0])
 
         # Whether or not to connect to the registry list on the blockchain
         off_chain = False
@@ -106,6 +104,8 @@ def ParseCommandLine(args):
 
         if options.off_chain:
                 off_chain = True
+
+        direct_jrpc = AvalonDirectClient(config=config)
 
         worker_id = options.worker_id
         message = options.message
@@ -160,7 +160,7 @@ def Main(args=None):
         # Prepare worker
         req_id = 31
         global worker_id
-        worker_registry_instance = direct_jrpc.create_worker_registry(config)
+        worker_registry_instance = direct_jrpc.get_worker_registry_instance()
         if not worker_id:
                 worker_lookup_result = worker_registry_instance.worker_lookup(
                     worker_type=WorkerType.TEE_SGX, id=req_id)
