@@ -34,6 +34,8 @@ services:
         - https_proxy
         - no_proxy
         - ENCLAVE_TYPE=kme
+        - IMAGE=$IMAGE
+        - DISTRO=$DISTRO
     environment:
       - http_proxy
       - https_proxy
@@ -70,22 +72,12 @@ services:
       context: .
       dockerfile: ./enclave_manager/Dockerfile
       args:
-        - http_proxy
-        - https_proxy
-        - no_proxy
         - ENCLAVE_TYPE=wpe
         # Configure list of workload that need to be supported
         # by this WPE by separating each workload by delimiter semicolon.
         - WORKLOADS=echo-result;heart-disease-eval;inside-out-eval;simple-wallet
-    environment:
-      - http_proxy
-      - https_proxy
-      - no_proxy
     volumes:
       - pool-1:/shared-pool-1
-    expose:
-      # ZMQ socket port.
-      - 5555
     command: |
       bash -c "
         mv /project/avalon/wpe_mr_enclave.txt /shared-pool-1
