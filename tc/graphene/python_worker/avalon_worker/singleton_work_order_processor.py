@@ -17,8 +17,11 @@ import sys
 import logging
 import argparse
 import json
+from hashlib import sha256
+
 import avalon_worker.receive_request as receive_request
-import avalon_worker.crypto.worker_hash as worker_hash
+import avalon_crypto_utils.worker_hash as worker_hash
+import avalon_crypto_utils.crypto_utility as crypto_utility
 from avalon_worker.base_work_order_processor import BaseWorkOrderProcessor
 from avalon_worker.error_code import WorkerError
 import avalon_worker.utility.jrpc_utility as jrpc_utility
@@ -32,7 +35,7 @@ logger.addHandler(logging.StreamHandler(sys.stdout))
 
 def main(args=None):
     """
-    Graphene worker main function.
+    Graphene Singleton worker main function.
     """
     # Parse command line parameters.
     parser = argparse.ArgumentParser()
@@ -137,6 +140,7 @@ class SingletonWorkOrderProcessor(BaseWorkOrderProcessor):
                                                            out_data,
                                                            session_key,
                                                            session_key_iv)
+            output_json = self._encrypt_and_sign_response(output_json)
         else:
             jrpc_id = input_json["id"]
             err_code = WorkerError.INVALID_PARAMETER_FORMAT_OR_VALUE
@@ -147,6 +151,28 @@ class SingletonWorkOrderProcessor(BaseWorkOrderProcessor):
         # return json str
         output_json_str = json.dumps(output_json)
         return output_json_str
+
+
+# -------------------------------------------------------------------------
+
+    def _handle_methods(self, method_name, params):
+        """
+        Invoke request handling as per method name.
+
+        Parameters :
+            method_name: name of method received in request
+            params: Parameters received in request
+        Returns :
+            JSON RPC response containing result or None for method not found.
+        """
+        output = None
+        # Process worker signup/work order
+        if (method_name == "ProcessWorkerSignup"):
+            output = self._process_worker_signup()
+        elif (method_name == "ProcessWorkOrder"):
+            output = self._process_work_order(params[0])
+        return output
+
 
 # -------------------------------------------------------------------------
 
@@ -173,11 +199,34 @@ class SingletonWorkOrderProcessor(BaseWorkOrderProcessor):
         res_hash = worker_hash.WorkerHash().calculate_response_hash(
             output_json["result"])
         res_hash_sign = self.sign.sign_message(res_hash)
-        res_hash_sign_b64 = self.encrypt.byte_array_to_base64(res_hash_sign)
+        res_hash_sign_b64 = crypto_utility.byte_array_to_base64(res_hash_sign)
         output_json["result"]["workerSignature"] = res_hash_sign_b64
 
         return output_json
 
+# -------------------------------------------------------------------------
+
+    def _get_quote(self):
+        """
+        Get SGX quote of worker enclave.
+
+        Returns :
+            SGX quote value of worker enclave as base64 encoded string.
+            If Intel SGX environment is not present returns empty string.
+        """
+        # Write user report data.
+        # First 32 bytes of report data has SHA256 hash of worker's
+        # public signing key. Next 32 bytes is filled with Zero.
+        hash_pub_key = sha256(self.worker_public_sign_key).digest()
+        user_data = hash_pub_key + bytearray(32)
+        ret = self.sgx_attestation.write_user_report_data(user_data)
+        # Get quote
+        if ret:
+            quote_str = self.sgx_attestation.get_quote()
+        else:
+            quote_str = ""
+        # Return quote.
+        return quote_str
 # -------------------------------------------------------------------------
 
 

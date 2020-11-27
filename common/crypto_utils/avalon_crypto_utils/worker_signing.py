@@ -72,8 +72,7 @@ class WorkerSign():
             return None
 
 # -------------------------------------------------------------------------
-
-    def sign_message(self, message_hash_bytes):
+    def sign_message(self, message_hash_bytes, signing_key_str=None):
         """
         Sign message hash using ECDSA private key.
 
@@ -84,7 +83,10 @@ class WorkerSign():
             Raises exception in case of error.
         """
         try:
-            private_key = self.sign_private_key
+            if signing_key_str is None:
+                private_key = self.sign_private_key
+            else:
+                private_key = SigningKey.from_pem(signing_key_str)
             signed = \
                 private_key.sign_digest_deterministic(
                     message_hash_bytes,

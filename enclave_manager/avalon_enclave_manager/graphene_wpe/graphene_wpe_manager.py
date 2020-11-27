@@ -22,10 +22,12 @@ import sys
 import random
 
 from avalon_enclave_manager.base_enclave_manager import EnclaveManager
-from avalon_enclave_manager.wpe.wpe_requester import WPERequester
-from avalon_enclave_manager.wpe.wpe_enclave_manager \
-    import WorkOrderProcessorEnclaveManager
-from avalon_enclave_manager.graphene.graphene_wpe_enclave_info \
+from avalon_enclave_manager.work_order_processor_manager \
+    import WOProcessorManager
+from avalon_enclave_manager.wpe_common.wpe_requester import WPERequester
+from avalon_enclave_manager.wpe_common.wo_processor_manager_helper \
+    import WOProcessorEnclaveManagerHelper
+from avalon_enclave_manager.graphene_wpe.graphene_wpe_enclave_info \
     import GrapheneWPESignupInfo
 from utility.zmq_comm import ZmqCommunication
 from utility.jrpc_utility import get_request_json
@@ -34,7 +36,8 @@ from utility.jrpc_utility import get_request_json
 logger = logging.getLogger(__name__)
 
 
-class GrapheneWPEManager(WorkOrderProcessorEnclaveManager):
+class GrapheneWPEManager(
+        WOProcessorEnclaveManagerHelper, WOProcessorManager):
     """
     Manager class to handle work order processing in a worker
     pool setup with Graphene
@@ -47,8 +50,10 @@ class GrapheneWPEManager(WorkOrderProcessorEnclaveManager):
         graphene_zmq_url = config.get("EnclaveManager")["graphene_zmq_url"]
         self.zmq_socket = ZmqCommunication(graphene_zmq_url)
         self.zmq_socket.connect()
-
-        super().__init__(config)
+        WOProcessorManager.__init__(self, config)
+        WOProcessorEnclaveManagerHelper.__init__(self)
+        self._identity = self._worker_id
+        self._config = config
 
 # -------------------------------------------------------------------------
 
@@ -76,6 +81,7 @@ class GrapheneWPEManager(WorkOrderProcessorEnclaveManager):
         # verification_key_signature delimited by ' '
         self._unique_verification_key = response.split(' ')[1]
         self._unique_verification_key_signature = response.split(' ')[2]
+
         # Verify unique verification key signature using unique id
         result = self._verify_unique_id_signature(
             self._unique_verification_key,
@@ -86,7 +92,8 @@ class GrapheneWPEManager(WorkOrderProcessorEnclaveManager):
         worker_signup_json = self._signup_worker(
             self._unique_verification_key)
         # signup enclave
-        signup_data = GrapheneWPESignupInfo(worker_signup_json)
+        signup_data = GrapheneWPESignupInfo(self._config, worker_signup_json)
+        self.mr_enclave = signup_data.get_enclave_measurement()
         # return signup data
         logger.info("WPE signup data {}".format(signup_data.proof_data))
         return signup_data
@@ -103,7 +110,9 @@ class GrapheneWPEManager(WorkOrderProcessorEnclaveManager):
         """
         nonce = None
         json_request = get_request_json("GenerateNonce",
-                                        random.randint(0, 100000))
+                                        random.randint(0, 100000),
+                                        {"nonce_size": 32})
+
         try:
             # Get a nonce generated at Graphene worker
             response = self.zmq_socket.send_request_zmq(
@@ -130,7 +139,7 @@ class GrapheneWPEManager(WorkOrderProcessorEnclaveManager):
                   "uniqueVerificationKeySignature": verif_key_sig}
         json_request = get_request_json("VerifyUniqueIdSignature",
                                         random.randint(0, 100000), params)
-        res = 0
+        res = -1
         try:
             response = self.zmq_socket.send_request_zmq(
                 json.dumps(json_request))
@@ -186,11 +195,26 @@ class GrapheneWPEManager(WorkOrderProcessorEnclaveManager):
         Returns :
             response - Response as received after work-order execution
         """
-        wo_request = work_order_request.SgxWorkOrderRequest(
-            "WPE",
-            input_json_str,
-            pre_proc_output)
-        return wo_request.execute()
+        json_request = get_request_json(
+            "ProcessWorkOrder", random.randint(0, 100000),
+            [input_json_str, pre_proc_output])
+        try:
+            # Send work order request to WPE Graphene worker
+            wo_result = self.zmq_socket.send_request_zmq(
+                json.dumps(json_request))
+        except Exception as ex:
+            logger.error("Exception while sending data over ZMQ:" + str(ex))
+            return None
+
+        if wo_result is None:
+            logger.error("WPE Graphene work order execution error")
+            return None
+        try:
+            wo_result_json = json.loads(wo_result)
+        except Exception as ex:
+            logger.error("Error loading json execution result:" + str(ex))
+            return None
+        return wo_result_json
 
 # -------------------------------------------------------------------------
 
@@ -200,7 +224,7 @@ def main(args=None):
     import utility.logger as plogger
 
     # parse out the configuration file first
-    tcf_home = os.environ.get("TCF_HOME", "../../../../")
+    tcf_home = os.environ.get("TCF_HOME", "../../../")
 
     conf_files = ["graphene_wpe_config.toml"]
     conf_paths = [".", tcf_home + "/"+"config"]
@@ -244,7 +268,6 @@ def main(args=None):
         EnclaveManager.parse_command_line(config, remainder)
         logger.info("Initialize GrapheneWPEManager")
         enclave_manager = GrapheneWPEManager(config)
-        logger.info("About to start GrapheneWPEManager")
         enclave_manager.start_enclave_manager()
     except Exception as e:
         logger.error("Exception occurred while running Graphene WPE, " +

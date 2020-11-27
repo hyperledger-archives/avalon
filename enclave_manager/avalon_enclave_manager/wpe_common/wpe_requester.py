@@ -20,11 +20,7 @@ import random
 import secrets
 import logging
 import hashlib
-import argparse
 
-import config.config as pconfig
-import utility.logger as plogger
-import utility.hex_utils as hex_utils
 import avalon_crypto_utils.worker_encryption as worker_encryption
 import avalon_crypto_utils.worker_signing as worker_signing
 from database import connector
@@ -188,6 +184,7 @@ class WPERequester():
 
         if "result" in response:
             wo_response_json = response["result"]
+            logger.info("verify result signature\n\n")
             if self._verify_res_signature(wo_response_json,
                                           self._worker.verification_key,
                                           wo_req["params"]["requesterNonce"]):
