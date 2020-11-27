@@ -20,6 +20,7 @@ import string
 import json
 from hashlib import sha256
 from abc import ABC, abstractmethod
+
 import avalon_crypto_utils.worker_encryption as worker_encryption
 import avalon_crypto_utils.worker_signing as worker_signing
 import avalon_crypto_utils.worker_hash as worker_hash
@@ -33,8 +34,6 @@ from avalon_worker.attestation.sgx_attestation_factory \
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 logger.addHandler(logging.StreamHandler(sys.stdout))
-
-# -------------------------------------------------------------------------
 
 
 class BaseWorkOrderProcessor(ABC):
@@ -53,7 +52,6 @@ class BaseWorkOrderProcessor(ABC):
         """
         self.workload_json_file = workload_json_file
         self._generate_worker_keys()
-        self._generate_worker_signup()
         # Create workload processor.
         self.wl_processor = \
             workload_processor.WorkLoadProcessor(self.workload_json_file)
@@ -80,7 +78,7 @@ class BaseWorkOrderProcessor(ABC):
 
 # -------------------------------------------------------------------------
 
-    def _generate_worker_signup(self):
+    def _generate_worker_signup(self, unique_id=None):
         """
         Generate worker signup.
         """
@@ -95,12 +93,28 @@ class BaseWorkOrderProcessor(ABC):
         # Create Graphene SGX Attestation instance.
         self.sgx_attestation = \
             SgxAttestationFactory().create(SgxAttestationFactory.GRAPHENE)
-        signup_data_json["mrenclave"] = \
-            self._get_mrenclave()
-        signup_data_json["quote"] = \
-            self._get_quote()
+        signup_data_json["mrenclave"] = self._get_mrenclave()
+        if unique_id:
+            signup_data_json["quote"] = self._get_quote(unique_id)
+        else:
+            signup_data_json["quote"] = self._get_quote()
 
         self.signup_data_json_str = json.dumps(signup_data_json)
+
+# -------------------------------------------------------------------------
+
+    def _process_worker_signup(self, unique_id=None):
+        """
+        Process signup request and returns worker details.
+
+        Returns :
+            JSON signup response containing worker details.
+        """
+        if unique_id:
+            self._generate_worker_signup(unique_id)
+        else:
+            self._generate_worker_signup()
+        return self.signup_data_json_str
 
 # -------------------------------------------------------------------------
 
@@ -124,20 +138,15 @@ class BaseWorkOrderProcessor(ABC):
                                                             0,
                                                             err_msg)
             return json.dumps(error_json)
-        # Process worker signup/work order
         try:
-            if (method_name == "ProcessWorkerSignup"):
-                output = self._process_worker_signup()
-            elif (method_name == "ProcessWorkOrder"):
-                output = self._process_work_order(params)
-            else:
+            output = self._handle_methods(method_name, params)
+            if output is None:
                 err_code = WorkerError.INVALID_PARAMETER_FORMAT_OR_VALUE
                 err_msg = "Unsupported method"
                 error_json = jrpc_utility.create_error_response(err_code,
                                                                 0,
                                                                 err_msg)
                 output = json.dumps(error_json)
-            return output
         except Exception as ex:
             err_code = WorkerError.UNKNOWN_ERROR
             err_msg = "Error processing work order: " + str(ex)
@@ -145,22 +154,27 @@ class BaseWorkOrderProcessor(ABC):
                                                             0,
                                                             err_msg)
             return json.dumps(error_json)
-
-# -------------------------------------------------------------------------
-
-    def _process_worker_signup(self):
-        """
-        Process signup request and returns worker details.
-
-        Returns :
-            JSON signup response containing worker details.
-        """
-        return self.signup_data_json_str
+        return output
 
 # -------------------------------------------------------------------------
 
     @abstractmethod
-    def _process_work_order(self, input_json_str):
+    def _handle_methods(self, method_name, params):
+        """
+        Invoke request handling as per method name.
+
+        Parameters :
+            method_name: name of method received in request
+            params: Parameters received in request
+        Returns :
+            JSON RPC response containing result or None for method not found.
+        """
+        pass
+
+# -------------------------------------------------------------------------
+
+    @abstractmethod
+    def _process_work_order(self, input_json_str, pre_processed_json_str=None):
         """
         Process Avalon work order and returns JSON RPC response
 
@@ -168,8 +182,12 @@ class BaseWorkOrderProcessor(ABC):
             input_json_str: JSON formatted work order request string.
                             work order JSON is formatted as per
                             TC spec ver 1.1 section 6.
+            pre_processed_json_str: JSON formatted work order request
+                            pre-processed by KME worker. The keys present in
+                            the json will be used to process original
+                            work order request by WPE worker
         Returns :
-            JSON RPC response containing result or error.
+            JSON RPC response containing result or None for method not found.
         """
         pass
 
@@ -243,8 +261,7 @@ class BaseWorkOrderProcessor(ABC):
             workerNonce.encode("UTF-8"))
         output_json["result"]["outData"] = [out_data]
 
-        return self._encrypt_and_sign_response(
-            session_key, session_key_iv, output_json)
+        return output_json
 
 # -------------------------------------------------------------------------
 
@@ -275,12 +292,14 @@ class BaseWorkOrderProcessor(ABC):
             mrenclave value of worker enclave as hex string.
             If Intel SGX environment is not present returns empty string.
         """
+        logger.info("GET mr enclave")
         mrenclave = self.sgx_attestation.get_mrenclave()
         return mrenclave
 
 # -------------------------------------------------------------------------
 
-    def _get_quote(self):
+    @abstractmethod
+    def _get_quote(self, unique_id=None):
         """
         Get SGX quote of worker enclave.
 
@@ -288,18 +307,6 @@ class BaseWorkOrderProcessor(ABC):
             SGX quote value of worker enclave as base64 encoded string.
             If Intel SGX environment is not present returns empty string.
         """
-        # Write user report data.
-        # First 32 bytes of report data has SHA256 hash of worker's
-        # public signing key. Next 32 bytes is filled with Zero.
-        hash_pub_key = sha256(self.worker_public_sign_key).digest()
-        user_data = hash_pub_key + bytearray(32)
-        ret = self.sgx_attestation.write_user_report_data(user_data)
-        # Get quote
-        if ret:
-            quote_str = self.sgx_attestation.get_quote()
-        else:
-            quote_str = ""
-        # Return quote.
-        return quote_str
+        pass
 
 # -------------------------------------------------------------------------

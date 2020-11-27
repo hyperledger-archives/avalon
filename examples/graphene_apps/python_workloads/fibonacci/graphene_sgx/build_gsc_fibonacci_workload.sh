@@ -71,3 +71,12 @@ fi
 # Sign image to generate final GSC image
 echo "Generate Signed GSC image"
 ./gsc sign-image $IMAGE_NAME $SIGN_KEY_FILE
+
+# Extract enclave info from GSC image
+./gsc info-image $GSC_IMAGE_NAME > gsc-info.toml
+
+# Extract mrenclave corresponding to python and persist to file
+python3 $TCF_HOME/scripts/mr_enclave.py
+
+# Move MRENCLAVE file to TCF_HOME
+mv wpe_mr_enclave.txt $TCF_HOME

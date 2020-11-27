@@ -13,11 +13,12 @@
 # limitations under the License.
 
 import base64
-import utility.hex_utils as hex_utils
 import secrets
 import string
-
 import logging
+from Cryptodome.Random import get_random_bytes
+
+import utility.hex_utils as hex_utils
 
 logger = logging.getLogger(__name__)
 
@@ -69,6 +70,21 @@ def base64_to_byte_array(b64_str):
 
 
 # -------------------------------------------------------------------------
+
+def generate_random_bytes(size):
+    """
+    Function to generate random byte array for given size
+
+    Parameters:
+        size Size of bytearray to be generated
+    Returns:
+        Random byte array of length size
+    """
+    return get_random_bytes(size)
+
+# -----------------------------------------------------------------
+
+
 def byte_array_to_base64(data_bytes):
     """
     Converts bytes to Base64 encoded string.
