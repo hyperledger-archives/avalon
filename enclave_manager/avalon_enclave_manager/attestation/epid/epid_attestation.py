@@ -20,7 +20,7 @@ import importlib
 
 from ssl import SSLError
 from requests.exceptions import HTTPError, Timeout
-import avalon_enclave_manager.ias_client as ias_client
+import avalon_enclave_manager.attestation.epid.ias_client as ias_client
 from avalon_enclave_manager.attestation.attestation import Attestation
 from avalon_enclave_manager.enclave_type import EnclaveType
 
@@ -34,7 +34,7 @@ class EpidAttestation(Attestation):
     _sig_rl_update_time = None
     _epid_group = None
     _ias = None
-    _tcf_enclave_info = None
+    _epid_enclave_info = None
     SIG_RL_UPDATE_PERIOD = 8 * 60 * 60  # in seconds every 8 hours
 
     # -------------------------------------------------------
@@ -58,19 +58,22 @@ class EpidAttestation(Attestation):
         logger.info("ENCLAVE_TYPE {}".format(enclave_type))
         if enclave_type == EnclaveType.KME:
             self.enclave_info = importlib.import_module(
-                "avalon_enclave_manager.attestation.enclave_info_kme")
+                "avalon_enclave_manager.attestation.epid." +
+                "epid_enclave_info_kme")
         elif enclave_type == EnclaveType.WPE:
             self.enclave_info = importlib.import_module(
-                "avalon_enclave_manager.attestation.enclave_info_wpe")
+                "avalon_enclave_manager.attestation.epid." +
+                "epid_enclave_info_wpe")
         elif enclave_type == EnclaveType.SINGLETON:
             self.enclave_info = importlib.import_module(
-                "avalon_enclave_manager.attestation.enclave_info_singleton")
+                "avalon_enclave_manager.attestation.epid." +
+                "epid_enclave_info_singleton")
         else:
             logger.exception('Unsupported enclave type passed in the config')
             raise Exception('Unsupported enclave type passed in the config')
 
         # IAS is not initialized in Intel SGX SIM mode
-        if not self._ias and not self.enclave_info.is_sgx_simulator():
+        if not self._ias and not self.is_sgx_simulator():
             self._ias = \
                 ias_client.IasClient(
                     IasServer=config['ias_url'],
@@ -99,7 +102,7 @@ class EpidAttestation(Attestation):
 
         # If we are not running in the simulator, we are going to go and get
         # an attestation verification report for our signup data.
-        if not self.enclave_info.is_sgx_simulator():
+        if not self.is_sgx_simulator():
             logger.info("Running in Intel SGX HW mode")
             logger.debug("posting verification to IAS")
             ias_nonce = '{0:032X}'.format(random.getrandbits(128))
@@ -150,8 +153,8 @@ class EpidAttestation(Attestation):
         Returns :
             @returns True on success False on failure
         """
-        if not self._tcf_enclave_info:
-            self._tcf_enclave_info = self.enclave_info.tcf_enclave_info(
+        if not self._epid_enclave_info:
+            self._epid_enclave_info = self.enclave_info.EpidEnclaveInfo(
                 signed_enclave, self._config['spid'], persisted_sealed_data,
                 int(num_of_enclave))
 
@@ -178,8 +181,8 @@ class EpidAttestation(Attestation):
         Returns :
             @returns mr_enclave - Enclave measurement for enclave
         """
-        return self._tcf_enclave_info.mr_enclave \
-            if self._tcf_enclave_info is not None else None
+        return self._epid_enclave_info.mr_enclave \
+            if self._epid_enclave_info is not None else None
 
     # -----------------------------------------------------------------
 
@@ -190,8 +193,8 @@ class EpidAttestation(Attestation):
         Returns :
             @returns basename - Basename of enclave
         """
-        return self._tcf_enclave_info.basename \
-            if self._tcf_enclave_info is not None else None
+        return self._epid_enclave_info.basename \
+            if self._epid_enclave_info is not None else None
 
     # -----------------------------------------------------------------
 
@@ -201,19 +204,19 @@ class EpidAttestation(Attestation):
         """
 
         if self._epid_group is None:
-            self._epid_group = self._tcf_enclave_info.get_epid_group()
+            self._epid_group = self._epid_enclave_info.get_epid_group()
         logger.info("EPID: " + self._epid_group)
 
         if not self._sig_rl_update_time \
                 or ((time.time() - self._sig_rl_update_time)
                     > SIG_RL_UPDATE_PERIOD):
             sig_rl = ""
-            if not self.enclave_info.is_sgx_simulator():
+            if not self.is_sgx_simulator():
                 sig_rl = self._ias.get_signature_revocation_lists(
                     self._epid_group)
                 logger.debug("Received SigRl of {} bytes ".format(len(sig_rl)))
 
-            self._tcf_enclave_info.set_signature_revocation_list(sig_rl)
+            self._epid_enclave_info.set_signature_revocation_list(sig_rl)
             self._sig_rl_update_time = time.time()
 
     # -----------------------------------------------------------------

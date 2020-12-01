@@ -13,7 +13,21 @@
  * limitations under the License.
  */
 
-%module enclave_info_wpe
+#pragma once
 
-%include epid_enclave_info.i
+#include <string>
+#include "attestation.h"
 
+bool is_sgx_simulator();
+
+class BaseEnclaveInfo {
+public:
+    void init_enclave_info(const std::string& enclave_module_path,
+        const Attestation* attestation,
+        const std::string& persisted_sealed_data,
+        const int num_of_enclaves);
+    virtual ~BaseEnclaveInfo();
+
+    std::string mr_enclave;         // hex encoding of the enclave measurement
+    std::string basename;           // hex encoding of the basename
+};  // class base_enclave_info

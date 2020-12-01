@@ -157,39 +157,29 @@ tcf_err_t SignupDataSingleton::UnsealEnclaveData(
 tcf_err_t SignupDataSingleton::VerifyEnclaveInfo(
     const std::string& enclaveInfo,
     const std::string& mr_enclave) {
-    tcf_err_t result = TCF_SUCCESS;
+    tcf_err_t tresult = TCF_SUCCESS;
     try {
         // xxxxx call the enclave
         sgx_enclave_id_t enclaveid = g_Enclave[0].GetEnclaveId();
-        tcf_err_t presult = TCF_SUCCESS;
 
-        sgx_status_t sresult = tcf::sgx_util::CallSgx(
-            [ enclaveid,
-              &presult,
-              enclaveInfo,
-              mr_enclave ] () {
-              sgx_status_t sresult =
-              ecall_VerifyEnclaveInfo(
-                             enclaveid,
-                             &presult,
-                             enclaveInfo.c_str(),
-                             mr_enclave.c_str());
-          return tcf::error::ConvertErrorStatus(sresult, presult);
-    });
-
-        tcf::error::ThrowSgxError(sresult,
-            "Intel SGX enclave call failed (ecall_VerifyEnclaveInfo)");
-        g_Enclave[0].ThrowTCFError(presult);
+        tresult = g_Enclave[0].VerifyEnclaveInfoSingleton(
+            enclaveInfo, mr_enclave, enclaveid);
 
     } catch (tcf::error::Error& e) {
         tcf::enclave_api::base::SetLastError(e.what());
-        result = e.error_code();
+	tcf::Log(TCF_LOG_ERROR, "Enclave signup info verification failed: %s",
+            e.what());
+        tresult = e.error_code();
     } catch (std::exception& e) {
         tcf::enclave_api::base::SetLastError(e.what());
-        result = TCF_ERR_UNKNOWN;
+	tcf::Log(TCF_LOG_ERROR, "Enclave signup info verification failed: %s",
+            e.what());
+        tresult = TCF_ERR_UNKNOWN;
     } catch (...) {
         tcf::enclave_api::base::SetLastError("Unexpected exception");
-        result = TCF_ERR_UNKNOWN;
+	tcf::Log(TCF_LOG_ERROR, "Enclave signup info verification failed"
+            " unknown error");
+        tresult = TCF_ERR_UNKNOWN;
     }
-    return result;
+    return tresult;
 }  // SignupDataSingleton::VerifyEnclaveInfo

@@ -61,7 +61,7 @@ namespace tcf {
               numOfEnclaves -- Number of worker enclaves to create
             */
             tcf_err_t Initialize(const std::string& inPathToEnclave,
-                const tcf::attestation::Attestation *attestation,
+                const Attestation *attestation,
                 const std::string& persisted_sealed_data,
                 const int numOfEnclaves);
 

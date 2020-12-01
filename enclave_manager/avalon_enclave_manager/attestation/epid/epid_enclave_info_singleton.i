@@ -1,4 +1,4 @@
-/* Copyright 2018 Intel Corporation
+/* Copyright 2020 Intel Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,14 +13,7 @@
  * limitations under the License.
  */
 
-#pragma once
+%module epid_enclave_info_singleton
 
-#include <Python.h>
-#include <string>
+%include epid_enclave_info.i
 
-#include "work_order_wrap.h"
-
-void InitializeTCFEnclaveModule();
-
-void _SetLogger(
-    PyObject*);

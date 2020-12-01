@@ -23,32 +23,42 @@
 #include "types.h"
 #include "attestation.h"
 
-namespace tcf {
+class EpidAttestation: public Attestation {
+public:
+    EpidAttestation();
+    virtual ~EpidAttestation();
+    tcf_err_t GetEnclaveCharacteristics(const sgx_enclave_id_t& enclave_id,
+        sgx_measurement_t* outEnclaveMeasurement,
+        sgx_basename_t* outEnclaveBasename);
+    size_t GetQuoteSize(void);
+    void CreateQuoteFromReport(const sgx_report_t* inEnclaveReport,
+        ByteArray& outEnclaveQuote);
+    void GetEpidGroup(HexEncodedString& outEpidGroup);
+    void SetSpid(const HexEncodedString& inSpid);
+    void SetSignatureRevocationList (const std::string& inSignatureRevocationList);
 
-    namespace attestation {
+#ifdef BUILD_SINGLETON
+    tcf_err_t VerifyEnclaveInfoSingleton(
+        const std::string& enclaveInfo,
+        const std::string& mr_enclave,
+        const sgx_enclave_id_t& enclave_id);
+#elif BUILD_KME
+   tcf_err_t VerifyEnclaveInfoKME(
+        const std::string& enclaveInfo,
+        const std::string& mr_enclave,
+        const std::string& ext_data,
+        const sgx_enclave_id_t& enclave_id);
+#elif BUILD_WPE
+    tcf_err_t VerifyEnclaveInfoWPE(
+        const std::string& enclaveInfo,
+        const std::string& mr_enclave,
+        const std::string& ext_data,
+        const sgx_enclave_id_t& enclave_id);
+#endif
 
-        class EpidAttestation: public Attestation {
-
-            public:
-                EpidAttestation();
-                virtual ~EpidAttestation();
-	        tcf_err_t GetEnclaveCharacteristics(const sgx_enclave_id_t& enclave_id,
-	            sgx_measurement_t* outEnclaveMeasurement,
-                    sgx_basename_t* outEnclaveBasename);
-                size_t GetQuoteSize(void);
-                void CreateQuoteFromReport(const sgx_report_t* inEnclaveReport,
-                    ByteArray& outEnclaveQuote);
-		void GetEpidGroup(HexEncodedString& outEpidGroup);
-	        void SetSpid(const HexEncodedString& inSpid);
-	        void SetSignatureRevocationList (const std::string& inSignatureRevocationList);
-
-            protected:
-	        std::string signatureRevocationList;
-                sgx_spid_t spid;
-	        sgx_epid_group_id_t epidGroupId;
-        };  // class EpidAttestation
-
-    }  /* namespace attestation */
-
-}  // namespace tcf
+protected:
+    std::string signatureRevocationList;
+    sgx_spid_t spid;
+    sgx_epid_group_id_t epidGroupId;
+};  // class EpidAttestation
 

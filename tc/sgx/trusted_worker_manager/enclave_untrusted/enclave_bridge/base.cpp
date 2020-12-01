@@ -69,7 +69,7 @@ std::string tcf::enclave_api::base::GetLastError(void) {
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 tcf_err_t tcf::enclave_api::base::Initialize(
     const std::string& inPathToEnclave,
-    const tcf::attestation::Attestation *attestation,
+    const Attestation *attestation,
     const std::string& persisted_sealed_data,
     const int numOfEnclaves) {
     tcf_err_t ret = TCF_SUCCESS;

@@ -13,7 +13,14 @@
  * limitations under the License.
  */
 
-%module enclave_info_singleton
+%include enclave_info.i
 
-%include epid_enclave_info.i
+%{
+#include "base_enclave_info.h"
+#include "epid_enclave_info.h"
+%}
 
+/* Swig include directive to include header file(Both c++ or other swig file).
+It is used by swig compiler. */
+%include "base_enclave_info.h"
+%include "epid_enclave_info.h"

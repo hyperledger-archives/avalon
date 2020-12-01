@@ -27,7 +27,7 @@ if sys.version_info[0] < 3:
     sys.exit(1)
 
 
-tcf_root_dir = os.environ.get('TCF_HOME', '../..')
+tcf_root_dir = os.environ.get('TCF_HOME', '../../..')
 
 version = subprocess.check_output(
     os.path.join(tcf_root_dir, 'bin/get_version')).decode('ascii').strip()
@@ -83,7 +83,7 @@ verify_report_modulefiles = [
 ]
 
 verify_report_module = Extension(
-    'verify_report._verify_report',
+    'verify_report._ias_verify_report',
     verify_report_modulefiles,
     swig_opts=['-c++'] + ['-I%s' % i for i in verify_report_include_dirs],
     extra_compile_args=compile_args,
@@ -93,9 +93,9 @@ verify_report_module = Extension(
 
 # -----------------------------------------------------------------
 setup(
-    name='avalon_verify_report_utils',
+    name='avalon_verify_ias_report_utils',
     version=version,
-    description='Avalon Verify Report Utils Library',
+    description='Avalon Verify IAS Report Utils Library',
     author='Hyperledger Avalon',
     url='https://github.com/hyperledger/avalon',
     packages=find_packages(),

@@ -33,10 +33,13 @@ enclave_bridge_wrapper_path = os.path.join(tcf_root_dir,
 enclave_bridge_path = os.path.join(tcf_root_dir,
          'tc/sgx/trusted_worker_manager/enclave_untrusted/enclave_bridge')
 swig_file_path = os.path.join(tcf_root_dir,
-         'enclave_manager/avalon_enclave_manager/attestation')
+         'enclave_manager/avalon_enclave_manager/attestation/')
 
 # If enclave_type is not set then default to singleton
 enclave_type =  os.environ.get('ENCLAVE_TYPE', 'singleton').lower()
+
+# If attestation_type is not set then default to EPID.
+attestation_type = os.environ.get('ATTESTATION_TYPE', 'epid').lower()
 
 # Defaults to path '/opt/intel/sgxsdk' if SGX_SDK env variable is not passed
 sgx_sdk = os.environ.get('SGX_SDK', '/opt/intel/sgxsdk')
@@ -78,22 +81,22 @@ library_dirs = [
 libraries = []
 
 if enclave_type == "kme":
-    module_name = 'enclave_info_kme'
     libraries.append('avalon-kme-enclave-bridge')
 elif enclave_type == "wpe":
-    module_name = 'enclave_info_wpe'
     libraries.append('avalon-wpe-enclave-bridge')
 elif enclave_type == "singleton":
-    module_name = 'enclave_info_singleton'
     libraries.append('avalon-singleton-enclave-bridge')
 else:
     print('Unsupported enclave type passed in the config %s', enclave_type)
     sys.exit(1)
 
-lib_name = 'avalon_enclave_manager.attestation._' + module_name
-swig_file_name = os.path.join(tcf_root_dir,
-        'enclave_manager/avalon_enclave_manager/attestation/' \
-        + module_name + '.i')
+module_name = attestation_type + '_enclave_info_' + enclave_type
+lib_name = 'avalon_enclave_manager.attestation.' + attestation_type +\
+    '._' + module_name
+swig_file_name = os.path.join(swig_file_path, attestation_type,
+    module_name + '.i')
+cpp_file = attestation_type + '_enclave_info.cpp'
+print("SWIG file {} lib name {} cpp file {}".format(swig_file_name, lib_name, cpp_file))
 
 # Target wheel package name
 whl_package_name = enclave_type + '_enclave_manager_attestation'
@@ -101,7 +104,8 @@ whl_package_name = enclave_type + '_enclave_manager_attestation'
 enclave_info_module_files = [
     swig_file_name,
     os.path.join(enclave_bridge_wrapper_path, 'swig_utils.cpp'),
-    os.path.join(enclave_bridge_wrapper_path, 'enclave_info.cpp'),
+    os.path.join(enclave_bridge_wrapper_path, 'base_enclave_info.cpp'),
+    os.path.join(enclave_bridge_wrapper_path, cpp_file),
 ]
 
 enclave_info_module = Extension(

@@ -222,28 +222,10 @@ tcf_err_t SignupDataWPE::VerifyEnclaveInfo(
     try {
         // xxxxx call the enclave
         sgx_enclave_id_t enclaveid = g_Enclave[0].GetEnclaveId();
-        tcf_err_t presult = TCF_SUCCESS;
 
-	//ByteArray ext_data_bytes = StrToByteArray(ext_data);
-        sgx_status_t sresult = tcf::sgx_util::CallSgx(
-            [ enclaveid,
-              &presult,
-              enclaveInfo,
-              mr_enclave,
-              ext_data ] () {
-              sgx_status_t sresult =
-              ecall_VerifyEnclaveInfoWPE(
-                             enclaveid,
-                             &presult,
-                             enclaveInfo.c_str(),
-                             mr_enclave.c_str(),
-                             ext_data.c_str());
-          return tcf::error::ConvertErrorStatus(sresult, presult);
-    });
-
-        tcf::error::ThrowSgxError(sresult,
-            "Intel SGX enclave call failed (ecall_VerifyEnclaveInfoWPE)");
-        g_Enclave[0].ThrowTCFError(presult);
+        result = g_Enclave[0].VerifyEnclaveInfoWPE(enclaveInfo,
+            mr_enclave, ext_data, enclaveid);
+        g_Enclave[0].ThrowTCFError(result);
 
     } catch (tcf::error::Error& e) {
         tcf::enclave_api::base::SetLastError(e.what());

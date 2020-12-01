@@ -28,7 +28,7 @@ enclave {
             [out] sgx_report_t* outEnclaveReport
             );
 
-        public tcf_err_t ecall_VerifyEnclaveInfo(
+        public tcf_err_t ecall_VerifyEnclaveInfoEpid(
             [in, string] const char* inEnclaveInfo,
             [in, string] const char* mr_enclave
             );

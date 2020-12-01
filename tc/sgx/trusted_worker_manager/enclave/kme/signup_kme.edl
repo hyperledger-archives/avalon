@@ -32,7 +32,7 @@ enclave {
             [out] sgx_report_t* outEnclaveReport
         );
 
-        public tcf_err_t ecall_VerifyEnclaveInfoKME(
+        public tcf_err_t ecall_VerifyEnclaveInfoKMEEpid(
             [in, string] const char* inEnclaveInfo,
             [in, string] const char* mrEnclaveValue,
             [in, size=inExtDataSize] const uint8_t* inExtData,

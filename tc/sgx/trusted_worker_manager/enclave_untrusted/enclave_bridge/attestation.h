@@ -26,29 +26,40 @@
 #include "tcf_error.h"
 #include "types.h"
 
-namespace tcf {
+class Attestation {
 
-    namespace attestation {
+public:
+    Attestation();
+    virtual ~Attestation();
+    virtual tcf_err_t GetEnclaveCharacteristics(
+        const sgx_enclave_id_t& enclaveId,
+        sgx_measurement_t* outEnclaveMeasurement,
+        sgx_basename_t* outEnclaveBasename) = 0;
+    virtual size_t GetQuoteSize(void) = 0;
+    virtual void CreateQuoteFromReport(
+        const sgx_report_t* inEnclaveReport,
+        ByteArray& outEnclaveQuote) = 0;
+#ifdef BUILD_SINGLETON
+    virtual tcf_err_t VerifyEnclaveInfoSingleton(
+        const std::string& enclaveInfo,
+        const std::string& mr_enclave,
+        const sgx_enclave_id_t& enclave_id) = 0;
+#elif BUILD_KME
+   virtual tcf_err_t VerifyEnclaveInfoKME(
+        const std::string& enclaveInfo,
+        const std::string& mr_enclave,
+        const std::string& ext_data,
+        const sgx_enclave_id_t& enclave_id) = 0;
+#elif BUILD_WPE
+    virtual tcf_err_t VerifyEnclaveInfoWPE(
+        const std::string& enclaveInfo,
+        const std::string& mr_enclave,
+        const std::string& ext_data,
+        const sgx_enclave_id_t& enclave_id) = 0;
+#endif
 
-        class Attestation {
+protected:
+    size_t quoteSize;
+    sgx_target_info_t reportTargetInfo;
 
-        public:
-            Attestation();
-            virtual ~Attestation();
-	    virtual tcf_err_t GetEnclaveCharacteristics(const sgx_enclave_id_t& enclaveId,
-                sgx_measurement_t* outEnclaveMeasurement,
-                sgx_basename_t* outEnclaveBasename) = 0;
-            virtual size_t GetQuoteSize(void) = 0;
-            virtual void CreateQuoteFromReport(const sgx_report_t* inEnclaveReport,
-                                       ByteArray& outEnclaveQuote) = 0;
-
-        protected:
-            size_t quoteSize;
-            sgx_target_info_t reportTargetInfo;
-
-        };  // class Attestation
-
-    }  /* namespace attestation */
-
-}  // namespace tcf
-
+};  // class Attestation

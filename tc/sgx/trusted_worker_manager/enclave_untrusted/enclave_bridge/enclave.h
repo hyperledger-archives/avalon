@@ -31,7 +31,7 @@ namespace tcf {
 
         class Enclave {
         public:
-            Enclave(const tcf::attestation::Attestation *attestation);
+            Enclave(const Attestation *attestation);
             virtual ~Enclave();
 
             void Load(
@@ -73,6 +73,25 @@ namespace tcf {
 	    void LoadEnclave(
                 const Base64EncodedString& persistedSealedEnclaveData = "");
 
+#ifdef BUILD_SINGLETON
+            tcf_err_t VerifyEnclaveInfoSingleton(
+		const std::string& enclave_info,
+                const std::string& mr_enclave,
+                const sgx_enclave_id_t& enclave_id);
+#elif BUILD_KME
+            tcf_err_t VerifyEnclaveInfoKME(
+		const std::string& enclave_info,
+                const std::string& mr_enclave,
+                const std::string& ext_data,
+                const sgx_enclave_id_t& enclave_id);
+#elif BUILD_WPE
+            tcf_err_t VerifyEnclaveInfoWPE(
+                const std::string& enclave_info,
+                const std::string& mr_enclave,
+                const std::string& ext_data,
+                const sgx_enclave_id_t& enclave_id);
+#endif
+
         protected:
             static void QuerySgxStatus();
 
@@ -83,7 +102,7 @@ namespace tcf {
             size_t sealedSignupDataSize;
 
             std::string enclaveError;
-	    tcf::attestation::Attestation *attestation;
+	    Attestation *attestation;
 
         };  // class Enclave
 

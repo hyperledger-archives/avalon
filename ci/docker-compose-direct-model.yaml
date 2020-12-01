@@ -46,6 +46,7 @@ services:
         - ENCLAVE_TYPE=singleton
         - IMAGE=$IMAGE
         - DISTRO=$DISTRO
+        - ATTESTATION_TYPE=epid
     command: |
       bash -c "
         enclave_manager --lmdb_url http://avalon-lmdb:9090

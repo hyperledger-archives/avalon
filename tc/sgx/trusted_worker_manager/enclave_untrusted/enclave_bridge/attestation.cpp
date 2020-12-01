@@ -15,17 +15,6 @@
 
 #include "attestation.h"
 
-namespace tcf {
+Attestation::Attestation() {}
 
-    namespace attestation {
-
-	    Attestation::Attestation() {
-	    }
-
-	    Attestation::~Attestation() {
-	    }
-
-    }  /* namespace attestation */
-
-}  // namespace tcf
-
+Attestation::~Attestation() {}
