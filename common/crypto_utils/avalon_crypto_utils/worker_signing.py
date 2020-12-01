@@ -21,7 +21,7 @@ from ecdsa.util import sigencode_der, sigdecode_der
 import avalon_crypto_utils.crypto_utility as crypto_utility
 from utility.hex_utils import hex_to_byte_array
 import avalon_crypto_utils.worker_hash as worker_hash
-
+from error_code.error_status import SignatureStatus
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -167,7 +167,7 @@ class WorkerSign():
 
         concat_string = wo_response["extVerificationKey"] + requester_nonce
         v_key_sig = wo_response["extVerificationKeySignature"]
-        v_key_hash = crypto_utility.compute_message_hash(
+        v_key_hash = worker_hash.WorkerHash().compute_message_hash(
             bytes(concat_string, 'UTF-8'))
         decoded_v_key_sig = crypto_utility.base64_to_byte_array(v_key_sig)
         return self.verify_signature_from_pubkey(decoded_v_key_sig,
@@ -229,7 +229,7 @@ class WorkerSign():
             str(input_json_params["updateType"]) + \
             input_json_params["updateData"]
         concat_hash = bytes(concat_string, 'UTF-8')
-        final_hash = crypto_utility.compute_message_hash(concat_hash)
+        final_hash = worker_hash.WorkerHash().compute_message_hash(concat_hash)
         signature = input_json_params["updateSignature"]
         verification_key = \
             input_json_params["receiptVerificationKey"].encode("ascii")
@@ -259,7 +259,8 @@ class WorkerSign():
             input_json_params["workOrderRequestHash"] + \
             input_json_params["requesterGeneratedNonce"]
         concat_hash = bytes(concat_string, "UTF-8")
-        final_hash = bytes(crypto_utility.compute_message_hash(concat_hash))
+        final_hash = bytes(
+            worker_hash.WorkerHash().compute_message_hash(concat_hash))
         signature = input_json_params["requesterSignature"]
         verification_key = \
             input_json_params["receiptVerificationKey"].encode("ascii")

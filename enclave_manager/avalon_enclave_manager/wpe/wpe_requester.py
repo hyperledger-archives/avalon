@@ -26,6 +26,7 @@ import config.config as pconfig
 import utility.logger as plogger
 import utility.hex_utils as hex_utils
 import avalon_crypto_utils.worker_encryption as worker_encryption
+import avalon_crypto_utils.worker_signing as worker_signing
 from database import connector
 from error_code.error_status import SignatureStatus
 from http_client.http_jrpc_client import HttpJrpcClient
@@ -89,7 +90,7 @@ class WPERequester():
 
         # Create session key and iv to sign work order request
         worker_encrypt = worker_encryption.WorkerEncrypt()
-        session_key = worker_encrypt.generate_key()
+        session_key = worker_encrypt.generate_session_key()
         session_iv = worker_encrypt.generate_iv()
 
         wo_req = self._construct_wo_req(
@@ -103,14 +104,8 @@ class WPERequester():
             if self._verify_res_signature(wo_response_json,
                                           self._worker.verification_key,
                                           wo_req["params"]["requesterNonce"]):
-                decrypted_res = worker_encrypt.decrypted_response(
-                    wo_response_json, session_key, session_iv)
-                # Response contains an array of results. In this case, the
-                # array has single element and the data field is of interest.
-                # The data contains result,verification_key and
-                # verification_key_signature delimited by ' '.
-                # @TODO : Update to use multiple out_data fields.
-                return decrypted_res[0]['data']
+                return self.decrypt_wo_response(
+                    wo_response_json, session_key, session_iv, worker_encrypt)
             return None
         else:
             logger.error("Could not get a unique id from the KME : {}"
@@ -144,7 +139,7 @@ class WPERequester():
 
         # Create session key and iv to sign work order request
         worker_encrypt = worker_encryption.WorkerEncrypt()
-        session_key = worker_encrypt.generate_key()
+        session_key = worker_encrypt.generate_session_key()
         session_iv = worker_encrypt.generate_iv()
 
         wo_req = self._construct_wo_req(
@@ -158,12 +153,8 @@ class WPERequester():
             if "error" not in wo_response_json and self._verify_res_signature(
                     wo_response_json, self._worker.verification_key,
                     wo_req["params"]["requesterNonce"]):
-                decrypted_res = worker_encrypt.decrypted_response(
-                    wo_response_json, session_key, session_iv)
-                # Response contains an array of results. In this case, the
-                # array has single element and the data field is of interest.
-                # It is integer with status of registration.
-                return decrypted_res[0]['data']
+                return self.decrypt_wo_response(
+                    wo_response_json, session_key, session_iv, worker_encrypt)
             return None
         else:
             logger.error("Could not register this WPE with the KME : {}"
@@ -186,7 +177,7 @@ class WPERequester():
 
         # Create session key and iv to sign work order request
         worker_encrypt = worker_encryption.WorkerEncrypt()
-        session_key = worker_encrypt.generate_key()
+        session_key = worker_encrypt.generate_session_key()
         session_iv = worker_encrypt.generate_iv()
 
         wo_req = self._construct_wo_req(
@@ -200,16 +191,31 @@ class WPERequester():
             if self._verify_res_signature(wo_response_json,
                                           self._worker.verification_key,
                                           wo_req["params"]["requesterNonce"]):
-                decrypted_res = worker_encrypt.decrypted_response(
-                    wo_response_json, session_key, session_iv)
-                # Response contains an array of results. In this case, the
-                # array has single element and the data field is of interest.
-                return decrypted_res[0]['data']
+                return self.decrypt_wo_response(
+                    wo_response_json, session_key, session_iv, worker_encrypt)
             return None
         else:
             logger.error("Could not preprocess work order at KME : {}"
                          .format(response))
             return response
+
+    def decrypt_wo_response(self, wo_response, session_key,
+                            session_iv, worker_encrypt):
+        """
+        Decrypt work order response using session key
+        Parameters:
+            @param wo_response - JSON encoded work order response
+            @param session_key - One time symmetric encryption key
+            @param session_iv - Initialization vector
+            @param worker_encrypt - WorkerEncrypt class object
+        Returns:
+            decrypted response data in plain
+        """
+        decrypted_res = worker_encrypt.decrypt_work_order_data_json(
+            wo_response["outData"], session_key, session_iv)
+        # Response contains an array of results. In this case, the
+        # array has single element and the data field is of interest.
+        return decrypted_res[0]['data'].decode("utf-8")
 
     def _construct_wo_req(self, in_data, workload_id, encryption_key,
                           session_key, session_iv):
