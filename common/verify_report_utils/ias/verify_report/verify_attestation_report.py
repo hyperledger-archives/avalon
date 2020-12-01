@@ -14,7 +14,7 @@
 
 import json
 import logging
-import verify_report.verify_report as verify_report_util
+import verify_report.ias_verify_report as verify_report_util
 from error_code.error_status import QuoteStatus
 
 logger = logging.getLogger(__name__)

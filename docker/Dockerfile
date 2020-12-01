@@ -196,11 +196,11 @@ WORKDIR /project/avalon/common/crypto_utils
 RUN echo "Building Avalon Common Crypto Python\n" \
  && make
 
-COPY ./common/verify_report_utils /project/avalon/common/verify_report_utils
+COPY ./common/verify_report_utils/ias /project/avalon/common/verify_report_utils/ias
 
-WORKDIR /project/avalon/common/verify_report_utils
+WORKDIR /project/avalon/common/verify_report_utils/ias
 
-RUN echo "Building Avalon Verify Report Utils\n" \
+RUN echo "Building Avalon Verify IAS Report Utils\n" \
  && make
 
 # -------------=== Avalon SDK build ===-------------
@@ -276,7 +276,7 @@ COPY ./sdk/avalon_sdk/connector/blockchains/ethereum/contracts /project/avalon/s
 # Copy Python build artifacts
 COPY --from=common_python_image /project/avalon/common/python/dist/*.whl dist/
 COPY --from=common_crypto_utils_image /project/avalon/common/crypto_utils/dist/*.whl dist/
-COPY --from=common_crypto_utils_image /project/avalon/common/verify_report_utils/dist/*.whl dist/
+COPY --from=common_crypto_utils_image /project/avalon/common/verify_report_utils/ias/dist/*.whl dist/
 COPY --from=avalon_sdk_image /project/avalon/sdk/dist/*.whl dist/
 
 # Installing wheel file requires python3-pip package.

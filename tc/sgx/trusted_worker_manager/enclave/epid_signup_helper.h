@@ -1,4 +1,5 @@
-/* Copyright 2018 Intel Corporation
+
+/* Copyright 2020 Intel Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +16,17 @@
 
 #pragma once
 
-#include <Python.h>
 #include <string>
 
-#include "work_order_wrap.h"
-
-void InitializeTCFEnclaveModule();
-
-void _SetLogger(
-    PyObject*);
+class EpidSignupHelper {
+public:
+       tcf_err_t verify_enclave_info(const char* enclave_info,
+           const char* mr_enclave);
+       std::string get_enclave_id();
+       std::string get_enclave_encryption_key();
+       sgx_report_data_t get_report_data();
+protected:
+          std::string enclave_id;
+          std::string enclave_encryption_key;
+          sgx_report_data_t report_data;
+};

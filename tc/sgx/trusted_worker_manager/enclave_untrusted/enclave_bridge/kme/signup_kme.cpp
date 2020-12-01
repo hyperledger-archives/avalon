@@ -172,26 +172,8 @@ tcf_err_t SignupDataKME::VerifyEnclaveInfo(
         sgx_enclave_id_t enclaveid = g_Enclave[0].GetEnclaveId();
         tcf_err_t presult = TCF_SUCCESS;
 
-	ByteArray ext_data_bytes = HexEncodedStringToByteArray(ext_data);
-        sgx_status_t sresult = tcf::sgx_util::CallSgx(
-            [ enclaveid,
-              &presult,
-              enclaveInfo,
-              mr_enclave,
-              ext_data_bytes ] () {
-              sgx_status_t sresult =
-              ecall_VerifyEnclaveInfoKME(
-                             enclaveid,
-                             &presult,
-                             enclaveInfo.c_str(),
-                             mr_enclave.c_str(),
-                             ext_data_bytes.data(),
-                             ext_data_bytes.size());
-          return tcf::error::ConvertErrorStatus(sresult, presult);
-    });
-
-        tcf::error::ThrowSgxError(sresult,
-            "Intel SGX enclave call failed (ecall_VerifyEnclaveInfo)");
+        presult = g_Enclave[0].VerifyEnclaveInfoKME(enclaveInfo,
+            mr_enclave, ext_data, enclaveid);
         g_Enclave[0].ThrowTCFError(presult);
 
     } catch (tcf::error::Error& e) {

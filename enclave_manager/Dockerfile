@@ -342,7 +342,7 @@ WORKDIR /project/avalon/common/crypto_utils
 
 RUN make && make install
 
-WORKDIR /project/avalon/common/verify_report_utils
+WORKDIR /project/avalon/common/verify_report_utils/ias
 
 RUN make && make install
 

@@ -46,8 +46,8 @@ namespace tcf {
         // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
         // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-        Enclave::Enclave(const tcf::attestation::Attestation *attestation_obj) :
-            attestation(const_cast<tcf::attestation::Attestation *>(attestation_obj)) {
+        Enclave::Enclave(const Attestation *attestation_obj) :
+            attestation(const_cast<Attestation *>(attestation_obj)) {
         }  // Enclave::Enclave
 
         // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -236,6 +236,34 @@ namespace tcf {
             }
         }  // Enclave::QuerySgxStatus
 
-    }  // namespace enclave_api
 
+// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+#ifdef BUILD_SINGLETON
+        tcf_err_t Enclave::VerifyEnclaveInfoSingleton(
+            const std::string& enclave_info,
+            const std::string& mr_enclave,
+            const sgx_enclave_id_t& enclave_id) {
+            return this->attestation->VerifyEnclaveInfoSingleton(enclave_info,
+                mr_enclave, enclave_id);
+        }
+#elif BUILD_KME
+        tcf_err_t Enclave::VerifyEnclaveInfoKME(
+	    const std::string& enclave_info,
+            const std::string& mr_enclave,
+            const std::string& ext_data,
+            const sgx_enclave_id_t& enclave_id) {
+            return this->attestation->VerifyEnclaveInfoKME(enclave_info, mr_enclave,
+                ext_data, enclave_id);
+        }
+#elif BUILD_WPE
+        tcf_err_t Enclave::VerifyEnclaveInfoWPE(
+	    const std::string& enclave_info,
+            const std::string& mr_enclave,
+            const std::string& ext_data,
+            const sgx_enclave_id_t& enclave_id) {
+            return this->attestation->VerifyEnclaveInfoWPE(enclave_info, mr_enclave,
+                ext_data, enclave_id);
+        }
+#endif
+    }  // namespace enclave_api
 }  // namespace tcf

@@ -16,7 +16,7 @@ import logging
 from avalon_enclave_manager.enclave_attributes import EnclaveAttributes
 import random
 import json
-import avalon_enclave_manager.ias_client as ias_client
+import avalon_enclave_manager.attestation.epid.ias_client as ias_client
 
 logger = logging.getLogger(__name__)
 

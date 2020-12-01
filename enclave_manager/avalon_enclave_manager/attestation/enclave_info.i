@@ -1,4 +1,4 @@
-/* Copyright 2018 Intel Corporation
+/* Copyright 2020 Intel Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,17 +13,23 @@
  * limitations under the License.
  */
 
-%module verify_report 
+%include <std_vector.i>
+%include <std_map.i>
+%include <std_string.i>
+%include <stdint.i>
+
+namespace std {
+    %template(StringVector) vector<string>;
+    %template(StringMap) map<string, string>;
+}
 
 %{
-#include "types.h"
 #include "error.h"
-#include "ias_attestation_util.h"
 %}
 
 %include <exception.i>
 
-%exception  {
+%exception {
     try
     {
         $function
@@ -74,9 +80,18 @@
 }
 
 
-%include "std_string.i"
-%include "stdint.i"
+%thread;
+%{
+#include "swig_utils.h"
+%}
 
-%include "types.h"
-%include "ias_attestation_util.h"
+%{
+#include "tcf_enclave.h"
+%}
 
+%include "tcf_enclave.h"
+%nothread;
+
+%init %{
+    InitializeTCFEnclaveModule();
+%}
