@@ -51,7 +51,7 @@ def _parse_config_file(config_file):
         config = pconfig.parse_configuration_files(conf_files, conf_paths)
         json.dumps(config)
     except pconfig.ConfigurationException as e:
-        logger.error(str(e))
+        logging.error(str(e))
         config = None
 
     return config
@@ -77,7 +77,7 @@ def main(args=None):
 
     config = _parse_config_file(options.config)
     if config is None:
-        logger.error("\n Error in parsing config file: {}\n".format(
+        logging.error("\n Error in parsing config file: {}\n".format(
             options.config
         ))
         sys.exit(-1)
