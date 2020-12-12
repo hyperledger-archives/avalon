@@ -19,6 +19,7 @@
 #include <string>
 #include <vector>
 
+#include "sgx_key.h"
 #include "error.h"
 #include "tcf_error.h"
 #include "types.h"
@@ -36,7 +37,8 @@ namespace tcf {
 
             void Load(
                 const std::string& inEnclaveFilePath,
-                const Base64EncodedString& inSealedEnclaveData);
+                const Base64EncodedString& inSealedEnclaveData,
+                const uint8_t (&kss_config_id)[SGX_CONFIGID_SIZE]);
 
             void Unload();
 
@@ -73,6 +75,7 @@ namespace tcf {
 	    void LoadEnclave(
                 const Base64EncodedString& persistedSealedEnclaveData = "");
 
+
 #ifdef BUILD_SINGLETON
             tcf_err_t VerifyEnclaveInfoSingleton(
 		const std::string& enclave_info,
@@ -102,7 +105,11 @@ namespace tcf {
             size_t sealedSignupDataSize;
 
             std::string enclaveError;
-	    Attestation *attestation;
+
+
+        private:
+            uint8_t _kss_config[SGX_CONFIGID_SIZE] = {NULL};
+            Attestation *attestation;
 
         };  // class Enclave
 

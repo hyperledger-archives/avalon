@@ -30,6 +30,20 @@ EpidEnclaveInfo::EpidEnclaveInfo(
 }  // EpidEnclaveInfo::EpidEnclaveInfo
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+EpidEnclaveInfo::EpidEnclaveInfo(
+    const std::string& enclave_module_path,
+    const std::string& spid,
+    const std::string& persisted_sealed_enclave_data,
+    const int num_of_enclaves,
+    const std::string& kss_config_id) {
+
+    this->epid_attestation = new EpidAttestation();
+    this->epid_attestation->SetSpid(spid);
+
+    this->init_enclave_info(enclave_module_path, this->epid_attestation,
+        persisted_sealed_enclave_data, num_of_enclaves, kss_config_id);
+}  // EpidEnclaveInfo::EpidEnclaveInfo
+// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 EpidEnclaveInfo::~EpidEnclaveInfo() {
 
 }  // EpidEnclaveInfo::~EpidEnclaveInfo

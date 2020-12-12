@@ -27,8 +27,10 @@
 #include "signup_singleton.h"
 #include "sgx_utility.h"
 
+
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 tcf_err_t SignupDataSingleton::CreateEnclaveData(
+    const uint8_t (&kss_config_id)[SGX_CONFIGID_SIZE],
     StringArray& outPublicEnclaveData,
     Base64EncodedString& outSealedEnclaveData,
     Base64EncodedString& outEnclaveQuote) {
@@ -50,6 +52,9 @@ tcf_err_t SignupDataSingleton::CreateEnclaveData(
         // We need target info in order to create signup data report
         sgx_target_info_t target_info = { 0 };
         sgx_epid_group_id_t epidGroupId = { 0 };
+        sgx_config_id_t config_id = { 0 };
+
+
         sresult = tcf::sgx_util::CallSgx(
                 [&target_info,
                  &epidGroupId] () {
@@ -62,6 +67,8 @@ tcf_err_t SignupDataSingleton::CreateEnclaveData(
         // Properly size the sealed signup data buffer for the caller
         // and call into the enclave to create the signup data
         sgx_report_t enclave_report = { 0 };
+        for(int i=0; i <SGX_CONFIGID_SIZE;i++ ){
+            config_id[i] = kss_config_id[i];}
 
         sresult = tcf::sgx_util::CallSgx(
             [enclaveid,
@@ -88,11 +95,17 @@ tcf_err_t SignupDataSingleton::CreateEnclaveData(
         outSealedEnclaveData = \
             ByteArrayToBase64EncodedString(sealed_enclave_data_buffer);
 
+        memcpy(
+            enclave_report.body.config_id,
+            config_id,
+            sizeof(sgx_config_id_t));
+
         // Take the report generated and create a quote for it, encode it
         size_t quote_size = tcf::enclave_api::base::GetEnclaveQuoteSize();
         ByteArray enclave_quote_buffer(quote_size);
         g_Enclave[0].CreateQuoteFromReport(&enclave_report, enclave_quote_buffer);
         outEnclaveQuote = ByteArrayToBase64EncodedString(enclave_quote_buffer);
+
     } catch (tcf::error::Error& e) {
         tcf::enclave_api::base::SetLastError(e.what());
         result = e.error_code();

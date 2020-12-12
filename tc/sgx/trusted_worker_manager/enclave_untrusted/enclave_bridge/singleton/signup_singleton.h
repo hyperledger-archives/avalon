@@ -17,14 +17,17 @@
 #pragma once
 
 #include <stdlib.h>
+#include "sgx_key.h"
 
 #include "tcf_error.h"
 #include "types.h"
+#include <memory>
 #include "signup.h"
 
 class SignupDataSingleton : public SignupData {
 public:
     tcf_err_t CreateEnclaveData(
+            const uint8_t (&kss_config_id)[SGX_CONFIGID_SIZE],
             StringArray& outPublicEnclaveData,
             Base64EncodedString& outSealedEnclaveData,
             Base64EncodedString& outEnclaveQuote);

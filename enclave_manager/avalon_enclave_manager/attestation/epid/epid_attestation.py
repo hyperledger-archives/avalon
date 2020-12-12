@@ -153,8 +153,15 @@ class EpidAttestation(Attestation):
         Returns :
             @returns True on success False on failure
         """
+
         if not self._epid_enclave_info:
-            self._epid_enclave_info = self.enclave_info.EpidEnclaveInfo(
+            if self._config.get("kss_config") is not None:
+                logger.info("KSS Config: " + self._config.get("kss_config"))
+                self._epid_enclave_info = self.enclave_info.EpidEnclaveInfo(
+                signed_enclave, self._config['spid'], persisted_sealed_data,
+                int(num_of_enclave), self._config.get("kss_config"))
+            else:
+                self._epid_enclave_info = self.enclave_info.EpidEnclaveInfo(
                 signed_enclave, self._config['spid'], persisted_sealed_data,
                 int(num_of_enclave))
 

@@ -16,6 +16,7 @@
 #include <iostream>
 #include <vector>
 
+#include <string.h>
 #include "log.h"
 #include "error.h"
 #include "tcf_error.h"
@@ -31,18 +32,50 @@ bool is_sgx_simulator() {
 }  // is_sgx_simulator
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+void BaseEnclaveInfo::init_enclave_info(
+    const std::string& enclave_module_path,
+    const Attestation* attestation,
+    const std::string& persisted_sealed_enclave_data,
+    const int num_of_enclaves,
+    const std::string& kss_config_id) {
+    tcf::Log(TCF_LOG_INFO, "Initializing Avalon Intel SGX Enclave\n");
+
+    const char* config = kss_config_id.c_str();
+    size_t length = strlen(config) + 1;
+
+    for (int i =0; i<length; ++i){ kss_config[i] = (uint8_t)(config[i]);}
+
+    tcf_err_t ret = tcf::enclave_api::base::Initialize(
+        enclave_module_path, attestation,
+        persisted_sealed_enclave_data, num_of_enclaves, kss_config);
+    ThrowTCFError(ret);
+    tcf::Log(TCF_LOG_INFO, "Avalon Intel SGX Enclave initialized.\n");
+
+    HexEncodedString mrEnclaveBuffer;
+    HexEncodedString basenameBuffer;
+
+    ThrowTCFError(
+        tcf::enclave_api::base::GetEnclaveCharacteristics(
+            mrEnclaveBuffer, basenameBuffer));
+
+    this->mr_enclave = mrEnclaveBuffer;
+    this->basename = basenameBuffer;
+
+}  // BaseEnclaveInfo::init_enclave_info
+
 void BaseEnclaveInfo::init_enclave_info(
     const std::string& enclave_module_path,
     const Attestation* attestation,
     const std::string& persisted_sealed_enclave_data,
     const int num_of_enclaves) {
     tcf::Log(TCF_LOG_INFO, "Initializing Avalon Intel SGX Enclave\n");
-    tcf::Log(TCF_LOG_DEBUG, "Enclave path: %s\n", enclave_module_path.c_str());
-    // tcf::Log(TCF_LOG_DEBUG, "SPID: %s\n", spid.c_str());
 
     tcf_err_t ret = tcf::enclave_api::base::Initialize(
         enclave_module_path, attestation,
-        persisted_sealed_enclave_data, num_of_enclaves);
+        persisted_sealed_enclave_data, num_of_enclaves, kss_config);
+
     ThrowTCFError(ret);
     tcf::Log(TCF_LOG_INFO, "Avalon Intel SGX Enclave initialized.\n");
 

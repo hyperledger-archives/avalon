@@ -17,7 +17,7 @@
 
 #include <stdlib.h>
 #include <string>
-
+#include "sgx_key.h"
 #include "error.h"
 #include "tcf_error.h"
 #include "types.h"
@@ -60,10 +60,12 @@ namespace tcf {
               persisted_sealed_data - Sealed data persisted from last bootup
               numOfEnclaves -- Number of worker enclaves to create
             */
+
             tcf_err_t Initialize(const std::string& inPathToEnclave,
                 const Attestation *attestation,
                 const std::string& persisted_sealed_data,
-                const int numOfEnclaves);
+                const int numOfEnclaves,
+                const uint8_t (&kss_config_id)[SGX_CONFIGID_SIZE]);
 
             /*
               Stop Avalon services

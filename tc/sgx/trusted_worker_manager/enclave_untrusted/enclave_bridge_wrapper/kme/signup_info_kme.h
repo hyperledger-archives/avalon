@@ -16,6 +16,7 @@
 #pragma once
 
 #include "signup_info.h"
+#include <sgx_key.h>
 
 class SignupInfoKME : public SignupInfo {
 public:

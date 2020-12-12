@@ -26,6 +26,14 @@ public:
     EpidEnclaveInfo(const std::string& enclave_module_path,
         const std::string& spid, const std::string& persisted_sealed_data,
         const int num_of_enclaves);
+
+    EpidEnclaveInfo(
+    const std::string& enclave_module_path,
+    const std::string& spid,
+    const std::string& persisted_sealed_enclave_data,
+    const int num_of_enclaves,
+    const std::string& kss_config_id);
+
     virtual ~EpidEnclaveInfo();
     std::string get_epid_group();
     void set_signature_revocation_list(

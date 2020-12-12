@@ -70,7 +70,8 @@ namespace tcf {
         // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
         void Enclave::Load(
             const std::string& inEnclaveFilePath,
-            const Base64EncodedString& inSealedEnclaveData) {
+            const Base64EncodedString& inSealedEnclaveData,
+            const uint8_t (&kss_config_id)[SGX_CONFIGID_SIZE]) {
             tcf::error::ThrowIf<tcf::error::ValueError>(
                 inEnclaveFilePath.empty() ||
                 inEnclaveFilePath.length() > PATH_MAX,
@@ -78,7 +79,12 @@ namespace tcf {
 
             this->Unload();
             this->enclaveFilePath = inEnclaveFilePath;
+            for(int i=0; i <SGX_CONFIGID_SIZE;i++ ){
+                this->_kss_config[i] = kss_config_id[i];
+            }
+
             this->LoadEnclave(inSealedEnclaveData);
+
         }  // Enclave::Load
 
         // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -114,6 +120,11 @@ namespace tcf {
 		"Attestation object is not initialized"
 	    );
 	    this->attestation->CreateQuoteFromReport(inEnclaveReport, outEnclaveQuote);
+        
+        sgx_quote_t* enclaveQuote =
+                reinterpret_cast<sgx_quote_t *>(&outEnclaveQuote[0]);
+        tcf::Log(TCF_LOG_INFO,"KSS Config Id added to the EnclaveQuote : %s\n", enclaveQuote->report_body.config_id );
+
         }  // Enclave::GenerateSignupData
 
 
@@ -137,7 +148,6 @@ namespace tcf {
             if (!this->enclaveId) {
                 /* Enclave id, used in communicating with enclave */
                 Enclave::QuerySgxStatus();
-
                 sgx_launch_token_t token = { 0 };
                 int flags = SGX_DEBUG_FLAG;
                 tcf::error::ThrowSgxError((SGX_DEBUG_FLAG == 0 ?
@@ -147,7 +157,9 @@ namespace tcf {
 
                 // First attempt to load the enclave executable
                 sgx_status_t ret = SGX_SUCCESS;
-                ret = tcf::sgx_util::CallSgx([this, flags, &token] () {
+                if(this->_kss_config[0] == NULL){
+                    
+                    ret = tcf::sgx_util::CallSgx([this, flags, &token] () {
                         int updated = 0;
                         return sgx_create_enclave(
                             this->enclaveFilePath.c_str(),
@@ -160,7 +172,30 @@ namespace tcf {
                     10,  // retries
                     250  // retryWaitMs
                     );
-                tcf::error::ThrowSgxError(ret, "Unable to create enclave.");
+                    tcf::error::ThrowSgxError(ret, "Unable to create enclave.");
+                    
+                } else {
+                    tcf::Log(TCF_LOG_INFO, "Enclave::sgx_create_enclave_ex called" );
+                    void *enclave_ex_p[32] = { 0 };
+                    enclave_ex_p[SGX_CREATE_ENCLAVE_EX_KSS_BIT_IDX] = &this->_kss_config;
+                    
+                    ret = tcf::sgx_util::CallSgx([this, flags, &token, enclave_ex_p] () {
+                        int updated = 0;
+                        return sgx_create_enclave_ex(
+                                                this->enclaveFilePath.c_str(),
+                                                flags,
+                                                &token,
+                                                &updated,
+                                                &this->enclaveId,
+                                                NULL,
+                                                SGX_CREATE_ENCLAVE_EX_KSS,
+                                                (const void** )enclave_ex_p);
+                    },
+                    10,  // retries
+                    250  // retryWaitMs
+                    );
+                     tcf::error::ThrowSgxError(ret, "Unable to create enclave with Config id");
+                }
                 // Initialize the enclave
                 tcf_err_t tcfError = TCF_SUCCESS;
 

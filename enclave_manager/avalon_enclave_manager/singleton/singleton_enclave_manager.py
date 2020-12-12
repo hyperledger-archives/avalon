@@ -119,6 +119,9 @@ def main(args=None):
     parser.add_argument("--config-dir", help="configuration folder", nargs="+")
     parser.add_argument("--worker_id",
                         help="Id of worker in plain text", type=str)
+    parser.add_argument("--kss_config",
+                        help="Key sharing and separation configuration id",
+                        type=str)
 
     (options, remainder) = parser.parse_known_args(args)
 
@@ -137,6 +140,9 @@ def main(args=None):
 
     if options.worker_id:
         config["WorkerConfig"]["worker_id"] = options.worker_id
+
+    if options.kss_config:
+        config["EnclaveModule"]["kss_config"] = options.kss_config
 
     plogger.setup_loggers(config.get("Logging", {}))
     sys.stdout = plogger.stream_to_logger(
