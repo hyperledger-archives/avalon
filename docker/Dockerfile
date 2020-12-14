@@ -31,7 +31,7 @@ ARG DISTRO
 
 COPY ./scripts/install_packages /project/avalon/scripts/
 
-RUN packages=""; \
+RUN packages="wget tar"; \
     pip_packages=""; \
     if [ "$DISTRO" = "bionic" ] ; then \
       DEBIAN_FRONTEND=noninteractive \
@@ -55,7 +55,7 @@ ARG DISTRO
 COPY ./scripts/install_packages /project/avalon/scripts/
 
 # Add necessary packages
-RUN packages="ca-certificates pkg-config python3-pip make" \
+RUN packages="ca-certificates pkg-config python3-pip make wget tar" \
     pip_packages="setuptools"; \
     if [ "$DISTRO" = "bionic" ] ; then \
       packages="$packages python3-dev"; \
@@ -105,7 +105,7 @@ FROM $IMAGE as common_cpp_image
 ARG DISTRO
 COPY ./scripts/install_packages /project/avalon/scripts/
 
-RUN packages="pkg-config make cmake "; \
+RUN packages="pkg-config make cmake wget tar"; \
     if [ "$DISTRO" = "centos" ] ; then \
       packages="$packages gcc gcc-c++"; \
     fi; \
@@ -121,6 +121,28 @@ COPY --from=openssl_image /usr/local/lib64 /usr/local/lib64
 
 RUN ldconfig \
  && ln -s /etc/ssl/certs/* /usr/local/ssl/certs/
+
+RUN mkdir -p /opt/intel/
+WORKDIR /opt/intel/
+RUN SGX_SDK_FILE=sgx_linux_x64_sdk_2.11.100.2.bin \
+  && wget https://download.01.org/intel-sgx/sgx-linux/2.11/distro/ubuntu18.04-server/$SGX_SDK_FILE \
+  && chmod +x ./$SGX_SDK_FILE \
+  && echo "yes" | bash ./$SGX_SDK_FILE \
+  && rm $SGX_SDK_FILE \
+  && echo ". /opt/intel/sgxsdk/environment" >> /etc/environment
+
+RUN packages="libsgx-dcap-ql-dev libsgx-dcap-quote-verify libsgx-dcap-quote-verify-dev"; \
+    if [ "$DISTRO" = "bionic" ] ; then \
+      # Add Intel SGX repo to apt sources and install Intel SGX PSW packages
+      echo 'deb [arch=amd64] https://download.01.org/intel-sgx/sgx_repo/ubuntu bionic main' | tee /etc/apt/sources.list.d/intel-sgx.list; \
+      wget -qO - https://download.01.org/intel-sgx/sgx_repo/ubuntu/intel-sgx-deb.key | apt-key add - ; \
+      apt-get update; \
+    elif [ "$DISTRO" = "centos" ] ; then \
+      wget https://download.01.org/intel-sgx/sgx-linux/2.10/distro/centos8.1-server/sgx_rpm_local_repo.tgz; \
+      tar -xvf sgx_rpm_local_repo.tgz; \
+      yum-config-manager --add-repo file:///opt/intel/sgx_rpm_local_repo; \
+    fi; \
+    /project/avalon/scripts/install_packages -c install -q "$packages"
 
 ENV TCF_HOME=/project/avalon
 
@@ -184,6 +206,19 @@ COPY VERSION /project/avalon/
 COPY ./bin /project/avalon/bin
 COPY ./common/cpp /project/avalon/common/cpp
 
+RUN packages="libsgx-dcap-ql-dev libsgx-dcap-quote-verify libsgx-dcap-quote-verify-dev"; \
+    if [ "$DISTRO" = "bionic" ] ; then \
+      # Add Intel SGX repo to apt sources and install Intel SGX PSW packages
+      echo 'deb [arch=amd64] https://download.01.org/intel-sgx/sgx_repo/ubuntu bionic main' | tee /etc/apt/sources.list.d/intel-sgx.list; \
+      wget -qO - https://download.01.org/intel-sgx/sgx_repo/ubuntu/intel-sgx-deb.key | apt-key add - ; \
+      apt-get update; \
+    elif [ "$DISTRO" = "centos" ] ; then \
+      wget https://download.01.org/intel-sgx/sgx-linux/2.10/distro/centos8.1-server/sgx_rpm_local_repo.tgz; \
+      tar -xvf sgx_rpm_local_repo.tgz; \
+      yum-config-manager --add-repo file:///opt/intel/sgx_rpm_local_repo; \
+    fi; \
+    /project/avalon/scripts/install_packages -c install -q "$packages"
+
 ENV TCF_HOME=/project/avalon
 
 # For centos, /usr/local/lib64/pkgconfig/ path be included in PKG_CONFIG_PATH
@@ -196,11 +231,16 @@ WORKDIR /project/avalon/common/crypto_utils
 RUN echo "Building Avalon Common Crypto Python\n" \
  && make
 
-COPY ./common/verify_report_utils/ias /project/avalon/common/verify_report_utils/ias
+COPY ./common/verify_report_utils/ /project/avalon/common/verify_report_utils/
 
 WORKDIR /project/avalon/common/verify_report_utils/ias
 
 RUN echo "Building Avalon Verify IAS Report Utils\n" \
+ && make
+
+WORKDIR /project/avalon/common/verify_report_utils/dcap
+
+RUN echo "Building Avalon Verify DCAP Report Utils\n" \
  && make
 
 # -------------=== Avalon SDK build ===-------------
@@ -251,7 +291,20 @@ RUN packages="git"; \
     if [ "$DISTRO" = "bionic" ] ; then \
       /project/avalon/scripts/install_packages -c uninstall -q "python3-pip"; \
     fi
-      
+
+RUN packages="wget tar libsgx-dcap-default-qpl libsgx-dcap-quote-verify"; \
+  if [ "$DISTRO" = "bionic" ] ; then \
+    # Add Intel SGX repo to apt sources and install Intel SGX PSW packages
+    echo 'deb [arch=amd64] https://download.01.org/intel-sgx/sgx_repo/ubuntu bionic main' | tee /etc/apt/sources.list.d/intel-sgx.list; \
+    wget -qO - https://download.01.org/intel-sgx/sgx_repo/ubuntu/intel-sgx-deb.key | apt-key add - ; \
+    apt-get update; \
+  elif [ "$DISTRO" = "centos" ] ; then \
+    wget https://download.01.org/intel-sgx/sgx-linux/2.10/distro/centos8.1-server/sgx_rpm_local_repo.tgz; \
+    tar -xvf sgx_rpm_local_repo.tgz; \
+    yum-config-manager --add-repo file:///opt/intel/sgx_rpm_local_repo; \
+  fi; \
+  /project/avalon/scripts/install_packages -c install -q "$packages"
+
 RUN python3 -m solcx.install v0.5.15
 
 ARG DISPLAY
@@ -277,7 +330,11 @@ COPY ./sdk/avalon_sdk/connector/blockchains/ethereum/contracts /project/avalon/s
 COPY --from=common_python_image /project/avalon/common/python/dist/*.whl dist/
 COPY --from=common_crypto_utils_image /project/avalon/common/crypto_utils/dist/*.whl dist/
 COPY --from=common_crypto_utils_image /project/avalon/common/verify_report_utils/ias/dist/*.whl dist/
+COPY --from=common_crypto_utils_image /project/avalon/common/verify_report_utils/dcap/dist/*.whl dist/
 COPY --from=avalon_sdk_image /project/avalon/sdk/dist/*.whl dist/
+
+# Configure QPL to use self-signed cert for local PCCS
+COPY docker/pccs/sgx_default_qcnl.conf /etc/sgx_default_qcnl.conf
 
 # Installing wheel file requires python3-pip package.
 # But python3-pip package will increase size of final docker image.

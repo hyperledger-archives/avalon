@@ -24,8 +24,13 @@ SET(TCF_CORE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../../../")
 
 # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
-FILE(GLOB PROJECT_HEADERS *.h ../*.h)
-FILE(GLOB PROJECT_SOURCES *.cpp ../*.cpp)
+if("${ATTESTATION_TYPE}" STREQUAL "epid")
+    FILE(GLOB PROJECT_HEADERS *.h ../*.h ../epid/*.h)
+    FILE(GLOB PROJECT_SOURCES *.cpp ../*.cpp ../epid/*.cpp)
+elseif("${ATTESTATION_TYPE}" STREQUAL "dcap")
+    FILE(GLOB PROJECT_HEADERS *.h ../*.h ../dcap/*.h)
+    FILE(GLOB PROJECT_SOURCES *.cpp ../*.cpp ../dcap/*.cpp)
+endif()
 FILE(GLOB PROJECT_EDL ${TCF_CORE_DIR}/trusted_worker_manager/enclave/wpe/wpe_enclave.edl)
 
 SOURCE_GROUP("Source" FILES ${PROJECT_HEADERS} ${PROJECT_SOURCES})

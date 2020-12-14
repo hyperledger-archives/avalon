@@ -33,6 +33,7 @@ public:
     size_t GetQuoteSize(void);
     void CreateQuoteFromReport(const sgx_report_t* inEnclaveReport,
         ByteArray& outEnclaveQuote);
+    void InitQuote(sgx_target_info_t& target_info);
     void GetEpidGroup(HexEncodedString& outEpidGroup);
     void SetSpid(const HexEncodedString& inSpid);
     void SetSignatureRevocationList (const std::string& inSignatureRevocationList);

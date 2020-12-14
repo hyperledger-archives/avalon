@@ -236,6 +236,11 @@ namespace tcf {
             }
         }  // Enclave::QuerySgxStatus
 
+        // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+        /* Initialize the quote by calling sgx sdk API */
+        void Enclave::InitQuote(sgx_target_info_t& target_info) {
+            this->attestation->InitQuote(target_info);
+        } // Enclave::InitQuote
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 #ifdef BUILD_SINGLETON

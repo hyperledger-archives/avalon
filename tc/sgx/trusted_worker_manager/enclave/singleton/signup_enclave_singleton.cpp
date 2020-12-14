@@ -45,7 +45,7 @@
 #include "verify-ias-report.h"
 #include "signup_enclave_util.h"
 #include "epid_signup_helper.h"
-
+#include "dcap_signup_helper.h"
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 // XX Declaration of static helper functions                         XX
@@ -187,6 +187,33 @@ tcf_err_t ecall_VerifyEnclaveInfoEpid(const char* enclave_info,
         "Invalid Report data: computedReportData does not match expectedReportData");
     return result;
 }  // ecall_VerifyEnclaveInfoEpid
+
+// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+tcf_err_t ecall_VerifyEnclaveInfoDcap(const char* enclave_info,
+    const char* mr_enclave) {
+    tcf_err_t tresult = TCF_SUCCESS;
+    DcapSignupHelper signup_helper;
+    tresult = signup_helper.verify_enclave_info(enclave_info, mr_enclave);
+
+    tcf::error::ThrowIf<tcf::error::ValueError>(
+        tresult != TCF_SUCCESS,
+        "Trusted enclave info verification failed");
+    // Verify Report Data by comparing hash of report data in
+    // Verification Report with computed report data
+    sgx_report_data_t computed_report_data = {0};
+    CreateReportData(signup_helper.get_enclave_id(), &computed_report_data);
+
+    //Compare computedReportData with expectedReportData
+    sgx_report_data_t expected_report_data = signup_helper.get_report_data();
+    tcf::error::ThrowIf<tcf::error::ValueError>(
+        memcmp(computed_report_data.d, expected_report_data.d,
+        SGX_REPORT_DATA_SIZE)  != 0,
+        "Invalid Report data: computedReportData does not match expectedReportData");
+    Log(TCF_LOG_INFO, "After ecall_VerifyEnclaveInfoDcap");
+    return tresult;
+
+}  // ecall_VerifyEnclaveInfoDcap
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 void CreateReportData(const std::string& enclave_signing_key,

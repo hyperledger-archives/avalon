@@ -31,5 +31,7 @@ enclave {
             [out, size=inAllocatedPublicEnclaveDataSize] char* outPublicEnclaveData,
             size_t inAllocatedPublicEnclaveDataSize
             );
+
+        public sgx_status_t ecall_get_target_info([out] sgx_target_info_t* target_info);
     };
 };

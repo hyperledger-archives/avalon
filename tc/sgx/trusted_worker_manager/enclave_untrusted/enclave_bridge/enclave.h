@@ -73,6 +73,7 @@ namespace tcf {
 	    void LoadEnclave(
                 const Base64EncodedString& persistedSealedEnclaveData = "");
 
+            void InitQuote(sgx_target_info_t& target_info);
 #ifdef BUILD_SINGLETON
             tcf_err_t VerifyEnclaveInfoSingleton(
 		const std::string& enclave_info,

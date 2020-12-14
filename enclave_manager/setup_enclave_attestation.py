@@ -65,6 +65,7 @@ if debug_flag :
 include_dirs = [
     enclave_bridge_wrapper_path,
     enclave_bridge_path,
+    os.path.join(enclave_bridge_path, attestation_type),
     swig_file_path,
     os.path.join(tcf_root_dir, 'common/cpp'),
     os.path.join(tcf_root_dir, 'tc/sgx/trusted_worker_manager/common'),
@@ -99,7 +100,8 @@ cpp_file = attestation_type + '_enclave_info.cpp'
 print("SWIG file {} lib name {} cpp file {}".format(swig_file_name, lib_name, cpp_file))
 
 # Target wheel package name
-whl_package_name = enclave_type + '_enclave_manager_attestation'
+whl_package_name = attestation_type + '_' + enclave_type + \
+    '_enclave_manager_attestation'
 
 enclave_info_module_files = [
     swig_file_name,

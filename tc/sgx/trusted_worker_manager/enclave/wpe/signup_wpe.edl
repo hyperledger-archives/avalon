@@ -46,5 +46,11 @@ enclave {
             [in, string] const char* mrEnclave,
             [in, string] const char* inExtData
         );
+
+        public tcf_err_t ecall_VerifyEnclaveInfoWPEDcap(
+            [in, string] const char* inEnclaveInfo,
+            [in, string] const char* mrEnclave,
+            [in, string] const char* inExtData
+        );
     };
 };
