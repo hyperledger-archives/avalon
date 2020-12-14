@@ -15,12 +15,13 @@
 # Set SGX_MODE default (which can be overridden with an environment variable):
 SGX_MODE?=SIM
 ENCLAVE_TYPE?=singleton
+ATTESTATION_TYPE?=epid
 
 PY_VERSION=${shell python3 --version | sed 's/Python \(3\.[0-9]\).*/\1/' | tr -d .}
 MOD_VERSION=${shell ../bin/get_version}
 
 ENCLAVE_MANAGER_WHEEL_FILE=dist/${ENCLAVE_TYPE}_enclave_manager-${MOD_VERSION}-cp${PY_VERSION}-cp${PY_VERSION}m-linux_x86_64.whl
-ENCLAVE_ATTESTATION_WHEEL_FILE=dist/${ENCLAVE_TYPE}_enclave_manager_attestation-${MOD_VERSION}-cp${PY_VERSION}-cp${PY_VERSION}m-linux_x86_64.whl
+ENCLAVE_ATTESTATION_WHEEL_FILE=dist/${ATTESTATION_TYPE}_${ENCLAVE_TYPE}_enclave_manager_attestation-${MOD_VERSION}-cp${PY_VERSION}-cp${PY_VERSION}m-linux_x86_64.whl
 
 all : $(ENCLAVE_ATTESTATION_WHEEL_FILE) $(ENCLAVE_MANAGER_WHEEL_FILE)
 

@@ -50,16 +50,7 @@ tcf_err_t SignupDataKME::CreateEnclaveData(
     
         // We need target info in order to create signup data report
         sgx_target_info_t target_info = { 0 };
-        sgx_epid_group_id_t epidGroupId = { 0 };
-        sresult =
-            tcf::sgx_util::CallSgx(
-                [&target_info,
-                 &epidGroupId] () {
-                    return sgx_init_quote(&target_info, &epidGroupId);
-                });
-        tcf::error::ThrowSgxError(sresult,
-            "Intel SGX enclave call failed (sgx_init_quote);"
-            " failed to initialize the quote");
+        g_Enclave[0].InitQuote(target_info);
 
         // Properly size the sealed signup data buffer for the caller
         // and call into the enclave to create the signup data

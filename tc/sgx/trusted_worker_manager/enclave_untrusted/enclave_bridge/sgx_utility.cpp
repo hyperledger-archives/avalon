@@ -74,7 +74,36 @@ namespace tcf {
 
             return ret;
         }  // CallSgx
+
 	// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+        quote3_error_t CallSgx(
+            std::function<quote3_error_t(void)> fxn,
+            int retries,
+            int retryDelayMs) {
+            quote3_error_t ret = SGX_QL_SUCCESS;
+            int count = 0;
+            bool retry = true;
+            do {
+                ret = fxn();
+                if (SGX_QL_ENCLAVE_LOST == ret) {
+                    // Enclave lost, potentially due to power state change
+                    // reload the enclave and try again
+                    g_Enclave[0].LoadEnclave();
+                } else if (SGX_QL_ERROR_BUSY == ret) {
+                    // Device is busy... wait and try again.
+                    usleep(retryDelayMs  * 1000);
+                    count++;
+                    retry = count <= retries;
+                } else {
+                    // Not an error code we need to handle here,
+                    // exit the loop and let the calling function handle it.
+                    retry = false;
+                }
+            } while (retry);
+
+
+            return ret;
+        }  // Enclave::CallSgx
 
     }  /* namespace sgx_util */
 

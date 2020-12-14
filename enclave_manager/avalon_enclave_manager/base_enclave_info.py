@@ -45,6 +45,11 @@ class BaseEnclaveInfo(EnclaveAttributes):
                     "avalon_enclave_manager.attestation.epid.epid_attestation")
                 self._attestation = epid_attestation.EpidAttestation(
                     config.get("EpidAttestation"), enclave_type)
+            elif self._config["attestation_type"] == "DCAP":
+                dcap_attestation = importlib.import_module(
+                    "avalon_enclave_manager.attestation.dcap.dcap_attestation")
+                self._attestation = dcap_attestation.DcapAttestation(
+                    config.get("DcapAttestation"), enclave_type)
             else:
                 raise ValueError('Invalid attestation type {}'.format(
                     self._config["attestation_type"]))

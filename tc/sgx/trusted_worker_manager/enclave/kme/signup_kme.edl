@@ -38,5 +38,12 @@ enclave {
             [in, size=inExtDataSize] const uint8_t* inExtData,
             size_t inExtDataSize
         );
+
+        public tcf_err_t ecall_VerifyEnclaveInfoKMEDcap(
+            [in, string] const char* inEnclaveInfo,
+            [in, string] const char* mrEnclaveValue,
+            [in, size=inExtDataSize] const uint8_t* inExtData,
+            size_t inExtDataSize
+        );
     };
 };

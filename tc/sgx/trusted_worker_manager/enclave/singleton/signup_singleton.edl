@@ -17,6 +17,7 @@ enclave {
     include "sgx_trts.h"
     include "sgx_tseal.h"
     include "tcf_error.h"
+    include "sgx_error.h"
 
     trusted {
         public tcf_err_t ecall_CreateSignupData(
@@ -29,6 +30,11 @@ enclave {
             );
 
         public tcf_err_t ecall_VerifyEnclaveInfoEpid(
+            [in, string] const char* inEnclaveInfo,
+            [in, string] const char* mr_enclave
+            );
+
+        public tcf_err_t ecall_VerifyEnclaveInfoDcap(
             [in, string] const char* inEnclaveInfo,
             [in, string] const char* mr_enclave
             );

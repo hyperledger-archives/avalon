@@ -33,7 +33,7 @@ while getopts "c:p:q:" OPTCHAR ; do
 	esac
 done
 
-if [ $DISTRO = "bionic" ]; then
+if [ "$DISTRO" = "bionic" ]; then
         if [ $action = "install" ]; then
 		if [ ! -z "$package" ] ; then
 			apt-get update
@@ -51,7 +51,7 @@ if [ $DISTRO = "bionic" ]; then
 		fi
         fi
 
-elif [ $DISTRO = "centos" ]; then
+elif [ "$DISTRO" = "centos" ]; then
 	if [ $action = "install" ]; then
 		if [ ! -z "$package" ] ; then
 			dnf update -y

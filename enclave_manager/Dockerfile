@@ -175,6 +175,13 @@ RUN if [ "$DISTRO" = "bionic" ] ; then \
          libsgx-urts \
          libsgx-epid \
          libsgx-quote-ex \
+         libsgx-dcap-default-qpl \
+         libsgx-dcap-ql \
+         libsgx-dcap-ql-dev \
+         libsgx-ae-qve \
+         libsgx-dcap-quote-verify \
+         libsgx-dcap-quote-verify-dev \
+         libsgx-uae-service \
       && apt-get clean \
       && rm -rf /var/lib/apt/lists/* \
      
@@ -193,6 +200,13 @@ RUN if [ "$DISTRO" = "bionic" ] ; then \
          libsgx-epid \
          libsgx-quote-ex \
          libsgx-urts; \
+         libsgx-dcap-default-qpl \
+         libsgx-dcap-ql \
+         libsgx-dcap-ql-dev \
+         libsgx-ae-qve \
+         libsgx-dcap-quote-verify \
+         libsgx-dcap-quote-verify-dev \
+         libsgx-uae-service; \
       cd /opt/intel \
       && wget https://download.01.org/intel-sgx/sgx-linux/2.10/distro/centos8.1-server/sgx_linux_x64_sdk_2.10.100.2.bin \
       && chmod +x sgx_linux_x64_sdk_2.10.100.2.bin \
@@ -200,7 +214,9 @@ RUN if [ "$DISTRO" = "bionic" ] ; then \
       && echo ". /opt/intel/sgxsdk/environment" >> /etc/environment; \
     fi
      
-     
+# Configure QPL to use self-signed cert for local PCCS
+COPY docker/pccs/sgx_default_qcnl.conf /etc/sgx_default_qcnl.conf     
+
 # Copy openssl build artifacts from openssl_image
 ENV OPENSSL_VER=1.1.1g
 
@@ -269,6 +285,7 @@ ARG MAKECLEAN
 ARG TCF_DEBUG_BUILD
 ARG ENCLAVE_TYPE
 ARG WORKLOADS
+ARG ATTESTATION_TYPE
 
 # Environment setup
 ENV TCF_HOME=/project/avalon
@@ -339,10 +356,6 @@ RUN mkdir -p build \
   && make
 
 WORKDIR /project/avalon/common/crypto_utils
-
-RUN make && make install
-
-WORKDIR /project/avalon/common/verify_report_utils/ias
 
 RUN make && make install
 

@@ -37,6 +37,7 @@
 #include "signup_enclave_util.h"
 #include "verify-ias-report.h"
 #include "epid_signup_helper.h"
+#include "dcap_signup_helper.h"
 
 static void CreateReportDataWPE(const char* ext_data,
     const std::string& enclave_encrypt_key,
@@ -260,6 +261,33 @@ tcf_err_t ecall_VerifyEnclaveInfoWPEEpid(const char* enclave_info,
         "Invalid Report data: computedReportData does not match expectedReportData");
     return result;
 }  // ecall_VerifyEnclaveInfoWPEEpid
+
+// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+tcf_err_t ecall_VerifyEnclaveInfoWPEDcap(const char* enclave_info,
+    const char* mr_enclave, const char* ext_data) {
+    tcf::error::ThrowIfNull(ext_data, "Extended data is NULL");
+
+    tcf_err_t result = TCF_SUCCESS;
+    DcapSignupHelper signup_helper;
+    result = signup_helper.verify_enclave_info(enclave_info, mr_enclave);
+
+    tcf::error::ThrowIf<tcf::error::ValueError>(
+        result != TCF_SUCCESS,
+        "Trusted enclave info verification failed");
+    // Verify Report Data by comparing hash of report data in
+    // Verification Report with computed report data
+    sgx_report_data_t computed_report_data = {0};
+    CreateReportDataWPE(ext_data,
+        signup_helper.get_enclave_encryption_key(), &computed_report_data);
+
+    //Compare computedReportData with expectedReportData
+    sgx_report_data_t expected_report_data = signup_helper.get_report_data();
+    tcf::error::ThrowIf<tcf::error::ValueError>(
+        memcmp(computed_report_data.d, expected_report_data.d,
+        SGX_REPORT_DATA_SIZE)  != 0,
+        "Invalid Report data: computedReportData does not match expectedReportData");
+    return result;
+}  // ecall_VerifyEnclaveInfoWPEDcap
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 void CreateReportDataWPE(const char* ext_data,

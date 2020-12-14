@@ -15,6 +15,8 @@
 
 #include <string.h>
 
+#include "sgx_utils.h"
+
 #include "enclave_common_t.h"
 
 #include "avalon_sgx_error.h"
@@ -22,7 +24,6 @@
 #include "enclave_data.h"
 #include "enclave_utils.h"
 #include "signup_enclave_common.h"
-
 
 // Initializing singleton class object which gets initialized when
 // getInstance is called
@@ -128,3 +129,9 @@ tcf_err_t ecall_UnsealEnclaveData(char* outPublicEnclaveData,
 
     return result;
 }  // ecall_UnsealEnclaveData
+
+// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+sgx_status_t ecall_get_target_info(sgx_target_info_t* target_info) {
+    sgx_status_t res = sgx_self_target(target_info);
+    return res;
+}  // ecall_get_target_info

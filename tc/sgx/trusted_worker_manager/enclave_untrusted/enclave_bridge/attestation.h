@@ -39,6 +39,7 @@ public:
     virtual void CreateQuoteFromReport(
         const sgx_report_t* inEnclaveReport,
         ByteArray& outEnclaveQuote) = 0;
+    virtual void InitQuote(sgx_target_info_t &target_info) = 0;
 #ifdef BUILD_SINGLETON
     virtual tcf_err_t VerifyEnclaveInfoSingleton(
         const std::string& enclaveInfo,

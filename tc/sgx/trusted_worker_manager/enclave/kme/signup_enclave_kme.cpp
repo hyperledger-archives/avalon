@@ -36,6 +36,7 @@
 #include "signup_enclave_util.h"
 #include "verify-ias-report.h"
 #include "epid_signup_helper.h"
+#include "dcap_signup_helper.h"
 
 #define KME_SIGNUP_EXT_DATA_SIZE 32
 
@@ -159,6 +160,36 @@ tcf_err_t ecall_VerifyEnclaveInfoKMEEpid(const char* enclave_info,
         "Invalid Report data: computedReportData does not match expectedReportData");
     return result;
 }  // ecall_VerifyEnclaveInfoKMEEpid
+
+// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+tcf_err_t ecall_VerifyEnclaveInfoKMEDcap(const char* enclave_info,
+    const char* mr_enclave, const uint8_t* ext_data, size_t ext_data_size) {
+    tcf::error::ThrowIfNull(ext_data, "Extended data is NULL");
+    tcf::error::ThrowIf<tcf::error::ValueError>(
+        ext_data_size != KME_SIGNUP_EXT_DATA_SIZE,
+        "Extended data size should be 32 bytes");
+
+    tcf_err_t result = TCF_SUCCESS;
+    DcapSignupHelper signup_helper;
+    result = signup_helper.verify_enclave_info(enclave_info, mr_enclave);
+
+    tcf::error::ThrowIf<tcf::error::ValueError>(
+        result != TCF_SUCCESS,
+        "Trusted enclave info verification failed");
+    // Verify Report Data by comparing hash of report data in
+    // Verification Report with computed report data
+    sgx_report_data_t computed_report_data = {0};
+    CreateReportDataKME(signup_helper.get_enclave_id(),
+        ext_data, &computed_report_data);
+
+    //Compare computedReportData with expectedReportData
+    sgx_report_data_t expected_report_data = signup_helper.get_report_data();
+    tcf::error::ThrowIf<tcf::error::ValueError>(
+        memcmp(computed_report_data.d, expected_report_data.d,
+        SGX_REPORT_DATA_SIZE)  != 0,
+        "Invalid Report data: computedReportData does not match expectedReportData");
+    return result;
+}  // ecall_VerifyEnclaveInfoKMEDcap
 
 void CreateReportDataKME(const std::string& enclave_signing_key,
     const uint8_t* ext_data, sgx_report_data_t* report_data) {

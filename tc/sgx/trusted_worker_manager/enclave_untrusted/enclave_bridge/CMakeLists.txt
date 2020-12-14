@@ -47,6 +47,21 @@ ELSE()
     OPTION(SGX_USE_SIMULATOR "Use the Intel SGX simulator" FALSE)
 ENDIF()
 
+# Attestation mode EPID/DCAP
+SET(ATTESTATION_TYPE "$ENV{ATTESTATION_TYPE}")
+IF("${ATTESTATION_TYPE} " STREQUAL " ")
+    message(WARNING,
+	"ATTESTATION_TYPE environment variable not defined, defaulting to EPID attestation")
+    SET(ATTESTATION_TYPE "epid")
+    ADD_DEFINITIONS(-DEPID_ATTESTATION=1)
+ELSEIF("${ATTESTATION_TYPE}" STREQUAL "dcap")
+    message(WARNING, "Attestation mode is set to DCAP")
+    ADD_DEFINITIONS(-DDCAP_ATTESTATION=1)
+ELSEIF("${ATTESTATION_TYPE}" STREQUAL "epid")
+    message(WARNING, "Attestation mode is set to EPID")
+    ADD_DEFINITIONS(-DEPID_ATTESTATION=1)
+ENDIF()
+
 SET(SGX_SDK "$ENV{SGX_SDK}")
 if("${SGX_SDK} " STREQUAL " ")
     message(FATAL_ERROR "SGX_SDK environment variable not defined!")
@@ -75,7 +90,8 @@ IF(${SGX_USE_SIMULATOR})
     ADD_DEFINITIONS(-D SGX_SIMULATOR)
     SET(SGX_LIBS_UNTRUSTED_NAMES sgx_urts_sim sgx_epid_sim ${SGX_LIBS_UNTRUSTED_NAMES})
 ELSE()
-    SET(SGX_LIBS_UNTRUSTED_NAMES sgx_urts sgx_epid ${SGX_LIBS_UNTRUSTED_NAMES})
+    SET(SGX_LIBS_UNTRUSTED_NAMES sgx_urts sgx_epid sgx_dcap_ql sgx_quote_ex sgx_dcap_quoteverify
+	${SGX_LIBS_UNTRUSTED_NAMES})
 ENDIF()
 
 FOREACH(lib ${SGX_LIBS_UNTRUSTED_NAMES})
@@ -107,7 +123,7 @@ ENDFUNCTION()
 FUNCTION(LINK_ENCLAVE_BRIDGE_COMMON_LIBRARIES)
     TARGET_LINK_LIBRARIES(${PROJECT_NAME} PRIVATE ${SGX_LIBS_UNTRUSTED})
     TARGET_LINK_LIBRARIES(${PROJECT_NAME} PRIVATE -luavalon-common -luavalon-crypto
-        -luavalon-base64 -luavalon-sgx-common -lpthread)
+        -luavalon-base64 -luavalon-parson -luavalon-sgx-common -lpthread)
 ENDFUNCTION()
 
 FUNCTION(INCLUDE_ENCLAVE_BRIDGE_COMMON_DIRECTORIES)
@@ -116,6 +132,7 @@ FUNCTION(INCLUDE_ENCLAVE_BRIDGE_COMMON_DIRECTORIES)
     INCLUDE_DIRECTORIES(${TCF_CORE_DIR}/trusted_worker_manager/common)
     INCLUDE_DIRECTORIES(${TCF_TOP_DIR}/common/cpp/crypto)
     INCLUDE_DIRECTORIES(${TCF_TOP_DIR}/common/cpp/packages/base64)
+    INCLUDE_DIRECTORIES(${TCF_TOP_DIR}/common/cpp/packages/parson)
     INCLUDE_DIRECTORIES(${TCF_CORE_DIR}/trusted_worker_manager/enclave_untrusted/enclave_bridge)
 ENDFUNCTION()
 

@@ -60,6 +60,9 @@ class GenericClient():
         # Mode
         self._mode = options.mode
 
+        # Attestation type
+        self._attestation = options.attestation
+
         # Http JSON RPC listener uri
         self._uri = options.uri
         if self._uri:
@@ -147,6 +150,13 @@ class GenericClient():
             help="should be one of listing or registry (default)",
             default="registry",
             choices={"registry", "listing"},
+            type=str)
+        parser.add_argument(
+            "-t", "--attestation",
+            help="should be one of attestation type [EPID/DCAP], "
+            "defaults to EPID",
+            default="EPID",
+            choices={"EPID", "DCAP"},
             type=str)
         mutually_excl_group_worker = parser.add_mutually_exclusive_group()
         mutually_excl_group_worker.add_argument(
@@ -238,6 +248,9 @@ class GenericClient():
     def mode(self):
         return self._mode
 
+    def attestation_type(self):
+        return self._attestation
+
 
 def Main(args=None):
     parser = GenericClient(args)
@@ -280,7 +293,8 @@ def Main(args=None):
     session_iv = encrypt.generate_iv()
 
     # Do worker verification
-    generic_client_obj.do_worker_verification(worker_obj)
+    generic_client_obj.do_worker_verification(
+        worker_obj, parser.attestation_type())
 
     logging.info("**********Worker details Updated with Worker ID" +
                  "*********\n%s\n", worker_id)

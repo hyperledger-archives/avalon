@@ -82,3 +82,8 @@ ADD_SUBDIRECTORY(packages/base64)
 ADD_SUBDIRECTORY(packages/parson)
 ADD_SUBDIRECTORY(crypto)
 ADD_SUBDIRECTORY(verify_ias_report)
+
+# verify_dcap_report library is used by only untrusted code(enclave bridge and bridge wrapper)
+if(UNTRUSTED_ONLY)
+    ADD_SUBDIRECTORY(verify_dcap_report)
+endif()

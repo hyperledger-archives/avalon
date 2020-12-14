@@ -229,6 +229,19 @@ void EpidAttestation::SetSignatureRevocationList (
     this->quoteSize = size;
 }  // EpidAttestation::SetSignatureRevocationList
 
+
+void EpidAttestation::InitQuote(sgx_target_info_t& target_info) {
+    sgx_epid_group_id_t epidGroupId = { 0 };
+    sgx_status_t sresult = tcf::sgx_util::CallSgx(
+         [&target_info,
+          &epidGroupId] () {
+              return sgx_init_quote(&target_info, &epidGroupId);
+         });
+    tcf::error::ThrowSgxError(sresult,
+        "Intel SGX enclave call failed (sgx_init_quote);"
+        " failed to initialize the quote");
+}  // EpidAttestation::InitQuote
+
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 #ifdef BUILD_SINGLETON
 tcf_err_t EpidAttestation::VerifyEnclaveInfoSingleton(
