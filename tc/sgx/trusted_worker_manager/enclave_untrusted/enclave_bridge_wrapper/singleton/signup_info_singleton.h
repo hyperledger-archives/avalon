@@ -14,8 +14,9 @@
  */
 
 #pragma once
-
+#include "sgx_key.h"
 #include "signup_info.h"
+
 
 class SignupInfoSingleton : public SignupInfo {
 public:
@@ -23,6 +24,8 @@ public:
     SignupInfoSingleton() {}
 
     std::map<std::string, std::string> CreateEnclaveData();
+
+    std::map<std::string, std::string> CreateEnclaveData(const std::string& kss_config_id);
 
     std::map<std::string, std::string> UnsealEnclaveData();
 
@@ -41,5 +44,6 @@ private:
     canonical representation of the signup info.
     */
     std::string serialized_;
+    uint8_t  kss_config[SGX_CONFIGID_SIZE] = { NULL };
 };  // class SignupInfoSingleton
 

@@ -22,6 +22,7 @@
 
 #include <sgx_utils.h>
 #include <sgx_quote.h>
+#include <sgx_key.h>
 
 #include "crypto.h"
 #include "error.h"

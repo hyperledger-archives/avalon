@@ -48,7 +48,6 @@ int tcf::enclave_api::base::IsSgxSimulator() {
 #endif  // defined(SGX_SIMULATOR)
 }  // tcf::enclave_api::base::IsSgxSimulator
 
-
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 tcf::enclave_queue::ReadyEnclave tcf::enclave_api::base::GetReadyEnclave() {
     return tcf::enclave_queue::ReadyEnclave(g_EnclaveReadyQueue);
@@ -60,7 +59,6 @@ void tcf::enclave_api::base::SetLastError(
     const std::string& message) {
     g_LastError = message;
 }  // tcf::enclave_api::base::SetLastError
-
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 std::string tcf::enclave_api::base::GetLastError(void) {
     return g_LastError;
@@ -71,7 +69,8 @@ tcf_err_t tcf::enclave_api::base::Initialize(
     const std::string& inPathToEnclave,
     const Attestation *attestation,
     const std::string& persisted_sealed_data,
-    const int numOfEnclaves) {
+    const int numOfEnclaves,
+    const uint8_t (&kss_config_id)[SGX_CONFIGID_SIZE]) {
     tcf_err_t ret = TCF_SUCCESS;
 
     try {
@@ -86,7 +85,7 @@ tcf_err_t tcf::enclave_api::base::Initialize(
             }
 
             for (tcf::enclave_api::Enclave& enc : g_Enclave) {
-                enc.Load(inPathToEnclave, persisted_sealed_data);
+                enc.Load(inPathToEnclave, persisted_sealed_data, kss_config_id);
             }
 
             g_IsInitialized = true;

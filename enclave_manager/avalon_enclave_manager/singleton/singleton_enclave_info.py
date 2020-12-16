@@ -96,8 +96,12 @@ class SingletonEnclaveInfo(BaseEnclaveInfo):
         """
 
         signup_cpp_obj = enclave.SignupInfoSingleton()
+        if self._config.get("kss_config") is not None:
+            signup_data = signup_cpp_obj.CreateEnclaveData(
+                self._config.get("kss_config"))
+        else:
+            signup_data = signup_cpp_obj.CreateEnclaveData()
 
-        signup_data = signup_cpp_obj.CreateEnclaveData()
         if signup_data is None:
             return None
 
@@ -114,10 +118,11 @@ class SingletonEnclaveInfo(BaseEnclaveInfo):
         if signup_info_obj.sealed_signup_data is None:
             logger.info("Sealed data is None, so nothing to persist.")
         else:
-            file_utils.write_to_file(signup_info_obj.sealed_signup_data,
-                                     self._get_sealed_data_file_name(
-                                         self._config["sealed_data_path"],
-                                         self._worker_id))
+            file_utils.write_to_file(
+                signup_info_obj.sealed_signup_data,
+                self._get_sealed_data_file_name(
+                    self._config["sealed_data_path"],
+                    self._worker_id))
         # Now we can return the real object
         return signup_info_obj
 
@@ -166,8 +171,9 @@ class SingletonEnclaveInfo(BaseEnclaveInfo):
         persisted_sealed_data = file_utils.read_file(
             self._get_sealed_data_file_name(self._config["sealed_data_path"],
                                             self._worker_id))
+
         return self._attestation.init_enclave_info(
-            signed_enclave, persisted_sealed_data,
-            int(self._config['num_of_enclaves']))
+                signed_enclave, persisted_sealed_data,
+                int(self._config['num_of_enclaves']))
 
     # -----------------------------------------------------------------

@@ -17,6 +17,7 @@
 #pragma once
 
 #include <stdlib.h>
+#include <sgx_key.h>
 
 #include "types.h"
 #include "signup.h"
