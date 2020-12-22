@@ -92,7 +92,6 @@ class TCSWorkOrderHandlerSync(TCSWorkOrderHandler):
 
         worker_id = input_value_json["params"]["workerId"]
         # Check if workerId is exists in avalon
-        worker_id = input_value_json["params"]["workerId"]
         if not self._is_worker_exists(worker_id):
             raise JSONRPCDispatchException(
                 JsonRpcErrorCode.INVALID_PARAMETER,
