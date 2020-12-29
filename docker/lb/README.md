@@ -24,7 +24,8 @@ coming from clients to one of the many avalon-listeners running in backend.
  
     # run the transaction
     cd examples/apps/generic_client
-    ./generic_client.py --uri "http://avalon-lb-nginx:9947" --workload_id "echo-result" --in_data "Hello" --worker_id "singleton-worker-1"
+    ./generic_client.py --uri "http://avalon-lb-nginx:9947" --workload_id "echo-result" --in_data "Hello" --worker_id "singleton-worker-1" \
+    -avs "http://avalon-avs:6090"
      ```
 
 
@@ -54,5 +55,6 @@ coming from clients to one of the many avalon-listeners running in backend.
 
     # run the transaction
     cd examples/apps/generic_client
-    ./generic_client.py --uri "http://avalon-lb-haproxy:9947" --workload_id "echo-result" --in_data "Hello" --worker_id "singleton-worker-1"
+    ./generic_client.py --uri "http://avalon-lb-haproxy:9947" --workload_id "echo-result" --in_data "Hello" --worker_id "singleton-worker-1" \
+    -avs "http://avalon-avs:6090"
     ```

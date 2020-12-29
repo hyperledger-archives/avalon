@@ -39,7 +39,7 @@ docker-compose -f docker-compose.yaml -f docker/compose/avalon-graphene.yaml up
 You could then test it by getting into the `avalon-shell` container and invoking the generic client. For example, run the generic client from `/project/avalon/examples/app/generic_client` as -
 ```
 ./generic_client.py --uri "http://avalon-listener:1947" -w "graphene-worker-1" --workload_id \
-"python-palindrome" --in_data "God save Eva s dog" -o
+"python-palindrome" --in_data "God save Eva s dog" -o -avs "http://avalon-avs:6090"
 ```
 
 ### Running with Graphene SGX

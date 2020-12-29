@@ -27,28 +27,36 @@ generic_client_path="${TCF_HOME}/examples/apps/generic_client"
 # Read Listener port from config file
 listener_port=`grep listener_port ${TCF_HOME}/config/tcs_config.toml | awk {'print $3'}`
 LISTENER_URL="localhost"
+ATTESTATION_VERIFICATION_SERVICE="localhost"
 # worker id should match with worker id of singleton enclave manager
 WORKER_ID="singleton-worker-1"
 
-while getopts "l:lh" OPTCHAR ; do
-    case $OPTCHAR in
-        l )
-            LISTENER_URL=$OPTARG
+while getopts ":l:a:h" OPTCHAR ; do
+    echo "Processing $OPTCHAR : OPTIND is $OPTIND"
+    case "$OPTCHAR" in
+        l)
+            LISTENER_URL="$OPTARG"
             ;;
-        \?|h )
+        a)
+            ATTESTATION_VERIFICATION_SERVICE="$OPTARG"
+            ;;
+        \?|h)
             BN=$(basename $0)
             echo "$BN: Run tests for Hyperledger Avalon" 1>&2
-            echo "Usage: $BN [-l|-h|-?]" 1>&2
+            echo "Usage: $BN [-l|-a|-h|-?]" 1>&2
             echo "Where:" 1>&2
             echo "   -l       specify the Listener service name" 1>&2
+            echo "   -a       specify the attestation verification service name" 1>&2
             echo "   -? or -h print usage information" 1>&2
             echo "Examples:" 1>&2
-            echo "   $BN -l avalon-listener" 1>&2
+            echo "   $BN -l avalon-listener -a avalon-avs" 1>&2
             exit 2
             ;;
     esac
 done
-shift `expr $OPTIND - 1`
+echo "Out of the getopts loop. OPTIND is now $OPTIND"
+echo "LISTENER_URL $LISTENER_URL"
+shift $OPTIND-1
 
 yell() {
     echo "$0: $*" >&2;
@@ -90,7 +98,8 @@ do
     try python3 ${TCF_HOME}/tests/Demo.py \
         --logfile __screen__ --loglevel warn \
         --input_dir ${TCF_HOME}/tests/$folder/ \
-        --connect_uri "http://$LISTENER_URL:$listener_port" work_orders/output.json > /dev/null
+        --connect_uri "http://$LISTENER_URL:$listener_port" \
+        --avs_uri "http://$ATTESTATION_VERIFICATION_SERVICE:6090" work_orders/output.json > /dev/null
 
     yell "#------------------------------------------------------------------------------------------------"
     yell "#------------------------------------------------------------------------------------------------"
@@ -99,18 +108,20 @@ done
 yell "Start testing generic client for echo workload ................"
 yell "#------------------------------------------------------------------------------------------------"
 try $generic_client_path/generic_client.py --uri "http://$LISTENER_URL:1947" \
-    --workload_id "echo-result" --in_data "Hello" --worker_id $WORKER_ID
+    --workload_id "echo-result" --in_data "Hello" --worker_id $WORKER_ID \
+    -avs "http://$ATTESTATION_VERIFICATION_SERVICE:6090"
 
 yell "Start testing generic client for heart disease eval workload ................"
 yell "#------------------------------------------------------------------------------------------------"
 try $generic_client_path/generic_client.py --uri "http://$LISTENER_URL:1947" \
     --workload_id "heart-disease-eval" \
-    --in_data "Data: 25 10 1 67  102 125 1 95 5 10 1 11 36 1" --worker_id $WORKER_ID
-
+    --in_data "Data: 25 10 1 67  102 125 1 95 5 10 1 11 36 1" --worker_id $WORKER_ID \
+    -avs "http://$ATTESTATION_VERIFICATION_SERVICE:6090"
 yell "Start testing generic client with input data as plain text................"
 yell "#------------------------------------------------------------------------------------------------"
 try $generic_client_path/generic_client.py --uri "http://$LISTENER_URL:1947" \
-    --workload_id "echo-result" --in_data "Hello" -p --worker_id $WORKER_ID
+    --workload_id "echo-result" --in_data "Hello" -p --worker_id $WORKER_ID \
+    -avs "http://$ATTESTATION_VERIFICATION_SERVICE:6090"
 
 yell "#------------------------------------------------------------------------------------------------"
 yell "#------------------------------------------------------------------------------------------------"

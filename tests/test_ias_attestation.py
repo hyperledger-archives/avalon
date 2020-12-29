@@ -29,7 +29,7 @@ from avalon_sdk.worker.worker_details import WorkerType
 import avalon_sdk.worker.worker_details as worker
 from avalon_sdk.work_order.work_order_params import WorkOrderParams
 from avalon_sdk.connector.direct.avalon_direct_client import AvalonDirectClient
-import verify_report.verify_attestation_report as attestation_util
+import avalon_crypto_utils.verify_attestation_report as attestation_util
 from error_code.error_status import WorkOrderStatus
 
 # Remove duplicate loggers

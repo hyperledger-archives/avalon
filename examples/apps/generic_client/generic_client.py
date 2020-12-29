@@ -110,6 +110,9 @@ class GenericClient():
         # requester signature for work order requests
         self._requester_signature = options.requester_signature
 
+        # Avalon attestation verification service uri
+        self._avs_uri = options.attestation_verification_service
+
         logging.info("******* Hyperledger Avalon Generic client *******")
 
         # mode should be one of listing or registry (default)
@@ -182,6 +185,10 @@ class GenericClient():
             "-rs", "--requester_signature",
             help="Enable requester signature for work order requests",
             action="store_true")
+        parser.add_argument(
+            "-avs", "--attestation_verification_service",
+            help="Uri of avalon attestation verification service",
+            type=str)
         options = parser.parse_args(args)
 
         return options
@@ -238,6 +245,9 @@ class GenericClient():
     def mode(self):
         return self._mode
 
+    def avs(self):
+        return self._avs_uri
+
 
 def Main(args=None):
     parser = GenericClient(args)
@@ -280,7 +290,10 @@ def Main(args=None):
     session_iv = encrypt.generate_iv()
 
     # Do worker verification
-    generic_client_obj.do_worker_verification(worker_obj)
+    if generic_client_obj.do_worker_verification(
+            worker_obj, parser.avs()) is False:
+        logging.error("Worker verification failed\n")
+        sys.exit(-1)
 
     logging.info("**********Worker details Updated with Worker ID" +
                  "*********\n%s\n", worker_id)
