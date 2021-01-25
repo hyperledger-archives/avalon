@@ -121,7 +121,7 @@ RUN packages="cmake git swig"; \
 
 RUN if [ "$DISTRO" = "centos" ] ; then \
       /project/avalon/scripts/install_packages -c install -q "epel-release"; \
-      dnf -y --enablerepo=PowerTools install protobuf-devel yum-utils ocaml ocaml-ocamlbuild dh-autoreconf; \
+      dnf -y --enablerepo=powertools install protobuf-devel yum-utils ocaml ocaml-ocamlbuild dh-autoreconf; \
     fi
 
 COPY VERSION /project/avalon/

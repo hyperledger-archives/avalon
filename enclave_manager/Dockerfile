@@ -150,7 +150,7 @@ RUN packages="pkg-config cmake make git swig wget tar curl unzip" \
     /project/avalon/scripts/install_packages -c install -q "$packages" -p "$pip_packages"
 
 RUN if [ "$DISTRO" = "centos" ] ; then \
-      dnf -y --enablerepo=PowerTools install protobuf-devel yum-utils ocaml ocaml-ocamlbuild dh-autoreconf \
+      dnf -y --enablerepo=powertools install protobuf-devel yum-utils ocaml ocaml-ocamlbuild dh-autoreconf \
       && yum groupinstall 'Development Tools' -y \
       && alternatives --set python /usr/bin/python3; \
     fi
