@@ -39,7 +39,7 @@ class WOProcessorEnclaveManagerHelper(ABC):
 
         # Extended_measurements is a tuple, viz., basename and measurement
         # for the enclave
-        logger.info("Executing boot flow for graphene WPE")
+        logger.info("Executing boot flow for WPE")
         if self._wpe_requester\
             .register_wo_processor(self._unique_verification_key,
                                    self.encryption_key,
