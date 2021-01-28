@@ -57,7 +57,8 @@ https://creativecommons.org/licenses/by/4.0/
 
      `cp config.yaml.template config.yaml`
 
-     *# Adopt config.yaml to the installed Intel SGX driver and desired Graphene repository.*
+     *# Adopt config.yaml to the installed Intel SGX driver and desired Graphene repository.
+        Since Graphene is under rapid development, checkout stable version to avoid issues*
 
      *# Avalon Python worker uses below configuration*.
 
@@ -65,7 +66,7 @@ https://creativecommons.org/licenses/by/4.0/
      Distro: "ubuntu18.04"
      Graphene:
          Repository: "https://github.com/oscarlab/graphene.git"
-         Branch: "master"
+         Branch: "5ba470800d50f7449d582a1162924b9df33cce7b"
      SGXDriver:
          Repository: "https://github.com/01org/linux-sgx-driver.git"
          Branch: "sgx_driver_2.6"

@@ -155,6 +155,7 @@ ENV TCF_HOME=/project/avalon
 
 COPY ./config/graphene_config.toml /project/avalon/config/
 COPY ./enclave_manager/setup_${ENCLAVE_TYPE}.py /project/avalon/enclave_manager/
+COPY ./enclave_manager/avalon_enclave_manager/attestation_common /project/avalon/enclave_manager/avalon_enclave_manager/attestation_common
 COPY ./enclave_manager/Makefile-graphene /project/avalon/enclave_manager/
 COPY ./enclave_manager/avalon_enclave_manager/*.py /project/avalon/enclave_manager/avalon_enclave_manager/
 COPY ./enclave_manager/avalon_enclave_manager/${ENCLAVE_TYPE} /project/avalon/enclave_manager/avalon_enclave_manager/${ENCLAVE_TYPE}
