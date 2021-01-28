@@ -140,7 +140,9 @@ class SingletonWorkOrderProcessor(BaseWorkOrderProcessor):
                                                            out_data,
                                                            session_key,
                                                            session_key_iv)
-            output_json = self._encrypt_and_sign_response(output_json)
+            output_json = self._encrypt_and_sign_response(session_key,
+                                                          session_key_iv,
+                                                          output_json)
         else:
             jrpc_id = input_json["id"]
             err_code = WorkerError.INVALID_PARAMETER_FORMAT_OR_VALUE
@@ -170,7 +172,7 @@ class SingletonWorkOrderProcessor(BaseWorkOrderProcessor):
         if (method_name == "ProcessWorkerSignup"):
             output = self._process_worker_signup()
         elif (method_name == "ProcessWorkOrder"):
-            output = self._process_work_order(params[0])
+            output = self._process_work_order(params)
         return output
 
 
