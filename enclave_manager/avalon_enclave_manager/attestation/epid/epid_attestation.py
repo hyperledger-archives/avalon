@@ -20,7 +20,7 @@ import importlib
 
 from ssl import SSLError
 from requests.exceptions import HTTPError, Timeout
-import avalon_enclave_manager.attestation.epid.ias_client as ias_client
+import avalon_enclave_manager.attestation_common.ias_client as ias_client
 from avalon_enclave_manager.attestation.attestation import Attestation
 from avalon_enclave_manager.enclave_type import EnclaveType
 

@@ -17,7 +17,7 @@ import json
 import random
 from abc import ABC, abstractmethod
 
-import avalon_enclave_manager.attestation.epid.ias_client as ias_client
+import avalon_enclave_manager.attestation_common.ias_client as ias_client
 
 logger = logging.getLogger(__name__)
 
