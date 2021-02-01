@@ -107,7 +107,7 @@ COPY ./scripts/install_packages /project/avalon/scripts/
 
 RUN packages="pkg-config make cmake wget tar"; \
     if [ "$DISTRO" = "centos" ] ; then \
-      packages="$packages gcc gcc-c++"; \
+      packages="$packages gcc gcc-c++ yum-utils"; \
     fi; \
     /project/avalon/scripts/install_packages -c install -q "$packages"
 
@@ -137,12 +137,15 @@ RUN packages="libsgx-dcap-ql-dev libsgx-dcap-quote-verify libsgx-dcap-quote-veri
       echo 'deb [arch=amd64] https://download.01.org/intel-sgx/sgx_repo/ubuntu bionic main' | tee /etc/apt/sources.list.d/intel-sgx.list; \
       wget -qO - https://download.01.org/intel-sgx/sgx_repo/ubuntu/intel-sgx-deb.key | apt-key add - ; \
       apt-get update; \
+      /project/avalon/scripts/install_packages -c install -q "$packages"; \
     elif [ "$DISTRO" = "centos" ] ; then \
-      wget https://download.01.org/intel-sgx/sgx-linux/2.10/distro/centos8.1-server/sgx_rpm_local_repo.tgz; \
+      wget https://download.01.org/intel-sgx/sgx-dcap/1.8/linux/distro/centos8.1-server/sgx_rpm_local_repo.tgz; \
       tar -xvf sgx_rpm_local_repo.tgz; \
       yum-config-manager --add-repo file:///opt/intel/sgx_rpm_local_repo; \
-    fi; \
-    /project/avalon/scripts/install_packages -c install -q "$packages"
+      yum --nogpgcheck install -y libsgx-dcap-ql-devel \
+      libsgx-dcap-quote-verify \
+      libsgx-dcap-quote-verify-devel; \
+    fi;
 
 ENV TCF_HOME=/project/avalon
 
@@ -186,7 +189,7 @@ COPY ./scripts/install_packages /project/avalon/scripts/
 
 RUN packages="swig"; \
     if [ "$DISTRO" = "centos" ] ; then \
-      packages="$packages make gcc gcc-c++"; \
+      packages="$packages make gcc gcc-c++ yum-utils"; \
     fi; \
     /project/avalon/scripts/install_packages -c install -q "$packages"
 
@@ -206,18 +209,23 @@ COPY VERSION /project/avalon/
 COPY ./bin /project/avalon/bin
 COPY ./common/cpp /project/avalon/common/cpp
 
+WORKDIR /opt/intel
+
 RUN packages="libsgx-dcap-ql-dev libsgx-dcap-quote-verify libsgx-dcap-quote-verify-dev"; \
     if [ "$DISTRO" = "bionic" ] ; then \
       # Add Intel SGX repo to apt sources and install Intel SGX PSW packages
       echo 'deb [arch=amd64] https://download.01.org/intel-sgx/sgx_repo/ubuntu bionic main' | tee /etc/apt/sources.list.d/intel-sgx.list; \
       wget -qO - https://download.01.org/intel-sgx/sgx_repo/ubuntu/intel-sgx-deb.key | apt-key add - ; \
       apt-get update; \
+      /project/avalon/scripts/install_packages -c install -q "$packages"; \
     elif [ "$DISTRO" = "centos" ] ; then \
-      wget https://download.01.org/intel-sgx/sgx-linux/2.10/distro/centos8.1-server/sgx_rpm_local_repo.tgz; \
+      wget https://download.01.org/intel-sgx/sgx-dcap/1.8/linux/distro/centos8.1-server/sgx_rpm_local_repo.tgz; \
       tar -xvf sgx_rpm_local_repo.tgz; \
       yum-config-manager --add-repo file:///opt/intel/sgx_rpm_local_repo; \
-    fi; \
-    /project/avalon/scripts/install_packages -c install -q "$packages"
+      yum --nogpgcheck install -y libsgx-dcap-ql-devel \
+      libsgx-dcap-quote-verify \
+      libsgx-dcap-quote-verify-devel; \
+    fi;
 
 ENV TCF_HOME=/project/avalon
 
@@ -292,18 +300,23 @@ RUN packages="git"; \
       /project/avalon/scripts/install_packages -c uninstall -q "python3-pip"; \
     fi
 
+WORKDIR /opt/intel/
 RUN packages="wget tar libsgx-dcap-default-qpl libsgx-dcap-quote-verify"; \
   if [ "$DISTRO" = "bionic" ] ; then \
     # Add Intel SGX repo to apt sources and install Intel SGX PSW packages
     echo 'deb [arch=amd64] https://download.01.org/intel-sgx/sgx_repo/ubuntu bionic main' | tee /etc/apt/sources.list.d/intel-sgx.list; \
     wget -qO - https://download.01.org/intel-sgx/sgx_repo/ubuntu/intel-sgx-deb.key | apt-key add - ; \
     apt-get update; \
+    /project/avalon/scripts/install_packages -c install -q "$packages"; \
   elif [ "$DISTRO" = "centos" ] ; then \
-    wget https://download.01.org/intel-sgx/sgx-linux/2.10/distro/centos8.1-server/sgx_rpm_local_repo.tgz; \
+    yum install -y yum-utils; \
+    wget https://download.01.org/intel-sgx/sgx-dcap/1.8/linux/distro/centos8.1-server/sgx_rpm_local_repo.tgz; \
     tar -xvf sgx_rpm_local_repo.tgz; \
     yum-config-manager --add-repo file:///opt/intel/sgx_rpm_local_repo; \
-  fi; \
-  /project/avalon/scripts/install_packages -c install -q "$packages"
+    yum --nogpgcheck install -y libsgx-dcap-default-qpl \
+      libsgx-dcap-ql \
+      libsgx-dcap-quote-verify; \
+  fi;
 
 RUN python3 -m solcx.install v0.5.15
 

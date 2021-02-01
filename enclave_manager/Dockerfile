@@ -150,7 +150,7 @@ RUN packages="pkg-config cmake make git swig wget tar curl unzip" \
     /project/avalon/scripts/install_packages -c install -q "$packages" -p "$pip_packages"
 
 RUN if [ "$DISTRO" = "centos" ] ; then \
-      dnf -y --enablerepo=PowerTools install protobuf-devel yum-utils ocaml ocaml-ocamlbuild dh-autoreconf \
+      dnf -y --enablerepo=powertools install protobuf-devel yum-utils ocaml ocaml-ocamlbuild dh-autoreconf \
       && yum groupinstall 'Development Tools' -y \
       && alternatives --set python /usr/bin/python3; \
     fi
@@ -192,14 +192,14 @@ RUN if [ "$DISTRO" = "bionic" ] ; then \
       && echo ". /opt/intel/sgxsdk/environment" >> /etc/environment; \
 
     elif [ "$DISTRO" = "centos" ] ; then \
-      wget https://download.01.org/intel-sgx/sgx-linux/2.10/distro/centos8.1-server/sgx_rpm_local_repo.tgz \
+      wget https://download.01.org/intel-sgx/sgx-dcap/1.8/linux/distro/centos8.1-server/sgx_rpm_local_repo.tgz \
       && tar -xvf sgx_rpm_local_repo.tgz \
       && yum-config-manager --add-repo file:///opt/intel/sgx_rpm_local_repo \
       && yum --nogpgcheck install -y \
          libsgx-launch \
          libsgx-epid \
          libsgx-quote-ex \
-         libsgx-urts; \
+         libsgx-urts \
          libsgx-dcap-default-qpl \
          libsgx-dcap-ql \
          libsgx-dcap-ql-dev \
