@@ -118,12 +118,14 @@ class FabricWrapper():
         returns ContractResponse.SUCCESS on success
         and ContractResponse.ERROR on failure.
         """
-        cc_methods = self.__valid_calls[chaincode_name]
-        if cc_methods is None:
+        if chaincode_name in self.__valid_calls:
+            cc_methods = self.__valid_calls[chaincode_name]
+        else:
             logging.error("Invalid chain code name")
             return False
-        the_call = cc_methods[method_name]
-        if the_call is None:
+        if method_name in cc_methods:
+            the_call = cc_methods[method_name]
+        else:
             logging.error("Please specify a valid method name. \
                 Valid ones for chaincode " +
                           chaincode_name + " are " +
