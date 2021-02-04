@@ -19,7 +19,7 @@ from os import environ
 from utility.hex_utils import is_valid_hex_str
 from avalon_sdk.connector.blockchains.fabric.fabric_wrapper \
     import FabricWrapper
-from avalon_sdk.connector.interfaces.work_order \
+from avalon_sdk.connector.interfaces.work_order_receipt \
     import WorkOrderReceipt
 
 logging.basicConfig(
@@ -42,6 +42,8 @@ class FabricWorkOrderReceiptImpl(WorkOrderReceipt):
         self.__fabric_wrapper = None
         # Chain code name
         self.CHAIN_CODE = 'receipt'
+        self.WORK_ORDER_RECEIPT_CREATED_EVENT_NAME = 'workOrderReceiptCreated'
+        self.WORK_ORDER_RECEIPT_UPDATED_EVENT_NAME = 'workOrderReceiptUpdated'
         if config is not None:
             self.__fabric_wrapper = FabricWrapper(config)
         else:
@@ -218,7 +220,7 @@ class FabricWorkOrderReceiptImpl(WorkOrderReceipt):
                     binascii.hexlify(work_order_id).decode("utf8")):
                 logging.info("Invalid work order id {}".format(work_order_id))
                 return -1
-            if not is_valid_hex_str(
+            if updater_id is not None and not is_valid_hex_str(
                     binascii.hexlify(updater_id).decode("utf8")):
                 logging.info("Invalid updater id {}".format(updater_id))
                 return -1
