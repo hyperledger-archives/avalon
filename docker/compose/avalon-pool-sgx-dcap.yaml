@@ -1,0 +1,64 @@
+# Copyright 2021 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+version: '3.5'
+
+services:
+
+  avalon-kme:
+    container_name: avalon-kme
+    image: avalon-sgx-enclave-manager-kme-dev
+    build:
+      args:
+        - SGX_MODE=HW
+        - ATTESTATION_TYPE=dcap
+    devices:
+      - "/dev/sgx:/dev/sgx"
+    depends_on:
+      - avalon-pccs
+    command: |
+      bash -c "
+        if [ -v CLEAN_SEALED_DATA ] && [ $CLEAN_SEALED_DATA = 1 ]; then rm -f /project/avalon/.sealed/.sealed.data*; fi;
+        while true;
+          do
+            if [ -e /shared-pool-1/wpe_mr_enclave.txt ];
+              then cp /shared-pool-1/wpe_mr_enclave.txt /project/avalon/wpe_mr_enclave.txt;
+              break;
+            fi;
+            sleep 1;
+        done;
+        sleep 5s
+        enclave_manager --lmdb_url http://avalon-lmdb:9090 --bind http://avalon-kme:1948
+        tail -f /dev/null
+      "
+
+  avalon-enclave-manager:
+    container_name: avalon-wpe
+    image: avalon-sgx-enclave-manager-wpe-dev
+    build:
+      args:
+        - SGX_MODE=HW
+        - ATTESTATION_TYPE=dcap
+    devices:
+      - "/dev/sgx:/dev/sgx"
+    depends_on:
+      - avalon-pccs
+    command: |
+      bash -c "
+        mv /project/avalon/wpe_mr_enclave.txt /shared-pool-1
+        sleep 5s
+        enclave_manager --lmdb_url http://avalon-lmdb:9090 --kme_listener_url http://avalon-kme:1948
+        tail -f /dev/null
+      "
+

@@ -18,16 +18,16 @@
 #include <string>
 
 #include "tcf_error.h"
+#include "signup_helper.h"
 
-class DcapSignupHelper {
+class DcapSignupHelper: public SignupHelper {
 public:
-    tcf_err_t verify_enclave_info(const char* enclave_info,
-       const char* mr_enclave);
-    std::string get_enclave_id();
-    std::string get_enclave_encryption_key();
-    sgx_report_data_t get_report_data();
-protected:
-    std::string enclave_id;
-    std::string enclave_encryption_key;
-    sgx_report_data_t report_data;
+       tcf_err_t verify_enclave_info(const char* enclave_info,
+           const char* mr_enclave);
+       VerificationStatus verify_attestation_report(const ByteArray& attestation_data,
+           const ByteArray& hex_id,
+           ByteArray& mr_enclave,
+           ByteArray& mr_signer,
+           ByteArray& encryption_public_key_hash,
+           ByteArray& verification_key_hash);
 };
