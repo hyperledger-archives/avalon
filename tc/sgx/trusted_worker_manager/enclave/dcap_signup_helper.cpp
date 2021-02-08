@@ -101,18 +101,58 @@ tcf_err_t DcapSignupHelper::verify_enclave_info(const char* enclave_info,
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
-std::string DcapSignupHelper::get_enclave_id() {
-    return this->enclave_id;
+VerificationStatus DcapSignupHelper::verify_attestation_report(
+    const ByteArray& attestation_data,
+    const ByteArray& hex_id,
+    ByteArray& mr_enclave,
+    ByteArray& mr_signer,
+    ByteArray& encryption_public_key_hash,
+    ByteArray& verification_key_hash) {
+
+    const char* svalue = nullptr;
+    /// Verify attestation report
+    VerificationStatus result = VERIFICATION_SUCCESS;
+    std::string att_data_string = ByteArrayToString(attestation_data);
+    /// Parse the attestation data
+    JsonValue proof_data_parsed(json_parse_string(att_data_string.c_str()));
+    tcf::error::ThrowIfNull(proof_data_parsed.value,
+        "Failed to parse the proofData, badly formed JSON");
+    JSON_Object* proof_object = json_value_get_object(proof_data_parsed);
+    tcf::error::ThrowIfNull(proof_object, "Invalid proof, expecting object");
+
+    svalue = json_object_dotget_string(proof_object, "report_signature");
+    tcf::error::ThrowIfNull(svalue, "Invalid proof_signature");
+    const std::string proof_signature(svalue);
+
+    //Parse verification report
+    svalue = json_object_dotget_string(proof_object, "verification_report");
+    tcf::error::ThrowIfNull(svalue, "Invalid proof_verification_report");
+    const std::string verification_report(svalue);
+    //TODO: Do app quote verification and verify qve report and identity
+
+    // Extract ReportData and MR_ENCLAVE from isvEnclaveQuoteBody
+    // present in Verification Report
+    sgx_quote3_t* p_quote = reinterpret_cast<sgx_quote3_t*>(
+        Base64EncodedStringToByteArray(verification_report).data());
+    sgx_report_body_t* report_body = &p_quote->report_body;
+    sgx_report_data_t expected_report_data = *(&report_body->report_data);
+    sgx_measurement_t mr_enclave_from_report = *(&report_body->mr_enclave);
+    sgx_measurement_t mr_signer_from_report = *(&report_body->mr_signer);
+
+    /// Convert uint8_t array to ByteArray(vector<uint8_t>)
+    ByteArray mr_enclave_bytes(std::begin(mr_enclave_from_report.m),
+        std::end(mr_enclave_from_report.m));
+    ByteArray mr_signer_bytes(std::begin(mr_signer_from_report.m),
+        std::end(mr_signer_from_report.m));
+    mr_enclave = mr_enclave_bytes;
+    mr_signer = mr_signer_bytes;
+
+
+    encryption_public_key_hash = ByteArray(std::begin(expected_report_data.d),
+                                     std::begin(expected_report_data.d)+SGX_HASH_SIZE);
+    verification_key_hash = ByteArray(std::begin(expected_report_data.d)+SGX_HASH_SIZE,
+                                     std::end(expected_report_data.d));
+    return result;
 }
 
 // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-
-std::string DcapSignupHelper::get_enclave_encryption_key() {
-    return this->enclave_encryption_key;
-}
-
-// XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-
-sgx_report_data_t DcapSignupHelper::get_report_data() {
-    return this->report_data;
-}

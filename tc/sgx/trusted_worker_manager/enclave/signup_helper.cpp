@@ -1,5 +1,4 @@
-
-/* Copyright 2020 Intel Corporation
+/* Copyright 2021 Intel Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,19 +13,18 @@
  * limitations under the License.
  */
 
-#pragma once
-
-#include <string>
 #include "signup_helper.h"
 
-class EpidSignupHelper:public SignupHelper {
-public:
-    tcf_err_t verify_enclave_info(const char* enclave_info,
-       const char* mr_enclave);
-    VerificationStatus verify_attestation_report(const ByteArray& attestation_data,
-       const ByteArray& hex_id,
-       ByteArray& mr_enclave,
-       ByteArray& mr_signer,
-       ByteArray& encryption_public_key_hash,
-       ByteArray& verification_key_hash);
-};
+std::string SignupHelper::get_enclave_id() {
+    return this->enclave_id;
+}
+
+std::string SignupHelper::get_enclave_encryption_key() {
+    return this->enclave_encryption_key;
+}
+
+
+sgx_report_data_t SignupHelper::get_report_data() {
+    return this->report_data;
+}
+

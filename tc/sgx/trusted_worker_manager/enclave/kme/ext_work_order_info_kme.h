@@ -21,11 +21,6 @@
 #include "work_order_key_info.h"
 #include "ext_work_order_info_impl.h"
 
-enum VerificationStatus {
-    VERIFICATION_SUCCESS = 0, /// WPE registration success status
-    VERIFICATION_FAILED = 1, /// WPE registration failure status
-};
-
 enum KmeRegistrationStatus {
     ERR_WPE_REG_SUCCESS = 0, /// WPE registration success status
     ERR_WPE_REG_FAILED = 1, /// WPE registration failure status

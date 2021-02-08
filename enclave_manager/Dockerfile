@@ -268,7 +268,6 @@ RUN platform=""; \
     && rm -rf /tmp/intel-sgx-ssl \
     && echo "SGX_SSL=/opt/intel/sgxssl" >> /etc/environment
 
-COPY . /project/avalon
 # Docker build won't progress if host _dev folder not removed
 RUN rm -rf /project/avalon/tools/build/_dev
 
@@ -300,6 +299,17 @@ ENV PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/usr/local/lib64/pkgconfig/
 
 RUN openssl genrsa -3 -out $TCF_HOME/enclave.pem 3072
 
+COPY ./examples/apps /project/avalon/examples/apps
+COPY ./common/cpp /project/avalon/common/cpp
+COPY ./tc/sgx/trusted_worker_manager/enclave/kme/workload /project/avalon/tc/sgx/trusted_worker_manager/enclave/kme/workload
+COPY ./tc/sgx/trusted_worker_manager /project/avalon/tc/sgx/trusted_worker_manager
+COPY ./common/crypto_utils /project/avalon/common/crypto_utils
+COPY ./enclave_manager /project/avalon/enclave_manager
+COPY ./common/sgx_workload /project/avalon/common/sgx_workload
+COPY ./bin /project/avalon/bin
+COPY ./VERSION /project/avalon/VERSION
+COPY ./scripts/generate_mrenclave.sh /project/avalon/scripts/generate_mrenclave.sh
+COPY ./config /project/avalon/config
 WORKDIR /project/avalon/common/sgx_workload
 
 RUN mkdir -p build \
