@@ -28,19 +28,16 @@ fi
 Cleanup () {
     echo "Cleaning up"
     rm ias-certificates.cpp.tmp -f
-    rm RK_PUB.zip -f
     rm AttestationReportSigningCACert.pem -f
 }
 
 trap 'echo "**ERROR - line $LINENO**"; Cleanup; exit 1' HUP INT QUIT PIPE TERM ERR
 
 #get certificate from Intel
-curl https://software.intel.com/sites/default/files/managed/7b/de/RK_PUB.zip -o RK_PUB.zip
-test -e RK_PUB.zip
-echo "Zipped certificated downloaded"
-
-unzip -o RK_PUB.zip
+curl https://certificates.trustedservices.intel.com/Intel_SGX_Attestation_RootCA.pem -o AttestationReportSigningCACert.pem
 test -e AttestationReportSigningCACert.pem
+
+echo "Certificate downloaded"
 
 echo ""
 echo -n "Building ias-certificates.cpp ... "
