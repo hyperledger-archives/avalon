@@ -133,7 +133,7 @@ COPY --from=common_python_image /project/avalon/common/python/dist/*.whl dist/
 COPY --from=avalon_sdk_image /project/avalon/sdk/dist/*.whl dist/
 
 # Install fabric python sdk
-RUN git clone https://github.com/hyperledger/fabric-sdk-py.git \
+RUN git clone https://github.com/hyperledger/fabric-sdk-py.git --branch v0.9.0\
   && cd fabric-sdk-py \
   && make install
 
