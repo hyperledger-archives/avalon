@@ -32,7 +32,7 @@ Example
 $ ./run_test.sh
 Collecting setuptools
 ...
-Successfully installed avalon-sdk-0.5.0.dev1
+Successfully installed avalon-sdk-0.6.0.dev1
 Build complete
 $ ./run_test.sh test
 *****Running avalon crypto utils tests*****
