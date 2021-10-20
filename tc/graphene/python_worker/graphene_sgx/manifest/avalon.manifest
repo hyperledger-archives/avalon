@@ -1,0 +1,26 @@
+sgx.enclave_size = "256M" # Minimum enclave size, can be increased based on the requirements
+sgx.thread_num = 8
+sgx.allow_file_creation = 1
+sgx.file_check_policy = "allow_all_but_log"
+
+
+# the below files may differ from Docker container to Docker container, so they are marked as
+# allowed (this may be insecure if untrusted host maliciously modified these files!)
+# sgx.allowed_files.etchostname = "file:/etc/hostname"
+# sgx.allowed_files.etchosts    = "file:/etc/hosts"
+# sgx.allowed_files.etcresolv   = "file:/etc/resolv.conf"
+
+# Below are the required files to be allowed for "Gramine Integration with Avalon"
+sgx.allowed_files = [
+  "file:/usr/local/lib/python3.9/",
+  "file:/home/python_worker/bash", # for getdents test
+  "file:/etc/hostname",
+  "file:/etc/hosts",
+  "file:/etc/resolv.conf",
+  "file:/root/.python_history-00001.tmp",
+  "file:/tmp"
+]
+
+# To enable eventfd() for using libzmq system calls, which is disable in Graphene by default.
+sys.insecure__allow_eventfd = true
+

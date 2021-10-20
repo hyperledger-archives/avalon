@@ -60,7 +60,7 @@ https://creativecommons.org/licenses/by/4.0/
 
 - To run fibonacci workload as a docker container in Graphene-SGX environment and to use a test application to send work order requests, execute the following command from [fibonacci](https://github.com/hyperledger/avalon/tree/master/examples/graphene_apps/python_workloads/fibonacci) directory.
 
-  `docker-compose -f docker-compose.yaml -f compose/graphene-sgx.yaml up`
+  `docker-compose -f docker-compose.yaml -f compose/graphene-wpe-sgx.yaml up`
 
   Above command will run test work orders listed in file [*test_fib_work_orders.json*](http://github.com/hyperledger/avalon/tree/master/examples/graphene_apps/python_workloads/fibonacci/tests/test_fib_work_orders.json).
 

@@ -54,7 +54,6 @@ class FibonacciWorkLoad(WorkLoad):
             logger.error(out_msg)
             result = False
         return result, out_msg_bytes
-
 # -------------------------------------------------------------------------
 
     def _fibonacci(self, n):
