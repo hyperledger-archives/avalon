@@ -38,14 +38,12 @@ if [ "$GSC_IMAGE_EXISTS" = "yes" ]; then
   sudo docker rmi $GSC_IMAGE_NAME --force
 fi
 
-# Manifest files
-
-MANIFEST_FILE="./avalon.manifest" #"${TCF_HOME}tc/graphene/python_worker/graphene_sgx/manifest/python.manifest"
-echo $MANIFEST_FILE
+# Manifest file
+MANIFEST_FILE="${TCF_HOME}tc/graphene/python_worker/graphene_sgx/manifest/avalon.manifest"
 
 # Build image
 echo "Build unsigned GSC image"
-sudo ./gsc build --insecure-args $IMAGE_NAME $MANIFEST_FILE
+./gsc build --insecure-args $IMAGE_NAME $MANIFEST_FILE
 
 # Generate signing key if it doesn't exists
 SIGN_KEY_FILE=enclave-key.pem
@@ -55,7 +53,5 @@ fi
 
 # Sign image to generate final GSC image
 echo "Generate Signed GSC image"
-sudo ./gsc sign-image $IMAGE_NAME  $SIGN_KEY_FILE
+./gsc sign-image $IMAGE_NAME  $SIGN_KEY_FILE
 
-# Retrieve SGX-related information from graphenized image using gsc info-image
-# sudo ./gsc info-image $IMAGE_NAME

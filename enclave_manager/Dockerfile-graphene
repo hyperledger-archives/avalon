@@ -167,8 +167,6 @@ COPY ./enclave_manager/Makefile-graphene /project/avalon/enclave_manager/
 COPY ./enclave_manager/avalon_enclave_manager/*.py /project/avalon/enclave_manager/avalon_enclave_manager/
 COPY ./enclave_manager/avalon_enclave_manager/${ENCLAVE_TYPE} /project/avalon/enclave_manager/avalon_enclave_manager/${ENCLAVE_TYPE}
 COPY ./enclave_manager/avalon_enclave_manager/wpe_common /project/avalon/enclave_manager/avalon_enclave_manager/wpe_common
-# COPY ./wpe_mr_enclave.txt /project/avalon/
-
 
 WORKDIR /project/avalon/enclave_manager
 
