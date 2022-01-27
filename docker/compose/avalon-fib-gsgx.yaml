@@ -18,7 +18,4 @@ services:
   graphene-python-workload:
     image: gsc-avalon-fibonacci-workload-dev
     devices:
-      - "/dev/gsgx:/dev/gsgx"
-      - "/dev/isgx:/dev/isgx"
-    volumes:
-      - /var/run/aesmd/aesm.socket:/var/run/aesmd/aesm.socket
+      - "/dev/sgx_enclave:/dev/sgx_enclave"

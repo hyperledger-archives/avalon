@@ -32,7 +32,6 @@ build :
 install:
 	@echo INSTALLING WHEEL FILE =================
 	pip3 install $(WHEEL_FILE)
-
 clean:
 	if pip3 uninstall --yes $(WHEEL_FILE); then echo UNINSTALLED $(WHEEL_FILE) WHEEL FILE ; fi
 	rm -rf build deps dist *.egg-info

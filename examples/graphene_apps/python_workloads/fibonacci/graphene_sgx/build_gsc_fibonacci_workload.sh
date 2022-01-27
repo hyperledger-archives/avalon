@@ -18,6 +18,7 @@
 
 # Avalon python worker docker image name.
 IMAGE_NAME=avalon-fibonacci-workload-dev
+echo "Building GSC image $IMAGE_NAME started"
 # Graphenized docker image name for python worker.
 GSC_IMAGE_NAME=gsc-$IMAGE_NAME
 
@@ -37,30 +38,12 @@ if [ "$GSC_IMAGE_EXISTS" = "yes" ]; then
   sudo docker rmi $GSC_IMAGE_NAME --force
 fi
 
-# Manifest files
-MANIFEST_FILE_DIR="${TCF_HOME}/tc/graphene/python_worker/graphene_sgx/manifest"
-MANIFEST_FILES="python.manifest
-sh.manifest
-gcc.manifest
-collect2.manifest
-ld.manifest"
-# Generate list of manifest files
-LIST_MANIFEST_FILES=""
-for f in $MANIFEST_FILES
-do
-  FILE_NAME=${MANIFEST_FILE_DIR}/$f
-  if [ ! -f $FILE_NAME ]; then
-    echo "ERROR:Manifest file $FILE_NAME doesn't exist"
-    exit
-  fi
-  LIST_MANIFEST_FILES+=${MANIFEST_FILE_DIR}/$f
-  LIST_MANIFEST_FILES+=" "
-done
-echo $LIST_MANIFEST_FILES
+# Manifest file
+MANIFEST_FILE="${TCF_HOME}tc/graphene/python_worker/graphene_sgx/manifest/avalon.manifest"
 
 # Build image
 echo "Build unsigned GSC image"
-./gsc build --insecure-args $IMAGE_NAME $LIST_MANIFEST_FILES
+./gsc build --insecure-args $IMAGE_NAME $MANIFEST_FILE
 
 # Generate signing key if it doesn't exists
 SIGN_KEY_FILE=enclave-key.pem
@@ -70,13 +53,5 @@ fi
 
 # Sign image to generate final GSC image
 echo "Generate Signed GSC image"
-./gsc sign-image $IMAGE_NAME $SIGN_KEY_FILE
+./gsc sign-image $IMAGE_NAME  $SIGN_KEY_FILE
 
-# Extract enclave info from GSC image
-./gsc info-image $GSC_IMAGE_NAME > gsc-info.toml
-
-# Extract mrenclave corresponding to python and persist to file
-python3 $TCF_HOME/scripts/mr_enclave.py
-
-# Move MRENCLAVE file to TCF_HOME
-mv wpe_mr_enclave.txt $TCF_HOME

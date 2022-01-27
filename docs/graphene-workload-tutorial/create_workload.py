@@ -45,7 +45,8 @@ FILES = {
     os.path.join("src","my_workload.py.template"),
     os.path.join("tests","test_work_orders.json.template"),
     "workload.json.template",
-    "Makefile.template"
+    "Makefile.template",
+    "setup.py.template"
 }
 
 IN_DIR = "workload"
